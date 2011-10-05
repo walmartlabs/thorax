@@ -1,0 +1,17 @@
+{
+  "name": "thorax",
+  "version": "0.5.0",
+  "description": "Mobile Backbone",
+  "keywords": ["mobile", "backbone"],
+  "author": "Ryan Eastridge <ryan@syntacticx.com> (http://syntacticx.com)",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/walmartlabs/thorax.git"
+  },
+  "engines": {
+    "node": ">=0.4.7"
+  },
+  "dependencies": {
+    "lumbar": ">=0.5.3",
+  }
+}
