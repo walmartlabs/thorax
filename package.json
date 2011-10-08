@@ -12,6 +12,10 @@
     "node": ">=0.4.7"
   },
   "dependencies": {
-    "lumbar": ">=0.5.3",
+    "optimist": "~0.2",
+    "handlebars": "~1.0"
+  },
+  "bin": {
+    "thorax": "./bin/thorax"
   }
 }

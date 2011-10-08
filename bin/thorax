@@ -1,0 +1,169 @@
+#!/usr/bin/env node
+
+var fs = require('fs'),
+  path = require('path'),
+  argv = require('optimist').argv,
+  handlebars = require('handlebars'),
+  child = require('child_process'),
+  action = argv._[0],
+  target = argv._[1];
+
+// Show help prompt if requested or if the 
+// incorrect usage options are supplied
+if (argv.h || argv.help || !action || (action == 'init' && !target)) {
+  console.log([
+    "Usage:",
+    "",
+    "Create a new project & directory:",
+    "",
+    "  thorax init project-name",
+    "",
+    "In project directory:",
+    "",
+    "  thorax install node-module-name",
+    "  thorax view name",
+    "  thorax view name",
+    "  thorax collection-view name",
+    "  thorax model name",
+    "  thorax collection name",
+    "  thorax router name",
+    "  thorax template template",
+    "  thorax module name",
+    "  thorax platform name",
+    "  thorax package name"
+  ].join("\n"));
+  return;
+}
+
+target = target || '.';
+
+var mode = 0777,
+  modifyLumbarJSON = function(callback) {
+    var json_path = path.join(getProjectRoot(target), 'lumbar.json');
+    fs.readFile(json_path, function(err, data) {
+      fs.writeFileSync(json_path, JSON.stringify(callback(JSON.parse(data)), null, 2));
+    });
+  },
+  getPackageJSON = function() {
+    return JSON.parse(fs.readFileSync(path.join(getProjectRoot(target), 'lumbar.json')));
+  },
+  getProjectRoot = function(path) {
+    return path;
+  },
+  generateView = function() {
+    
+  },
+  camelize = function(string) {
+    return string.replace (/(?:^|[-_])(\w)/g, function (_, c) {
+      return c ? c.toUpperCase () : '';
+    });
+  },
+  moduleName = camelize(target.split('/').pop()),
+  defaultPackageJSON = {
+    
+  },
+  defaultLumbarJSON = {
+    application: {
+      name: moduleName,
+      module: 'base'
+    },
+    platforms: ['web'],
+    packages: {
+      web: {
+        platforms: ['web'],
+        combine: false,
+        modules: ['base','main']
+      }
+    },
+    modules: {
+      base: {
+        files: [
+          {src: 'app/lib/zepto.js', global: true},
+          {src: 'app/lib/underscore.js', global: true},
+          {src: 'app/lib/backbone.js', global: true},
+          {src: 'app/lib/handlebars.vm.js', global: true},
+          {src: 'app/lib/script.js', global: true, platform: 'web'},
+          {src: 'app/lib/thorax.js', global: true},
+          'package_config.json',
+          'module_map.json'
+        ]
+      }
+    },
+    templates: {
+      precompile: {
+        knownHelpers: [
+          'template',
+          'view'
+        ],
+        knownHelpersOnly: true
+      }
+    }
+  };
+
+if (action === 'init') {
+  //file structure
+  fs.mkdirSync(target, mode);
+  fs.mkdirSync(path.join(target, 'app'), mode);
+  fs.mkdirSync(path.join(target, 'app', 'models'), mode);
+  fs.mkdirSync(path.join(target, 'app', 'collections'), mode);
+  fs.mkdirSync(path.join(target, 'app', 'views'), mode);
+  fs.mkdirSync(path.join(target, 'app', 'routers'), mode);
+  fs.mkdirSync(path.join(target, 'app', 'lib'), mode);
+  fs.mkdirSync(path.join(target, 'app', 'platform'), mode);
+  fs.mkdirSync(path.join(target, 'app', 'styles'), mode);
+  fs.mkdirSync(path.join(target, 'app', 'templates'), mode);
+  fs.mkdirSync(path.join(target, 'public'), mode);
+  fs.mkdirSync(path.join(target, 'generators'), mode);
+
+  //write default libs
+  ['zepto','underscore','backbone','handlebars.vm','script','thorax'].forEach(function(library) {
+    fs.writeFileSync(path.join(target, 'app', 'lib', library + '.js'), fs.readFileSync(path.join(__dirname, '..', 'lib', library + '.js')));
+  });
+
+  //lumbar.json
+  fs.writeFileSync(path.join(target, 'lumbar.json'), '{}');
+
+  modifyLumbarJSON(function(data) {
+    return defaultLumbarJSON;
+  });
+
+  console.log('thorax: creating application in: ' + target + '');
+  console.log('thorax: Installing lumbar');
+  console.log('');
+  child.exec('cd ' + target + '; npm install lumbar; cd ..;', function (error, stdout, stderr) {
+    if (stdout && stdout !== '') {
+      console.log('npm: ' + stdout);
+    }
+    if (stderr && stderr !== '') {
+      console.error('npm: ' + stderr);
+    }
+  });
+  console.log('');
+  console.log('thorax: Install complete, cd to ' + target ' and run "jake watch"');
+
+} else {
+  moduleName = getPackageJSON().application.name;
+  if (action === 'install') {
+    
+  } else if (action === 'view') {
+  
+  } else if (action === 'collection-view') {
+    
+  } else if (action === 'model') {
+     
+  } else if (action === 'collection') {
+     
+  } else if (action === 'router') {
+    
+  } else if (action === 'template') {
+
+  } else if (action === 'platform') {
+  
+  } else if (action === 'package') {
+  
+  } else if (action === 'module') {
+
+  } else {
+    console.error('Unknown action: ' + action);
+  }
+}
