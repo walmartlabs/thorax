@@ -42,6 +42,19 @@ module.exports = function(thorax, next) {
     thorax.copy(path.join(__dirname, plugin_path), plugin_path);
   });
 
+  //generators
+  [
+    path.join('generators', 'collection-view.handlebars'),
+    path.join('generators', 'collection.handlebars'),
+    path.join('generators', 'index.handlebars'),
+    path.join('generators', 'init.handlebars'),
+    path.join('generators', 'model.handlebars'),
+    path.join('generators', 'router.handlebars'),
+    path.join('generators', 'view.handlebars')
+  ].forEach(function(generator) {
+    thorax.copy(path.join(__dirname, generator), generator);
+  });
+
   //Jakefile
   thorax.copy(path.join(__dirname, 'Jakefile'), 'Jakefile');
   
@@ -55,6 +68,7 @@ module.exports = function(thorax, next) {
       name: thorax.project,
       module: 'base'
     },
+    language: 'javascript',
     loadPrefix: thorax.loadPrefix,
     packages: {},
     platforms: [],

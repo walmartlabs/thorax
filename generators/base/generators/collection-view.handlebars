@@ -1,0 +1,11 @@
+{{project}}.Views.{{className}} = {{project}}.View.extend({
+  name: '{{name}}',
+  events: {
+    
+  },
+  itemContext: function(item) {
+    return _.extend({}, item.attributes, {
+      
+    });
+  }
+});

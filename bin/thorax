@@ -7,27 +7,7 @@ var argv = require('optimist').argv,
 // Show help prompt if requested or if the 
 // incorrect usage options are supplied
 if (argv.h || argv.help || !action) {
-  console.log([
-    "Usage:",
-    "",
-    "Create a new project & directory:",
-    "",
-    "  thorax init project-name [web|mobile]",
-    "",
-    "In project directory:",
-    "",
-    "  thorax install node-module-name",
-    "  thorax view name",
-    "  thorax view name",
-    "  thorax collection-view name",
-    "  thorax model name",
-    "  thorax collection name",
-    "  thorax router name",
-    "  thorax template template",
-    "  thorax module name",
-    "  thorax platform name",
-    "  thorax package name"
-  ].join("\n"));
+  console.log(Thorax.help);
   return;
 }
 
