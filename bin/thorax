@@ -1,24 +1,18 @@
 #!/usr/bin/env node
 
-var fs = require('fs'),
-  path = require('path'),
-  argv = require('optimist').argv,
-  handlebars = require('handlebars'),
-  
+var argv = require('optimist').argv,  
   Thorax = require('../thorax.js'),
-  action = argv._[0],
-  target = argv._[1],
-  generator = argv._[2]; //for init
+  action = argv._[0];
 
 // Show help prompt if requested or if the 
 // incorrect usage options are supplied
-if (argv.h || argv.help || !action || (action == 'init' && !target)) {
+if (argv.h || argv.help || !action) {
   console.log([
     "Usage:",
     "",
     "Create a new project & directory:",
     "",
-    "  thorax init project-name [web|mobile|bootstrap]",
+    "  thorax init project-name [web|mobile]",
     "",
     "In project directory:",
     "",
@@ -37,46 +31,4 @@ if (argv.h || argv.help || !action || (action == 'init' && !target)) {
   return;
 }
 
-var thorax = new Thorax(target || '.');
-
-if (action === 'init') {
-  thorax.log('creating application in: ' + target + '');
-  thorax.generate('base', function() {
-    if (generator) {
-      thorax.generate(generator, function() {
-        thorax.npmInstall(function() {
-          thorax.log('install complete');
-        });
-      });
-    } else {
-      thorax.npmInstall(function() {
-        thorax.log('install complete');
-      });
-    }
-  });
-
-} else {
-  if (action === 'install') {
-    
-  } else if (action === 'view') {
-  
-  } else if (action === 'collection-view') {
-    
-  } else if (action === 'model') {
-     
-  } else if (action === 'collection') {
-     
-  } else if (action === 'router') {
-    
-  } else if (action === 'template') {
-
-  } else if (action === 'platform') {
-  
-  } else if (action === 'package') {
-  
-  } else if (action === 'module') {
-
-  } else {
-    console.error('Unknown action: ' + action);
-  }
-}
+Thorax.actions[action].apply(this, argv._.slice(1));

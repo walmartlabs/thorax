@@ -1,0 +1,115 @@
+var child_process = require("child_process"),
+    fs = require("fs"),
+    growl = require('growl'),
+    path = require('path'),
+    sys = require("sys"),
+    wrench = require('wrench'),
+    lumbarJSON = JSON.parse(fs.readfileSync(path.join(__dirname, 'package.json')));
+
+function streamData(prefix, data) {
+    var lines = data.toString().split(/\r\n|\n|\r/g);
+    for (var i = 0, len = lines.length-1; i < len; i++) {
+        sys.print(prefix);
+        sys.print(lines[i]);
+        sys.print("\n");
+    }
+    if (lines[lines.length-1]) {
+        sys.print(prefix);
+        sys.print(lines[lines.length-1]);
+    }
+}
+
+function doStylus(dir, watch, complete) {
+  var count = 0;
+  var tracker = complete && function() {
+    count++;
+    if (count === 2) {
+      complete();
+    }
+  }
+
+  for (var style_file in lumbarJSON.styles) {
+    var plugins = lumbarJSON.styles[style_file];
+    doStylusSet([style_file], plugins, dir, watch, tracker);
+  }
+}
+
+function doStylusSet(files, urlPlugin, dir, watch, complete) {
+    var args = ["-c"].concat(plugins.map(function(plugin) {
+      return ["--use", process.cwd() + plugin];
+    })).concat([
+      "--use", process.cwd() + "/node_modules/nib",
+      "--include", "./public",
+      "--out", (dir || '.') + "/public"
+    ]);
+    if (watch) {
+        args.unshift('--watch');
+    }
+    args.push.apply(args, files);
+
+    var stylus = child_process.spawn(__dirname + '/node_modules/stylus/bin/stylus', args);
+    stylus.stdout.on('data', function (data) {
+        streamData('stylus: ', data);
+    });
+    stylus.stderr.on('data', function (data) {
+        streamData('stylus err: ', data);
+    });
+
+    stylus.on('exit', function() {
+      complete || growl.notify('Stylus Borked', { title: 'Stylus Borked', sticky: true });
+
+      complete && complete()
+    });
+}
+
+function doLumbar(dir, watch, minimize, configFile, complete) {
+    var args = [
+        '--config', configFile || './config/dev.json',
+        "./lumbar.json",
+        (dir || '.') + "/public"
+    ];
+    if (watch) {
+        args.push('--watch');
+    }
+    if (minimize) {
+        args.push('--minimize');
+    }
+
+    var stylus = child_process.spawn(__dirname + '/node_modules/lumbar/bin/lumbar', args);
+    stylus.stdout.on('data', function (data) {
+        streamData('lumbar: ', data);
+    });
+    stylus.stderr.on('data', function (data) {
+        streamData('lumbar err: ', data);
+    });
+
+    stylus.on('exit', function() {
+      complete || growl.notify('Lumbar Borked', { title: 'Lumbar Borked', sticky: true });
+
+      complete && complete()
+    });
+}
+
+desc("The default task. Executes init");
+task("default", ['init'], function() {});
+
+desc("Initializes the public directory for all content that is not included in the repository")
+task("init", ['stylus', 'lumbar'], function() {});
+
+desc("Process all stylus templates.")
+task("stylus", [], function() {
+    // We could interface with this directly, but that would require duplicating the logic in
+    // the asset bin. For now fork it.
+    doStylus('', false, complete);
+}, true);
+
+desc("Process all lumbar modules.")
+task("lumbar", [], function() {
+    doLumbar('', false, false, undefined, complete);
+}, true);
+
+desc("Initializes the file change watcher for stylus scripts");
+task("watch", [], function() {
+    doStylus('', true);
+    doLumbar('', true);
+});

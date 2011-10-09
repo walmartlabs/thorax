@@ -13,8 +13,7 @@
   },
   "dependencies": {
     "optimist": "~0.2",
-    "handlebars": "~1.0",
-    "glob": "~2"
+    "handlebars": "~1.0"
   },
   "bin": {
     "thorax": "./bin/thorax"
