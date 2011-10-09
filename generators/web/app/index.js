@@ -13,7 +13,5 @@ module.exports = function(thorax, next) {
 
   thorax.writeFile(path.join('public', 'index.html'), thorax.template(path.join(__dirname, 'index.html.handlebars')));
 
-  thorax.writeFile(path.join('app', 'init.js'), thorax.template(path.join(__dirname, 'init.js.handlebars')));
-
   next();
 };

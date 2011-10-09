@@ -1,0 +1,15 @@
+var {{project}} = exports;
+
+Thorax.configure({
+  scope: {{project}},
+  layout: '.layout'
+});
+
+$(document).ready(function() {
+
+  {{project}}.layout.transition = '333ms ease-in-out';
+
+  Backbone.history.start({
+    trackDirection: true
+  });
+});

@@ -56,11 +56,16 @@ module.exports = function(thorax, next) {
   });
 
   //Jakefile
-  thorax.copy(path.join(__dirname, 'Jakefile'), 'Jakefile');
+  thorax.writeFile('Jakefile', thorax.template(path.join(__dirname, 'Jakefile.handlebars'),{}));
   
+  //project subclasses
+  ['collection','model','router','view'].forEach(function(type) {
+    thorax.writeFile(path.join('app', type + '.js'), thorax.template(path.join(__dirname, 'app', type + '.js.handlebars'),{}));
+  });
+
   //initialize lumbar and package json files
-  fs.writeFileSync(path.join(thorax.target, 'lumbar.json'), '{}');
-  fs.writeFileSync(path.join(thorax.target, 'package.json'), '{}');
+  thorax.writeFile('lumbar.json', '{}');
+  thorax.writeFile('package.json', '{}');
 
   //default lumbar json
   thorax.lumbarJSON = {

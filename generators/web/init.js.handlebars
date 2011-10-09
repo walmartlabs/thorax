@@ -1,0 +1,14 @@
+var {{project}} = exports;
+
+Thorax.configure({
+  scope: {{project}},
+  layout: '.layout'
+});
+
+$(document).ready(function() {
+
+  {{project}}.layout = Thorax.createLayout('.layout');
+  {{project}}.layout.transition = 'none';
+
+  Backbone.history.start();
+});

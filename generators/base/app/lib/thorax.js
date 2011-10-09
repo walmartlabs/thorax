@@ -33,10 +33,15 @@
       _.extend(scope, {
         templates: {},
         Views: {},
-        Mixins: {}
+        Mixins: {},
+        Models: {},
+        Collections: {},
+        Routers: {}
       });
 
       Backbone.history = new Thorax.History();
+
+      scope.layout = Thorax.createLayout(options.layout || '.layout');
     },
     createLayout: function(element) {
       var layout = Backbone.View.extend(_.extend({
@@ -44,6 +49,21 @@
       }, layoutProtoProps);
       return new layout;
     },
+    routeClick: function(event) {
+      if ($(event.target).attr("data-external")) {
+        return;
+      }
+      var transition = this.getAttribute('data-transition');
+      if (transition && transition != '') {
+        scope.layout.setNextTransitionMode(transition); 
+      }
+      var href = this.getAttribute("href");
+      // Route anything that starts with # or / (excluding //domain urls)
+      if (href && (href[0] === '#' || (href[0] === '/' && href[1] !== '/'))) {
+        Backbone.history.navigate(href, true);
+        event.preventDefault();
+      }
+    }
     _moduleMap: function(map, loadPrefix) {
       var routes = {},
       handlers = {
@@ -769,6 +789,27 @@
   };
 
   Thorax.View.registerEvents({
+    //built in dom events
+    'click a': Thorax.routeClick,
+    'submit form': function(event) {
+      // Hide any virtual keyboards that may be lingering around
+      var focused = $(':focus')[0];
+      focused && focused.blur();
+    },
+    'change .form-field input[type="checkbox"]': function(event) {
+      // don't process the change events on checkboxes
+      event.stopPropagation();
+    },
+
+
+    //if($(event.target).parents('.header,.breadcrumbs').length > 0 && !$(event.target).hasClass('header-button')) {
+    //  transition = 'slideLeft';
+    //}else if($(event.target).parents('.layout').length > 0) {
+    //  transition = 'slideRight';
+    //}
+
+
+
     error: function() {
       window.scrollTo(0, 0);
   
@@ -785,15 +826,6 @@
     },
     deactivated: function() {
       resetSubmitState.call(this);
-    },
-    'submit form': function(event) {
-      // Hide any virtual keyboards that may be lingering around
-      var focused = $(':focus')[0];
-      focused && focused.blur();
-    },
-    'change .form-field input[type="checkbox"]': function(event) {
-      // don't process the change events on checkboxes
-      event.stopPropagation();
     },
     'load:start': function() {
       $(this.el).addClass(this._loadingClassName);
@@ -873,6 +905,10 @@
     return new SafeString(Thorax.View.prototype.template.call(this.parentScope, name, this));
   });
 
+  Thorax.View.registerHelper('link', function(url) {
+    return (Backbone.history._hasPushState ? Backbone.history.options.root : '#') + url;
+  });
+
   //private / module vars for layout view
   var resetElementAnimationStyles = function(element) {
       element.style.webkitTransition = null;
@@ -930,6 +966,23 @@
     
     //class definition, used by Thorax.createLayout
     layoutProtoProps = {
+      events: {
+        reset: function(view, scrollTop) {
+          //for native
+          if (scrollTop && this.transition != 'none') {
+            var ua = navigator.userAgent.toLowerCase();
+            if (view && ua.match(/ipod|iphone|ipad/)) {
+              // Android flashes when attempting to adjust the offset in this manner
+              // so only run it under ios.
+              view.el.style.top = -scrollTop + 'px';
+            } else {
+              // For all others just jump to the top before beggining the transition
+              // This seems more palatable than a flash of the same content.
+              window.scrollTo(0, 0);
+            }
+          }
+        }
+      },
       initialize: function(){
         this.el = $(this.el)[0];
     
@@ -1088,6 +1141,8 @@
       forwardsTransitionMode: 'slideRight',
       backwardsTransitionMode: 'slideLeft'
     };
+
+  
 
   // Thorax.History
   // --------------
