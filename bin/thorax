@@ -11,4 +11,4 @@ if (argv.h || argv.help || !action) {
   return;
 }
 
-Thorax.actions[action].apply(this, argv._.slice(1));
+Thorax.action.apply(this, argv._);

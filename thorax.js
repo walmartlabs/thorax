@@ -1,5 +1,5 @@
 var Thorax,
-  mode = 0777,
+  mode = 0777 ^ process.umask(),
   path = require('path'),
   fs = require('fs'),
   child = require('child_process'),
@@ -23,27 +23,72 @@ var loadGenerators = function() {
       name = name.replace(pattern, '');
     }
     if (!name.match(/\.(js|coffee)$/)) {
-      name = name + this.lumbarJSON.language === 'javascript' ? '.js' : '.coffee';
+      name = name + (this.lumbarJSON.language === 'javascript' ? '.js' : '.coffee');
     }
     return name;
   },
 
   nameFromFileName = function(file_name) {
-    return path.basename(file_name).replace(/\..*$/);
+    return path.basename(file_name).replace(/\..*$/, '');
   },
 
   moduleNameFromArguments = function(args) {
     if (args.length === 1) {
-      module_name = args[1].split('/').shift();
+      module_name = args[0].split('/').shift();
     } else {
       module_name = args[0];
     }
-    if (!thorax.lumbarJSON.modules[module_name]) {
-      thorax.log('error: module ' + module_name ' does not exist');
-      console.log(module.exports.help);
+    if (!this.lumbarJSON.modules[module_name]) {
+      this.error('module "' + module_name + '" does not exist');
+      console.log('');
+      console.log('Create a module or router with this name:');
+      console.log('  thorax router ' + module_name);
+      console.log('  thorax module ' + module_name);
+      console.log('');
+      if (args.length === 1) {
+        console.log('Or specify an existing module:');
+        console.log('  thorax ' + module.exports.currentAction + ' module-name ' + args[0]);
+      }
+      console.log('');
       return false;
     }
     return module_name;
+  },
+
+  fileNameFromArguments = function(args) {
+    if (args.length === 1) {
+      return args[0];
+    } else {
+      return args[1];
+    }
+  },
+
+  // Recursive mkdir
+  mkdirsSync = function(dirname) {
+    var pathsNotFound = [];
+    var fn = dirname;
+    while (true) {
+      try {
+        var stats = fs.statSync(fn);
+        if (stats.isDirectory()) {
+          break;
+        }
+        throw new Error('Unable to create directory at ' + fn);
+      }
+      catch (e) {
+        pathsNotFound.push(fn);
+        fn = path.dirname(fn);
+      }
+    }
+    for (var i = pathsNotFound.length-1; i>-1; i--) {
+      var fn = pathsNotFound[i];
+      fs.mkdirSync(fn, mode);
+    }
+    return pathsNotFound;
+  },
+
+  detectIfIsThoraxProjectDir = function() {
+    if (!path.exists())
   };
 
 //constructor
@@ -63,13 +108,15 @@ module.exports = function(target, options) {
     this.packageJSON = {};
     this.lumbarJSON = {};
   } else {
-    try {
-      this.packageJSON = JSON.parse(fs.readFileSync(this._packageJSONPath));
-      this.lumbarJSON = JSON.parse(fs.readFileSync(this._lumbarJSONPath));
-    } catch(e) {
-      thorax.log('error: ' + this.target + ' does not appear to be a Thorax project directory');
-    }
+    this.packageJSON = JSON.parse(fs.readFileSync(this._packageJSONPath));
+    this.lumbarJSON = JSON.parse(fs.readFileSync(this._lumbarJSONPath));
+    this.project = this.lumbarJSON.application.name;
   }
+};
+
+module.exports.action = function (action) {
+  module.exports.currentAction = action;
+  module.exports.actions[action].apply(this, Array.prototype.slice.call(arguments, 1));
 };
 
 module.exports.help = [
@@ -77,16 +124,16 @@ module.exports.help = [
   "",
   "Create a new project & directory:",
   "",
-  "  thorax init project-name [web|mobile]",
+  "  thorax create project-name [web|mobile]",
   "",
   "In project directory:",
   "",
   "  thorax install node-module-name",
-  "  thorax view [module-name] file-name",
-  "  thorax collection-view [module-name] file-name",
-  "  thorax model [module-name] file-name",
+  "  thorax view module-name file-name",
+  "  thorax collection-view module-name file-name",
+  "  thorax model module-name] file-name",
   "  thorax collection [module-name] file-name",
-  "  thorax router name",
+  "  thorax router module-name",
   "  thorax module name",
   "  thorax template template",
   "  thorax platform name",
@@ -95,7 +142,7 @@ module.exports.help = [
 
 //actions
 module.exports.actions = {
-  init: function(target, generator) {
+  create: function(target, generator) {
     var thorax = new module.exports(target, {
       create: true
     });
@@ -104,7 +151,7 @@ module.exports.actions = {
       thorax.save(function(){
         //empty module name will install from generated package.json
         thorax.npmInstall('',function() {
-          thorax.log('init complete');
+          thorax.log('project created in ' + target);
         });
       });
     };
@@ -160,48 +207,60 @@ module.exports.actions = {
 
   view: function(module_name, file_name) {
     var thorax = new module.exports();
+    file_name = fileNameFromArguments.call(thorax, arguments);
     module_name = moduleNameFromArguments.call(thorax, arguments);
     if (module_name) {
-      file_name = cleanFileName.call(this, file_name, /^\/?app\/views\/?/);
-
+      file_name = cleanFileName.call(thorax, file_name, /^\/?app\/views\/?/);
       var full_path = path.join('app', 'views', file_name),
         engine = thorax.lumbarJSON.templates.engine,
         template_path = path.join(thorax.target, 'generators', 'view.handlebars'),
         view_template_path = path.join('app', 'templates', file_name).replace(/\.(js|coffee)$/, '.' + engine)
       
+      thorax.checkPath(full_path);
+      thorax.checkPath(view_template_path);
+
       thorax.writeFile(full_path, thorax.template(template_path, {
         fileName: full_path,
         moduleName: module_name,
-        name: name,
-        className: camelize(name)
+        name: file_name.replace(/\.(js|coffee)$/, ''),
+        className: camelize(file_name.replace(/\.(js|coffee)$/, '').replace(/\//g, '-'))
       }));
 
       thorax.writeFile(view_template_path, '');
       
       thorax.lumbarJSON.modules[module_name].files.push(full_path);
       thorax.lumbarJSON.templates[full_path] = [view_template_path];
+
+      thorax.save(function() {
+        thorax.log('created view: ' + file_name);
+        thorax.log('created template: ' + view_template_path);
+      });
     }
   },
 
   'collection-view': function(module_name, file_name) {
     var thorax = new module.exports();
     module_name = moduleNameFromArguments.call(thorax, arguments);
+    file_name = fileNameFromArguments.call(thorax, arguments);
     if (module_name) {
-      file_name = cleanFileName.call(this, file_name, /^\/?app\/views\/?/);
+      file_name = cleanFileName.call(thorax, file_name, /^\/?app\/views\/?/);
 
       var full_path = path.join('app', 'views', file_name),
         engine = thorax.lumbarJSON.templates.engine,
         template_path = path.join(thorax.target, 'generators', 'collection-view.handlebars'),
         view_template_path = path.join('app', 'templates', file_name).replace(/\.(js|coffee)$/, '.' + engine);
       
+      thorax.checkPath(full_path);
+
       //view file
       thorax.writeFile(full_path, thorax.template(template_path, {
         fileName: full_path,
         moduleName: module_name,
-        name: name,
-        className: camelize(name)
+        name: file_name.replace(/\.(js|coffee)$/, ''),
+        className: camelize(file_name.replace(/\.(js|coffee)$/, '').replace(/\//g, '-'))
       }));
       thorax.lumbarJSON.modules[module_name].files.push(full_path);
+      thorax.log('created view: ' + file_name);
 
       //templates
       thorax.lumbarJSON.templates[full_path] = [
@@ -210,54 +269,76 @@ module.exports.actions = {
         view_template_path.replace(new RegExp('.' + engine + '$'), '-empty.' + engine)
       ];
       thorax.lumbarJSON.templates[full_path].forEach(function(_view_template_path) {
+        thorax.checkPath(_view_template_path);
         thorax.writeFile(_view_template_path, '');
+        thorax.log('created template: ' + _view_template_path);
       });
+
+      thorax.save();
     }
   },
 
   model: function(module_name, file_name) {
     var thorax = new module.exports();
+    file_name = fileNameFromArguments.call(thorax, arguments);
     module_name = moduleNameFromArguments.call(thorax, arguments);
     if (module_name) {
-      file_name = cleanFileName.call(this, file_name, /^\/?app\/models\/?/);
+      file_name = cleanFileName.call(thorax, file_name, /^\/?app\/models\/?/);
 
       var full_path = path.join('app', 'models', file_name),
         template_path = path.join(thorax.target, 'generators', 'model.handlebars');
+      
+      thorax.checkPath(full_path);
 
       thorax.writeFile(full_path, thorax.template(template_path, {
         fileName: full_path,
         moduleName: module_name,
-        name: name,
-        className: camelize(name)
+        name: file_name.replace(/\.(js|coffee)$/, ''),
+        className: camelize(file_name.replace(/\.(js|coffee)$/, '').replace(/\//g, '-'))
       }));
       thorax.lumbarJSON.modules[module_name].files.push(full_path);
+
+      thorax.save(function() {
+        thorax.log('created model: ' + file_name);
+      });
     }
   },
 
   collection: function(module_name, file_name) {
     var thorax = new module.exports();
+    file_name = fileNameFromArguments.call(thorax, arguments);
     module_name = moduleNameFromArguments.call(thorax, arguments);
     if (module_name) {
-      file_name = cleanFileName.call(this, file_name, /^\/?app\/models\/?/);
+      file_name = cleanFileName.call(thorax, file_name, /^\/?app\/models\/?/);
 
       var full_path = path.join('app', 'collections', file_name),
         template_path = path.join(thorax.target, 'generators', 'collection.handlebars');
 
+      thorax.checkPath(full_path);
+
       thorax.writeFile(full_path, thorax.template(template_path, {
         fileName: full_path,
         moduleName: module_name,
-        name: name,
-        className: camelize(name)
+        name: file_name.replace(/\.(js|coffee)$/, ''),
+        className: camelize(file_name.replace(/\.(js|coffee)$/, '').replace(/\//g, '-'))
       }));
       thorax.lumbarJSON.modules[module_name].files.push(full_path);
+
+      thorax.save(function() {
+        thorax.log('created collection: ' + file_name);
+      });
     }
   },
 
   router: function(file_name) {
-    var thorax = new module.exports(),
-      name = cleanFileName.call(this, file_name, /^\/?app\/routers\/?/),
-      file_name = path.join('app', 'routers', file_name),
-      template_path = path.join(thorax.target, 'generators', 'router.handlebars'),
+    var thorax = new module.exports();
+
+    file_name = cleanFileName.call(thorax, file_name, /^\/?app\/routers\/?/);
+    file_name = path.join('app', 'routers', file_name);
+    
+    thorax.checkPath(file_name);
+
+    var template_path = path.join(thorax.target, 'generators', 'router.handlebars'),
       name = nameFromFileName(file_name),
       template_output = thorax.template(template_path,{
         name: name,
@@ -266,16 +347,16 @@ module.exports.actions = {
         className: camelize(name)
       }),
       complete = function() {
-        thorax.log('created router:' + file_name);
+        thorax.log('created router: ' + file_name);
       };
 
     thorax.writeFile(file_name, template_output);
-    if (!thorax.modules[module_name]) {
-      thorax.lumbarJSON.modules[module_name] = {
+    if (!thorax.lumbarJSON.modules[name]) {
+      thorax.lumbarJSON.modules[name] = {
         routes: {},
         files: []
       };
-      thorax.log('created module: ' + module_name);
+      thorax.log('created module: ' + name);
       thorax.save(complete);
     } else {
       complete();
@@ -285,6 +366,7 @@ module.exports.actions = {
   template: function(file_name) {
     file_name = cleanFileName.call(this, file_name, /^\/?app\/templates\/?/);
     var thorax = new module.exports();
+    thorax.checkPath(file_name);
     thorax.writeFile(path.join('app', 'templates', file_name), '');
     thorax.log('created template: ' + file_name);
   },
@@ -334,6 +416,10 @@ var methods = {
     console.log('thorax.' + this.generatorName + ': ' + message);
   },
   
+  error: function(message) {
+    console.log('thorax.' + this.generatorName + ' error: ' + message);
+  },
+
   generate: function(generator_name, next) {
     this.generatorName = generator_name;
     this._generators[generator_name](this, next);
@@ -346,14 +432,23 @@ var methods = {
   copy: function(src, dest) {
     fs.writeFileSync(path.join(this.target, dest), fs.readFileSync(src));
   },
-  
+
+  checkPath: function(dir) {
+    var target_path = path.join(this.target, path.dirname(dir));
+    if (!path.exists(target_path)) {
+      mkdirsSync.call(this, target_path).forEach(function(created_dir) {
+        this.log('created directory: ' + created_dir.substring(this.target.length + 1, created_dir.length));
+      }, this);
+    }
+  },
+    
   writeFile: function(dest, contents) {
     fs.writeFileSync(path.join(this.target, dest), contents);
   },
 
   template: function(src, context) {
-    var template_src = fs.readFileSync(src),
-      template = Handlebars.compile(template_src);
+    var template_src = fs.readFileSync(src).toString(),
+      template = handlebars.compile(template_src);
     context = context || {};
     context.project = this.project;
     context.target = this.target;
@@ -370,17 +465,17 @@ var methods = {
     ;
 
     child.exec(command,function(error, stdout, stderr) {
-      var path;
+      var installed_path;
       if (stdout && stdout !== '') {
         console.log('thorax.npm-install: ' + stdout);
-        path = stdout.split(/\n/).shift().replace(/\s$/, '').split(/\s/).pop();
+        installed_path = stdout.split(/\n/).shift().replace(/\s$/, '').split(/\s/).pop();
       }
       if (stderr && stderr !== '') {
         console.error('thorax.npm-install error: ' + stderr);
-        path = false;
+        installed_path = false;
       }
-      if (next) {
-        next(path);
+      if (installed_path) {
+        next(installed_path);
       }
     });
   }

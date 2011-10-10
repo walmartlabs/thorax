@@ -46,8 +46,6 @@ module.exports = function(thorax, next) {
   [
     path.join('generators', 'collection-view.handlebars'),
     path.join('generators', 'collection.handlebars'),
-    path.join('generators', 'index.handlebars'),
-    path.join('generators', 'init.handlebars'),
     path.join('generators', 'model.handlebars'),
     path.join('generators', 'router.handlebars'),
     path.join('generators', 'view.handlebars')
@@ -57,10 +55,16 @@ module.exports = function(thorax, next) {
 
   //Jakefile
   thorax.writeFile('Jakefile', thorax.template(path.join(__dirname, 'Jakefile.handlebars'),{}));
-  
-  //project subclasses
-  ['collection','model','router','view'].forEach(function(type) {
-    thorax.writeFile(path.join('app', type + '.js'), thorax.template(path.join(__dirname, 'app', type + '.js.handlebars'),{}));
+
+  //project subclass stubs
+  [
+    'collection',
+    'model',
+    'router',
+    'view'
+  ].forEach(function(type) {
+    var output = thorax.template(path.join(__dirname, 'app', type + '.js.handlebars'),{});
+    thorax.writeFile(path.join('app', type + '.js'), output);
   });
 
   //initialize lumbar and package json files

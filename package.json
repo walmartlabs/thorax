@@ -17,5 +17,6 @@
   },
   "bin": {
     "thorax": "./bin/thorax"
-  }
+  },
+  "main": "./thorax.js"
 }
