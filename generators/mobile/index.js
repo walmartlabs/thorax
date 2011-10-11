@@ -16,15 +16,12 @@ module.exports = function(thorax, next) {
     platform: 'mobile'
   });
 
-  thorax.lumbarJSON.platforms.push('mobile');
-  thorax.lumbarJSON.packages[thorax.project] = {
-    platforms: thorax.lumbarJSON.platforms,
-    combine: false
-  };
+  thorax.platform('mobile');
+  thorax['package'](path.basename(thorax.target));
 
-  thorax.writeFile(path.join('public', 'index.html'), thorax.template(path.join(__dirname, 'index.html.handlebars')));
+  thorax.writeFile(path.join('public', 'index.html'), thorax.render(path.join(__dirname, 'index.html.handlebars')));
 
-  thorax.writeFile(path.join('app', 'init.js'), thorax.template(path.join(__dirname, 'init.js.handlebars')));
+  thorax.writeFile(path.join('app', 'init.js'), thorax.render(path.join(__dirname, 'init.js.handlebars')));
 
   next();
 };

@@ -18,12 +18,12 @@ var loadGenerators = function() {
     });
   },
 
-  cleanFileName = function(name, pattern) {
+  cleanFileName = function(name, pattern, extension) {
     if (name.match(pattern)) {
       name = name.replace(pattern, '');
     }
     if (!name.match(/\.(js|coffee)$/)) {
-      name = name + (this.lumbarJSON.language === 'javascript' ? '.js' : '.coffee');
+      name = name + (extension ? '.' + extension : (this.thoraxJSON.language === 'javascript' ? '.js' : '.coffee'));
     }
     return name;
   },
@@ -80,37 +80,61 @@ var loadGenerators = function() {
         fn = path.dirname(fn);
       }
     }
-    for (var i = pathsNotFound.length-1; i>-1; i--) {
+    for (var i = pathsNotFound.length - 1; i >- 1; i--) {
       var fn = pathsNotFound[i];
       fs.mkdirSync(fn, mode);
     }
     return pathsNotFound;
   },
 
-  detectIfIsThoraxProjectDir = function() {
-    if (!path.exists())
+  detectThoraxProjectDir = function(options) {
+    if (!path.existsSync(path.join(this.target, 'package.json')) || !path.existsSync(path.join(this.target, 'lumbar.json')) || !path.existsSync(path.join(this.target, 'thorax.json'))) {
+      //crude attempt to see if we are in a thorax project dir
+      var dir, test_target;
+      for (var i = 1; i < 4; ++i) {
+        dir = [this.target];
+        for (var _i = 0; _i < i; ++_i) {
+          dir.push('..');
+        }
+        test_target = path.join.apply(path, dir);
+        if (path.existsSync(path.join(test_target, 'package.json')) && path.existsSync(path.join(test_target, 'lumbar.json')) && path.existsSync(path.join(test_target, 'thorax.json'))) {
+          setTarget.call(this, test_target);
+          return true;
+        }
+      }
+      thorax.log(this.target + ' does not appear to be a thorax project, lumbar.json, thorax.json, package.json must be present');
+      if (!options || typeof options.exit === 'undefined' || options.exit === false) {
+        process.exit(1);
+        return false;
+      }
+    } else {
+      return true;
+    }
+  },
+
+  setTarget = function(target) {
+    this.target = target;
+    this._packageJSONPath = path.join(this.target, 'package.json');
+    this._lumbarJSONPath = path.join(this.target, 'lumbar.json');
+    this._thoraxJSONPath = path.join(this.target, 'thorax.json');
   };
 
 //constructor
 module.exports = function(target, options) {
   this.generatorName = 'base'; //for thorax.log
   this.loadPrefix = '';
-  this.target = target || process.cwd();
-  this.project = camelize(path.basename(this.target));
+  setTarget.call(this, target || process.cwd());
   this._generators = {};
   loadGenerators.call(this);
-  this._packageJSONPath = path.join(this.target, 'package.json');
-  this._lumbarJSONPath = path.join(this.target, 'lumbar.json');
   if (options && options.create) {
-    this.mkdir(null); //creates the project directory
-    fs.writeFileSync(this._lumbarJSONPath, '{}');
-    fs.writeFileSync(this._packageJSONPath, '{}');
-    this.packageJSON = {};
-    this.lumbarJSON = {};
+    this.project = camelize(path.basename(this.target));
   } else {
-    this.packageJSON = JSON.parse(fs.readFileSync(this._packageJSONPath));
-    this.lumbarJSON = JSON.parse(fs.readFileSync(this._lumbarJSONPath));
-    this.project = this.lumbarJSON.application.name;
+    if (detectThoraxProjectDir.call(this, options)) {
+      this.packageJSON = JSON.parse(fs.readFileSync(this._packageJSONPath));
+      this.lumbarJSON = JSON.parse(fs.readFileSync(this._lumbarJSONPath));
+      this.thoraxJSON = JSON.parse(fs.readFileSync(this._thoraxJSONPath));
+      this.project = this.lumbarJSON.application.name;
+    }
   }
 };
 
@@ -138,7 +162,7 @@ module.exports.help = [
   "  thorax template template",
   "  thorax platform name",
   "  thorax package name"
-].join("\n")
+].join("\n");
 
 //actions
 module.exports.actions = {
@@ -186,12 +210,9 @@ module.exports.actions = {
           return;
         }
         if (module_json.main && !module_json.thorax) {
-          thorax.copy(path.join(module_path, module_json.main), path.join('app', 'lib', path.basename(module_json.main)));
+          thorax.copy(path.join(module_path, module_json.main), path.join(thorax.thoraxJSON.paths.lib, path.basename(module_json.main)));
         }
         if (module_json.thorax) {
-          if (module_json.thorax.scripts && module_json.thorax.scripts.install) {
-            require(path.join(module_path, module_json.thorax.scripts.install))(thorax);
-          }
           if (module_json.thorax.files) {
             module_json.thorax.files.forEach(function(file) {
               thorax.copy(path.join(module_path, file), file);
@@ -203,204 +224,27 @@ module.exports.actions = {
         });
       });
     });
-  },
-
-  view: function(module_name, file_name) {
-    var thorax = new module.exports();
-    file_name = fileNameFromArguments.call(thorax, arguments);
-    module_name = moduleNameFromArguments.call(thorax, arguments);
-    if (module_name) {
-      file_name = cleanFileName.call(thorax, file_name, /^\/?app\/views\/?/);
-      var full_path = path.join('app', 'views', file_name),
-        engine = thorax.lumbarJSON.templates.engine,
-        template_path = path.join(thorax.target, 'generators', 'view.handlebars'),
-        view_template_path = path.join('app', 'templates', file_name).replace(/\.(js|coffee)$/, '.' + engine)
-      
-      thorax.checkPath(full_path);
-      thorax.checkPath(view_template_path);
-
-      thorax.writeFile(full_path, thorax.template(template_path, {
-        fileName: full_path,
-        moduleName: module_name,
-        name: file_name.replace(/\.(js|coffee)$/, ''),
-        className: camelize(file_name.replace(/\.(js|coffee)$/, '').replace(/\//g, '-'))
-      }));
-
-      thorax.writeFile(view_template_path, '');
-      
-      thorax.lumbarJSON.modules[module_name].files.push(full_path);
-      thorax.lumbarJSON.templates[full_path] = [view_template_path];
-
-      thorax.save(function() {
-        thorax.log('created view: ' + file_name);
-        thorax.log('created template: ' + view_template_path);
-      });
-    }
-  },
-
-  'collection-view': function(module_name, file_name) {
-    var thorax = new module.exports();
-    module_name = moduleNameFromArguments.call(thorax, arguments);
-    file_name = fileNameFromArguments.call(thorax, arguments);
-    if (module_name) {
-      file_name = cleanFileName.call(thorax, file_name, /^\/?app\/views\/?/);
-
-      var full_path = path.join('app', 'views', file_name),
-        engine = thorax.lumbarJSON.templates.engine,
-        template_path = path.join(thorax.target, 'generators', 'collection-view.handlebars'),
-        view_template_path = path.join('app', 'templates', file_name).replace(/\.(js|coffee)$/, '.' + engine);
-      
-      thorax.checkPath(full_path);
-
-      //view file
-      thorax.writeFile(full_path, thorax.template(template_path, {
-        fileName: full_path,
-        moduleName: module_name,
-        name: file_name.replace(/\.(js|coffee)$/, ''),
-        className: camelize(file_name.replace(/\.(js|coffee)$/, '').replace(/\//g, '-'))
-      }));
-      thorax.lumbarJSON.modules[module_name].files.push(full_path);
-      thorax.log('created view: ' + file_name);
-
-      //templates
-      thorax.lumbarJSON.templates[full_path] = [
-        view_template_path,
-        view_template_path.replace(new RegExp('.' + engine + '$'), '-item.' + engine),
-        view_template_path.replace(new RegExp('.' + engine + '$'), '-empty.' + engine)
-      ];
-      thorax.lumbarJSON.templates[full_path].forEach(function(_view_template_path) {
-        thorax.checkPath(_view_template_path);
-        thorax.writeFile(_view_template_path, '');
-        thorax.log('created template: ' + _view_template_path);
-      });
-
-      thorax.save();
-    }
-  },
-
-  model: function(module_name, file_name) {
-    var thorax = new module.exports();
-    file_name = fileNameFromArguments.call(thorax, arguments);
-    module_name = moduleNameFromArguments.call(thorax, arguments);
-    if (module_name) {
-      file_name = cleanFileName.call(thorax, file_name, /^\/?app\/models\/?/);
-
-      var full_path = path.join('app', 'models', file_name),
-        template_path = path.join(thorax.target, 'generators', 'model.handlebars');
-      
-      thorax.checkPath(full_path);
-
-      thorax.writeFile(full_path, thorax.template(template_path, {
-        fileName: full_path,
-        moduleName: module_name,
-        name: file_name.replace(/\.(js|coffee)$/, ''),
-        className: camelize(file_name.replace(/\.(js|coffee)$/, '').replace(/\//g, '-'))
-      }));
-      thorax.lumbarJSON.modules[module_name].files.push(full_path);
-
-      thorax.save(function() {
-        thorax.log('created model: ' + file_name);
-      });
-    }
-  },
-
-  collection: function(module_name, file_name) {
-    var thorax = new module.exports();
-    file_name = fileNameFromArguments.call(thorax, arguments);
-    module_name = moduleNameFromArguments.call(thorax, arguments);
-    if (module_name) {
-      file_name = cleanFileName.call(thorax, file_name, /^\/?app\/models\/?/);
-
-      var full_path = path.join('app', 'collections', file_name),
-        template_path = path.join(thorax.target, 'generators', 'collection.handlebars');
-
-      thorax.checkPath(full_path);
-
-      thorax.writeFile(full_path, thorax.template(template_path, {
-        fileName: full_path,
-        moduleName: module_name,
-        name: file_name.replace(/\.(js|coffee)$/, ''),
-        className: camelize(file_name.replace(/\.(js|coffee)$/, '').replace(/\//g, '-'))
-      }));
-      thorax.lumbarJSON.modules[module_name].files.push(full_path);
-
-      thorax.save(function() {
-        thorax.log('created collection: ' + file_name);
-      });
-    }
-  },
-
-  router: function(file_name) {
-    var thorax = new module.exports();
-
-    file_name = cleanFileName.call(thorax, file_name, /^\/?app\/routers\/?/);
-    file_name = path.join('app', 'routers', file_name);
-    
-    thorax.checkPath(file_name);
-
-    var template_path = path.join(thorax.target, 'generators', 'router.handlebars'),
-      name = nameFromFileName(file_name),
-      template_output = thorax.template(template_path,{
-        name: name,
-        fileName: file_name,
-        name: name,
-        className: camelize(name)
-      }),
-      complete = function() {
-        thorax.log('created router: ' + file_name);
-      };
-
-    thorax.writeFile(file_name, template_output);
-    if (!thorax.lumbarJSON.modules[name]) {
-      thorax.lumbarJSON.modules[name] = {
-        routes: {},
-        files: []
-      };
-      thorax.log('created module: ' + name);
-      thorax.save(complete);
-    } else {
-      complete();
-    }
-  },
-
-  template: function(file_name) {
-    file_name = cleanFileName.call(this, file_name, /^\/?app\/templates\/?/);
-    var thorax = new module.exports();
-    thorax.checkPath(file_name);
-    thorax.writeFile(path.join('app', 'templates', file_name), '');
-    thorax.log('created template: ' + file_name);
-  },
-
-  platform: function(name) {
-    var thorax = new module.exports();
-    thorax.lumbarJSON.modules[name] = {};
-    thorax.save(function() {
-      thorax.log('created module: ' + name);
-    });
-  },
-
-  'package': function(name) {
-    var thorax = new module.exports();
-    thorax.lumbarJSON.packages[name] = {
-      platforms: thorax.lumbarJSON.platforms,
-      combine: false
-    };
-    thorax.save(function() {
-      thorax.log('created package: ' + name);
-    });
-  },
-
-  'module': function(name) {
-    var thorax = new module.exports();
-    thorax.lumbarJSON.modules[name] = {
-      routes: {},
-      files: []
-    };
-    thorax.save(function() {
-      thorax.log('created module: ' + name);
-    });
   }
 };
+
+[
+  'view',
+  'collection-view',
+  'collection',
+  'model',
+  'router',
+  'style',
+  'template',
+  'package',
+  'platform',
+  'module'
+].forEach(function(action) {
+  module.exports.actions[action] = function() {
+    var thorax = new module.exports();
+    thorax[action].apply(thorax, arguments);
+    thorax.save();
+  };
+});
 
 //instance methods
 var methods = {
@@ -433,9 +277,13 @@ var methods = {
     fs.writeFileSync(path.join(this.target, dest), fs.readFileSync(src));
   },
 
+  symlink: function(src, dest) {
+    fs.symlinkSync(src, path.join(this.target, dest));
+  },
+
   checkPath: function(dir) {
     var target_path = path.join(this.target, path.dirname(dir));
-    if (!path.exists(target_path)) {
+    if (!path.existsSync(target_path)) {
       mkdirsSync.call(this, target_path).forEach(function(created_dir) {
         this.log('created directory: ' + created_dir.substring(this.target.length + 1, created_dir.length));
       }, this);
@@ -443,10 +291,14 @@ var methods = {
   },
     
   writeFile: function(dest, contents) {
+    if (path.exists(dest)) {
+      this.log(dest + ' already exists, not overwriting');
+      return;
+    }
     fs.writeFileSync(path.join(this.target, dest), contents);
   },
 
-  template: function(src, context) {
+  render: function(src, context) {
     var template_src = fs.readFileSync(src).toString(),
       template = handlebars.compile(template_src);
     context = context || {};
@@ -478,6 +330,183 @@ var methods = {
         next(installed_path);
       }
     });
+  },
+
+  view: function(module_name, file_name) {
+    file_name = fileNameFromArguments.call(this, arguments);
+    module_name = moduleNameFromArguments.call(this, arguments);
+    if (module_name) {
+      file_name = cleanFileName.call(this, file_name, /^\/?app\/views\/?/);
+      var full_path = path.join(this.thoraxJSON.paths.views, file_name),
+        engine = this.lumbarJSON.templates.engine,
+        template_path = path.join(this.target, this.thoraxJSON.paths.generators, 'view.handlebars'),
+        view_template_path = path.join(this.thoraxJSON.paths.templates, file_name).replace(/\.(js|coffee)$/, '.' + engine)
+      
+      this.checkPath(full_path);
+      this.checkPath(view_template_path);
+
+      this.writeFile(full_path, this.render(template_path, {
+        fileName: full_path,
+        moduleName: module_name,
+        name: file_name.replace(/\.(js|coffee)$/, ''),
+        className: camelize(file_name.replace(/\.(js|coffee)$/, '').replace(/\//g, '-'))
+      }));
+      this.log('created view: ' + file_name);
+
+      this.writeFile(view_template_path, '');
+      this.log('created template: ' + view_template_path);
+
+      this.lumbarJSON.modules[module_name].files.push(full_path);
+      this.lumbarJSON.templates[full_path] = [view_template_path];
+    }
+  },
+
+  'collection-view': function(module_name, file_name) {
+    module_name = moduleNameFromArguments.call(this, arguments);
+    file_name = fileNameFromArguments.call(this, arguments);
+    if (module_name) {
+      file_name = cleanFileName.call(this, file_name, /^\/?app\/views\/?/);
+
+      var full_path = path.join(this.thoraxJSON.paths.views, file_name),
+        engine = this.lumbarJSON.templates.engine,
+        template_path = path.join(this.target, this.thoraxJSON.paths.generators, 'collection-view.handlebars'),
+        view_template_path = path.join(this.thoraxJSON.paths.templates, file_name).replace(/\.(js|coffee)$/, '.' + engine);
+      
+      this.checkPath(full_path);
+
+      //view file
+      this.writeFile(full_path, this.render(template_path, {
+        fileName: full_path,
+        moduleName: module_name,
+        name: file_name.replace(/\.(js|coffee)$/, ''),
+        className: camelize(file_name.replace(/\.(js|coffee)$/, '').replace(/\//g, '-'))
+      }));
+      this.lumbarJSON.modules[module_name].files.push(full_path);
+      this.log('created view: ' + file_name);
+
+      //templates
+      this.lumbarJSON.templates[full_path] = [
+        view_template_path,
+        view_template_path.replace(new RegExp('.' + engine + '$'), '-item.' + engine),
+        view_template_path.replace(new RegExp('.' + engine + '$'), '-empty.' + engine)
+      ];
+      this.lumbarJSON.templates[full_path].forEach(function(_view_template_path) {
+        this.checkPath(_view_template_path);
+        this.writeFile(_view_template_path, '');
+        this.log('created template: ' + _view_template_path);
+      }, this);
+    }
+  },
+
+  model: function(module_name, file_name) {
+    file_name = fileNameFromArguments.call(this, arguments);
+    module_name = moduleNameFromArguments.call(this, arguments);
+    if (module_name) {
+      file_name = cleanFileName.call(this, file_name, /^\/?app\/models\/?/);
+
+      var full_path = path.join(this.thoraxJSON.paths.models, file_name),
+        template_path = path.join(this.target, this.thoraxJSON.paths.generators, 'model.handlebars');
+      
+      this.checkPath(full_path);
+
+      this.writeFile(full_path, this.render(template_path, {
+        fileName: full_path,
+        moduleName: module_name,
+        name: file_name.replace(/\.(js|coffee)$/, ''),
+        className: camelize(file_name.replace(/\.(js|coffee)$/, '').replace(/\//g, '-'))
+      }));
+      this.log('created model: ' + file_name);
+
+      this.lumbarJSON.modules[module_name].files.push(full_path);
+    }
+  },
+
+  collection: function(module_name, file_name) {
+    file_name = fileNameFromArguments.call(this, arguments);
+    module_name = moduleNameFromArguments.call(this, arguments);
+    if (module_name) {
+      file_name = cleanFileName.call(this, file_name, /^\/?app\/models\/?/);
+
+      var full_path = path.join(this.thoraxJSON.paths.collections, file_name),
+        template_path = path.join(this.target, this.thoraxJSON.paths.generators, 'collection.handlebars');
+
+      this.checkPath(full_path);
+
+      this.writeFile(full_path, this.render(template_path, {
+        fileName: full_path,
+        moduleName: module_name,
+        name: file_name.replace(/\.(js|coffee)$/, ''),
+        className: camelize(file_name.replace(/\.(js|coffee)$/, '').replace(/\//g, '-'))
+      }));
+      this.log('created collection: ' + file_name);
+
+      this.lumbarJSON.modules[module_name].files.push(full_path);
+    }
+  },
+
+  router: function(file_name) {
+    file_name = cleanFileName.call(this, file_name, /^\/?app\/routers\/?/);
+    file_name = path.join(this.thoraxJSON.paths.routers, file_name);
+    
+    this.checkPath(file_name);
+
+    var template_path = path.join(this.target, this.thoraxJSON.paths.generators, 'router.handlebars'),
+      name = nameFromFileName(file_name),
+      template_output = this.render(template_path,{
+        name: name,
+        fileName: file_name,
+        name: name,
+        className: camelize(name)
+      });
+
+    this.writeFile(file_name, template_output);
+    this.log('created router: ' + file_name);
+
+    if (!this.lumbarJSON.modules[name]) {
+      this.lumbarJSON.modules[name] = {
+        routes: {},
+        files: []
+      };
+    }  
+  },
+
+  style: function(file_name) {
+    file_name = cleanFileName.call(this, file_name, /^\/?app\/styles\/?/, 'styl');
+    var full_path = path.join(this.thoraxJSON.paths.styles, file_name);
+    this.checkPath(full_path);
+    this.writeFile(full_path, '');
+    this.log('created stylesheet: ' + file_name);
+    this.lumbarJSON.styles[full_path] = path.join(this.thoraxJSON.paths.styles, 'plugins', 'url-import.js');
+  },
+
+  template: function(file_name) {
+    file_name = cleanFileName.call(this, file_name, /^\/?app\/templates\/?/);
+    var full_path = path.join(this.thoraxJSON.paths.templates, file_name);
+    this.checkPath(full_path);
+    this.writeFile(full_path, '');
+    this.log('created template: ' + full_path);
+  },
+
+  platform: function(name) {
+    this.lumbarJSON.modules[name] = {};
+    this.log('created platform: ' + name);
+  },
+
+  'package': function(name) {
+    this.lumbarJSON.packages[name] = {
+      platforms: this.lumbarJSON.platforms,
+      combine: false
+    };
+    this.log('created package: ' + name);
+    this.style(name);
+  },
+
+  'module': function(name) {
+    this.lumbarJSON.modules[name] = {
+      routes: {},
+      files: []
+    };
+    this.log('created module: ' + name);
   }
 };
 

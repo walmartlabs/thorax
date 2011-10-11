@@ -4,7 +4,7 @@ var child_process = require("child_process"),
     path = require('path'),
     sys = require("sys"),
     wrench = require('wrench'),
-    lumbarJSON = JSON.parse(fs.readfileSync(path.join(__dirname, 'package.json')));
+    lumbarJSON = JSON.parse(fs.readFileSync(path.join(__dirname, 'package.json')));
 
 function streamData(prefix, data) {
     var lines = data.toString().split(/\r\n|\n|\r/g);
@@ -113,3 +113,9 @@ task("watch", [], function() {
     doStylus('', true);
     doLumbar('', true);
 });
+
+if (path.existsSync(path.join(__dirname, 'tasks'))) {
+  fs.readdirSync(path.join(__dirname, 'tasks')).forEach(function(task) {
+    require(path.join(__dirname, 'tasks', task));
+  });
+}

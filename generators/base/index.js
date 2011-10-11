@@ -6,7 +6,8 @@ module.exports = function(thorax, next) {
 
   //create folder structure
   [
-    path.join('app'),
+    null,
+    'app',
     path.join('app', 'models'),
     path.join('app', 'collections'),
     path.join('app', 'views'),
@@ -16,8 +17,9 @@ module.exports = function(thorax, next) {
     path.join('app', 'styles'),
     path.join('app', 'styles', 'plugins'),
     path.join('app', 'templates'),
-    path.join('public'),
-    path.join('generators')
+    'public',
+    'generators',
+    'tasks'
   ].forEach(thorax.mkdir, thorax);
 
   //core libraries
@@ -54,7 +56,11 @@ module.exports = function(thorax, next) {
   });
 
   //Jakefile
-  thorax.writeFile('Jakefile', thorax.template(path.join(__dirname, 'Jakefile.handlebars'),{}));
+  thorax.writeFile('Jakefile', thorax.render(path.join(__dirname, 'Jakefile.handlebars'),{}));
+
+  //TODO: remove need for this
+  thorax.mkdir('config');
+  thorax.copy(path.join(__dirname, 'config', 'dev.json'), path.join('config', 'dev.json'));
 
   //project subclass stubs
   [
@@ -63,13 +69,29 @@ module.exports = function(thorax, next) {
     'router',
     'view'
   ].forEach(function(type) {
-    var output = thorax.template(path.join(__dirname, 'app', type + '.js.handlebars'),{});
+    var output = thorax.render(path.join(__dirname, 'app', type + '.js.handlebars'),{});
     thorax.writeFile(path.join('app', type + '.js'), output);
   });
 
-  //initialize lumbar and package json files
-  thorax.writeFile('lumbar.json', '{}');
-  thorax.writeFile('package.json', '{}');
+  //initialize lumbar, thorax and package json files
+  thorax.lumbarJSON = {};
+
+  thorax.packageJSON = {};
+
+  thorax.thoraxJSON = {
+    paths: {
+      lib: "app/lib",
+      views: "app/views",
+      collections: "app/collections",
+      models: "app/models",
+      routers: "app/routers",
+      styles: "app/styles",
+      templates: "app/templates",
+      generators: "generators"
+    },
+    language: "javascript"
+  };
+  thorax.writeFile('thorax.json', JSON.stringify(thorax.thoraxJSON));
 
   //default lumbar json
   thorax.lumbarJSON = {
@@ -94,6 +116,7 @@ module.exports = function(thorax, next) {
         ]
       }
     },
+    styles: [],
     templates: {
       engine: 'handlebars',
       precompile: {
@@ -112,6 +135,7 @@ module.exports = function(thorax, next) {
     version: '0.0.1',
     dependencies: {
       lumbar: '~0.5.3',
+      thorax: '*',
       growl: '~1.1',
       stylus: 'http://static.incaseofstairs.com/stylus.tar.gz',
       nib: '~0.0.8',
