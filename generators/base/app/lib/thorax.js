@@ -50,21 +50,22 @@
       return new layout;
     },
     routeClick: function(event) {
-      if ($(event.target).attr("data-external")) {
+      var target = $(event.target);
+      if (target.attr("data-external")) {
         return;
       }
-      var transition = this.getAttribute('data-transition');
+      var transition = target.attr('data-transition');
       if (transition && transition != '') {
         scope.layout.setNextTransitionMode(transition); 
       }
-      var href = this.getAttribute("href");
+      var href = target.attr("href");
       // Route anything that starts with # or / (excluding //domain urls)
       if (href && (href[0] === '#' || (href[0] === '/' && href[1] !== '/'))) {
         Backbone.history.navigate(href, true);
         event.preventDefault();
       }
     },
-    moduleMap: function(map, loadPrefix) {
+    _moduleMap: function(map, loadPrefix) {
       var routes = {},
       handlers = {
         routes: routes
@@ -74,7 +75,7 @@
         var name = map[route];
         var handlerName = "loader" + name;
         routes[route] = handlerName
-        handlers[handlerName] = generateLoader(name);
+        handlers[handlerName] = generateLoader(name, loadPrefix);
       }
       Thorax._moduleMapRouter = new (Backbone.Router.extend(handlers));
     }
@@ -87,7 +88,6 @@
     view_name_attribute_name = 'data-view-name',
     view_cid_attribute_name = 'data-view-cid',
     view_placeholder_attribute_name = 'data-view-tmp',
-    collection_cid_attribute_name = 'data-collection-cid',
     model_cid_attribute_name = 'data-model-cid',
 
     //load event setup
@@ -207,8 +207,8 @@
       var selector = this._collectionSelector || '.collection';
       var element = this.$(selector);
       if (element.length === 0) {
-        console.error(this.name + ' collection element selector: "' + selector + '" returned empty.');
-        return false;
+        console.error(this.name + ' collection element selector: "' + selector + '" returned empty, returning ' + this.name + '.el');
+        return $(this.el);
       } else {
         return element;
       }
@@ -270,9 +270,12 @@
     _configure: function(options) {
       //setup
       if (!this.name) {
-        console.warn('All views extending Thorax.View should be named.');
+        console.warn('All views extending Thorax.View should have a name property.');
       }
       Backbone.View.prototype._configure.call(this, options);
+      
+      //will be called again by Backbone.View(), after _configure() is complete but safe to call twice
+      this._ensureElement();
 
       //model and collection events
       bindModelAndCollectionEvents.call(this, this.constructor.events);
@@ -467,8 +470,6 @@
     },
       
     setCollection: function(collection, options) {
-      (this.el[0] || this.el).setAttribute(collection_cid_attribute_name, collection.cid);
-
       options = _.extend({
         fetch: true,
         success: false,
@@ -559,7 +560,7 @@
       return this.template(this.name + '-empty.handlebars');
     },
 
-    appendItem: function(item, index) {
+    appendItem: function(model, index) {
       index = index || this.collection.indexOf(model) || 0;
       var collection_element = getCollectionElement.call(this);
       var item_view = this.renderItem(model, index);
@@ -788,28 +789,14 @@
   Thorax.View.registerEvents({
     //built in dom events
     'click a': Thorax.routeClick,
+
     'submit form': function(event) {
       // Hide any virtual keyboards that may be lingering around
       var focused = $(':focus')[0];
       focused && focused.blur();
     },
-    'change .form-field input[type="checkbox"]': function(event) {
-      // don't process the change events on checkboxes
-      event.stopPropagation();
-    },
 
-
-    //if($(event.target).parents('.header,.breadcrumbs').length > 0 && !$(event.target).hasClass('header-button')) {
-    //  transition = 'slideLeft';
-    //}else if($(event.target).parents('.layout').length > 0) {
-    //  transition = 'slideRight';
-    //}
-
-
-
-    error: function() {
-      window.scrollTo(0, 0);
-  
+    error: function() {  
       resetSubmitState.call(this);
     
       // If we errored with a model we want to reset the content but leave the UI
@@ -925,7 +912,7 @@
       this.trigger('reset', new_view_element, scrollTop);
     },
 
-    completeTransition = function(old_view, callback) {
+    completeTransition = function(view, old_view, callback) {
       $(this.el).removeClass('transitioning');
       // Force a scroll again to prevent Android from attempting to restore the scroll
       // position for the back transitions.
@@ -960,26 +947,25 @@
         callback();
       }, this));
     },
+
+    onLayoutReset = function(view, scrollTop) {
+      //for native
+      if (scrollTop && this.transition != 'none') {
+        var ua = navigator.userAgent.toLowerCase();
+        if (view && ua.match(/ipod|iphone|ipad/)) {
+          // Android flashes when attempting to adjust the offset in this manner
+          // so only run it under ios.
+          view.el.style.top = -scrollTop + 'px';
+        } else {
+          // For all others just jump to the top before beggining the transition
+          // This seems more palatable than a flash of the same content.
+          window.scrollTo(0, 0);
+        }
+      }
+    },
     
     //class definition, used by Thorax.createLayout
     layoutProtoProps = {
-      events: {
-        reset: function(view, scrollTop) {
-          //for native
-          if (scrollTop && this.transition != 'none') {
-            var ua = navigator.userAgent.toLowerCase();
-            if (view && ua.match(/ipod|iphone|ipad/)) {
-              // Android flashes when attempting to adjust the offset in this manner
-              // so only run it under ios.
-              view.el.style.top = -scrollTop + 'px';
-            } else {
-              // For all others just jump to the top before beggining the transition
-              // This seems more palatable than a flash of the same content.
-              window.scrollTo(0, 0);
-            }
-          }
-        }
-      },
       initialize: function(){
         this.el = $(this.el)[0];
     
@@ -998,6 +984,8 @@
         Backbone.history.bind('route',_.bind(function(fragment,index){
           this._historyDirection = index >= 0 ? 'forwards' : 'backwards';
         },this));
+
+        this.bind('reset', _.bind(onLayoutReset, this));
       },
       
       setNextTransitionMode: function(transition_mode){
@@ -1036,16 +1024,15 @@
             : this._transitionMode || this.forwardsTransitionMode
         ;
         this._forceTransitionMode = false;
-            
         if (this._transitionMode == 'none' || !old_view) {
           // None or first view, no transition
-          completeTransition.call(this);
+          completeTransition.call(this, view);
         } else {
           $(this.el).addClass('transitioning');
           resetLayout.call(this, view.el, scrollTop);
     
           //animated transition
-          this[transition_mode](view.el, clientWidth, clientHeight);
+          this[transition_mode](view, clientWidth, clientHeight);
         }
     
         return view;
@@ -1056,8 +1043,9 @@
       //clientWidth, clientHeight are passed by setView as an optomization to avoid reflow
 
       //position next view on right and slide right to it
-      slideRight: function(new_view_element, clientWidth, clientHeight){
-        var viewsElement = this.views,
+      slideRight: function(new_view, clientWidth, clientHeight) {
+        var new_view_element = new_view.el,
+          viewsElement = this.views,
           clientWidth = clientWidth || this.el.clientWidth,
           clientHeight = clientHeight || this.el.clientHeight,
           old_view_element = this.view.el,
@@ -1069,7 +1057,7 @@
         viewsElement.style.left = '-' + clientWidth + 'px';
         new_view_element.style.left = clientWidth + 'px';
         
-        cleanupTransition.call(this, new_view_element, _.bind(completeTransition, this, this.view, callback));
+        cleanupTransition.call(this, new_view_element, _.bind(completeTransition, this, new_view, this.view, callback));
     
         viewsElement.clientWidth;   // It flows and flows. Needed to trigger the transition
         viewsElement.style.webkitTransform = 'translateX(0px)';
@@ -1077,8 +1065,9 @@
       },
 
       //position next view on left and slide left to it
-      slideLeft: function(new_view_element, clientWidth, clientHeight){
-        var viewsElement = this.views,
+      slideLeft: function(new_view, clientWidth, clientHeight) {
+        var new_view_element = new_view.el,
+          viewsElement = this.views,
           clientWidth = clientWidth || this.el.clientWidth,
           clientHeight = clientHeight || this.el.clientHeight,
           old_view_element = this.view.el,
@@ -1087,7 +1076,7 @@
         old_view_element.style.left = clientWidth + 'px';
         viewsElement.style.left = '-' + clientWidth + 'px';
     
-        cleanupTransition.call(this, new_view_element, _.bind(completeTransition, this, this.view, callback));
+        cleanupTransition.call(this, new_view_element, _.bind(completeTransition, this, new_view, this.view, callback));
     
         viewsElement.clientWidth;   // It flows and flows. Needed to trigger the transition
         viewsElement.style.webkitTransform = 'translateX(' + clientWidth + 'px)';
@@ -1095,8 +1084,9 @@
       },
 
       //position next view below and slide it up over the previous view
-      slideUp: function(new_view_element, clientWidth, clientHeight){
-        var viewsElement = this.views,
+      slideUp: function(new_view, clientWidth, clientHeight) {
+        var new_view_element = new_view.el,
+          viewsElement = this.views,
           clientWidth = clientWidth || this.el.clientWidth,
           clientHeight = clientHeight || this.el.clientHeight,
           old_view_element = this.view.el,
@@ -1107,7 +1097,7 @@
         new_view_element.style.zIndex = 2;
         new_view_element.style.top = clientHeight + 'px';
     
-        cleanupTransition.call(this, new_view_element, _.bind(completeTransition, this, this.view, callback));
+        cleanupTransition.call(this, new_view_element, _.bind(completeTransition, this, new_view, this.view, callback));
     
         viewsElement.clientWidth;   // It flows and flows. Needed to trigger the transition
         new_view_element.style.webkitTransform = 'translateY(-' + clientHeight + 'px)';
@@ -1115,8 +1105,9 @@
       },
 
       //position next view underneath the current view and slide the current view down
-      slideDown: function(new_view_element, clientWidth, clientHeight){
-        var viewsElement = this.views,
+      slideDown: function(new_view, clientWidth, clientHeight) {
+        var new_view_element = new_view.el,
+          viewsElement = this.views,
           clientWidth = clientWidth || this.el.clientWidth,
           clientHeight = clientHeight || this.el.clientHeight,
           old_view_element = this.view.el,
@@ -1127,7 +1118,7 @@
         new_view_element.style.zIndex = 1;
         new_view_element.style.top = '0px';
         
-        cleanupTransition.call(this, new_view_element,_.bind(completeTransition, this, this.view, callback));
+        cleanupTransition.call(this, new_view_element,_.bind(completeTransition, this, new_view, this.view, callback));
     
         viewsElement.clientWidth;   // It flows and flows. Needed to trigger the transition
         old_view_element.style.webkitTransform = 'translateY(' + clientHeight + 'px)';
