@@ -7,7 +7,14 @@ module.exports = function(thorax, next) {
     src: zepto_path,
     global: true
   });
-  
+
+  var thorax_history_path = path.join('app', 'lib', 'thorax-history.js');
+  thorax.copy(path.join(__dirname, thorax_history_path), thorax_history_path);
+  thorax.lumbarJSON.modules.base.files.push({
+    src: thorax_history_path,
+    global: true
+  });
+
   var remove_click_delay_path = path.join('app', 'lib', 'remove-click-delay.js');
   thorax.copy(path.join(__dirname, remove_click_delay_path), remove_click_delay_path);
   thorax.lumbarJSON.modules.base.files.push({

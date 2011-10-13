@@ -463,10 +463,7 @@ var methods = {
     this.log('created router: ' + file_name);
 
     if (!this.lumbarJSON.modules[name]) {
-      this.lumbarJSON.modules[name] = {
-        routes: {},
-        files: []
-      };
+      this.module(name);
     }  
   },
 
@@ -488,8 +485,16 @@ var methods = {
   },
 
   platform: function(name) {
-    this.lumbarJSON.modules[name] = {};
+    this.lumbarJSON.platforms.push(name);
+    var file_path = path.join('app', 'platform', name + (this.thoraxJSON.language === 'javascript' ? '.js' : '.coffee'));
+    this.writeFile(file_path);
+    this.lumbarJSON.modules.base.files.push({
+      src: file_path,
+      global: true,
+      platform: name
+    });
     this.log('created platform: ' + name);
+    this.style(name);
   },
 
   'package': function(name) {
@@ -498,7 +503,6 @@ var methods = {
       combine: false
     };
     this.log('created package: ' + name);
-    this.style(name);
   },
 
   'module': function(name) {

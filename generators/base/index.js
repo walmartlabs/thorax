@@ -99,7 +99,7 @@ module.exports = function(thorax, next) {
       name: thorax.project,
       module: 'base'
     },
-    language: 'javascript',
+    moduleMap: 'Thorax.moduleMap',
     loadPrefix: thorax.loadPrefix,
     packages: {},
     platforms: [],
