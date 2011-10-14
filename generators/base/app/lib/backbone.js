@@ -31,8 +31,8 @@
   var _ = root._;
   if (!_ && (typeof require !== 'undefined')) _ = require('underscore')._;
 
-  // For Backbone's purposes, jQuery or Zepto owns the `$` variable.
-  var $ = root.jQuery || root.Zepto;
+  // For Backbone's purposes, jQuery, Zepto, or Ender owns the `$` variable.
+  var $ = root.jQuery || root.Zepto || root.ender;
 
   // Runs Backbone.js in *noConflict* mode, returning the `Backbone` variable
   // to its previous owner. Returns a reference to this Backbone object.
@@ -692,8 +692,8 @@
     },
 
     // Simple proxy to `Backbone.history` to save a fragment into the history.
-    navigate : function(fragment, triggerRoute) {
-      Backbone.history.navigate(fragment, triggerRoute);
+    navigate : function(fragment, triggerRoute, replace) {
+      Backbone.history.navigate(fragment, triggerRoute, replace);
     },
 
     // Bind all defined routes to `Backbone.history`. We have to reverse the
@@ -738,20 +738,33 @@
   };
 
   // Cached regex for cleaning hashes.
-  var hashStrip = /^#*/;
+  var hashStrip = /^(?:#|%23)*\d*(?:#|%23)*/;
+
+  // Cached regex for index extraction from the hash
+  var indexMatch = /^(?:#|%23)*(\d+)(?:#|%23)/;
 
   // Cached regex for detecting MSIE.
   var isExplorer = /msie [\w.]+/;
+
+  // Regex for detecting webkit version
+  var webkitVersion = /WebKit\/([\d.]+)/;
 
   // Has the history handling already been started?
   var historyStarted = false;
 
   // Set up all inheritable **Backbone.History** properties and methods.
-  _.extend(Backbone.History.prototype, {
+  _.extend(Backbone.History.prototype, Backbone.Events, {
 
     // The default interval to poll for hash changes, if necessary, is
     // twenty times a second.
     interval: 50,
+
+    // Get the location of the current route within the backbone history.
+    // This should be considered a hint
+    // Returns -1 if history is unknown or disabled
+    getIndex : function() {
+      return this._directionIndex;
+    },
 
     // Get the cross-browser normalized URL fragment, either from the URL,
     // the hash, or the override.
@@ -761,12 +774,13 @@
           fragment = window.location.pathname;
           var search = window.location.search;
           if (search) fragment += search;
-          if (fragment.indexOf(this.options.root) == 0) fragment = fragment.substr(this.options.root.length);
         } else {
           fragment = window.location.hash;
         }
       }
-      return decodeURIComponent(fragment.replace(hashStrip, ''));
+      fragment = decodeURIComponent(fragment.replace(hashStrip, ''));
+      if (!fragment.indexOf(this.options.root)) fragment = fragment.substr(this.options.root.length);
+      return fragment;
     },
 
     // Start the hash change handling, returning `true` if the current URL matches
@@ -785,6 +799,16 @@
       if (oldIE) {
         this.iframe = $('<iframe src="javascript:0" tabindex="-1" />').hide().appendTo('body')[0].contentWindow;
         this.navigate(fragment);
+      }
+
+      // If we are in hash mode figure out if we are on a browser that is hit by 63777
+      //     https://bugs.webkit.org/show_bug.cgi?id=63777
+      if (!this._hasPushState && window.history && window.history.replaceState) {
+        var webkitVersion = /WebKit\/([\d.]+)/.exec(navigator.userAgent);
+        if (webkitVersion) {
+          webkitVersion = parseFloat(webkitVersion[1]);
+          this._useReplaceState = webkitVersion < 535.2;
+        }
       }
 
       // Depending on whether we're using pushState or hashes, and whether
@@ -813,6 +837,22 @@
         window.history.replaceState({}, document.title, loc.protocol + '//' + loc.host + this.options.root + this.fragment);
       }
 
+      // Direction tracking setup
+      this._trackDirection  = !!this.options.trackDirection;
+      if (this._trackDirection) {
+        var loadedIndex = this.loadIndex();
+        this._directionIndex  = loadedIndex || window.history.length;
+        this._state = {index: this._directionIndex};
+
+        // If we are tracking direction ensure that we have a direction field to play with
+        if (!loadedIndex) {
+          if (!this._hasPushState) {
+            loc.replace(loc.pathname + (loc.search || '') + '#' + this._directionIndex + '#' + this.fragment);
+          } else {
+            window.history.replaceState({index: this._directionIndex}, document.title, loc);
+          }
+        }
+      }
       if (!this.options.silent) {
         return this.loadUrl();
       }
@@ -828,9 +868,21 @@
     // calls `loadUrl`, normalizing across the hidden iframe.
     checkUrl : function(e) {
       var current = this.getFragment();
-      if (current == this.fragment && this.iframe) current = this.getFragment(this.iframe.location.hash);
+      var fromIframe;
+      if (current == this.fragment && this.iframe) {
+        current = this.getFragment(this.iframe.location.hash);
+        fromIframe = true;
+      }
       if (current == this.fragment || current == decodeURIComponent(this.fragment)) return false;
-      if (this.iframe) this.navigate(current);
+
+      this._state = e && (e.originalEvent || e).state;
+      var loadedIndex = this.loadIndex(fromIframe && this.iframe.location.hash);
+      if (!loadedIndex) {
+        this.navigate(current, false, true, this._directionIndex+1);
+      } else if (this.iframe) {
+        this.navigate(current, false, false, loadedIndex);
+      }
+
       this.loadUrl() || this.loadUrl(window.location.hash);
     },
 
@@ -838,37 +890,100 @@
     // match, returns `true`. If no defined routes matches the fragment,
     // returns `false`.
     loadUrl : function(fragmentOverride) {
+      var history = this;
       var fragment = this.fragment = this.getFragment(fragmentOverride);
+
       var matched = _.any(this.handlers, function(handler) {
         if (handler.route.test(fragment)) {
+          if (history._ignoreChange) {
+            history._ignoreChange = false;
+            history._directionIndex  = history.loadIndex();
+            history._pendingNavigate && setTimeout(history._pendingNavigate, 0);
+            return true;
+          }
+
+          var oldIndex = history._directionIndex;
+          history._directionIndex  = history.loadIndex();
+          history.trigger('route', fragment, history._directionIndex-oldIndex);
+
           handler.callback(fragment);
           return true;
         }
       });
+
       return matched;
+    },
+
+    // Pulls the direction index out of the state or hash
+    loadIndex : function(fragmentOverride) {
+      if (!this._trackDirection) return;
+      if (!fragmentOverride && this._hasPushState) {
+        return (this._state && this._state.index) || 0;
+      } else {
+        var match = indexMatch.exec(fragmentOverride || window.location.hash);
+        return (match && parseInt(match[1], 10)) || 0;
+      }
     },
 
     // Save a fragment into the hash history. You are responsible for properly
     // URL-encoding the fragment in advance. This does not trigger
     // a `hashchange` event.
-    navigate : function(fragment, triggerRoute) {
+    navigate : function(fragment, triggerRoute, replace, forceIndex) {
+      // If we are waiting for a back/forward operation do not execute just yet
+      if (this._ignoreChange) {
+        this._pendingNavigate = _.bind(this.navigate, this, fragment, triggerRoute, replace, forceIndex);
+        return;
+      }
+
       var frag = (fragment || '').replace(hashStrip, '');
+      var loc = window.location;
       if (this.fragment == frag || this.fragment == decodeURIComponent(frag)) return;
+
+      // Figure out the direction index if enabled
+      var newIndex;
+      if (this._trackDirection) {
+        newIndex = forceIndex || (this._directionIndex + (replace ? 0 : 1));
+      }
+
       if (this._hasPushState) {
-        var loc = window.location;
         if (frag.indexOf(this.options.root) != 0) frag = this.options.root + frag;
         this.fragment = frag;
-        window.history.pushState({}, document.title, loc.protocol + '//' + loc.host + frag);
+
+        var history = window.history;
+        this._state = {index: newIndex};
+        history[replace ? 'replaceState' : 'pushState'](this._state, document.title, loc.protocol + '//' + loc.host + frag);
       } else {
-        window.location.hash = this.fragment = frag;
+        this.fragment = frag;
+        if (this._trackDirection) frag = newIndex + '#' + frag;
+        if (replace) {
+          if (this._useReplaceState) {
+            window.history.replaceState({}, document.title, loc.protocol + '//' + loc.host + loc.pathname + (loc.search || '') + '#' + frag);
+          } else {
+            loc.replace(loc.pathname + (loc.search || '') + '#' + frag);
+          }
+        } else {
+          loc.hash = frag;
+        }
+
         if (this.iframe && (frag != this.getFragment(this.iframe.location.hash))) {
-          this.iframe.document.open().close();
+          !replace && this.iframe.document.open().close();
           this.iframe.location.hash = frag;
         }
       }
       if (triggerRoute) this.loadUrl(fragment);
-    }
+    },
 
+    back : function(triggerRoute) {
+      this.go(-1, triggerRoute);
+    },
+    foward : function(triggerRoute) {
+      this.go(1, triggerRoute);
+    },
+    go : function(count, triggerRoute) {
+      this._ignoreChange = !triggerRoute;
+
+      window.history.go(count);
+    }
   });
 
   // Backbone.View
@@ -936,7 +1051,7 @@
       return el;
     },
 
-    // Set callbacks, where `this.callbacks` is a hash of
+    // Set callbacks, where `this.events` is a hash of
     //
     // *{"event selector": "callback"}*
     //
@@ -953,7 +1068,7 @@
     delegateEvents : function(events) {
       if (!(events || (events = this.events))) return;
       if (_.isFunction(events)) events = events.call(this);
-      $(this.el).unbind('.delegateEvents' + this.cid);
+      this.undelegateEvents();
       for (var key in events) {
         var method = this[events[key]];
         if (!method) throw new Error('Event "' + events[key] + '" does not exist');
@@ -967,6 +1082,11 @@
           $(this.el).delegate(selector, eventName, method);
         }
       }
+    },
+
+    // Clears all callbacks previously bound to the view with `delegateEvents`.
+    undelegateEvents: function() {
+      $(this.el).unbind('.delegateEvents' + this.cid);
     },
 
     // Performs the initial configuration of a View with a set of options.
@@ -984,7 +1104,7 @@
     // Ensure that the View has a DOM element to render into.
     // If `this.el` is a string, pass it through `$()`, take the first
     // matching element, and re-assign it to `el`. Otherwise, create
-    // an element from the `id`, `className` and `tagName` proeprties.
+    // an element from the `id`, `className` and `tagName` properties.
     _ensureElement : function() {
       if (!this.el) {
         var attrs = this.attributes || {};
@@ -1022,7 +1142,7 @@
 
   // Override this function to change the manner in which Backbone persists
   // models to the server. You will be passed the type of request, and the
-  // model in question. By default, uses makes a RESTful Ajax request
+  // model in question. By default, makes a RESTful Ajax request
   // to the model's `url()`. Some possible customizations could be:
   //
   // * Use `setTimeout` to batch rapid-fire updates into a single request.
