@@ -78,7 +78,9 @@
         handlers[handlerName] = generateLoader(name, loadPrefix);
       }
       Thorax._moduleMapRouter = new (Backbone.Router.extend(handlers));
-    }
+    },
+    //used by "template" and "view" template helpers, not thread safe though it shouldn't matter in browser land
+    _currentTemplateContext: false 
   }, Backbone.Events);
 
   //private / module vars for Thorax.View
@@ -266,6 +268,21 @@
       }
     };
 
+  //wrap Backbone.View constructor to support initialize event
+  var old_backbone_view = Backbone.View;
+  Backbone.View = function(options) {
+    this.cid = _.uniqueId('view');
+    this._configure(options || {});
+    this._ensureElement();
+    this.delegateEvents();
+    this.trigger('initialize:before', options);
+    this.initialize.apply(this, arguments);
+    this.trigger('initialize:after', options);
+  };
+
+  Backbone.View.prototype = old_backbone_view.prototype;
+  Backbone.View.extend = old_backbone_view.extend;
+
   Thorax.View = Backbone.View.extend({
     _configure: function(options) {
       //setup
@@ -304,14 +321,6 @@
           }
         }
       }
-
-      //bind model or collection if passed to constructor
-      if (options.model) {
-        this.setModel(options.model);
-      }
-      if (options.collection) {
-        this.setCollection(options.collection);
-      }
     },
 
     _ensureElement : function() {
@@ -342,15 +351,23 @@
     },
   
     view: function(name, options) {
-      var instance = typeof name === 'string' ? new scope.Views[name](options) : name;
+      var instance;
+      if (typeof name === 'string') {
+        if (!scope.Views[name]) {
+          throw new Error('view: ' + name + ' does not exist.');
+        }
+        instance = new scope.Views[name](options);
+      } else {
+        instance = name;
+      }
       this._views[instance.cid] = instance;
       return instance;
     },
     
     template: function(file, data) {
+      Thorax._currentTemplateContext = this;
       data = _.extend({}, (this.options ? this.options : {}), data || {}, {
-        cid: _.uniqueId('t'),
-        parentScope: this
+        cid: _.uniqueId('t')
       });
   
       var template, templateName, fileName = file + (file.match(/\.handlebars$/) ? '' : '.handlebars');  
@@ -446,7 +463,6 @@
       }
   
       this.model = model;
-  
       this._modelOptions = options;
   
       if (this.model) {
@@ -477,7 +493,7 @@
         loading: true
       },options || {});
   
-      if (this.collection) {
+      if (this.collection && this._collectionOptions) {
         this._events.collection.forEach(function(event) {
           this.collection.unbind(event[0], event[1]);
         }, this);
@@ -796,6 +812,16 @@
       focused && focused.blur();
     },
 
+    'initialize:after': function(options) {
+      //bind model or collection if passed to constructor
+      if (options && options.model) {
+        this.setModel(options.model);
+      }
+      if (options && options.collection) {
+        this.setCollection(options.collection);
+      }
+    },
+
     error: function() {  
       resetSubmitState.call(this);
     
@@ -881,12 +907,12 @@
   });
 
   Thorax.View.registerHelper('view', function(view, options) {
-    var instance = this.parentScope.view(view, options);
+    var instance = Thorax._currentTemplateContext.view(view, options);
     return '<div ' + view_placeholder_attribute_name + '="' + instance.cid + '"></div>';
   });
   
-  Thorax.View.registerHelper('template', function(name) {
-    return new SafeString(Thorax.View.prototype.template.call(this.parentScope, name, this));
+  Thorax.View.registerHelper('template', function(name, options) {
+    return new SafeString(Thorax.View.prototype.template.call(Thorax._currentTemplateContext, name, _.defualts(options || {}, this)));
   });
 
   Thorax.View.registerHelper('link', function(url) {
