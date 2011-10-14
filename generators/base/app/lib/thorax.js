@@ -38,8 +38,8 @@
         Collections: {},
         Routers: {}
       });
-
-      Backbone.history = new Thorax.History();
+      
+      Backbone.history || (Backbone.history = new Backbone.History);
 
       scope.layout = Thorax.createLayout(options.layout || '.layout');
     },
@@ -469,6 +469,8 @@
         this._events.model.forEach(function(event) {
           this.model.bind(event[0], event[1]);
         }, this);
+
+        this.model.trigger('set', this.model);
     
         if (this._shouldFetch(this.model, options)) {
           this.model.fetch({
@@ -478,8 +480,9 @@
               }
             },this))
           });
+        } else {
+          this.model.trigger('change');
         }
-        this.model.trigger('change');
       }
   
       return this;
@@ -507,6 +510,8 @@
           this.collection.bind(event[0], event[1]);
         }, this);
       
+        this.collection.trigger('set', this.collection);
+
         if (this._shouldFetch(this.collection, options)) {
           this.collection.fetch({
             success: _.once(_.bind(function(){
