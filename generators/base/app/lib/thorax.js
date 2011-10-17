@@ -66,6 +66,9 @@
       }
     },
     _moduleMap: function(map, loadPrefix) {
+      if (Thorax._moduleMapRouter) {
+        return;
+      }
       var routes = {},
       handlers = {
         routes: routes
@@ -456,12 +459,14 @@
         loading: true
       },options || {});
   
-      if (this.model) {
+      var old_model = this.model;
+
+      if (old_model) {
         this._events.model.forEach(function(event) {
-          this.model.unbind(event[0], event[1]);
+          old_model.unbind(event[0], event[1]);
         }, this);
       }
-  
+    
       this.model = model;
       this._modelOptions = options;
   
@@ -470,7 +475,7 @@
           this.model.bind(event[0], event[1]);
         }, this);
 
-        this.model.trigger('set', this.model);
+        this.model.trigger('set', this.model, old_model);
     
         if (this._shouldFetch(this.model, options)) {
           this.model.fetch({
@@ -496,12 +501,14 @@
         loading: true
       },options || {});
   
-      if (this.collection && this._collectionOptions) {
+      var old_collection = this.collection;
+
+      if (old_collection) {
         this._events.collection.forEach(function(event) {
-          this.collection.unbind(event[0], event[1]);
+          old_collection.unbind(event[0], event[1]);
         }, this);
       }
-  
+      
       this.collection = collection;
       this._collectionOptions = options;
   
@@ -510,7 +517,7 @@
           this.collection.bind(event[0], event[1]);
         }, this);
       
-        this.collection.trigger('set', this.collection);
+        this.collection.trigger('set', this.collection, old_collection);
 
         if (this._shouldFetch(this.collection, options)) {
           this.collection.fetch({
@@ -948,7 +955,7 @@
       // Force a scroll again to prevent Android from attempting to restore the scroll
       // position for the back transitions.
       window.scrollTo(0, 0);
-    
+
       if (old_view && old_view.el.parentNode) {
         $(old_view.el).remove();
       }
@@ -1087,7 +1094,7 @@
         }
         viewsElement.style.left = '-' + clientWidth + 'px';
         new_view_element.style.left = clientWidth + 'px';
-        
+
         cleanupTransition.call(this, new_view_element, _.bind(completeTransition, this, new_view, this.view, callback));
     
         viewsElement.clientWidth;   // It flows and flows. Needed to trigger the transition
@@ -1106,7 +1113,7 @@
 
         old_view_element.style.left = clientWidth + 'px';
         viewsElement.style.left = '-' + clientWidth + 'px';
-    
+
         cleanupTransition.call(this, new_view_element, _.bind(completeTransition, this, new_view, this.view, callback));
     
         viewsElement.clientWidth;   // It flows and flows. Needed to trigger the transition
@@ -1149,7 +1156,7 @@
         new_view_element.style.zIndex = 1;
         new_view_element.style.top = '0px';
         
-        cleanupTransition.call(this, new_view_element,_.bind(completeTransition, this, new_view, this.view, callback));
+        cleanupTransition.call(this, new_view_element, _.bind(completeTransition, this, new_view, this.view, callback));
     
         viewsElement.clientWidth;   // It flows and flows. Needed to trigger the transition
         old_view_element.style.webkitTransform = 'translateY(' + clientHeight + 'px)';
