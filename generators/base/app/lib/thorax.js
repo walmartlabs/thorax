@@ -590,20 +590,32 @@
 
     appendItem: function(model, index) {
       index = index || this.collection.indexOf(model) || 0;
-      var collection_element = getCollectionElement.call(this);
+      var collection_element = getCollectionElement.call(this)[0];
       var item_view = this.renderItem(model, index);
       if (item_view) {
         if (item_view.cid) {
           this._views[item_view.cid] = item_view.cid;
         }
         var previous_model = index > 0 ? this.collection.at(index - 1) : false;
-        if (!previous_model) {
-          collection_element.prepend(item_view.el || item_view || '');
-          collection_element.children().first().attr(model_cid_attribute_name, model.cid);
+        var item_element;
+        if (item_view.el) {
+          item_element = item_view.el;
         } else {
-          var previous_model_element = collection_element.find('[' + model_cid_attribute_name + '="' + previous_model.cid + '"]');
-          previous_model_element.append(item_view.el || item_view);
-          previous_model_element.next().attr(model_cid_attribute_name, model.cid);
+          //renderItem returned string
+          var div = document.createElement('div');
+          div.innerHTML = item_view;
+          item_element = div.childNodes[0];
+        }
+        if (item_element) {
+          $(item_element).attr(model_cid_attribute_name, model.cid);
+          if (!previous_model) {
+            collection_element.insertBefore(item_element, collection_element.firstChild);
+          } else {
+            var previous_model_element = $(collection_element).find('[' + model_cid_attribute_name + '="' + previous_model.cid + '"]');
+            if (previous_model_element[0]) {
+              collection_element.insertBefore(item_element, previous_model_element[0].nextSibling);
+            }
+          }
         }
       }
       return item_view;
@@ -962,8 +974,6 @@
     
       this.view = view;
     
-      this._transitionMode = this.forwardsTransitionMode;
-    
       // Execute the events on the next iter. This gives things a chance
       // to settle and also protects us from NPEs in callback resulting in
       // an unremoved listeners
@@ -1061,10 +1071,10 @@
             ? this.backwardsTransitionMode
             : this._transitionMode || this.forwardsTransitionMode
         ;
-        this._forceTransitionMode = false;
+        
         if (this._transitionMode == 'none' || !old_view) {
           // None or first view, no transition
-          completeTransition.call(this, view);
+          completeTransition.call(this, view, old_view);
         } else {
           $(this.el).addClass('transitioning');
           resetLayout.call(this, view.el, scrollTop);
@@ -1072,7 +1082,11 @@
           //animated transition
           this[transition_mode](view, clientWidth, clientHeight);
         }
-    
+
+        //reset transition mode
+        this._forceTransitionMode = false;
+        this._transitionMode = this.forwardsTransitionMode;
+
         return view;
       },
 
