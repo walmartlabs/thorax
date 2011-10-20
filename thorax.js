@@ -41,13 +41,13 @@ var loadGenerators = function() {
     if (!this.lumbarJSON.modules[module_name]) {
       this.error('module "' + module_name + '" does not exist');
       console.log('');
-      console.log('Create a module or router with this name:');
+      console.log('To create a module or router with this name run either:');
       console.log('  thorax router ' + module_name);
       console.log('  thorax module ' + module_name);
       console.log('');
       if (args.length === 1) {
         console.log('Or specify an existing module:');
-        console.log('  thorax ' + module.exports.currentAction + ' module-name ' + args[0]);
+        console.log('  thorax ' + module.exports.currentAction + ' your-module-name ' + args[0]);
       }
       console.log('');
       return false;
@@ -140,7 +140,7 @@ module.exports = function(target, options) {
 
 module.exports.action = function (action) {
   module.exports.currentAction = action;
-  module.exports.actions[action].apply(this, Array.prototype.slice.call(arguments, 1));
+  return module.exports.actions[action].apply(this, Array.prototype.slice.call(arguments, 1));
 };
 
 module.exports.help = [
@@ -242,7 +242,11 @@ module.exports.actions = {
   module.exports.actions[action] = function() {
     var thorax = new module.exports();
     thorax[action].apply(thorax, arguments);
-    thorax.save();
+    if (thorax.thoraxJSON.modifyLumbarJSON) {
+      thorax.save();
+    } else {
+      return thorax.helpMessages;
+    }
   };
 });
 
@@ -255,13 +259,25 @@ var methods = {
       next();
     }
   },
+
+  help: function(messages) {
+    if (!this.helpMessages) {
+      this.helpMessages = [];
+    }
+    this.helpMessages.push('');
+    this.helpMessages = this.helpMessages.concat(messages);
+  },
   
   log: function(message) {
-    console.log('thorax.' + this.generatorName + ': ' + message);
+    console.log(message);
   },
   
   error: function(message) {
-    console.log('thorax.' + this.generatorName + ' error: ' + message);
+    console.log('error: ' + message);
+  },
+
+  warn: function(message) {
+    console.log('warning: ' + message);
   },
 
   generate: function(generator_name, next) {
@@ -291,11 +307,12 @@ var methods = {
   },
     
   writeFile: function(dest, contents) {
-    if (path.exists(dest)) {
-      this.log(dest + ' already exists, not overwriting');
-      return;
+    if (path.existsSync(dest)) {
+      this.warn(dest + ' already exists');
+      return false;
     }
     fs.writeFileSync(path.join(this.target, dest), contents);
+    return true;
   },
 
   render: function(src, context) {
@@ -319,11 +336,11 @@ var methods = {
     child.exec(command,function(error, stdout, stderr) {
       var installed_path;
       if (stdout && stdout !== '') {
-        console.log('thorax.npm-install: ' + stdout);
+        console.log('npm install: ' + stdout);
         installed_path = stdout.split(/\n/).shift().replace(/\s$/, '').split(/\s/).pop();
       }
       if (stderr && stderr !== '') {
-        console.error('thorax.npm-install error: ' + stderr);
+        console.error('npm install error: ' + stderr);
         installed_path = false;
       }
       if (installed_path) {
@@ -345,19 +362,35 @@ var methods = {
       this.checkPath(full_path);
       this.checkPath(view_template_path);
 
-      this.writeFile(full_path, this.render(template_path, {
+      if(this.writeFile(full_path, this.render(template_path, {
         fileName: full_path,
         moduleName: module_name,
         name: file_name.replace(/\.(js|coffee)$/, ''),
         className: camelize(file_name.replace(/\.(js|coffee)$/, '').replace(/\//g, '-'))
-      }));
-      this.log('created view: ' + file_name);
+      }))) {
+        this.log('created view: ' + file_name);
+      }
 
-      this.writeFile(view_template_path, '');
-      this.log('created template: ' + view_template_path);
+      if (this.writeFile(view_template_path, '')) {
+        this.log('created template: ' + view_template_path);
+      }
 
-      this.lumbarJSON.modules[module_name].files.push(full_path);
-      this.lumbarJSON.templates[full_path] = [view_template_path];
+      if (this.thoraxJSON.modifyLumbarJSON) {
+        this.lumbarJSON.modules[module_name].files.push(full_path);
+        this.lumbarJSON.templates[full_path] = [view_template_path];
+      } else {
+        this.help([
+          'in modules.' + module_name + '.files:',
+          '',
+          '        "' + full_path + '"',
+          '',
+          'in templates:',
+          '',
+          '    "' + full_path + '": [',
+          '      "' + view_template_path + '"',
+          '    ]'
+        ]);
+      }
     }
   },
 
@@ -375,26 +408,44 @@ var methods = {
       this.checkPath(full_path);
 
       //view file
-      this.writeFile(full_path, this.render(template_path, {
+      if(this.writeFile(full_path, this.render(template_path, {
         fileName: full_path,
         moduleName: module_name,
         name: file_name.replace(/\.(js|coffee)$/, ''),
         className: camelize(file_name.replace(/\.(js|coffee)$/, '').replace(/\//g, '-'))
-      }));
-      this.lumbarJSON.modules[module_name].files.push(full_path);
-      this.log('created view: ' + file_name);
+      }))) {
+        this.log('created view: ' + file_name);
+      }
 
-      //templates
-      this.lumbarJSON.templates[full_path] = [
-        view_template_path,
-        view_template_path.replace(new RegExp('.' + engine + '$'), '-item.' + engine),
-        view_template_path.replace(new RegExp('.' + engine + '$'), '-empty.' + engine)
-      ];
-      this.lumbarJSON.templates[full_path].forEach(function(_view_template_path) {
-        this.checkPath(_view_template_path);
-        this.writeFile(_view_template_path, '');
-        this.log('created template: ' + _view_template_path);
-      }, this);
+      if (this.thoraxJSON.modifyLumbarJSON) {
+        this.lumbarJSON.modules[module_name].files.push(full_path);
+  
+        //templates
+        this.lumbarJSON.templates[full_path] = [
+          view_template_path,
+          view_template_path.replace(new RegExp('.' + engine + '$'), '-item.' + engine),
+          view_template_path.replace(new RegExp('.' + engine + '$'), '-empty.' + engine)
+        ];
+        this.lumbarJSON.templates[full_path].forEach(function(_view_template_path) {
+          this.checkPath(_view_template_path);
+          if (this.writeFile(_view_template_path, '')) {
+            this.log('created template: ' + _view_template_path);
+          }
+        }, this);
+      } else {
+        this.help([
+          'in modules.' + module_name + '.files:',
+          '',
+          '        "' + full_path + '"',
+          '',
+          'in templates:',
+          '    "' + full_path + '": [',
+          '      "' + view_template_path + '"',
+          '      "' + view_template_path.replace(new RegExp('.' + engine + '$'), '-item.' + engine) + '"',
+          '      "' + view_template_path.replace(new RegExp('.' + engine + '$'), '-empty.' + engine) + '"',          
+          '    ]'
+        ]);
+      }
     }
   },
 
@@ -409,15 +460,24 @@ var methods = {
       
       this.checkPath(full_path);
 
-      this.writeFile(full_path, this.render(template_path, {
+      if(this.writeFile(full_path, this.render(template_path, {
         fileName: full_path,
         moduleName: module_name,
         name: file_name.replace(/\.(js|coffee)$/, ''),
         className: camelize(file_name.replace(/\.(js|coffee)$/, '').replace(/\//g, '-'))
-      }));
-      this.log('created model: ' + file_name);
+      }))) {
+        this.log('created model: ' + file_name);
+      }
 
-      this.lumbarJSON.modules[module_name].files.push(full_path);
+      if (this.thoraxJSON.modifyLumbarJSON) {
+        this.lumbarJSON.modules[module_name].files.push(full_path);
+      } else {
+        this.help([
+          'in modules.' + module_name + '.files:',
+          '',
+          '        "' + full_path + '"'
+        ]);
+      }
     }
   },
 
@@ -432,15 +492,24 @@ var methods = {
 
       this.checkPath(full_path);
 
-      this.writeFile(full_path, this.render(template_path, {
+      if (this.writeFile(full_path, this.render(template_path, {
         fileName: full_path,
         moduleName: module_name,
         name: file_name.replace(/\.(js|coffee)$/, ''),
         className: camelize(file_name.replace(/\.(js|coffee)$/, '').replace(/\//g, '-'))
-      }));
-      this.log('created collection: ' + file_name);
+      }))) {
+        this.log('created collection: ' + file_name);
+      }
 
-      this.lumbarJSON.modules[module_name].files.push(full_path);
+      if (this.thoraxJSON.modifyLumbarJSON) {
+        this.lumbarJSON.modules[module_name].files.push(full_path);
+      } else {
+        this.help([
+          'in modules.' + module_name + '.files:',
+          '',
+          '        "' + full_path + '"'
+        ]);
+      }
     }
   },
 
@@ -459,8 +528,9 @@ var methods = {
         className: camelize(name)
       });
 
-    this.writeFile(file_name, template_output);
-    this.log('created router: ' + file_name);
+    if(this.writeFile(file_name, template_output)) {
+      this.log('created router: ' + file_name);
+    }
 
     if (!this.lumbarJSON.modules[name]) {
       this.module(name);
@@ -471,46 +541,88 @@ var methods = {
     file_name = cleanFileName.call(this, file_name, /^\/?app\/styles\/?/, 'styl');
     var full_path = path.join(this.thoraxJSON.paths.styles, file_name);
     this.checkPath(full_path);
-    this.writeFile(full_path, '');
-    this.log('created stylesheet: ' + file_name);
-    this.lumbarJSON.styles[full_path] = path.join(this.thoraxJSON.paths.styles, 'plugins', 'url-import.js');
+    if (this.writeFile(full_path, '')) {
+      this.log('created stylesheet: ' + file_name);
+    }
+    //TODO: modify JSON based on final spec
   },
 
   template: function(file_name) {
     file_name = cleanFileName.call(this, file_name, /^\/?app\/templates\/?/);
     var full_path = path.join(this.thoraxJSON.paths.templates, file_name);
     this.checkPath(full_path);
-    this.writeFile(full_path, '');
-    this.log('created template: ' + full_path);
+    if (this.writeFile(full_path, '')) {
+      this.log('created template: ' + full_path);
+    }    
   },
 
   platform: function(name) {
-    this.lumbarJSON.platforms.push(name);
     var file_path = path.join('app', 'platform', name + (this.thoraxJSON.language === 'javascript' ? '.js' : '.coffee'));
-    this.writeFile(file_path);
-    this.lumbarJSON.modules.base.files.push({
-      src: file_path,
-      global: true,
-      platform: name
-    });
-    this.log('created platform: ' + name);
+    if (this.writeFile(file_path)) {
+      this.log('created file: ' + file_path);
+    }
+    if (this.thoraxJSON.modifyLumbarJSON) {
+      this.lumbarJSON.platforms.push(name);
+      this.lumbarJSON.modules.base.files.push({
+        src: file_path,
+        global: true,
+        platform: name
+      });
+      this.log('created platform: ' + name);
+    } else {
+      this.help([
+        'in platforms:',
+        '',
+        '    "' + name + '"',
+        '',
+        'in modules.base.files:',
+        '',
+        '        {',
+        '          "src": "' + file_path + '",',
+        '          "global": true,',
+        '          "platform": "' + name + '"',
+        '        }'
+      ]);
+    }
     this.style(name);
   },
 
   'package': function(name) {
-    this.lumbarJSON.packages[name] = {
-      platforms: this.lumbarJSON.platforms,
-      combine: false
-    };
-    this.log('created package: ' + name);
+    if (this.thoraxJSON.modifyLumbarJSON) {
+      this.lumbarJSON.packages[name] = {
+        platforms: this.lumbarJSON.platforms,
+        combine: false
+      };
+      this.log('created package: ' + name);
+    } else {
+      this.help([
+        'in packages:',
+        '',
+        '    "' + name + '": {',
+        '      "platforms": [' + this.lumbarJSON.platforms.map(function(platform){return '"' + platform + '"';}).join(', ') + '],',
+        '      "combine": false',
+        '    }'
+      ]);
+    }
   },
 
   'module': function(name) {
-    this.lumbarJSON.modules[name] = {
-      routes: {},
-      files: []
-    };
-    this.log('created module: ' + name);
+    if (this.thoraxJSON.modifyLumbarJSON) {
+      this.lumbarJSON.modules[name] = {
+        routes: {},
+        files: []
+      };
+      this.log('created module: ' + name);
+    } else {
+      this.help([
+        'in modules:',
+        '',
+        '    "' + name + '": {',
+        '      "routes": {},',
+        '      "files": []', 
+        '    }'
+      ]);
+    }
   }
 };
 

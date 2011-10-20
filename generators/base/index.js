@@ -79,6 +79,7 @@ module.exports = function(thorax, next) {
   thorax.packageJSON = {};
 
   thorax.thoraxJSON = {
+    modifyLumbarJSON: true,
     paths: {
       lib: "app/lib",
       views: "app/views",

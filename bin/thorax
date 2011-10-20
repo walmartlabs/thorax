@@ -11,4 +11,15 @@ if (argv.h || argv.help || !action) {
   return;
 }
 
-Thorax.action.apply(this, argv._);
+var output = Thorax.action.apply(this, argv._);
+if (output && output.forEach) {
+  var str = 'add the following to lumbar.json:';
+  console.log(str);
+  console.log((new Array(str.length + 1)).join('-'));
+  output.forEach(function(line) {
+    console.log(line);
+  });
+  console.log('');
+  console.log((new Array(str.length + 1)).join('-'));
+  console.log('');
+}
