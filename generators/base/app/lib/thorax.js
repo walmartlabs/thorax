@@ -12,25 +12,13 @@
     throw new Error('script.js required to run Thorax');
   }
 
-  //private / module vars for Thorax
-  var Thorax,
-    scope,
-    generateLoader = function(name, loadPrefix) {
-      return function() {
-        loadStartEventEmitter.call(Thorax);
-        $script((loadPrefix || '') + name, function() {
-          loadEndEventEmitter.call(Thorax);
-          // Reload with the new route
-          Backbone.history.loadUrl();
-        });
-      };
-    };
+  var Thorax, scope;
 
-  this.Thorax = Thorax = _.extend({
+  this.Thorax = Thorax = {
     configure: function(options) {
       scope = options.scope || Thorax;
 
-      _.extend(scope, {
+      _.extend(scope, Backbone.Events, {
         templates: {},
         Views: {},
         Mixins: {},
@@ -84,195 +72,31 @@
     },
     //used by "template" and "view" template helpers, not thread safe though it shouldn't matter in browser land
     _currentTemplateContext: false 
-  }, Backbone.Events);
+  };
 
-  //private / module vars for Thorax.View
+  //private functions for Thorax
+
+  function generateLoader(name, loadPrefix) {
+    return function() {
+      loadStartEventEmitter.call(scope);
+      $script((loadPrefix || '') + name, function() {
+        loadEndEventEmitter.call(scope);
+        // Reload with the new route
+        Backbone.history.loadUrl();
+      });
+    };
+  };
+
+  //private vars for Thorax.View
   var eventSplitter = /^(\S+)\s*(.*)$/,
-
-    //attribute names
     view_name_attribute_name = 'data-view-name',
     view_cid_attribute_name = 'data-view-cid',
     view_placeholder_attribute_name = 'data-view-tmp',
     model_cid_attribute_name = 'data-model-cid',
-
-    //load event setup
     pendingLoadSize = 0,
-    loadStartEventEmitter = function() {
-      pendingLoadSize++;
-      this._loadStartTimeout = setTimeout(_.bind(function() {
-        pendingLoadSize--;
-        this.trigger('load:start');
-      }, this), this._loadingTimeoutDuration * 1000);
-    },
-    loadEndEventEmitter = function() {
-      clearTimeout(this._loadStartTimeout);
-      if (pendingLoadSize) {
-        // this will cancel out the need to call load:end
-        pendingLoadSize--;
-        for (var i = 0; i < pendingLoadSize; i++) {
-          // we need to make sure all load:start and load:end calls are balanced
-          this.trigger('load:start');
-        }
-        pendingLoadSize = 0;
-      } else {
-        this.trigger('load:end');
-      }
-    },
-
-    containHandlerToCurentView = function(handler, cid) {
-      return function(event) {
-        var containing_view_element = $(event.target).closest('[' + view_name_attribute_name + ']');
-        if (containing_view_element.length === 0 || containing_view_element.length > 0 && containing_view_element[0].getAttribute(view_cid_attribute_name) == cid) {
-          handler(event);
-        }
-      };
-    },
-
-    //model/collection events, to be bound/unbound on setModel/setCollection
-    processModelOrCollectionEvent = function(events, type) {
-      for (var _name in events[type] || {}) {
-        if (_.isArray(events[type][_name])) {
-          for (var i = 0; i < events[type][_name].length; ++i) {
-            this._events[type].push([_name, this._bindEventHandler(events[type][_name][i])]);
-          }
-        } else {
-          this._events[type].push([_name, this._bindEventHandler(events[type][_name])]);
-        }
-      }
-    },
-
-    //used by _processEvents
-    processEvent = function(name, handler) {
-      if (!name.match(/\s+/)) {
-        //view events
-        this.bind(name, this._bindEventHandler(handler));
-      } else {
-        //DOM events
-        var match = name.match(eventSplitter);
-        var eventName = match[1] + '.delegateEvents' + this.cid, selector = match[2];
-        if (selector === '') {
-          $(this.el).bind(eventName, containHandlerToCurentView(this._bindEventHandler(handler), this.cid));
-        } else {
-          $(this.el).delegate(selector, eventName, containHandlerToCurentView(this._bindEventHandler(handler), this.cid));
-        }
-      }
-    },
-
-    //used by Thorax.View.addEvents for global event registration
-    addEvent = function(target, name, handler) {
-      if (!target[name]) {
-        target[name] = [];
-      }
-      if (_.isArray(handler)) {
-        for (var i = 0; i < handler.length; ++i) {
-          target[name].push(handler[i]);
-        }
-      } else {
-        target[name].push(handler);
-      }
-    },
-
-    resetSubmitState = function() {
-      this.$('form').removeAttr('data-submit-wait');
-    },
-
-    //called with context of input
-    getInputValue = function() {
-      if (this.type === 'checkbox' || this.type === 'radio') {
-        if ($(this).attr('data-onOff')) {
-          return this.checked;
-        } else if (this.checked) {
-          return this.value;
-        }
-      } else if (this.multiple === true) {
-        var values = [];
-        $('option',this).each(function(){
-          if (this.selected) {
-            values.push(this.value);
-          }
-        });
-        return values;
-      } else {
-        return this.value;
-      }
-    },
-
-    bindModelAndCollectionEvents = function(events) {
-      if (!this._events) {
-        this._events = {
-          model: [],
-          collection: []
-        };
-      }
-      processModelOrCollectionEvent.call(this, events, 'model');
-      processModelOrCollectionEvent.call(this, events, 'collection');
-    },
-
-    getCollectionElement = function() {
-      var selector = this._collectionSelector || '.collection';
-      var element = this.$(selector);
-      if (element.length === 0) {
-        console.error(this.name + ' collection element selector: "' + selector + '" returned empty, returning ' + this.name + '.el');
-        return $(this.el);
-      } else {
-        return element;
-      }
-    },
-
-    preserveCollectionElement = function(callback) {
-      var old_collection_element = getCollectionElement.call(this);
-      callback.call(this);
-      var new_collection_element = getCollectionElement.call(this);
-      if (old_collection_element.length && new_collection_element.length) {
-        new_collection_element[0].parentNode.insertBefore(old_collection_element[0], new_collection_element[0]);
-        new_collection_element[0].parentNode.removeChild(new_collection_element[0]);
-      }
-    },
-
-    appendViews = function() {
-      for (var id in this._views || {}) {
-        var view_placeholder_element = this.$('[' + view_placeholder_attribute_name + '="' + id + '"]')[0];
-        if (view_placeholder_element) {
-          var view = this._views[id];
-          //has the view been rendered at least once? if not call render().
-          //subclasses overriding render() that do not call the parent's render()
-          //or set _rendered may be rendered twice but will not error
-          if (!view._renderCount) {
-            view.render();
-          }
-          view_placeholder_element.parentNode.insertBefore(view.el, view_placeholder_element);
-          view_placeholder_element.parentNode.removeChild(view_placeholder_element);
-        }
-      }
-    },
-
-    destroyChildViews = function() {
-      for (var id in this._views || {}) {
-        if (this._views[id].destroy) {
-          this._views[id].destroy();
-        }
-        this._views[id] = null;
-      }
-    },
-
-    appendEmpty = function() {
-      var empty_view = this.renderEmpty();
-      if (empty_view.cid) {
-        this._views[empty_view.cid] = empty_view
-      }
-      collection_element.html(empty_view.el || empty_view || '');
-    },
-
-    applyMixin = function(mixin) {
-      if (_.isArray(mixin)) {
-        this.mixin.apply(this, mixin);
-      } else {
-        this.mixin(mixin);
-      }
-    };
+    old_backbone_view = Backbone.View;
 
   //wrap Backbone.View constructor to support initialize event
-  var old_backbone_view = Backbone.View;
   Backbone.View = function(options) {
     this.cid = _.uniqueId('view');
     this._configure(options || {});
@@ -288,12 +112,15 @@
 
   Thorax.View = Backbone.View.extend({
     _configure: function(options) {
+      //this.options is removed in Thorax.View, we merge passed
+      //properties directly with the view and template context
+      _.extend(this, options || {});
+
       //setup
       if (!this.name) {
         console.warn('All views extending Thorax.View should have a name property.');
       }
-      Backbone.View.prototype._configure.call(this, options);
-      
+            
       //will be called again by Backbone.View(), after _configure() is complete but safe to call twice
       this._ensureElement();
 
@@ -369,9 +196,16 @@
     
     template: function(file, data) {
       Thorax._currentTemplateContext = this;
-      data = _.extend({}, (this.options ? this.options : {}), data || {}, {
+      
+      var view_context = {};
+      for (var key in this) {
+        if (typeof this[key] !== 'function') {
+          view_context[key] = this[key];
+        }
+      }
+      data = _.extend({
         cid: _.uniqueId('t')
-      });
+      }, view_context, data || {});
   
       var template, templateName, fileName = file + (file.match(/\.handlebars$/) ? '' : '.handlebars');  
       templateName = 'templates/' + fileName;
@@ -704,6 +538,7 @@
       }
       
       callback && callback.call(this,attributes);
+      return attributes;
     },
   
     _preventDuplicateSubmission: function(event, callback) {
@@ -932,255 +767,433 @@
 
   Thorax.View.registerHelper('view', function(view, options) {
     var instance = Thorax._currentTemplateContext.view(view, options);
-    return '<div ' + view_placeholder_attribute_name + '="' + instance.cid + '"></div>';
+    return new Handlebars.SafeString('<div ' + view_placeholder_attribute_name + '="' + instance.cid + '"></div>');
   });
   
   Thorax.View.registerHelper('template', function(name, options) {
-    return new SafeString(Thorax.View.prototype.template.call(Thorax._currentTemplateContext, name, _.defualts(options || {}, this)));
+    return new Handlebars.SafeString(Thorax.View.prototype.template.call(Thorax._currentTemplateContext, name, _.defualts(options || {}, this)));
   });
 
   Thorax.View.registerHelper('link', function(url) {
     return (Backbone.history._hasPushState ? Backbone.history.options.root : '#') + url;
   });
 
-  //private / module vars for layout view
-  var resetElementAnimationStyles = function(element) {
-      element.style.webkitTransition = null;
-      element.style.webkitTransform = null;
-      element.style.webkitTransitionDuration = null;
-      element.style.webkitTransitionTimingFunction = null;
-      element.style.webkitTransitionDelay = null;
-    
-      element.style.zIndex = '';
-      element.style.left = '0px';
-      element.style.top = '0px';
-    },
+  //private Thorax.View methods
 
-    resetLayout = function(new_view_element, scrollTop) {
-      resetElementAnimationStyles(new_view_element);
-      resetElementAnimationStyles(this.views);
-      this.trigger('reset', new_view_element, scrollTop);
-    },
+  function loadStartEventEmitter() {
+    pendingLoadSize++;
+    this._loadStartTimeout = setTimeout(_.bind(function() {
+      pendingLoadSize--;
+      this.trigger('load:start');
+    }, this), this._loadingTimeoutDuration * 1000);
+  };
 
-    completeTransition = function(view, old_view, callback) {
-      $(this.el).removeClass('transitioning');
-      // Force a scroll again to prevent Android from attempting to restore the scroll
-      // position for the back transitions.
-      window.scrollTo(0, 0);
-
-      if (old_view && old_view.el.parentNode) {
-        $(old_view.el).remove();
+  function loadEndEventEmitter() {
+    clearTimeout(this._loadStartTimeout);
+    if (pendingLoadSize) {
+      // this will cancel out the need to call load:end
+      pendingLoadSize--;
+      for (var i = 0; i < pendingLoadSize; i++) {
+        // we need to make sure all load:start and load:end calls are balanced
+        this.trigger('load:start');
       }
-    
-      this.view = view;
-    
-      // Execute the events on the next iter. This gives things a chance
-      // to settle and also protects us from NPEs in callback resulting in
-      // an unremoved listeners
-      setTimeout(_.bind(function() {
-        if (old_view) {
-          old_view.destroy();
-        }
-        this.view.trigger('ready');
-        this.trigger('change:view:end', view, old_view);
-        if (callback) {
-          callback();
-        }
-      }, this), 0);
-    },
+      pendingLoadSize = 0;
+    } else {
+      this.trigger('load:end');
+    }
+  };
 
-    cleanupTransition = function(new_view_element, callback) {
-      $(this.views).one('webkitTransitionEnd', _.bind(function() {
-        resetLayout.call(this, new_view_element);
-        callback();
-      }, this));
-    },
-
-    onLayoutReset = function(view, scrollTop) {
-      //for native
-      if (scrollTop && this.transition != 'none') {
-        var ua = navigator.userAgent.toLowerCase();
-        if (view && ua.match(/ipod|iphone|ipad/)) {
-          // Android flashes when attempting to adjust the offset in this manner
-          // so only run it under ios.
-          view.el.style.top = -scrollTop + 'px';
-        } else {
-          // For all others just jump to the top before beggining the transition
-          // This seems more palatable than a flash of the same content.
-          window.scrollTo(0, 0);
-        }
+  function containHandlerToCurentView(handler, cid) {
+    return function(event) {
+      var containing_view_element = $(event.target).closest('[' + view_name_attribute_name + ']');
+      if (containing_view_element.length === 0 || containing_view_element.length > 0 && containing_view_element[0].getAttribute(view_cid_attribute_name) == cid) {
+        handler(event);
       }
-    },
-    
-    //class definition, used by Thorax.createLayout
-    layoutProtoProps = {
-      initialize: function(){
-        this.el = $(this.el)[0];
-    
-        //setup cards container
-        this.views = this.make('div', {
-          'class': 'views'
-        });
-        this.el.appendChild(this.views);
-    
-        //transition mode setup
-        this._forceTransitionMode = false;
-        this._transitionMode = this.forwardsTransitionMode;
-    
-        //track history direction for transition mode
-        this._historyDirection = 'forwards';
-        Backbone.history.bind('route',_.bind(function(fragment,index){
-          this._historyDirection = index >= 0 ? 'forwards' : 'backwards';
-        },this));
-
-        this.bind('reset', _.bind(onLayoutReset, this));
-      },
-      
-      setNextTransitionMode: function(transition_mode){
-        this._forceTransitionMode = true;
-        this._transitionMode = transition_mode;
-      },
-
-      setView: function(view, params){
-        var old_view = this.view;
-    
-        if (view == old_view){
-          return;
-        }
-        
-        this.trigger('change:view:start', view, old_view);
-
-        if(params && params.transition){
-          this.setNextTransitionMode(params.transition);
-        }
-    
-        // Read any reflow possible fields that we may need prior to dirtying the layout
-        var scrollTop = document.body.scrollTop,
-          clientWidth = this.el.clientWidth
-          clientHeight = this.el.clientHeight;
-    
-        old_view && old_view.trigger('deactivated');
-    
-        this.views.appendChild(view.el);
-        view.trigger('activated', params || {});
-        
-        //set transition mode
-        var transition_mode = this._forceTransitionMode
-          ? this._transitionMode
-          : this._historyDirection === 'backwards'
-            ? this.backwardsTransitionMode
-            : this._transitionMode || this.forwardsTransitionMode
-        ;
-        
-        if (this._transitionMode == 'none' || !old_view) {
-          // None or first view, no transition
-          completeTransition.call(this, view, old_view);
-        } else {
-          $(this.el).addClass('transitioning');
-          resetLayout.call(this, view.el, scrollTop);
-    
-          //animated transition
-          this[transition_mode](view, clientWidth, clientHeight);
-        }
-
-        //reset transition mode
-        this._forceTransitionMode = false;
-        this._transitionMode = this.forwardsTransitionMode;
-
-        return view;
-      },
-
-      //transitions, in all transitions clientWidth, clientHeight are optional
-      //and can receive an optional callback as the last argument
-      //clientWidth, clientHeight are passed by setView as an optomization to avoid reflow
-
-      //position next view on right and slide right to it
-      slideRight: function(new_view, clientWidth, clientHeight) {
-        var new_view_element = new_view.el,
-          viewsElement = this.views,
-          clientWidth = clientWidth || this.el.clientWidth,
-          clientHeight = clientHeight || this.el.clientHeight,
-          old_view_element = this.view.el,
-          callback = typeof arguments[arguments.length - 1] === 'function' ? arguments[arguments.length - 1] : null;
-
-        if(!viewsElement.style.webkitTransform){
-          viewsElement.style.webkitTransform = 'translateX(' + clientWidth + 'px)';
-        }
-        viewsElement.style.left = '-' + clientWidth + 'px';
-        new_view_element.style.left = clientWidth + 'px';
-
-        cleanupTransition.call(this, new_view_element, _.bind(completeTransition, this, new_view, this.view, callback));
-    
-        viewsElement.clientWidth;   // It flows and flows. Needed to trigger the transition
-        viewsElement.style.webkitTransform = 'translateX(0px)';
-        viewsElement.style.webkitTransition = '-webkit-transform ' + this.transition;
-      },
-
-      //position next view on left and slide left to it
-      slideLeft: function(new_view, clientWidth, clientHeight) {
-        var new_view_element = new_view.el,
-          viewsElement = this.views,
-          clientWidth = clientWidth || this.el.clientWidth,
-          clientHeight = clientHeight || this.el.clientHeight,
-          old_view_element = this.view.el,
-          callback = typeof arguments[arguments.length - 1] === 'function' ? arguments[arguments.length - 1] : null;
-
-        old_view_element.style.left = clientWidth + 'px';
-        viewsElement.style.left = '-' + clientWidth + 'px';
-
-        cleanupTransition.call(this, new_view_element, _.bind(completeTransition, this, new_view, this.view, callback));
-    
-        viewsElement.clientWidth;   // It flows and flows. Needed to trigger the transition
-        viewsElement.style.webkitTransform = 'translateX(' + clientWidth + 'px)';
-        viewsElement.style.webkitTransition = '-webkit-transform ' + this.transition;
-      },
-
-      //position next view below and slide it up over the previous view
-      slideUp: function(new_view, clientWidth, clientHeight) {
-        var new_view_element = new_view.el,
-          viewsElement = this.views,
-          clientWidth = clientWidth || this.el.clientWidth,
-          clientHeight = clientHeight || this.el.clientHeight,
-          old_view_element = this.view.el,
-          callback = typeof arguments[arguments.length - 1] === 'function' ? arguments[arguments.length - 1] : null;
-
-        //TODO: slideUp and slide down happening faster on second pass
-        old_view_element.style.zIndex = 1;
-        new_view_element.style.zIndex = 2;
-        new_view_element.style.top = clientHeight + 'px';
-    
-        cleanupTransition.call(this, new_view_element, _.bind(completeTransition, this, new_view, this.view, callback));
-    
-        viewsElement.clientWidth;   // It flows and flows. Needed to trigger the transition
-        new_view_element.style.webkitTransform = 'translateY(-' + clientHeight + 'px)';
-        new_view_element.style.webkitTransition = '-webkit-transform ' + this.transition;
-      },
-
-      //position next view underneath the current view and slide the current view down
-      slideDown: function(new_view, clientWidth, clientHeight) {
-        var new_view_element = new_view.el,
-          viewsElement = this.views,
-          clientWidth = clientWidth || this.el.clientWidth,
-          clientHeight = clientHeight || this.el.clientHeight,
-          old_view_element = this.view.el,
-          callback = typeof arguments[arguments.length - 1] === 'function' ? arguments[arguments.length - 1] : null;
-
-        //TODO: slideUp and slide down happening faster on second pass
-        old_view_element.style.zIndex = 2;
-        new_view_element.style.zIndex = 1;
-        new_view_element.style.top = '0px';
-        
-        cleanupTransition.call(this, new_view_element, _.bind(completeTransition, this, new_view, this.view, callback));
-    
-        viewsElement.clientWidth;   // It flows and flows. Needed to trigger the transition
-        old_view_element.style.webkitTransform = 'translateY(' + clientHeight + 'px)';
-        old_view_element.style.webkitTransition = '-webkit-transform ' + this.transition;
-      },
-
-      transition: '333ms ease-in-out',
-      forwardsTransitionMode: 'slideRight',
-      backwardsTransitionMode: 'slideLeft'
     };
+  };
+
+  //model/collection events, to be bound/unbound on setModel/setCollection
+  function processModelOrCollectionEvent(events, type) {
+    for (var _name in events[type] || {}) {
+      if (_.isArray(events[type][_name])) {
+        for (var i = 0; i < events[type][_name].length; ++i) {
+          this._events[type].push([_name, this._bindEventHandler(events[type][_name][i])]);
+        }
+      } else {
+        this._events[type].push([_name, this._bindEventHandler(events[type][_name])]);
+      }
+    }
+  };
+
+  //used by _processEvents
+  function processEvent(name, handler) {
+    if (!name.match(/\s+/)) {
+      //view events
+      this.bind(name, this._bindEventHandler(handler));
+    } else {
+      //DOM events
+      var match = name.match(eventSplitter);
+      var eventName = match[1] + '.delegateEvents' + this.cid, selector = match[2];
+      if (selector === '') {
+        $(this.el).bind(eventName, containHandlerToCurentView(this._bindEventHandler(handler), this.cid));
+      } else {
+        $(this.el).delegate(selector, eventName, containHandlerToCurentView(this._bindEventHandler(handler), this.cid));
+      }
+    }
+  };
+
+  //used by Thorax.View.addEvents for global event registration
+  function addEvent(target, name, handler) {
+    if (!target[name]) {
+      target[name] = [];
+    }
+    if (_.isArray(handler)) {
+      for (var i = 0; i < handler.length; ++i) {
+        target[name].push(handler[i]);
+      }
+    } else {
+      target[name].push(handler);
+    }
+  };
+
+  function resetSubmitState() {
+    this.$('form').removeAttr('data-submit-wait');
+  };
+
+  //called with context of input
+  function getInputValue() {
+    if (this.type === 'checkbox' || this.type === 'radio') {
+      if ($(this).attr('data-onOff')) {
+        return this.checked;
+      } else if (this.checked) {
+        return this.value;
+      }
+    } else if (this.multiple === true) {
+      var values = [];
+      $('option',this).each(function(){
+        if (this.selected) {
+          values.push(this.value);
+        }
+      });
+      return values;
+    } else {
+      return this.value;
+    }
+  };
+
+  function bindModelAndCollectionEvents(events) {
+    if (!this._events) {
+      this._events = {
+        model: [],
+        collection: []
+      };
+    }
+    processModelOrCollectionEvent.call(this, events, 'model');
+    processModelOrCollectionEvent.call(this, events, 'collection');
+  };
+
+  function getCollectionElement() {
+    var selector = this._collectionSelector || '.collection';
+    var element = this.$(selector);
+    if (element.length === 0) {
+      console.error(this.name + ' collection element selector: "' + selector + '" returned empty, returning ' + this.name + '.el');
+      return $(this.el);
+    } else {
+      return element;
+    }
+  };
+
+  function preserveCollectionElement(callback) {
+    var old_collection_element = getCollectionElement.call(this);
+    callback.call(this);
+    var new_collection_element = getCollectionElement.call(this);
+    if (old_collection_element.length && new_collection_element.length) {
+      new_collection_element[0].parentNode.insertBefore(old_collection_element[0], new_collection_element[0]);
+      new_collection_element[0].parentNode.removeChild(new_collection_element[0]);
+    }
+  };
+
+  function appendViews() {
+    for (var id in this._views || {}) {
+      var view_placeholder_element = this.$('[' + view_placeholder_attribute_name + '="' + id + '"]')[0];
+      if (view_placeholder_element) {
+        var view = this._views[id];
+        //has the view been rendered at least once? if not call render().
+        //subclasses overriding render() that do not call the parent's render()
+        //or set _rendered may be rendered twice but will not error
+        if (!view._renderCount) {
+          view.render();
+        }
+        view_placeholder_element.parentNode.insertBefore(view.el, view_placeholder_element);
+        view_placeholder_element.parentNode.removeChild(view_placeholder_element);
+      }
+    }
+  };
+
+  function destroyChildViews() {
+    for (var id in this._views || {}) {
+      if (this._views[id].destroy) {
+        this._views[id].destroy();
+      }
+      this._views[id] = null;
+    }
+  };
+
+  function appendEmpty() {
+    var empty_view = this.renderEmpty();
+    if (empty_view.cid) {
+      this._views[empty_view.cid] = empty_view
+    }
+    collection_element.html(empty_view.el || empty_view || '');
+  };
+
+  function applyMixin(mixin) {
+    if (_.isArray(mixin)) {
+      this.mixin.apply(this, mixin);
+    } else {
+      this.mixin(mixin);
+    }
+  };
+
+
+  //private / module vars for layout view
+  function resetElementAnimationStyles(element) {
+    element.style.webkitTransition = null;
+    element.style.webkitTransform = null;
+    element.style.webkitTransitionDuration = null;
+    element.style.webkitTransitionTimingFunction = null;
+    element.style.webkitTransitionDelay = null;
+  
+    element.style.zIndex = '';
+    element.style.left = '0px';
+    element.style.top = '0px';
+  };
+
+  function resetLayout(new_view_element, scrollTop) {
+    resetElementAnimationStyles(new_view_element);
+    resetElementAnimationStyles(this.views);
+    this.trigger('reset', new_view_element, scrollTop);
+  };
+
+  function completeTransition(view, old_view, callback) {
+    $(this.el).removeClass('transitioning');
+    // Force a scroll again to prevent Android from attempting to restore the scroll
+    // position for the back transitions.
+    window.scrollTo(0, 0);
+
+    if (old_view && old_view.el.parentNode) {
+      $(old_view.el).remove();
+    }
+  
+    this.view = view;
+  
+    // Execute the events on the next iter. This gives things a chance
+    // to settle and also protects us from NPEs in callback resulting in
+    // an unremoved listeners
+    setTimeout(_.bind(function() {
+      if (old_view) {
+        old_view.destroy();
+      }
+      this.view.trigger('ready');
+      this.trigger('change:view:end', view, old_view);
+      if (callback) {
+        callback();
+      }
+    }, this), 0);
+  };
+
+  function cleanupTransition(new_view_element, callback) {
+    $(this.views).one('webkitTransitionEnd', _.bind(function() {
+      resetLayout.call(this, new_view_element);
+      callback();
+    }, this));
+  };
+
+  function onLayoutReset(view, scrollTop) {
+    //for native
+    if (scrollTop && this.transition != 'none') {
+      var ua = navigator.userAgent.toLowerCase();
+      if (view && ua.match(/ipod|iphone|ipad/)) {
+        // Android flashes when attempting to adjust the offset in this manner
+        // so only run it under ios.
+        view.el.style.top = -scrollTop + 'px';
+      } else {
+        // For all others just jump to the top before beggining the transition
+        // This seems more palatable than a flash of the same content.
+        window.scrollTo(0, 0);
+      }
+    }
+  };
+  
+  //class definition, used by Thorax.createLayout
+  var layoutProtoProps = {
+    initialize: function(){
+      this.el = $(this.el)[0];
+  
+      //setup cards container
+      this.views = this.make('div', {
+        'class': 'views'
+      });
+      this.el.appendChild(this.views);
+  
+      //transition mode setup
+      this._forceTransitionMode = false;
+      this._transitionMode = this.forwardsTransitionMode;
+  
+      //track history direction for transition mode
+      this._historyDirection = 'forwards';
+      Backbone.history.bind('route',_.bind(function(fragment,index){
+        this._historyDirection = index >= 0 ? 'forwards' : 'backwards';
+      },this));
+
+      this.bind('reset', _.bind(onLayoutReset, this));
+    },
+    
+    setNextTransitionMode: function(transition_mode){
+      this._forceTransitionMode = true;
+      this._transitionMode = transition_mode;
+    },
+
+    setView: function(view, params){
+      var old_view = this.view;
+  
+      if (view == old_view){
+        return;
+      }
+      
+      this.trigger('change:view:start', view, old_view);
+
+      if(params && params.transition){
+        this.setNextTransitionMode(params.transition);
+      }
+  
+      // Read any reflow possible fields that we may need prior to dirtying the layout
+      var scrollTop = document.body.scrollTop,
+        clientWidth = this.el.clientWidth
+        clientHeight = this.el.clientHeight;
+  
+      old_view && old_view.trigger('deactivated');
+  
+      this.views.appendChild(view.el);
+      view.trigger('activated', params || {});
+      
+      //set transition mode
+      var transition_mode = this._forceTransitionMode
+        ? this._transitionMode
+        : this._historyDirection === 'backwards'
+          ? this.backwardsTransitionMode
+          : this._transitionMode || this.forwardsTransitionMode
+      ;
+      
+      if (this._transitionMode == 'none' || !old_view) {
+        // None or first view, no transition
+        completeTransition.call(this, view, old_view);
+      } else {
+        $(this.el).addClass('transitioning');
+        resetLayout.call(this, view.el, scrollTop);
+  
+        //animated transition
+        this[transition_mode](view, clientWidth, clientHeight);
+      }
+
+      //reset transition mode
+      this._forceTransitionMode = false;
+      this._transitionMode = this.forwardsTransitionMode;
+
+      return view;
+    },
+
+    //transitions, in all transitions clientWidth, clientHeight are optional
+    //and can receive an optional callback as the last argument
+    //clientWidth, clientHeight are passed by setView as an optomization to avoid reflow
+
+    //position next view on right and slide right to it
+    slideRight: function(new_view, clientWidth, clientHeight) {
+      var new_view_element = new_view.el,
+        viewsElement = this.views,
+        clientWidth = clientWidth || this.el.clientWidth,
+        clientHeight = clientHeight || this.el.clientHeight,
+        old_view_element = this.view.el,
+        callback = typeof arguments[arguments.length - 1] === 'function' ? arguments[arguments.length - 1] : null;
+
+      if(!viewsElement.style.webkitTransform){
+        viewsElement.style.webkitTransform = 'translateX(' + clientWidth + 'px)';
+      }
+      viewsElement.style.left = '-' + clientWidth + 'px';
+      new_view_element.style.left = clientWidth + 'px';
+
+      cleanupTransition.call(this, new_view_element, _.bind(completeTransition, this, new_view, this.view, callback));
+  
+      viewsElement.clientWidth;   // It flows and flows. Needed to trigger the transition
+      viewsElement.style.webkitTransform = 'translateX(0px)';
+      viewsElement.style.webkitTransition = '-webkit-transform ' + this.transition;
+    },
+
+    //position next view on left and slide left to it
+    slideLeft: function(new_view, clientWidth, clientHeight) {
+      var new_view_element = new_view.el,
+        viewsElement = this.views,
+        clientWidth = clientWidth || this.el.clientWidth,
+        clientHeight = clientHeight || this.el.clientHeight,
+        old_view_element = this.view.el,
+        callback = typeof arguments[arguments.length - 1] === 'function' ? arguments[arguments.length - 1] : null;
+
+      old_view_element.style.left = clientWidth + 'px';
+      viewsElement.style.left = '-' + clientWidth + 'px';
+
+      cleanupTransition.call(this, new_view_element, _.bind(completeTransition, this, new_view, this.view, callback));
+  
+      viewsElement.clientWidth;   // It flows and flows. Needed to trigger the transition
+      viewsElement.style.webkitTransform = 'translateX(' + clientWidth + 'px)';
+      viewsElement.style.webkitTransition = '-webkit-transform ' + this.transition;
+    },
+
+    //position next view below and slide it up over the previous view
+    slideUp: function(new_view, clientWidth, clientHeight) {
+      var new_view_element = new_view.el,
+        viewsElement = this.views,
+        clientWidth = clientWidth || this.el.clientWidth,
+        clientHeight = clientHeight || this.el.clientHeight,
+        old_view_element = this.view.el,
+        callback = typeof arguments[arguments.length - 1] === 'function' ? arguments[arguments.length - 1] : null;
+
+      //TODO: slideUp and slide down happening faster on second pass
+      old_view_element.style.zIndex = 1;
+      new_view_element.style.zIndex = 2;
+      new_view_element.style.top = clientHeight + 'px';
+  
+      cleanupTransition.call(this, new_view_element, _.bind(completeTransition, this, new_view, this.view, callback));
+  
+      viewsElement.clientWidth;   // It flows and flows. Needed to trigger the transition
+      new_view_element.style.webkitTransform = 'translateY(-' + clientHeight + 'px)';
+      new_view_element.style.webkitTransition = '-webkit-transform ' + this.transition;
+    },
+
+    //position next view underneath the current view and slide the current view down
+    slideDown: function(new_view, clientWidth, clientHeight) {
+      var new_view_element = new_view.el,
+        viewsElement = this.views,
+        clientWidth = clientWidth || this.el.clientWidth,
+        clientHeight = clientHeight || this.el.clientHeight,
+        old_view_element = this.view.el,
+        callback = typeof arguments[arguments.length - 1] === 'function' ? arguments[arguments.length - 1] : null;
+
+      //TODO: slideUp and slide down happening faster on second pass
+      old_view_element.style.zIndex = 2;
+      new_view_element.style.zIndex = 1;
+      new_view_element.style.top = '0px';
+      
+      cleanupTransition.call(this, new_view_element, _.bind(completeTransition, this, new_view, this.view, callback));
+  
+      viewsElement.clientWidth;   // It flows and flows. Needed to trigger the transition
+      old_view_element.style.webkitTransform = 'translateY(' + clientHeight + 'px)';
+      old_view_element.style.webkitTransition = '-webkit-transform ' + this.transition;
+    },
+
+    transition: '333ms ease-in-out',
+    forwardsTransitionMode: 'slideRight',
+    backwardsTransitionMode: 'slideLeft'
+  };
 
   Thorax.Router = Backbone.Router.extend({
     view: function(name, attributes) {
@@ -1191,7 +1204,7 @@
     }
   },{
     create: function(module, protoProps, classProps) {
-      return scope.Routers[name] = new (this.extend(_.extend({}, module, protoProps), classProps));
+      return new (this.extend(_.extend({}, module, protoProps), classProps));
     }
   });
 
