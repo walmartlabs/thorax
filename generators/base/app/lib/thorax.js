@@ -494,25 +494,14 @@
       },options || {});
   
       var attributes = {};
-  
-      this.$('select,input,textarea').each(function(){
-        if (this.type === 'button' || this.type === 'cancel' || this.type === 'submit') {
-          return;
-        }
-        var object = attributes;
-        var keys = this.name.split('[');
-        var key;
-        for(var i = 0; i < keys.length - 1; ++i) {
-          key = keys[i].replace(']','');
-          if (!object[key]) {
-            object[key] = {};
-          }
-          object = object[key];
-        }
-        key = keys[keys.length - 1].replace(']','');
+      
+      //callback has context of element
+      eachNamedInput.call(this, function() {
         var value = getInputValue.call(this);
         if (typeof value !== 'undefined') {
-          object[key] = value;
+          objectAndKeyFromAttributesAndName(attributes, this.name, {mode: 'serialize'}, function(object, key) {
+            object[key] = value;
+          });
         }
       });
   
@@ -554,29 +543,23 @@
       if (!this.$('form').length) {
         return;
       }
-      var attributes = attributes || this.context(this.model);
-      var iterate = function(object,prefix,nested) {
-        _.each(object,function(value,key) {
-          if (typeof value === 'object') {
-            iterate.call(this,value,prefix + key + '[',true);
-          } else {
-            var inputs = this.$('[name="' + prefix + key + (nested ? ']' : '') + '"]');
-            if (inputs.length) {
-              inputs.each(function(){
-                if (this.type === 'checkbox' && _.isBoolean(value)) {
-                  this.checked = value;
-                } else if (this.type === 'checkbox' || this.type === 'radio') {
-                  this.checked = value == this.value;
-                } else {
-                  this.value = value;
-                }
-              });
+      var value, attributes = attributes || this.context(this.model);
+      
+      //callback has context of element
+      eachNamedInput.call(this, function() {
+        objectAndKeyFromAttributesAndName.call(this, attributes, this.name, {mode: 'populate'}, function(object, key) {
+          if (object && typeof (value = object[key]) !== 'undefined') {
+            //will only execute if we have a name that matches the structure in attributes
+            if (this.type === 'checkbox' && _.isBoolean(value)) {
+              this.checked = value;
+            } else if (this.type === 'checkbox' || this.type === 'radio') {
+              this.checked = value == this.value;
+            } else {
+              this.value = value;
             }
           }
-        },this);
-      };
-  
-      iterate.call(this,attributes,'',false);
+        });
+      });
     },
   
     _checkFirstRadio: function(){
@@ -775,12 +758,12 @@
   });
 
   Thorax.View.registerHelper('view', function(view, options) {
-    var instance = Thorax._currentTemplateContext.view(view, options);
+    var instance = Thorax._currentTemplateContext.view(view, options ? options.hash : {});
     return new Handlebars.SafeString('<div ' + view_placeholder_attribute_name + '="' + instance.cid + '"></div>');
   });
   
   Thorax.View.registerHelper('template', function(name, options) {
-    var context = _.extend({}, this, options || {});
+    var context = _.extend({}, this, options ? options.hash : {});
     var output = Thorax.View.prototype.template.call(Thorax._currentTemplateContext, name, context);
     return new Handlebars.SafeString(output);
   });
@@ -892,6 +875,34 @@
     }
   };
 
+  //calls a callback with the correct object fragment and key from a compound name
+  function objectAndKeyFromAttributesAndName(attributes, name, options, callback) {
+    var key, i, object = attributes, keys = name.split('['), mode = options.mode;
+    for(i = 0; i < keys.length - 1; ++i) {
+      key = keys[i].replace(']','');
+      if (!object[key]) {
+        if (mode == 'serialize') {
+          object[key] = {};
+        } else {
+          return callback.call(this, false, key);
+        }
+      }
+      object = object[key];
+    }
+    key = keys[keys.length - 1].replace(']', '');
+    callback.call(this, object, key);
+  };
+
+  function eachNamedInput(iterator, context) {
+    var i = 0;
+    this.$('select,input,textarea').each(function() {
+      if (this.type !== 'button' && this.type !== 'cancel' && this.type !== 'submit' && this.name && this.name !== '') {
+        iterator.call(context || this, i, this);
+        ++i;
+      }
+    });
+  };
+
   function bindModelAndCollectionEvents(events) {
     if (!this._events) {
       this._events = {
@@ -968,7 +979,6 @@
       this.mixin(mixin);
     }
   };
-
 
   //private / module vars for layout view
   function resetElementAnimationStyles(element) {
