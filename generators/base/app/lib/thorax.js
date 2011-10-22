@@ -8,10 +8,6 @@
     throw new Error('Backbone.js required to run Thorax');
   }
 
-  if (typeof this.$script === 'undefined') {
-    throw new Error('script.js required to run Thorax');
-  }
-
   var Thorax, scope;
 
   this.Thorax = Thorax = {
@@ -46,6 +42,10 @@
   //private functions for Thorax
   var moduleMapRouter;
   function moduleMap(map, loadPrefix) {
+    if (typeof this.$script === 'undefined') {
+      throw new Error('script.js required to run Thorax');
+    }
+
     if (moduleMapRouter) {
       return;
     }
