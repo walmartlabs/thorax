@@ -780,7 +780,9 @@
   });
   
   Thorax.View.registerHelper('template', function(name, options) {
-    return new Handlebars.SafeString(Thorax.View.prototype.template.call(Thorax._currentTemplateContext, name, _.defualts(options || {}, this)));
+    var context = _.extend({}, this, options || {});
+    var output = Thorax.View.prototype.template.call(Thorax._currentTemplateContext, name, context);
+    return new Handlebars.SafeString(output);
   });
 
   Thorax.View.registerHelper('link', function(url) {
@@ -953,7 +955,10 @@
     if (empty_view.cid) {
       this._views[empty_view.cid] = empty_view
     }
-    collection_element.html(empty_view.el || empty_view || '');
+    var collection_element = getCollectionElement.call(this);
+    if (collection_element.length) {
+      collection_element.empty().append(empty_view.el || empty_view || '');
+    }
   };
 
   function applyMixin(mixin) {
