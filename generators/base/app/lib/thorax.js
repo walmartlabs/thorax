@@ -42,10 +42,9 @@
   //private functions for Thorax
   var moduleMapRouter;
   function moduleMap(map, loadPrefix) {
-    if (typeof this.$script === 'undefined') {
+    if (typeof $script === 'undefined') {
       throw new Error('script.js required to run Thorax');
     }
-
     if (moduleMapRouter) {
       return;
     }
