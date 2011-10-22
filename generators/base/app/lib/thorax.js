@@ -105,7 +105,7 @@
 
       //setup
       if (!this.name) {
-        console.warn('All views extending Thorax.View should have a name property.');
+        console.error('All views extending Thorax.View should have a name property.');
       }
             
       //will be called again by Backbone.View(), after _configure() is complete but safe to call twice
@@ -199,7 +199,7 @@
       template = scope.templates[templateName];
   
       if (!template) {
-        console.warn('Unable to find template ' + templateName);
+        console.error('Unable to find template ' + templateName);
         return '';
       } else {
         return template(data);
