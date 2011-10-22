@@ -16,7 +16,11 @@
 
   this.Thorax = Thorax = {
     configure: function(options) {
-      scope = options.scope || Thorax;
+      scope = options.scope || (typeof exports !== 'undefined' && exports);
+
+      if (!scope) {
+        throw new Error('No scope passed to Thorax.configure() and no "exports" was available inside of thorax.js');
+      }
 
       _.extend(scope, Backbone.Events, {
         templates: {},
@@ -29,52 +33,35 @@
       
       Backbone.history || (Backbone.history = new Backbone.History);
 
-      scope.layout = Thorax.createLayout(options.layout || '.layout');
-    },
-    createLayout: function(element) {
-      var layout = Backbone.View.extend(_.extend({
-        el: element || '.layout'
-      }, layoutProtoProps));
-      return new layout;
-    },
-    routeClick: function(event) {
-      var target = $(event.target);
-      if (target.attr("data-external")) {
-        return;
-      }
-      var transition = target.attr('data-transition');
-      if (transition && transition != '') {
-        scope.layout.setNextTransitionMode(transition); 
-      }
-      var href = target.attr("href");
-      // Route anything that starts with # or / (excluding //domain urls)
-      if (href && (href[0] === '#' || (href[0] === '/' && href[1] !== '/'))) {
-        Backbone.history.navigate(href, true);
-        event.preventDefault();
-      }
-    },
-    _moduleMap: function(map, loadPrefix) {
-      if (Thorax._moduleMapRouter) {
-        return;
-      }
-      var routes = {},
-      handlers = {
-        routes: routes
-      };
-      // For each route create a handler that will load the associated module on request
-      for (var route in map) {
-        var name = map[route];
-        var handlerName = "loader" + name;
-        routes[route] = handlerName
-        handlers[handlerName] = generateLoader(name, loadPrefix);
-      }
-      Thorax._moduleMapRouter = new (Backbone.Router.extend(handlers));
+      scope.layout = new Thorax.Layout({
+        el: options.layout || '.layout'
+      });
+
+      scope.moduleMap = moduleMap;
     },
     //used by "template" and "view" template helpers, not thread safe though it shouldn't matter in browser land
     _currentTemplateContext: false 
   };
 
   //private functions for Thorax
+  var moduleMapRouter;
+  function moduleMap(map, loadPrefix) {
+    if (moduleMapRouter) {
+      return;
+    }
+    var routes = {},
+    handlers = {
+      routes: routes
+    };
+    // For each route create a handler that will load the associated module on request
+    for (var route in map) {
+      var name = map[route];
+      var handlerName = "loader" + name;
+      routes[route] = handlerName
+      handlers[handlerName] = generateLoader(name, loadPrefix);
+    }
+    moduleMapRouter = new (Backbone.Router.extend(handlers));
+  };
 
   function generateLoader(name, loadPrefix) {
     return function() {
@@ -203,9 +190,9 @@
           view_context[key] = this[key];
         }
       }
-      data = _.extend({
+      data = _.extend({}, view_context, data || {}, {
         cid: _.uniqueId('t')
-      }, view_context, data || {});
+      });
   
       var template, templateName, fileName = file + (file.match(/\.handlebars$/) ? '' : '.handlebars');  
       templateName = 'templates/' + fileName;
@@ -295,11 +282,10 @@
   
       var old_model = this.model;
 
-      if (old_model) {
-        this._events.model.forEach(function(event) {
-          old_model.unbind(event[0], event[1]);
-        }, this);
-      }
+      this.freeze({
+        model: old_model, //may be false
+        collection: false
+      });
     
       this.model = model;
       this._modelOptions = options;
@@ -337,11 +323,10 @@
   
       var old_collection = this.collection;
 
-      if (old_collection) {
-        this._events.collection.forEach(function(event) {
-          old_collection.unbind(event[0], event[1]);
-        }, this);
-      }
+      this.freeze({
+        model: false, //may be false
+        collection: old_collection
+      });
       
       this.collection = collection;
       this._collectionOptions = options;
@@ -455,16 +440,25 @@
       return item_view;
     },
   
-    freeze: function() {
-      if (this.collection && this._events && this._events.collection) {
+    freeze: function(options) {
+      var model, collection;
+      if (typeof options === 'undefined') {
+        model = this.model;
+        collection = this.collection;
+      } else {
+        model = options.model;
+        collection = options.collection;
+      }
+
+      if (collection && this._events && this._events.collection) {
         this._events.collection.forEach(function(event) {
-          this.collection.unbind(event[0], event[1]);
+          collection.unbind(event[0], event[1]);
         }, this);
       }
 
-      if (this.model && this._events && this._events.model) {
+      if (model && this._events && this._events.model) {
         this._events.model.forEach(function(event) {
-          this.model.unbind(event[0], event[1]);
+          model.unbind(event[0], event[1]);
         }, this);
       }
     },
@@ -663,7 +657,22 @@
 
   Thorax.View.registerEvents({
     //built in dom events
-    'click a': Thorax.routeClick,
+    'click a': function(event) {
+      var target = $(event.target);
+      if (target.attr("data-external")) {
+        return;
+      }
+      var transition = target.attr('data-transition');
+      if (transition && transition != '') {
+        scope.layout.setNextTransitionMode(transition); 
+      }
+      var href = target.attr("href");
+      // Route anything that starts with # or / (excluding //domain urls)
+      if (href && (href[0] === '#' || (href[0] === '/' && href[1] !== '/'))) {
+        Backbone.history.navigate(href, true);
+        event.preventDefault();
+      }
+    },
 
     'submit form': function(event) {
       // Hide any virtual keyboards that may be lingering around
@@ -1002,11 +1011,23 @@
     }, this), 0);
   };
 
-  function cleanupTransition(new_view_element, callback) {
+  function cleanupTransition(delta_x, delta_y, new_view_element, callback) {
     $(this.views).one('webkitTransitionEnd', _.bind(function() {
       resetLayout.call(this, new_view_element);
       callback();
     }, this));
+
+    this.views.clientWidth;   // It flows and flows. Needed to trigger the transition
+
+    var transform = [];
+    if (delta_x !== false) {
+      transform.push('translateX(' + String(delta_x) + 'px)');
+    }
+    if (delta_y !== false) {
+      transform.push('translateY(' + String(delta_y) + 'px)');
+    }
+    this.views.style.webkitTransform = transform.join(' ');
+    this.views.style.webkitTransition = '-webkit-transform ' + this.transition;
   };
 
   function onLayoutReset(view, scrollTop) {
@@ -1025,9 +1046,9 @@
     }
   };
   
-  //class definition, used by Thorax.createLayout
-  var layoutProtoProps = {
-    initialize: function(){
+  //main layout class, instance of which is available on scope.layout
+  Thorax.Layout = Backbone.View.extend({
+    initialize: function() {
       this.el = $(this.el)[0];
   
       //setup cards container
@@ -1109,91 +1130,33 @@
 
     //position next view on right and slide right to it
     slideRight: function(new_view, clientWidth, clientHeight) {
-      var new_view_element = new_view.el,
-        viewsElement = this.views,
-        clientWidth = clientWidth || this.el.clientWidth,
-        clientHeight = clientHeight || this.el.clientHeight,
-        old_view_element = this.view.el,
+      var clientWidth = clientWidth || this.el.clientWidth,
         callback = typeof arguments[arguments.length - 1] === 'function' ? arguments[arguments.length - 1] : null;
 
-      if(!viewsElement.style.webkitTransform){
-        viewsElement.style.webkitTransform = 'translateX(' + clientWidth + 'px)';
+      if (!this.views.style.webkitTransform){
+        this.views.style.webkitTransform = 'translateX(' + clientWidth + 'px)';
       }
-      viewsElement.style.left = '-' + clientWidth + 'px';
-      new_view_element.style.left = clientWidth + 'px';
+      this.views.style.left = '-' + clientWidth + 'px';
+      new_view.el.style.left = clientWidth + 'px';
 
-      cleanupTransition.call(this, new_view_element, _.bind(completeTransition, this, new_view, this.view, callback));
-  
-      viewsElement.clientWidth;   // It flows and flows. Needed to trigger the transition
-      viewsElement.style.webkitTransform = 'translateX(0px)';
-      viewsElement.style.webkitTransition = '-webkit-transform ' + this.transition;
+      cleanupTransition.call(this, 0, false, new_view.el, _.bind(completeTransition, this, new_view, this.view, callback));
     },
 
     //position next view on left and slide left to it
     slideLeft: function(new_view, clientWidth, clientHeight) {
-      var new_view_element = new_view.el,
-        viewsElement = this.views,
-        clientWidth = clientWidth || this.el.clientWidth,
-        clientHeight = clientHeight || this.el.clientHeight,
-        old_view_element = this.view.el,
+      var clientWidth = clientWidth || this.el.clientWidth,
         callback = typeof arguments[arguments.length - 1] === 'function' ? arguments[arguments.length - 1] : null;
 
-      old_view_element.style.left = clientWidth + 'px';
-      viewsElement.style.left = '-' + clientWidth + 'px';
+      this.view.el.style.left = clientWidth + 'px';
+      this.views.style.left = '-' + clientWidth + 'px';
 
-      cleanupTransition.call(this, new_view_element, _.bind(completeTransition, this, new_view, this.view, callback));
-  
-      viewsElement.clientWidth;   // It flows and flows. Needed to trigger the transition
-      viewsElement.style.webkitTransform = 'translateX(' + clientWidth + 'px)';
-      viewsElement.style.webkitTransition = '-webkit-transform ' + this.transition;
-    },
-
-    //position next view below and slide it up over the previous view
-    slideUp: function(new_view, clientWidth, clientHeight) {
-      var new_view_element = new_view.el,
-        viewsElement = this.views,
-        clientWidth = clientWidth || this.el.clientWidth,
-        clientHeight = clientHeight || this.el.clientHeight,
-        old_view_element = this.view.el,
-        callback = typeof arguments[arguments.length - 1] === 'function' ? arguments[arguments.length - 1] : null;
-
-      //TODO: slideUp and slide down happening faster on second pass
-      old_view_element.style.zIndex = 1;
-      new_view_element.style.zIndex = 2;
-      new_view_element.style.top = clientHeight + 'px';
-  
-      cleanupTransition.call(this, new_view_element, _.bind(completeTransition, this, new_view, this.view, callback));
-  
-      viewsElement.clientWidth;   // It flows and flows. Needed to trigger the transition
-      new_view_element.style.webkitTransform = 'translateY(-' + clientHeight + 'px)';
-      new_view_element.style.webkitTransition = '-webkit-transform ' + this.transition;
-    },
-
-    //position next view underneath the current view and slide the current view down
-    slideDown: function(new_view, clientWidth, clientHeight) {
-      var new_view_element = new_view.el,
-        viewsElement = this.views,
-        clientWidth = clientWidth || this.el.clientWidth,
-        clientHeight = clientHeight || this.el.clientHeight,
-        old_view_element = this.view.el,
-        callback = typeof arguments[arguments.length - 1] === 'function' ? arguments[arguments.length - 1] : null;
-
-      //TODO: slideUp and slide down happening faster on second pass
-      old_view_element.style.zIndex = 2;
-      new_view_element.style.zIndex = 1;
-      new_view_element.style.top = '0px';
-      
-      cleanupTransition.call(this, new_view_element, _.bind(completeTransition, this, new_view, this.view, callback));
-  
-      viewsElement.clientWidth;   // It flows and flows. Needed to trigger the transition
-      old_view_element.style.webkitTransform = 'translateY(' + clientHeight + 'px)';
-      old_view_element.style.webkitTransition = '-webkit-transform ' + this.transition;
+      cleanupTransition.call(this, clientWidth, false, new_view.el, _.bind(completeTransition, this, new_view, this.view, callback));
     },
 
     transition: '333ms ease-in-out',
     forwardsTransitionMode: 'slideRight',
     backwardsTransitionMode: 'slideLeft'
-  };
+  });
 
   Thorax.Router = Backbone.Router.extend({
     view: function(name, attributes) {
@@ -1204,7 +1167,7 @@
     }
   },{
     create: function(module, protoProps, classProps) {
-      return new (this.extend(_.extend({}, module, protoProps), classProps));
+      return scope.Routers[module.name] = new (this.extend(_.extend({}, module, protoProps), classProps));
     }
   });
 
