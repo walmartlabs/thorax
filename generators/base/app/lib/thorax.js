@@ -907,7 +907,7 @@
     var selector = this._collectionSelector || '.collection';
     var element = this.$(selector);
     if (element.length === 0) {
-      console.error(this.name + ' collection element selector: "' + selector + '" returned empty, returning ' + this.name + '.el');
+      console.error(this.name + '._collectionSelector: "' + selector + '" returned empty, returning ' + this.name + '.el');
       return $(this.el);
     } else {
       return element;
