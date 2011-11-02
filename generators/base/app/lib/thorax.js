@@ -406,10 +406,20 @@
       return this.template(this.name + '-empty.handlebars');
     },
 
+    //appendItem(model [,index])
+    //appendItem(html_string, index) only first node will be used
+    //appendItem(view, index)
     appendItem: function(model, index) {
-      index = index || this.collection.indexOf(model) || 0;
-      var collection_element = getCollectionElement.call(this)[0];
-      var item_view = this.renderItem(model, index);
+      var item_view,
+        collection_element = getCollectionElement.call(this)[0];
+
+      if (model.el || typeof model === 'string') {
+        item_view = model;
+      } else {
+        index = index || this.collection.indexOf(model) || 0;
+        item_view = this.renderItem(model, index);
+      }
+      
       if (item_view) {
         if (item_view.cid) {
           this._views[item_view.cid] = item_view.cid;
@@ -420,9 +430,7 @@
           item_element = item_view.el;
         } else {
           //renderItem returned string
-          var div = document.createElement('div');
-          div.innerHTML = item_view;
-          item_element = div.childNodes[0];
+          item_element = $(item_view)[0];
         }
         if (item_element) {
           $(item_element).attr(model_cid_attribute_name, model.cid);
@@ -961,7 +969,7 @@
   };
 
   function appendEmpty() {
-    var empty_view = this.renderEmpty();
+    var empty_view = this.renderEmpty() || '';
     if (empty_view.cid) {
       this._views[empty_view.cid] = empty_view
     }
@@ -1004,7 +1012,7 @@
     // position for the back transitions.
     window.scrollTo(0, 0);
 
-    if (old_view && old_view.el.parentNode) {
+    if (old_view && old_view.el && old_view.el.parentNode) {
       $(old_view.el).remove();
     }
   
@@ -1018,6 +1026,7 @@
         old_view.destroy();
       }
       this.view.trigger('ready');
+      this._transitionInProgress = false;
       this.trigger('change:view:end', view, old_view);
       if (callback) {
         callback();
@@ -1082,6 +1091,8 @@
       },this));
 
       this.bind('reset', _.bind(onLayoutReset, this));
+
+      this._transitionInProgress = false;
     },
     
     setNextTransitionMode: function(transition_mode){
@@ -1090,10 +1101,16 @@
     },
 
     setView: function(view, params){
+      if (this._transitionInProgress) {
+        return false;
+      }
+
+      this._transitionInProgress = true;
+
       var old_view = this.view;
   
       if (view == old_view){
-        return;
+        return false;
       }
       
       this.trigger('change:view:start', view, old_view);
