@@ -36,11 +36,69 @@
       scope.moduleMap = moduleMap;
     },
     //used by "template" and "view" template helpers, not thread safe though it shouldn't matter in browser land
-    _currentTemplateContext: false 
+    _currentTemplateContext: false,
+
+    // Loading indicator helper. Note that only one load handler pair may be defined per object.
+    throttleLoadStart: function(start) {
+      return function(message, background) {
+        var self = this;
+
+        if (!self._loadStart) {
+          var loadingTimeout = self._loadingTimeoutDuration;
+          if (loadingTimeout === void 0) {
+            // If we are running on a non-view object pull the default timeout
+            loadingTimeout = Thorax.View.prototype._loadingTimeoutDuration;
+          }
+
+          self._loadStart = {
+            timeout: setTimeout(function() {
+                self._loadStart.run = true;
+                start.call(self, self._loadStart.message, self._loadStart.background);
+              },
+              loadingTimeout*1000),
+            message: message,
+            background: background,
+            pending: 1
+          };
+        } else {
+          clearTimeout(self._loadStart.endTimeout);
+          self._loadStart.pending++;
+
+          self._loadStart.message = message;
+          self._loadStart.background  = self._loadStart.background && background;
+        }
+      };
+    },
+    throttleLoadEnd: function(end) {
+      return function(background) {
+        var self = this;
+        if (self._loadStart) {
+          self._loadStart.pending--;
+
+          // Reset the end timeout
+          clearTimeout(self._loadStart.endTimeout);
+          self._loadStart.endTimeout = setTimeout(function(){
+            if (self._loadStart.pending <= 0) {
+              var run = self._loadStart.run;
+
+              // If stopping make sure we don't run a start
+              clearTimeout(self._loadStart.timeout);
+              self._loadStart = undefined;
+
+              if (run) {
+                // Emit the end behavior, but only if there is a paired start
+                end.call(self, background);
+              }
+            }
+          }, 100);
+        }
+      };
+    }
   };
 
   //private functions for Thorax
   var moduleMapRouter;
+  var loadedModules = {}
   function moduleMap(map, loadPrefix) {
     if (typeof $script === 'undefined') {
       throw new Error('script.js required to run Thorax');
@@ -63,10 +121,18 @@
   };
 
   function generateLoader(name, loadPrefix) {
+    var key = (loadPrefix || '') + name;
     return function() {
-      loadStartEventEmitter.call(scope);
-      $script((loadPrefix || '') + name, function() {
-        loadEndEventEmitter.call(scope);
+      // if we've already tried to load this module, we've got a problem
+      if (loadedModules[key]) {
+        console.error('module was not loaded properly (no route replacement): ' + key);
+        return;
+      }
+
+      scope.trigger('load:start');
+      $script(key, function() {
+        scope.trigger('load:end');
+        loadedModules[key] = true;
         // Reload with the new route
         Backbone.history.loadUrl();
       });
@@ -79,8 +145,9 @@
     view_cid_attribute_name = 'data-view-cid',
     view_placeholder_attribute_name = 'data-view-tmp',
     model_cid_attribute_name = 'data-model-cid',
-    pendingLoadSize = 0,
-    old_backbone_view = Backbone.View;
+    old_backbone_view = Backbone.View,
+    //android scrollTo(0, 0) shows url bar, scrollTo(0, 1) hides it
+    minimumScrollYOffset = (navigator.userAgent.toLowerCase().indexOf("android") > -1) ? 1 : 0;
 
   //wrap Backbone.View constructor to support initialize event
   Backbone.View = function(options) {
@@ -168,6 +235,13 @@
   
     view: function(name, options) {
       var instance;
+      if (typeof name === 'object' && name.hash && name.hash.name) {
+        // named parameters
+        options = name.hash;
+        name = name.hash.name;
+        delete options.name;
+      }
+
       if (typeof name === 'string') {
         if (!scope.Views[name]) {
           throw new Error('view: ' + name + ' does not exist.');
@@ -192,17 +266,18 @@
       data = _.extend({}, view_context, data || {}, {
         cid: _.uniqueId('t')
       });
-  
-      var template, templateName, fileName = file + (file.match(/\.handlebars$/) ? '' : '.handlebars');  
-      templateName = 'templates/' + fileName;
-      template = scope.templates[templateName];
-  
+
+      var template = this.loadTemplate(file, data);
       if (!template) {
-        console.error('Unable to find template ' + templateName);
+        console.error('Unable to find template ' + file);
         return '';
       } else {
         return template(data);
-      }      
+      }
+    },
+    loadTemplate: function(file, data) {
+      var fileName = 'templates/' + file + (file.match(/\.handlebars$/) ? '' : '.handlebars');
+      return scope.templates[fileName];
     },
   
     html: function(html) {
@@ -269,15 +344,6 @@
   
     setModel: function(model, options) {
       (this.el[0] || this.el).setAttribute(model_cid_attribute_name, model.cid);
-
-      options = _.extend({
-        fetch: true,
-        success: false,
-        render: true,
-        populate: true,
-        errors: true,
-        loading: true
-      },options || {});
   
       var old_model = this.model;
 
@@ -287,7 +353,7 @@
       });
     
       this.model = model;
-      this._modelOptions = options;
+      this.setModelOptions(options);
   
       if (this.model) {
         this._events.model.forEach(function(event) {
@@ -296,30 +362,40 @@
 
         this.model.trigger('set', this.model, old_model);
     
-        if (this._shouldFetch(this.model, options)) {
+        if (this._shouldFetch(this.model, this._modelOptions)) {
           this.model.fetch({
+            ignoreErrors: this.ignoreFetchError,
             success: _.once(_.bind(function(){
-              if (options.success) {
-                options.success(model);
+              if (this._modelOptions.success) {
+                this._modelOptions.success(model);
               }
             },this))
           });
         } else {
-          this.model.trigger('change');
+          //want to trigger built in event handler (render() + populate())
+          //without triggering event on model
+          onModelChange.call(this);
         }
       }
   
       return this;
     },
+
+    setModelOptions: function(options) {
+      if (!this._modelOptions) {
+        this._modelOptions = {
+          fetch: true,
+          success: false,
+          render: true,
+          populate: true,
+          errors: true
+        };
+      }
+      _.extend(this._modelOptions, options || {});
+      return this._modelOptions;
+    },
       
     setCollection: function(collection, options) {
-      options = _.extend({
-        fetch: true,
-        success: false,
-        errors: true,
-        loading: true
-      },options || {});
-  
       var old_collection = this.collection;
 
       this.freeze({
@@ -328,7 +404,7 @@
       });
       
       this.collection = collection;
-      this._collectionOptions = options;
+      this.setCollectionOptions(options);
   
       if (this.collection) {
         this._events.collection.forEach(function(event) {
@@ -337,20 +413,35 @@
       
         this.collection.trigger('set', this.collection, old_collection);
 
-        if (this._shouldFetch(this.collection, options)) {
+        if (this._shouldFetch(this.collection, this._collectionOptions)) {
           this.collection.fetch({
+            ignoreErrors: this.ignoreFetchError,
             success: _.once(_.bind(function(){
-              if (options.success) {
-                options.success(this.collection);
+              if (this._collectionOptions.success) {
+                this._collectionOptions.success(this.collection);
               }
             },this))
           });
         } else {
-          this.collection.trigger('reset');
+          //want to trigger built in event handler (render())
+          //without triggering event on collection
+          onCollectionReset.call(this);
         }
       }
   
       return this;
+    },
+
+    setCollectionOptions: function(options) {
+      if (!this._collectionOptions) {
+        this._collectionOptions = {
+          fetch: true,
+          success: false,
+          errors: true
+        };
+      }
+      _.extend(this._collectionOptions, options || {});
+      return this._collectionOptions;
     },
 
     context: function(model) {
@@ -372,7 +463,7 @@
       this.trigger('rendered');
       return output;
     },
-  
+
     renderCollection: function() {
       this.render();
       var collection_element = getCollectionElement.call(this);
@@ -385,6 +476,7 @@
           return this.renderItem(model, i);
         }, this));
         if (elements[0] && elements[0].el) {
+          collection_element.empty();
           elements.forEach(function(view) {
             this._views[view.cid] = view;
             collection_element.append(view.el);
@@ -395,7 +487,10 @@
         collection_element.children().each(function(i) {
           this.setAttribute(model_cid_attribute_name, cids[i]);
         });
+
+        appendViews.call(this, collection_element);
       }
+      this.trigger('rendered:collection', collection_element);
     },
   
     renderItem: function(item, i) {
@@ -412,7 +507,8 @@
     appendItem: function(model, index) {
       var item_view,
         collection_element = getCollectionElement.call(this)[0];
-
+      
+      //if argument is a view, or html string
       if (model.el || typeof model === 'string') {
         item_view = model;
       } else {
@@ -432,6 +528,7 @@
           //renderItem returned string
           item_element = $(item_view)[0];
         }
+
         if (item_element) {
           $(item_element).attr(model_cid_attribute_name, model.cid);
           if (!previous_model) {
@@ -442,6 +539,9 @@
               collection_element.insertBefore(item_element, previous_model_element[0].nextSibling);
             }
           }
+
+          appendViews.call(this, item_element);
+          this.trigger('rendered:item', item_element);
         }
       }
       return item_view;
@@ -500,10 +600,10 @@
         validate: true
       },options || {});
   
-      var attributes = {};
+      var attributes = options.attributes || {};
       
       //callback has context of element
-      eachNamedInput.call(this, function() {
+      eachNamedInput.call(this, options, function() {
         var value = getInputValue.call(this);
         if (typeof value !== 'undefined') {
           objectAndKeyFromAttributesAndName(attributes, this.name, {mode: 'serialize'}, function(object, key) {
@@ -533,7 +633,13 @@
   
     _preventDuplicateSubmission: function(event, callback) {
       event.preventDefault();
+
       var form = $(event.target);
+      if ((event.target.tagName || '').toLowerCase() !== 'form') {
+        // Handle non-submit events by gating on the form
+        form = $(event.target).closest('form');
+      }
+
       if (!form.attr('data-submit-wait')) {
         form.attr('data-submit-wait', 'true');
         if (callback) {
@@ -553,7 +659,7 @@
       var value, attributes = attributes || this.context(this.model);
       
       //callback has context of element
-      eachNamedInput.call(this, function() {
+      eachNamedInput.call(this, {}, function() {
         objectAndKeyFromAttributesAndName.call(this, attributes, this.name, {mode: 'populate'}, function(object, key) {
           if (object && typeof (value = object[key]) !== 'undefined') {
             //will only execute if we have a name that matches the structure in attributes
@@ -588,19 +694,25 @@
   
     destroy: function(){
       this.freeze();
+      this.trigger('destroyed');
       this.undelegateEvents();
-      this._events = {};
       this.unbind();
+      this._events = {};
       this.el = null;
       this.collection = null;
       this.model = null;
       destroyChildViews.call(this);
-      this.trigger('destroyed');
     },
 
     //loading config
     _loadingClassName: 'loading',
-    _loadingTimeoutDuration: 0.33
+    _loadingTimeoutDuration: 0.33,
+
+    scrollTo: function(x, y) {
+      y = y || minimumScrollYOffset;
+      window.scrollTo(x, y);
+      return [x, y];
+    }
   }, {
     create: function(name, protoProps, classProps) {
       protoProps.name = name;
@@ -647,23 +759,6 @@
 
   Thorax.View.registerEvents({
     //built in dom events
-    'click a': function(event) {
-      var target = $(event.target);
-      if (target.attr("data-external")) {
-        return;
-      }
-      var transition = target.attr('data-transition');
-      if (transition && transition != '') {
-        scope.layout.setNextTransitionMode(transition); 
-      }
-      var href = target.attr("href");
-      // Route anything that starts with # or / (excluding //domain urls)
-      if (href && (href[0] === '#' || (href[0] === '/' && href[1] !== '/'))) {
-        Backbone.history.navigate(href, true);
-        event.preventDefault();
-      }
-    },
-
     'submit form': function(event) {
       // Hide any virtual keyboards that may be lingering around
       var focused = $(':focus')[0];
@@ -695,12 +790,12 @@
     deactivated: function() {
       resetSubmitState.call(this);
     },
-    'load:start': function() {
+    'load:start': Thorax.throttleLoadStart(function(message, background) {
       $(this.el).addClass(this._loadingClassName);
-    },
-    'load:end': function() {
+    }),
+    'load:end': Thorax.throttleLoadEnd(function(message, background) {
       $(this.el).removeClass(this._loadingClassName);
-    },
+    }),
     model: {
       error: function(model, errors){
         if (this._modelOptions.errors) {
@@ -708,23 +803,14 @@
         }
       },
       change: function() {
-        if (this._modelOptions.render) {
-          this.render();
-        }
-        if (this._modelOptions.populate) {
-          this.populate();
-        }
+        onModelChange.call(this);
       },
-      'load:start': function() {
-        if (this._modelOptions.loading) {
-          loadStartEventEmitter.call(this);
-        }
+      'load:start': function(message, background) {
+        this.trigger('load:start', message, background);
       },
-      'load:end': function() {
-        if (this._modelOptions.loading) {
-          loadEndEventEmitter.call(this);
-        }
-      } 
+      'load:end': function(message, background) {
+        this.trigger('load:end', message, background);
+      }
     },
     collection: {
       add: function(model) {
@@ -744,22 +830,18 @@
         }
       },
       reset: function() {
-        this.renderCollection();
+        onCollectionReset.call(this);
       },
       error: function(collection, message) {
         if (this._collectionOptions.errors) {
           this.trigger('error', message);
         }
       },
-      'load:start': function() {
-        if (this._collectionOptions.loading) {
-          loadStartEventEmitter.call(this);
-        }
+      'load:start': function(message, background) {
+        this.trigger('load:start', message, background);
       },
-      'load:end': function() {
-        if (this._collectionOptions.loading) {
-          loadEndEventEmitter.call(this);
-        }
+      'load:end': function(message, background) {
+        this.trigger('load:end', message, background);
       }
     }
   });
@@ -781,33 +863,23 @@
 
   //private Thorax.View methods
 
-  function loadStartEventEmitter() {
-    pendingLoadSize++;
-    this._loadStartTimeout = setTimeout(_.bind(function() {
-      pendingLoadSize--;
-      this.trigger('load:start');
-    }, this), this._loadingTimeoutDuration * 1000);
+  function onModelChange() {
+    if (this._modelOptions.render) {
+      this.render();
+    }
+    if (this._modelOptions.populate) {
+      this.populate();
+    }
   };
 
-  function loadEndEventEmitter() {
-    clearTimeout(this._loadStartTimeout);
-    if (pendingLoadSize) {
-      // this will cancel out the need to call load:end
-      pendingLoadSize--;
-      for (var i = 0; i < pendingLoadSize; i++) {
-        // we need to make sure all load:start and load:end calls are balanced
-        this.trigger('load:start');
-      }
-      pendingLoadSize = 0;
-    } else {
-      this.trigger('load:end');
-    }
+  function onCollectionReset() {
+    this.renderCollection();
   };
 
   function containHandlerToCurentView(handler, cid) {
     return function(event) {
       var containing_view_element = $(event.target).closest('[' + view_name_attribute_name + ']');
-      if (containing_view_element.length === 0 || containing_view_element.length > 0 && containing_view_element[0].getAttribute(view_cid_attribute_name) == cid) {
+      if (!containing_view_element.length || containing_view_element[0].getAttribute(view_cid_attribute_name) == cid) {
         handler(event);
       }
     };
@@ -827,8 +899,16 @@
   };
 
   //used by _processEvents
+  var domEvents = [
+    'mousedown', 'mouseup', 'mousemove', 'mouseover', 'mouseout',
+    'touchstart', 'touchend', 'touchmove',
+    'click', 'dblclick',
+    'keyup', 'keydown', 'keypress',
+    'focus', 'blur'
+  ];
+
   function processEvent(name, handler) {
-    if (!name.match(/\s+/)) {
+    if (!name.match(/\s+/) && domEvents.indexOf(name) === -1) {
       //view events
       this.bind(name, this._bindEventHandler(handler));
     } else {
@@ -900,9 +980,9 @@
     callback.call(this, object, key);
   };
 
-  function eachNamedInput(iterator, context) {
+  function eachNamedInput(options, iterator, context) {
     var i = 0;
-    this.$('select,input,textarea').each(function() {
+    $('select,input,textarea', options.root || this.el).each(function() {
       if (this.type !== 'button' && this.type !== 'cancel' && this.type !== 'submit' && this.name && this.name !== '') {
         iterator.call(context || this, i, this);
         ++i;
@@ -942,21 +1022,25 @@
     }
   };
 
-  function appendViews() {
-    for (var id in this._views || {}) {
-      var view_placeholder_element = this.$('[' + view_placeholder_attribute_name + '="' + id + '"]')[0];
-      if (view_placeholder_element) {
-        var view = this._views[id];
+  function appendViews(scope) {
+    var self = this;
+    if (!self._views) {
+      return;
+    }
+
+    $('[' + view_placeholder_attribute_name + ']', scope || self.el).forEach(function(el) {
+      var view = self._views[el.getAttribute(view_placeholder_attribute_name)];
+      if (view) {
         //has the view been rendered at least once? if not call render().
         //subclasses overriding render() that do not call the parent's render()
         //or set _rendered may be rendered twice but will not error
         if (!view._renderCount) {
           view.render();
         }
-        view_placeholder_element.parentNode.insertBefore(view.el, view_placeholder_element);
-        view_placeholder_element.parentNode.removeChild(view_placeholder_element);
+        el.parentNode.insertBefore(view.el, el);
+        el.parentNode.removeChild(el);
       }
-    }
+    });
   };
 
   function destroyChildViews() {
@@ -976,7 +1060,10 @@
     var collection_element = getCollectionElement.call(this);
     if (collection_element.length) {
       collection_element.empty().append(empty_view.el || empty_view || '');
+      this.trigger('rendered:empty', collection_element);
     }
+
+    appendViews.call(this);
   };
 
   function applyMixin(mixin) {
@@ -986,207 +1073,70 @@
       this.mixin(mixin);
     }
   };
-
-  //private / module vars for layout view
-  function resetElementAnimationStyles(element) {
-    element.style.webkitTransition = null;
-    element.style.webkitTransform = null;
-    element.style.webkitTransitionDuration = null;
-    element.style.webkitTransitionTimingFunction = null;
-    element.style.webkitTransitionDelay = null;
-  
-    element.style.zIndex = '';
-    element.style.left = '0px';
-    element.style.top = '0px';
-  };
-
-  function resetLayout(new_view_element, scrollTop) {
-    resetElementAnimationStyles(new_view_element);
-    resetElementAnimationStyles(this.views);
-    this.trigger('reset', new_view_element, scrollTop);
-  };
-
-  function completeTransition(view, old_view, callback) {
-    $(this.el).removeClass('transitioning');
-    // Force a scroll again to prevent Android from attempting to restore the scroll
-    // position for the back transitions.
-    window.scrollTo(0, 0);
-
-    if (old_view && old_view.el && old_view.el.parentNode) {
-      $(old_view.el).remove();
-    }
-  
-    this.view = view;
-  
-    // Execute the events on the next iter. This gives things a chance
-    // to settle and also protects us from NPEs in callback resulting in
-    // an unremoved listeners
-    setTimeout(_.bind(function() {
-      if (old_view) {
-        old_view.destroy();
-      }
-      this.view.trigger('ready');
-      this._transitionInProgress = false;
-      this.trigger('change:view:end', view, old_view);
-      if (callback) {
-        callback();
-      }
-    }, this), 0);
-  };
-
-  function cleanupTransition(delta_x, delta_y, new_view_element, callback) {
-    $(this.views).one('webkitTransitionEnd', _.bind(function() {
-      resetLayout.call(this, new_view_element);
-      callback();
-    }, this));
-
-    this.views.clientWidth;   // It flows and flows. Needed to trigger the transition
-
-    var transform = [];
-    if (delta_x !== false) {
-      transform.push('translateX(' + String(delta_x) + 'px)');
-    }
-    if (delta_y !== false) {
-      transform.push('translateY(' + String(delta_y) + 'px)');
-    }
-    this.views.style.webkitTransform = transform.join(' ');
-    this.views.style.webkitTransition = '-webkit-transform ' + this.transition;
-  };
-
-  function onLayoutReset(view, scrollTop) {
-    //for native
-    if (scrollTop && this.transition != 'none') {
-      var ua = navigator.userAgent.toLowerCase();
-      if (view && ua.match(/ipod|iphone|ipad/)) {
-        // Android flashes when attempting to adjust the offset in this manner
-        // so only run it under ios.
-        view.el.style.top = -scrollTop + 'px';
-      } else {
-        // For all others just jump to the top before beggining the transition
-        // This seems more palatable than a flash of the same content.
-        window.scrollTo(0, 0);
-      }
-    }
-  };
   
   //main layout class, instance of which is available on scope.layout
   Thorax.Layout = Backbone.View.extend({
+    events: {
+      'click a': 'anchorClick'
+    },
+
     initialize: function() {
       this.el = $(this.el)[0];
-  
-      //setup cards container
       this.views = this.make('div', {
         'class': 'views'
       });
       this.el.appendChild(this.views);
-  
-      //transition mode setup
-      this._forceTransitionMode = false;
-      this._transitionMode = this.forwardsTransitionMode;
-  
-      //track history direction for transition mode
-      this._historyDirection = 'forwards';
-      Backbone.history.bind('route',_.bind(function(fragment,index){
-        this._historyDirection = index >= 0 ? 'forwards' : 'backwards';
-      },this));
-
-      this.bind('reset', _.bind(onLayoutReset, this));
-
-      this._transitionInProgress = false;
     },
     
-    setNextTransitionMode: function(transition_mode){
-      this._forceTransitionMode = true;
-      this._transitionMode = transition_mode;
-    },
-
     setView: function(view, params){
-      if (this._transitionInProgress) {
-        return false;
-      }
-
-      this._transitionInProgress = true;
-
       var old_view = this.view;
-  
+
       if (view == old_view){
         return false;
       }
       
       this.trigger('change:view:start', view, old_view);
 
-      if(params && params.transition){
-        this.setNextTransitionMode(params.transition);
-      }
-  
-      // Read any reflow possible fields that we may need prior to dirtying the layout
-      var scrollTop = document.body.scrollTop,
-        clientWidth = this.el.clientWidth
-        clientHeight = this.el.clientHeight;
-  
       old_view && old_view.trigger('deactivated');
-  
-      this.views.appendChild(view.el);
+
       view.trigger('activated', params || {});
-      
-      //set transition mode
-      var transition_mode = this._forceTransitionMode
-        ? this._transitionMode
-        : this._historyDirection === 'backwards'
-          ? this.backwardsTransitionMode
-          : this._transitionMode || this.forwardsTransitionMode
-      ;
-      
-      if (this._transitionMode == 'none' || !old_view) {
-        // None or first view, no transition
-        completeTransition.call(this, view, old_view);
-      } else {
-        $(this.el).addClass('transitioning');
-        resetLayout.call(this, view.el, scrollTop);
-  
-        //animated transition
-        this[transition_mode](view, clientWidth, clientHeight);
+
+      if (old_view && old_view.el && old_view.el.parentNode) {
+        $(old_view.el).remove();
       }
 
-      //reset transition mode
-      this._forceTransitionMode = false;
-      this._transitionMode = this.forwardsTransitionMode;
+      this.views.appendChild(view.el);
+  
+      window.scrollTo(0, minimumScrollYOffset);
+
+      this.view = view;
+  
+      // Execute the events on the next iter. This gives things a chance
+      // to settle and also protects us from NPEs in callback resulting in
+      // unremoved listeners
+      setTimeout(_.bind(function() {
+        if (old_view) {
+          old_view.destroy();
+        }
+        this.view.trigger('ready');
+        this.trigger('change:view:end', view, old_view);
+      }, this));      
 
       return view;
     },
 
-    //transitions, in all transitions clientWidth, clientHeight are optional
-    //and can receive an optional callback as the last argument
-    //clientWidth, clientHeight are passed by setView as an optomization to avoid reflow
-
-    //position next view on right and slide right to it
-    slideRight: function(new_view, clientWidth, clientHeight) {
-      var clientWidth = clientWidth || this.el.clientWidth,
-        callback = typeof arguments[arguments.length - 1] === 'function' ? arguments[arguments.length - 1] : null;
-
-      if (!this.views.style.webkitTransform){
-        this.views.style.webkitTransform = 'translateX(' + clientWidth + 'px)';
+    anchorClick: function(event) {
+      var target = $(event.target);
+      if (target.attr("data-external")) {
+        return;
       }
-      this.views.style.left = '-' + clientWidth + 'px';
-      new_view.el.style.left = clientWidth + 'px';
-
-      cleanupTransition.call(this, 0, false, new_view.el, _.bind(completeTransition, this, new_view, this.view, callback));
-    },
-
-    //position next view on left and slide left to it
-    slideLeft: function(new_view, clientWidth, clientHeight) {
-      var clientWidth = clientWidth || this.el.clientWidth,
-        callback = typeof arguments[arguments.length - 1] === 'function' ? arguments[arguments.length - 1] : null;
-
-      this.view.el.style.left = clientWidth + 'px';
-      this.views.style.left = '-' + clientWidth + 'px';
-
-      cleanupTransition.call(this, clientWidth, false, new_view.el, _.bind(completeTransition, this, new_view, this.view, callback));
-    },
-
-    transition: '333ms ease-in-out',
-    forwardsTransitionMode: 'slideRight',
-    backwardsTransitionMode: 'slideLeft'
+      var href = target.attr("href");
+      // Route anything that starts with # or / (excluding //domain urls)
+      if (href && (href[0] === '#' || (href[0] === '/' && href[1] !== '/'))) {
+        Backbone.history.navigate(href, true);
+        event.preventDefault();
+      }
+    }
   });
 
   Thorax.Router = Backbone.Router.extend({
@@ -1199,11 +1149,65 @@
   },{
     create: function(module, protoProps, classProps) {
       return scope.Routers[module.name] = new (this.extend(_.extend({}, module, protoProps), classProps));
+    },
+
+    loadData: function(data, callback, canceled) {
+      if (data && data.isPopulated()) {
+        return callback(data);
+      }
+
+      function finalizer(isError) {
+        data.unbind('error', errorHandler);
+        if (isError) {
+          scope.trigger('load:end');
+        }
+        canceled && canceled.apply(this, arguments);
+      }
+      var errorHandler = _.bind(finalizer, this, true);
+      data.bind('error', errorHandler);
+
+      data.fetch({
+        success: Thorax.Router.bindToRoute(function() {
+            data.unbind('error', errorHandler);
+            callback.apply(this, arguments);
+          },
+          _.bind(finalizer, this, false))
+      });
+    },
+    bindToRoute: function(callback, canceled) {
+      var fragment = Backbone.history.getFragment(),
+          completed;
+
+      function finalizer(isCanceled) {
+        if (completed) {
+          // Prevent multiple execution, i.e. we were canceled but the success callback still runs
+          return;
+        }
+
+        completed = true;
+        Backbone.history.unbind('route', resetLoader);
+
+        scope.trigger('load:end');
+        var args = Array.prototype.slice.call(arguments, 1);
+        if (!isCanceled && fragment === Backbone.history.getFragment()) {
+          callback.apply(this, args);
+        } else {
+          canceled && canceled.apply(this, args);
+        }
+      }
+
+      var resetLoader = _.bind(finalizer, this, true);
+      Backbone.history.bind('route', resetLoader);
+
+      scope.trigger('load:start');
+      return _.bind(finalizer, this, false);
     }
   });
 
   Thorax.Collection = Backbone.Collection.extend({
-    
+    fetch: function(options) {
+      fetchQueue.call(this, options || {}, Backbone.Collection.prototype.fetch);
+    }
   },{
     create: function(name, protoProps, classProps) {
       protoProps.name = name;
@@ -1212,7 +1216,9 @@
   });
 
   Thorax.Model = Backbone.Model.extend({
-    
+    fetch: function(options) {
+      fetchQueue.call(this, options || {}, Backbone.Model.prototype.fetch);
+    }
   },{
     create: function(name, protoProps, classProps) {
       protoProps.name = name;
@@ -1220,4 +1226,35 @@
     }
   });
 
+  function fetchQueue(options, $super) {
+    if (!this.fetchQueue) {
+      // Kick off the request
+      this.fetchQueue = [options];
+      options = _.defaults({
+        success: flushQueue(this, this.fetchQueue, 'success'),
+        error: flushQueue(this, this.fetchQueue, 'error')
+      }, options);
+      $super.call(this, options);
+    } else {
+      // Currently fetching. Queue and process once complete
+      this.fetchQueue.push(options);
+    }
+  }
+  function flushQueue(self, fetchQueue, handler) {
+    return function() {
+      var args = arguments;
+      // Flush the queue. Executes any callback handlers that
+      // may have been passed in the fetch options.
+      fetchQueue.forEach(function(options) {
+        if (options[handler]) {
+          options[handler].apply(this, args);
+        }
+      }, this);
+
+      // Reset the queue if we are still the active request
+      if (self.fetchQueue === fetchQueue) {
+        self.fetchQueue = undefined;
+      }
+    }
+  }
 }).call(this);
