@@ -540,7 +540,8 @@
           item_element = item_view.el;
         } else {
           //renderItem returned string
-          item_element = $(item_view)[0];
+          item_element = this._createItemElement();;
+          item_element.innerHTML = item_view;
         }
 
         if (item_element) {
@@ -559,6 +560,10 @@
         }
       }
       return item_view;
+    },
+
+    _createItemElement: function() {
+      return this.make('div');
     },
   
     freeze: function(options) {
