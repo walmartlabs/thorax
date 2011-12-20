@@ -975,10 +975,6 @@
     }
   };
 
-  function removeEvent(target, name, handler) {
-    
-  };
-
   function resetSubmitState() {
     this.$('form').removeAttr('data-submit-wait');
   };
