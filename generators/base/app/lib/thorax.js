@@ -478,24 +478,10 @@
       if (this.collection.length == 0) {
         appendEmpty.call(this);
       } else {
-        var cids = [];
-        var elements = _.compact(this.collection.map(function(model, i) {
-          cids.push(model.cid);
-          return this.renderItem(model, i);
-        }, this));
-        if (elements[0] && elements[0].el) {
-          collection_element.empty();
-          elements.forEach(function(view) {
-            this._views[view.cid] = view;
-            collection_element.append(view.el);
-          }, this);
-        } else {
-          collection_element.html(elements.join(''));
-        }
-        collection_element.children().each(function(i) {
-          this.setAttribute(model_cid_attribute_name, cids[i]);
+        var self = this;
+        this.collection.each(function(model) {
+          self.appendItem(model, -1);
         });
-
         appendViews.call(this, collection_element);
       }
       this.trigger('rendered:collection', collection_element);
@@ -514,13 +500,17 @@
     //appendItem(view, index)
     appendItem: function(model, index) {
       // if a transition from/to empty could happen, re-render
-      if (this.collection.length <= 1) {
-        this.renderCollection();
-        return;
+      if (index === -1) {
+        // coming from renderCollection
+        index = 0;
+      } else {
+        if (this.collection.length <= 1) {
+          this.renderCollection();
+          return;
+        }
       }
 
-      var item_view,
-        collection_element = getCollectionElement.call(this)[0];
+      var item_view;
 
       //if argument is a view, or html string
       if (model.el || typeof model === 'string') {
@@ -534,26 +524,19 @@
         if (item_view.cid) {
           this._views[item_view.cid] = item_view.cid;
         }
-        var previous_model = index > 0 ? this.collection.at(index - 1) : false;
         var item_element;
         if (item_view.el) {
           item_element = item_view.el;
         } else {
           //renderItem returned string
-          item_element = this._createItemElement();;
+          item_element = this._createItemElement();
           item_element.innerHTML = item_view;
         }
 
         if (item_element) {
-          $(item_element).attr(model_cid_attribute_name, model.cid);
-          if (!previous_model) {
-            collection_element.insertBefore(item_element, collection_element.firstChild);
-          } else {
-            var previous_model_element = $(collection_element).find('[' + model_cid_attribute_name + '="' + previous_model.cid + '"]');
-            if (previous_model_element[0]) {
-              collection_element.insertBefore(item_element, previous_model_element[0].nextSibling);
-            }
-          }
+          var collection_element = getCollectionElement.call(this)[0];
+          var itemAppender = this._getItemAppender();
+          itemAppender.call(this, item_element, collection_element, model, index);
 
           appendViews.call(this, item_element);
           this.trigger('rendered:item', item_element);
@@ -564,6 +547,10 @@
 
     _createItemElement: function() {
       return this.make('div');
+    },
+
+    _getItemAppender: function() {
+      return Thorax.View.topDownItemAppender;
     },
   
     freeze: function(options) {
@@ -768,6 +755,20 @@
     }
   });
 
+  // view item appenders
+  Thorax.View.topDownItemAppender = function(itemElement, collectionElement, model, index) {
+    var previous_model = index > 0 ? this.collection.at(index - 1) : false;
+    $(itemElement).attr(model_cid_attribute_name, model.cid);
+    if (!previous_model) {
+      collectionElement.insertBefore(itemElement, collectionElement.firstChild);
+    } else {
+      var previous_model_element = $(collectionElement).find('[' + model_cid_attribute_name + '="' + previous_model.cid + '"]');
+      if (previous_model_element[0]) {
+        collectionElement.insertBefore(itemElement, previous_model_element[0].nextSibling);
+      }
+    }
+  }
+  
   //events and mixins properties need act as inheritable, not static / shared
   Thorax.View.extend = function(protoProps, classProps) {
     var child = Backbone.View.extend.call(this, protoProps, classProps);
