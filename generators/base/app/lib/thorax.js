@@ -1187,7 +1187,8 @@
         throw new Error('view: ' + name + ' does not exist.');
       }
       return new scope.Views[name](attributes);
-    }
+    },
+    bindToRoute: bindToRoute
   },{
     create: function(module, protoProps, classProps) {
       return scope.Routers[module.name] = new (this.extend(_.extend({}, module, protoProps), classProps));
@@ -1216,40 +1217,43 @@
           _.bind(finalizer, this, false))
       });
     },
-    bindToRoute: function(callback, canceled) {
-      var fragment = Backbone.history.getFragment(),
-          completed;
+    bindToRoute: bindToRoute
+  });
 
-      function finalizer(isCanceled) {
-        if (completed) {
-          // Prevent multiple execution, i.e. we were canceled but the success callback still runs
-          return;
-        }
+  function bindToRoute(callback, failback) {
+    var fragment = Backbone.history.getFragment(),
+        completed;
 
-        completed = true;
-        Backbone.history.unbind('route', resetLoader);
-
-        scope.trigger('load:end');
-        var args = Array.prototype.slice.call(arguments, 1);
-        if (!isCanceled && fragment === Backbone.history.getFragment()) {
-          callback.apply(this, args);
-        } else {
-          canceled && canceled.apply(this, args);
-        }
+    function finalizer(isCanceled) {
+      if (completed) {
+        // Prevent multiple execution, i.e. we were canceled but the success callback still runs
+        return;
       }
 
-      var resetLoader = _.bind(finalizer, this, true);
-      Backbone.history.bind('route', resetLoader);
+      completed = true;
+      Backbone.history.unbind('route', resetLoader);
 
-      scope.trigger('load:start');
-      return _.bind(finalizer, this, false);
+      scope.trigger('load:end');
+      var args = Array.prototype.slice.call(arguments, 1);
+      if (!isCanceled && fragment === Backbone.history.getFragment()) {
+        callback.apply(this, args);
+      } else {
+        failback && failback.apply(this, args);
+      }
     }
-  });
+
+    var resetLoader = _.bind(finalizer, this, true);
+    Backbone.history.bind('route', resetLoader);
+
+    scope.trigger('load:start');
+    return _.bind(finalizer, this, false);
+  }
 
   Thorax.Collection = Backbone.Collection.extend({
     fetch: function(options) {
       fetchQueue.call(this, options || {}, Backbone.Collection.prototype.fetch);
-    }
+    },
+    load: loadData
   },{
     create: function(name, protoProps, classProps) {
       protoProps.name = name;
@@ -1260,13 +1264,39 @@
   Thorax.Model = Backbone.Model.extend({
     fetch: function(options) {
       fetchQueue.call(this, options || {}, Backbone.Model.prototype.fetch);
-    }
+    },
+    load: loadData
   },{
     create: function(name, protoProps, classProps) {
       protoProps.name = name;
       return scope.Models[name] = this.extend(protoProps, classProps);
     }
   });
+
+  function loadData(callback, failback) {
+    if (this.isPopulated()) {
+      return callback(this);
+    }
+
+    function finalizer(isError) {
+      this.unbind('error', errorHandler);
+      if (isError) {
+        scope.trigger('load:end');
+      }
+      failback && failback.apply(this, arguments);
+    }
+
+    var errorHandler = _.bind(finalizer, this, true);
+    this.bind('error', errorHandler);
+
+    this.fetch({
+      success: bindToRoute(_.bind(function() {
+          this.unbind('error', errorHandler);
+          callback.apply(this, arguments);
+        }, this),
+        _.bind(finalizer, this, false))
+    });
+  }
 
   function fetchQueue(options, $super) {
     if (!this.fetchQueue) {
@@ -1282,6 +1312,7 @@
       this.fetchQueue.push(options);
     }
   }
+
   function flushQueue(self, fetchQueue, handler) {
     return function() {
       var args = arguments;
