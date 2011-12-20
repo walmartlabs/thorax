@@ -275,7 +275,7 @@
         cid: _.uniqueId('t')
       });
 
-      var template = this.loadTemplate(file, data);
+      var template = this.loadTemplate(file, data, scope);
       if (!template) {
         console.error('Unable to find template ' + file);
         return '';
@@ -283,7 +283,7 @@
         return template(data);
       }
     },
-    loadTemplate: function(file, data) {
+    loadTemplate: function(file, data, scope) {
       var fileName = 'templates/' + file + (file.match(/\.handlebars$/) ? '' : '.handlebars');
       return scope.templates[fileName];
     },
