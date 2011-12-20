@@ -630,9 +630,11 @@
       }
   
       if (options.set && this.model) {
-        this.model.set(attributes, {
+        if (!this.model.set(attributes, {
           silent: true
-        });
+        })) {
+          return false;
+        };
       }
       
       callback && callback.call(this,attributes);
