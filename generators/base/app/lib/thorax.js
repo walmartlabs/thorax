@@ -834,8 +834,8 @@
       }
     },
     collection: {
-      add: function(model) {
-        this.appendItem(model);
+      add: function(model, collection) {
+        this.appendItem(model, collection.indexOf(model));
       },
       remove: function(model) {
         this.$('[' + model_cid_attribute_name + '="' + model.cid + '"]').remove();
