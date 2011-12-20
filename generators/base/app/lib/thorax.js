@@ -534,6 +534,7 @@
         }
 
         if (item_element) {
+          $(item_element).attr(model_cid_attribute_name, model.cid);
           var collection_element = getCollectionElement.call(this)[0];
           var itemAppender = this._getItemAppender();
           itemAppender.call(this, item_element, collection_element, model, index);
@@ -758,7 +759,6 @@
   // view item appenders
   Thorax.View.topDownItemAppender = function(itemElement, collectionElement, model, index) {
     var previous_model = index > 0 ? this.collection.at(index - 1) : false;
-    $(itemElement).attr(model_cid_attribute_name, model.cid);
     if (!previous_model) {
       collectionElement.insertBefore(itemElement, collectionElement.firstChild);
     } else {
