@@ -149,10 +149,6 @@
 
   //private vars for Thorax.View
   var eventSplitter = /^(\S+)\s*(.*)$/,
-    view_name_attribute_name = 'data-view-name',
-    view_cid_attribute_name = 'data-view-cid',
-    view_placeholder_attribute_name = 'data-view-tmp',
-    model_cid_attribute_name = 'data-model-cid',
     old_backbone_view = Backbone.View,
     //android scrollTo(0, 0) shows url bar, scrollTo(0, 1) hides it
     minimumScrollYOffset = (navigator.userAgent.toLowerCase().indexOf("android") > -1) ? 1 : 0;
@@ -216,8 +212,8 @@
 
     _ensureElement : function() {
       Backbone.View.prototype._ensureElement.call(this);
-      (this.el[0] || this.el).setAttribute(view_name_attribute_name, this.name || 'unknown');
-      (this.el[0] || this.el).setAttribute(view_cid_attribute_name, this.cid);      
+      (this.el[0] || this.el).setAttribute(Thorax.View._view_name_attribute_nam, this.name || 'unknown');
+      (this.el[0] || this.el).setAttribute(Thorax.View._view_cid_attribute_name, this.cid);      
     },
 
     mixin: function(name) {
@@ -351,7 +347,7 @@
     },
   
     setModel: function(model, options) {
-      (this.el[0] || this.el).setAttribute(model_cid_attribute_name, model.cid);
+      (this.el[0] || this.el).setAttribute(Thorax.View._model_cid_attribute_name, model.cid);
   
       var old_model = this.model;
 
@@ -534,7 +530,7 @@
         }
 
         if (item_element) {
-          $(item_element).attr(model_cid_attribute_name, model.cid);
+          $(item_element).attr(Thorax.View._model_cid_attribute_name, model.cid);
           var collection_element = getCollectionElement.call(this)[0];
           var itemAppender = this._getItemAppender();
           itemAppender.call(this, item_element, collection_element, model, index);
@@ -756,13 +752,18 @@
     }
   });
 
+  Thorax.View._view_name_attribute_name = 'data-view-name';
+  Thorax.View._view_cid_attribute_name = 'data-view-cid';
+  Thorax.View._view_placeholder_attribute_name = 'data-view-tmp';
+  Thorax.View._model_cid_attribute_name = 'data-model-cid';
+
   // view item appenders
   Thorax.View.topDownItemAppender = function(itemElement, collectionElement, model, index) {
     var previous_model = index > 0 ? this.collection.at(index - 1) : false;
     if (!previous_model) {
       collectionElement.insertBefore(itemElement, collectionElement.firstChild);
     } else {
-      var previous_model_element = $(collectionElement).find('[' + model_cid_attribute_name + '="' + previous_model.cid + '"]');
+      var previous_model_element = $(collectionElement).find('[' + Thorax.View._model_cid_attribute_name + '="' + previous_model.cid + '"]');
       if (previous_model_element[0]) {
         collectionElement.insertBefore(itemElement, previous_model_element[0].nextSibling);
       }
@@ -839,7 +840,7 @@
         this.appendItem(model);
       },
       remove: function(model) {
-        this.$('[' + model_cid_attribute_name + '="' + model.cid + '"]').remove();
+        this.$('[' + Thorax.View._model_cid_attribute_name + '="' + model.cid + '"]').remove();
         for (var cid in this._views) {
           if (this._views[cid].model && this._views[cid].model.cid === model.cid) {
             this._views[cid].destroy();
@@ -870,7 +871,7 @@
 
   Thorax.View.registerHelper('view', function(view, options) {
     var instance = Thorax._currentTemplateContext.view(view, options ? options.hash : {});
-    return new Handlebars.SafeString('<div ' + view_placeholder_attribute_name + '="' + instance.cid + '"></div>');
+    return new Handlebars.SafeString('<div ' + Thorax.View._view_placeholder_attribute_name + '="' + instance.cid + '"></div>');
   });
   
   Thorax.View.registerHelper('template', function(name, options) {
@@ -900,8 +901,8 @@
 
   function containHandlerToCurentView(handler, cid) {
     return function(event) {
-      var containing_view_element = $(event.target).closest('[' + view_name_attribute_name + ']');
-      if (!containing_view_element.length || containing_view_element[0].getAttribute(view_cid_attribute_name) == cid) {
+      var containing_view_element = $(event.target).closest('[' + Thorax.View._view_name_attribute_nam + ']');
+      if (!containing_view_element.length || containing_view_element[0].getAttribute(Thorax.View._view_cid_attribute_name) == cid) {
         handler(event);
       }
     };
@@ -1050,8 +1051,8 @@
       return;
     }
 
-    $('[' + view_placeholder_attribute_name + ']', scope || self.el).forEach(function(el) {
-      var view = self._views[el.getAttribute(view_placeholder_attribute_name)];
+    $('[' + Thorax.View._view_placeholder_attribute_name + ']', scope || self.el).forEach(function(el) {
+      var view = self._views[el.getAttribute(Thorax.View._view_placeholder_attribute_name)];
       if (view) {
         //has the view been rendered at least once? if not call render().
         //subclasses overriding render() that do not call the parent's render()
