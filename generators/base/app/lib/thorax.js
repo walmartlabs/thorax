@@ -1,4 +1,12 @@
 (function(){
+  if (typeof this.$ === 'undefined') {
+    throw new Error('jquery.js/zepto.js required to run Thorax');
+  } else {
+    if (!$.fn.forEach) {
+      // support jquery/zepto iterators
+      $.fn.forEach = $.fn.each;
+     }
+  }
 
   if (typeof this._ === 'undefined') {
     throw new Error('Underscore.js required to run Thorax');
@@ -267,7 +275,7 @@
         cid: _.uniqueId('t')
       });
 
-      var template = this.loadTemplate(file, data);
+      var template = this.loadTemplate(file, data, scope);
       if (!template) {
         console.error('Unable to find template ' + file);
         return '';
@@ -275,7 +283,7 @@
         return template(data);
       }
     },
-    loadTemplate: function(file, data) {
+    loadTemplate: function(file, data, scope) {
       var fileName = 'templates/' + file + (file.match(/\.handlebars$/) ? '' : '.handlebars');
       return scope.templates[fileName];
     },
@@ -505,9 +513,15 @@
     //appendItem(html_string, index) only first node will be used
     //appendItem(view, index)
     appendItem: function(model, index) {
+      // if a transition from/to empty could happen, re-render
+      if (this.collection.length <= 1) {
+        this.renderCollection();
+        return;
+      }
+
       var item_view,
         collection_element = getCollectionElement.call(this)[0];
-      
+
       //if argument is a view, or html string
       if (model.el || typeof model === 'string') {
         item_view = model;
@@ -526,7 +540,8 @@
           item_element = item_view.el;
         } else {
           //renderItem returned string
-          item_element = $(item_view)[0];
+          item_element = this._createItemElement();;
+          item_element.innerHTML = item_view;
         }
 
         if (item_element) {
@@ -545,6 +560,10 @@
         }
       }
       return item_view;
+    },
+
+    _createItemElement: function() {
+      return this.make('div');
     },
   
     freeze: function(options) {
@@ -622,9 +641,11 @@
       }
   
       if (options.set && this.model) {
-        this.model.set(attributes, {
+        if (!this.model.set(attributes, {
           silent: true
-        });
+        })) {
+          return false;
+        };
       }
       
       callback && callback.call(this,attributes);
