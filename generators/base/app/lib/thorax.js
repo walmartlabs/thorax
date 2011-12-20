@@ -513,9 +513,15 @@
     //appendItem(html_string, index) only first node will be used
     //appendItem(view, index)
     appendItem: function(model, index) {
+      // if a transition from/to empty could happen, re-render
+      if (this.collection.length <= 1) {
+        this.renderCollection();
+        return;
+      }
+
       var item_view,
         collection_element = getCollectionElement.call(this)[0];
-      
+
       //if argument is a view, or html string
       if (model.el || typeof model === 'string') {
         item_view = model;
