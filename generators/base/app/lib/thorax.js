@@ -641,9 +641,7 @@
       }
   
       if (options.set && this.model) {
-        if (!this.model.set(attributes, {
-          silent: true
-        })) {
+        if (!this.model.set(attributes, {silent: true})) {
           return false;
         };
       }
