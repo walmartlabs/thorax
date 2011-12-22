@@ -1,12 +1,41 @@
 
 ## Overview
-An opinionated Backbone mobile WebKit application framework.
 
 - [Underscore](http://documentcloud.github.com/underscore/)
 - [Backbone](http://documentcloud.github.com/backbone/)
 - [Zepto](https://github.com/madrobby/zepto)
 - [Handlebars](http://www.handlebarsjs.com/)
-- [iScroll](http://cubiq.org/iscroll-4)
+- [Lumbar](http://walmartlabs.github.com/lumbar)
+
+## Installation
+
+    npm install -g thorax
+
+## Command Line Interface
+
+### create **thorax create $project-name [web|mobile]**
+
+### install **thorax install $npm-module-name**
+
+### view **thorax view $module-name $file-name**
+
+### collection-view **thorax collection-view $module-name $file-name**
+
+### model **thorax model [$module-name] file-name**
+
+### collection **thorax collection [$module-name] $file-name**
+
+### router **thorax router $module-name**
+
+### module **thorax module $name**
+
+### template **thorax template $template-name**
+
+### platform **thorax platform $name**
+
+### package **thorax package $name**
+
+## Command Line 
 
 TODO:
 - layout view

@@ -6,13 +6,7 @@ var Thorax,
   handlebars = require('handlebars');
 
 //private methods
-var loadGenerators = function() {
-    fs.readdirSync(path.join(__dirname, 'generators')).forEach(function(generator_dir) {
-      this._generators[path.basename(generator_dir)] = require(path.join(__dirname, 'generators', generator_dir, 'index.js'));
-    }, this);
-  },
-
-  camelize = function(string) {
+var camelize = function(string) {
     return string.replace (/(?:^|[-_])(\w)/g, function (_, c) {
       return c ? c.toUpperCase () : '';
     });
@@ -124,8 +118,6 @@ module.exports = function(target, options) {
   this.generatorName = 'base'; //for thorax.log
   this.loadPrefix = '';
   setTarget.call(this, target || process.cwd());
-  this._generators = {};
-  loadGenerators.call(this);
   if (options && options.create) {
     this.project = camelize(path.basename(this.target));
   } else {
@@ -166,7 +158,7 @@ module.exports.help = [
 
 //actions
 module.exports.actions = {
-  create: function(target, generator) {
+  create: function(target, generator_package_name) {
     var thorax = new module.exports(target, {
       create: true
     });
@@ -180,9 +172,10 @@ module.exports.actions = {
       });
     };
 
-    thorax.generate('base', function() {
-      if (generator) {
-        thorax.generate(generator, complete);
+    var base_generator = require(path.join(__dirname, 'generator', 'index.js');
+    base_generator(this, function() {
+      if (generator_package_name) {
+        thorax.generate(generator_package_name, complete);
       } else {
         complete();
       }
@@ -280,9 +273,12 @@ var methods = {
     console.log('warning: ' + message);
   },
 
-  generate: function(generator_name, next) {
-    this.generatorName = generator_name;
-    this._generators[generator_name](this, next);
+  generate: function(generator_npm_package_name, next) {
+    var context = this;
+    this.generatorName = generator_npm_package_name;
+    thorax.npmInstall(generator_npm_package_name, function(installed_module_path) {
+      require(installed_module_path)(context, next);
+    });
   },
   
   mkdir: function(name) {
