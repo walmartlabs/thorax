@@ -172,8 +172,8 @@ module.exports.actions = {
       });
     };
 
-    var base_generator = require(path.join(__dirname, 'generator', 'index.js');
-    base_generator(this, function() {
+    var base_generator = require(path.join(__dirname, 'generator', 'index.js'));
+    base_generator(thorax, function() {
       if (generator_package_name) {
         thorax.generate(generator_package_name, complete);
       } else {
@@ -276,8 +276,9 @@ var methods = {
   generate: function(generator_npm_package_name, next) {
     var context = this;
     this.generatorName = generator_npm_package_name;
-    thorax.npmInstall(generator_npm_package_name, function(installed_module_path) {
-      require(installed_module_path)(context, next);
+    child.exec('cd ' + path.join(process.cwd(), context.target) + '; npm install ' + generator_npm_package_name + ';', function() {
+      var generator = require(path.join(process.cwd(), context.target, 'node_modules', generator_npm_package_name, 'index.js'));
+      generator(context, next);
     });
   },
   

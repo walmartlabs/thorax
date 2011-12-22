@@ -140,7 +140,8 @@ module.exports = function(thorax, next) {
       growl: '~1.1',
       stylus: 'http://static.incaseofstairs.com/stylus.tar.gz',
       nib: '~0.0.8',
-      wrench: '~1.1'
+      wrench: '~1.1',
+      jake: '*'
     }
   };
 
