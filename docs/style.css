@@ -62,12 +62,12 @@
             }
     div.container {
       position: relative;
-      width: 550px;
+      width: 700px;
       margin: 40px 0 50px 260px;
     }
     p, div.container ul {
       margin: 20px 0;
-      width: 550px;
+      width: 700px;
     }
       p.warning {
         font-size: 12px;
@@ -145,8 +145,14 @@
         margin-left: 20px;
       }
       pre {
+        border: 5px solid #666;
+        background-color:#000;
+        color:#fff;
         font-size: 12px;
-        padding: 2px 0 2px 15px;
-        border: 4px solid #bbb; border-top: 0; border-bottom: 0;
+        padding: 17px;
+        border: 5px solid #eee;
         margin: 0px 0 30px;
+        box-shadow: 0 0 10px #666;
+        -webkit-box-shadow: 0 0 10px #666;
+        -moz-box-shadow: 0 0 10px #666;
       }

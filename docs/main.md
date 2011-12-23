@@ -13,7 +13,7 @@
 
 ## Command Line Interface
 
-### create **thorax create $project-name [$npm-module-name]**
+### create *thorax create $project-name [$npm-module-name]*
 
 Create a new thorax project. $npm-module-name may be an npm package name that contains a generator (just an index.js file exporting a function to run). The two handy generators you'll want to use are:
 
@@ -22,29 +22,29 @@ Create a new thorax project. $npm-module-name may be an npm package name that co
 
     thorax create todos thorax-web
 
-### install **thorax install $npm-module-name**
+### install *thorax install $npm-module-name*
 
 Install an npm module into your project, adding the module as a dependency in your package.json file. 
 
-### view **thorax view $module-name $file-name**
+### view *thorax view $module-name $file-name*
 
 
 
-### collection-view **thorax collection-view $module-name $file-name**
+### collection-view *thorax collection-view $module-name $file-name*
 
-### model **thorax model [$module-name] file-name**
+### model *thorax model [$module-name] file-name*
 
-### collection **thorax collection [$module-name] $file-name**
+### collection *thorax collection [$module-name] $file-name*
 
-### router **thorax router $module-name**
+### router *thorax router $module-name*
 
-### module **thorax module $name**
+### module *thorax module $name*
 
-### template **thorax template $template-name**
+### template *thorax template $template-name*
 
-### platform **thorax platform $name**
+### platform *thorax platform $name*
 
-### package **thorax package $name**
+### package *thorax package $name*
 
 ## Command Line 
 
