@@ -92,7 +92,7 @@
       padding-top: 20px;
     }
       h2 {
-        font-size: 20px;
+        font-size: 26px;
       }
       .container h2 {
         border-top: 1px solid #CCC;
@@ -100,7 +100,7 @@
     h3 {
       padding-bottom: 0;
       margin-bottom: -18px;
-      font-size: 16px;
+      font-size: 20px;
       line-height: 30px;
       white-space: nowrap;
     }
@@ -143,6 +143,9 @@
       }
       code, .container h3 em {
         margin-left: 20px;
+      }
+      .container h3 em {
+        font-size:14px;
       }
       pre {
         border: 5px solid #666;

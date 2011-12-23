@@ -365,7 +365,7 @@ var methods = {
         name: file_name.replace(/\.(js|coffee)$/, ''),
         className: camelize(file_name.replace(/\.(js|coffee)$/, '').replace(/\//g, '-'))
       }))) {
-        this.log('created view: ' + file_name);
+        this.log('created view: ' + full_path);
       }
 
       if (this.writeFile(view_template_path, '')) {
@@ -463,7 +463,7 @@ var methods = {
         name: file_name.replace(/\.(js|coffee)$/, ''),
         className: camelize(file_name.replace(/\.(js|coffee)$/, '').replace(/\//g, '-'))
       }))) {
-        this.log('created model: ' + file_name);
+        this.log('created model: ' + full_path);
       }
 
       if (this.thoraxJSON.modifyLumbarJSON) {
@@ -495,7 +495,7 @@ var methods = {
         name: file_name.replace(/\.(js|coffee)$/, ''),
         className: camelize(file_name.replace(/\.(js|coffee)$/, '').replace(/\//g, '-'))
       }))) {
-        this.log('created collection: ' + file_name);
+        this.log('created collection: ' + full_path);
       }
 
       if (this.thoraxJSON.modifyLumbarJSON) {
