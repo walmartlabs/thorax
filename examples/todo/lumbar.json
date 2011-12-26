@@ -1,0 +1,42 @@
+{
+  "application": {
+    "name": "Todo",
+    "module": "base"
+  },
+  "platforms": [ "web" ],
+  "modules": {
+    "base": [
+      {"src": "lib/underscore.js", "global": true},
+      {"src": "lib/jquery.js", "global": true},
+      {"src": "lib/handlebars.js", "global": true},
+      {"src": "lib/backbone.js", "global": true},
+      {"src": "lib/backbone-localstorage.js", "global": true},
+      {"src": "lib/script.js", "global": true},
+      {"src": "lib/thorax.js", "global": true},
+
+      "js/app.js",
+      "module_map.json"
+    ],
+    "todo": {
+      "routes": {
+        "": "list",
+        "todo": "list"
+      },
+      "files": [
+        "js/models/todo-item.js",
+        "js/collections/todo-list.js",
+        "js/views/todo-item.js",
+        "js/views/todo-list.js",
+        "js/controllers/todo.js"
+      ]
+    }
+  },
+  "templates": {
+    "js/views/todo-list.js": [
+      "templates/todo-list.handlebars",
+      "templates/todo-status.handlebars"
+    ],
+    "js/views/todo-item.js": ["templates/todo-item.handlebars"]
+  },
+  "loadPrefix": "./"
+}
