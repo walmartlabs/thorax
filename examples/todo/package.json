@@ -1,19 +1,8 @@
 {
-  "name": "phoenix",
-  "description": "Rise from the ashes of 3938 burning wickets",
+  "name": "ThoraxTodo",
+  "description": "Thorax example project",
   "version": "0.0.1",
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/brisbaneshores/phoenix.git"
-  },
   "engines": {
     "node": "~0.4.5"
-  },
-  "dependencies": {
-      "lumbar": "~0.5",
-      "stylus": "http://static.incaseofstairs.com/stylus.tar.gz",
-      "nib": "~0.0.8",
-      "wrench": "~1.1"
-  },
-  "main": "dev/index.js"
+  }
 }
