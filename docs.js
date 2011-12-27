@@ -2,7 +2,7 @@ var md = require("node-markdown").Markdown;
 var fs = require('fs');
 var jsdom = require('jsdom');
 
-exports.generate = function(){
+exports.generate = function(callback){
   var contents = fs.readFileSync(__dirname + '/template.html').toString();
 
   var css = fs.readFileSync(__dirname + '/style.css');
@@ -39,5 +39,8 @@ exports.generate = function(){
     });
     window.$('#sidebar').html(toc_html);
     fs.writeFileSync(__dirname + '/index.html', "<!DOCTYPE HTML>\n<html>\n" + window.document.documentElement.innerHTML + "</html>");
+    if(callback) {
+      callback();
+    }
   });
 };
