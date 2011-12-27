@@ -133,6 +133,111 @@ Assuming you installed the *thorax-server* npm package this command will start a
 
 ---
 
+## Thorax
+
+### configure *Thorax.configure([options])*
+
+- scope
+- layout (element)
+
+### throttleLoadStart *Thorax.throttleLoadStart(callback)*
+
+### throttleLoadEnd *Thorax.throttleLoadEnd(callback)*
+
+## Thorax.View Class
+
+### create *App.View.create(name, protoProps [,classProps])*
+
+### registerHelper *App.View.registerHelper(name, callback)*
+
+### registerMixin *App.View.registerMixin(name, callback, methods)*
+
+### registerEvents *App.View.registerEvents(events)*
+
+### unregisterEvents *App.View.unregisterEvents([event])*
+
+## Thorax.View Instance
+
+### mixin *view.mixin(name)*
+
+### view *view.view(name [,options])*
+
+### template *view.template(name, [,scope])
+
+### html *view.html([content])*
+
+### setModel *view.setModel(model)*
+
+### setCollection *view.setCollection(collection)*
+
+
+### context *view.context([model])*
+
+### itemContext *view.itemContext(model, index)*
+
+### render *view.render()*
+
+### renderCollection *view.renderCollection()*
+
+### renderItem *view.renderItem()*
+
+### renderEmpty *view.renderEmpty()*
+
+### appendItem *view.appendItem(model [,index])*
+
+### freeze *view.freeze([options])
+
+- model
+- collection
+
+### serialize *view.serialize(callback)*
+
+### populate *view.populate([attributes])*
+
+### validateInput *view.validateInput()*
+
+### destroy *view.destroy()*
+
+### scrollTo *view.scrollTo(x ,y)
+
+## Thorax.layout
+
+### setView *Thorax.layout.setView
+
+## Thorax.View Events
+
+### initialize:before
+
+### initialize:after
+
+### rendered
+
+### rendered:collection
+
+### rendered:item
+
+### rendered:empty
+
+### validate
+
+### error 
+
+### destroyed
+
+### activated
+
+### deactivated
+
+### ready
+
+### load:start
+
+### load:end
+
+
+
+---
+
 ## Class Structure
 
 - Backbone.View &rarr; Thorax.View &rarr; $app-name.View &rarr; $app-name.Views.$view-name
