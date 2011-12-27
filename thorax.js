@@ -1187,30 +1187,6 @@
     create: function(module, protoProps, classProps) {
       return scope.Routers[module.name] = new (this.extend(_.extend({}, module, protoProps), classProps));
     },
-
-    loadData: function(data, callback, canceled) {
-      if (data && data.isPopulated()) {
-        return callback(data);
-      }
-
-      function finalizer(isError) {
-        data.unbind('error', errorHandler);
-        if (isError) {
-          scope.trigger('load:end');
-        }
-        canceled && canceled.apply(this, arguments);
-      }
-      var errorHandler = _.bind(finalizer, this, true);
-      data.bind('error', errorHandler);
-
-      data.fetch({
-        success: Thorax.Router.bindToRoute(function() {
-            data.unbind('error', errorHandler);
-            callback.apply(this, arguments);
-          },
-          _.bind(finalizer, this, false))
-      });
-    },
     bindToRoute: bindToRoute
   });
 
