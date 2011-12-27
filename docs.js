@@ -6,10 +6,10 @@ exports.generate = function(){
   var contents = fs.readFileSync(__dirname + '/template.html').toString();
 
   var css = fs.readFileSync(__dirname + '/style.css');
-  var main_html = md(fs.readFileSync(__dirname + '/main.md').toString());
+  var main_html = md(fs.readFileSync(__dirname + '/README.md').toString());
 
   contents = contents.replace('<!-- style.css -->', css);
-  contents = contents.replace('<!-- main.md -->', main_html);
+  contents = contents.replace('<!-- README.md -->', main_html);
 
   jsdom.env(contents, [
     'http://code.jquery.com/jquery-1.5.min.js'
