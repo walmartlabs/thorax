@@ -84,8 +84,6 @@ Intro, covering views with no model / collection, view with model, view with col
 
 ### render *view.render()*
 
-### rendered *event*
-
 ### context *view.context([model])*
 
 - options
@@ -100,19 +98,28 @@ Intro, covering views with no model / collection, view with model, view with col
 
 ### renderCollection *view.renderCollection()*
 
-### rendered:collection *event*
-
 ### renderItem *view.renderItem()*
-
-### rendered:item *event*
 
 ### renderEmpty *view.renderEmpty()*
 
-### rendered:empty *event*
-
 ### appendItem *view.appendItem(model [,index])*
 
+### rendered
+
+### rendered:collection
+
+### rendered:item
+
+### rendered:empty
+
 ## Events
+
+### events *App.View.events*
+
+- dom events
+- view events
+- model events
+- collection events
 
 ### registerEvents *App.View.registerEvents(events)*
 
@@ -137,6 +144,6 @@ Intro, covering views with no model / collection, view with model, view with col
 
 ### validateInput *view.validateInput()*
 
-### validate *event*
+### validate
 
-### error *event*
+### error

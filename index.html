@@ -169,7 +169,7 @@
 </style>
 </head>
 <body>
-  <div id="sidebar" class="interface"><h2><a href="#overview">Overview</a></h2><h2><a href="#quick">Quick Start</a></h2><h2><a href="#configuration">Configuration</a></h2><ul><li><a href="#configuration-configure">configure</a></li></ul><h2><a href="#routers">Routers &amp; Layout</a></h2><ul><li><a href="#routers &amp; layout-modules">Modules</a></li><li><a href="#routers &amp; layout-create">create</a></li><li><a href="#routers &amp; layout-view">view</a></li><li><a href="#routers &amp; layout-setview">setView</a></li><li><a href="#routers &amp; layout-view">View</a></li></ul><h2><a href="#loading">Loading Data</a></h2><ul><li><a href="#loading data-load:start">load:start</a></li><li><a href="#loading data-load:end">load:end</a></li><li><a href="#loading data-load">load</a></li><li><a href="#loading data-bindtoroute">bindToRoute</a></li></ul><h2><a href="#templating">Templating</a></h2><ul><li><a href="#templating-name">name</a></li><li><a href="#templating-registerhelper">registerHelper</a></li><li><a href="#templating-template">template</a></li><li><a href="#templating-view">view</a></li><li><a href="#templating-html">html</a></li><li><a href="#templating-setmodel">setModel</a></li><li><a href="#templating-render">render</a></li><li><a href="#templating-rendered">rendered</a></li><li><a href="#templating-context">context</a></li><li><a href="#templating-setcollection">setCollection</a></li><li><a href="#templating-itemcontext">itemContext</a></li><li><a href="#templating-rendercollection">renderCollection</a></li><li><a href="#templating-rendered:collection">rendered:collection</a></li><li><a href="#templating-renderitem">renderItem</a></li><li><a href="#templating-rendered:item">rendered:item</a></li><li><a href="#templating-renderempty">renderEmpty</a></li><li><a href="#templating-rendered:empty">rendered:empty</a></li><li><a href="#templating-appenditem">appendItem</a></li></ul><h2><a href="#events">Events</a></h2><ul><li><a href="#events-registerevents">registerEvents</a></li><li><a href="#events-unregisterevents">unregisterEvents</a></li><li><a href="#events-freeze">freeze</a></li></ul><h2><a href="#mixins">Mixins</a></h2><ul><li><a href="#mixins-registermixin">registerMixin</a></li><li><a href="#mixins-mixin">mixin</a></li></ul><h2><a href="#form">Form Handling</a></h2><ul><li><a href="#form handling-serialize">serialize</a></li><li><a href="#form handling-populate">populate</a></li><li><a href="#form handling-validateinput">validateInput</a></li><li><a href="#form handling-validate">validate</a></li><li><a href="#form handling-error">error</a></li></ul></div>
+  <div id="sidebar" class="interface"><h2><a href="#overview">Overview</a></h2><h2><a href="#quick">Quick Start</a></h2><h2><a href="#configuration">Configuration</a></h2><ul><li><a href="#configuration-configure">configure</a></li></ul><h2><a href="#routers">Routers &amp; Layout</a></h2><ul><li><a href="#routers &amp; layout-modules">Modules</a></li><li><a href="#routers &amp; layout-create">create</a></li><li><a href="#routers &amp; layout-view">view</a></li><li><a href="#routers &amp; layout-setview">setView</a></li><li><a href="#routers &amp; layout-view">View</a></li></ul><h2><a href="#loading">Loading Data</a></h2><ul><li><a href="#loading data-load:start">load:start</a></li><li><a href="#loading data-load:end">load:end</a></li><li><a href="#loading data-load">load</a></li><li><a href="#loading data-bindtoroute">bindToRoute</a></li></ul><h2><a href="#templating">Templating</a></h2><ul><li><a href="#templating-name">name</a></li><li><a href="#templating-registerhelper">registerHelper</a></li><li><a href="#templating-template">template</a></li><li><a href="#templating-view">view</a></li><li><a href="#templating-html">html</a></li><li><a href="#templating-setmodel">setModel</a></li><li><a href="#templating-render">render</a></li><li><a href="#templating-context">context</a></li><li><a href="#templating-setcollection">setCollection</a></li><li><a href="#templating-itemcontext">itemContext</a></li><li><a href="#templating-rendercollection">renderCollection</a></li><li><a href="#templating-renderitem">renderItem</a></li><li><a href="#templating-renderempty">renderEmpty</a></li><li><a href="#templating-appenditem">appendItem</a></li><li><a href="#templating-rendered">rendered</a></li><li><a href="#templating-rendered:collection">rendered:collection</a></li><li><a href="#templating-rendered:item">rendered:item</a></li><li><a href="#templating-rendered:empty">rendered:empty</a></li></ul><h2><a href="#events">Events</a></h2><ul><li><a href="#events-events">events</a></li><li><a href="#events-registerevents">registerEvents</a></li><li><a href="#events-unregisterevents">unregisterEvents</a></li><li><a href="#events-freeze">freeze</a></li></ul><h2><a href="#mixins">Mixins</a></h2><ul><li><a href="#mixins-registermixin">registerMixin</a></li><li><a href="#mixins-mixin">mixin</a></li></ul><h2><a href="#form">Form Handling</a></h2><ul><li><a href="#form handling-serialize">serialize</a></li><li><a href="#form handling-populate">populate</a></li><li><a href="#form handling-validateinput">validateInput</a></li><li><a href="#form handling-validate">validate</a></li><li><a href="#form handling-error">error</a></li></ul></div>
   <div class="container">
     <h2 id="overview">Overview</h2>
 
@@ -274,8 +274,6 @@ jake start
 
 <h3 id="templating-render">render <em>view.render()</em></h3>
 
-<h3 id="templating-rendered">rendered <em>event</em></h3>
-
 <h3 id="templating-context">context <em>view.context([model])</em></h3>
 
 <ul>
@@ -293,19 +291,30 @@ jake start
 
 <h3 id="templating-rendercollection">renderCollection <em>view.renderCollection()</em></h3>
 
-<h3 id="templating-rendered:collection">rendered:collection <em>event</em></h3>
-
 <h3 id="templating-renderitem">renderItem <em>view.renderItem()</em></h3>
-
-<h3 id="templating-rendered:item">rendered:item <em>event</em></h3>
 
 <h3 id="templating-renderempty">renderEmpty <em>view.renderEmpty()</em></h3>
 
-<h3 id="templating-rendered:empty">rendered:empty <em>event</em></h3>
-
 <h3 id="templating-appenditem">appendItem <em>view.appendItem(model [,index])</em></h3>
 
+<h3 id="templating-rendered">rendered</h3>
+
+<h3 id="templating-rendered:collection">rendered:collection</h3>
+
+<h3 id="templating-rendered:item">rendered:item</h3>
+
+<h3 id="templating-rendered:empty">rendered:empty</h3>
+
 <h2 id="events">Events</h2>
+
+<h3 id="events-events">events <em>App.View.events</em></h3>
+
+<ul>
+<li>dom events</li>
+<li>view events</li>
+<li>model events</li>
+<li>collection events</li>
+</ul>
 
 <h3 id="events-registerevents">registerEvents <em>App.View.registerEvents(events)</em></h3>
 
@@ -332,9 +341,9 @@ jake start
 
 <h3 id="form handling-validateinput">validateInput <em>view.validateInput()</em></h3>
 
-<h3 id="form handling-validate">validate <em>event</em></h3>
+<h3 id="form handling-validate">validate</h3>
 
-<h3 id="form handling-error">error <em>event</em></h3>
+<h3 id="form handling-error">error</h3>
   </div>
 </body>
 <script src="http://code.jquery.com/jquery-1.5.min.js"></script></html>
