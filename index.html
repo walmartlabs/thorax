@@ -169,7 +169,7 @@
 </style>
 </head>
 <body>
-  <div id="sidebar" class="interface"><h2><a href="#overview">Overview</a></h2><h2><a href="#quick">Quick Start</a></h2><h2><a href="#layout">Layout</a></h2><h2><a href="#module">Module Loading</a></h2><h2><a href="#load">Load Events</a></h2><h2><a href="#templating">Templating</a></h2><h2><a href="#events">Events</a></h2><h2><a href="#form">Form Handling</a></h2><h2><a href="#thorax">Thorax</a></h2><ul><li><a href="#thorax-configure">configure</a></li><li><a href="#thorax-throttleloadstart">throttleLoadStart</a></li><li><a href="#thorax-throttleloadend">throttleLoadEnd</a></li></ul><h2><a href="#thorax-view">Thorax.View</a></h2><ul><li><a href="#thorax-view-create">create</a></li><li><a href="#thorax-view-registerhelper">registerHelper</a></li><li><a href="#thorax-view-registermixin">registerMixin</a></li><li><a href="#thorax-view-registerevents">registerEvents</a></li><li><a href="#thorax-view-unregisterevents">unregisterEvents</a></li><li><a href="#thorax-view-mixin">mixin</a></li><li><a href="#thorax-view-view">view</a></li><li><a href="#thorax-view-template">template</a></li><li><a href="#thorax-view-html">html</a></li><li><a href="#thorax-view-setmodel">setModel</a></li><li><a href="#thorax-view-setcollection">setCollection</a></li><li><a href="#thorax-view-context">context</a></li><li><a href="#thorax-view-itemcontext">itemContext</a></li><li><a href="#thorax-view-render">render</a></li><li><a href="#thorax-view-rendercollection">renderCollection</a></li><li><a href="#thorax-view-renderitem">renderItem</a></li><li><a href="#thorax-view-renderempty">renderEmpty</a></li><li><a href="#thorax-view-appenditem">appendItem</a></li><li><a href="#thorax-view-freeze">freeze</a></li><li><a href="#thorax-view-serialize">serialize</a></li><li><a href="#thorax-view-populate">populate</a></li><li><a href="#thorax-view-validateinput">validateInput</a></li><li><a href="#thorax-view-destroy">destroy</a></li><li><a href="#thorax-view-scrollto">scrollTo</a></li></ul><h2><a href="#thorax-layout">Thorax.layout</a></h2><ul><li><a href="#thorax-layout-setview">setView</a></li></ul><h2><a href="#thorax-model">Thorax.Model</a></h2><ul><li><a href="#thorax-model-create">create</a></li><li><a href="#thorax-model-load">load</a></li></ul><h2><a href="#thorax-collection">Thorax.Collection</a></h2><ul><li><a href="#thorax-collection-create">create</a></li><li><a href="#thorax-collection-load">load</a></li></ul><h2><a href="#thorax-router">Thorax.Router</a></h2><ul><li><a href="#thorax-router-create">create</a></li><li><a href="#thorax-router-view">view</a></li><li><a href="#thorax-router-bindtoroute">bindToRoute</a></li></ul><h2><a href="#events">Events</a></h2><ul><li><a href="#events-initialize:before">initialize:before</a></li><li><a href="#events-initialize:after">initialize:after</a></li><li><a href="#events-rendered">rendered</a></li><li><a href="#events-rendered:collection">rendered:collection</a></li><li><a href="#events-rendered:item">rendered:item</a></li><li><a href="#events-rendered:empty">rendered:empty</a></li><li><a href="#events-validate">validate</a></li><li><a href="#events-error">error</a></li><li><a href="#events-destroyed">destroyed</a></li><li><a href="#events-activated">activated</a></li><li><a href="#events-deactivated">deactivated</a></li><li><a href="#events-ready">ready</a></li><li><a href="#events-load:start">load:start</a></li><li><a href="#events-load:end">load:end</a></li></ul></div>
+  <div id="sidebar" class="interface"><h2><a href="#overview">Overview</a></h2><h2><a href="#quick">Quick Start</a></h2><h2><a href="#configuration">Configuration</a></h2><ul><li><a href="#configuration-configure">configure</a></li></ul><h2><a href="#routers">Routers &amp; Layout</a></h2><ul><li><a href="#routers &amp; layout-modules">Modules</a></li><li><a href="#routers &amp; layout-create">create</a></li><li><a href="#routers &amp; layout-view">view</a></li><li><a href="#routers &amp; layout-setview">setView</a></li><li><a href="#routers &amp; layout-view">View</a></li></ul><h2><a href="#loading">Loading Data</a></h2><ul><li><a href="#loading data-load:start">load:start</a></li><li><a href="#loading data-load:end">load:end</a></li><li><a href="#loading data-load">load</a></li><li><a href="#loading data-bindtoroute">bindToRoute</a></li></ul><h2><a href="#templating">Templating</a></h2><ul><li><a href="#templating-name">name</a></li><li><a href="#templating-registerhelper">registerHelper</a></li><li><a href="#templating-template">template</a></li><li><a href="#templating-view">view</a></li><li><a href="#templating-html">html</a></li><li><a href="#templating-setmodel">setModel</a></li><li><a href="#templating-render">render</a></li><li><a href="#templating-rendered">rendered</a></li><li><a href="#templating-context">context</a></li><li><a href="#templating-setcollection">setCollection</a></li><li><a href="#templating-itemcontext">itemContext</a></li><li><a href="#templating-rendercollection">renderCollection</a></li><li><a href="#templating-rendered:collection">rendered:collection</a></li><li><a href="#templating-renderitem">renderItem</a></li><li><a href="#templating-rendered:item">rendered:item</a></li><li><a href="#templating-renderempty">renderEmpty</a></li><li><a href="#templating-rendered:empty">rendered:empty</a></li><li><a href="#templating-appenditem">appendItem</a></li></ul><h2><a href="#events">Events</a></h2><ul><li><a href="#events-registerevents">registerEvents</a></li><li><a href="#events-unregisterevents">unregisterEvents</a></li><li><a href="#events-freeze">freeze</a></li></ul><h2><a href="#mixins">Mixins</a></h2><ul><li><a href="#mixins-registermixin">registerMixin</a></li><li><a href="#mixins-mixin">mixin</a></li></ul><h2><a href="#form">Form Handling</a></h2><ul><li><a href="#form handling-serialize">serialize</a></li><li><a href="#form handling-populate">populate</a></li><li><a href="#form handling-validateinput">validateInput</a></li><li><a href="#form handling-validate">validate</a></li><li><a href="#form handling-error">error</a></li></ul></div>
   <div class="container">
     <h2 id="overview">Overview</h2>
 
@@ -200,166 +200,141 @@ jake init
 jake start
 </code></pre>
 
-<h2 id="layout">Layout</h2>
+<h2 id="configuration">Configuration</h2>
 
-<h2 id="module">Module Loading</h2>
-
-<h2 id="load">Load Events</h2>
+<h3 id="configuration-configure">configure <em>Thorax.configure(options)</em></h3>
 
 <ul>
-<li>bindToRoute</li>
-<li>load method</li>
+<li>layout property</li>
+<li>scope property, what gets set on scope property</li>
 </ul>
+
+<h2 id="routers">Routers &amp; Layout</h2>
+
+<h3 id="routers &amp;amp; layout-modules">Modules</h3>
+
+<p>base and other modules, how are they created</p>
+
+<h3 id="routers &amp;amp; layout-create">create <em>Thorax.Router.create(module, protoProps [,classProps])</em></h3>
+
+<h3 id="routers &amp;amp; layout-view">view <em>router.view(name)</em></h3>
+
+<h3 id="routers &amp;amp; layout-setview">setView <em>Application.layout.setView(view)</em></h3>
+
+<h3 id="routers &amp;amp; layout-view">View Lifecycle Events</h3>
+
+<ul>
+<li>initialize:before</li>
+<li>initialize:after</li>
+<li>activated</li>
+<li>ready</li>
+<li>deactivated</li>
+<li>destroyed</li>
+</ul>
+
+<h2 id="loading">Loading Data</h2>
+
+<h3 id="loading data-load:start">load:start <em>event</em></h3>
+
+<h3 id="loading data-load:end">load:end <em>event</em></h3>
+
+<ul>
+<li>model / collection load event triggers</li>
+<li>module loading event triggers</li>
+</ul>
+
+<h3 id="loading data-load">load <em>model/collection.load(callback [,failback])</em></h3>
+
+<h3 id="loading data-bindtoroute">bindToRoute <em>router.bindToRoute(callback [,failback])</em></h3>
 
 <h2 id="templating">Templating</h2>
 
+<p>Intro, covering views with no model / collection, view with model, view with collection, view with both.</p>
+
+<h3 id="templating-name">name <em>view.name</em></h3>
+
+<h3 id="templating-registerhelper">registerHelper <em>App.View.registerHelper(name, callback)</em></h3>
+
+<h3 id="templating-template">template *view.template(name, [,scope])</h3>
+
+<h3 id="templating-view">view <em>view.view(name [,options])</em></h3>
+
 <ul>
-<li>model</li>
-<li>collection</li>
-<li>context</li>
-<li>registerHelper</li>
+<li>example called from view</li>
+<li>example called from template, view handling inside templates</li>
 </ul>
+
+<h3 id="templating-html">html <em>view.html([content])</em></h3>
+
+<h3 id="templating-setmodel">setModel <em>view.setModel(model)</em></h3>
+
+<ul>
+<li>model set event</li>
+</ul>
+
+<h3 id="templating-render">render <em>view.render()</em></h3>
+
+<h3 id="templating-rendered">rendered <em>event</em></h3>
+
+<h3 id="templating-context">context <em>view.context([model])</em></h3>
+
+<ul>
+<li>options</li>
+</ul>
+
+<h3 id="templating-setcollection">setCollection <em>view.setCollection(collection)</em></h3>
+
+<ul>
+<li><p>collection set event</p></li>
+<li><p>options</p></li>
+</ul>
+
+<h3 id="templating-itemcontext">itemContext <em>view.itemContext(model, index)</em></h3>
+
+<h3 id="templating-rendercollection">renderCollection <em>view.renderCollection()</em></h3>
+
+<h3 id="templating-rendered:collection">rendered:collection <em>event</em></h3>
+
+<h3 id="templating-renderitem">renderItem <em>view.renderItem()</em></h3>
+
+<h3 id="templating-rendered:item">rendered:item <em>event</em></h3>
+
+<h3 id="templating-renderempty">renderEmpty <em>view.renderEmpty()</em></h3>
+
+<h3 id="templating-rendered:empty">rendered:empty <em>event</em></h3>
+
+<h3 id="templating-appenditem">appendItem <em>view.appendItem(model [,index])</em></h3>
 
 <h2 id="events">Events</h2>
 
+<h3 id="events-registerevents">registerEvents <em>App.View.registerEvents(events)</em></h3>
+
+<h3 id="events-unregisterevents">unregisterEvents <em>App.View.unregisterEvents([event])</em></h3>
+
+<h3 id="events-freeze">freeze *view.freeze([options])</h3>
+
 <ul>
-<li>registerEvents</li>
-<li>model / collection events</li>
+<li>model</li>
+<li>collection</li>
 </ul>
+
+<h2 id="mixins">Mixins</h2>
+
+<h3 id="mixins-registermixin">registerMixin <em>App.View.registerMixin(name, callback, methods)</em></h3>
+
+<h3 id="mixins-mixin">mixin <em>view.mixin(name)</em></h3>
 
 <h2 id="form">Form Handling</h2>
 
-<h2 id="thorax">Thorax</h2>
+<h3 id="form handling-serialize">serialize <em>view.serialize(callback)</em></h3>
 
-<h3 id="thorax-configure">configure <em>Thorax.configure([options])</em></h3>
+<h3 id="form handling-populate">populate <em>view.populate([attributes])</em></h3>
 
-<ul>
-<li>scope</li>
-<li>layout (element)</li>
-</ul>
+<h3 id="form handling-validateinput">validateInput <em>view.validateInput()</em></h3>
 
-<h3 id="thorax-throttleloadstart">throttleLoadStart <em>Thorax.throttleLoadStart(callback)</em></h3>
+<h3 id="form handling-validate">validate <em>event</em></h3>
 
-<h3 id="thorax-throttleloadend">throttleLoadEnd <em>Thorax.throttleLoadEnd(callback)</em></h3>
-
-<h2 id="thorax-view">Thorax.View</h2>
-
-<p>Subclass of <a href="http://documentcloud.github.com/backbone/#View">Backbone.View</a></p>
-
-<h3 id="thorax-view-create">create <em>App.View.create(name, protoProps [,classProps])</em></h3>
-
-<h3 id="thorax-view-registerhelper">registerHelper <em>App.View.registerHelper(name, callback)</em></h3>
-
-<h3 id="thorax-view-registermixin">registerMixin <em>App.View.registerMixin(name, callback, methods)</em></h3>
-
-<h3 id="thorax-view-registerevents">registerEvents <em>App.View.registerEvents(events)</em></h3>
-
-<h3 id="thorax-view-unregisterevents">unregisterEvents <em>App.View.unregisterEvents([event])</em></h3>
-
-<h3 id="thorax-view-mixin">mixin <em>view.mixin(name)</em></h3>
-
-<h3 id="thorax-view-view">view <em>view.view(name [,options])</em></h3>
-
-<h3 id="thorax-view-template">template *view.template(name, [,scope])</h3>
-
-<h3 id="thorax-view-html">html <em>view.html([content])</em></h3>
-
-<h3 id="thorax-view-setmodel">setModel <em>view.setModel(model)</em></h3>
-
-<h3 id="thorax-view-setcollection">setCollection <em>view.setCollection(collection)</em></h3>
-
-<h3 id="thorax-view-context">context <em>view.context([model])</em></h3>
-
-<h3 id="thorax-view-itemcontext">itemContext <em>view.itemContext(model, index)</em></h3>
-
-<h3 id="thorax-view-render">render <em>view.render()</em></h3>
-
-<h3 id="thorax-view-rendercollection">renderCollection <em>view.renderCollection()</em></h3>
-
-<h3 id="thorax-view-renderitem">renderItem <em>view.renderItem()</em></h3>
-
-<h3 id="thorax-view-renderempty">renderEmpty <em>view.renderEmpty()</em></h3>
-
-<h3 id="thorax-view-appenditem">appendItem <em>view.appendItem(model [,index])</em></h3>
-
-<h3 id="thorax-view-freeze">freeze *view.freeze([options])</h3>
-
-<ul>
-<li>model</li>
-<li>collection</li>
-</ul>
-
-<h3 id="thorax-view-serialize">serialize <em>view.serialize(callback)</em></h3>
-
-<h3 id="thorax-view-populate">populate <em>view.populate([attributes])</em></h3>
-
-<h3 id="thorax-view-validateinput">validateInput <em>view.validateInput()</em></h3>
-
-<h3 id="thorax-view-destroy">destroy <em>view.destroy()</em></h3>
-
-<h3 id="thorax-view-scrollto">scrollTo *view.scrollTo(x ,y)</h3>
-
-<h2 id="thorax-layout">Thorax.layout</h2>
-
-<p>Subclass of <a href="http://documentcloud.github.com/backbone/#View">Backbone.View</a></p>
-
-<h3 id="thorax-layout-setview">setView *Thorax.layout.setView</h3>
-
-<h2 id="thorax-model">Thorax.Model</h2>
-
-<p>Subclass of <a href="http://documentcloud.github.com/backbone/#Model">Backbone.Model</a></p>
-
-<h3 id="thorax-model-create">create <em>Thorax.Collection.create(name, protoProps [,classProps])</em></h3>
-
-<h3 id="thorax-model-load">load <em>collection.load(callback [,failback])</em></h3>
-
-<h2 id="thorax-collection">Thorax.Collection</h2>
-
-<p>Subclass of <a href="http://documentcloud.github.com/backbone/#Collection">Backbone.Collection</a></p>
-
-<h3 id="thorax-collection-create">create <em>Thorax.Collection.create(name, protoProps [,classProps])</em></h3>
-
-<h3 id="thorax-collection-load">load <em>collection.load(callback [,failback])</em></h3>
-
-<h2 id="thorax-router">Thorax.Router</h2>
-
-<p>Subclass of <a href="http://documentcloud.github.com/backbone/#Router">Backbone.Router</a></p>
-
-<h3 id="thorax-router-create">create <em>Thorax.Router.create(name, protoProps [,classProps])</em></h3>
-
-<h3 id="thorax-router-view">view <em>router.view(name [,attributes])</em></h3>
-
-<h3 id="thorax-router-bindtoroute">bindToRoute <em>router.bindToRoute(callback [,failback])</em></h3>
-
-<h2 id="events">Events</h2>
-
-<h3 id="events-initialize:before">initialize:before <em>Thorax.View</em></h3>
-
-<h3 id="events-initialize:after">initialize:after <em>Thorax.View</em></h3>
-
-<h3 id="events-rendered">rendered <em>Thorax.View</em></h3>
-
-<h3 id="events-rendered:collection">rendered:collection <em>Thorax.View</em></h3>
-
-<h3 id="events-rendered:item">rendered:item <em>Thorax.View</em></h3>
-
-<h3 id="events-rendered:empty">rendered:empty <em>Thorax.View</em></h3>
-
-<h3 id="events-validate">validate <em>Thorax.View</em></h3>
-
-<h3 id="events-error">error <em>Thorax.View</em></h3>
-
-<h3 id="events-destroyed">destroyed <em>Thorax.View</em></h3>
-
-<h3 id="events-activated">activated <em>Thorax.View</em></h3>
-
-<h3 id="events-deactivated">deactivated <em>Thorax.View</em></h3>
-
-<h3 id="events-ready">ready <em>Thorax.View</em></h3>
-
-<h3 id="events-load:start">load:start <em>scope, Thorax.View</em></h3>
-
-<h3 id="events-load:end">load:end <em>scope, Thorax.View</em></h3>
+<h3 id="form handling-error">error <em>event</em></h3>
   </div>
 </body>
 <script src="http://code.jquery.com/jquery-1.5.min.js"></script></html>

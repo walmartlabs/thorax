@@ -24,89 +24,112 @@ This will create a blank project. If you'd like to play with something that is a
     jake init
     jake start
 
-## Layout
+## Configuration
 
-## Module Loading
+### configure *Thorax.configure(options)*
 
-## Load Events
+- layout property
+- scope property, what gets set on scope property
 
-- bindToRoute
-- load method
+## Routers & Layout
+
+### Modules
+
+base and other modules, how are they created
+
+### create *Thorax.Router.create(module, protoProps [,classProps])*
+### view *router.view(name)*
+### setView *Application.layout.setView(view)*
+
+### View Lifecycle Events
+
+- initialize:before
+- initialize:after
+- activated
+- ready
+- deactivated
+- destroyed
+
+## Loading Data
+
+### load:start *event*
+### load:end *event*
+
+- model / collection load event triggers
+- module loading event triggers
+
+### load *model/collection.load(callback [,failback])*
+### bindToRoute *router.bindToRoute(callback [,failback])*
 
 ## Templating
 
-- model
-- collection
-- context
-- registerHelper
+Intro, covering views with no model / collection, view with model, view with collection, view with both.
 
-## Events
-
-- registerEvents
-- model / collection events
-
-## Form Handling
-
-
-
-## Thorax
-
-### configure *Thorax.configure([options])*
-
-- scope
-- layout (element)
-
-### throttleLoadStart *Thorax.throttleLoadStart(callback)*
-
-### throttleLoadEnd *Thorax.throttleLoadEnd(callback)*
-
-
-
-
-## Thorax.View 
-
-Subclass of [Backbone.View](http://documentcloud.github.com/backbone/#View)
-
-### create *App.View.create(name, protoProps [,classProps])*
+### name *view.name*
 
 ### registerHelper *App.View.registerHelper(name, callback)*
 
-### registerMixin *App.View.registerMixin(name, callback, methods)*
-
-### registerEvents *App.View.registerEvents(events)*
-
-### unregisterEvents *App.View.unregisterEvents([event])*
-
-### mixin *view.mixin(name)*
+### template *view.template(name, [,scope])
 
 ### view *view.view(name [,options])*
 
-### template *view.template(name, [,scope])
+- example called from view
+- example called from template, view handling inside templates
 
 ### html *view.html([content])*
 
 ### setModel *view.setModel(model)*
 
-### setCollection *view.setCollection(collection)*
-
-### context *view.context([model])*
-
-### itemContext *view.itemContext(model, index)*
+- model set event
 
 ### render *view.render()*
 
+### rendered *event*
+
+### context *view.context([model])*
+
+- options
+
+### setCollection *view.setCollection(collection)*
+
+- collection set event
+
+- options
+
+### itemContext *view.itemContext(model, index)*
+
 ### renderCollection *view.renderCollection()*
+
+### rendered:collection *event*
 
 ### renderItem *view.renderItem()*
 
+### rendered:item *event*
+
 ### renderEmpty *view.renderEmpty()*
 
+### rendered:empty *event*
+
 ### appendItem *view.appendItem(model [,index])*
+
+## Events
+
+### registerEvents *App.View.registerEvents(events)*
+
+### unregisterEvents *App.View.unregisterEvents([event])*
 
 ### freeze *view.freeze([options])
 
 - model
 - collection
+
+## Mixins
+
+### registerMixin *App.View.registerMixin(name, callback, methods)*
+
+### mixin *view.mixin(name)*
+
+## Form Handling
 
 ### serialize *view.serialize(callback)*
 
@@ -114,65 +137,6 @@ Subclass of [Backbone.View](http://documentcloud.github.com/backbone/#View)
 
 ### validateInput *view.validateInput()*
 
-### destroy *view.destroy()*
+### validate *event*
 
-### scrollTo *view.scrollTo(x ,y)
-
-## Thorax.layout
-
-Subclass of [Backbone.View](http://documentcloud.github.com/backbone/#View)
-
-### setView *Thorax.layout.setView
-
-## Thorax.Model
-
-Subclass of [Backbone.Model](http://documentcloud.github.com/backbone/#Model)
-
-### create *Thorax.Collection.create(name, protoProps [,classProps])*
-### load *collection.load(callback [,failback])*
-
-## Thorax.Collection
-
-Subclass of [Backbone.Collection](http://documentcloud.github.com/backbone/#Collection)
-
-### create *Thorax.Collection.create(name, protoProps [,classProps])*
-### load *collection.load(callback [,failback])*
-
-## Thorax.Router
-
-Subclass of [Backbone.Router](http://documentcloud.github.com/backbone/#Router)
-
-### create *Thorax.Router.create(name, protoProps [,classProps])*
-### view *router.view(name [,attributes])*
-### bindToRoute *router.bindToRoute(callback [,failback])*
-
-## Events
-
-### initialize:before *Thorax.View*
-
-### initialize:after *Thorax.View*
-
-### rendered *Thorax.View*
-
-### rendered:collection *Thorax.View*
-
-### rendered:item *Thorax.View*
-
-### rendered:empty *Thorax.View*
-
-### validate *Thorax.View*
-
-### error *Thorax.View*
-
-### destroyed *Thorax.View*
-
-### activated *Thorax.View*
-
-### deactivated *Thorax.View*
-
-### ready *Thorax.View*
-
-### load:start *scope, Thorax.View*
-
-### load:end *scope, Thorax.View*
-
+### error *event*
