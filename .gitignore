@@ -1,1 +1,4 @@
+.project
 node_modules
+examples/todo/Jakefile
+examples/todo/public/web
