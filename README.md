@@ -1,7 +1,7 @@
 
 ## Overview
 
-Opinionated Backbone
+Opinionated Backbone...
 
 - [Underscore](http://documentcloud.github.com/underscore/)
 - [Backbone](http://documentcloud.github.com/backbone/)
