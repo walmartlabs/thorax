@@ -5,9 +5,6 @@ var fs = require('fs');
 task('docs', function() {
   var readme_contents = fs.readFileSync(path.join(__dirname, 'README.md'));
   exec([
-    'git add README.md',
-    'git commit -m "updated documentation"',
-    'git push origin master',
     'git checkout gh-pages',
     'npm install jsdom',
     'npm install node-markdown'
