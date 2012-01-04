@@ -1,349 +1,550 @@
-<!DOCTYPE HTML>
-<html>
-
-<head>
-  <meta http-equiv="content-type" content="text/html;charset=UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="chrome=1">
-  <title>Phoenix View Framework</title>
-  <style>    body {
-      font-size: 14px;
-      line-height: 22px;
-      font-family: Helvetica Neue, Helvetica, Arial;
-      background: #f4f4f4 url("background.png");
-    }
-    .interface {
-      font-family: "Lucida Grande", "Lucida Sans Unicode", Helvetica, Arial, sans-serif !important;
-    }
-    div#sidebar {
-      background: #fff;
-      position: fixed;
-      top: 0; left: 0; bottom: 0;
-      width: 200px;
-      overflow-y: auto;
-      overflow-x: hidden;
-      padding: 15px 0 30px 30px;
-      border-right: 1px solid #ddd;
-      box-shadow: 0 0 20px #ccc; -webkit-box-shadow: 0 0 20px #ccc; -moz-box-shadow: 0 0 20px #ccc;
-    }
-      #sidebar h2 {
-        margin: 0;
-        padding: 0;
-        font-size: inherit;
-        line-height: inherit;
-        font-weight: inherit;
-      }
-
-        #sidebar h2 a, a:visited {
-          display: block;
-          color: black;
-          font-weight: bold;
-          margin-top: 15px;
-        }
-          #sidebar h2 a:hover {
-            text-decoration: underline;
-          }
-      #sidebar ul {
-        font-size: 11px;
-        line-height: 14px;
-        margin: 5px 0 0 0;
-        padding-left: 0px;
-        list-style-type: none;
-        font-family: Lucida Grande;
-      }
-        #sidebar li {
-          cursor: pointer;
-          margin: 0 0 3px 0;
-
-        }
-
-        #sidebar li:before {
-          content: '– ';  
-        }
-
-          #sidebar li a {
-            text-decoration: none;
-            color: black;
-          }
-            #sidebar li a:hover {
-              text-decoration: underline;
-            }
-    div.container {
-      position: relative;
-      width: 700px;
-      margin: 40px 0 50px 260px;
-    }
-    p, div.container ul {
-      margin: 20px 0;
-      width: 700px;
-    }
-      p.warning {
-        font-size: 12px;
-        line-height: 18px;
-        font-style: italic;
-      }
-      div.container ul {
-        list-style: circle;
-        font-size: 12px;
-        padding-left: 15px;
-      }
-    a, a:visited {
-      color: #444;
-    }
-    a:active, a:hover {
-      color: #000;
-    }
-    a img {
-      border: 0;
-    }
-    h1, h2, h3, h4, h5, h6 {
-      padding-top: 20px;
-    }
-      h2 {
-        font-size: 26px;
-      }
-      .container h2 {
-        border-top: 1px solid #CCC;
-      }
-    h3 {
-      padding-bottom: 0;
-      margin-bottom: -18px;
-      font-size: 20px;
-      line-height: 30px;
-      white-space: nowrap;
-    }
-
-    .container h3 {
-      padding-top:0;
-    }
-
-    span.alias {
-      font-size: 14px;
-      font-style: italic;
-      margin-left: 20px;
-    }
-    table {
-      margin: 15px 0 0; padding: 0;
-    }
-      tr, td {
-        margin: 0; padding: 0;
-      }
-        td {
-          padding: 0px 15px 5px 0;
-        }
-    code, pre, p em, .container em {
-      font-family: Monaco, Consolas, "Lucida Console", monospace;
-      font-size: 12px;
-      line-height: 18px;
-      font-style: normal;
-      font-weight: normal;
-    }
-
-    .container pre {
-      text-indent: -20px;
-    }
-
-      p em {
-        padding: 0px 3px;
-        background: #fff;
-        border: 1px solid #ddd;
-        zoom: 1;
-      }
-      code, .container h3 em {
-        margin-left: 20px;
-      }
-      .container h3 em {
-        font-size:14px;
-      }
-      pre {
-        border: 5px solid #666;
-        background-color:#000;
-        color:#fff;
-        font-size: 12px;
-        padding: 17px;
-        border: 5px solid #eee;
-        margin: 0px 0 30px;
-        box-shadow: 0 0 10px #666;
-        -webkit-box-shadow: 0 0 10px #666;
-        -moz-box-shadow: 0 0 10px #666;
-      }
-</style>
+<!DOCTYPE html><html>  <head>    <meta http-equiv="content-type" content="text/html;charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Thorax</title>
+    <script type="text/javascript" src="scripts/main.js"></script>
+    <script type="text/javascript" src="scripts/whitespace.js"></script>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/style.css">
 </head>
-<body>
-  <div id="sidebar" class="interface"><h2><a href="#overview">Overview</a></h2><h2><a href="#quick">Quick Start</a></h2><h2><a href="#configuration">Configuration</a></h2><ul><li><a href="#configuration-configure">configure</a></li></ul><h2><a href="#routers">Routers &amp; Layout</a></h2><ul><li><a href="#routers &amp; layout-modules">Modules</a></li><li><a href="#routers &amp; layout-create">create</a></li><li><a href="#routers &amp; layout-view">view</a></li><li><a href="#routers &amp; layout-setview">setView</a></li><li><a href="#routers &amp; layout-view">View</a></li></ul><h2><a href="#loading">Loading Data</a></h2><ul><li><a href="#loading data-load:start">load:start</a></li><li><a href="#loading data-load:end">load:end</a></li><li><a href="#loading data-load">load</a></li><li><a href="#loading data-bindtoroute">bindToRoute</a></li></ul><h2><a href="#templating">Templating</a></h2><ul><li><a href="#templating-name">name</a></li><li><a href="#templating-registerhelper">registerHelper</a></li><li><a href="#templating-template">template</a></li><li><a href="#templating-view">view</a></li><li><a href="#templating-html">html</a></li><li><a href="#templating-setmodel">setModel</a></li><li><a href="#templating-render">render</a></li><li><a href="#templating-context">context</a></li><li><a href="#templating-setcollection">setCollection</a></li><li><a href="#templating-itemcontext">itemContext</a></li><li><a href="#templating-rendercollection">renderCollection</a></li><li><a href="#templating-renderitem">renderItem</a></li><li><a href="#templating-renderempty">renderEmpty</a></li><li><a href="#templating-appenditem">appendItem</a></li><li><a href="#templating-rendered">rendered</a></li><li><a href="#templating-rendered:collection">rendered:collection</a></li><li><a href="#templating-rendered:item">rendered:item</a></li><li><a href="#templating-rendered:empty">rendered:empty</a></li></ul><h2><a href="#events">Events</a></h2><ul><li><a href="#events-events">events</a></li><li><a href="#events-registerevents">registerEvents</a></li><li><a href="#events-unregisterevents">unregisterEvents</a></li><li><a href="#events-freeze">freeze</a></li></ul><h2><a href="#mixins">Mixins</a></h2><ul><li><a href="#mixins-registermixin">registerMixin</a></li><li><a href="#mixins-mixin">mixin</a></li></ul><h2><a href="#form">Form Handling</a></h2><ul><li><a href="#form handling-serialize">serialize</a></li><li><a href="#form handling-populate">populate</a></li><li><a href="#form handling-validateinput">validateInput</a></li><li><a href="#form handling-validate">validate</a></li><li><a href="#form handling-error">error</a></li></ul></div>
-  <div class="container">
-    <h2 id="overview">Overview</h2>
-
-<p>Opinionated Backbone, uses the following libraries:</p>
-
-<ul>
-<li><a href="http://documentcloud.github.com/underscore/">Underscore</a></li>
-<li><a href="http://documentcloud.github.com/backbone/">Backbone</a></li>
-<li><a href="https://github.com/madrobby/zepto">Zepto</a></li>
-<li><a href="http://www.handlebarsjs.com/">Handlebars</a></li>
-<li><a href="http://learnboost.github.com/stylus/">Stylus</a></li>
-<li><a href="http://walmartlabs.github.com/lumbar">Lumbar</a></li>
-</ul>
-
-<h2 id="quick">Quick Start</h2>
-
-<p>Thorax can be used standalone but is designed to work best with <a href="http://walmartlabs.github.com/lumbar">Lumbar</a>. The easiest way to setup a new Thoax + Lumbar project is with the the <a href="http://walmartlabs.github.com/thorax-cli">Thorax command line library</a>:</p>
-
-<pre><code>npm install -g thorax-cli
-thorax create project-name
-</code></pre>
-
-<p>This will create a blank project. If you'd like to play with something that is already functional install the <a href="http://walmartlabs.github.com/thorax-todos">Thorax Todos</a> application:</p>
-
-<pre><code>cd project-name
+  <body>    <div id="sidebar" class="interface">
+      <h2>
+        <a href="#overview">Overview</a>
+      </h2>
+      <ul>
+        <li>
+          <a href="#overview-quick">Quick Start</a>
+        </li>
+      </ul>
+      <h2>
+        <a href="#configuration">Configuration</a>
+      </h2>
+      <ul>
+        <li>
+          <a href="#configuration-configure">configure </a>
+        </li>
+      </ul>
+      <h2>
+        <a href="#routers">Routers &amp; Layout</a>
+      </h2>
+      <ul>
+        <li>
+          <a href="#routers &amp; layout-modules">Modules</a>
+        </li>
+        <li>
+          <a href="#routers &amp; layout-create">create </a>
+        </li>
+        <li>
+          <a href="#routers &amp; layout-view">view </a>
+        </li>
+        <li>
+          <a href="#routers &amp; layout-setview">setView </a>
+        </li>
+        <li>
+          <a href="#routers &amp; layout-view">View Lifecycle Events</a>
+        </li>
+      </ul>
+      <h2>
+        <a href="#loading">Loading Data</a>
+      </h2>
+      <ul>
+        <li>
+          <a href="#loading data-load:start">load:start </a>
+        </li>
+        <li>
+          <a href="#loading data-load:end">load:end </a>
+        </li>
+        <li>
+          <a href="#loading data-load">load </a>
+        </li>
+        <li>
+          <a href="#loading data-bindtoroute">bindToRoute </a>
+        </li>
+      </ul>
+      <h2>
+        <a href="#templating">Templating</a>
+      </h2>
+      <ul>
+        <li>
+          <a href="#templating-name">name </a>
+        </li>
+        <li>
+          <a href="#templating-registerhelper">registerHelper </a>
+        </li>
+        <li>
+          <a href="#templating-template">template </a>
+        </li>
+        <li>
+          <a href="#templating-view">view </a>
+        </li>
+        <li>
+          <a href="#templating-html">html </a>
+        </li>
+        <li>
+          <a href="#templating-setmodel">setModel </a>
+        </li>
+        <li>
+          <a href="#templating-render">render </a>
+        </li>
+        <li>
+          <a href="#templating-context">context </a>
+        </li>
+        <li>
+          <a href="#templating-setcollection">setCollection </a>
+        </li>
+        <li>
+          <a href="#templating-itemcontext">itemContext </a>
+        </li>
+        <li>
+          <a href="#templating-rendercollection">renderCollection </a>
+        </li>
+        <li>
+          <a href="#templating-renderitem">renderItem </a>
+        </li>
+        <li>
+          <a href="#templating-renderempty">renderEmpty </a>
+        </li>
+        <li>
+          <a href="#templating-appenditem">appendItem </a>
+        </li>
+        <li>
+          <a href="#templating-rendered">rendered</a>
+        </li>
+        <li>
+          <a href="#templating-rendered:collection">rendered:collection</a>
+        </li>
+        <li>
+          <a href="#templating-rendered:item">rendered:item</a>
+        </li>
+        <li>
+          <a href="#templating-rendered:empty">rendered:empty</a>
+        </li>
+      </ul>
+      <h2>
+        <a href="#event">Event</a>
+      </h2>
+      <ul>
+        <li>
+          <a href="#event-events">events </a>
+        </li>
+        <li>
+          <a href="#event-registerevents">registerEvents </a>
+        </li>
+        <li>
+          <a href="#event-unregisterevents">unregisterEvents </a>
+        </li>
+        <li>
+          <a href="#event-freeze">freeze </a>
+        </li>
+      </ul>
+      <h2>
+        <a href="#mixins">Mixins</a>
+      </h2>
+      <ul>
+        <li>
+          <a href="#mixins-registermixin">registerMixin </a>
+        </li>
+        <li>
+          <a href="#mixins-mixin">mixin </a>
+        </li>
+      </ul>
+      <h2>
+        <a href="#form">Form Handling</a>
+      </h2>
+      <ul>
+        <li>
+          <a href="#form handling-serialize">serialize </a>
+        </li>
+        <li>
+          <a href="#form handling-populate">populate </a>
+        </li>
+        <li>
+          <a href="#form handling-validateinput">validateInput </a>
+        </li>
+        <li>
+          <a href="#form handling-validate">validate</a>
+        </li>
+        <li>
+          <a href="#form handling-error">error</a>
+        </li>
+      </ul>
+      <h2>
+        <a href="#command">Command Line Interface</a>
+      </h2>
+      <ul>
+        <li>
+          <a href="#command line interface-create">create </a>
+        </li>
+        <li>
+          <a href="#command line interface-install">install </a>
+        </li>
+        <li>
+          <a href="#command line interface-router">router </a>
+        </li>
+        <li>
+          <a href="#command line interface-view">view </a>
+        </li>
+        <li>
+          <a href="#command line interface-collection-view">collection-view </a>
+        </li>
+        <li>
+          <a href="#command line interface-model">model </a>
+        </li>
+        <li>
+          <a href="#command line interface-collection">collection </a>
+        </li>
+        <li>
+          <a href="#command line interface-watch">watch </a>
+        </li>
+        <li>
+          <a href="#command line interface-start">start </a>
+        </li>
+      </ul>
+    </div>
+    <div class="container">      <h2 id="overview">Overview</h2>
+      <p>Opinionated Backbone, uses the following libraries:</p>
+      <ul>
+        <li>
+          <a href="http://documentcloud.github.com/underscore/">Underscore</a>
+        </li>
+        <li>
+          <a href="http://documentcloud.github.com/backbone/">Backbone</a>
+        </li>
+        <li>
+          <a href="https://github.com/madrobby/zepto">Zepto</a>
+        </li>
+        <li>
+          <a href="http://www.handlebarsjs.com/">Handlebars</a>
+        </li>
+        <li>
+          <a href="http://learnboost.github.com/stylus/">Stylus</a>
+        </li>
+        <li>
+          <a href="http://walmartlabs.github.com/lumbar">Lumbar</a>
+        </li>
+      </ul>
+      <h3 id="overview-quick">Quick Start</h3>
+      <p>Thorax can be used standalone but is designed to work best with         <a href="http://walmartlabs.github.com/lumbar">Lumbar</a>
+. The easiest way to setup a new Thoax + Lumbar project is with the the         <a href="http://walmartlabs.github.com/thorax-cli">Thorax command line library</a>
+:</p>
+      <pre>
+        <code>npm install -g thorax-cli
+thorax create project-name</code>
+      </pre>
+      <p>This will create a blank project. If you'd like to play with something that is already functional install the         <a href="http://walmartlabs.github.com/thorax-todos">Thorax Todos</a>
+ application:</p>
+      <pre>
+        <code>cd project-name
 thorax install thorax-todos
 jake init
-jake start
-</code></pre>
-
-<h2 id="configuration">Configuration</h2>
-
-<h3 id="configuration-configure">configure <em>Thorax.configure(options)</em></h3>
-
-<ul>
-<li>layout property</li>
-<li>scope property, what gets set on scope property</li>
-</ul>
-
-<h2 id="routers">Routers &amp; Layout</h2>
-
-<h3 id="routers &amp;amp; layout-modules">Modules</h3>
-
-<p>base and other modules, how are they created</p>
-
-<h3 id="routers &amp;amp; layout-create">create <em>Thorax.Router.create(module, protoProps [,classProps])</em></h3>
-
-<h3 id="routers &amp;amp; layout-view">view <em>router.view(name)</em></h3>
-
-<h3 id="routers &amp;amp; layout-setview">setView <em>Application.layout.setView(view)</em></h3>
-
-<h3 id="routers &amp;amp; layout-view">View Lifecycle Events</h3>
-
-<ul>
-<li>initialize:before</li>
-<li>initialize:after</li>
-<li>activated</li>
-<li>ready</li>
-<li>deactivated</li>
-<li>destroyed</li>
-</ul>
-
-<h2 id="loading">Loading Data</h2>
-
-<h3 id="loading data-load:start">load:start <em>event</em></h3>
-
-<h3 id="loading data-load:end">load:end <em>event</em></h3>
-
-<ul>
-<li>model / collection load event triggers</li>
-<li>module loading event triggers</li>
-</ul>
-
-<h3 id="loading data-load">load <em>model/collection.load(callback [,failback])</em></h3>
-
-<h3 id="loading data-bindtoroute">bindToRoute <em>router.bindToRoute(callback [,failback])</em></h3>
-
-<h2 id="templating">Templating</h2>
-
-<p>Intro, covering views with no model / collection, view with model, view with collection, view with both.</p>
-
-<h3 id="templating-name">name <em>view.name</em></h3>
-
-<h3 id="templating-registerhelper">registerHelper <em>App.View.registerHelper(name, callback)</em></h3>
-
-<h3 id="templating-template">template *view.template(name, [,scope])</h3>
-
-<h3 id="templating-view">view <em>view.view(name [,options])</em></h3>
-
-<ul>
-<li>example called from view</li>
-<li>example called from template, view handling inside templates</li>
-</ul>
-
-<h3 id="templating-html">html <em>view.html([content])</em></h3>
-
-<h3 id="templating-setmodel">setModel <em>view.setModel(model)</em></h3>
-
-<ul>
-<li>model set event</li>
-</ul>
-
-<h3 id="templating-render">render <em>view.render()</em></h3>
-
-<h3 id="templating-context">context <em>view.context([model])</em></h3>
-
-<ul>
-<li>options</li>
-</ul>
-
-<h3 id="templating-setcollection">setCollection <em>view.setCollection(collection)</em></h3>
-
-<ul>
-<li><p>collection set event</p></li>
-<li><p>options</p></li>
-</ul>
-
-<h3 id="templating-itemcontext">itemContext <em>view.itemContext(model, index)</em></h3>
-
-<h3 id="templating-rendercollection">renderCollection <em>view.renderCollection()</em></h3>
-
-<h3 id="templating-renderitem">renderItem <em>view.renderItem()</em></h3>
-
-<h3 id="templating-renderempty">renderEmpty <em>view.renderEmpty()</em></h3>
-
-<h3 id="templating-appenditem">appendItem <em>view.appendItem(model [,index])</em></h3>
-
-<h3 id="templating-rendered">rendered</h3>
-
-<h3 id="templating-rendered:collection">rendered:collection</h3>
-
-<h3 id="templating-rendered:item">rendered:item</h3>
-
-<h3 id="templating-rendered:empty">rendered:empty</h3>
-
-<h2 id="events">Events</h2>
-
-<h3 id="events-events">events <em>App.View.events</em></h3>
-
-<ul>
-<li>dom events</li>
-<li>view events</li>
-<li>model events</li>
-<li>collection events</li>
-</ul>
-
-<h3 id="events-registerevents">registerEvents <em>App.View.registerEvents(events)</em></h3>
-
-<h3 id="events-unregisterevents">unregisterEvents <em>App.View.unregisterEvents([event])</em></h3>
-
-<h3 id="events-freeze">freeze *view.freeze([options])</h3>
-
-<ul>
-<li>model</li>
-<li>collection</li>
-</ul>
-
-<h2 id="mixins">Mixins</h2>
-
-<h3 id="mixins-registermixin">registerMixin <em>App.View.registerMixin(name, callback, methods)</em></h3>
-
-<h3 id="mixins-mixin">mixin <em>view.mixin(name)</em></h3>
-
-<h2 id="form">Form Handling</h2>
-
-<h3 id="form handling-serialize">serialize <em>view.serialize(callback)</em></h3>
-
-<h3 id="form handling-populate">populate <em>view.populate([attributes])</em></h3>
-
-<h3 id="form handling-validateinput">validateInput <em>view.validateInput()</em></h3>
-
-<h3 id="form handling-validate">validate</h3>
-
-<h3 id="form handling-error">error</h3>
-  </div>
+jake start</code>
+      </pre>
+      <h2 id="configuration">Configuration</h2>
+      <h3 id="configuration-configure">configure         <em>Thorax.configure(options)</em>
+      </h3>
+      <ul>
+        <li>layout property</li>
+        <li>scope property, what gets set on scope property</li>
+      </ul>
+      <h2 id="routers">Routers &amp; Layout</h2>
+      <h3 id="routers &amp;amp; layout-modules">Modules</h3>
+      <p>base and other modules, how are they created</p>
+      <h3 id="routers &amp;amp; layout-create">create         <em>Thorax.Router.create(module, protoProps [,classProps])</em>
+      </h3>
+      <h3 id="routers &amp;amp; layout-view">view         <em>router.view(name)</em>
+      </h3>
+      <h3 id="routers &amp;amp; layout-setview">setView         <em>Application.layout.setView(view)</em>
+      </h3>
+      <h3 id="routers &amp;amp; layout-view">View Lifecycle Events</h3>
+      <ul>
+        <li>initialize:before</li>
+        <li>initialize:after</li>
+        <li>activated</li>
+        <li>ready</li>
+        <li>deactivated</li>
+        <li>destroyed</li>
+      </ul>
+      <h2 id="loading">Loading Data</h2>
+      <h3 id="loading data-load:start">load:start         <em>event</em>
+      </h3>
+      <h3 id="loading data-load:end">load:end         <em>event</em>
+      </h3>
+      <ul>
+        <li>model / collection load event triggers</li>
+        <li>module loading event triggers</li>
+      </ul>
+      <h3 id="loading data-load">load         <em>model/collection.load(callback [,failback])</em>
+      </h3>
+      <h3 id="loading data-bindtoroute">bindToRoute         <em>router.bindToRoute(callback [,failback])</em>
+      </h3>
+      <h2 id="templating">Templating</h2>
+      <p>Intro, covering views with no model / collection, view with model, view with collection, view with both.</p>
+      <h3 id="templating-name">name         <em>view.name</em>
+      </h3>
+      <h3 id="templating-registerhelper">registerHelper         <em>App.View.registerHelper(name, callback)</em>
+      </h3>
+      <h3 id="templating-template">template         <em>view.template(name, [,scope])</em>
+      </h3>
+      <h3 id="templating-view">view         <em>view.view(name [,options])</em>
+      </h3>
+      <ul>
+        <li>example called from view</li>
+        <li>example called from template, view handling inside templates</li>
+      </ul>
+      <h3 id="templating-html">html         <em>view.html([content])</em>
+      </h3>
+      <h3 id="templating-setmodel">setModel         <em>view.setModel(model)</em>
+      </h3>
+      <ul>
+        <li>model set event</li>
+      </ul>
+      <h3 id="templating-render">render         <em>view.render()</em>
+      </h3>
+      <h3 id="templating-context">context         <em>view.context([model])</em>
+      </h3>
+      <ul>
+        <li>options</li>
+      </ul>
+      <h3 id="templating-setcollection">setCollection         <em>view.setCollection(collection)</em>
+      </h3>
+      <ul>
+        <li>
+          <p>collection set event</p>
+        </li>
+        <li>
+          <p>options</p>
+        </li>
+      </ul>
+      <h3 id="templating-itemcontext">itemContext         <em>view.itemContext(model, index)</em>
+      </h3>
+      <h3 id="templating-rendercollection">renderCollection         <em>view.renderCollection()</em>
+      </h3>
+      <h3 id="templating-renderitem">renderItem         <em>view.renderItem()</em>
+      </h3>
+      <h3 id="templating-renderempty">renderEmpty         <em>view.renderEmpty()</em>
+      </h3>
+      <h3 id="templating-appenditem">appendItem         <em>view.appendItem(model [,index])</em>
+      </h3>
+      <h3 id="templating-rendered">rendered</h3>
+      <h3 id="templating-rendered:collection">rendered:collection</h3>
+      <h3 id="templating-rendered:item">rendered:item</h3>
+      <h3 id="templating-rendered:empty">rendered:empty</h3>
+      <h2 id="event">Event</h2>
+      <h3 id="event-events">events         <em>App.View.events</em>
+      </h3>
+      <ul>
+        <li>dom events</li>
+        <li>view events</li>
+        <li>model events</li>
+        <li>collection events</li>
+      </ul>
+      <h3 id="event-registerevents">registerEvents         <em>App.View.registerEvents(events)</em>
+      </h3>
+      <h3 id="event-unregisterevents">unregisterEvents         <em>App.View.unregisterEvents([event])</em>
+      </h3>
+      <h3 id="event-freeze">freeze         <em>view.freeze([options])</em>
+      </h3>
+      <ul>
+        <li>model</li>
+        <li>collection</li>
+      </ul>
+      <h2 id="mixins">Mixins</h2>
+      <h3 id="mixins-registermixin">registerMixin         <em>App.View.registerMixin(name, callback, methods)</em>
+      </h3>
+      <h3 id="mixins-mixin">mixin         <em>view.mixin(name)</em>
+      </h3>
+      <h2 id="form">Form Handling</h2>
+      <h3 id="form handling-serialize">serialize         <em>view.serialize(callback)</em>
+      </h3>
+      <h3 id="form handling-populate">populate         <em>view.populate([attributes])</em>
+      </h3>
+      <h3 id="form handling-validateinput">validateInput         <em>view.validateInput()</em>
+      </h3>
+      <h3 id="form handling-validate">validate</h3>
+      <h3 id="form handling-error">error</h3>
+      <h2 id="command">Command Line Interface</h2>
+      <p>It is possible to use the main         <a href="https://github.com/walmartlabs/thorax/blob/master/generator/app/lib/thorax.js">thorax.js</a>
+ library completely standalone, but all of the documentation will assume you will be using a project structure created by the command line interface.</p>
+      <h3 id="command line interface-create">create         <em>thorax create $project-name [$npm-module-name]</em>
+      </h3>
+      <p>Create a new thorax project. $npm-module-name may be an npm package name that contains a generator (just an index.js file exporting a function to run). The two handy generators you'll want to use are:</p>
+      <ul>
+        <li>thorax-web</li>
+        <li>thorax-mobile</li>
+      </ul>
+      <p>To generate a new project called "todos" you would run:</p>
+      <pre>
+        <code>thorax create todos thorax-web</code>
+      </pre>
+      <p>This will create the following directory structure</p>
+      <ul>
+        <li>
+          <strong>app</strong>
+          <ul>
+            <li>
+              <strong>collection.js</strong>
+            </li>
+            <li>
+              <strong>collections</strong>
+            </li>
+            <li>
+              <strong>init.js</strong>
+ - Application setup file</li>
+            <li>
+              <strong>lib</strong>
+ - jQuery / Zepto, Backbone, etc</li>
+            <li>
+              <strong>model.js</strong>
+            </li>
+            <li>
+              <strong>models</strong>
+            </li>
+            <li>
+              <strong>platform</strong>
+ - Platform specific files (i.e. Android only code)</li>
+            <li>
+              <strong>router.js</strong>
+            </li>
+            <li>
+              <strong>routers</strong>
+            </li>
+            <li>
+              <strong>styles</strong>
+            </li>
+            <li>
+              <strong>templates</strong>
+            </li>
+            <li>
+              <strong>view.js</strong>
+            </li>
+            <li>
+              <strong>views</strong>
+            </li>
+          </ul>
+        </li>
+        <li>
+          <strong>config</strong>
+        </li>
+        <li>
+          <strong>generators</strong>
+ - Code generation templates used by the command line interface</li>
+        <li>
+          <strong>lumbar.json</strong>
+ - See           <a href="http://walmartlabs.github.com/lumbar">Lumbar documentation</a>
+        </li>
+        <li>
+          <strong>Jakefile</strong>
+        </li>
+        <li>
+          <strong>node_modules</strong>
+        </li>
+        <li>
+          <strong>package.json</strong>
+        </li>
+        <li>
+          <strong>public</strong>
+ - Static assets, Lumbar will generate it's output here</li>
+        <li>
+          <strong>tasks</strong>
+ - Jake tasks</li>
+        <li>
+          <strong>thorax.json</strong>
+ - Path information for the thorax command line interface</li>
+      </ul>
+      <p>All other thorax commands are run from inside the project directory.</p>
+      <pre>
+        <code>cd todos</code>
+      </pre>
+      <h3 id="command line interface-install">install         <em>thorax install $npm-module-name</em>
+      </h3>
+      <p>Install an npm module into your project, adding the module as a dependency in your package.json file. A simple express server module is available named         <em>thorax-server</em>
+      </p>
+      <pre>
+        <code>thorax install thorax-server</code>
+      </pre>
+      <p>This makes available the         <em>jake start</em>
+ command which you can use to run a simple express server that is serving out your app.</p>
+      <h3 id="command line interface-router">router         <em>thorax router $module-name</em>
+      </h3>
+      <p>Generate a router class and a module of the same name. A module is defined in         <em>lumbar.json</em>
+ and is composed of models, collections, views, templates, styles and a single router. Lumbar combines these files into a single js and single css file which are lazily loaded when one of the module's route's is visited. Running:</p>
+      <pre>
+        <code>thorax router main</code>
+      </pre>
+      <ul>
+        <li>creates: app/routers/main.js</li>
+        <li>adds a JSON fragment for the           <em>main</em>
+ module in           <em>lumbar.json</em>
+        </li>
+      </ul>
+      <p>You'll need to fill in the         <em>routes</em>
+ hash inside         <em>lumbar.json</em>
+ with path: method name pairs to match your router class. This is how Lumbar / Thorax work together to lazily load your modules.</p>
+      <h3 id="command line interface-view">view         <em>thorax view $module-name $view-name</em>
+      </h3>
+      <p>Generate a view class and template of the same name. Running:</p>
+      <pre>
+        <code>thorax view main header</code>
+      </pre>
+      <ul>
+        <li>creates: app/views/header.js</li>
+        <li>creates: app/templates/header.handlebars</li>
+        <li>adds the appropriate JSON fragments in the           <em>main</em>
+ module in           <em>lumbar.json</em>
+        </li>
+      </ul>
+      <h3 id="command line interface-collection-view">collection-view         <em>thorax collection-view $module-name $view-name</em>
+      </h3>
+      <p>Generate a view class which will render a collection and the appropriate templates of the same name. Running:</p>
+      <pre>
+        <code>thorax collection-view main header</code>
+      </pre>
+      <ul>
+        <li>creates: todo-list.js</li>
+        <li>creates: app/templates/todo-list.handlebars</li>
+        <li>creates: app/templates/todo-list-item.handlebars</li>
+        <li>creates: app/templates/todo-list-empty.handlebars</li>
+        <li>adds the appropriate JSON fragments in the           <em>main</em>
+ module in           <em>lumbar.json</em>
+        </li>
+      </ul>
+      <h3 id="command line interface-model">model         <em>thorax model $module-name $model-name</em>
+      </h3>
+      <p>Generate a model class. Running:</p>
+      <pre>
+        <code>thorax model main todo</code>
+      </pre>
+      <ul>
+        <li>creates: app/models/todo.js</li>
+        <li>adds the appropriate JSON fragments in the           <em>main</em>
+ module in           <em>lumbar.json</em>
+        </li>
+      </ul>
+      <h3 id="command line interface-collection">collection         <em>thorax collection $module-name $collection-name</em>
+      </h3>
+      <p>Generate a collection class. Running:</p>
+      <pre>
+        <code>thorax collection main todo-list</code>
+      </pre>
+      <ul>
+        <li>creates: app/collections/todo-list.js</li>
+        <li>adds the appropriate JSON fragments in the           <em>main</em>
+ module in           <em>lumbar.json</em>
+        </li>
+      </ul>
+      <h3 id="command line interface-watch">watch         <em>jake watch</em>
+      </h3>
+      <p>Watches all files, generating the appropriate JavaScript or CSS in the         <em>public</em>
+ folder when changes occur.</p>
+      <pre>
+        <code>jake watch</code>
+      </pre>
+      <h3 id="command line interface-start">start         <em>jake start</em>
+      </h3>
+      <p>Assuming you installed the         <em>thorax-server</em>
+ npm package this command will start a simple express server for the application you just created.</p>
+      <pre>
+        <code>jake start</code>
+      </pre>
+</div>
 </body>
-<script src="http://code.jquery.com/jquery-1.5.min.js"></script></html>
+</html>

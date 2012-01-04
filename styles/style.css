@@ -2,7 +2,7 @@
       font-size: 14px;
       line-height: 22px;
       font-family: Helvetica Neue, Helvetica, Arial;
-      background: #f4f4f4 url("background.png");
+      background: #f4f4f4 url("/assets/background.png");
     }
     .interface {
       font-family: "Lucida Grande", "Lucida Sans Unicode", Helvetica, Arial, sans-serif !important;
@@ -132,7 +132,7 @@
     }
 
     .container pre {
-      text-indent: -20px;
+      font-weight:bold;
     }
 
       p em {
@@ -141,7 +141,7 @@
         border: 1px solid #ddd;
         zoom: 1;
       }
-      code, .container h3 em {
+      .container h3 em {
         margin-left: 20px;
       }
       .container h3 em {
@@ -152,7 +152,7 @@
         background-color:#000;
         color:#fff;
         font-size: 12px;
-        padding: 17px;
+        padding: 17px 17px 0px 17px;
         border: 5px solid #eee;
         margin: 0px 0 30px;
         box-shadow: 0 0 10px #666;
