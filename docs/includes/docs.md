@@ -24,6 +24,18 @@ This will create a blank project. If you'd like to play with something that is a
     jake init
     jake start
 
+
+Hey
+
+    ```blah blah```
+
+gsdgs
+
+```blah
+
+blah
+```
+
 ## Configuration
 
 ### configure *Thorax.configure(options)*
