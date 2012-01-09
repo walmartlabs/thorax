@@ -41,7 +41,6 @@
         el: options.layout || '.layout'
       });
 
-      scope.moduleMap = moduleMap;
     },
     //used by "template" and "view" template helpers, not thread safe though it shouldn't matter in browser land
     _currentTemplateContext: false,
@@ -102,49 +101,6 @@
         }
       };
     }
-  };
-
-  //private functions for Thorax
-  var moduleMapRouter;
-  var loadedModules = {}
-  function moduleMap(map, loadPrefix) {
-    if (typeof $script === 'undefined') {
-      throw new Error('script.js required to run Thorax');
-    }
-    if (moduleMapRouter) {
-      return;
-    }
-    var routes = {},
-    handlers = {
-      routes: routes
-    };
-    // For each route create a handler that will load the associated module on request
-    for (var route in map) {
-      var name = map[route];
-      var handlerName = "loader" + name;
-      routes[route] = handlerName
-      handlers[handlerName] = generateLoader(name, loadPrefix);
-    }
-    moduleMapRouter = new (Backbone.Router.extend(handlers));
-  };
-
-  function generateLoader(name, loadPrefix) {
-    var key = (loadPrefix || '') + name;
-    return function() {
-      // if we've already tried to load this module, we've got a problem
-      if (loadedModules[key]) {
-        console.error('module was not loaded properly (no route replacement): ' + key);
-        return;
-      }
-
-      scope.trigger('load:start');
-      $script(key, function() {
-        scope.trigger('load:end');
-        loadedModules[key] = true;
-        // Reload with the new route
-        Backbone.history.loadUrl();
-      });
-    };
   };
 
   //private vars for Thorax.View
