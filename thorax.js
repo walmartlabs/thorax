@@ -742,6 +742,9 @@
   //events and mixins properties need act as inheritable, not static / shared
   Thorax.View.extend = function(protoProps, classProps) {
     var child = Backbone.View.extend.call(this, protoProps, classProps);
+    if (child.name) {
+      scope.Views[child.name] = child;
+    }
     child.mixins = _.clone(this.mixins);
     child.events = _.clone(this.events);
     child.events.model = _.clone(this.events.model);
@@ -1180,24 +1183,30 @@
       fetchQueue.call(this, options || {}, Backbone.Collection.prototype.fetch);
     },
     load: loadData
-  },{
-    create: function(name, protoProps, classProps) {
-      protoProps.name = name;
-      return scope.Collections[name] = this.extend(protoProps, classProps);
-    }
   });
+
+  Thorax.Collection.extend = function(protoProps, classProps) {
+    var child = Backbone.Collection.extend.call(this, protoProps, classProps);
+    if (child.name) {
+      scope.Collections[child.name] = child;
+    }
+    return child;
+  };
 
   Thorax.Model = Backbone.Model.extend({
     fetch: function(options) {
       fetchQueue.call(this, options || {}, Backbone.Model.prototype.fetch);
     },
     load: loadData
-  },{
-    create: function(name, protoProps, classProps) {
-      protoProps.name = name;
-      return scope.Models[name] = this.extend(protoProps, classProps);
-    }
   });
+
+  Thorax.Model.extend = function(protoProps, classProps) {
+    var child = Backbone.Model.extend.call(this, protoProps, classProps);
+    if (child.name) {
+      scope.Models[child.name] = child;
+    }
+    return child;
+  };
 
   function loadData(callback, failback) {
     if (this.isPopulated()) {
