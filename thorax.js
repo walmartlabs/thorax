@@ -689,10 +689,6 @@
       return [x, y];
     }
   }, {
-    create: function(name, protoProps, classProps) {
-      protoProps.name = name;
-      return scope.Views[name] = this.extend(protoProps, classProps);
-    },
     registerHelper: function(name, callback) {
       this[name] = callback;
       Handlebars.registerHelper(name, this[name]);
