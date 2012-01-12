@@ -1,14 +1,36 @@
+@charset "UTF-8";
+
+
+@font-face {  /*----- CHANGE TO TYPEKIT ------*/
+ font-family: 'PreloSlabMedium';
+ src: url('fonts/preloslab-medium-webfont.eot');
+ src: url('fonts/preloslab-medium-webfont.eot?#iefix') format('embedded-opentype'), url('fonts/preloslab-medium-webfont.woff') format('woff'), url('fonts/preloslab-medium-webfont.ttf') format('truetype'), url('fonts/preloslab-medium-webfont.svg#PreloSlabMedium') format('svg');
+ font-weight: normal;
+ font-style: normal;
+}
+ @font-face {
+ font-family: 'PreloSlabBold';
+ src: url('fonts/preloslab-bold-webfont.eot');
+ src: url('fonts/preloslab-bold-webfont.eot?#iefix') format('embedded-opentype'), url('fonts/preloslab-bold-webfont.woff') format('woff'), url('fonts/preloslab-bold-webfont.ttf') format('truetype'), url('fonts/preloslab-bold-webfont.svg#PreloSlabBold') format('svg');
+ font-weight: normal;
+ font-style: normal;
+}
+
     body {
+      background: #48494c url(../assets/images/hdr_bg.png);
+      background-repeat: repeat-x;
+      color: #DBDBDB;
+      font-family: "Helvetica Neue Medium", "Helvetica Neue", Helvetica, Arial, Trebuchet, sans-serif;
       font-size: 14px;
       line-height: 22px;
-      font-family: Helvetica Neue, Helvetica, Arial;
-      background:#fff;
     }
     .interface {
       font-family: "Lucida Grande", "Lucida Sans Unicode", Helvetica, Arial, sans-serif !important;
     }
     div#sidebar {
-      background: #fff;
+      font-family: 'PreloSlabBold';
+      font-size: 13px;
+      background: #000;
       position: fixed;
       top: 0; left: 0; bottom: 0;
       width: 200px;
@@ -17,6 +39,7 @@
       padding: 15px 0 30px 30px;
       border-right: 1px solid #ddd;
       box-shadow: 0 0 20px #ccc; -webkit-box-shadow: 0 0 20px #ccc; -moz-box-shadow: 0 0 20px #ccc;
+      background: #242426;
     }
       #sidebar h2 {
         margin: 0;
@@ -28,20 +51,21 @@
 
         #sidebar h2 a, a:visited {
           display: block;
-          color: black;
-          font-weight: bold;
+          color: #A5843C;
+          font-family: 'PreloSlabBold';
+          text-decoration: none;
           margin-top: 15px;
+          font-size: 16px;
         }
           #sidebar h2 a:hover {
             text-decoration: underline;
           }
       #sidebar ul {
-        font-size: 11px;
+        font-size: 13px;
         line-height: 14px;
-        margin: 5px 0 0 0;
+        margin: 0;
         padding-left: 0px;
         list-style-type: none;
-        font-family: Lucida Grande;
       }
         #sidebar li {
           cursor: pointer;
@@ -50,12 +74,12 @@
         }
 
         #sidebar li:before {
-          content: '– ';  
+          content: ' - ';  
         }
 
           #sidebar li a {
             text-decoration: none;
-            color: black;
+            color: #DBDBDB;
           }
             #sidebar li a:hover {
               text-decoration: underline;
@@ -63,7 +87,11 @@
     div.container {
       position: relative;
       width: 700px;
-      margin: 40px 0 50px 260px;
+      margin: 26px 0 50px 224px;
+      background-image: url(../assets/images/badge_thorax.png);
+      background-repeat: no-repeat;
+      padding-top: 48px;
+      padding-left: 78px;
     }
     p, div.container ul {
       margin: 20px 0;
@@ -76,14 +104,14 @@
       }
       div.container ul {
         list-style: circle;
-        font-size: 12px;
+        font-size: 13px;
         padding-left: 15px;
       }
     a, a:visited {
-      color: #444;
+      color: #fff;
     }
     a:active, a:hover {
-      color: #000;
+      color: #fff;
     }
     a img {
       border: 0;
@@ -95,14 +123,21 @@
         font-size: 26px;
       }
       .container h2 {
-        border-top: 1px solid #CCC;
+        color: #E3AB32;
+        font-size: 22px;
+        font-family: PreloSlabMedium;
+        font-weight: normal;
       }
     h3 {
-      padding-bottom: 0;
-      margin-bottom: -18px;
-      font-size: 20px;
-      line-height: 30px;
-      white-space: nowrap;
+      font-family: PreloSlabMedium;
+      font-size: 19px;
+      color: white;
+      border-bottom-width: 1px;
+      border-bottom-style: solid;
+      border-bottom-color: white;
+      margin-bottom: 6px;
+      font-style: normal;
+      font-weight: normal;
     }
 
     .container h3 {
@@ -125,23 +160,22 @@
         }
     code, pre, p em, .container em {
       font-family: Monaco, Consolas, "Lucida Console", monospace;
-      font-size: 12px;
+      font-size: 13px;
       line-height: 18px;
       font-style: normal;
       font-weight: normal;
     }
 
     .container pre {
-      font-weight:bold;
+      text-indent: -20px;
     }
 
       p em {
         padding: 0px 3px;
-        background: #fff;
-        border: 1px solid #ddd;
+        color: #E3AB32;
         zoom: 1;
       }
-      .container h3 em {
+      code, .container h3 em {
         margin-left: 20px;
       }
       .container h3 em {
@@ -152,7 +186,7 @@
         background-color:#000;
         color:#fff;
         font-size: 12px;
-        padding: 17px 17px 0px 17px;
+        padding: 17px;
         border: 5px solid #eee;
         margin: 0px 0 30px;
         box-shadow: 0 0 10px #666;
