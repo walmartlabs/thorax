@@ -13,11 +13,20 @@
       {"src": "lib/backbone-localstorage.js", "global": true},
       {"src": "lib/script.js", "global": true},
       {"src": "lib/thorax.js", "global": true},
+      {"src": "lib/lumbar-loader.js"},
+      {"module-map": true},
+      {"src": "lib/lumbar-loader-standard.js"},
+      {"src": "lib/lumbar-loader-backbone.js"},
 
-      "js/app.js",
-      "module_map.json"
+      "js/app.js"
+      
     ],
     "todo": {
+      "static": [
+        "index.html",
+        "style.css",
+        "destroy.png"
+      ],
       "routes": {
         "": "list",
         "todo": "list"
@@ -38,5 +47,5 @@
     ],
     "js/views/todo-item.js": ["templates/todo-item.handlebars"]
   },
-  "loadPrefix": "./"
+  "loadPrefix": "../"
 }

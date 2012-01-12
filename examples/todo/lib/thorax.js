@@ -41,7 +41,6 @@
         el: options.layout || '.layout'
       });
 
-      scope.moduleMap = moduleMap;
     },
     //used by "template" and "view" template helpers, not thread safe though it shouldn't matter in browser land
     _currentTemplateContext: false,
@@ -102,49 +101,6 @@
         }
       };
     }
-  };
-
-  //private functions for Thorax
-  var moduleMapRouter;
-  var loadedModules = {}
-  function moduleMap(map, loadPrefix) {
-    if (typeof $script === 'undefined') {
-      throw new Error('script.js required to run Thorax');
-    }
-    if (moduleMapRouter) {
-      return;
-    }
-    var routes = {},
-    handlers = {
-      routes: routes
-    };
-    // For each route create a handler that will load the associated module on request
-    for (var route in map) {
-      var name = map[route];
-      var handlerName = "loader" + name;
-      routes[route] = handlerName
-      handlers[handlerName] = generateLoader(name, loadPrefix);
-    }
-    moduleMapRouter = new (Backbone.Router.extend(handlers));
-  };
-
-  function generateLoader(name, loadPrefix) {
-    var key = (loadPrefix || '') + name;
-    return function() {
-      // if we've already tried to load this module, we've got a problem
-      if (loadedModules[key]) {
-        console.error('module was not loaded properly (no route replacement): ' + key);
-        return;
-      }
-
-      scope.trigger('load:start');
-      $script(key, function() {
-        scope.trigger('load:end');
-        loadedModules[key] = true;
-        // Reload with the new route
-        Backbone.history.loadUrl();
-      });
-    };
   };
 
   //private vars for Thorax.View
@@ -733,10 +689,6 @@
       return [x, y];
     }
   }, {
-    create: function(name, protoProps, classProps) {
-      protoProps.name = name;
-      return scope.Views[name] = this.extend(protoProps, classProps);
-    },
     registerHelper: function(name, callback) {
       this[name] = callback;
       Handlebars.registerHelper(name, this[name]);
@@ -786,6 +738,9 @@
   //events and mixins properties need act as inheritable, not static / shared
   Thorax.View.extend = function(protoProps, classProps) {
     var child = Backbone.View.extend.call(this, protoProps, classProps);
+    if (child.name) {
+      scope.Views[child.name] = child;
+    }
     child.mixins = _.clone(this.mixins);
     child.events = _.clone(this.events);
     child.events.model = _.clone(this.events.model);
@@ -1187,30 +1142,6 @@
     create: function(module, protoProps, classProps) {
       return scope.Routers[module.name] = new (this.extend(_.extend({}, module, protoProps), classProps));
     },
-
-    loadData: function(data, callback, canceled) {
-      if (data && data.isPopulated()) {
-        return callback(data);
-      }
-
-      function finalizer(isError) {
-        data.unbind('error', errorHandler);
-        if (isError) {
-          scope.trigger('load:end');
-        }
-        canceled && canceled.apply(this, arguments);
-      }
-      var errorHandler = _.bind(finalizer, this, true);
-      data.bind('error', errorHandler);
-
-      data.fetch({
-        success: Thorax.Router.bindToRoute(function() {
-            data.unbind('error', errorHandler);
-            callback.apply(this, arguments);
-          },
-          _.bind(finalizer, this, false))
-      });
-    },
     bindToRoute: bindToRoute
   });
 
@@ -1248,24 +1179,30 @@
       fetchQueue.call(this, options || {}, Backbone.Collection.prototype.fetch);
     },
     load: loadData
-  },{
-    create: function(name, protoProps, classProps) {
-      protoProps.name = name;
-      return scope.Collections[name] = this.extend(protoProps, classProps);
-    }
   });
+
+  Thorax.Collection.extend = function(protoProps, classProps) {
+    var child = Backbone.Collection.extend.call(this, protoProps, classProps);
+    if (child.name) {
+      scope.Collections[child.name] = child;
+    }
+    return child;
+  };
 
   Thorax.Model = Backbone.Model.extend({
     fetch: function(options) {
       fetchQueue.call(this, options || {}, Backbone.Model.prototype.fetch);
     },
     load: loadData
-  },{
-    create: function(name, protoProps, classProps) {
-      protoProps.name = name;
-      return scope.Models[name] = this.extend(protoProps, classProps);
-    }
   });
+
+  Thorax.Model.extend = function(protoProps, classProps) {
+    var child = Backbone.Model.extend.call(this, protoProps, classProps);
+    if (child.name) {
+      scope.Models[child.name] = child;
+    }
+    return child;
+  };
 
   function loadData(callback, failback) {
     if (this.isPopulated()) {
