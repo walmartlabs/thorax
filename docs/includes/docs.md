@@ -12,66 +12,179 @@ Opinionated Backbone, uses the following libraries:
 
 ### Quick Start
 
-Thorax can be used standalone but is designed to work best with [Lumbar](http://walmartlabs.github.com/lumbar). The easiest way to setup a new Thoax + Lumbar project is with the the [Thorax command line library](http://walmartlabs.github.com/thorax-cli):
+Thorax can be used standalone but is designed to work best with [Lumbar](http://walmartlabs.github.com/lumbar). The easiest way to setup a new Thoax + Lumbar project is with the thorax command line tool:
 
-    npm install -g thorax-cli
+    npm install -g lumbar thorax
     thorax create project-name
-
-This will create a blank project. If you'd like to play with something that is already functional install the [Thorax Todos](http://walmartlabs.github.com/thorax-todos) application:
-
     cd project-name
-    thorax install thorax-todos
-    jake init
-    jake start
+    lumbar build lumbar.json public
+    bin/server 8000
 
+This will create a hello world project, for a more complete example clone the [Thorax Todos](https://github.com/walmartlabs/thorax-todos) project. [Thorax Todos live demo](http://walmartlabs.github.com/thorax-todos/).
 
-Hey
+### Project Structure
 
-    ```blah blah```
-
-gsdgs
-
-```blah
-
-blah
-```
+- `bin` - executable node scripts
+- `generators` - code generation templates used by the [command line interface](#command)
+- `js` - application code, models, collections, views, routers
+- `lumbar.json` - [see Lumbar docs](http://walmartlabs.github.com/lumbar)
+- `static` - static files / assets that will end up in the `public` folder
+- `styles`
+- `templates` 
+- `thorax.json` - configuration for the [command line interface](#command)
 
 ## Configuration
 
+### Modules
+
+In your `lumbar.json` file you can specify the modules that compose your application. Any files inside of the `base` module will always be present, while files specified in other modules will only be loaded when a route from that module has been visited. [See the Lumbar docs](http://walmartlabs.github.com/lumbar) for a detailed explanation.
+
+Any configuration should be done inside of `js/init.js`. The `Application` object will not exist yet, you can reference it as `exports`.
+
 ### configure *Thorax.configure(options)*
 
-- layout property
-- scope property, what gets set on scope property
+Start Thorax and create the `Application.layout` object.
+
+- `layout` - string css selector or Element where the `Application.layout` object will attach, defaults to `.layout`
 
 ## Routers & Layout
 
-### Modules
+Thorax + Lumbar expects that you create one router of the same name as the module, per module. In the example project there is a `hello-world` module and a corresponding `js/routers/hello-world.js` file.
 
-base and other modules, how are they created
+### create *Application.Router.create(module, protoProps [,classProps])*
 
-### create *Thorax.Router.create(module, protoProps [,classProps])*
-### view *router.view(name)*
+Returns an `Application.Router` subclass. The module object will be automatically available inside the router file assuming it is part of a module.
+
+    Application.Router.create(module, {
+      index: function() {}
+    });
+
+Each router method should redirect to another router method or call `Application.layout.setView`
+
+### view *router.view(name [,attributes])*
+
+Create a new view instance, looking it up by the `name` property in the view's class definition.
+
 ### setView *Application.layout.setView(view)*
+
+Append the view to the `Application.layout` object, displaying it on the page.
+
+    routerMethod: function(id) {
+      var view = this.view('view/name');
+      view.bind('ready', function() {
+        view.$('input:first')[0].focus();
+      });
+      this.setView(view);
+    }
+
+This will trigger two events on the `Application.layout` object, both of which will receive the new view and the old view (if present):
+
+- `change:view:start` - immediately after `setView` call
+- `change:view:end` - old view destroyed, new view in DOM and ready
 
 ### View Lifecycle Events
 
-- initialize:before
-- initialize:after
-- activated
-- ready
-- deactivated
-- destroyed
+By calling `Application.layout.setView` on a given view various events will be triggered on that view.
+
+- `initialize:before` - during constructor call, before *initialize* has been called
+- `initialize:after` - during construcor call, after *initialize* has been called
+- `activated` - immediately after *setView* was called with the view
+- `ready` - *view.el* attached to parent
+- `deactivated` - *setView* called with the next view, *view.el* still attached to parent
+- `destroyed` - after the *view.el* has been removed from parent, immediately before *view.el* and child views are destroyed
 
 ## Loading Data
 
-### load:start *event*
-### load:end *event*
+Various components in Thorax trigger two load events: `load:start` and `load:end`. They will be triggered in the following circumstances:
 
-- model / collection load event triggers
-- module loading event triggers
+- on a model or collection when `sync` is called (via `fetch`, `save`, etc)
+- on a view, when model or collection has been set on the view with `setModel` or `setCollection` and the model or collection triggers the event
+- on the `Application` object when a module is loaded, or when `model/collection.load` is called
+
+To implement both modal (blocking) and inline load indicators in your application:
+
+    Application.bind('load:start', function() {
+      //show modal loading indicator
+    });
+    Application.bind('load:end', function() {
+      //hide modal loading indicator
+    });
+
+    Application.View.registerEvents({
+      'load:start': function() {
+        //show inline loading indicator
+      },
+      'load:end': function() {
+        //hide inline loading indicator
+      }
+    });
 
 ### load *model/collection.load(callback [,failback])*
+
+Use this method when you need to display a blocking load indicator or can't set the next view until the requested data has loaded.
+
+Calls `fetch` on the model or collection, triggering `load:start` and `load:end` on both the model / collection and the `Application` object. `callback` and `failback` will be used as arguments to `bindToRoute`.
+
+    routerMethod: function(id) {
+      var view = this.view('view/name');
+      var model = new Application.Model({id: id});
+      //will trigger load:start on Application, model.fetch call
+      model.load(_.bind(function() {
+        //callback only called if browser still on this route
+        //load:end triggered on Application
+        view.setModel(model);
+        this.setView(view);
+      }, this), function() {
+        //failback only called if browser has left this route
+      });
+    }
+
 ### bindToRoute *router.bindToRoute(callback [,failback])*
+
+Used by `model/collection.load`. Binds the callback to the current route. If the browser navigtates to another route in the time between when the callback is bound and when it is executed, callback will not be called. Else failback will be called if present.
+
+    routerMethod: function() {
+      var callback = this.bindToRoute(function() {
+        //callback called if browser is still on route
+      });
+      setTimeout(callback, 5000);
+    }
+
+## Event 
+
+Thorax adds to Backbone's event handling by making
+
+### events *Application.View.events*
+
+    Application.View.extend({
+      name: 'view-name',
+      events: {
+        custom: '_onCustom',
+        'click a': '_onClick',
+        model: {
+          change: '_onChange'
+        },
+        collection: {
+          add: function(model){}
+        }
+      },
+      _onCustom: function(){},
+      _onClick: function(event){},
+      _onChange: function(){}
+    });
+
+- dom events
+- view events
+- model events
+- collection events
+
+### registerEvents *Application.View.registerEvents(events)*
+
+### unregisterEvents *Application.View.unregisterEvents([event])*
+
+### freeze *view.freeze([options])*
+
+`setModel` and `setCollection` add event handlers to the view, call freeze to remove them. `options` may contain a `model` or `collection` key that should contain the model or collection that was set with `setModel` or `setCollection`.
 
 ## Templating
 
@@ -124,30 +237,6 @@ Intro, covering views with no model / collection, view with model, view with col
 
 ### rendered:empty
 
-## Event 
-
-### events *App.View.events*
-
-- dom events
-- view events
-- model events
-- collection events
-
-### registerEvents *App.View.registerEvents(events)*
-
-### unregisterEvents *App.View.unregisterEvents([event])*
-
-### freeze *view.freeze([options])*
-
-- model
-- collection
-
-## Mixins
-
-### registerMixin *App.View.registerMixin(name, callback, methods)*
-
-### mixin *view.mixin(name)*
-
 ## Form Handling
 
 ### serialize *view.serialize(callback)*
@@ -160,67 +249,49 @@ Intro, covering views with no model / collection, view with model, view with col
 
 ### error
 
+## Mixins
+
+### registerMixin *Application.View.registerMixin(name, callback, methods)*
+
+Create a named mixin. Callback will be called with the context of the view instance calling `mixin`. `methods` will be added to the view instance.
+
+    Application.View.registerMixin('mixin-name', function() {
+      
+    }, {
+      methodName: function(){}
+    });
+
+    Application.View.extend({
+      name: 'view-name',
+      initialize: function() {
+        this.mixin('mixin-name');
+      }
+    });
+
+### mixin *view.mixin(name)*
+
+Apply a given mixin by name. The mixin will only be applied once, thus duplicate calls `mixin` with the same `name` will not cause the mixin callback to be run multiple times.
+
 ## Command Line Interface
 
-It is possible to use the main [thorax.js](https://github.com/walmartlabs/thorax/blob/master/generator/app/lib/thorax.js) library completely standalone, but all of the documentation will assume you will be using a project structure created by the command line interface.
+It is possible to use the main [thorax.js](https://github.com/walmartlabs/thorax/blob/master/thorax.js) library completely standalone, but all of the documentation will assume you will be using a project structure created by the command line interface. To install the command line tools run:
 
-### create *thorax create $project-name [$npm-module-name]*
+    npm install -g lumbar thorax
 
-Create a new thorax project. $npm-module-name may be an npm package name that contains a generator (just an index.js file exporting a function to run). The two handy generators you'll want to use are:
+### create *thorax create $project-name*
 
-- thorax-web
-- thorax-mobile
-
-To generate a new project called "todos" you would run:
-
-    thorax create todos thorax-web
-
-This will create the following directory structure
-
-- **app**
-  - **collection.js**
-  - **collections**
-  - **init.js** - Application setup file
-  - **lib** - jQuery / Zepto, Backbone, etc
-  - **model.js**
-  - **models**
-  - **platform** - Platform specific files (i.e. Android only code)
-  - **router.js**
-  - **routers**
-  - **styles**
-  - **templates**
-  - **view.js**
-  - **views**
-- **config**
-- **generators** - Code generation templates used by the command line interface
-- **lumbar.json** - See [Lumbar documentation](http://walmartlabs.github.com/lumbar)
-- **Jakefile**
-- **node_modules**
-- **package.json**
-- **public** - Static assets, Lumbar will generate it's output here
-- **tasks** - Jake tasks
-- **thorax.json** - Path information for the thorax command line interface
-
-All other thorax commands are run from inside the project directory.
+Create a new thorax project. All other thorax commands are run from inside the project directory.
 
     cd todos
-
-### install *thorax install $npm-module-name*
-
-Install an npm module into your project, adding the module as a dependency in your package.json file. A simple express server module is available named *thorax-server*
-
-    thorax install thorax-server
-
-This makes available the *jake start* command which you can use to run a simple express server that is serving out your app.
 
 ### router *thorax router $module-name*
 
 Generate a router class and a module of the same name. A module is defined in *lumbar.json* and is composed of models, collections, views, templates, styles and a single router. Lumbar combines these files into a single js and single css file which are lazily loaded when one of the module's route's is visited. Running:
 
-    thorax router main
+    thorax router todos
 
-- creates: app/routers/main.js
-- adds a JSON fragment for the *main* module in *lumbar.json*
+- creates: app/routers/todos.js
+- adds a JSON fragment for the *todos* module in *lumbar.json*
 
 You'll need to fill in the *routes* hash inside *lumbar.json* with path: method name pairs to match your router class. This is how Lumbar / Thorax work together to lazily load your modules.
 
@@ -228,7 +299,7 @@ You'll need to fill in the *routes* hash inside *lumbar.json* with path: method 
 
 Generate a view class and template of the same name. Running:
 
-    thorax view main header
+    thorax view todos header
 
 - creates: app/views/header.js
 - creates: app/templates/header.handlebars
@@ -238,7 +309,7 @@ Generate a view class and template of the same name. Running:
 
 Generate a view class which will render a collection and the appropriate templates of the same name. Running:
 
-    thorax collection-view main header
+    thorax collection-view todos todo-list
 
 - creates: todo-list.js
 - creates: app/templates/todo-list.handlebars
@@ -250,7 +321,7 @@ Generate a view class which will render a collection and the appropriate templat
 
 Generate a model class. Running:
 
-    thorax model main todo
+    thorax model todos todo
 
 - creates: app/models/todo.js
 - adds the appropriate JSON fragments in the *main* module in *lumbar.json*
@@ -259,20 +330,26 @@ Generate a model class. Running:
 
 Generate a collection class. Running:
 
-    thorax collection main todo-list
+    thorax collection todos todo-list
 
 - creates: app/collections/todo-list.js
 - adds the appropriate JSON fragments in the *main* module in *lumbar.json*
 
-### watch *jake watch*
+### watch *lumbar watch $lumbar-json-location $output-directory*
 
-Watches all files, generating the appropriate JavaScript or CSS in the *public* folder when changes occur.
+Watches all files, generating the appropriate JavaScript or CSS in the `output-directory` when changes occur.
 
-    jake watch
+    lumbar watch ./lumbar.json ./public
 
-### start *jake start*
+### build *lumbar build $lumbar-json-location $output-dir*
 
-Assuming you installed the *thorax-server* npm package this command will start a simple express server for the application you just created.
+Just like watch, but runs once then exits.
 
-    jake start
+    lumbar build ./lumbar.json ./public
+
+### server *bin/server $port-number*
+
+The example project includes a server script that will start an express server with a static provider for the `public` directory of your project.
+
+    ./bin/server 8000
 

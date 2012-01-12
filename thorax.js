@@ -1178,6 +1178,7 @@
     fetch: function(options) {
       fetchQueue.call(this, options || {}, Backbone.Collection.prototype.fetch);
     },
+    sync: sync,
     load: loadData
   });
 
@@ -1193,6 +1194,7 @@
     fetch: function(options) {
       fetchQueue.call(this, options || {}, Backbone.Model.prototype.fetch);
     },
+    sync: sync,
     load: loadData
   });
 
@@ -1203,6 +1205,26 @@
     }
     return child;
   };
+
+  function sync(method, model_or_collection, options) {
+    var success, error;
+    if (options.success) {
+      success = options.success;
+      options.success = function() {
+        model_or_collection.trigger('load:end');
+        return success.apply(this, arguments);
+      };
+    }
+    if (options.error) {
+      error = options.error;
+      options.error = function() {
+        model_or_collection.trigger('load:end');
+        return error.apply(this, arguments);
+      };
+    }
+    model_or_collection.trigger('load:start');
+    return Backbone.sync.apply(this, arguments);
+  }
 
   function loadData(callback, failback) {
     if (this.isPopulated()) {
@@ -1247,6 +1269,7 @@
   function flushQueue(self, fetchQueue, handler) {
     return function() {
       var args = arguments;
+
       // Flush the queue. Executes any callback handlers that
       // may have been passed in the fetch options.
       fetchQueue.forEach(function(options) {
