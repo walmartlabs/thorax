@@ -1,7 +1,7 @@
 {
   "name": "thorax",
-  "version": "0.5.0",
-  "description": "Mobile Backbone",
+  "version": "0.6.1",
+  "description": "Strengthening your Backbone",
   "keywords": ["mobile", "backbone"],
   "author": "Ryan Eastridge <ryan@syntacticx.com> (http://syntacticx.com)",
   "repository": {

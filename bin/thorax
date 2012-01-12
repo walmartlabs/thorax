@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 var argv = require('optimist').argv,  
-  Thorax = require('../thorax.js'),
+  Thorax = require('../lib/cli.js'),
   action = argv._[0];
 
 // Show help prompt if requested or if the 
