@@ -49,15 +49,19 @@ module.exports = function(static) {
   });
 
   static.file('index.handlebars', function(file) {
+    function filter(str) {
+      return str.replace(/\./g,'-').replace(/\&amp\;/g, 'and').replace(/\s+/g, '-').toLowerCase();
+    }
+
     file.$(function(window) {
       //assign ids
       window.$('.container h2').each(function() {
-        this.id = this.innerHTML.split(/\s/).shift().replace(/\./g,'-').toLowerCase();
+        this.id = filter(this.innerHTML.split(/\s/).shift());
       });
       window.$('.container h3').each(function() {
-        var name = this.innerHTML.split(/\s/).shift();
+        var name = this.innerHTML.split(/\s/).shift().toLowerCase();
         var header = window.$(this).prevAll('h2:first')[0];
-        this.id = (header.innerHTML.replace(/\./g,'-') + '-' + name).toLowerCase();
+        this.id = filter(header.innerHTML) + '-' + name;
       });
       
       //build toc
