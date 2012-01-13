@@ -59,7 +59,13 @@ module.exports = function(static) {
         var header = window.$(this).prevAll('h2:first')[0];
         this.id = (header.innerHTML.replace(/\./g,'-') + '-' + name).toLowerCase();
       });
-      
+
+      // Code highlighting
+      window.$('code').each(function() {
+        // Ensure that html embedded is properly escaped
+        this.textContent = this.textContent.replace(/&/gm, '&amp;').replace(/</gm, '&lt;');;
+      });
+
       //build toc
       var toc_html = '';
       window.$('.container h2').each(function() {
