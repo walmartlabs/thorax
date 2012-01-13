@@ -51,7 +51,8 @@ div#sidebar {
   font-weight: inherit;
 }
 
-#sidebar h2 a, a:visited {
+#sidebar h2 a,
+a:visited {
   display: block;
   color: #A5843C;
   font-family: 'PreloSlabBold';
@@ -168,20 +169,14 @@ code, pre, p em, .container em {
   font-weight: normal;
 }
 
-.container pre {
-  text-indent: -20px;
-}
-
 p em {
   padding: 0px 3px;
   color: #E3AB32;
   zoom: 1;
 }
-code, .container h3 em {
-  margin-left: 10px;
-}
-.container h3 em {
-  font-size:14px;
+.container h3 > em {
+  display: block;
+  margin-left: 25px;
 }
 pre {
   border: 7px solid #A3A3A3;
