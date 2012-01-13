@@ -48,7 +48,7 @@ div#sidebar {
 	top: 0;
 	left: 0;
 	bottom: 0;
-	width: 20%;
+	right: 80%;
 	overflow-y: auto;
 	overflow-x: hidden;
 	padding: 0 0 2em 2em;
@@ -57,7 +57,6 @@ div#sidebar {
 	-moz-box-shadow: 0 0 1.42em #ccc;
 	box-shadow: 0 0 1.42em #ccc;
 	background: #242426;
-	z-index: 99;
 }
 
 #sidebar li.header {
@@ -114,15 +113,21 @@ div#sidebar {
 }
 
 div.container {
+	padding-top: 1em;
+	position: fixed;
+	left: 20%;
+	right: 0;
+	top: 0;
+	height: 100%;
+	overflow-y: auto;
+}
+div.page {
+  background-image: url(../assets/images/badge_thorax.png);
+  background-position: 2px 0;
+  background-repeat: no-repeat;
 	max-width: 700px;
-	margin: 1.85em 1.85em 1.85em 20%;
-	background-image: url(../assets/images/badge_thorax.png);
-	background-repeat: no-repeat;
-	background-position: 26px 0;
-	padding-top: 2em;
-	padding-left: 7em;
-	overflow-x: hidden;
-	z-index: 20;
+	padding: 1.85em;
+	padding-left: 5em;
 }
 
 p,div.container ul {
@@ -233,7 +238,7 @@ pre {
 	box-shadow: 0 0 0.71em #666;
 }
 
-@media all and (max-width: 780px) {
+@media all and (max-width: 920px) {
 	body {
 	  margin-left: 0;
 	}
@@ -241,8 +246,10 @@ pre {
 		display: none;
 	}
 	div.container {
-	  margin-left: 0;
+	  left: 0;
 	  background-position: 0 0;
+	}
+	div.page {
 	  padding-left: 1.85em;
 	}
 }
