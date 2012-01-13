@@ -132,9 +132,6 @@
       font-family: PreloSlabMedium;
       font-size: 19px;
       color: white;
-      border-bottom-width: 1px;
-      border-bottom-style: solid;
-      border-bottom-color: white;
       margin-bottom: 6px;
       font-style: normal;
       font-weight: normal;
@@ -176,17 +173,17 @@
         zoom: 1;
       }
       code, .container h3 em {
-        margin-left: 20px;
+        margin-left: 10px;
       }
       .container h3 em {
         font-size:14px;
       }
       pre {
-        border: 5px solid #666;
-        background-color:#000;
+        border: 7px solid #A3A3A3;
+        background-color: #242426;
         color:#fff;
         font-size: 12px;
-        padding: 17px;
+        padding: 17px 17px 0 17px;
         border: 5px solid #eee;
         margin: 0px 0 30px;
         box-shadow: 0 0 10px #666;
