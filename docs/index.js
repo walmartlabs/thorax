@@ -1,9 +1,7 @@
 var path = require('path');
 
 module.exports = function(static) {
-  
-console.log("HERE");
-  
+    
   //copy assets to assets folder in target
   static.file(/^assets\//, function(file) {
     file.write('assets');
