@@ -150,11 +150,19 @@ Used by `model/collection.load`. Binds the callback to the current route. If the
       setTimeout(callback, 5000);
     }
 
-## Event 
+## Events
 
-Thorax adds to Backbone's event handling by making
+Thorax adds to Backbone's event handling by enhancing the `view.events` hash, and providing a way of registering events for all views with `registerEvents` and `unregisterEvents`.
 
 ### events *Application.View.events*
+
+Thorax enhances the `Backbone.View.events` hash handling in the following ways:
+
+- accepts functions as a value to the hash in addition to a string method name
+- accepts non DOM event names that will be treated as view events
+- accepts a `collection or `model` hash of events that will be bound to the model or collection when `setModel` or `setCollection` are called, callbacks will be called with a context of the view instance
+
+An example of a view implementing all of the above:
 
     Application.View.extend({
       name: 'view-name',
@@ -173,18 +181,141 @@ Thorax adds to Backbone's event handling by making
       _onChange: function(){}
     });
 
-- dom events
-- view events
-- model events
-- collection events
-
-### registerEvents *Application.View.registerEvents(events)*
-
-### unregisterEvents *Application.View.unregisterEvents([event])*
-
 ### freeze *view.freeze([options])*
 
 `setModel` and `setCollection` add event handlers to the view, call freeze to remove them. `options` may contain a `model` or `collection` key that should contain the model or collection that was set with `setModel` or `setCollection`.
+
+### registerEvents *Application.View.registerEvents(events)*
+
+Add events to all instances of a view. Accepts a hash in the same format as described in `Application.View.events`
+
+    Application.View.registerEvents({
+      'click a': function() {
+        //called on any a click for all instances
+        //and subclasses of Application.View
+      }
+    });
+
+    Subclass = Application.View.extend({});
+    Subclass.registerEvents({
+      //events for all instances and subclasses of Subclass
+    });
+
+### unregisterEvents *Application.View.unregisterEvents([event])*
+
+Unregister events for all instances and subclasses of Application.View. Note that calling `unregisterEvents` on `Application.View` will unregister the built in events that make `setModel` and `setCollection` work. 
+
+    Subclass.unregisterEvents(); //all events
+    Application.View.unregisterEvents('click a');
+    Application.View.unregisterEvents('model', 'change');
+
+---
+
+OLD DOCS
+
+## Templates
+Every View should have a *name* attribute, which should be the path to the view without the filename extension for example *checkout/shipping-options*. By default each view will render a corresponding template of the same name. Each rendered template will have a context with: 
+
+- model *attributes* if a model was set with *setModel*
+- view *attributes* hash or return value from *attributes* function, if no model is present
+- attributes passed to the view constructor
+- cid attribute (unique id for each rendered template)
+- view partials registered with the *partials* hash or *partial* method
+
+Calling *setCollection* on a view will bind events on collection *add*, *remove* and *reset*, updating the *_collectionElement* as appropriate. *_collectionElement* defaults to ".collection". A view with a collection requires the following templates:
+
+- **name.handlebars**
+- **name-item.handlebars** - must have exactly one outer element
+- **name-empty.handlebars**
+
+An *itemAttributes* method can be specified which recieves each model in the collection and must return the attributes which will be passed to *name-item.handlebars*. A simple implementation might look like:
+
+    Phoenix.Views.Shelf = Phoenix.View.extend({
+      name: 'shelf',
+      itemAttributes: function(model) {
+        return _.extend({
+          key: 'value'
+        }, model.attributes);
+      }
+    });
+
+    //shelf.handlebars
+    <h2>Shelf</h2>
+    <ul class="collection"></ul>
+
+    //shelf-item.handlebars
+    <li>{{key}}</li>
+
+    //shelf-empty.handlebars
+    <li>There are no items in the shelf.</li>
+
+### destroy *view.destroy()*
+Destroy the card, calls *destroy* on any partials that were initialized. Custom cleanup behavior can be implemented by binding the *destroyed* event.
+
+### render *view.render()*
+By default calls this.html(this.renderTemplate(this.name + ".handlebars"))
+
+### renderTemplate *view.renderTemplate(path_to_template [,attributes])*
+Render a template with the given attributes, return the string output.
+
+### html *view.html([content])*
+Overwrites main element of the view. Views and Mixins (such as Scrollable) may change what the main element is. Returns the element which was updated allowing for chainable calls.
+
+    this.html('<p></p>').addClass('name')
+
+
+### setModel *view.setModel(model [,options])*
+Set the *model* attribute of the view, triggering some customizable behaviors:
+
+- **fetch** - auto fetch the model if empty, defaults to true
+- **success** - a callback to call when fetch() succeeds, defaults to noop
+- **render** - wether to call render after *setModel* and on the model's *change* event
+- **populate** - wether to auto call *populate*, if there is no form in the view *populate* will have no effect
+- **errors** - wether to bind error handlers, defaults to true
+- **validate** - wether to call *validate* on the model in addition to the view when *serialize* is called
+- **loading** - wether to trigger *load:start* and *load:end* events in the view if the model triggers them, defaults to true
+
+### setCollection *view.setCollection(collection [,options])*
+Set the *collection* attribute of the view. This will bind event handlers to call *_renderItem*, *_renderEmpty* as the collection changes, and by default will call fetch() on the collection. Options may contain:
+
+- **fetch** - auto fetch, defaults to true
+- **sucess** - a callback to call when fetch() succeeds, defaults to noop
+- **errors** - wether to bind error handlers, defaults to true
+- **loading** - wether to trigger *load:start* and *load:end* events in the view if the collection triggers them, defaults to true
+
+### attributes *view.attributes()*
+Override if needed. Called to extract attributes for *render*. Defaults to:
+
+   return this.model ? this.model.attributes : this;
+
+### itemAttributes *view.itemAttributes(model)*
+Override if needed. Called to extract attributes for *_renderItem* from each item in a collection. Defaults to:
+
+    returns model.attributes;
+
+### \_renderItem *view.\_renderItem(model)*
+Override if needed. Called for each item in a collection after *setCollection* is called. Must return a string, defaults to:
+
+    return this.renderTemplate(this.name + '-item.handlebars',this.itemAttributes.call(this,item)); 
+
+### \_renderEmpty *view.\_renderEmpty()*
+Override if needed. Called when the collection is empty. Must return a string. Defaults to:
+  
+    return this.renderTemplate(this.name + '-empty.handlebars');
+
+### \_collectionElement *view.\_collectionElement*
+Override if needed. Element or String selector to select the collection element in the view, defaults to ".collection"
+
+### \_loadingTimeoutDuration *view.\_loadingTimeoutDuration*
+Amount of time before _loadingClassName is added to object.el after *load:start* occurs.
+
+### \_loadingClassName *view.\_loadingClassName*
+Defaults to "loading"
+
+END OLD DOCS
+
+---
+
 
 ## Templating
 
@@ -239,15 +370,74 @@ Intro, covering views with no model / collection, view with model, view with col
 
 ## Form Handling
 
-### serialize *view.serialize(callback)*
+Thorax provides helpers to assist with form handling, but makes no user interface decisions for you. Use the `validate` and `error` events to implement error messages in your application.
+
+    Application.View.registerEvents({
+      validate: function(attributes, errors) {
+        //clear previous errors if present
+      },
+      error: function(errors) {
+        errors.forEach(function(error) {
+          //lookup input by error.name
+          //display error from error.message
+        });
+      }
+    });
+
+### serialize *view.serialize([event], callback [,options])*
+
+Serializes a form. `callback` will receive the attributes from the form and will only be called if `validateInput` returns nothing or an empty array. If an `event` is passed a check will be run to prevent duplicate submission. `options` may contain:
+
+- `set` - defaults to true, wether or not to set the attributes if valid on a model if one was set with `setModel`
+- `validate - defaults to true, wether or not to call `validateInput` during serialization
+
+Each form input in your application should contain a corresponding label. Since you may want to re-use the same form multiple times in the same view a `cid` attribute with a unique value is provided to each render call of each template:
+    
+    <label for="{{cid}}-last-name"/>
+    <input name="last-name" id="{{cid}}-last-name" value="Beastridge"/>
+    <label for="{{cid}}-last-name"/>
+    <input name="address[street]" value="123 Chestnut" id="{{cid}}-address[street]"/>
+
+    Phoenix.View.extend({
+      name: "address-form",
+      events: {
+        "submit form": "_handleSubmit"
+      },
+      _handleSubmit: function(event) {
+        this.serialize(event, function(attributes) {
+          attributes["last-name"] === "Beastridge";
+          attributes.address.street === "123 Chestnut";
+        });
+      }
+    });
+
+`serialize` Triggers the following events:
+
+- `validate` - with an attributes hash and errors array after `validateInput` is called
+- `error` - with an errors array, if validateInput returned an array with any errors
 
 ### populate *view.populate([attributes])*
 
-### validateInput *view.validateInput()*
+Populate the form fields in the view with the given attributes. The keys of the attributes should correspond to the names of the inputs. `populate` is automatically called with the response from `view.context(view.model)` when `setModel` is called.
 
-### validate
+    view.populate({
+      "last-name": "Beastridge"
+      address: {
+        street: "123 Chestnut"
+      }
+    });
 
-### error
+### validateInput *view.validateInput(attributes)*
+
+Validate the attributes created by `serialize`, must return an array or nothing (if valid). It's recommended that the array contain hashes with `name` and `message` attributes, but arbitrary data or objects may be passed. If the array has a zero length the attributes are considered to be valid. Returning an array with any errors will trigger the `error` event.
+
+    validateInput: function(attributes) {
+      var errors = [];
+      if (attributes.password && !attributes.password.match(/.{6,11}/)) {
+        errors.push({name: 'password', message: 'Invalid Password'});
+      }
+      return errors;
+    }
 
 ## Mixins
 
