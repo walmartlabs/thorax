@@ -213,20 +213,6 @@ Unregister events for all instances and subclasses of Application.View. Note tha
 
 OLD DOCS
 
-## Templates
-Every View should have a *name* attribute, which should be the path to the view without the filename extension for example *checkout/shipping-options*. By default each view will render a corresponding template of the same name. Each rendered template will have a context with: 
-
-- model *attributes* if a model was set with *setModel*
-- view *attributes* hash or return value from *attributes* function, if no model is present
-- attributes passed to the view constructor
-- cid attribute (unique id for each rendered template)
-- view partials registered with the *partials* hash or *partial* method
-
-Calling *setCollection* on a view will bind events on collection *add*, *remove* and *reset*, updating the *_collectionElement* as appropriate. *_collectionElement* defaults to ".collection". A view with a collection requires the following templates:
-
-- **name.handlebars**
-- **name-item.handlebars** - must have exactly one outer element
-- **name-empty.handlebars**
 
 An *itemAttributes* method can be specified which recieves each model in the collection and must return the attributes which will be passed to *name-item.handlebars*. A simple implementation might look like:
 
@@ -249,45 +235,6 @@ An *itemAttributes* method can be specified which recieves each model in the col
     //shelf-empty.handlebars
     <li>There are no items in the shelf.</li>
 
-### destroy *view.destroy()*
-Destroy the card, calls *destroy* on any partials that were initialized. Custom cleanup behavior can be implemented by binding the *destroyed* event.
-
-### render *view.render()*
-By default calls this.html(this.renderTemplate(this.name + ".handlebars"))
-
-### renderTemplate *view.renderTemplate(path_to_template [,attributes])*
-Render a template with the given attributes, return the string output.
-
-### html *view.html([content])*
-Overwrites main element of the view. Views and Mixins (such as Scrollable) may change what the main element is. Returns the element which was updated allowing for chainable calls.
-
-    this.html('<p></p>').addClass('name')
-
-
-### setModel *view.setModel(model [,options])*
-Set the *model* attribute of the view, triggering some customizable behaviors:
-
-- **fetch** - auto fetch the model if empty, defaults to true
-- **success** - a callback to call when fetch() succeeds, defaults to noop
-- **render** - wether to call render after *setModel* and on the model's *change* event
-- **populate** - wether to auto call *populate*, if there is no form in the view *populate* will have no effect
-- **errors** - wether to bind error handlers, defaults to true
-- **validate** - wether to call *validate* on the model in addition to the view when *serialize* is called
-- **loading** - wether to trigger *load:start* and *load:end* events in the view if the model triggers them, defaults to true
-
-### setCollection *view.setCollection(collection [,options])*
-Set the *collection* attribute of the view. This will bind event handlers to call *_renderItem*, *_renderEmpty* as the collection changes, and by default will call fetch() on the collection. Options may contain:
-
-- **fetch** - auto fetch, defaults to true
-- **sucess** - a callback to call when fetch() succeeds, defaults to noop
-- **errors** - wether to bind error handlers, defaults to true
-- **loading** - wether to trigger *load:start* and *load:end* events in the view if the collection triggers them, defaults to true
-
-### attributes *view.attributes()*
-Override if needed. Called to extract attributes for *render*. Defaults to:
-
-   return this.model ? this.model.attributes : this;
-
 ### itemAttributes *view.itemAttributes(model)*
 Override if needed. Called to extract attributes for *_renderItem* from each item in a collection. Defaults to:
 
@@ -306,11 +253,6 @@ Override if needed. Called when the collection is empty. Must return a string. D
 ### \_collectionElement *view.\_collectionElement*
 Override if needed. Element or String selector to select the collection element in the view, defaults to ".collection"
 
-### \_loadingTimeoutDuration *view.\_loadingTimeoutDuration*
-Amount of time before _loadingClassName is added to object.el after *load:start* occurs.
-
-### \_loadingClassName *view.\_loadingClassName*
-Defaults to "loading"
 
 END OLD DOCS
 
@@ -319,54 +261,198 @@ END OLD DOCS
 
 ## Templating
 
-Intro, covering views with no model / collection, view with model, view with collection, view with both.
+Lumbar + Thorax uses [Handlebars](http://www.handlebarsjs.com) as the built in templating language.
 
 ### name *view.name*
 
-### registerHelper *App.View.registerHelper(name, callback)*
+Every view descending from Application.View must have a name attribute. `render` will look for a corresponding handlebars template of the same name.
 
-### template *view.template(name, [,scope])*
+    Application.View.extend({
+      name: 'view-name'
+      // templates/view-name.handlebars should exist
+    });
 
-### view *view.view(name [,options])*
+`Application.Router` and `Application.View` instances both have a `view` method that will look up the view class by name and create new instance.
 
-- example called from view
-- example called from template, view handling inside templates
+    var instance = this.view('view-name');
+
+### registerHelper *Application.View.registerHelper(name, callback)*
+
+Register a new helper that will be available in all handlebars templates
+
+    Application.View.registerHelper('bold', function(content, options) {
+      //options.hash contains key, value pairs from named / html arguments
+      //to the helper
+      return '<b>' + content + '</b>';
+    });
+
+    {{bold "Text"}}
+
+### template *view.template(name [,attributes])*
+
+Synchronously render a given template by file name sans extension. `render` and `renderCollection` both use this method. The scope inside of a template will contain all of the non function attributes of a view (which can be passed to the view constructor) and a `cid` attribute which is a unique id for each rendering of a given template.
+    
+    var klass = Application.View.extend({
+      name: 'view-name'
+    });
+    var view = new klass({
+      title: 'The Title'
+    });    
+    console.log(view.template({
+      body: 'The Body'
+    }));
+
+    // templates/view-name.handlebars
+    <h1>{{title}}</h1>
+    <p>{{body}}</p>
+
+This method is also available as a template helper, it will only render the template as a string, if there is a corresponding view it will **not** be initialized. The scope of the current template will be carried inward to the rendred template. 
+    
+    {{template "header" key="value"}}
+    <h1>{{title}}</h1>
+    <p>{{body}}</p>
+    {{template "footer"}}
+
+### view *view.view(name [,attributes])*
+
+Create a new view instance, looking it up by the `name` property in the view's class definition.
+    
+    Application.View.extend({
+      name: 'header'
+    });
+    Application.View.extend({
+      name: 'footer'
+    });
+    Application.View.extend({
+      name: 'main',
+      initialize: function() {
+        this.header = this.view('header');
+      }
+    });
+
+This method is also available as a template helper which can receive a string name of a view to initialize and append, or a reference to an already initialized view.
+
+    // templates/main.handlebars
+    {{view header}}
+    <h1>{{title}}</h1>
+    <p>{{body}}</p>
+    {{view "footer"}}
 
 ### html *view.html([content])*
 
-### setModel *view.setModel(model)*
-
-- model set event
+Replace the HTML in a given view. The collection element and the child views appended by the `{{view}}` helper will be automatically preserved if present.
 
 ### render *view.render()*
 
+Render a template with the filename of the view's `name` attribute (sans extension), calling `view.html()` with the result. Triggers the `rendered` event.
+
+### setModel *view.setModel(model)*
+
+Set the *model* attribute of the view, triggering some customizable behaviors:
+
+- `fetch` - auto fetch the model if empty, defaults to true
+- `success` - a callback to call when fetch() succeeds, defaults to false
+- `render` - wether to call render after *setModel* and on the model's *change* event, defaults to true
+- `populate` - wether to auto call *populate*, defaults to true. if there is no form in the view *populate* will have no effect
+- `errors` - wether to bubble the error event from the model to the view
+
+`setModel` will trigger the `model set` event:
+
+    Application.View.extend({
+      name: 'view-name',
+      events: {
+        model: {
+          set: function(model) {}
+        }
+      }
+    });
+
 ### context *view.context([model])*
 
-- options
+Specify this function to override what attributes will be passed from a model set with `setModel` to a template.
 
-### setCollection *view.setCollection(collection)*
+    Application.View.extend({
+      name: 'view-name',
+      context: function(model) {
+        return _.extend({}, model.attributes, {
+          title: model.getTitle()
+        });
+      }
+    });
 
-- collection set event
+### setCollection *view.setCollection(collection [,options])*
 
-- options
+Set the *collection* attribute of the view. This will bind events on collection `add`, `remove` and `reset`, updating the collection element (specified by `_collectionSelector`) as needed. `options` may contain: 
+
+- `fetch` - auto fetch, defaults to true
+- `success` - a callback to call when fetch() succeeds, defaults to false
+- `errors` - wether to bubble error events from the collection to the view, defaults to true
+
+Collection rendering assumes that the following templates will be present.
+
+- `templates/name.handlebars`
+- `templates/name-item.handlebars` - must have exactly one outer element
+- `templates/name-empty.handlebars`
+
+You can use the `thorax collection-view $module-name $view-name` command to auto generate the view files, templates and lumbar.json entries.
+
+The following events will be triggered when the collection is rendered:
+
+- `rendered:collection` - called when `renderCollection` is called, receives the the collection element
+- `rendered:item` - called for each item rendered in a non empty collection after `renderCollection` is called, receives the item element or view after it has been rendered
+- `rendered:empty` - called when `renderCollection` is called with an empty collection, receives the the collection element
+
+### _collectionSelector *view._collectionSelector*
+
+A string specifying the CSS selector used to select the collection element. The collection element is not auto generated and must be present in your template. `_collectionSelector` defaults to `.collection`
+
+    Application.View.extend({
+      name: 'view-name',
+      _collectionSelector: '.custom-collection'
+    });
+
+    // templates/view-name.handlebars
+    <div class="custom-collection"></div>
 
 ### itemContext *view.itemContext(model, index)*
 
+Just like the `context` method, but called for each item in the collection.
+
 ### renderCollection *view.renderCollection()*
 
-### renderItem *view.renderItem()*
+Re-render the entire collection. If you need custom behavior when a collection is rendered it is better to use the `rendered` or `rendered:collection` events. This method looks for `this.collection` which should be set by `setCollection` and ignores any arguments passed.
+
+### renderItem *view.renderItem(model, index)*
+
+Override this method to specify how an item is rendered. May return a string or another view.
+
+    renderItem: function(model) {
+      return new MyItemView({
+        model: model
+      });
+    }
+
+
+
+    renderItem: function(model, i) {
+      return this.template(this.name + '-item.handlebars', this.itemContext(model, i));
+    }
 
 ### renderEmpty *view.renderEmpty()*
 
-### appendItem *view.appendItem(model [,index])*
+Override this method to specify what happens when `renderCollection` is called when the collection is empty. May return a string or another view. The default implementation is:
+  
+    renderEmpty: function() {
+      return this.template(this.name + '-empty.handlebars');
+    }
 
-### rendered
+### appendItem *view.appendItem(item [,index])*
 
-### rendered:collection
+Append and item at a given index. If no index is passed the index of the model in the current collection will be used, if the first argument is not a model, 0 will be used. Item may be:
 
-### rendered:item
-
-### rendered:empty
+- a model which will be passed to `renderItem`
+- an arbitrary html string which should contain exactly one outer element
+- a view instance
 
 ## Form Handling
 
@@ -418,7 +504,7 @@ Each form input in your application should contain a corresponding label. Since 
 
 ### populate *view.populate([attributes])*
 
-Populate the form fields in the view with the given attributes. The keys of the attributes should correspond to the names of the inputs. `populate` is automatically called with the response from `view.context(view.model)` when `setModel` is called.
+Populate the form fields in the view with the given attributes. The keys of the attributes should correspond to the names of the inputs. `populate` is automatically called with the response from `view.context(view.model.attributes)` when `setModel` is called.
 
     view.populate({
       "last-name": "Beastridge"
