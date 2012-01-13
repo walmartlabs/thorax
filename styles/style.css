@@ -57,6 +57,7 @@ div#sidebar {
 	-moz-box-shadow: 0 0 1.42em #ccc;
 	box-shadow: 0 0 1.42em #ccc;
 	background: #242426;
+	z-index: 99;
 }
 
 #sidebar li.header {
@@ -121,6 +122,7 @@ div.container {
 	padding-top: 2em;
 	padding-left: 7em;
 	overflow-x: hidden;
+	z-index: 20;
 }
 
 p,div.container ul {
