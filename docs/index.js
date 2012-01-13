@@ -1,6 +1,9 @@
 var path = require('path');
 
 module.exports = function(static) {
+  
+console.log("HERE");
+  
   //copy assets to assets folder in target
   static.file(/^assets\//, function(file) {
     file.write('assets');
@@ -65,18 +68,19 @@ module.exports = function(static) {
       });
       
       //build toc
-      var toc_html = '';
+      var toc_html = '<ul>';
       window.$('.container h2').each(function() {
-        toc_html += '<h2><a href="#' + this.id + '">' + this.innerHTML + '</a></h2>';
+        toc_html += '<li class="header"><a href="#' + this.id + '">' + this.innerHTML + '</a>';
         var signatures = window.$(this).nextUntil('h2').filter('h3');
         if (signatures.length) {
-          toc_html += '<ul>';
+          toc_html += '<ul class="sub">';
           signatures.each(function(){
             toc_html += '<li><a href="#' + this.id + '">' + this.innerHTML.split(/\</).shift() + '</a></li>'
           });
-          toc_html += '</ul>';
+          toc_html += '</ul></li>';
         }
       });
+      toc_html += '</ul>';
 
       //append toc
       window.$('#sidebar').html(toc_html);
