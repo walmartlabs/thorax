@@ -1,161 +1,246 @@
-    body {
-      font-size: 14px;
-      line-height: 22px;
-      font-family: Helvetica Neue, Helvetica, Arial;
-      background: #f4f4f4 url("/assets/background.png");
-    }
-    .interface {
-      font-family: "Lucida Grande", "Lucida Sans Unicode", Helvetica, Arial, sans-serif !important;
-    }
-    div#sidebar {
-      background: #fff;
-      position: fixed;
-      top: 0; left: 0; bottom: 0;
-      width: 200px;
-      overflow-y: auto;
-      overflow-x: hidden;
-      padding: 15px 0 30px 30px;
-      border-right: 1px solid #ddd;
-      box-shadow: 0 0 20px #ccc; -webkit-box-shadow: 0 0 20px #ccc; -moz-box-shadow: 0 0 20px #ccc;
-    }
-      #sidebar h2 {
-        margin: 0;
-        padding: 0;
-        font-size: inherit;
-        line-height: inherit;
-        font-weight: inherit;
-      }
+@charset "UTF-8";
 
-        #sidebar h2 a, a:visited {
-          display: block;
-          color: black;
-          font-weight: bold;
-          margin-top: 15px;
-        }
-          #sidebar h2 a:hover {
-            text-decoration: underline;
-          }
-      #sidebar ul {
-        font-size: 11px;
-        line-height: 14px;
-        margin: 5px 0 0 0;
-        padding-left: 0px;
-        list-style-type: none;
-        font-family: Lucida Grande;
-      }
-        #sidebar li {
-          cursor: pointer;
-          margin: 0 0 3px 0;
+@font-face { /*----- CHANGE TO TYPEKIT ------*/
+	font-family: 'PreloSlabMedium';
+	src: url('fonts/preloslab-medium-webfont.eot');
+	src: url('fonts/preloslab-medium-webfont.eot?#iefix')
+		format('embedded-opentype'),
+		url('fonts/preloslab-medium-webfont.woff') format('woff'),
+		url('fonts/preloslab-medium-webfont.ttf') format('truetype'),
+		url('fonts/preloslab-medium-webfont.svg#PreloSlabMedium')
+		format('svg');
+	font-weight: normal;
+	font-style: normal;
+}
 
-        }
+@font-face {
+	font-family: 'PreloSlabBold';
+	src: url('fonts/preloslab-bold-webfont.eot');
+	src: url('fonts/preloslab-bold-webfont.eot?#iefix')
+		format('embedded-opentype'), url('fonts/preloslab-bold-webfont.woff')
+		format('woff'), url('fonts/preloslab-bold-webfont.ttf')
+		format('truetype'),
+		url('fonts/preloslab-bold-webfont.svg#PreloSlabBold') format('svg');
+	font-weight: normal;
+	font-style: normal;
+}
 
-        #sidebar li:before {
-          content: '– ';  
-        }
+body {
+	background: #48494c url(../assets/images/hdr_bg.png);
+	background-repeat: repeat-x;
+	color: #DBDBDB;
+	font-family: "Helvetica Neue Medium", "Helvetica Neue", Helvetica, Arial,
+		Trebuchet, sans-serif;
+	font-size: 1em;
+	line-height: 1.57em;
+}
 
-          #sidebar li a {
-            text-decoration: none;
-            color: black;
-          }
-            #sidebar li a:hover {
-              text-decoration: underline;
-            }
-    div.container {
-      position: relative;
-      width: 700px;
-      margin: 40px 0 50px 260px;
-    }
-    p, div.container ul {
-      margin: 20px 0;
-      width: 700px;
-    }
-      p.warning {
-        font-size: 12px;
-        line-height: 18px;
-        font-style: italic;
-      }
-      div.container ul {
-        list-style: circle;
-        font-size: 12px;
-        padding-left: 15px;
-      }
-    a, a:visited {
-      color: #444;
-    }
-    a:active, a:hover {
-      color: #000;
-    }
-    a img {
-      border: 0;
-    }
-    h1, h2, h3, h4, h5, h6 {
-      padding-top: 20px;
-    }
-      h2 {
-        font-size: 26px;
-      }
-      .container h2 {
-        border-top: 1px solid #CCC;
-      }
-    h3 {
-      padding-bottom: 0;
-      margin-bottom: -18px;
-      font-size: 20px;
-      line-height: 30px;
-      white-space: nowrap;
-    }
+.interface {
+	font-family: "Lucida Grande", "Lucida Sans Unicode", Helvetica, Arial,
+		sans-serif !important;
+}
 
-    .container h3 {
-      padding-top:0;
-    }
+div#sidebar {
+	font-family: 'PreloSlabBold';
+	font-size: 0.92em;
+	background: #000;
+	position: fixed;
+	top: 0;
+	left: 0;
+	bottom: 0;
+	width: 20%;
+	overflow-y: auto;
+	overflow-x: hidden;
+	padding: 0 0 2em 2em;
+	border-right: 1px solid #ddd;
+	-webkit-box-shadow: 0 0 1.42em #ccc;
+	-moz-box-shadow: 0 0 1.42em #ccc;
+	box-shadow: 0 0 1.42em #ccc;
+	background: #242426;
+}
 
-    span.alias {
-      font-size: 14px;
-      font-style: italic;
-      margin-left: 20px;
-    }
-    table {
-      margin: 15px 0 0; padding: 0;
-    }
-      tr, td {
-        margin: 0; padding: 0;
-      }
-        td {
-          padding: 0px 15px 5px 0;
-        }
-    code, pre, p em, .container em {
-      font-family: Monaco, Consolas, "Lucida Console", monospace;
-      font-size: 12px;
-      line-height: 18px;
-      font-style: normal;
-      font-weight: normal;
-    }
+#sidebar li.header {
+	margin: 0;
+	padding: 0;
+	font-size: inherit;
+	line-height: inherit;
+	font-weight: inherit;
+	margin-top: 1.2em;
+}
 
-    .container pre {
-      font-weight:bold;
-    }
+#sidebar li.header > a,a:visited {
+	font-family: 'PreloSlabBold';
+	color: #A5843C;
+	text-decoration: none;
+	margin-top: 1.14em;
+	font-size: 1.14em;
+}
 
-      p em {
-        padding: 0px 3px;
-        background: #fff;
-        border: 1px solid #ddd;
-        zoom: 1;
-      }
-      .container h3 em {
-        margin-left: 20px;
-      }
-      .container h3 em {
-        font-size:14px;
-      }
-      pre {
-        border: 5px solid #666;
-        background-color:#000;
-        color:#fff;
-        font-size: 12px;
-        padding: 17px 17px 0px 17px;
-        border: 5px solid #eee;
-        margin: 0px 0 30px;
-        box-shadow: 0 0 10px #666;
-        -webkit-box-shadow: 0 0 10px #666;
-        -moz-box-shadow: 0 0 10px #666;
-      }
+#sidebar h2 a:hover {
+	text-decoration: underline;
+}
+
+#sidebar ul {
+	font-size: 1em;
+	line-height: 1em;
+	margin: 0;
+	padding-left: 0;
+	list-style-type: none;
+}
+
+#sidebar li {
+	cursor: pointer;
+	margin: 1.2em 0 0.2em 0;
+}
+
+#sidebar .sub li:before {
+	content: ' - ';
+}
+
+#sidebar li .sub li {
+	margin-top: 0.3em;
+}
+
+#sidebar li .sub a {
+	text-decoration: none;
+	color: #DBDBDB;
+	font-size: 0.8em;
+	font-weight: normal;
+}
+
+#sidebar li a:hover {
+	text-decoration: underline;
+}
+
+div.container {
+	max-width: 700px;
+	margin: 1.85em 1.85em 1.85em 20%;
+	background-image: url(../assets/images/badge_thorax.png);
+	background-repeat: no-repeat;
+	background-position: 26px 0;
+	padding-top: 2em;
+	padding-left: 7em;
+	overflow-x: hidden;
+}
+
+p,div.container ul {
+	margin: 1.4em 0;
+}
+
+p.warning {
+	font-size: 0.85em;
+	line-height: 1.28em;
+	font-style: italic;
+}
+
+div.container ul {
+	list-style: circle;
+	font-size: 0.92em;
+	padding-left: 1.07em;
+}
+
+a,a:visited {
+	color: #fff;
+}
+
+a:active,a:hover {
+	color: #fff;
+}
+
+a img {
+	border: 0;
+}
+
+h1,h2,h3,h4,h5,h6 {
+	padding-top: 1.42em;
+}
+
+h2 {
+	font-size: 1.85em;
+}
+
+.container h2 {
+	color: #E3AB32;
+	font-size: 1.57em;
+	font-family: PreloSlabMedium;
+	font-weight: normal;
+}
+
+h3 {
+	font-family: PreloSlabMedium;
+	font-size: 1.35em;
+	color: white;
+	margin-bottom: 0.42em;
+	font-style: normal;
+	font-weight: normal;
+}
+
+.container h3 {
+	padding-top: 0;
+}
+
+span.alias {
+	font-size: 1em;
+	font-style: italic;
+	margin-left: 1.42em;
+}
+
+table {
+	margin: 1.07em 0 0;
+	padding: 0;
+}
+
+tr,td {
+	margin: 0;
+	padding: 0;
+}
+
+td {
+	padding: 0px 1.07em 0.35em 0;
+}
+
+code,pre,p em,.container em {
+	font-family: Monaco, Consolas, "Lucida Console", monospace;
+	font-size: 0.92em;
+	line-height: 1.28em;
+	font-style: normal;
+	font-weight: normal;
+}
+
+p em {
+	padding: 0px 0.21em;
+	color: #E3AB32;
+	zoom: 1;
+}
+
+.container h3>em {
+	display: block;
+	margin-left: 1.78em;
+}
+
+pre {
+	border: 0.5em solid #A3A3A3;
+	background-color: #242426;
+	color: #fff;
+	font-size: 0.85em;
+	padding: 1.21em 1.21em 0 1.21em;
+	border: 5px solid #eee;
+	margin: 0px 0 2.14em;
+	-webkit-box-shadow: 0 0 0.71em #666;
+	-moz-box-shadow: 0 0 0.71em #666;
+	box-shadow: 0 0 0.71em #666;
+}
+
+@media all and (max-width: 780px) {
+	body {
+	  margin-left: 0;
+	}
+	div#sidebar {
+		display: none;
+	}
+	div.container {
+	  margin-left: 0;
+	  background-position: 0 0;
+	  padding-left: 1.85em;
+	}
+}
