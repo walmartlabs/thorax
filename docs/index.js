@@ -1,6 +1,7 @@
 var path = require('path');
 
 module.exports = function(static) {
+    
   //copy assets to assets folder in target
   static.file(/^assets\//, function(file) {
     file.write('assets');
@@ -49,15 +50,19 @@ module.exports = function(static) {
   });
 
   static.file('index.handlebars', function(file) {
+    function filter(str) {
+      return str.replace(/\./g,'-').replace(/\&amp\;/g, 'and').replace(/\s+/g, '-').toLowerCase();
+    }
+
     file.$(function(window) {
       //assign ids
       window.$('.container h2').each(function() {
-        this.id = this.innerHTML.split(/\s/).shift().replace(/\./g,'-').toLowerCase();
+        this.id = filter(this.innerHTML.split(/\s/).shift());
       });
       window.$('.container h3').each(function() {
-        var name = this.innerHTML.split(/\s/).shift();
+        var name = this.innerHTML.split(/\s/).shift().toLowerCase();
         var header = window.$(this).prevAll('h2:first')[0];
-        this.id = (header.innerHTML.replace(/\./g,'-') + '-' + name).toLowerCase();
+        this.id = filter(header.innerHTML) + '-' + name;
       });
 
       // Code highlighting
@@ -67,18 +72,19 @@ module.exports = function(static) {
       });
 
       //build toc
-      var toc_html = '';
+      var toc_html = '<ul>';
       window.$('.container h2').each(function() {
-        toc_html += '<h2><a href="#' + this.id + '">' + this.innerHTML + '</a></h2>';
+        toc_html += '<li class="header"><a href="#' + this.id + '">' + this.innerHTML + '</a>';
         var signatures = window.$(this).nextUntil('h2').filter('h3');
         if (signatures.length) {
-          toc_html += '<ul>';
+          toc_html += '<ul class="sub">';
           signatures.each(function(){
             toc_html += '<li><a href="#' + this.id + '">' + this.innerHTML.split(/\</).shift() + '</a></li>'
           });
-          toc_html += '</ul>';
+          toc_html += '</ul></li>';
         }
       });
+      toc_html += '</ul>';
 
       //append toc
       window.$('#sidebar').html(toc_html);

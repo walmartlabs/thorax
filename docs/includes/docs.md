@@ -1,14 +1,14 @@
 
 ## Overview
 
-Opinionated Backbone, uses the following libraries:
+An opinionated Backbone application framework using:
 
-- [Underscore](http://documentcloud.github.com/underscore/)
-- [Backbone](http://documentcloud.github.com/backbone/)
-- [Zepto](https://github.com/madrobby/zepto)
-- [Handlebars](http://www.handlebarsjs.com/)
-- [Stylus](http://learnboost.github.com/stylus/)
-- [Lumbar](http://walmartlabs.github.com/lumbar)
+- [Backbone](http://documentcloud.github.com/backbone/) - the core framework that Thorax builds on
+- [Underscore](http://documentcloud.github.com/underscore/) - to make sure you have your JavaScript utility belt with you
+- [Zepto](https://github.com/madrobby/zepto) - bitesize mobile DOM goodness
+- [Handlebars](http://www.handlebarsjs.com/) - to make sure you have the best mustache for [movember](http://us.movember.com/)
+- [Stylus](http://learnboost.github.com/stylus/) - for the cleanest CSS experience around
+- [Lumbar](http://walmartlabs.github.com/lumbar) - our own library for seemless packaging so you are deploy-ready
 
 ### Quick Start
 
@@ -208,56 +208,6 @@ Unregister events for all instances and subclasses of Application.View. Note tha
     Subclass.unregisterEvents(); //all events
     Application.View.unregisterEvents('click a');
     Application.View.unregisterEvents('model', 'change');
-
----
-
-OLD DOCS
-
-
-An *itemAttributes* method can be specified which recieves each model in the collection and must return the attributes which will be passed to *name-item.handlebars*. A simple implementation might look like:
-
-    Phoenix.Views.Shelf = Phoenix.View.extend({
-      name: 'shelf',
-      itemAttributes: function(model) {
-        return _.extend({
-          key: 'value'
-        }, model.attributes);
-      }
-    });
-
-    //shelf.handlebars
-    <h2>Shelf</h2>
-    <ul class="collection"></ul>
-
-    //shelf-item.handlebars
-    <li>{{key}}</li>
-
-    //shelf-empty.handlebars
-    <li>There are no items in the shelf.</li>
-
-### itemAttributes *view.itemAttributes(model)*
-Override if needed. Called to extract attributes for *_renderItem* from each item in a collection. Defaults to:
-
-    returns model.attributes;
-
-### \_renderItem *view.\_renderItem(model)*
-Override if needed. Called for each item in a collection after *setCollection* is called. Must return a string, defaults to:
-
-    return this.renderTemplate(this.name + '-item.handlebars',this.itemAttributes.call(this,item)); 
-
-### \_renderEmpty *view.\_renderEmpty()*
-Override if needed. Called when the collection is empty. Must return a string. Defaults to:
-  
-    return this.renderTemplate(this.name + '-empty.handlebars');
-
-### \_collectionElement *view.\_collectionElement*
-Override if needed. Element or String selector to select the collection element in the view, defaults to ".collection"
-
-
-END OLD DOCS
-
----
-
 
 ## Templating
 
