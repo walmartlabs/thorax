@@ -38,7 +38,9 @@ div#sidebar {
   overflow-x: hidden;
   padding: 15px 0 30px 30px;
   border-right: 1px solid #ddd;
-  box-shadow: 0 0 20px #ccc; -webkit-box-shadow: 0 0 20px #ccc; -moz-box-shadow: 0 0 20px #ccc;
+  -webkit-box-shadow: 0 0 20px #ccc;
+     -moz-box-shadow: 0 0 20px #ccc;
+          box-shadow: 0 0 20px #ccc;
   background: #242426;
 }
 #sidebar h2 {
@@ -189,7 +191,7 @@ pre {
   padding: 17px 17px 0 17px;
   border: 5px solid #eee;
   margin: 0px 0 30px;
-  box-shadow: 0 0 10px #666;
   -webkit-box-shadow: 0 0 10px #666;
-  -moz-box-shadow: 0 0 10px #666;
+     -moz-box-shadow: 0 0 10px #666;
+          box-shadow: 0 0 10px #666;
 }
