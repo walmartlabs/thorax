@@ -1,245 +1,355 @@
 @charset "UTF-8";
 
 @font-face { /*----- CHANGE TO TYPEKIT ------*/
-	font-family: 'PreloSlabMedium';
-	src: url('fonts/preloslab-medium-webfont.eot');
-	src: url('fonts/preloslab-medium-webfont.eot?#iefix')
-		format('embedded-opentype'),
-		url('fonts/preloslab-medium-webfont.woff') format('woff'),
-		url('fonts/preloslab-medium-webfont.ttf') format('truetype'),
-		url('fonts/preloslab-medium-webfont.svg#PreloSlabMedium')
-		format('svg');
-	font-weight: normal;
-	font-style: normal;
+  font-family: 'PreloSlabMedium';
+  src: url('fonts/preloslab-medium-webfont.eot');
+  src: url('fonts/preloslab-medium-webfont.eot?#iefix')
+    format('embedded-opentype'),
+    url('fonts/preloslab-medium-webfont.woff') format('woff'),
+    url('fonts/preloslab-medium-webfont.ttf') format('truetype'),
+    url('fonts/preloslab-medium-webfont.svg#PreloSlabMedium')
+    format('svg');
+  font-weight: normal;
+  font-style: normal;
 }
 
 @font-face {
-	font-family: 'PreloSlabBold';
-	src: url('fonts/preloslab-bold-webfont.eot');
-	src: url('fonts/preloslab-bold-webfont.eot?#iefix')
-		format('embedded-opentype'), url('fonts/preloslab-bold-webfont.woff')
-		format('woff'), url('fonts/preloslab-bold-webfont.ttf')
-		format('truetype'),
-		url('fonts/preloslab-bold-webfont.svg#PreloSlabBold') format('svg');
-	font-weight: normal;
-	font-style: normal;
+  font-family: 'PreloSlabBold';
+  src: url('fonts/preloslab-bold-webfont.eot');
+  src: url('fonts/preloslab-bold-webfont.eot?#iefix')
+    format('embedded-opentype'), url('fonts/preloslab-bold-webfont.woff')
+    format('woff'), url('fonts/preloslab-bold-webfont.ttf')
+    format('truetype'),
+    url('fonts/preloslab-bold-webfont.svg#PreloSlabBold') format('svg');
+  font-weight: normal;
+  font-style: normal;
 }
 
 body {
-	background: #48494c url(../assets/images/hdr_bg.png);
-	background-repeat: repeat-x;
-	color: #DBDBDB;
-	font-family: "Helvetica Neue Medium", "Helvetica Neue", Helvetica, Arial,
-		Trebuchet, sans-serif;
-	font-size: 1em;
-	line-height: 1.57em;
+  background: #48494c url(../assets/images/hdr_bg.png);
+  background-repeat: repeat-x;
+  color: #DBDBDB;
+  font-family: "Helvetica Neue Medium", "Helvetica Neue", Helvetica, Arial,
+    Trebuchet, sans-serif;
+  font-size: 1em;
+  line-height: 1.57em;
 }
 
 .interface {
-	font-family: "Lucida Grande", "Lucida Sans Unicode", Helvetica, Arial,
-		sans-serif !important;
+  font-family: "Lucida Grande", "Lucida Sans Unicode", Helvetica, Arial,
+    sans-serif !important;
 }
 
 div#sidebar {
-	font-family: 'PreloSlabBold';
-	font-size: 0.92em;
-	background: #000;
-	position: fixed;
-	top: 0;
-	left: 0;
-	bottom: 0;
-	width: 20%;
-	overflow-y: auto;
-	overflow-x: hidden;
-	padding: 0 0 2em 2em;
-	border-right: 1px solid #ddd;
-	-webkit-box-shadow: 0 0 1.42em #ccc;
-	-moz-box-shadow: 0 0 1.42em #ccc;
-	box-shadow: 0 0 1.42em #ccc;
-	background: #242426;
+  font-family: 'PreloSlabBold';
+  font-size: 0.92em;
+  background: #000;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 20%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0 0 2em 2em;
+  border-right: 1px solid #ddd;
+  -webkit-box-shadow: 0 0 1.42em #ccc;
+  -moz-box-shadow: 0 0 1.42em #ccc;
+  box-shadow: 0 0 1.42em #ccc;
+  background: #242426;
 }
 
 #sidebar li.header {
-	margin: 0;
-	padding: 0;
-	font-size: inherit;
-	line-height: inherit;
-	font-weight: inherit;
-	margin-top: 1.2em;
+  margin: 0;
+  padding: 0;
+  font-size: inherit;
+  line-height: inherit;
+  font-weight: inherit;
+  margin-top: 1.2em;
 }
 
 #sidebar li.header > a,a:visited {
-	font-family: 'PreloSlabBold';
-	color: #A5843C;
-	text-decoration: none;
-	margin-top: 1.14em;
-	font-size: 1.14em;
+  font-family: 'PreloSlabBold';
+  color: #A5843C;
+  text-decoration: none;
+  margin-top: 1.14em;
+  font-size: 1.14em;
 }
 
 #sidebar h2 a:hover {
-	text-decoration: underline;
+  text-decoration: underline;
 }
 
 #sidebar ul {
-	font-size: 1em;
-	line-height: 14px;
-	margin: 0;
-	padding-left: 0px;
-	list-style-type: none;
+  font-size: 1em;
+  line-height: 14px;
+  margin: 0;
+  padding-left: 0px;
+  list-style-type: none;
 }
 
 #sidebar li {
-	cursor: pointer;
-	margin: 1.2em 0 3px 0;
+  cursor: pointer;
+  margin: 1.2em 0 3px 0;
 }
 
 #sidebar .sub li:before {
-	content: ' - ';
+  content: ' - ';
 }
 
 #sidebar li .sub li {
-	margin-top: 0.3em;
+  margin-top: 0.3em;
 }
 
 #sidebar li .sub a {
-	text-decoration: none;
-	color: #DBDBDB;
-	font-size: 0.8em;
-	font-weight: normal;
+  text-decoration: none;
+  color: #DBDBDB;
+  font-size: 0.8em;
+  font-weight: normal;
 }
 
 #sidebar li a:hover {
-	text-decoration: underline;
+  text-decoration: underline;
 }
 
 div.container {
-	max-width: 700px;
-	margin: 1.85em 1.85em 1.85em 20%;
-	background-image: url(../assets/images/badge_thorax.png);
-	background-repeat: no-repeat;
-	background-position: 26px 0;
-	padding-top: 48px;
-	padding-left: 78px;
-	overflow-x: hidden;
+  max-width: 700px;
+  margin: 1.85em 1.85em 1.85em 20%;
+  background-image: url(../assets/images/badge_thorax.png);
+  background-repeat: no-repeat;
+  background-position: 26px 0;
+  padding-top: 48px;
+  padding-left: 78px;
+  overflow-x: hidden;
 }
 
 p,div.container ul {
-	margin: 20px 0;
+  margin: 20px 0;
 }
 
 p.warning {
-	font-size: 12px;
-	line-height: 18px;
-	font-style: italic;
+  font-size: 12px;
+  line-height: 18px;
+  font-style: italic;
 }
 
 div.container ul {
-	list-style: circle;
-	font-size: 13px;
-	padding-left: 15px;
+  list-style: circle;
+  font-size: 13px;
+  padding-left: 15px;
 }
 
 a,a:visited {
-	color: #fff;
+  color: #fff;
 }
 
 a:active,a:hover {
-	color: #fff;
+  color: #fff;
 }
 
 a img {
-	border: 0;
+  border: 0;
 }
 
 h1,h2,h3,h4,h5,h6 {
-	padding-top: 20px;
+  padding-top: 20px;
 }
 
 h2 {
-	font-size: 26px;
+  font-size: 26px;
 }
 
 .container h2 {
-	color: #E3AB32;
-	font-size: 22px;
-	font-family: PreloSlabMedium;
-	font-weight: normal;
+  color: #E3AB32;
+  font-size: 22px;
+  font-family: PreloSlabMedium;
+  font-weight: normal;
 }
 
 h3 {
-	font-family: PreloSlabMedium;
-	font-size: 19px;
-	color: white;
-	margin-bottom: 6px;
-	font-style: normal;
-	font-weight: normal;
+  font-family: PreloSlabMedium;
+  font-size: 19px;
+  color: white;
+  margin-bottom: 6px;
+  font-style: normal;
+  font-weight: normal;
 }
 
 .container h3 {
-	padding-top: 0;
+  padding-top: 0;
 }
 
 span.alias {
-	font-size: 14px;
-	font-style: italic;
-	margin-left: 20px;
+  font-size: 14px;
+  font-style: italic;
+  margin-left: 20px;
 }
 
 table {
-	margin: 15px 0 0;
-	padding: 0;
+  margin: 15px 0 0;
+  padding: 0;
 }
 
 tr,td {
-	margin: 0;
-	padding: 0;
+  margin: 0;
+  padding: 0;
 }
 
 td {
-	padding: 0px 15px 5px 0;
+  padding: 0px 15px 5px 0;
 }
 
 code,pre,p em,.container em {
-	font-family: Monaco, Consolas, "Lucida Console", monospace;
-	font-size: 13px;
-	line-height: 18px;
-	font-style: normal;
-	font-weight: normal;
+  font-family: Monaco, Consolas, "Lucida Console", monospace;
+  font-size: 13px;
+  line-height: 18px;
+  font-style: normal;
+  font-weight: normal;
 }
 
 p em {
-	padding: 0px 3px;
-	color: #E3AB32;
-	zoom: 1;
+  padding: 0px 3px;
+  color: #E3AB32;
+  zoom: 1;
 }
 
 .container h3>em {
-	display: block;
-	margin-left: 25px;
+  display: block;
+  margin-left: 25px;
 }
 
 pre {
-	border: 7px solid #A3A3A3;
-	background-color: #242426;
-	color: #fff;
-	font-size: 12px;
-	padding: 17px 17px 0 17px;
-	border: 5px solid #eee;
-	margin: 0px 0 30px;
-	-webkit-box-shadow: 0 0 10px #666;
-	-moz-box-shadow: 0 0 10px #666;
-	box-shadow: 0 0 10px #666;
+  border: 7px solid #A3A3A3;
+  background-color: #242426;
+  color: #fff;
+  font-size: 12px;
+  padding: 17px 17px 0 17px;
+  border: 5px solid #eee;
+  margin: 0px 0 30px;
+  -webkit-box-shadow: 0 0 10px #666;
+  -moz-box-shadow: 0 0 10px #666;
+  box-shadow: 0 0 10px #666;
+}
+
+
+/*
+
+Zenburn style from voldmar.ru (c) Vladimir Epifanov <voldmar@voldmar.ru>
+based on dark.css by Ivan Sagalaev
+
+*/
+
+pre .keyword,
+pre .tag,
+pre .django .tag,
+pre .django .keyword,
+pre .css .class,
+pre .css .id,
+pre .lisp .title {
+  color: #E3CEAB;
+}
+
+pre .django .template_tag,
+pre .django .variable,
+pre .django .filter .argument {
+  color: #DCDCDC;
+}
+
+pre .number,
+pre .date {
+  color: #8CD0D3;
+}
+
+pre .dos .envvar,
+pre .dos .stream,
+pre .variable,
+pre .apache .sqbracket {
+  color: #EFDCBC;
+}
+
+pre .dos .flow,
+pre .diff .change,
+pre .python .exception,
+pre .python .built_in,
+pre .literal,
+pre .tex .special {
+  color: #EFEFAF;
+}
+
+pre .diff .chunk,
+pre .ruby .subst {
+  color: #8F8F8F;
+}
+
+pre .dos .keyword,
+pre .python .decorator,
+pre .class .title,
+pre .haskell .label,
+pre .function .title,
+pre .ini .title,
+pre .diff .header,
+pre .ruby .class .parent,
+pre .apache .tag,
+pre .nginx .built_in,
+pre .tex .command,
+pre .input_number {
+    color: #efef8f;
+}
+
+pre .dos .winutils,
+pre .ruby .symbol,
+pre .ruby .symbol .string,
+pre .ruby .symbol .keyword,
+pre .ruby .symbol .keymethods,
+pre .ruby .string,
+pre .ruby .instancevar {
+  color: #DCA3A3;
+}
+
+pre .diff .deletion,
+pre .string,
+pre .tag .value,
+pre .preprocessor,
+pre .built_in,
+pre .sql .aggregate,
+pre .javadoc,
+pre .smalltalk .class,
+pre .smalltalk .localvars,
+pre .smalltalk .array,
+pre .css .rules .value,
+pre .attr_selector,
+pre .pseudo,
+pre .apache .cbracket,
+pre .tex .formula {
+  color: #CC9393;
+}
+
+pre .shebang,
+pre .diff .addition,
+pre .comment,
+pre .java .annotation,
+pre .template_comment,
+pre .pi,
+pre .doctype {
+  color: #7F9F7F;
+}
+
+pre .xml .css,
+pre .xml .javascript,
+pre .xml .vbscript,
+pre .tex .formula {
+  opacity: 0.5;
 }
 
 @media all and (max-width: 780px) {
-	body {
-	  margin-left: 0;
-	}
-	div#sidebar {
-		display: none;
-	}
-	div.container {
-	  margin-left: 0;
-	  background-position: 0 0;
-	}
+  body {
+    margin-left: 0;
+  }
+  div#sidebar {
+    display: none;
+  }
+  div.container {
+    margin-left: 0;
+    background-position: 0 0;
+  }
 }
