@@ -104,8 +104,8 @@ div#sidebar {
 
 div.container {
   max-width: 700px;
-  margin: 0 0 0 20%;
   background-image: url(../assets/images/badge_thorax.png);
+  margin: 1.85em 0 0 20%;
   background-repeat: no-repeat;
   padding: 3em 1.85em 0 1.85em;
   overflow-x: hidden;
@@ -196,6 +196,9 @@ pre > code {
   background: transparent;
 }
 
+blockquote {
+  white-space: pre;
+}
 
 /*
 
