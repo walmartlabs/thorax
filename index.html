@@ -151,7 +151,7 @@ Application.View.registerEvents({
 
 <p>Thorax enhances the <code>Backbone.View.events</code> hash handling in the following ways:</p>
 
-<ul><li>accepts functions as a value to the hash in addition to a string method name</li><li>accepts non DOM event names that will be treated as view events</li><li>accepts a <code>collection or </code>model<code> hash of events that will be bound to the model or collection when </code>setModel<code> or </code>setCollection` are called, callbacks will be called with a context of the view instance</li></ul>
+<ul><li>accepts functions as a value to the hash in addition to a string method name</li><li>accepts non DOM event names that will be treated as view events</li><li>accepts a <code>collection</code> or <code>model</code> hash of events that will be bound to the model or collection when <code>setModel</code> or <code>setCollection</code> are called, callbacks will be called with a context of the view instance</li></ul>
 
 <p>An example of a view implementing all of the above:</p>
 
@@ -224,7 +224,7 @@ Application.View.unregisterEvents('model', 'change');</code></pre>
 <pre><code>Application.View.registerHelper('bold', function(content, options) {
   //options.hash contains key, value pairs from named / html arguments
   //to the helper
-  return '&amp;lt;b&gt;' + content + '&amp;lt;/b&gt;';
+  return '&lt;b&gt;' + content + '&lt;/b&gt;';
 });
 
 {{bold "Text"}}</code></pre>
@@ -244,14 +244,14 @@ console.log(view.template({
 }));
 
 // templates/view-name.handlebars
-&amp;lt;h1&gt;{{title}}&amp;lt;/h1&gt;
-&amp;lt;p&gt;{{body}}&amp;lt;/p&gt;</code></pre>
+&lt;h1&gt;{{title}}&lt;/h1&gt;
+&lt;p&gt;{{body}}&lt;/p&gt;</code></pre>
 
 <p>This method is also available as a template helper, it will only render the template as a string, if there is a corresponding view it will <strong>not</strong> be initialized. The scope of the current template will be carried inward to the rendred template. </p>
 
 <pre><code>{{template "header" key="value"}}
-&amp;lt;h1&gt;{{title}}&amp;lt;/h1&gt;
-&amp;lt;p&gt;{{body}}&amp;lt;/p&gt;
+&lt;h1&gt;{{title}}&lt;/h1&gt;
+&lt;p&gt;{{body}}&lt;/p&gt;
 {{template "footer"}}</code></pre>
 
 <h3 id="templating-view">view <em>view.view(name [,attributes])</em></h3>
@@ -275,8 +275,8 @@ Application.View.extend({
 
 <pre><code>// templates/main.handlebars
 {{view header}}
-&amp;lt;h1&gt;{{title}}&amp;lt;/h1&gt;
-&amp;lt;p&gt;{{body}}&amp;lt;/p&gt;
+&lt;h1&gt;{{title}}&lt;/h1&gt;
+&lt;p&gt;{{body}}&lt;/p&gt;
 {{view "footer"}}</code></pre>
 
 <h3 id="templating-html">html <em>view.html([content])</em></h3>
@@ -343,7 +343,7 @@ Application.View.extend({
 });
 
 // templates/view-name.handlebars
-&amp;lt;div class="custom-collection"&gt;&amp;lt;/div&gt;</code></pre>
+&lt;div class="custom-collection"&gt;&lt;/div&gt;</code></pre>
 
 <h3 id="templating-itemcontext">itemContext <em>view.itemContext(model, index)</em></h3>
 
@@ -407,10 +407,10 @@ renderItem: function(model, i) {
 
 <p>Each form input in your application should contain a corresponding label. Since you may want to re-use the same form multiple times in the same view a <code>cid</code> attribute with a unique value is provided to each render call of each template:</p>
 
-<pre><code>&amp;lt;label for="{{cid}}-last-name"/&gt;
-&amp;lt;input name="last-name" id="{{cid}}-last-name" value="Beastridge"/&gt;
-&amp;lt;label for="{{cid}}-last-name"/&gt;
-&amp;lt;input name="address[street]" value="123 Chestnut" id="{{cid}}-address[street]"/&gt;
+<pre><code>&lt;label for="{{cid}}-last-name"/&gt;
+&lt;input name="last-name" id="{{cid}}-last-name" value="Beastridge"/&gt;
+&lt;label for="{{cid}}-last-name"/&gt;
+&lt;input name="address[street]" value="123 Chestnut" id="{{cid}}-address[street]"/&gt;
 
 Phoenix.View.extend({
   name: "address-form",
@@ -446,7 +446,7 @@ Phoenix.View.extend({
 
 <pre><code>validateInput: function(attributes) {
   var errors = [];
-  if (attributes.password &amp;amp;&amp;amp; !attributes.password.match(/.{6,11}/)) {
+  if (attributes.password &amp;&amp; !attributes.password.match(/.{6,11}/)) {
     errors.push({name: 'password', message: 'Invalid Password'});
   }
   return errors;
