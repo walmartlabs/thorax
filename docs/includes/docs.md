@@ -160,7 +160,7 @@ Thorax enhances the `Backbone.View.events` hash handling in the following ways:
 
 - accepts functions as a value to the hash in addition to a string method name
 - accepts non DOM event names that will be treated as view events
-- accepts a `collection or `model` hash of events that will be bound to the model or collection when `setModel` or `setCollection` are called, callbacks will be called with a context of the view instance
+- accepts a `collection` or `model` hash of events that will be bound to the model or collection when `setModel` or `setCollection` are called, callbacks will be called with a context of the view instance
 
 An example of a view implementing all of the above:
 
