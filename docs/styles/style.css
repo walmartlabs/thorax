@@ -1,0 +1,323 @@
+@charset "UTF-8";
+
+@font-face { /*----- CHANGE TO TYPEKIT ------*/
+  font-family: 'PreloSlabMedium';
+  src: url('fonts/preloslab-medium-webfont.eot');
+  src: url('fonts/preloslab-medium-webfont.eot?#iefix')
+    format('embedded-opentype'),
+    url('fonts/preloslab-medium-webfont.woff') format('woff'),
+    url('fonts/preloslab-medium-webfont.ttf') format('truetype'),
+    url('fonts/preloslab-medium-webfont.svg#PreloSlabMedium')
+    format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'PreloSlabBold';
+  src: url('fonts/preloslab-bold-webfont.eot');
+  src: url('fonts/preloslab-bold-webfont.eot?#iefix')
+    format('embedded-opentype'), url('fonts/preloslab-bold-webfont.woff')
+    format('woff'), url('fonts/preloslab-bold-webfont.ttf')
+    format('truetype'),
+    url('fonts/preloslab-bold-webfont.svg#PreloSlabBold') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+
+body {
+  background: #48494c url(../assets/images/hdr_bg.png);
+  background-repeat: repeat-x;
+  color: #DBDBDB;
+  font-family: "Helvetica Neue Medium", "Helvetica Neue", Helvetica, Arial,
+    Trebuchet, sans-serif;
+  line-height: 1.57em;
+}
+
+div#sidebar {
+  font-family: "Lucida Grande", "Lucida Sans Unicode", Helvetica, Arial,sans-serif;
+  font-size: 0.92em;
+  box-sizing: border-box;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 20%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0 0 2em 2em;
+  border-right: 1px solid #ddd;
+  -webkit-box-shadow: 0 0 1.42em #ccc;
+  -moz-box-shadow: 0 0 1.42em #ccc;
+  box-shadow: 0 0 1.42em #ccc;
+  background: #242426;
+}
+
+#sidebar li.header {
+  margin: 0;
+  padding: 0;
+  font-size: inherit;
+  line-height: inherit;
+  font-weight: inherit;
+  margin-top: 1.2em;
+}
+
+#sidebar li.header > a {
+  color: #A5843C;
+  text-decoration: none;
+  margin-top: 1.14em;
+  font-family: 'PreloSlabBold', "Lucida Grande", "Lucida Sans Unicode", Helvetica, Arial,sans-serif;
+  font-size: 1.14em;
+}
+
+#sidebar ul {
+  font-size: 1em;
+  line-height: 1em;
+  margin: 0;
+  padding-left: 0;
+  list-style-type: none;
+}
+
+#sidebar li {
+  cursor: pointer;
+  margin: 1.2em 0 0.21em 0;
+}
+
+#sidebar .sub li:before {
+  content: ' - ';
+}
+
+#sidebar li .sub li {
+  margin-top: 0.3em;
+}
+
+#sidebar li .sub a {
+  text-decoration: none;
+  color: #DBDBDB;
+  font-size: 0.8em;
+  font-weight: normal;
+}
+
+#sidebar li a:hover {
+  text-decoration: underline;
+}
+
+div.container {
+  max-width: 700px;
+  background-image: url(../assets/images/badge_thorax.png);
+  margin: 1.85em 0 0 20%;
+  background-repeat: no-repeat;
+  padding: 3em 1.85em 0 1.85em;
+  overflow-x: hidden;
+}
+
+p,
+ul {
+  margin: 1.42em 0;
+}
+
+ul {
+  list-style: circle;
+  font-size: 0.92em;
+  padding-left: 1.07em;
+}
+
+a,
+a:visited,
+a:active,
+a:hover {
+  color: #fff;
+}
+
+a img {
+  border: 0;
+}
+
+h1,h2,h3,h4,h5,h6 {
+  padding-top: 1em;
+}
+
+h2 {
+  color: #E3AB32;
+  font-size: 1.57em;
+  font-family: PreloSlabMedium;
+  font-weight: normal;
+}
+
+h3 {
+  font-family: PreloSlabMedium;
+  font-size: 1.35em;
+  color: white;
+  margin-bottom: 0.42em;
+  font-style: normal;
+  font-weight: normal;
+  padding-top: 0;
+}
+h3 > em {
+  display: block;
+  margin-left: 2em;
+  font-size: 0.74em;
+}
+
+code, pre, em {
+  font-family: Monaco, Consolas, "Lucida Console", monospace;
+  font-size: 0.92em;
+  line-height: 1.28em;
+  font-style: normal;
+  font-weight: normal;
+}
+
+em {
+  padding: 0 3px;
+  color: #E3AB32;
+}
+
+code {
+  color: #fff;
+  background: #636467;
+  padding: 1px;
+}
+
+pre {
+  border: 0.5em solid #A3A3A3;
+  background-color: #242426;
+  color: #fff;
+  font-size: 0.85em;
+  padding: 1.21em;
+  border: 0.35em solid #eee;
+  margin: 0 0 2.1em;
+  overflow: auto;
+  -webkit-box-shadow: 0 0 0.71em #666;
+  -moz-box-shadow: 0 0 0.71em #666;
+  box-shadow: 0 0 0.71em #666;
+}
+pre > code {
+  color: inherit;
+  background: transparent;
+}
+
+blockquote {
+  white-space: pre;
+}
+
+/*
+
+Zenburn style from voldmar.ru (c) Vladimir Epifanov <voldmar@voldmar.ru>
+based on dark.css by Ivan Sagalaev
+
+*/
+
+.keyword,
+.tag,
+.django .tag,
+.django .keyword,
+.css .class,
+.css .id,
+.lisp .title {
+  color: #E3CEAB;
+}
+
+.django .template_tag,
+.django .variable,
+.django .filter .argument {
+  color: #DCDCDC;
+}
+
+.number,
+.date {
+  color: #8CD0D3;
+}
+
+.dos .envvar,
+.dos .stream,
+.variable,
+.apache .sqbracket {
+  color: #EFDCBC;
+}
+
+.dos .flow,
+.diff .change,
+.python .exception,
+.python .built_in,
+.literal,
+.tex .special {
+  color: #EFEFAF;
+}
+
+.diff .chunk,
+.ruby .subst {
+  color: #8F8F8F;
+}
+
+.dos .keyword,
+.python .decorator,
+.class .title,
+.haskell .label,
+.function .title,
+.ini .title,
+.diff .header,
+.ruby .class .parent,
+.apache .tag,
+.nginx .built_in,
+.tex .command,
+.input_number {
+    color: #efef8f;
+}
+
+.dos .winutils,
+.ruby .symbol,
+.ruby .symbol .string,
+.ruby .symbol .keyword,
+.ruby .symbol .keymethods,
+.ruby .string,
+.ruby .instancevar {
+  color: #DCA3A3;
+}
+
+.diff .deletion,
+.string,
+.tag .value,
+.preprocessor,
+.built_in,
+.sql .aggregate,
+.javadoc,
+.smalltalk .class,
+.smalltalk .localvars,
+.smalltalk .array,
+.css .rules .value,
+.attr_selector,
+.pseudo,
+.apache .cbracket,
+.tex .formula {
+  color: #CC9393;
+}
+
+.shebang,
+.diff .addition,
+.comment,
+.java .annotation,
+.template_comment,
+.pi,
+.doctype {
+  color: #7F9F7F;
+}
+
+.xml .css,
+.xml .javascript,
+.xml .vbscript,
+.tex .formula {
+  opacity: 0.5;
+}
+
+@media all and (max-width: 780px) {
+	body {
+	  margin-left: 0;
+	  font-size: 0.9em;
+	}
+	div#sidebar {
+		display: none;
+	}
+	div.container {
+	  margin-left: 0;
+	}
+}
