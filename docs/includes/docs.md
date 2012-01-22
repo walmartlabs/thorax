@@ -67,7 +67,7 @@ Create a new view instance, looking it up by the `name` property in the view's c
 
 ### setView *Application.layout.setView(view)*
 
-Append the view to the `Application.layout` object, displaying it on the page.
+Append the view to the `Application.layout` object, displaying it on the page. This method is aliased to `Application.Router.prototype.setView` making it available as `this.setView` inside of router methods:
 
     routerMethod: function(id) {
       var view = this.view('view/name');
