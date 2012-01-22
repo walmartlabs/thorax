@@ -12,7 +12,7 @@ An opinionated Backbone application framework using:
 
 ### Quick Start
 
-Thorax can be used standalone but is designed to work best with [Lumbar](http://walmartlabs.github.com/lumbar). The easiest way to setup a new Thoax + Lumbar project is with the thorax command line tool:
+Thorax can be used [standalone (40kb)](https://github.com/walmartlabs/thorax/blob/master/thorax.js) but is designed to work best with [Lumbar](http://walmartlabs.github.com/lumbar). The easiest way to setup a new Thoax + Lumbar project is with the thorax command line tool or by [downloading the sample project](https://github.com/walmartlabs/thorax-example) it creates. To use the command line tools you'll need [node](http://nodejs.org/) (we recommend using [nvm](https://github.com/creationix/nvm) to install node) and [npm](http://npmjs.org/). If you are on a mac you'll need [Xcode](http://itunes.apple.com/us/app/xcode/id448457090?mt=12) installed to run gcc.
 
     npm install -g lumbar thorax
     thorax create project-name
