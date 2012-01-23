@@ -266,7 +266,10 @@
     //allow events hash to specify view, collection and model events
     //as well as DOM events. Merges Thorax.View.events with this.events
     delegateEvents: function(events) {
-      this.undelegateEvents();
+      //undelegateEvents does not exist in some copies of backbone tagged 0.5.3
+      if (this.undelegateEvents) {
+        this.undelegateEvents();
+      }
       this._processEvents(this.constructor.events);
       if (this.events) {
         this._processEvents(this.events);
@@ -670,7 +673,9 @@
     destroy: function(){
       this.freeze();
       this.trigger('destroyed');
-      this.undelegateEvents();
+      if (this.undelegateEvents) {
+        this.undelegateEvents();
+      }
       this.unbind();
       this._events = {};
       this.el = null;
