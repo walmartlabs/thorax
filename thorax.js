@@ -488,7 +488,7 @@
         index = index || this.collection.indexOf(model) || 0;
         item_view = this.renderItem(model, index);
       }
-      
+
       if (item_view) {
         if (item_view.cid) {
           this._views[item_view.cid] = item_view.cid;
@@ -499,8 +499,13 @@
           item_element = item_view.el;
         } else {
           //renderItem returned string
-          item_element = this._createItemElement();;
+          item_element = this._createItemElement();
           item_element.innerHTML = item_view;
+          if (_.filter(item_element.childNodes, function(node) {
+            return node.nodeType === 1;
+          }).length === 1) {
+            item_element = item_element.firstChild;
+          }
         }
 
         if (item_element) {
