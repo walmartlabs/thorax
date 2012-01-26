@@ -112,11 +112,11 @@ Application.View.registerEvents({
   }
 });</code></pre>
 
-<h3 id="loading-data-load">load <em>model/collection.load(callback [,failback])</em></h3>
+<h3 id="loading-data-load">load <em>model/collection.load(callback [,failback [,options]])</em></h3>
 
 <p>Use this method when you need to display a blocking load indicator or can't set the next view until the requested data has loaded.</p>
 
-<p>Calls <code>fetch</code> on the model or collection, triggering <code>load:start</code> and <code>load:end</code> on both the model / collection and the <code>Application</code> object. <code>callback</code> and <code>failback</code> will be used as arguments to <code>bindToRoute</code>.</p>
+<p>Calls <code>fetch</code> on the model or collection, triggering <code>load:start</code> and <code>load:end</code> on both the model / collection and the <code>Application</code> object. <code>callback</code> and <code>failback</code> will be used as arguments to <code>bindToRoute</code>. <code>options</code> will be passed to the <code>fetch</code> call on the model or collection if present.</p>
 
 <pre><code>routerMethod: function(id) {
   var view = this.view('view/name');
@@ -291,7 +291,7 @@ Application.View.extend({
 
 <p>Set the <em>model</em> attribute of the view, triggering some customizable behaviors:</p>
 
-<ul><li><code>fetch</code> - auto fetch the model if empty, defaults to true</li><li><code>success</code> - a callback to call when fetch() succeeds, defaults to false</li><li><code>render</code> - wether to call render after <em>setModel</em> and on the model's <em>change</em> event, defaults to true</li><li><code>populate</code> - wether to auto call <em>populate</em>, defaults to true. if there is no form in the view <em>populate</em> will have no effect</li><li><code>errors</code> - wether to bubble the error event from the model to the view</li></ul>
+<ul><li><code>fetch</code> - auto fetch the model if empty, defaults to true, if an object is passed it will be used as the options to <code>fetch</code></li><li><code>success</code> - a callback to call when fetch() succeeds, defaults to false</li><li><code>render</code> - wether to call render after <em>setModel</em> and on the model's <em>change</em> event, defaults to true</li><li><code>populate</code> - wether to auto call <em>populate</em>, defaults to true. if there is no form in the view <em>populate</em> will have no effect</li><li><code>errors</code> - wether to bubble the error event from the model to the view</li></ul>
 
 <p><code>setModel</code> will trigger the <code>model set</code> event:</p>
 
@@ -321,7 +321,7 @@ Application.View.extend({
 
 <p>Set the <em>collection</em> attribute of the view. This will bind events on collection <code>add</code>, <code>remove</code> and <code>reset</code>, updating the collection element (specified by <code>_collectionSelector</code>) as needed. <code>options</code> may contain: </p>
 
-<ul><li><code>fetch</code> - auto fetch, defaults to true</li><li><code>success</code> - a callback to call when fetch() succeeds, defaults to false</li><li><code>errors</code> - wether to bubble error events from the collection to the view, defaults to true</li></ul>
+<ul><li><code>fetch</code> - auto fetch, defaults to true, if an object is passed it will be used as the options to <code>fetch</code></li><li><code>success</code> - a callback to call when fetch() succeeds, defaults to false</li><li><code>errors</code> - wether to bubble error events from the collection to the view, defaults to true</li></ul>
 
 <p>Collection rendering assumes that the following templates will be present.</p>
 
