@@ -1208,8 +1208,8 @@
 
   Thorax.Collection.extend = function(protoProps, classProps) {
     var child = Backbone.Collection.extend.call(this, protoProps, classProps);
-    if (child.name) {
-      scope.Collections[child.name] = child;
+    if (child.prototype.name) {
+      scope.Collections[child.prototype.name] = child;
     }
     return child;
   };
@@ -1224,8 +1224,8 @@
 
   Thorax.Model.extend = function(protoProps, classProps) {
     var child = Backbone.Model.extend.call(this, protoProps, classProps);
-    if (child.name) {
-      scope.Models[child.name] = child;
+    if (child.prototype.name) {
+      scope.Models[child.prototype.name] = child;
     }
     return child;
   };
