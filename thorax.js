@@ -330,14 +330,14 @@
         this.model.trigger('set', this.model, old_model);
     
         if (this._shouldFetch(this.model, this._modelOptions)) {
-          this.model.fetch({
+          this.model.fetch(_.extend(_.isObject(this._modelOptions.fetch) ? this._modelOptions.fetch : {}, {
             ignoreErrors: this.ignoreFetchError,
             success: _.once(_.bind(function(){
               if (this._modelOptions.success) {
                 this._modelOptions.success(model);
               }
             },this))
-          });
+          }));
         } else {
           //want to trigger built in event handler (render() + populate())
           //without triggering event on model
@@ -381,14 +381,14 @@
         this.collection.trigger('set', this.collection, old_collection);
 
         if (this._shouldFetch(this.collection, this._collectionOptions)) {
-          this.collection.fetch({
+          this.collection.fetch(_.extend(_.isObject(this._collectionOptions.fetch) ? this._collectionOptions.fetch : {}, {
             ignoreErrors: this.ignoreFetchError,
             success: _.once(_.bind(function(){
               if (this._collectionOptions.success) {
                 this._collectionOptions.success(this.collection);
               }
             },this))
-          });
+          }));
         } else {
           //want to trigger built in event handler (render())
           //without triggering event on collection
@@ -1250,9 +1250,14 @@
     return Backbone.sync.apply(this, arguments);
   }
 
-  function loadData(callback, failback) {
+  function loadData(callback, failback, options) {
     if (this.isPopulated()) {
       return callback(this);
+    }
+
+    if (arguments.length === 2 && typeof failback !== 'function' && _.isObject(failback)) {
+      options = failback;
+      failback = false;
     }
 
     function finalizer(isError) {
@@ -1266,13 +1271,13 @@
     var errorHandler = _.bind(finalizer, this, true);
     this.bind('error', errorHandler);
 
-    this.fetch({
+    this.fetch(_.extend(options || {}, {
       success: bindToRoute(_.bind(function() {
           this.unbind('error', errorHandler);
           callback.apply(this, arguments);
         }, this),
         _.bind(finalizer, this, false))
-    });
+    }));
   }
 
   function fetchQueue(options, $super) {

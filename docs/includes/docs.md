@@ -119,11 +119,11 @@ To implement both modal (blocking) and inline load indicators in your applicatio
       }
     });
 
-### load *model/collection.load(callback [,failback])*
+### load *model/collection.load(callback [,failback [,options]])*
 
 Use this method when you need to display a blocking load indicator or can't set the next view until the requested data has loaded.
 
-Calls `fetch` on the model or collection, triggering `load:start` and `load:end` on both the model / collection and the `Application` object. `callback` and `failback` will be used as arguments to `bindToRoute`.
+Calls `fetch` on the model or collection, triggering `load:start` and `load:end` on both the model / collection and the `Application` object. `callback` and `failback` will be used as arguments to `bindToRoute`. `options` will be passed to the `fetch` call on the model or collection if present.
 
     routerMethod: function(id) {
       var view = this.view('view/name');
@@ -300,7 +300,7 @@ Render a template with the filename of the view's `name` attribute (sans extensi
 
 Set the *model* attribute of the view, triggering some customizable behaviors:
 
-- `fetch` - auto fetch the model if empty, defaults to true
+- `fetch` - auto fetch the model if empty, defaults to true, if an object is passed it will be used as the options to `fetch`
 - `success` - a callback to call when fetch() succeeds, defaults to false
 - `render` - wether to call render after *setModel* and on the model's *change* event, defaults to true
 - `populate` - wether to auto call *populate*, defaults to true. if there is no form in the view *populate* will have no effect
@@ -334,7 +334,7 @@ Specify this function to override what attributes will be passed from a model se
 
 Set the *collection* attribute of the view. This will bind events on collection `add`, `remove` and `reset`, updating the collection element (specified by `_collectionSelector`) as needed. `options` may contain: 
 
-- `fetch` - auto fetch, defaults to true
+- `fetch` - auto fetch, defaults to true, if an object is passed it will be used as the options to `fetch`
 - `success` - a callback to call when fetch() succeeds, defaults to false
 - `errors` - wether to bubble error events from the collection to the view, defaults to true
 
