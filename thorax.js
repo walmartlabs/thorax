@@ -119,7 +119,8 @@
     model_cid_attribute_name = 'data-model-cid',
     old_backbone_view = Backbone.View,
     //android scrollTo(0, 0) shows url bar, scrollTo(0, 1) hides it
-    minimumScrollYOffset = (navigator.userAgent.toLowerCase().indexOf("android") > -1) ? 1 : 0;
+    minimumScrollYOffset = (navigator.userAgent.toLowerCase().indexOf("android") > -1) ? 1 : 0,
+    ELEMENT_NODE_TYPE = 1;
 
   //wrap Backbone.View constructor to support initialize event
   Backbone.View = function(options) {
@@ -338,7 +339,7 @@
         this.model.trigger('set', this.model, old_model);
     
         if (this._shouldFetch(this.model, this._modelOptions)) {
-          this.model.fetch(_.extend(_.isObject(this._modelOptions.fetch) ? this._modelOptions.fetch : {}, {
+          this.model.fetch(_.extend({}, _.isObject(this._modelOptions.fetch) ? this._modelOptions.fetch : {}, {
             ignoreErrors: this.ignoreFetchError,
             success: _.once(_.bind(function(){
               if (this._modelOptions.success) {
@@ -389,7 +390,7 @@
         this.collection.trigger('set', this.collection, old_collection);
 
         if (this._shouldFetch(this.collection, this._collectionOptions)) {
-          this.collection.fetch(_.extend(_.isObject(this._collectionOptions.fetch) ? this._collectionOptions.fetch : {}, {
+          this.collection.fetch(_.extend({}, _.isObject(this._collectionOptions.fetch) ? this._collectionOptions.fetch : {}, {
             ignoreErrors: this.ignoreFetchError,
             success: _.once(_.bind(function(){
               if (this._collectionOptions.success) {
@@ -510,7 +511,7 @@
           item_element = this._createItemElement();
           item_element.innerHTML = item_view;
           if (_.filter(item_element.childNodes, function(node) {
-            return node.nodeType === 1;
+            return node.nodeType === ELEMENT_NODE_TYPE;
           }).length === 1) {
             item_element = item_element.firstChild;
           }
@@ -1279,7 +1280,7 @@
     var errorHandler = _.bind(finalizer, this, true);
     this.bind('error', errorHandler);
 
-    this.fetch(_.extend(options || {}, {
+    this.fetch(_.extend({}, options || {}, {
       success: bindToRoute(_.bind(function() {
           this.unbind('error', errorHandler);
           callback.apply(this, arguments);
