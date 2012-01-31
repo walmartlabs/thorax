@@ -76,7 +76,7 @@
         }
       };
     },
-    throttleLoadEnd: function(end) {
+    throttleLoadEnd: function(end, timeout) {
       return function(background) {
         var self = this;
         if (self._loadStart) {
@@ -84,7 +84,10 @@
 
           // Reset the end timeout
           clearTimeout(self._loadStart.endTimeout);
-          self._loadStart.endTimeout = setTimeout(function(){
+          if (typeof timeout === 'undefined') {
+            timeout = 100;
+          }
+          var callback = function(){
             if (self._loadStart.pending <= 0) {
               var run = self._loadStart.run;
 
@@ -97,7 +100,12 @@
                 end.call(self, background);
               }
             }
-          }, 100);
+          };
+          if (timeout) {
+            self._loadStart.endTimeout = setTimeout(callback, timeout);
+          } else {
+            callback();
+          }
         }
       };
     }
