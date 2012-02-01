@@ -857,6 +857,9 @@
   });
 
   Thorax.View.registerHelper('view', function(view, options) {
+    if (!view) {
+      return '';
+    }
     var instance = Thorax._currentTemplateContext.view(view, options ? options.hash : {});
     return new Handlebars.SafeString('<div ' + view_placeholder_attribute_name + '="' + instance.cid + '"></div>');
   });
