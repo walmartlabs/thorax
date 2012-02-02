@@ -510,10 +510,11 @@
           //renderItem returned string
           item_element = this._createItemElement();
           item_element.innerHTML = item_view;
-          if (_.filter(item_element.childNodes, function(node) {
+          var element_nodes = _.filter(item_element.childNodes, function(node) {
             return node.nodeType === ELEMENT_NODE_TYPE;
-          }).length === 1) {
-            item_element = item_element.firstChild;
+          });
+          if (element_nodes.length === 1) {
+            item_element = element_nodes[0];
           }
         }
 
