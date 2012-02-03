@@ -596,7 +596,7 @@
       var attributes = options.attributes || {};
       
       //callback has context of element
-      eachNamedInput.call(this, options, function() {
+      this._eachNamedInput(options, function() {
         var value = getInputValue.call(this);
         if (typeof value !== 'undefined') {
           objectAndKeyFromAttributesAndName(attributes, this.name, {mode: 'serialize'}, function(object, key) {
@@ -623,7 +623,17 @@
       callback && callback.call(this,attributes);
       return attributes;
     },
-  
+
+    _eachNamedInput: function(options, iterator, context) {
+      var i = 0;
+      $('select,input,textarea', options.root || this.el).each(function() {
+        if (this.type !== 'button' && this.type !== 'cancel' && this.type !== 'submit' && this.name && this.name !== '') {
+          iterator.call(context || this, i, this);
+          ++i;
+        }
+      });
+    },
+
     _preventDuplicateSubmission: function(event, callback) {
       event.preventDefault();
 
@@ -998,16 +1008,6 @@
     }
     key = keys[keys.length - 1].replace(']', '');
     callback.call(this, object, key);
-  };
-
-  function eachNamedInput(options, iterator, context) {
-    var i = 0;
-    $('select,input,textarea', options.root || this.el).each(function() {
-      if (this.type !== 'button' && this.type !== 'cancel' && this.type !== 'submit' && this.name && this.name !== '') {
-        iterator.call(context || this, i, this);
-        ++i;
-      }
-    });
   };
 
   function bindModelAndCollectionEvents(events) {
