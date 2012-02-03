@@ -596,6 +596,7 @@
       var attributes = options.attributes || {};
       
       //callback has context of element
+      var self = this;
       this._eachNamedInput(options, function() {
         var value = getInputValue.call(this);
         if (typeof value !== 'undefined') {
@@ -662,7 +663,7 @@
       var value, attributes = attributes || this.context(this.model);
       
       //callback has context of element
-      eachNamedInput.call(this, {}, function() {
+      this._eachNamedInput({}, function() {
         objectAndKeyFromAttributesAndName.call(this, attributes, this.name, {mode: 'populate'}, function(object, key) {
           if (object && typeof (value = object[key]) !== 'undefined') {
             //will only execute if we have a name that matches the structure in attributes
