@@ -4,8 +4,12 @@
   } else {
     if (!$.fn.forEach) {
       // support jquery/zepto iterators
-      $.fn.forEach = $.fn.each;
-     }
+      $.fn.forEach = function(callback) {
+        this.each(function(index) {
+          callback(this, index);
+        });
+      }
+    }
   }
 
   if (typeof this._ === 'undefined') {
