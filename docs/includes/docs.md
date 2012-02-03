@@ -449,8 +449,15 @@ Each form input in your application should contain a corresponding label. Since 
 
 `serialize` Triggers the following events:
 
+- `serialize` - called before validation with serialized attributes
 - `validate` - with an attributes hash and errors array after `validateInput` is called
 - `error` - with an errors array, if validateInput returned an array with any errors
+
+If your view uses inputs with non standard names (or no names, multiple inputs with the same name, etc), use the `serialize` event:
+
+    this.bind('serialize', _.bind(function(attributes) {
+      attributes.custom = this.$('.my-input').val();
+    }, this));
 
 ### populate *view.populate([attributes])*
 
@@ -462,6 +469,12 @@ Populate the form fields in the view with the given attributes. The keys of the 
         street: "123 Chestnut"
       }
     });
+
+`populate` triggers a `populate` event. If your view uses inputs with non standard names (or no names, multiple inputs with the same name, etc), use this event:
+
+    this.bind('populate', _.bind(function(attributes) {
+      this.$('.my-input').val(attributes.custom);
+    }, this));
 
 ### validateInput *view.validateInput(attributes)*
 
