@@ -607,6 +607,8 @@
           });
         }
       });
+
+      this.trigger('seraizlie', attributes);
   
       if (options.validate) {
         var errors = this.validateInput(attributes) || [];
@@ -669,6 +671,8 @@
           }
         });
       });
+
+      this.trigger('populate', attributes);
     },
   
     _checkFirstRadio: function(){
