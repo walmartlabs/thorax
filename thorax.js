@@ -599,10 +599,11 @@
       var attributes = options.attributes || {};
       
       //callback has context of element
-      eachNamedInput.call(this, options, function() {
+      var self = this;
+      this._eachNamedInput(options, function() {
         var value = getInputValue.call(this);
         if (typeof value !== 'undefined') {
-          objectAndKeyFromAttributesAndName(attributes, this.name, {mode: 'serialize'}, function(object, key) {
+          self._objectAndKeyFromAttributesAndName(attributes, this.name, {mode: 'serialize'}, function(object, key) {
             object[key] = value;
           });
         }
@@ -628,7 +629,35 @@
       callback && callback.call(this,attributes);
       return attributes;
     },
-  
+
+    _eachNamedInput: function(options, iterator, context) {
+      var i = 0;
+      $('select,input,textarea', options.root || this.el).each(function() {
+        if (this.type !== 'button' && this.type !== 'cancel' && this.type !== 'submit' && this.name && this.name !== '') {
+          iterator.call(context || this, i, this);
+          ++i;
+        }
+      });
+    },
+
+    //calls a callback with the correct object fragment and key from a compound name
+    _objectAndKeyFromAttributesAndName: function(attributes, name, options, callback) {
+      var key, i, object = attributes, keys = name.split('['), mode = options.mode;
+      for(i = 0; i < keys.length - 1; ++i) {
+        key = keys[i].replace(']','');
+        if (!object[key]) {
+          if (mode == 'serialize') {
+            object[key] = {};
+          } else {
+            return callback.call(this, false, key);
+          }
+        }
+        object = object[key];
+      }
+      key = keys[keys.length - 1].replace(']', '');
+      callback.call(this, object, key);
+    },
+
     _preventDuplicateSubmission: function(event, callback) {
       event.preventDefault();
 
@@ -657,8 +686,9 @@
       var value, attributes = attributes || this.context(this.model);
       
       //callback has context of element
-      eachNamedInput.call(this, {}, function() {
-        objectAndKeyFromAttributesAndName.call(this, attributes, this.name, {mode: 'populate'}, function(object, key) {
+      var self = this;
+      this._eachNamedInput({}, function() {
+        self._objectAndKeyFromAttributesAndName(attributes, this.name, {mode: 'populate'}, function(object, key) {
           if (object && typeof (value = object[key]) !== 'undefined') {
             //will only execute if we have a name that matches the structure in attributes
             if (this.type === 'checkbox' && _.isBoolean(value)) {
@@ -987,34 +1017,6 @@
     } else {
       return this.value;
     }
-  };
-
-  //calls a callback with the correct object fragment and key from a compound name
-  function objectAndKeyFromAttributesAndName(attributes, name, options, callback) {
-    var key, i, object = attributes, keys = name.split('['), mode = options.mode;
-    for(i = 0; i < keys.length - 1; ++i) {
-      key = keys[i].replace(']','');
-      if (!object[key]) {
-        if (mode == 'serialize') {
-          object[key] = {};
-        } else {
-          return callback.call(this, false, key);
-        }
-      }
-      object = object[key];
-    }
-    key = keys[keys.length - 1].replace(']', '');
-    callback.call(this, object, key);
-  };
-
-  function eachNamedInput(options, iterator, context) {
-    var i = 0;
-    $('select,input,textarea', options.root || this.el).each(function() {
-      if (this.type !== 'button' && this.type !== 'cancel' && this.type !== 'submit' && this.name && this.name !== '') {
-        iterator.call(context || this, i, this);
-        ++i;
-      }
-    });
   };
 
   function bindModelAndCollectionEvents(events) {
