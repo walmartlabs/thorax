@@ -574,6 +574,7 @@
     //if event is passed, _preventDuplicateSubmission is called
     serialize: function() {
       var callback, options, event;
+      //ignore undefined arguments in case event was null
       for (var i = 0; i < arguments.length; ++i) {
         if (typeof arguments[i] === 'function') {
           callback = arguments[i];
@@ -583,8 +584,6 @@
           } else {
             options = arguments[i];
           }
-        } else {
-          console.error('Invalid argument to serialize():' + (typeof arguments[i]));
         }
       }
 
