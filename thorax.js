@@ -608,7 +608,7 @@
         }
       });
 
-      this.trigger('seraizlie', attributes);
+      this.trigger('serialize', attributes);
   
       if (options.validate) {
         var errors = this.validateInput(attributes) || [];
