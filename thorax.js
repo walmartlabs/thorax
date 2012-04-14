@@ -4,12 +4,8 @@
   } else {
     if (!$.fn.forEach) {
       // support jquery/zepto iterators
-      $.fn.forEach = function(callback) {
-        this.each(function(index) {
-          callback(this, index);
-        });
-      }
-    }
+      $.fn.forEach = $.fn.each;
+     }
   }
 
   if (typeof this._ === 'undefined') {
@@ -302,6 +298,8 @@
     },
 
     _processEvents: function(events) {
+      this._domEvents = this._domEvents || [];
+
       if (_.isFunction(events)) {
         events = events.call(this);
       }
@@ -447,7 +445,7 @@
     renderCollection: function() {
       this.render();
       var collection_element = getCollectionElement.call(this);
-      if (this.collection.length == 0) {
+      if (this.collection.length == 0 && this.collection.isPopulated()) {
         appendEmpty.call(this);
       } else {
         var cids = [];
@@ -472,7 +470,7 @@
       }
       this.trigger('rendered:collection', collection_element);
     },
-  
+
     renderItem: function(item, i) {
       return this.template(this.name + '-item.handlebars', this.itemContext(item, i));
     },
@@ -484,9 +482,10 @@
     //appendItem(model [,index])
     //appendItem(html_string, index) only first node will be used
     //appendItem(view, index)
-    appendItem: function(model, index) {
+    appendItem: function(model, index, force) {
       // if a transition from/to empty could happen, re-render
-      if (this.collection.length <= 1) {
+      //TODO: examine if this behavior is still needed
+      if (this.collection.length <= 1 && !force) {
         this.renderCollection();
         return;
       }
@@ -607,9 +606,9 @@
           });
         }
       });
-
-      this.trigger('serialize', attributes);
   
+      this.trigger('serialize', attributes);
+
       if (options.validate) {
         var errors = this.validateInput(attributes) || [];
         this.trigger('validate', attributes, errors);
@@ -826,8 +825,8 @@
       'load:start': function(message, background) {
         this.trigger('load:start', message, background);
       },
-      'load:end': function(message, background) {
-        this.trigger('load:end', message, background);
+      'load:end': function(background) {
+        this.trigger('load:end', background);
       }
     },
     collection: {
@@ -858,8 +857,8 @@
       'load:start': function(message, background) {
         this.trigger('load:start', message, background);
       },
-      'load:end': function(message, background) {
-        this.trigger('load:end', message, background);
+      'load:end': function(background) {
+        this.trigger('load:end', background);
       }
     }
   });
@@ -925,6 +924,7 @@
     'touchstart', 'touchend', 'touchmove',
     'click', 'dblclick',
     'keyup', 'keydown', 'keypress',
+    'submit',
     'focus', 'blur'
   ];
 
@@ -939,6 +939,8 @@
         this.bind(name, this._bindEventHandler(handler));
       } else {
         //DOM events
+        this._domEvents.push(name);
+
         var match = name.match(eventSplitter);
         var eventName = match[1] + '.delegateEvents' + this.cid, selector = match[2];
         if (selector === '') {
@@ -1189,7 +1191,7 @@
     bindToRoute: bindToRoute
   });
 
-  function bindToRoute(callback, failback) {
+  function bindToRoute(callback, failback, background) {
     var fragment = Backbone.history.getFragment(),
         completed;
 
@@ -1202,7 +1204,7 @@
       completed = true;
       Backbone.history.unbind('route', resetLoader);
 
-      scope.trigger('load:end');
+      background || scope.trigger('load:end');
       var args = Array.prototype.slice.call(arguments, 1);
       if (!isCanceled && fragment === Backbone.history.getFragment()) {
         callback.apply(this, args);
@@ -1214,7 +1216,7 @@
     var resetLoader = _.bind(finalizer, this, true);
     Backbone.history.bind('route', resetLoader);
 
-    scope.trigger('load:start');
+    background || scope.trigger('load:start');
     return _.bind(finalizer, this, false);
   }
 
@@ -1251,24 +1253,17 @@
   };
 
   function sync(method, model_or_collection, options) {
-    var success, error;
-    if (options.success) {
-      success = options.success;
-      options.success = function() {
-        model_or_collection.trigger('load:end');
-        return success.apply(this, arguments);
-      };
-    }
-    if (options.error) {
-      error = options.error;
-      options.error = function() {
-        model_or_collection.trigger('load:end');
-        return error.apply(this, arguments);
-      };
-    }
-    model_or_collection.trigger('load:start');
-    return Backbone.sync.apply(this, arguments);
+    var complete = options.complete;
+    options.complete = function() {
+      complete && complete.apply(this, arguments);
+      model_or_collection.trigger('load:end', options.background);
+    };
+    model_or_collection.trigger('load:start', undefined, options.background);
+    var request = Backbone.sync.apply(this, arguments);
+    this.trigger('request', request);
+    return request;
   }
+  Thorax.sync = sync;
 
   function loadData(callback, failback, options) {
     if (this.isPopulated()) {
@@ -1279,10 +1274,11 @@
       options = failback;
       failback = false;
     }
+    options = options || {};
 
     function finalizer(isError) {
       this.unbind('error', errorHandler);
-      if (isError) {
+      if (isError && !options.background) {
         scope.trigger('load:end');
       }
       failback && failback.apply(this, arguments);
@@ -1296,11 +1292,18 @@
           this.unbind('error', errorHandler);
           callback.apply(this, arguments);
         }, this),
-        _.bind(finalizer, this, false))
+        _.bind(finalizer, this, false),
+        options.background)
     }));
   }
 
   function fetchQueue(options, $super) {
+    if (options.resetQueue) {
+      // WARN: Should ensure that loaders are protected from out of band data
+      //    when using this option
+      this.fetchQueue = undefined;
+    }
+
     if (!this.fetchQueue) {
       // Kick off the request
       this.fetchQueue = [options];
