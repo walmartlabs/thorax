@@ -892,8 +892,8 @@
     if (collectionHelperOptions.tag) {
       delete collectionHelperOptions.tag;
     }
-    var htmlAttributes = _.map(collectionHelperOptions, function(key, value) {
-      return key = '="' + value + '"';
+    var htmlAttributes = _.map(collectionHelperOptions, function(value, key) {
+      return key + '="' + value + '"';
     }).join(' ');
     return new Handlebars.SafeString('<' + tag + ' ' + htmlAttributes + '></' + tag + '>');
   });
