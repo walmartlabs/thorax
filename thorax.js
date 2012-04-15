@@ -1,4 +1,4 @@
-(function(){
+(function(outerScope){
   if (typeof this.$ === 'undefined') {
     throw new Error('jquery.js/zepto.js required to run Thorax');
   } else {
@@ -20,10 +20,10 @@
 
   this.Thorax = Thorax = {
     configure: function(options) {
-      scope = options.scope || (typeof exports !== 'undefined' && exports);
+      scope = (options && options.scope) || (typeof exports !== 'undefined' && exports);
 
       if (!scope) {
-        throw new Error('No scope passed to Thorax.configure() and no "exports" was available inside of thorax.js');
+        scope = outerScope.Application = {};
       }
 
       _.extend(scope, Backbone.Events, {
@@ -38,7 +38,7 @@
       Backbone.history || (Backbone.history = new Backbone.History);
 
       scope.layout = new Thorax.Layout({
-        el: options.layout || '.layout'
+        el: options && options.layout || '.layout'
       });
 
     },
@@ -1336,4 +1336,4 @@
       }
     }
   }
-}).call(this);
+}).call(this, this);
