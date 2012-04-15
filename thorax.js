@@ -119,6 +119,8 @@
     view_cid_attribute_name = 'data-view-cid',
     view_placeholder_attribute_name = 'data-view-tmp',
     model_cid_attribute_name = 'data-model-cid',
+    collection_cid_attribute_name = 'data-collection-cid',
+    default_collection_selector = '[' + collection_cid_attribute_name + ']',
     old_backbone_view = Backbone.View,
     //android scrollTo(0, 0) shows url bar, scrollTo(0, 1) hides it
     minimumScrollYOffset = (navigator.userAgent.toLowerCase().indexOf("android") > -1) ? 1 : 0,
@@ -386,6 +388,7 @@
       });
       
       this.collection = collection;
+      this.collection.cid = _.uniqueId('collection');
       this.setCollectionOptions(options);
   
       if (this.collection) {
@@ -449,6 +452,7 @@
     renderCollection: function() {
       this.render();
       var collection_element = getCollectionElement.call(this);
+      collection_element.attr(collection_cid_attribute_name, this.collection.cid);
       if (this.collection.length == 0 && this.collection.isPopulated()) {
         appendEmpty.call(this);
       } else {
@@ -881,6 +885,19 @@
     return new Handlebars.SafeString(output);
   });
 
+  Thorax.View.registerHelper('collection', function(options) {
+    var collectionHelperOptions = _.clone(options.hash),
+        tag = (collectionHelperOptions.tag || 'div');
+    collectionHelperOptions[collection_cid_attribute_name] = "";
+    if (collectionHelperOptions.tag) {
+      delete collectionHelperOptions.tag;
+    }
+    var htmlAttributes = _.map(collectionHelperOptions, function(key, value) {
+      return key = '="' + value + '"';
+    }).join(' ');
+    return new Handlebars.SafeString('<' + tag + ' ' + htmlAttributes + '></' + tag + '>');
+  });
+
   Thorax.View.registerHelper('link', function(url) {
     return (Backbone.history._hasPushState ? Backbone.history.options.root : '#') + url;
   });
@@ -1035,7 +1052,7 @@
   };
 
   function getCollectionElement() {
-    var selector = this._collectionSelector || '.collection';
+    var selector = this._collectionSelector || default_collection_selector;
     var element = this.$(selector);
     if (element.length === 0) {
       console.error(this.name + '._collectionSelector: "' + selector + '" returned empty, returning ' + this.name + '.el');
