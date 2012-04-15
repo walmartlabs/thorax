@@ -1221,11 +1221,24 @@
   }
 
   Thorax.Collection = Backbone.Collection.extend({
+    isPopulated: function() {
+      return this._fetched || this.length > 0;
+    },
     fetch: function(options) {
+      options = options || {};
+      var success = options.success;
+      options.success = function(collection, response) {
+        collection._fetched = true;
+        success && success(collection, response);
+      };
       fetchQueue.call(this, options || {}, Backbone.Collection.prototype.fetch);
     },
+    reset: function(models, options) {
+      this._fetched = !!models;
+      return Backbone.Collection.prototype.reset.call(this, models, options);
+    },
     sync: sync,
-    load: loadData
+    load: loadData,
   });
 
   Thorax.Collection.extend = function(protoProps, classProps) {
@@ -1237,6 +1250,19 @@
   };
 
   Thorax.Model = Backbone.Model.extend({
+    isPopulated: function() {
+      // We are populated if we have attributes set
+      var attributes = _.clone(this.attributes);
+      var defaults = _.isFunction(this.defaults) ? this.defaults() : (this.defaults || {});
+      for (var default_key in defaults) {
+        if (attributes[default_key] != defaults[default_key]) {
+          return true;
+        }
+        delete attributes[default_key];
+      }
+      var keys = _.keys(attributes);
+      return keys.length > 1 || (keys.length === 1 && keys[0] !== 'id');
+    },
     fetch: function(options) {
       fetchQueue.call(this, options || {}, Backbone.Model.prototype.fetch);
     },
