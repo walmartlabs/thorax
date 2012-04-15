@@ -16,7 +16,7 @@
     throw new Error('Backbone.js required to run Thorax');
   }
 
-  var Thorax, scope;
+  var Thorax, scope, templatePathPrefix;
 
   this.Thorax = Thorax = {
     configure: function(options) {
@@ -34,6 +34,8 @@
         Collections: {},
         Routers: {}
       });
+
+      templatePathPrefix = options && typeof options.templatePathPrefix !== 'undefined' ? options.templatePathPrefix : 'templates/';
       
       Backbone.history || (Backbone.history = new Backbone.History);
 
@@ -249,7 +251,7 @@
       }
     },
     loadTemplate: function(file, data, scope) {
-      var fileName = 'templates/' + file + (file.match(/\.handlebars$/) ? '' : '.handlebars');
+      var fileName = templatePathPrefix + file + (file.match(/\.handlebars$/) ? '' : '.handlebars');
       return scope.templates[fileName];
     },
   
@@ -317,7 +319,9 @@
     },
 
     _shouldFetch: function(model_or_collection, options) {
-      return model_or_collection.url && options.fetch;
+      return model_or_collection.url && options.fetch && (
+        typeof model_or_collection.isPopulated === 'undefined' || !model_or_collection.isPopulated()
+      );
     },
   
     setModel: function(model, options) {
@@ -1238,7 +1242,7 @@
       return Backbone.Collection.prototype.reset.call(this, models, options);
     },
     sync: sync,
-    load: loadData,
+    load: loadData
   });
 
   Thorax.Collection.extend = function(protoProps, classProps) {
