@@ -1241,35 +1241,6 @@
     return _.bind(finalizer, this, false);
   }
 
-  Thorax.Collection = Backbone.Collection.extend({
-    isPopulated: function() {
-      return this._fetched || this.length > 0;
-    },
-    fetch: function(options) {
-      options = options || {};
-      var success = options.success;
-      options.success = function(collection, response) {
-        collection._fetched = true;
-        success && success(collection, response);
-      };
-      fetchQueue.call(this, options || {}, Backbone.Collection.prototype.fetch);
-    },
-    reset: function(models, options) {
-      this._fetched = !!models;
-      return Backbone.Collection.prototype.reset.call(this, models, options);
-    },
-    sync: sync,
-    load: loadData
-  });
-
-  Thorax.Collection.extend = function(protoProps, classProps) {
-    var child = Backbone.Collection.extend.call(this, protoProps, classProps);
-    if (child.prototype.name) {
-      scope.Collections[child.prototype.name] = child;
-    }
-    return child;
-  };
-
   Thorax.Model = Backbone.Model.extend({
     isPopulated: function() {
       // We are populated if we have attributes set
@@ -1295,6 +1266,36 @@
     var child = Backbone.Model.extend.call(this, protoProps, classProps);
     if (child.prototype.name) {
       scope.Models[child.prototype.name] = child;
+    }
+    return child;
+  };
+
+  Thorax.Collection = Backbone.Collection.extend({
+    model: Thorax.Model,
+    isPopulated: function() {
+      return this._fetched || this.length > 0;
+    },
+    fetch: function(options) {
+      options = options || {};
+      var success = options.success;
+      options.success = function(collection, response) {
+        collection._fetched = true;
+        success && success(collection, response);
+      };
+      fetchQueue.call(this, options || {}, Backbone.Collection.prototype.fetch);
+    },
+    reset: function(models, options) {
+      this._fetched = !!models;
+      return Backbone.Collection.prototype.reset.call(this, models, options);
+    },
+    sync: sync,
+    load: loadData
+  });
+
+  Thorax.Collection.extend = function(protoProps, classProps) {
+    var child = Backbone.Collection.extend.call(this, protoProps, classProps);
+    if (child.prototype.name) {
+      scope.Collections[child.prototype.name] = child;
     }
     return child;
   };
