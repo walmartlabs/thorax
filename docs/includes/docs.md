@@ -46,6 +46,8 @@ Any configuration should be done inside of `js/init.js`. The `Application` objec
 Start Thorax and create the `Application.layout` object.
 
 - `layout` - string css selector or Element where the `Application.layout` object will attach, defaults to `.layout`
+- `scope` - object scope to configure, defaults to a new object in the global scope `Application`
+- `templatePathPrefix` - Path where your templates are located. Defaults to "templates/"
 
 ## Routers & Layout
 
