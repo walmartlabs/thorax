@@ -1141,17 +1141,12 @@
       window.scrollTo(0, minimumScrollYOffset);
 
       this.view = view;
-  
-      // Execute the events on the next iter. This gives things a chance
-      // to settle and also protects us from NPEs in callback resulting in
-      // unremoved listeners
-      setTimeout(_.bind(function() {
-        if (old_view) {
-          old_view.destroy();
-        }
-        this.view.trigger('ready');
-        this.trigger('change:view:end', view, old_view);
-      }, this));      
+    
+      if (old_view) {
+        old_view.destroy();
+      }
+      this.view.trigger('ready');
+      this.trigger('change:view:end', view, old_view);
 
       return view;
     },
