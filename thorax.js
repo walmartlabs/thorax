@@ -279,10 +279,7 @@
     //allow events hash to specify view, collection and model events
     //as well as DOM events. Merges Thorax.View.events with this.events
     delegateEvents: function(events) {
-      //undelegateEvents does not exist in some copies of backbone tagged 0.5.3
-      if (this.undelegateEvents) {
-        this.undelegateEvents();
-      }
+      this.undelegateEvents();
       this._processEvents(this.constructor.events);
       if (this.events) {
         this._processEvents(this.events);
@@ -341,7 +338,7 @@
   
       if (this.model) {
         this._events.model.forEach(function(event) {
-          this.model.on(event[0], event[1]);
+          this.model.bind(event[0], event[1]);
         }, this);
 
         this.model.trigger('set', this.model, old_model);
@@ -393,7 +390,7 @@
   
       if (this.collection) {
         this._events.collection.forEach(function(event) {
-          this.collection.on(event[0], event[1]);
+          this.collection.bind(event[0], event[1]);
         }, this);
       
         this.collection.trigger('set', this.collection, old_collection);
@@ -493,27 +490,28 @@
         var previous_model = index > 0 ? this.collection.at(index - 1) : false;
         var item_element;
         if (item_view.el) {
-          item_element = item_view.el;
+          //renderItem returned element
+          item_element = [item_view.el];
         } else {
           //renderItem returned string
-          item_element = this._createItemElement();
-          item_element.innerHTML = item_view;
-          var element_nodes = _.filter(item_element.childNodes, function(node) {
+          item_element = _.filter($(item_view), function(node) {
             return node.nodeType === ELEMENT_NODE_TYPE;
           });
-          if (element_nodes.length === 1) {
-            item_element = element_nodes[0];
-          }
         }
 
         if (item_element) {
           $(item_element).attr(model_cid_attribute_name, model.cid);
+          //TODO: this doesn't work when multiple elements have been returned
           if (!previous_model) {
-            collection_element.insertBefore(item_element, collection_element.firstChild);
+            item_element.forEach(function(element) {
+              collection_element.insertBefore(element, collection_element.firstChild);
+            });
           } else {
             var previous_model_element = $(collection_element).find('[' + model_cid_attribute_name + '="' + previous_model.cid + '"]');
             if (previous_model_element[0]) {
-              collection_element.insertBefore(item_element, previous_model_element[0].nextSibling);
+              item_element.forEach(function(element) {
+                collection_element.insertBefore(element, previous_model_element[0].nextSibling);
+              });
             }
           }
 
@@ -525,10 +523,6 @@
         }
       }
       return item_view;
-    },
-
-    _createItemElement: function() {
-      return this.make('div');
     },
   
     freeze: function(options) {
@@ -543,13 +537,13 @@
 
       if (collection && this._events && this._events.collection) {
         this._events.collection.forEach(function(event) {
-          collection.off(event[0], event[1]);
+          collection.unbind(event[0], event[1]);
         }, this);
       }
 
       if (model && this._events && this._events.model) {
         this._events.model.forEach(function(event) {
-          model.off(event[0], event[1]);
+          model.unbind(event[0], event[1]);
         }, this);
       }
     },
@@ -685,7 +679,7 @@
       if (this.undelegateEvents) {
         this.undelegateEvents();
       }
-      this.off();
+      this.unbind();
       this._events = {};
       this.el = null;
       this.collection = null;
@@ -941,7 +935,7 @@
     } else {
       if (!name.match(/\s+/) && domEvents.indexOf(name) === -1) {
         //view events
-        this.on(name, handler, this);
+        this.bind(name, handler, this);
       } else {
         //DOM events
         this._domEvents.push(name);
@@ -949,7 +943,7 @@
         var match = name.match(eventSplitter);
         var eventName = match[1] + '.delegateEvents' + this.cid, selector = match[2];
         if (selector === '') {
-          $(this.el).on(eventName, containHandlerToCurentView(this._bindEventHandler(handler), this.cid));
+          $(this.el).bind(eventName, containHandlerToCurentView(this._bindEventHandler(handler), this.cid));
         } else {
           $(this.el).delegate(selector, eventName, containHandlerToCurentView(this._bindEventHandler(handler), this.cid));
         }
@@ -1194,7 +1188,7 @@
       }
 
       completed = true;
-      Backbone.history.off('route', resetLoader);
+      Backbone.history.unbind('route', resetLoader);
 
       background || scope.trigger('load:end');
       var args = Array.prototype.slice.call(arguments, 1);
@@ -1206,7 +1200,7 @@
     }
 
     var resetLoader = _.bind(finalizer, this, true);
-    Backbone.history.on('route', resetLoader);
+    Backbone.history.bind('route', resetLoader);
 
     background || scope.trigger('load:start');
     return _.bind(finalizer, this, false);
@@ -1296,7 +1290,7 @@
     options = options || {};
 
     function finalizer(isError) {
-      this.off('error', errorHandler);
+      this.unbind('error', errorHandler);
       if (isError && !options.background) {
         scope.trigger('load:end');
       }
@@ -1304,11 +1298,11 @@
     }
 
     var errorHandler = _.bind(finalizer, this, true);
-    this.on('error', errorHandler);
+    this.bind('error', errorHandler);
 
     this.fetch(_.extend({}, options || {}, {
       success: bindToRoute(_.bind(function() {
-          this.off('error', errorHandler);
+          this.unbind('error', errorHandler);
           callback.apply(this, arguments);
         }, this),
         _.bind(finalizer, this, false),
