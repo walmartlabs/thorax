@@ -643,20 +643,6 @@
       this.trigger('populate', attributes);
     },
   
-    _checkFirstRadio: function(){
-      // TODO : Use _.groupBy after upgrading to the latest underscore
-      var fields = {};
-      _.each(this.$('input[type=radio]:not([disabled])'), function(el) {
-        var col = fields[el.name] = fields[el.name] || [];
-        col.push(el);
-      });
-      _.each(fields, function(elements, name) {
-        if (!_.detect(elements, function(element) { return element.checked; })) {
-          elements[0].checked = true;
-        }
-      });
-    },
-  
     //perform form validation, implemented by child class
     validateInput: function() {},
   
