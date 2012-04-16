@@ -467,13 +467,26 @@
     },
 
     //appendItem(model [,index])
-    //appendItem(html_string, index) only first node will be used
+    //appendItem(html_string, index)
     //appendItem(view, index)
     appendItem: function(model, index, options) {
+      //empty item
+      if (!model) {
+        if (!options.silent) {
+          this.trigger('rendered:item', model);
+        }
+        return;
+      }
+
       var item_view,
-        collection_element = getCollectionElement.call(this);
+          collection_element = getCollectionElement.call(this);
 
       options = options || {};
+
+      //if index argument is a view
+      if (index && index.el) {
+        index = collection_element.find('> *').indexOf(index.el) + 1;
+      }
 
       //if argument is a view, or html string
       if (model.el || typeof model === 'string') {
