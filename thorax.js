@@ -341,7 +341,7 @@
   
       if (this.model) {
         this._events.model.forEach(function(event) {
-          this.model.bind(event[0], event[1]);
+          this.model.on(event[0], event[1]);
         }, this);
 
         this.model.trigger('set', this.model, old_model);
@@ -393,7 +393,7 @@
   
       if (this.collection) {
         this._events.collection.forEach(function(event) {
-          this.collection.bind(event[0], event[1]);
+          this.collection.on(event[0], event[1]);
         }, this);
       
         this.collection.trigger('set', this.collection, old_collection);
@@ -453,28 +453,10 @@
       this.render();
       var collection_element = getCollectionElement.call(this);
       collection_element.attr(collection_cid_attribute_name, this.collection.cid);
-      if (this.collection.length == 0 && this.collection.isPopulated()) {
+      if (this.collection.length === 0 && this.collection.isPopulated()) {
         appendEmpty.call(this);
       } else {
-        var cids = [];
-        var elements = _.compact(this.collection.map(function(model, i) {
-          cids.push(model.cid);
-          return this.renderItem(model, i);
-        }, this));
-        if (elements[0] && elements[0].el) {
-          collection_element.empty();
-          elements.forEach(function(view) {
-            this._views[view.cid] = view;
-            collection_element.append(view.el);
-          }, this);
-        } else {
-          collection_element.html(elements.join(''));
-        }
-        collection_element.children().each(function(i) {
-          this.setAttribute(model_cid_attribute_name, cids[i]);
-        });
-
-        appendViews.call(this, collection_element);
+        this.collection.forEach(this.appendItem, this);
       }
       this.trigger('rendered:collection', collection_element);
     },
@@ -490,16 +472,11 @@
     //appendItem(model [,index])
     //appendItem(html_string, index) only first node will be used
     //appendItem(view, index)
-    appendItem: function(model, index, force) {
-      // if a transition from/to empty could happen, re-render
-      //TODO: examine if this behavior is still needed
-      if (this.collection.length <= 1 && !force) {
-        this.renderCollection();
-        return;
-      }
-
+    appendItem: function(model, index, options) {
       var item_view,
         collection_element = getCollectionElement.call(this)[0];
+
+      options = options || {};
 
       //if argument is a view, or html string
       if (model.el || typeof model === 'string') {
@@ -541,7 +518,10 @@
           }
 
           appendViews.call(this, item_element);
-          this.trigger('rendered:item', item_element);
+
+          if (!options.silent) {
+            this.trigger('rendered:item', item_element);
+          }
         }
       }
       return item_view;
@@ -563,13 +543,13 @@
 
       if (collection && this._events && this._events.collection) {
         this._events.collection.forEach(function(event) {
-          collection.unbind(event[0], event[1]);
+          collection.off(event[0], event[1]);
         }, this);
       }
 
       if (model && this._events && this._events.model) {
         this._events.model.forEach(function(event) {
-          model.unbind(event[0], event[1]);
+          model.off(event[0], event[1]);
         }, this);
       }
     },
@@ -705,7 +685,7 @@
       if (this.undelegateEvents) {
         this.undelegateEvents();
       }
-      this.unbind();
+      this.off();
       this._events = {};
       this.el = null;
       this.collection = null;
@@ -839,6 +819,10 @@
     },
     collection: {
       add: function(model, collection) {
+        //if collection was empty, clear empty view
+        if (this.collection.length === 1) {
+          getCollectionElement.call(this).empty();
+        }
         this.appendItem(model, collection.indexOf(model));
       },
       remove: function(model) {
@@ -911,11 +895,11 @@
     if (this._modelOptions.populate) {
       this.populate();
     }
-  };
+  }
 
   function onCollectionReset() {
     this.renderCollection();
-  };
+  }
 
   function containHandlerToCurentView(handler, cid) {
     return function(event) {
@@ -924,7 +908,7 @@
         handler(event);
       }
     };
-  };
+  }
 
   //model/collection events, to be bound/unbound on setModel/setCollection
   function processModelOrCollectionEvent(events, type) {
@@ -937,7 +921,7 @@
         this._events[type].push([_name, this._bindEventHandler(events[type][_name])]);
       }
     }
-  };
+  }
 
   //used by _processEvents
   var domEvents = [
@@ -951,13 +935,13 @@
 
   function processEvent(name, handler) {
     if (name.match(/,/)) {
-      _.each(name.split(/,/), _.bind(function(fragment) {
+      _.each(name.split(/,/), function(fragment) {
         processEvent.call(this, fragment.replace(/(^[\s]+|[\s]+$)/g, ''), handler);
-      }, this));
+      }, this);
     } else {
       if (!name.match(/\s+/) && domEvents.indexOf(name) === -1) {
         //view events
-        this.bind(name, this._bindEventHandler(handler));
+        this.on(name, handler, this);
       } else {
         //DOM events
         this._domEvents.push(name);
@@ -965,13 +949,13 @@
         var match = name.match(eventSplitter);
         var eventName = match[1] + '.delegateEvents' + this.cid, selector = match[2];
         if (selector === '') {
-          $(this.el).bind(eventName, containHandlerToCurentView(this._bindEventHandler(handler), this.cid));
+          $(this.el).on(eventName, containHandlerToCurentView(this._bindEventHandler(handler), this.cid));
         } else {
           $(this.el).delegate(selector, eventName, containHandlerToCurentView(this._bindEventHandler(handler), this.cid));
         }
       }
     }
-  };
+  }
 
   //used by Thorax.View.addEvents for global event registration
   function addEvent(target, name, handler) {
@@ -985,11 +969,11 @@
     } else {
       target[name].push(handler);
     }
-  };
+  }
 
   function resetSubmitState() {
     this.$('form').removeAttr('data-submit-wait');
-  };
+  }
 
   //called with context of input
   function getInputValue() {
@@ -1010,7 +994,7 @@
     } else {
       return this.value;
     }
-  };
+  }
 
   //calls a callback with the correct object fragment and key from a compound name
   function objectAndKeyFromAttributesAndName(attributes, name, options, callback) {
@@ -1028,7 +1012,7 @@
     }
     key = keys[keys.length - 1].replace(']', '');
     callback.call(this, object, key);
-  };
+  }
 
   function eachNamedInput(options, iterator, context) {
     var i = 0;
@@ -1038,7 +1022,7 @@
         ++i;
       }
     });
-  };
+  }
 
   function bindModelAndCollectionEvents(events) {
     if (!this._events) {
@@ -1049,7 +1033,7 @@
     }
     processModelOrCollectionEvent.call(this, events, 'model');
     processModelOrCollectionEvent.call(this, events, 'collection');
-  };
+  }
 
   function getCollectionElement() {
     var selector = this._collectionSelector || default_collection_selector;
@@ -1060,7 +1044,7 @@
     } else {
       return element;
     }
-  };
+  }
 
   function preserveCollectionElement(callback) {
     var old_collection_element = getCollectionElement.call(this);
@@ -1070,7 +1054,7 @@
       new_collection_element[0].parentNode.insertBefore(old_collection_element[0], new_collection_element[0]);
       new_collection_element[0].parentNode.removeChild(new_collection_element[0]);
     }
-  };
+  }
 
   function appendViews(scope) {
     var self = this;
@@ -1091,7 +1075,7 @@
         el.parentNode.removeChild(el);
       }
     });
-  };
+  }
 
   function destroyChildViews() {
     for (var id in this._views || {}) {
@@ -1100,21 +1084,13 @@
       }
       this._views[id] = null;
     }
-  };
+  }
 
   function appendEmpty() {
-    var empty_view = this.renderEmpty() || '';
-    if (empty_view.cid) {
-      this._views[empty_view.cid] = empty_view
-    }
-    var collection_element = getCollectionElement.call(this);
-    if (collection_element.length) {
-      collection_element.empty().append(empty_view.el || empty_view || '');
-      this.trigger('rendered:empty', collection_element);
-    }
-
-    appendViews.call(this);
-  };
+    getCollectionElement.call(this).empty();
+    this.appendItem(this.renderEmpty(), 0, {silent: true});
+    this.trigger('rendered:empty');
+  }
 
   function applyMixin(mixin) {
     if (_.isArray(mixin)) {
@@ -1122,7 +1098,7 @@
     } else {
       this.mixin(mixin);
     }
-  };
+  }
   
   //main layout class, instance of which is available on scope.layout
   Thorax.Layout = Backbone.View.extend({
@@ -1188,7 +1164,7 @@
       var href = target.attr("href");
       // Route anything that starts with # or / (excluding //domain urls)
       if (href && (href[0] === '#' || (href[0] === '/' && href[1] !== '/'))) {
-        Backbone.history.navigate(href, true);
+        Backbone.history.navigate(href, {trigger: true});
         event.preventDefault();
       }
     }
@@ -1223,7 +1199,7 @@
       }
 
       completed = true;
-      Backbone.history.unbind('route', resetLoader);
+      Backbone.history.off('route', resetLoader);
 
       background || scope.trigger('load:end');
       var args = Array.prototype.slice.call(arguments, 1);
@@ -1235,7 +1211,7 @@
     }
 
     var resetLoader = _.bind(finalizer, this, true);
-    Backbone.history.bind('route', resetLoader);
+    Backbone.history.on('route', resetLoader);
 
     background || scope.trigger('load:start');
     return _.bind(finalizer, this, false);
@@ -1325,7 +1301,7 @@
     options = options || {};
 
     function finalizer(isError) {
-      this.unbind('error', errorHandler);
+      this.off('error', errorHandler);
       if (isError && !options.background) {
         scope.trigger('load:end');
       }
@@ -1333,11 +1309,11 @@
     }
 
     var errorHandler = _.bind(finalizer, this, true);
-    this.bind('error', errorHandler);
+    this.on('error', errorHandler);
 
     this.fetch(_.extend({}, options || {}, {
       success: bindToRoute(_.bind(function() {
-          this.unbind('error', errorHandler);
+          this.off('error', errorHandler);
           callback.apply(this, arguments);
         }, this),
         _.bind(finalizer, this, false),
