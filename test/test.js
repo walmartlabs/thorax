@@ -94,13 +94,13 @@ $(function() {
       matchCids(clonedLetterCollection);
 
       //reorder
-      clonedLetterCollection.remove(clonedLetterCollection.at(0 * indexMultiplier));
+      clonedLetterCollection.remove(clonedLetterCollection.at(0));
       equal(view.$('li')[0 * indexMultiplier].innerHTML + view.$('li')[2 * indexMultiplier].innerHTML, 'bd', 'rendered nodes in correct order');
-      clonedLetterCollection.remove(clonedLetterCollection.at(2 * indexMultiplier));
+      clonedLetterCollection.remove(clonedLetterCollection.at(2));
       equal(view.$('li')[0 * indexMultiplier].innerHTML + view.$('li')[1 * indexMultiplier].innerHTML, 'bc', 'rendered nodes in correct order');
       clonedLetterCollection.add(new LetterModel({letter: 'e'}));
       equal(view.$('li')[2 * indexMultiplier].innerHTML, 'e', 'collection and nodes maintain sort order');
-      clonedLetterCollection.add(new LetterModel({letter: 'a'}), {at: 0 * indexMultiplier});
+      clonedLetterCollection.add(new LetterModel({letter: 'a'}), {at: 0});
       equal(view.$('li')[0 * indexMultiplier].innerHTML, 'a', 'collection and nodes maintain sort order');
       equal(renderedCount, 1, 'rendered event count');
       equal(renderedCollectionCount, 1, 'rendered:collection event count');
@@ -143,7 +143,20 @@ $(function() {
     }));
     runCollectionTests(viewReturningMixed, 1);
 
+    var viewReturningMultiple = new (LetterCollectionView.extend({
+      renderItem: function(model, i) {
+        return this.template('letter-multiple-item', model.attributes);
+      }
+    }));
+    runCollectionTests(viewReturningMultiple, 2);
   });
 
 });
 
+//inheritable events (use that terminology in docs)
+
+//contain handler to current view (make fix so child views don't bubble)
+
+//form serialization / population / validation
+
+//application.layout w/router

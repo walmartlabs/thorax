@@ -471,7 +471,7 @@
     //appendItem(view, index)
     appendItem: function(model, index, options) {
       var item_view,
-        collection_element = getCollectionElement.call(this)[0];
+        collection_element = getCollectionElement.call(this);
 
       options = options || {};
 
@@ -484,35 +484,22 @@
       }
 
       if (item_view) {
+
         if (item_view.cid) {
-          this._views[item_view.cid] = item_view.cid;
+          this._views[item_view.cid] = item_view;
         }
-        var previous_model = index > 0 ? this.collection.at(index - 1) : false;
-        var item_element;
-        if (item_view.el) {
-          //renderItem returned element
-          item_element = [item_view.el];
-        } else {
-          //renderItem returned string
-          item_element = _.filter($(item_view), function(node) {
-            return node.nodeType === ELEMENT_NODE_TYPE;
-          });
-        }
+
+        var item_element = item_view.el ? [item_view.el] : _.filter($(item_view), function(node) {
+          return node.nodeType === ELEMENT_NODE_TYPE;
+        });
 
         if (item_element) {
           $(item_element).attr(model_cid_attribute_name, model.cid);
-          //TODO: this doesn't work when multiple elements have been returned
+          var previous_model = index > 0 ? this.collection.at(index - 1) : false;
           if (!previous_model) {
-            item_element.forEach(function(element) {
-              collection_element.insertBefore(element, collection_element.firstChild);
-            });
+            collection_element.prepend(item_element);
           } else {
-            var previous_model_element = $(collection_element).find('[' + model_cid_attribute_name + '="' + previous_model.cid + '"]');
-            if (previous_model_element[0]) {
-              item_element.forEach(function(element) {
-                collection_element.insertBefore(element, previous_model_element[0].nextSibling);
-              });
-            }
+            collection_element.find('[' + model_cid_attribute_name + '="' + previous_model.cid + '"]').last().after(item_element);
           }
 
           appendViews.call(this, item_element);
