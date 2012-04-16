@@ -8,7 +8,9 @@ $(function() {
     'letter.handlebars': Handlebars.compile('{{collection tag="ul"}}'), 
     'letter-item.handlebars': Handlebars.compile("<li>{{letter}}</li>"),
     'letter-empty.handlebars': Handlebars.compile("<li>empty</li>"),
-    'letter-multiple-item.handlebars': Handlebars.compile("<li>{{letter}}</li><li>{{letter}}</li>")
+    'letter-multiple-item.handlebars': Handlebars.compile("<li>{{letter}}</li><li>{{letter}}</li>"),
+    'parent.handlebars': Handlebars.compile("<div>{{view child}}</div>"),
+    'child.handlebars': Handlebars.compile("{{value}}")
   };
 
   var LetterModel = Thorax.Model.extend({});
@@ -153,7 +155,74 @@ $(function() {
 
 });
 
-//inheritable events (use that terminology in docs)
+test("Child views", function() {
+  var childRenderedCount = 0,
+      parentRenderedCount = 0;
+  var Child = Thorax.View.extend({
+    name: 'child',
+    events: {
+      rendered: function() {
+        ++childRenderedCount;
+      }
+    }
+  });
+  var Parent = Thorax.View.extend({
+    name: 'parent',
+    events: {
+      rendered: function() {
+        ++parentRenderedCount;
+      }
+    },
+    initialize: function() {
+      this.childModel = new Thorax.Model({
+        value: 'a'
+      });
+      this.child = this.view('child', {
+        model: this.childModel
+      });
+    }
+  });
+  var parent = new Parent();
+  parent.render();
+  equal(parent.$('[data-view-name="child"]').html(), 'a', 'view embedded');
+  equal(parentRenderedCount, 1);
+  equal(childRenderedCount, 1);
+
+  parent.render();
+  equal(parent.$('[data-view-name="child"]').html(), 'a', 'view embedded');
+  equal(parentRenderedCount, 2, 're-render of parent does not render child');
+  equal(childRenderedCount, 1, 're-render of parent does not render child');
+
+  parent.childModel.set({value: 'b'});
+  equal(parent.$('[data-view-name="child"]').html(), 'b', 'view embedded');
+  equal(parentRenderedCount, 2, 're-render of child does not parent child');
+  equal(childRenderedCount, 2, 're-render of child does not render parent');
+});
+
+test("Inheritable events", function() {
+  var Parent = Thorax.View.extend({}),
+      aCount = 0,
+      bCount = 0;
+  Parent.registerEvents({
+    a: function() {
+      ++aCount;
+    }
+  });
+  var Child = Parent.extend({});
+  Child.registerEvents({
+    b: function() {
+      ++bCount;
+    }
+  });
+  var parent = new Parent(),
+      child = new Child();
+  parent.trigger('a');
+  parent.trigger('b');
+  child.trigger('a');
+  child.trigger('b');
+  equal(aCount, 2);
+  equal(bCount, 1);
+});
 
 //contain handler to current view (make fix so child views don't bubble)
 
