@@ -908,7 +908,7 @@
     } else {
       if (!name.match(/\s+/) && domEvents.indexOf(name) === -1) {
         //view events
-        this.bind(name, handler, this);
+        this.bind(name, this._bindEventHandler(handler));
       } else {
         //DOM events
         this._domEvents.push(name);
