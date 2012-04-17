@@ -206,6 +206,14 @@ test("Child views", function() {
   equal(childRenderedCount, 3);
 });
 
+test("Template not found handling", function() {
+  var view = new Thorax.View();
+  equal('', view.template('foo', {}, true));
+  raises(function() {
+    view.template('foo');
+  });
+});
+
 test("Inheritable events", function() {
   var Parent = Thorax.View.extend({}),
       aCount = 0,

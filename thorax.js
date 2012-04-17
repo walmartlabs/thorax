@@ -237,7 +237,7 @@
       return instance;
     },
     
-    template: function(file, data) {
+    template: function(file, data, ignoreErrors) {
       Thorax._currentTemplateContext = this;
       
       var view_context = {};
@@ -252,8 +252,11 @@
 
       var template = this.loadTemplate(file, data, scope);
       if (!template) {
-        console.error('Unable to find template ' + file);
-        return '';
+        if (ignoreErrors) {
+          return ''
+        } else {
+          throw new Error('Unable to find template ' + file);
+        }
       } else {
         return template(data);
       }

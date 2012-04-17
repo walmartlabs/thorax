@@ -249,7 +249,7 @@ Register a new helper that will be available in all handlebars templates
 
     {{bold "Text"}}
 
-### template *view.template(name [,attributes])*
+### template *view.template(name [,attributes [,ignoreErrors]])*
 
 Synchronously render a given template by file name sans extension. `render` and `renderCollection` both use this method. The scope inside of a template will contain all of the non function attributes of a view (which can be passed to the view constructor) and a `cid` attribute which is a unique id for each rendering of a given template.
     
@@ -273,6 +273,8 @@ This method is also available as a template helper, it will only render the temp
     <h1>{{title}}</h1>
     <p>{{body}}</p>
     {{template "footer"}}
+
+When a template is not found an exception will be thrown, unless `ignoreErrors` is set to true in which case an empty string will be returned.
 
 ### view *view.view(name [,attributes])*
 
