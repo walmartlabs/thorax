@@ -303,7 +303,7 @@
     _bindEventHandler: function(callback) {
       var method = typeof callback === 'function' ? callback : this[callback];
       if (!method) {
-        console.error('Event "' + callback + '" does not exist');
+        throw new Error('Event "' + callback + '" does not exist');
       }
       return _.bind(method, this);
     },
