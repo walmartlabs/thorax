@@ -197,6 +197,13 @@ test("Child views", function() {
   equal(parent.$('[data-view-name="child"]').html(), 'b', 'view embedded');
   equal(parentRenderedCount, 2, 're-render of child does not parent child');
   equal(childRenderedCount, 2, 're-render of child does not render parent');
+
+  //ensure recursion does not happen when child view has the same model
+  //as parent
+  parent.setModel(parent.childModel);
+  parent.model.set({value: 'c'});
+  equal(parentRenderedCount, 4);
+  equal(childRenderedCount, 3);
 });
 
 test("Inheritable events", function() {
