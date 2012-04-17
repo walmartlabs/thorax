@@ -156,11 +156,6 @@
       //this.options is removed in Thorax.View, we merge passed
       //properties directly with the view and template context
       _.extend(this, options || {});
-
-      //setup
-      if (!this.name) {
-        console.error('All views extending Thorax.View should have a name property.');
-      }
             
       //will be called again by Backbone.View(), after _configure() is complete but safe to call twice
       this._ensureElement();
@@ -196,7 +191,7 @@
 
     _ensureElement : function() {
       Backbone.View.prototype._ensureElement.call(this);
-      (this.el[0] || this.el).setAttribute(view_name_attribute_name, this.name || 'unknown');
+      (this.el[0] || this.el).setAttribute(view_name_attribute_name, this.name || this.cid);
       (this.el[0] || this.el).setAttribute(view_cid_attribute_name, this.cid);      
     },
 
@@ -449,6 +444,7 @@
     emptyContext: function() {},
 
     render: function() {
+      ensureViewHasName.call(this);
       var output = this.template(this.name, this.context(this.model));
       this.html(output);
       if (!this._renderCount) {
@@ -473,10 +469,12 @@
     },
 
     renderItem: function(item, i) {
+      ensureViewHasName.call(this);
       return this.template(this.name + '-item', this.itemContext(item, i));
     },
   
     renderEmpty: function() {
+      ensureViewHasName.call(this);
       return this.template(this.name + '-empty', this.emptyContext());
     },
 
@@ -881,6 +879,12 @@
   });
 
   //private Thorax.View methods
+
+  function ensureViewHasName() {
+    if (!this.name) {
+      console.error(this.cid + " requires a 'view' attribute.");
+    }
+  }
 
   function onModelChange() {
     if (this._modelOptions.render) {
