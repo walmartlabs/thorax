@@ -225,61 +225,60 @@ test("Inheritable events", function() {
 });
 
 test("bindToRoute", function() {
-  var _Router = Thorax.Router.extend({});
-  var router = new _Router();
-  
-  var fragment = "foo";
+  var callback,
+      failback,
+      fragment = "foo",
+      _getFragment = Backbone.history.getFragment,
+      _Router = Thorax.Router.extend({});
+      router = new _Router();
+
   Backbone.history.getFragment = function() {
     return fragment;
   }
 
-  var success = 0;
-  var fail = 0;
-  function callback() {
-    success = true;
+  var _this = this;
+  function reset() {
+    callback = _this.spy();
+    failback = _this.spy();
+    return router.bindToRoute(callback, failback);
   }
-  function failback() {
-    fail = true;
-  }
-  
-  var func = router.bindToRoute(callback, failback);
+
+  var func = reset();
   Backbone.history.trigger('route');
-  equal(success, 0);
-  equal(fail, 0);
+  equal(callback.callCount, 0);
+  equal(failback.callCount, 0);
   
   // test new route before load complete
   fragment = "bar";
   Backbone.history.trigger('route');
-  equal(success, 0);
-  equal(fail, 1);
+  equal(callback.callCount, 0);
+  equal(failback.callCount, 1);
 
   // make sure callback doesn't work after route has changed
   func();
-  equal(success, 0);
-  equal(fail, 1);
+  equal(callback.callCount, 0);
+  equal(failback.callCount, 1);
 
-  // make sure callback works withoug initial route trigger
-  success = 0;
-  fail = 0;
-  func = router.bindToRoute(callback, failback);
+  // make sure callback works without initial route trigger
+  func = reset();
   func();
-  equal(success, 1);
-  equal(fail, 0);
+  equal(callback.callCount, 1);
+  equal(failback.callCount, 0);
 
   // make sure callback works with initial route trigger
-  success = 0;
-  fail = 0;
-  func = router.bindToRoute(callback, failback);
+  func = reset();
   Backbone.history.trigger('route');
   func();
-  equal(success, 1);
-  equal(fail, 0);
+  equal(callback.callCount, 1);
+  equal(failback.callCount, 0);
 
   // now make sure no execution happens after route change
   fragment = "bar";
   Backbone.history.trigger('route');
-  equal(success, 1);
-  equal(fail, 0);
+  equal(callback.callCount, 1);
+  equal(failback.callCount, 0);
+
+  Backbone.history.getFragment = _getFragment;
 });
 
 //contain handler to current view (make fix so child views don't bubble)
