@@ -885,7 +885,7 @@
 
   function ensureViewHasName() {
     if (!this.name) {
-      console.error(this.cid + " requires a 'view' attribute.");
+      throw new Error(this.cid + " requires a 'view' attribute.");
     }
   }
 
