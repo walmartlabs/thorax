@@ -1168,8 +1168,16 @@
         completed;
 
     function finalizer(isCanceled) {
+      var same = fragment === Backbone.history.getFragment();
+
       if (completed) {
         // Prevent multiple execution, i.e. we were canceled but the success callback still runs
+        return;
+      }
+
+      if (isCanceled && same) {
+        // Ignore the first route event if we are running in newer versions of backbone
+        // where the route operation is a postfix operation.
         return;
       }
 
@@ -1178,7 +1186,7 @@
 
       background || scope.trigger('load:end');
       var args = Array.prototype.slice.call(arguments, 1);
-      if (!isCanceled && fragment === Backbone.history.getFragment()) {
+      if (!isCanceled && same) {
         callback.apply(this, args);
       } else {
         failback && failback.apply(this, args);

@@ -224,6 +224,64 @@ test("Inheritable events", function() {
   equal(bCount, 1);
 });
 
+test("bindToRoute", function() {
+  var _Router = Thorax.Router.extend({});
+  var router = new _Router();
+  
+  var fragment = "foo";
+  Backbone.history.getFragment = function() {
+    return fragment;
+  }
+
+  var success = 0;
+  var fail = 0;
+  function callback() {
+    success = true;
+  }
+  function failback() {
+    fail = true;
+  }
+  
+  var func = router.bindToRoute(callback, failback);
+  Backbone.history.trigger('route');
+  equal(success, 0);
+  equal(fail, 0);
+  
+  // test new route before load complete
+  fragment = "bar";
+  Backbone.history.trigger('route');
+  equal(success, 0);
+  equal(fail, 1);
+
+  // make sure callback doesn't work after route has changed
+  func();
+  equal(success, 0);
+  equal(fail, 1);
+
+  // make sure callback works withoug initial route trigger
+  success = 0;
+  fail = 0;
+  func = router.bindToRoute(callback, failback);
+  func();
+  equal(success, 1);
+  equal(fail, 0);
+
+  // make sure callback works with initial route trigger
+  success = 0;
+  fail = 0;
+  func = router.bindToRoute(callback, failback);
+  Backbone.history.trigger('route');
+  func();
+  equal(success, 1);
+  equal(fail, 0);
+
+  // now make sure no execution happens after route change
+  fragment = "bar";
+  Backbone.history.trigger('route');
+  equal(success, 1);
+  equal(fail, 0);
+});
+
 //contain handler to current view (make fix so child views don't bubble)
 
 //form serialization / population / validation
