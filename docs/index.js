@@ -2,19 +2,9 @@ var path = require('path');
 
 module.exports = function(static) {
     
-  //copy assets to assets folder in target
-  static.file(/^assets\//, function(file) {
-    file.write('assets');
-  });
-
-  //copy scripts to scripts folder in target
-  static.file(/^scripts\//, function(file) {
-    file.write('scripts');
-  });
-
-  //copy styles to styles folder in target
-  static.file(/^styles\//, function(file) {
-    file.write('styles');
+  //copy assets, scripts & styles as is
+  static.file(/^(assets|scripts|styles)\//, function(file) {
+    file.save();
   });
 
   //copy pages to root
@@ -28,6 +18,7 @@ module.exports = function(static) {
     file.set('folder', path.dirname(file.source));
 
     //save to root of target directory
+    file.save(path.basename(file.name));
     file.write('.');
   });
 

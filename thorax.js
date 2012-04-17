@@ -1,15 +1,11 @@
-(function(){
+(function(outerScope){
   if (typeof this.$ === 'undefined') {
     throw new Error('jquery.js/zepto.js required to run Thorax');
   } else {
     if (!$.fn.forEach) {
       // support jquery/zepto iterators
-      $.fn.forEach = function(callback) {
-        this.each(function(index) {
-          callback(this, index);
-        });
-      }
-    }
+      $.fn.forEach = $.fn.each;
+     }
   }
 
   if (typeof this._ === 'undefined') {
@@ -20,14 +16,14 @@
     throw new Error('Backbone.js required to run Thorax');
   }
 
-  var Thorax, scope;
+  var Thorax, scope, templatePathPrefix;
 
   this.Thorax = Thorax = {
     configure: function(options) {
-      scope = options.scope || (typeof exports !== 'undefined' && exports);
+      scope = (options && options.scope) || (typeof exports !== 'undefined' && exports);
 
       if (!scope) {
-        throw new Error('No scope passed to Thorax.configure() and no "exports" was available inside of thorax.js');
+        scope = outerScope.Application = {};
       }
 
       _.extend(scope, Backbone.Events, {
@@ -38,11 +34,13 @@
         Collections: {},
         Routers: {}
       });
+
+      templatePathPrefix = options && typeof options.templatePathPrefix !== 'undefined' ? options.templatePathPrefix : 'templates/';
       
       Backbone.history || (Backbone.history = new Backbone.History);
 
       scope.layout = new Thorax.Layout({
-        el: options.layout || '.layout'
+        el: options && options.layout || '.layout'
       });
 
     },
@@ -121,6 +119,8 @@
     view_cid_attribute_name = 'data-view-cid',
     view_placeholder_attribute_name = 'data-view-tmp',
     model_cid_attribute_name = 'data-model-cid',
+    collection_cid_attribute_name = 'data-collection-cid',
+    default_collection_selector = '[' + collection_cid_attribute_name + ']',
     old_backbone_view = Backbone.View,
     //android scrollTo(0, 0) shows url bar, scrollTo(0, 1) hides it
     minimumScrollYOffset = (navigator.userAgent.toLowerCase().indexOf("android") > -1) ? 1 : 0,
@@ -253,7 +253,7 @@
       }
     },
     loadTemplate: function(file, data, scope) {
-      var fileName = 'templates/' + file + (file.match(/\.handlebars$/) ? '' : '.handlebars');
+      var fileName = templatePathPrefix + file + (file.match(/\.handlebars$/) ? '' : '.handlebars');
       return scope.templates[fileName];
     },
   
@@ -279,10 +279,7 @@
     //allow events hash to specify view, collection and model events
     //as well as DOM events. Merges Thorax.View.events with this.events
     delegateEvents: function(events) {
-      //undelegateEvents does not exist in some copies of backbone tagged 0.5.3
-      if (this.undelegateEvents) {
-        this.undelegateEvents();
-      }
+      this.undelegateEvents();
       this._processEvents(this.constructor.events);
       if (this.events) {
         this._processEvents(this.events);
@@ -302,6 +299,8 @@
     },
 
     _processEvents: function(events) {
+      this._domEvents = this._domEvents || [];
+
       if (_.isFunction(events)) {
         events = events.call(this);
       }
@@ -319,7 +318,9 @@
     },
 
     _shouldFetch: function(model_or_collection, options) {
-      return model_or_collection.url && options.fetch;
+      return model_or_collection.url && options.fetch && (
+        typeof model_or_collection.isPopulated === 'undefined' || !model_or_collection.isPopulated()
+      );
     },
   
     setModel: function(model, options) {
@@ -384,6 +385,7 @@
       });
       
       this.collection = collection;
+      this.collection.cid = _.uniqueId('collection');
       this.setCollectionOptions(options);
   
       if (this.collection) {
@@ -447,32 +449,15 @@
     renderCollection: function() {
       this.render();
       var collection_element = getCollectionElement.call(this);
-      if (this.collection.length == 0) {
+      collection_element.attr(collection_cid_attribute_name, this.collection.cid);
+      if (this.collection.length === 0 && this.collection.isPopulated()) {
         appendEmpty.call(this);
       } else {
-        var cids = [];
-        var elements = _.compact(this.collection.map(function(model, i) {
-          cids.push(model.cid);
-          return this.renderItem(model, i);
-        }, this));
-        if (elements[0] && elements[0].el) {
-          collection_element.empty();
-          elements.forEach(function(view) {
-            this._views[view.cid] = view;
-            collection_element.append(view.el);
-          }, this);
-        } else {
-          collection_element.html(elements.join(''));
-        }
-        collection_element.children().each(function(i) {
-          this.setAttribute(model_cid_attribute_name, cids[i]);
-        });
-
-        appendViews.call(this, collection_element);
+        this.collection.forEach(this.appendItem, this);
       }
       this.trigger('rendered:collection', collection_element);
     },
-  
+
     renderItem: function(item, i) {
       return this.template(this.name + '-item.handlebars', this.itemContext(item, i));
     },
@@ -482,17 +467,26 @@
     },
 
     //appendItem(model [,index])
-    //appendItem(html_string, index) only first node will be used
+    //appendItem(html_string, index)
     //appendItem(view, index)
-    appendItem: function(model, index) {
-      // if a transition from/to empty could happen, re-render
-      if (this.collection.length <= 1) {
-        this.renderCollection();
+    appendItem: function(model, index, options) {
+      //empty item
+      if (!model) {
+        if (!options.silent) {
+          this.trigger('rendered:item', model);
+        }
         return;
       }
 
       var item_view,
-        collection_element = getCollectionElement.call(this)[0];
+          collection_element = getCollectionElement.call(this);
+
+      options = options || {};
+
+      //if index argument is a view
+      if (index && index.el) {
+        index = collection_element.find('> *').indexOf(index.el) + 1;
+      }
 
       //if argument is a view, or html string
       if (model.el || typeof model === 'string') {
@@ -503,45 +497,32 @@
       }
 
       if (item_view) {
+
         if (item_view.cid) {
-          this._views[item_view.cid] = item_view.cid;
+          this._views[item_view.cid] = item_view;
         }
-        var previous_model = index > 0 ? this.collection.at(index - 1) : false;
-        var item_element;
-        if (item_view.el) {
-          item_element = item_view.el;
-        } else {
-          //renderItem returned string
-          item_element = this._createItemElement();
-          item_element.innerHTML = item_view;
-          var element_nodes = _.filter(item_element.childNodes, function(node) {
-            return node.nodeType === ELEMENT_NODE_TYPE;
-          });
-          if (element_nodes.length === 1) {
-            item_element = element_nodes[0];
-          }
-        }
+
+        var item_element = item_view.el ? [item_view.el] : _.filter($(item_view), function(node) {
+          return node.nodeType === ELEMENT_NODE_TYPE;
+        });
 
         if (item_element) {
           $(item_element).attr(model_cid_attribute_name, model.cid);
+          var previous_model = index > 0 ? this.collection.at(index - 1) : false;
           if (!previous_model) {
-            collection_element.insertBefore(item_element, collection_element.firstChild);
+            collection_element.prepend(item_element);
           } else {
-            var previous_model_element = $(collection_element).find('[' + model_cid_attribute_name + '="' + previous_model.cid + '"]');
-            if (previous_model_element[0]) {
-              collection_element.insertBefore(item_element, previous_model_element[0].nextSibling);
-            }
+            collection_element.find('[' + model_cid_attribute_name + '="' + previous_model.cid + '"]').last().after(item_element);
           }
 
           appendViews.call(this, item_element);
-          this.trigger('rendered:item', item_element);
+
+          if (!options.silent) {
+            this.trigger('rendered:item', item_element);
+          }
         }
       }
       return item_view;
-    },
-
-    _createItemElement: function() {
-      return this.make('div');
     },
   
     freeze: function(options) {
@@ -607,9 +588,9 @@
           });
         }
       });
-
-      this.trigger('serialize', attributes);
   
+      this.trigger('serialize', attributes);
+
       if (options.validate) {
         var errors = this.validateInput(attributes) || [];
         this.trigger('validate', attributes, errors);
@@ -673,20 +654,6 @@
       });
 
       this.trigger('populate', attributes);
-    },
-  
-    _checkFirstRadio: function(){
-      // TODO : Use _.groupBy after upgrading to the latest underscore
-      var fields = {};
-      _.each(this.$('input[type=radio]:not([disabled])'), function(el) {
-        var col = fields[el.name] = fields[el.name] || [];
-        col.push(el);
-      });
-      _.each(fields, function(elements, name) {
-        if (!_.detect(elements, function(element) { return element.checked; })) {
-          elements[0].checked = true;
-        }
-      });
     },
   
     //perform form validation, implemented by child class
@@ -826,12 +793,16 @@
       'load:start': function(message, background) {
         this.trigger('load:start', message, background);
       },
-      'load:end': function(message, background) {
-        this.trigger('load:end', message, background);
+      'load:end': function(background) {
+        this.trigger('load:end', background);
       }
     },
     collection: {
       add: function(model, collection) {
+        //if collection was empty, clear empty view
+        if (this.collection.length === 1) {
+          getCollectionElement.call(this).empty();
+        }
         this.appendItem(model, collection.indexOf(model));
       },
       remove: function(model) {
@@ -858,8 +829,8 @@
       'load:start': function(message, background) {
         this.trigger('load:start', message, background);
       },
-      'load:end': function(message, background) {
-        this.trigger('load:end', message, background);
+      'load:end': function(background) {
+        this.trigger('load:end', background);
       }
     }
   });
@@ -878,6 +849,19 @@
     return new Handlebars.SafeString(output);
   });
 
+  Thorax.View.registerHelper('collection', function(options) {
+    var collectionHelperOptions = _.clone(options.hash),
+        tag = (collectionHelperOptions.tag || 'div');
+    collectionHelperOptions[collection_cid_attribute_name] = "";
+    if (collectionHelperOptions.tag) {
+      delete collectionHelperOptions.tag;
+    }
+    var htmlAttributes = _.map(collectionHelperOptions, function(value, key) {
+      return key + '="' + value + '"';
+    }).join(' ');
+    return new Handlebars.SafeString('<' + tag + ' ' + htmlAttributes + '></' + tag + '>');
+  });
+
   Thorax.View.registerHelper('link', function(url) {
     return (Backbone.history._hasPushState ? Backbone.history.options.root : '#') + url;
   });
@@ -891,11 +875,11 @@
     if (this._modelOptions.populate) {
       this.populate();
     }
-  };
+  }
 
   function onCollectionReset() {
     this.renderCollection();
-  };
+  }
 
   function containHandlerToCurentView(handler, cid) {
     return function(event) {
@@ -904,7 +888,7 @@
         handler(event);
       }
     };
-  };
+  }
 
   //model/collection events, to be bound/unbound on setModel/setCollection
   function processModelOrCollectionEvent(events, type) {
@@ -917,7 +901,7 @@
         this._events[type].push([_name, this._bindEventHandler(events[type][_name])]);
       }
     }
-  };
+  }
 
   //used by _processEvents
   var domEvents = [
@@ -925,20 +909,23 @@
     'touchstart', 'touchend', 'touchmove',
     'click', 'dblclick',
     'keyup', 'keydown', 'keypress',
+    'submit',
     'focus', 'blur'
   ];
 
   function processEvent(name, handler) {
     if (name.match(/,/)) {
-      _.each(name.split(/,/), _.bind(function(fragment) {
+      _.each(name.split(/,/), function(fragment) {
         processEvent.call(this, fragment.replace(/(^[\s]+|[\s]+$)/g, ''), handler);
-      }, this));
+      }, this);
     } else {
       if (!name.match(/\s+/) && domEvents.indexOf(name) === -1) {
         //view events
         this.bind(name, this._bindEventHandler(handler));
       } else {
         //DOM events
+        this._domEvents.push(name);
+
         var match = name.match(eventSplitter);
         var eventName = match[1] + '.delegateEvents' + this.cid, selector = match[2];
         if (selector === '') {
@@ -948,7 +935,7 @@
         }
       }
     }
-  };
+  }
 
   //used by Thorax.View.addEvents for global event registration
   function addEvent(target, name, handler) {
@@ -962,11 +949,11 @@
     } else {
       target[name].push(handler);
     }
-  };
+  }
 
   function resetSubmitState() {
     this.$('form').removeAttr('data-submit-wait');
-  };
+  }
 
   //called with context of input
   function getInputValue() {
@@ -987,7 +974,7 @@
     } else {
       return this.value;
     }
-  };
+  }
 
   //calls a callback with the correct object fragment and key from a compound name
   function objectAndKeyFromAttributesAndName(attributes, name, options, callback) {
@@ -1005,7 +992,7 @@
     }
     key = keys[keys.length - 1].replace(']', '');
     callback.call(this, object, key);
-  };
+  }
 
   function eachNamedInput(options, iterator, context) {
     var i = 0;
@@ -1015,7 +1002,7 @@
         ++i;
       }
     });
-  };
+  }
 
   function bindModelAndCollectionEvents(events) {
     if (!this._events) {
@@ -1026,10 +1013,10 @@
     }
     processModelOrCollectionEvent.call(this, events, 'model');
     processModelOrCollectionEvent.call(this, events, 'collection');
-  };
+  }
 
   function getCollectionElement() {
-    var selector = this._collectionSelector || '.collection';
+    var selector = this._collectionSelector || default_collection_selector;
     var element = this.$(selector);
     if (element.length === 0) {
       console.error(this.name + '._collectionSelector: "' + selector + '" returned empty, returning ' + this.name + '.el');
@@ -1037,7 +1024,7 @@
     } else {
       return element;
     }
-  };
+  }
 
   function preserveCollectionElement(callback) {
     var old_collection_element = getCollectionElement.call(this);
@@ -1047,7 +1034,7 @@
       new_collection_element[0].parentNode.insertBefore(old_collection_element[0], new_collection_element[0]);
       new_collection_element[0].parentNode.removeChild(new_collection_element[0]);
     }
-  };
+  }
 
   function appendViews(scope) {
     var self = this;
@@ -1068,7 +1055,7 @@
         el.parentNode.removeChild(el);
       }
     });
-  };
+  }
 
   function destroyChildViews() {
     for (var id in this._views || {}) {
@@ -1077,21 +1064,13 @@
       }
       this._views[id] = null;
     }
-  };
+  }
 
   function appendEmpty() {
-    var empty_view = this.renderEmpty() || '';
-    if (empty_view.cid) {
-      this._views[empty_view.cid] = empty_view
-    }
-    var collection_element = getCollectionElement.call(this);
-    if (collection_element.length) {
-      collection_element.empty().append(empty_view.el || empty_view || '');
-      this.trigger('rendered:empty', collection_element);
-    }
-
-    appendViews.call(this);
-  };
+    getCollectionElement.call(this).empty();
+    this.appendItem(this.renderEmpty(), 0, {silent: true});
+    this.trigger('rendered:empty');
+  }
 
   function applyMixin(mixin) {
     if (_.isArray(mixin)) {
@@ -1099,7 +1078,7 @@
     } else {
       this.mixin(mixin);
     }
-  };
+  }
   
   //main layout class, instance of which is available on scope.layout
   Thorax.Layout = Backbone.View.extend({
@@ -1142,17 +1121,12 @@
       window.scrollTo(0, minimumScrollYOffset);
 
       this.view = view;
-  
-      // Execute the events on the next iter. This gives things a chance
-      // to settle and also protects us from NPEs in callback resulting in
-      // unremoved listeners
-      setTimeout(_.bind(function() {
-        if (old_view) {
-          old_view.destroy();
-        }
-        this.view.trigger('ready');
-        this.trigger('change:view:end', view, old_view);
-      }, this));      
+    
+      if (old_view) {
+        old_view.destroy();
+      }
+      this.view.trigger('ready');
+      this.trigger('change:view:end', view, old_view);
 
       return view;
     },
@@ -1165,7 +1139,7 @@
       var href = target.attr("href");
       // Route anything that starts with # or / (excluding //domain urls)
       if (href && (href[0] === '#' || (href[0] === '/' && href[1] !== '/'))) {
-        Backbone.history.navigate(href, true);
+        Backbone.history.navigate(href, {trigger: true});
         event.preventDefault();
       }
     }
@@ -1189,22 +1163,30 @@
     bindToRoute: bindToRoute
   });
 
-  function bindToRoute(callback, failback) {
+  function bindToRoute(callback, failback, background) {
     var fragment = Backbone.history.getFragment(),
         completed;
 
     function finalizer(isCanceled) {
+      var same = fragment === Backbone.history.getFragment();
+
       if (completed) {
         // Prevent multiple execution, i.e. we were canceled but the success callback still runs
+        return;
+      }
+
+      if (isCanceled && same) {
+        // Ignore the first route event if we are running in newer versions of backbone
+        // where the route operation is a postfix operation.
         return;
       }
 
       completed = true;
       Backbone.history.unbind('route', resetLoader);
 
-      scope.trigger('load:end');
+      background || scope.trigger('load:end');
       var args = Array.prototype.slice.call(arguments, 1);
-      if (!isCanceled && fragment === Backbone.history.getFragment()) {
+      if (!isCanceled && same) {
         callback.apply(this, args);
       } else {
         failback && failback.apply(this, args);
@@ -1214,27 +1196,24 @@
     var resetLoader = _.bind(finalizer, this, true);
     Backbone.history.bind('route', resetLoader);
 
-    scope.trigger('load:start');
+    background || scope.trigger('load:start');
     return _.bind(finalizer, this, false);
   }
 
-  Thorax.Collection = Backbone.Collection.extend({
-    fetch: function(options) {
-      fetchQueue.call(this, options || {}, Backbone.Collection.prototype.fetch);
-    },
-    sync: sync,
-    load: loadData
-  });
-
-  Thorax.Collection.extend = function(protoProps, classProps) {
-    var child = Backbone.Collection.extend.call(this, protoProps, classProps);
-    if (child.prototype.name) {
-      scope.Collections[child.prototype.name] = child;
-    }
-    return child;
-  };
-
   Thorax.Model = Backbone.Model.extend({
+    isPopulated: function() {
+      // We are populated if we have attributes set
+      var attributes = _.clone(this.attributes);
+      var defaults = _.isFunction(this.defaults) ? this.defaults() : (this.defaults || {});
+      for (var default_key in defaults) {
+        if (attributes[default_key] != defaults[default_key]) {
+          return true;
+        }
+        delete attributes[default_key];
+      }
+      var keys = _.keys(attributes);
+      return keys.length > 1 || (keys.length === 1 && keys[0] !== 'id');
+    },
     fetch: function(options) {
       fetchQueue.call(this, options || {}, Backbone.Model.prototype.fetch);
     },
@@ -1250,25 +1229,48 @@
     return child;
   };
 
+  Thorax.Collection = Backbone.Collection.extend({
+    model: Thorax.Model,
+    isPopulated: function() {
+      return this._fetched || this.length > 0;
+    },
+    fetch: function(options) {
+      options = options || {};
+      var success = options.success;
+      options.success = function(collection, response) {
+        collection._fetched = true;
+        success && success(collection, response);
+      };
+      fetchQueue.call(this, options || {}, Backbone.Collection.prototype.fetch);
+    },
+    reset: function(models, options) {
+      this._fetched = !!models;
+      return Backbone.Collection.prototype.reset.call(this, models, options);
+    },
+    sync: sync,
+    load: loadData
+  });
+
+  Thorax.Collection.extend = function(protoProps, classProps) {
+    var child = Backbone.Collection.extend.call(this, protoProps, classProps);
+    if (child.prototype.name) {
+      scope.Collections[child.prototype.name] = child;
+    }
+    return child;
+  };
+
   function sync(method, model_or_collection, options) {
-    var success, error;
-    if (options.success) {
-      success = options.success;
-      options.success = function() {
-        model_or_collection.trigger('load:end');
-        return success.apply(this, arguments);
-      };
-    }
-    if (options.error) {
-      error = options.error;
-      options.error = function() {
-        model_or_collection.trigger('load:end');
-        return error.apply(this, arguments);
-      };
-    }
-    model_or_collection.trigger('load:start');
-    return Backbone.sync.apply(this, arguments);
+    var complete = options.complete;
+    options.complete = function() {
+      complete && complete.apply(this, arguments);
+      model_or_collection.trigger('load:end', options.background);
+    };
+    model_or_collection.trigger('load:start', undefined, options.background);
+    var request = Backbone.sync.apply(this, arguments);
+    this.trigger('request', request);
+    return request;
   }
+  Thorax.sync = sync;
 
   function loadData(callback, failback, options) {
     if (this.isPopulated()) {
@@ -1279,10 +1281,11 @@
       options = failback;
       failback = false;
     }
+    options = options || {};
 
     function finalizer(isError) {
       this.unbind('error', errorHandler);
-      if (isError) {
+      if (isError && !options.background) {
         scope.trigger('load:end');
       }
       failback && failback.apply(this, arguments);
@@ -1296,11 +1299,18 @@
           this.unbind('error', errorHandler);
           callback.apply(this, arguments);
         }, this),
-        _.bind(finalizer, this, false))
+        _.bind(finalizer, this, false),
+        options.background)
     }));
   }
 
   function fetchQueue(options, $super) {
+    if (options.resetQueue) {
+      // WARN: Should ensure that loaders are protected from out of band data
+      //    when using this option
+      this.fetchQueue = undefined;
+    }
+
     if (!this.fetchQueue) {
       // Kick off the request
       this.fetchQueue = [options];
@@ -1333,4 +1343,4 @@
       }
     }
   }
-}).call(this);
+}).call(this, this);

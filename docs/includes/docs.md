@@ -1,7 +1,16 @@
 
 ## Overview
 
-An opinionated Backbone application framework using:
+An opinionated Backbone application framework,
+
+- data loading
+- form serialization and validation
+- model and collection binding
+- inheritable view and DOM events
+- routers and layouts
+- handlebars integration
+
+Thorax is built on:
 
 - [Backbone](http://documentcloud.github.com/backbone/) - the core framework that Thorax builds on
 - [Underscore](http://documentcloud.github.com/underscore/) - to make sure you have your JavaScript utility belt with you
@@ -46,6 +55,8 @@ Any configuration should be done inside of `js/init.js`. The `Application` objec
 Start Thorax and create the `Application.layout` object.
 
 - `layout` - string css selector or Element where the `Application.layout` object will attach, defaults to `.layout`
+- `scope` - object scope to configure, defaults to a new object in the global scope `Application`
+- `templatePathPrefix` - Path where your templates are located. Defaults to "templates/"
 
 ## Routers & Layout
 
@@ -592,3 +603,11 @@ The example project includes a server script that will start an express server w
 
     ./bin/server 8000
 
+## Change Log
+
+### 1.1
+
+- added {{collection}} helper, _collectionSelector is now deprecated and internally defaults to "[data-collection-cid], for backwards compatibility set it to ".collection" in your view classes.
+
+
+ is now deprecated, use
