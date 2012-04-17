@@ -16,6 +16,17 @@
     throw new Error('Backbone.js required to run Thorax');
   }
 
+  var TemplateEngine = {
+    extension: 'handlebars',
+    safeString: function(string) {
+      return new Handlebars.SafeString(string);
+    },
+    registerHelper: function(name, callback) {
+      return Handlebars.registerHelper(name, callback);
+    }
+  };
+  TemplateEngine.extensionRegExp = new RegExp('\\.' + TemplateEngine.extension + '$');
+
   var Thorax, scope, templatePathPrefix;
 
   this.Thorax = Thorax = {
@@ -252,8 +263,9 @@
         return template(data);
       }
     },
+
     loadTemplate: function(file, data, scope) {
-      var fileName = templatePathPrefix + file + (file.match(/\.handlebars$/) ? '' : '.handlebars');
+      var fileName = templatePathPrefix + file + (file.match(TemplateEngine.extensionRegExp) ? '' : '.' + TemplateEngine.extension);
       return scope.templates[fileName];
     },
   
@@ -437,7 +449,7 @@
     emptyContext: function() {},
 
     render: function() {
-      var output = this.template(this.name + '.handlebars', this.context(this.model));
+      var output = this.template(this.name, this.context(this.model));
       this.html(output);
       if (!this._renderCount) {
         this._renderCount = 1;
@@ -461,11 +473,11 @@
     },
 
     renderItem: function(item, i) {
-      return this.template(this.name + '-item.handlebars', this.itemContext(item, i));
+      return this.template(this.name + '-item', this.itemContext(item, i));
     },
   
     renderEmpty: function() {
-      return this.template(this.name + '-empty.handlebars', this.emptyContext());
+      return this.template(this.name + '-empty', this.emptyContext());
     },
 
     //appendItem(model [,index])
@@ -687,7 +699,7 @@
   }, {
     registerHelper: function(name, callback) {
       this[name] = callback;
-      Handlebars.registerHelper(name, this[name]);
+      TemplateEngine.registerHelper(name, this[name]);
     },
     registerMixin: function(name, callback, methods) {
       scope.Mixins[name] = [callback, methods];
@@ -842,13 +854,13 @@
       return '';
     }
     var instance = Thorax._currentTemplateContext.view(view, options ? options.hash : {});
-    return new Handlebars.SafeString('<div ' + view_placeholder_attribute_name + '="' + instance.cid + '"></div>');
+    return TemplateEngine.safeString('<div ' + view_placeholder_attribute_name + '="' + instance.cid + '"></div>');
   });
   
   Thorax.View.registerHelper('template', function(name, options) {
     var context = _.extend({}, this, options ? options.hash : {});
     var output = Thorax.View.prototype.template.call(Thorax._currentTemplateContext, name, context);
-    return new Handlebars.SafeString(output);
+    return TemplateEngine.safeString(output);
   });
 
   Thorax.View.registerHelper('collection', function(options) {
@@ -861,7 +873,7 @@
     var htmlAttributes = _.map(collectionHelperOptions, function(value, key) {
       return key + '="' + value + '"';
     }).join(' ');
-    return new Handlebars.SafeString('<' + tag + ' ' + htmlAttributes + '></' + tag + '>');
+    return TemplateEngine.safeString('<' + tag + ' ' + htmlAttributes + '></' + tag + '>');
   });
 
   Thorax.View.registerHelper('link', function(url) {
