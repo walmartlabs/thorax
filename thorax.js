@@ -1040,7 +1040,6 @@
     var selector = this._collectionSelector || default_collection_selector;
     var element = this.$(selector);
     if (element.length === 0) {
-      console.error(this.name + '._collectionSelector: "' + selector + '" returned empty, returning ' + this.name + '.el');
       return $(this.el);
     } else {
       return element;
