@@ -262,7 +262,7 @@
         return this.el.innerHTML;
       } else {
         var element;
-        if (this.collection && this._renderCount) {
+        if (this._collectionOptions && this._renderCount) {
           //preserveCollectionElement calls the callback after it has a reference
           //to the collection element, calls the callback, then re-appends the element
           preserveCollectionElement.call(this, function() {
