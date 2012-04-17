@@ -10,7 +10,7 @@ $(function() {
     'letter-empty.handlebars': Handlebars.compile("<li>empty</li>"),
     'letter-multiple-item.handlebars': Handlebars.compile("<li>{{letter}}</li><li>{{letter}}</li>"),
     'parent.handlebars': Handlebars.compile("<div>{{view child}}</div>"),
-    'child.handlebars': Handlebars.compile("{{value}}")
+    'child.handlebars': Handlebars.compile("<div>{{value}}</div>")
   };
 
   var LetterModel = Thorax.Model.extend({});
@@ -184,17 +184,17 @@ test("Child views", function() {
   });
   var parent = new Parent();
   parent.render();
-  equal(parent.$('[data-view-name="child"]').html(), 'a', 'view embedded');
+  equal(parent.$('[data-view-name="child"] > div').html(), 'a', 'view embedded');
   equal(parentRenderedCount, 1);
   equal(childRenderedCount, 1);
 
   parent.render();
-  equal(parent.$('[data-view-name="child"]').html(), 'a', 'view embedded');
+  equal(parent.$('[data-view-name="child"] > div').html(), 'a', 'view embedded');
   equal(parentRenderedCount, 2, 're-render of parent does not render child');
   equal(childRenderedCount, 1, 're-render of parent does not render child');
 
   parent.childModel.set({value: 'b'});
-  equal(parent.$('[data-view-name="child"]').html(), 'b', 'view embedded');
+  equal(parent.$('[data-view-name="child"] > div').html(), 'b', 'view embedded');
   equal(parentRenderedCount, 2, 're-render of child does not parent child');
   equal(childRenderedCount, 2, 're-render of child does not render parent');
 
@@ -296,7 +296,47 @@ test("bindToRoute", function() {
   Backbone.history.getFragment = _getFragment;
 });
 
-//contain handler to current view (make fix so child views don't bubble)
+test("dom events and containHandlerToCurrentView", function() {
+  
+  var childClickedCount = 0,
+      parentClickedCount = 0;
+  
+  var Child = Thorax.View.extend({
+    name: 'child',
+    events: {
+      'click div': function() {
+        ++childClickedCount;
+      }
+    }
+  });
+  
+  var Parent = Thorax.View.extend({
+    name: 'parent',
+    events: {
+      'click': function() {
+        ++parentClickedCount;
+      }
+    },
+    initialize: function() {
+      this.child = this.view('child');
+    }
+  });
+  
+  var parent = new Parent();
+  parent.render();
+  document.body.appendChild(parent.el);
+
+  parent.$('div').html();
+  $(parent.el).trigger('click');
+  equal(parentClickedCount, 1);
+  equal(childClickedCount, 0);
+  
+  parent.child.$('div').trigger('click');
+  equal(parentClickedCount, 1);
+  equal(childClickedCount, 1);
+
+  $(parent.el).remove();
+});
 
 //form serialization / population / validation
 
