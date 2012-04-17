@@ -434,6 +434,8 @@
       return item.attributes;
     },
 
+    emptyContext: function() {},
+
     render: function() {
       var output = this.template(this.name + '.handlebars', this.context(this.model));
       this.html(output);
@@ -463,7 +465,7 @@
     },
   
     renderEmpty: function() {
-      return this.template(this.name + '-empty.handlebars');
+      return this.template(this.name + '-empty.handlebars', this.emptyContext());
     },
 
     //appendItem(model [,index])
