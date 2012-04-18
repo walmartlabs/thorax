@@ -10,7 +10,8 @@ $(function() {
     'letter-empty.handlebars': Handlebars.compile("<li>empty</li>"),
     'letter-multiple-item.handlebars': Handlebars.compile("<li>{{letter}}</li><li>{{letter}}</li>"),
     'parent.handlebars': Handlebars.compile("<div>{{view child}}</div>"),
-    'child.handlebars': Handlebars.compile("<div>{{value}}</div>")
+    'child.handlebars': Handlebars.compile("<div>{{value}}</div>"),
+    'form.handlebars': Handlebars.compile('<form><input name="one"/><select name="two"><option value="a">a</option><option value="b">b</option></select><input name="three[four]"/></form>')
   };
 
   var LetterModel = Thorax.Model.extend({});
@@ -237,6 +238,24 @@ test("Inheritable events", function() {
   child.trigger('b');
   equal(aCount, 2);
   equal(bCount, 1);
+
+  //ensure events are properly cloned
+  Parent = Thorax.View.extend();
+  Parent.registerEvents({
+    a: 1
+  });
+
+  Child = Parent.extend({});
+  Child.registerEvents({
+    a: 2
+  });
+  
+  ChildTwo = Parent.extend({});
+
+  equal(Child.events.a[0], 1, 'ensure events are not shared between children');
+  equal(Child.events.a.length, 2, 'ensure events are not shared between children');
+  equal(ChildTwo.events.a[0], 1, 'ensure events are not shared between children');
+  equal(ChildTwo.events.a.length, 1, 'ensure events are not shared between children');
 });
 
 test("bindToRoute", function() {
@@ -313,7 +332,7 @@ test("dom events and containHandlerToCurrentView", function() {
   var Parent = Thorax.View.extend({
     name: 'parent',
     events: {
-      'click': function() {
+      'click div': function() {
         ++parentClickedCount;
       }
     },
@@ -326,8 +345,7 @@ test("dom events and containHandlerToCurrentView", function() {
   parent.render();
   document.body.appendChild(parent.el);
 
-  parent.$('div').html();
-  $(parent.el).trigger('click');
+  $(parent.$('div')[0]).trigger('click');
   equal(parentClickedCount, 1);
   equal(childClickedCount, 0);
   
@@ -338,6 +356,50 @@ test("dom events and containHandlerToCurrentView", function() {
   $(parent.el).remove();
 });
 
-//form serialization / population / validation
+test("serialize() / populate()", function() {
+  var FormView = Thorax.View.extend({
+    name: 'form'
+  });
+
+  var model = new Thorax.Model({
+    one: 'a',
+    two: 'b',
+    three: {
+      four: 'c'
+    }
+  });
+
+  var view = new FormView();
+  view.render();
+  var attributes = view.serialize();
+  equal(attributes.one, "", 'serialize empty attributes');
+  view.setModel(model);
+  attributes = view.serialize();
+  equal(attributes.one, 'a', 'serialize attributes from model');
+  equal(attributes.two, 'b', 'serialize attributes from model');
+  equal(attributes.three.four, 'c', 'serialize attributes from model');
+
+  view.populate({
+    one: 'aa',
+    two: 'b',
+    three: {
+      four: 'cc'
+    }
+  });
+  attributes = view.serialize();
+  equal(attributes.one, 'aa', 'serialize attributes from populate()');
+  equal(attributes.two, 'b', 'serialize attributes from populate()');
+  equal(attributes.three.four, 'cc', 'serialize attributes from populate()');
+
+  view.validateInput = function() {
+    return ['error'];
+  };
+  var errorCallbackCallCount = 0;
+  view.bind('error', function() {
+    ++errorCallbackCallCount;
+  });
+  ok(!view.serialize());
+  equal(errorCallbackCallCount, 1, "error event triggered when validateInput returned errors");
+});
 
 //application.layout w/router

@@ -752,6 +752,12 @@
     }
     child.mixins = _.clone(this.mixins);
     child.events = _.clone(this.events);
+    //need to deep clone events array
+    _.each(this.events, function(value, key) {
+      if (_.isArray(value)) {
+        child.events[key] = _.clone(value);
+      }
+    });
     child.events.model = _.clone(this.events.model);
     child.events.collection = _.clone(this.events.collection);
     return child;
@@ -946,13 +952,21 @@
       } else {
         //DOM events
         this._domEvents.push(name);
-
-        var match = name.match(eventSplitter);
-        var eventName = match[1] + '.delegateEvents' + this.cid, selector = match[2];
+        var nested = false;
+        if (name.match(/^nested /)) {
+          nested = true;
+          name = name.replace(/^nested /);
+        }
+        var match = name.match(eventSplitter),
+            eventName = match[1] + '.delegateEvents' + this.cid, selector = match[2],
+            boundHandler = this._bindEventHandler(handler);
+        if (!nested) {
+          boundHandler = containHandlerToCurentView(boundHandler, this.cid);
+        }
         if (selector === '') {
-          $(this.el).bind(eventName, containHandlerToCurentView(this._bindEventHandler(handler), this.cid));
+          $(this.el).bind(eventName, boundHandler);
         } else {
-          $(this.el).delegate(selector, eventName, containHandlerToCurentView(this._bindEventHandler(handler), this.cid));
+          $(this.el).delegate(selector, eventName, boundHandler);
         }
       }
     }
