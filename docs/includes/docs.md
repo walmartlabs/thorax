@@ -612,9 +612,17 @@ The example project includes a server script that will start an express server w
 
     ./bin/server 8000
 
+### templates *thorax templates templates-dir output-file application-name*
+
+If you aren't using Lumbar you can use this utility to inline all of your templates from a given directory into a single JavaScript file. You'll need to include the full Handlebars library as it's just inlining the template source, not the precompiled versions.
+
+    thorax templates ./templates ./templates.js Application
+
 ## Change Log
 
 ### 1.1
+
+- Added `thorax templates templates-dir output-file application-name` command line option for simple template inlining for projects not using Lumbar.
 
 - Checks for view.name are now lazy and will throw an exception instead of using console.error()
 

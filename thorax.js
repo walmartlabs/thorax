@@ -957,7 +957,7 @@
         var nested = false;
         if (name.match(/^nested /)) {
           nested = true;
-          name = name.replace(/^nested /);
+          name = name.replace(/^nested /, '');
         }
         var match = name.match(eventSplitter),
             eventName = match[1] + '.delegateEvents' + this.cid, selector = match[2],

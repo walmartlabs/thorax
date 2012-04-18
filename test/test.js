@@ -367,7 +367,9 @@ $(function() {
         }
       },
       initialize: function() {
-        this.child = this.view('child');
+        this.child = this.view('child', {
+          value: 'a'
+        });
       }
     });
     
@@ -383,6 +385,22 @@ $(function() {
     equal(parentClickedCount, 1);
     equal(childClickedCount, 1);
   
+    $(parent.el).remove();
+
+    var ParentWithNested = Parent.extend({
+      events: {
+        'nested click div': function() {
+          ++parentClickedCount;
+        }
+      }
+    });
+    parent = new ParentWithNested();
+    parent.render();
+    document.body.appendChild(parent.el);
+    $(parent.el).trigger('click');
+    $(parent.child.el).trigger('click');
+    equal(parentClickedCount, 3, 'test nested keyword');
+    equal(childClickedCount, 2, 'test nested keyword');
     $(parent.el).remove();
   });
   
