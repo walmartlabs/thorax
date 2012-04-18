@@ -616,14 +616,24 @@ The example project includes a server script that will start an express server w
 
 ### 1.1
 
-- appendItem now accepts a view as it's index argument in addition to an integer
+- Checks for view.name are now lazy and will throw an exception instead of using console.error()
 
-- collection bindings will now work properly when multiple nodes are generated from a string of HTML passed to appendItem / renderItem
+- Templates that are not found will throw an error instead of using console.error()
 
-- added emptyContext() used by renderEmpty()
+- Added templatePathPrefix to configure()
 
-- added {{collection}} helper, _collectionSelector is now deprecated and internally defaults to "[data-collection-cid], for backwards compatibility set it to ".collection" in your view classes.
+- Added isPopulated() methods to Thorax.Model and Thorax.Collection, used by data loading methods.
 
-- render now accepts HTML strings a DOM element or an array of DOM elements as it's only argument to make it easier to subclass the render method
+- appendItem now accepts a view as it's index argument in addition to an integer.
 
-- Thorax.Layout.prototype.setView can now accept false as an argument, which will transition the layout to an empty view
+- Collection bindings will now work properly when multiple nodes are generated from a string of HTML passed to appendItem / renderItem.
+
+- Added emptyContext() used by renderEmpty()
+
+- Added {{collection}} helper, _collectionSelector is now deprecated and internally defaults to "[data-collection-cid], for backwards compatibility set it to ".collection" in your view classes.
+
+- Render now accepts HTML strings a DOM element or an array of DOM elements as it's only argument to make it easier to subclass the render method.
+
+- Thorax.Layout.prototype.setView can now accept false as an argument, which will transition the layout to an empty view.
+
+- Unit tests!
