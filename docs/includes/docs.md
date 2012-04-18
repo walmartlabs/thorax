@@ -305,9 +305,16 @@ This method is also available as a template helper which can receive a string na
 
 Replace the HTML in a given view. The collection element and the child views appended by the `{{view}}` helper will be automatically preserved if present.
 
-### render *view.render()*
+### render *view.render([html])*
 
-Render a template with the filename of the view's `name` attribute (sans extension), calling `view.html()` with the result. Triggers the `rendered` event.
+Render a template with the filename of the view's `name` attribute (sans extension), calling `view.html()` with the result. Triggers the `rendered` event. To implement custom rendering behavior in your subclasses pass render() an HTML string, DOM element or array of DOM elements:
+
+    Thorax.View.extend({
+      render: function() {
+        var html = this.generateComplicatedOutput();
+        Thorax.View.prototype.render.call(this, html);
+      }
+    });
 
 ### setModel *view.setModel(model)*
 
@@ -609,7 +616,14 @@ The example project includes a server script that will start an express server w
 
 ### 1.1
 
+- appendItem now accepts a view as it's index argument in addition to an integer
+
+- collection bindings will now work properly when multiple nodes are generated from a string of HTML passed to appendItem / renderItem
+
+- added emptyContext() used by renderEmpty()
+
 - added {{collection}} helper, _collectionSelector is now deprecated and internally defaults to "[data-collection-cid], for backwards compatibility set it to ".collection" in your view classes.
 
+- render now accepts HTML strings a DOM element or an array of DOM elements as it's only argument to make it easier to subclass the render method
 
- is now deprecated, use
+- Thorax.Layout.prototype.setView can now accept false as an argument, which will transition the layout to an empty view

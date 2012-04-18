@@ -446,9 +446,11 @@
 
     emptyContext: function() {},
 
-    render: function() {
-      ensureViewHasName.call(this);
-      var output = this.template(this.name, this.context(this.model));
+    render: function(output) {
+      if (typeof output === 'undefined') {
+        ensureViewHasName.call(this);
+        output = this.template(this.name, this.context(this.model));
+      }
       this.html(output);
       if (!this._renderCount) {
         this._renderCount = 1;
@@ -1130,38 +1132,23 @@
     
     setView: function(view, params){
       var old_view = this.view;
-
       if (view == old_view){
         return false;
       }
-      
       this.trigger('change:view:start', view, old_view);
-
       old_view && old_view.trigger('deactivated');
-
-      view.trigger('activated', params || {});
-
+      view && view.trigger('activated', params || {});
       if (old_view && old_view.el && old_view.el.parentNode) {
         $(old_view.el).remove();
       }
-
       //make sure the view has been rendered at least once
-      if (!view._renderCount) {
-        view.render();
-      }
-
-      this.views.appendChild(view.el);
-  
+      view && !view._renderCount && view.render();
+      view && this.views.appendChild(view.el);
       window.scrollTo(0, minimumScrollYOffset);
-
       this.view = view;
-    
-      if (old_view) {
-        old_view.destroy();
-      }
-      this.view.trigger('ready');
+      old_view && old_view.destroy();
+      this.view && this.view.trigger('ready');
       this.trigger('change:view:end', view, old_view);
-
       return view;
     },
 

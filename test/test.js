@@ -154,252 +154,337 @@ $(function() {
     runCollectionTests(viewReturningMultiple, 2);
   });
 
-});
-
-test("Child views", function() {
-  var childRenderedCount = 0,
-      parentRenderedCount = 0;
-  var Child = Thorax.View.extend({
-    name: 'child',
-    events: {
-      rendered: function() {
-        ++childRenderedCount;
+  test("Child views", function() {
+    var childRenderedCount = 0,
+        parentRenderedCount = 0;
+    var Child = Thorax.View.extend({
+      name: 'child',
+      events: {
+        rendered: function() {
+          ++childRenderedCount;
+        }
       }
-    }
-  });
-  var Parent = Thorax.View.extend({
-    name: 'parent',
-    events: {
-      rendered: function() {
-        ++parentRenderedCount;
+    });
+    var Parent = Thorax.View.extend({
+      name: 'parent',
+      events: {
+        rendered: function() {
+          ++parentRenderedCount;
+        }
+      },
+      initialize: function() {
+        this.childModel = new Thorax.Model({
+          value: 'a'
+        });
+        this.child = this.view('child', {
+          model: this.childModel
+        });
       }
-    },
-    initialize: function() {
-      this.childModel = new Thorax.Model({
-        value: 'a'
-      });
-      this.child = this.view('child', {
-        model: this.childModel
-      });
-    }
-  });
-  var parent = new Parent();
-  parent.render();
-  equal(parent.$('[data-view-name="child"] > div').html(), 'a', 'view embedded');
-  equal(parentRenderedCount, 1);
-  equal(childRenderedCount, 1);
-
-  parent.render();
-  equal(parent.$('[data-view-name="child"] > div').html(), 'a', 'view embedded');
-  equal(parentRenderedCount, 2, 're-render of parent does not render child');
-  equal(childRenderedCount, 1, 're-render of parent does not render child');
-
-  parent.childModel.set({value: 'b'});
-  equal(parent.$('[data-view-name="child"] > div').html(), 'b', 'view embedded');
-  equal(parentRenderedCount, 2, 're-render of child does not parent child');
-  equal(childRenderedCount, 2, 're-render of child does not render parent');
-
-  //ensure recursion does not happen when child view has the same model
-  //as parent
-  parent.setModel(parent.childModel);
-  parent.model.set({value: 'c'});
-  equal(parentRenderedCount, 4);
-  equal(childRenderedCount, 3);
-});
-
-test("Template not found handling", function() {
-  var view = new Thorax.View();
-  equal('', view.template('foo', {}, true));
-  raises(function() {
-    view.template('foo');
-  });
-});
-
-test("Inheritable events", function() {
-  var Parent = Thorax.View.extend({}),
-      aCount = 0,
-      bCount = 0;
-  Parent.registerEvents({
-    a: function() {
-      ++aCount;
-    }
-  });
-  var Child = Parent.extend({});
-  Child.registerEvents({
-    b: function() {
-      ++bCount;
-    }
-  });
-  var parent = new Parent(),
-      child = new Child();
-  parent.trigger('a');
-  parent.trigger('b');
-  child.trigger('a');
-  child.trigger('b');
-  equal(aCount, 2);
-  equal(bCount, 1);
-
-  //ensure events are properly cloned
-  Parent = Thorax.View.extend();
-  Parent.registerEvents({
-    a: 1
-  });
-
-  Child = Parent.extend({});
-  Child.registerEvents({
-    a: 2
+    });
+    var parent = new Parent();
+    parent.render();
+    equal(parent.$('[data-view-name="child"] > div').html(), 'a', 'view embedded');
+    equal(parentRenderedCount, 1);
+    equal(childRenderedCount, 1);
+  
+    parent.render();
+    equal(parent.$('[data-view-name="child"] > div').html(), 'a', 'view embedded');
+    equal(parentRenderedCount, 2, 're-render of parent does not render child');
+    equal(childRenderedCount, 1, 're-render of parent does not render child');
+  
+    parent.childModel.set({value: 'b'});
+    equal(parent.$('[data-view-name="child"] > div').html(), 'b', 'view embedded');
+    equal(parentRenderedCount, 2, 're-render of child does not parent child');
+    equal(childRenderedCount, 2, 're-render of child does not render parent');
+  
+    //ensure recursion does not happen when child view has the same model
+    //as parent
+    parent.setModel(parent.childModel);
+    parent.model.set({value: 'c'});
+    equal(parentRenderedCount, 4);
+    equal(childRenderedCount, 3);
   });
   
-  ChildTwo = Parent.extend({});
-
-  equal(Child.events.a[0], 1, 'ensure events are not shared between children');
-  equal(Child.events.a.length, 2, 'ensure events are not shared between children');
-  equal(ChildTwo.events.a[0], 1, 'ensure events are not shared between children');
-  equal(ChildTwo.events.a.length, 1, 'ensure events are not shared between children');
-});
-
-test("bindToRoute", function() {
-  var callback,
-      failback,
-      fragment = "foo",
-      _getFragment = Backbone.history.getFragment,
-      _Router = Thorax.Router.extend({});
-      router = new _Router();
-
-  Backbone.history.getFragment = function() {
-    return fragment;
-  }
-
-  var _this = this;
-  function reset() {
-    callback = _this.spy();
-    failback = _this.spy();
-    return router.bindToRoute(callback, failback);
-  }
-
-  var func = reset();
-  Backbone.history.trigger('route');
-  equal(callback.callCount, 0);
-  equal(failback.callCount, 0);
+  test("Template not found handling", function() {
+    var view = new Thorax.View();
+    equal('', view.template('foo', {}, true));
+    raises(function() {
+      view.template('foo');
+    });
+  });
   
-  // test new route before load complete
-  fragment = "bar";
-  Backbone.history.trigger('route');
-  equal(callback.callCount, 0);
-  equal(failback.callCount, 1);
-
-  // make sure callback doesn't work after route has changed
-  func();
-  equal(callback.callCount, 0);
-  equal(failback.callCount, 1);
-
-  // make sure callback works without initial route trigger
-  func = reset();
-  func();
-  equal(callback.callCount, 1);
-  equal(failback.callCount, 0);
-
-  // make sure callback works with initial route trigger
-  func = reset();
-  Backbone.history.trigger('route');
-  func();
-  equal(callback.callCount, 1);
-  equal(failback.callCount, 0);
-
-  // now make sure no execution happens after route change
-  fragment = "bar";
-  Backbone.history.trigger('route');
-  equal(callback.callCount, 1);
-  equal(failback.callCount, 0);
-
-  Backbone.history.getFragment = _getFragment;
-});
-
-test("dom events and containHandlerToCurrentView", function() {
-  
-  var childClickedCount = 0,
-      parentClickedCount = 0;
-  
-  var Child = Thorax.View.extend({
-    name: 'child',
-    events: {
-      'click div': function() {
-        ++childClickedCount;
+  test("render() subclassing", function() {
+    var a = new Thorax.View({
+      render: function() {
+        Thorax.View.prototype.render.call(this, '<p>a</p>');
       }
-    }
-  });
-  
-  var Parent = Thorax.View.extend({
-    name: 'parent',
-    events: {
-      'click div': function() {
-        ++parentClickedCount;
+    });
+    a.render();
+
+    var b = new Thorax.View({
+      render: function() {
+        Thorax.View.prototype.render.call(this, $('<p>b</p>'));
       }
-    },
-    initialize: function() {
-      this.child = this.view('child');
-    }
+    });
+    b.render();
+
+    var c = new Thorax.View({
+      render: function() {
+        var el = document.createElement('p');
+        el.innerHTML = 'c';
+        Thorax.View.prototype.render.call(this, el);
+      }
+    });
+    c.render();
+
+    equal(a._renderCount, 1, '_renderCount incrimented');
+    equal(b._renderCount, 1, '_renderCount incrimented');
+    equal(c._renderCount, 1, '_renderCount incrimented');
+    equal(a.$('p').html(), 'a', 'parent render accepts string');
+    equal(b.$('p').html(), 'b', 'parent render accepts dom array');
+    equal(c.$('p').html(), 'c', 'parent render accepts dom element');
   });
   
-  var parent = new Parent();
-  parent.render();
-  document.body.appendChild(parent.el);
-
-  $(parent.$('div')[0]).trigger('click');
-  equal(parentClickedCount, 1);
-  equal(childClickedCount, 0);
+  test("Inheritable events", function() {
+    var Parent = Thorax.View.extend({}),
+        aCount = 0,
+        bCount = 0;
+    Parent.registerEvents({
+      a: function() {
+        ++aCount;
+      }
+    });
+    var Child = Parent.extend({});
+    Child.registerEvents({
+      b: function() {
+        ++bCount;
+      }
+    });
+    var parent = new Parent(),
+        child = new Child();
+    parent.trigger('a');
+    parent.trigger('b');
+    child.trigger('a');
+    child.trigger('b');
+    equal(aCount, 2);
+    equal(bCount, 1);
   
-  parent.child.$('div').trigger('click');
-  equal(parentClickedCount, 1);
-  equal(childClickedCount, 1);
-
-  $(parent.el).remove();
-});
-
-test("serialize() / populate()", function() {
-  var FormView = Thorax.View.extend({
-    name: 'form'
+    //ensure events are properly cloned
+    Parent = Thorax.View.extend();
+    Parent.registerEvents({
+      a: 1
+    });
+  
+    Child = Parent.extend({});
+    Child.registerEvents({
+      a: 2
+    });
+    
+    ChildTwo = Parent.extend({});
+  
+    equal(Child.events.a[0], 1, 'ensure events are not shared between children');
+    equal(Child.events.a.length, 2, 'ensure events are not shared between children');
+    equal(ChildTwo.events.a[0], 1, 'ensure events are not shared between children');
+    equal(ChildTwo.events.a.length, 1, 'ensure events are not shared between children');
   });
-
-  var model = new Thorax.Model({
-    one: 'a',
-    two: 'b',
-    three: {
-      four: 'c'
+  
+  test("bindToRoute", function() {
+    var callback,
+        failback,
+        fragment = "foo",
+        _getFragment = Backbone.history.getFragment,
+        _Router = Thorax.Router.extend({});
+        router = new _Router();
+  
+    Backbone.history.getFragment = function() {
+      return fragment;
     }
-  });
-
-  var view = new FormView();
-  view.render();
-  var attributes = view.serialize();
-  equal(attributes.one, "", 'serialize empty attributes');
-  view.setModel(model);
-  attributes = view.serialize();
-  equal(attributes.one, 'a', 'serialize attributes from model');
-  equal(attributes.two, 'b', 'serialize attributes from model');
-  equal(attributes.three.four, 'c', 'serialize attributes from model');
-
-  view.populate({
-    one: 'aa',
-    two: 'b',
-    three: {
-      four: 'cc'
+  
+    var _this = this;
+    function reset() {
+      callback = _this.spy();
+      failback = _this.spy();
+      return router.bindToRoute(callback, failback);
     }
+  
+    var func = reset();
+    Backbone.history.trigger('route');
+    equal(callback.callCount, 0);
+    equal(failback.callCount, 0);
+    
+    // test new route before load complete
+    fragment = "bar";
+    Backbone.history.trigger('route');
+    equal(callback.callCount, 0);
+    equal(failback.callCount, 1);
+  
+    // make sure callback doesn't work after route has changed
+    func();
+    equal(callback.callCount, 0);
+    equal(failback.callCount, 1);
+  
+    // make sure callback works without initial route trigger
+    func = reset();
+    func();
+    equal(callback.callCount, 1);
+    equal(failback.callCount, 0);
+  
+    // make sure callback works with initial route trigger
+    func = reset();
+    Backbone.history.trigger('route');
+    func();
+    equal(callback.callCount, 1);
+    equal(failback.callCount, 0);
+  
+    // now make sure no execution happens after route change
+    fragment = "bar";
+    Backbone.history.trigger('route');
+    equal(callback.callCount, 1);
+    equal(failback.callCount, 0);
+  
+    Backbone.history.getFragment = _getFragment;
   });
-  attributes = view.serialize();
-  equal(attributes.one, 'aa', 'serialize attributes from populate()');
-  equal(attributes.two, 'b', 'serialize attributes from populate()');
-  equal(attributes.three.four, 'cc', 'serialize attributes from populate()');
+  
+  test("dom events and containHandlerToCurrentView", function() {
+    
+    var childClickedCount = 0,
+        parentClickedCount = 0;
+    
+    var Child = Thorax.View.extend({
+      name: 'child',
+      events: {
+        'click div': function() {
+          ++childClickedCount;
+        }
+      }
+    });
+    
+    var Parent = Thorax.View.extend({
+      name: 'parent',
+      events: {
+        'click div': function() {
+          ++parentClickedCount;
+        }
+      },
+      initialize: function() {
+        this.child = this.view('child');
+      }
+    });
+    
+    var parent = new Parent();
+    parent.render();
+    document.body.appendChild(parent.el);
+  
+    $(parent.$('div')[0]).trigger('click');
+    equal(parentClickedCount, 1);
+    equal(childClickedCount, 0);
+    
+    parent.child.$('div').trigger('click');
+    equal(parentClickedCount, 1);
+    equal(childClickedCount, 1);
+  
+    $(parent.el).remove();
+  });
+  
+  test("serialize() / populate()", function() {
+    var FormView = Thorax.View.extend({
+      name: 'form'
+    });
+  
+    var model = new Thorax.Model({
+      one: 'a',
+      two: 'b',
+      three: {
+        four: 'c'
+      }
+    });
+  
+    var view = new FormView();
+    view.render();
+    var attributes = view.serialize();
+    equal(attributes.one, "", 'serialize empty attributes');
+    view.setModel(model);
+    attributes = view.serialize();
+    equal(attributes.one, 'a', 'serialize attributes from model');
+    equal(attributes.two, 'b', 'serialize attributes from model');
+    equal(attributes.three.four, 'c', 'serialize attributes from model');
+  
+    view.populate({
+      one: 'aa',
+      two: 'b',
+      three: {
+        four: 'cc'
+      }
+    });
+    attributes = view.serialize();
+    equal(attributes.one, 'aa', 'serialize attributes from populate()');
+    equal(attributes.two, 'b', 'serialize attributes from populate()');
+    equal(attributes.three.four, 'cc', 'serialize attributes from populate()');
+  
+    view.validateInput = function() {
+      return ['error'];
+    };
+    var errorCallbackCallCount = 0;
+    view.bind('error', function() {
+      ++errorCallbackCallCount;
+    });
+    ok(!view.serialize());
+    equal(errorCallbackCallCount, 1, "error event triggered when validateInput returned errors");
+  });
+  
+  test("Test thorax.layout", function() {
+    var a = new Thorax.View({
+      render: function() {
+        Thorax.View.prototype.render.call(this, 'a');
+      }
+    });
+    var aEventCounter = {};
+    a.bind('all', function(eventName) {
+      aEventCounter[eventName] || (aEventCounter[eventName] = 0);
+      ++aEventCounter[eventName];
+    });
+  
+    var b = new Thorax.View({
+      render: function() {
+        Thorax.View.prototype.render.call(this, 'b');
+      }
+    });
+    var bEventCounter = {};
+    b.bind('all', function(eventName) {
+      bEventCounter[eventName] || (bEventCounter[eventName] = 0);
+      ++bEventCounter[eventName];
+    });
+  
+    ok(!Application.layout.view, 'layout does not start with a view');
+  
+    Application.layout.setView(a);
+    equal(Application.layout.view, a, 'layout sets view');
+    ok(Application.layout.$('[data-view-name]').length, 'layout updates HTML')
+  
+    b.render();
+    Application.layout.setView(b);
+    equal(Application.layout.view, b, 'layout sets view');
+  
+    //lifecycle checks
+    equal(aEventCounter.rendered, 1);
+    equal(aEventCounter.activated, 1);
+    equal(aEventCounter.ready, 1);
+    equal(aEventCounter.deactivated, 1);
+    equal(aEventCounter.destroyed, 1);
+  
+    equal(bEventCounter.rendered, 1);
+    equal(bEventCounter.activated, 1);
+    equal(bEventCounter.ready, 1);
+    ok(!bEventCounter.deactivated);
+    ok(!bEventCounter.destroyed);
 
-  view.validateInput = function() {
-    return ['error'];
-  };
-  var errorCallbackCallCount = 0;
-  view.bind('error', function() {
-    ++errorCallbackCallCount;
+    Application.layout.setView(false);
+    ok(!Application.layout.view, 'layout can set to empty view');
+    equal(bEventCounter.rendered, 1);
+    equal(bEventCounter.activated, 1);
+    equal(bEventCounter.ready, 1);
+    equal(bEventCounter.deactivated, 1);
+    equal(bEventCounter.destroyed, 1);
   });
-  ok(!view.serialize());
-  equal(errorCallbackCallCount, 1, "error event triggered when validateInput returned errors");
+
 });
-
-//application.layout w/router
