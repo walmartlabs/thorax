@@ -489,9 +489,6 @@
     appendItem: function(model, index, options) {
       //empty item
       if (!model) {
-        if (!options.silent) {
-          this.trigger('rendered:item', model);
-        }
         return;
       }
 
