@@ -289,7 +289,7 @@
     //allow events hash to specify view, collection and model events
     //as well as DOM events. Merges Thorax.View.events with this.events
     delegateEvents: function(events) {
-      this.undelegateEvents();
+      this.undelegateEvents && this.undelegateEvents();
       this._processEvents(this.constructor.events);
       if (this.events) {
         this._processEvents(this.events);
@@ -520,6 +520,7 @@
         }
 
         var item_element = item_view.el ? [item_view.el] : _.filter($(item_view), function(node) {
+          //filter out top level whitespace nodes
           return node.nodeType === ELEMENT_NODE_TYPE;
         });
 
@@ -893,7 +894,7 @@
 
   function ensureViewHasName() {
     if (!this.name) {
-      throw new Error(this.cid + " requires a 'view' attribute.");
+      throw new Error(this.cid + " requires a 'name' attribute.");
     }
   }
 
