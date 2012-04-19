@@ -524,20 +524,19 @@
           return node.nodeType === ELEMENT_NODE_TYPE;
         });
 
-        if (item_element) {
-          $(item_element).attr(model_cid_attribute_name, model.cid);
-          var previous_model = index > 0 ? this.collection.at(index - 1) : false;
-          if (!previous_model) {
-            collection_element.prepend(item_element);
-          } else {
-            collection_element.find('[' + model_cid_attribute_name + '="' + previous_model.cid + '"]').last().after(item_element);
-          }
+        $(item_element).attr(model_cid_attribute_name, model.cid);
+        var previous_model = index > 0 ? this.collection.at(index - 1) : false;
+        if (!previous_model) {
+          collection_element.prepend(item_element);
+        } else {
+          //use last() as appendItem can accept multiple nodes from a template
+          collection_element.find('[' + model_cid_attribute_name + '="' + previous_model.cid + '"]').last().after(item_element);
+        }
 
-          appendViews.call(this, item_element);
+        appendViews.call(this, item_element);
 
-          if (!options.silent) {
-            this.trigger('rendered:item', item_element);
-          }
+        if (!options.silent) {
+          this.trigger('rendered:item', item_element);
         }
       }
       return item_view;
@@ -754,17 +753,21 @@
       scope.Views[child.prototype.name] = child;
     }
     child.mixins = _.clone(this.mixins);
-    child.events = _.clone(this.events);
-    //need to deep clone events array
-    _.each(this.events, function(value, key) {
-      if (_.isArray(value)) {
-        child.events[key] = _.clone(value);
-      }
-    });
-    child.events.model = _.clone(this.events.model);
-    child.events.collection = _.clone(this.events.collection);
+    cloneEvents(this, child, 'events');
+    cloneEvents(this.events, child.events, 'model');
+    cloneEvents(this.events, child.events, 'collection');
     return child;
   };
+
+  function cloneEvents(source, target, key) {
+    source[key] = _.clone(target[key]);
+    //need to deep clone events array
+    _.each(source[key], function(value, _key) {
+      if (_.isArray(value)) {
+        target[key][_key] = _.clone(value);
+      }
+    });
+  }
 
   Thorax.View.registerEvents({
     //built in dom events
