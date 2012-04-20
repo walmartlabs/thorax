@@ -1,3 +1,7 @@
+//TODO: fix failing nested keyword events
+//TODO: test events with "," in them
+//TODO: test registerEvents with handler as an array of handlers
+
 $(function() {
 
   Thorax.configure({

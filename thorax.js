@@ -290,39 +290,45 @@
     //as well as DOM events. Merges Thorax.View.events with this.events
     delegateEvents: function(events) {
       this.undelegateEvents && this.undelegateEvents();
-      this._processEvents(this.constructor.events);
+      //bindModelAndCollectionEvents on this.constructor.events and this.events
+      //done in _configure
+      this.registerEvents(this.constructor.events);
       if (this.events) {
-        this._processEvents(this.events);
+        this.registerEvents(this.events);
       }
       if (events) {
-        this._processEvents(events);
+        this.registerEvents(events);
         bindModelAndCollectionEvents.call(this, events);
       }
     },
 
-    _bindEventHandler: function(callback) {
-      var method = typeof callback === 'function' ? callback : this[callback];
-      if (!method) {
-        throw new Error('Event "' + callback + '" does not exist');
-      }
-      return _.bind(method, this);
+    registerEvents: function(events) {
+      processEvents(events).forEach(this._addEvent, this);
     },
 
-    _processEvents: function(events) {
-      this._domEvents = this._domEvents || [];
-
-      if (_.isFunction(events)) {
-        events = events.call(this);
-      }
-      for (var name in events) {
-        if (name !== 'model' && name !== 'collection') {
-          if (_.isArray(events[name])) {
-            for (var i = 0; i < events[name].length; ++i) {
-              processEvent.call(this, name, events[name][i]);
-            }
-          } else {
-            processEvent.call(this, name, events[name]);
-          }
+    //params may contain:
+    //- name
+    //- originalName
+    //- selector
+    //- type "view" || "DOM"
+    //- handler
+    _addEvent: function(params) {
+      if (params.type === 'view') {
+        this.bind(params.name, params.handler, this);
+      } else {
+        var nested = false,
+            boundHandler = bindEventHandler.call(this, params.handler);
+        if (params.name.match(/^nested /)) {
+          nested = true;
+          params.name = params.name.replace(/^nested /, '');
+        }
+        if (!nested) {
+          boundHandler = containHandlerToCurentView(boundHandler, this.cid);
+        }
+        if (params.selector) {
+          $(this.el).delegate(params.selector, params.name, boundHandler);
+        } else {
+          $(this.el).bind(params.name, boundHandler);
         }
       }
     },
@@ -925,15 +931,15 @@
     for (var _name in events[type] || {}) {
       if (_.isArray(events[type][_name])) {
         for (var i = 0; i < events[type][_name].length; ++i) {
-          this._events[type].push([_name, this._bindEventHandler(events[type][_name][i])]);
+          this._events[type].push([_name, bindEventHandler.call(this, events[type][_name][i])]);
         }
       } else {
-        this._events[type].push([_name, this._bindEventHandler(events[type][_name])]);
+        this._events[type].push([_name, bindEventHandler.call(this, events[type][_name])]);
       }
     }
   }
 
-  //used by _processEvents
+  //used by processEvents
   var domEvents = [
     'mousedown', 'mouseup', 'mousemove', 'mouseover', 'mouseout',
     'touchstart', 'touchend', 'touchmove',
@@ -943,39 +949,65 @@
     'focus', 'blur'
   ];
 
-  function processEvent(name, handler) {
-    if (name.match(/,/)) {
-      _.each(name.split(/,/), function(fragment) {
-        processEvent.call(this, fragment.replace(/(^[\s]+|[\s]+$)/g, ''), handler);
-      }, this);
-    } else {
-      if (!name.match(/\s+/) && domEvents.indexOf(name) === -1) {
-        //view events
-        this.bind(name, this._bindEventHandler(handler));
-      } else {
-        //DOM events
-        this._domEvents.push(name);
-        var nested = false;
-        if (name.match(/^nested /)) {
-          nested = true;
-          name = name.replace(/^nested /, '');
-        }
-        var match = name.match(eventSplitter),
-            eventName = match[1] + '.delegateEvents' + this.cid, selector = match[2],
-            boundHandler = this._bindEventHandler(handler);
-        if (!nested) {
-          boundHandler = containHandlerToCurentView(boundHandler, this.cid);
-        }
-        if (selector === '') {
-          $(this.el).bind(eventName, boundHandler);
+  function bindEventHandler(callback) {
+    var method = typeof callback === 'function' ? callback : this[callback];
+    if (!method) {
+      throw new Error('Event "' + callback + '" does not exist');
+    }
+    return _.bind(method, this);
+  }
+
+  function processEvents(events) {
+    if (_.isFunction(events)) {
+      events = events.call(this);
+    }
+    var processedEvents = [];
+    for (var name in events) {
+      if (name !== 'model' && name !== 'collection') {
+        if (name.match(/,/)) {
+          name.split(/,/).forEach(function(fragment) {
+            processEventItem.call(this, fragment.replace(/(^[\s]+|[\s]+$)/g, ''), events[name], processedEvents);
+          }, this);
         } else {
-          $(this.el).delegate(selector, eventName, boundHandler);
+          processEventItem.call(this, name, events[name], processedEvents);
         }
       }
     }
+    return processedEvents;
   }
 
-  //used by Thorax.View.addEvents for global event registration
+  function processEventItem(name, handler, target) {
+    if (_.isArray(handler)) {
+      for (var i = 0; i < handler.length; ++i) {
+        target.push(eventParamsFromEventItem(name, handler[i]));
+      }
+    } else {
+      target.push(eventParamsFromEventItem(name, handler));
+    }
+  }
+
+  function eventParamsFromEventItem(name, handler) {
+    var params = {
+      originalName: name,
+      handler: handler
+    };
+    if (isDOMEvent(name)) {
+      params.type = 'DOM';
+      var match = name.match(eventSplitter);
+      params.name = match[1] + '.delegateEvents';
+      params.selector = match[2];
+    } else {
+      params.type = 'view';
+      params.name = name;
+    }
+    return params;
+  }
+
+  function isDOMEvent(name) {
+    return !(!name.match(/\s+/) && domEvents.indexOf(name) === -1);
+  }
+
+  //used by Thorax.View.registerEvents for global event registration
   function addEvent(target, name, handler) {
     if (!target[name]) {
       target[name] = [];
