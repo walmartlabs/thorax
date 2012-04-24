@@ -139,6 +139,7 @@
 
   //wrap Backbone.View constructor to support initialize event
   Backbone.View = function(options) {
+    this._childEvents = [];
     this.cid = _.uniqueId('view');
     this._configure(options || {});
     this._ensureElement();
@@ -234,6 +235,7 @@
         instance = name;
       }
       this._views[instance.cid] = instance;
+      this._childEvents.forEach(instance._addEvent, instance);
       return instance;
     },
     
@@ -313,18 +315,13 @@
     //- type "view" || "DOM"
     //- handler
     _addEvent: function(params) {
+      if (params.nested) {
+        this._childEvents.push(params);
+      }
       if (params.type === 'view') {
         this.bind(params.name, params.handler, this);
       } else {
-        var nested = false,
-            boundHandler = bindEventHandler.call(this, params.handler);
-        if (params.name.match(/^nested /)) {
-          nested = true;
-          params.name = params.name.replace(/^nested /, '');
-        }
-        if (!nested) {
-          boundHandler = containHandlerToCurentView(boundHandler, this.cid);
-        }
+        var boundHandler = containHandlerToCurentView(bindEventHandler.call(this, params.handler), this.cid);
         if (params.selector) {
           $(this.el).delegate(params.selector, params.name, boundHandler);
         } else {
@@ -991,6 +988,10 @@
       originalName: name,
       handler: handler
     };
+    if (name.match(/^nested\s+/)) {
+      params.nested = true;
+      name = name.replace(/^nested\s+/, '');
+    }
     if (isDOMEvent(name)) {
       params.type = 'DOM';
       var match = name.match(eventSplitter);

@@ -435,9 +435,26 @@ $(function() {
     document.body.appendChild(parent.el);
     $(parent.el).trigger('click');
     $(parent.child.el).trigger('click');
-    equal(parentClickedCount, 3, 'test nested keyword');
+    equal(parentClickedCount, 4, 'test nested keyword');
     equal(childClickedCount, 2, 'test nested keyword');
     $(parent.el).remove();
+
+    //test nested view events
+    var testTriggerCount = 0;
+    Parent = Thorax.View.extend({
+      events: {
+        'nested test': function() {
+          ++testTriggerCount;
+        }
+      },
+      initialize: function() {
+        this.view(this.child = new Thorax.View());
+      }
+    });
+    parent = new Parent();
+    parent.trigger('test');
+    parent.child.trigger('test');
+    equal(testTriggerCount, 2, 'test nested view events');
   });
   
   test("serialize() / populate()", function() {
