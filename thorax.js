@@ -305,7 +305,7 @@
     },
 
     registerEvents: function(events) {
-      processEvents(events).forEach(this._addEvent, this);
+      processEvents.call(this, events).forEach(this._addEvent, this);
     },
 
     //params may contain:
@@ -976,17 +976,17 @@
   function processEventItem(name, handler, target) {
     if (_.isArray(handler)) {
       for (var i = 0; i < handler.length; ++i) {
-        target.push(eventParamsFromEventItem(name, handler[i]));
+        target.push(eventParamsFromEventItem.call(this, name, handler[i]));
       }
     } else {
-      target.push(eventParamsFromEventItem(name, handler));
+      target.push(eventParamsFromEventItem.call(this, name, handler));
     }
   }
 
   function eventParamsFromEventItem(name, handler) {
     var params = {
       originalName: name,
-      handler: handler
+      handler: typeof handler === 'string' ? this[handler] : handler
     };
     if (name.match(/^nested\s+/)) {
       params.nested = true;
