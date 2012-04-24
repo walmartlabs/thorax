@@ -1,6 +1,4 @@
-//TODO: fix failing nested keyword events
-//TODO: test events with "," in them
-//TODO: test registerEvents with handler as an array of handlers
+//TODO: fix failing nested keyword events 
 
 $(function() {
 
@@ -284,12 +282,46 @@ $(function() {
       a: 2
     });
     
-    ChildTwo = Parent.extend({});
+    var ChildTwo = Parent.extend({});
   
     equal(Child.events.a[0], 1, 'ensure events are not shared between children');
     equal(Child.events.a.length, 2, 'ensure events are not shared between children');
     equal(ChildTwo.events.a[0], 1, 'ensure events are not shared between children');
     equal(ChildTwo.events.a.length, 1, 'ensure events are not shared between children');
+  });
+
+  test("Multiple event registration", function() {
+    var view = new Thorax.View(), a = 0, b = 0, c = 0, d = 0, e = 0;
+    view.registerEvents({
+      'a,b': function() {
+        ++a;
+        ++b;
+      },
+      'c': [
+        function() {
+          ++c;
+        },
+        function() {
+          ++c;
+        }
+      ],
+      'd,e': [
+        function() {
+          ++d;
+        },
+        function() {
+          ++e;
+        }
+      ]
+    });
+    view.trigger('a');
+    view.trigger('b c');
+    view.trigger('d e');
+    equal(a, 2);
+    equal(b, 2);
+    equal(c, 2);
+    equal(d, 2);
+    equal(e, 2);
   });
   
   test("bindToRoute", function() {
@@ -297,7 +329,7 @@ $(function() {
         failback,
         fragment = "foo",
         _getFragment = Backbone.history.getFragment,
-        _Router = Thorax.Router.extend({});
+        _Router = Thorax.Router.extend({}),
         router = new _Router();
   
     Backbone.history.getFragment = function() {
