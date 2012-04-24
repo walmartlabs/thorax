@@ -46,7 +46,7 @@
         Routers: {}
       });
 
-      templatePathPrefix = options && typeof options.templatePathPrefix !== 'undefined' ? options.templatePathPrefix : 'templates/';
+      templatePathPrefix = options && typeof options.templatePathPrefix !== 'undefined' ? options.templatePathPrefix : '';
       
       Backbone.history || (Backbone.history = new Backbone.History);
 
