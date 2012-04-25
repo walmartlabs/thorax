@@ -125,17 +125,16 @@
   };
 
   //private vars for Thorax.View
-  var eventSplitter = /^(\S+)\s*(.*)$/,
-    view_name_attribute_name = 'data-view-name',
-    view_cid_attribute_name = 'data-view-cid',
-    view_placeholder_attribute_name = 'data-view-tmp',
-    model_cid_attribute_name = 'data-model-cid',
-    collection_cid_attribute_name = 'data-collection-cid',
-    default_collection_selector = '[' + collection_cid_attribute_name + ']',
-    old_backbone_view = Backbone.View,
-    //android scrollTo(0, 0) shows url bar, scrollTo(0, 1) hides it
-    minimumScrollYOffset = (navigator.userAgent.toLowerCase().indexOf("android") > -1) ? 1 : 0,
-    ELEMENT_NODE_TYPE = 1;
+  var view_name_attribute_name = 'data-view-name',
+      view_cid_attribute_name = 'data-view-cid',
+      view_placeholder_attribute_name = 'data-view-tmp',
+      model_cid_attribute_name = 'data-model-cid',
+      collection_cid_attribute_name = 'data-collection-cid',
+      default_collection_selector = '[' + collection_cid_attribute_name + ']',
+      old_backbone_view = Backbone.View,
+      //android scrollTo(0, 0) shows url bar, scrollTo(0, 1) hides it
+      minimumScrollYOffset = (navigator.userAgent.toLowerCase().indexOf("android") > -1) ? 1 : 0,
+      ELEMENT_NODE_TYPE = 1;
 
   //wrap Backbone.View constructor to support initialize event
   Backbone.View = function(options) {
@@ -983,23 +982,22 @@
     }
   }
 
+  var eventSplitter = /^(nested\s+)?(\S+)(?:\s+(.+))?/;
+
   function eventParamsFromEventItem(name, handler) {
     var params = {
       originalName: name,
       handler: typeof handler === 'string' ? this[handler] : handler
     };
-    if (name.match(/^nested\s+/)) {
-      params.nested = true;
-      name = name.replace(/^nested\s+/, '');
-    }
-    if (isDOMEvent(name)) {
+    var match = eventSplitter.exec(name);
+    params.nested = !!match[1];
+    params.name = match[2];
+    if (isDOMEvent(params.name)) {
       params.type = 'DOM';
-      var match = name.match(eventSplitter);
-      params.name = match[1] + '.delegateEvents';
-      params.selector = match[2];
+      params.name += '.delegateEvents' + this.cid;
+      params.selector = match[3];
     } else {
       params.type = 'view';
-      params.name = name;
     }
     return params;
   }
