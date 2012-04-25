@@ -1,7 +1,16 @@
 
 ## Overview
 
-An opinionated Backbone application framework using:
+An opinionated Backbone application framework,
+
+- data loading
+- form serialization and validation
+- model and collection binding
+- inheritable view and DOM events
+- routers and layouts
+- handlebars integration
+
+Thorax is built on:
 
 - [Backbone](http://documentcloud.github.com/backbone/) - the core framework that Thorax builds on
 - [Underscore](http://documentcloud.github.com/underscore/) - to make sure you have your JavaScript utility belt with you
@@ -46,6 +55,8 @@ Any configuration should be done inside of `js/init.js`. The `Application` objec
 Start Thorax and create the `Application.layout` object.
 
 - `layout` - string css selector or Element where the `Application.layout` object will attach, defaults to `.layout`
+- `scope` - object scope to configure, defaults to a new object in the global scope `Application`
+- `templatePathPrefix` - Path where your templates are located. Defaults to "templates/"
 
 ## Routers & Layout
 
@@ -238,7 +249,7 @@ Register a new helper that will be available in all handlebars templates
 
     {{bold "Text"}}
 
-### template *view.template(name [,attributes])*
+### template *view.template(name [,attributes [,ignoreErrors]])*
 
 Synchronously render a given template by file name sans extension. `render` and `renderCollection` both use this method. The scope inside of a template will contain all of the non function attributes of a view (which can be passed to the view constructor) and a `cid` attribute which is a unique id for each rendering of a given template.
     
@@ -262,6 +273,8 @@ This method is also available as a template helper, it will only render the temp
     <h1>{{title}}</h1>
     <p>{{body}}</p>
     {{template "footer"}}
+
+When a template is not found an exception will be thrown, unless `ignoreErrors` is set to true in which case an empty string will be returned.
 
 ### view *view.view(name [,attributes])*
 
@@ -292,9 +305,16 @@ This method is also available as a template helper which can receive a string na
 
 Replace the HTML in a given view. The collection element and the child views appended by the `{{view}}` helper will be automatically preserved if present.
 
-### render *view.render()*
+### render *view.render([html])*
 
-Render a template with the filename of the view's `name` attribute (sans extension), calling `view.html()` with the result. Triggers the `rendered` event.
+Render a template with the filename of the view's `name` attribute (sans extension), calling `view.html()` with the result. Triggers the `rendered` event. To implement custom rendering behavior in your subclasses pass render() an HTML string, DOM element or array of DOM elements:
+
+    Thorax.View.extend({
+      render: function() {
+        var html = this.generateComplicatedOutput();
+        Thorax.View.prototype.render.call(this, html);
+      }
+    });
 
 ### setModel *view.setModel(model)*
 
@@ -592,3 +612,36 @@ The example project includes a server script that will start an express server w
 
     ./bin/server 8000
 
+### templates *thorax templates templates-dir output-file application-name*
+
+If you aren't using Lumbar you can use this utility to inline all of your templates from a given directory into a single JavaScript file. You'll need to include the full Handlebars library as it's just inlining the template source, not the precompiled versions.
+
+    thorax templates ./templates ./templates.js Application
+
+## Change Log
+
+### 1.1
+
+- Added `thorax templates templates-dir output-file application-name` command line option for simple template inlining for projects not using Lumbar.
+
+- Checks for view.name are now lazy and will throw an exception instead of using console.error()
+
+- Templates that are not found will throw an error instead of using console.error()
+
+- Added templatePathPrefix to configure()
+
+- Added isPopulated() methods to Thorax.Model and Thorax.Collection, used by data loading methods.
+
+- appendItem now accepts a view as it's index argument in addition to an integer.
+
+- Collection bindings will now work properly when multiple nodes are generated from a string of HTML passed to appendItem / renderItem.
+
+- Added emptyContext() used by renderEmpty()
+
+- Added {{collection}} helper, _collectionSelector is now deprecated and internally defaults to "[data-collection-cid], for backwards compatibility set it to ".collection" in your view classes.
+
+- Render now accepts HTML strings a DOM element or an array of DOM elements as it's only argument to make it easier to subclass the render method.
+
+- Thorax.Layout.prototype.setView can now accept false as an argument, which will transition the layout to an empty view.
+
+- Unit tests!

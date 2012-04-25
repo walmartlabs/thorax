@@ -1,15 +1,11 @@
-(function(){
+(function(outerScope){
   if (typeof this.$ === 'undefined') {
     throw new Error('jquery.js/zepto.js required to run Thorax');
   } else {
     if (!$.fn.forEach) {
       // support jquery/zepto iterators
-      $.fn.forEach = function(callback) {
-        this.each(function(index) {
-          callback(this, index);
-        });
-      }
-    }
+      $.fn.forEach = $.fn.each;
+     }
   }
 
   if (typeof this._ === 'undefined') {
@@ -20,14 +16,25 @@
     throw new Error('Backbone.js required to run Thorax');
   }
 
-  var Thorax, scope;
+  var TemplateEngine = {
+    extension: 'handlebars',
+    safeString: function(string) {
+      return new Handlebars.SafeString(string);
+    },
+    registerHelper: function(name, callback) {
+      return Handlebars.registerHelper(name, callback);
+    }
+  };
+  TemplateEngine.extensionRegExp = new RegExp('\\.' + TemplateEngine.extension + '$');
+
+  var Thorax, scope, templatePathPrefix;
 
   this.Thorax = Thorax = {
     configure: function(options) {
-      scope = options.scope || (typeof exports !== 'undefined' && exports);
+      scope = (options && options.scope) || (typeof exports !== 'undefined' && exports);
 
       if (!scope) {
-        throw new Error('No scope passed to Thorax.configure() and no "exports" was available inside of thorax.js');
+        scope = outerScope.Application = {};
       }
 
       _.extend(scope, Backbone.Events, {
@@ -38,11 +45,13 @@
         Collections: {},
         Routers: {}
       });
+
+      templatePathPrefix = options && typeof options.templatePathPrefix !== 'undefined' ? options.templatePathPrefix : '';
       
       Backbone.history || (Backbone.history = new Backbone.History);
 
       scope.layout = new Thorax.Layout({
-        el: options.layout || '.layout'
+        el: options && options.layout || '.layout'
       });
 
     },
@@ -116,18 +125,20 @@
   };
 
   //private vars for Thorax.View
-  var eventSplitter = /^(\S+)\s*(.*)$/,
-    view_name_attribute_name = 'data-view-name',
-    view_cid_attribute_name = 'data-view-cid',
-    view_placeholder_attribute_name = 'data-view-tmp',
-    model_cid_attribute_name = 'data-model-cid',
-    old_backbone_view = Backbone.View,
-    //android scrollTo(0, 0) shows url bar, scrollTo(0, 1) hides it
-    minimumScrollYOffset = (navigator.userAgent.toLowerCase().indexOf("android") > -1) ? 1 : 0,
-    ELEMENT_NODE_TYPE = 1;
+  var view_name_attribute_name = 'data-view-name',
+      view_cid_attribute_name = 'data-view-cid',
+      view_placeholder_attribute_name = 'data-view-tmp',
+      model_cid_attribute_name = 'data-model-cid',
+      collection_cid_attribute_name = 'data-collection-cid',
+      default_collection_selector = '[' + collection_cid_attribute_name + ']',
+      old_backbone_view = Backbone.View,
+      //android scrollTo(0, 0) shows url bar, scrollTo(0, 1) hides it
+      minimumScrollYOffset = (navigator.userAgent.toLowerCase().indexOf("android") > -1) ? 1 : 0,
+      ELEMENT_NODE_TYPE = 1;
 
   //wrap Backbone.View constructor to support initialize event
   Backbone.View = function(options) {
+    this._childEvents = [];
     this.cid = _.uniqueId('view');
     this._configure(options || {});
     this._ensureElement();
@@ -145,11 +156,6 @@
       //this.options is removed in Thorax.View, we merge passed
       //properties directly with the view and template context
       _.extend(this, options || {});
-
-      //setup
-      if (!this.name) {
-        console.error('All views extending Thorax.View should have a name property.');
-      }
             
       //will be called again by Backbone.View(), after _configure() is complete but safe to call twice
       this._ensureElement();
@@ -185,7 +191,7 @@
 
     _ensureElement : function() {
       Backbone.View.prototype._ensureElement.call(this);
-      (this.el[0] || this.el).setAttribute(view_name_attribute_name, this.name || 'unknown');
+      (this.el[0] || this.el).setAttribute(view_name_attribute_name, this.name || this.cid);
       (this.el[0] || this.el).setAttribute(view_cid_attribute_name, this.cid);      
     },
 
@@ -228,10 +234,11 @@
         instance = name;
       }
       this._views[instance.cid] = instance;
+      this._childEvents.forEach(instance._addEvent, instance);
       return instance;
     },
     
-    template: function(file, data) {
+    template: function(file, data, ignoreErrors) {
       Thorax._currentTemplateContext = this;
       
       var view_context = {};
@@ -246,14 +253,18 @@
 
       var template = this.loadTemplate(file, data, scope);
       if (!template) {
-        console.error('Unable to find template ' + file);
-        return '';
+        if (ignoreErrors) {
+          return ''
+        } else {
+          throw new Error('Unable to find template ' + file);
+        }
       } else {
         return template(data);
       }
     },
+
     loadTemplate: function(file, data, scope) {
-      var fileName = 'templates/' + file + (file.match(/\.handlebars$/) ? '' : '.handlebars');
+      var fileName = templatePathPrefix + file + (file.match(TemplateEngine.extensionRegExp) ? '' : '.' + TemplateEngine.extension);
       return scope.templates[fileName];
     },
   
@@ -262,7 +273,7 @@
         return this.el.innerHTML;
       } else {
         var element;
-        if (this.collection && this._renderCount) {
+        if (this._collectionOptions && this._renderCount) {
           //preserveCollectionElement calls the callback after it has a reference
           //to the collection element, calls the callback, then re-appends the element
           preserveCollectionElement.call(this, function() {
@@ -279,47 +290,49 @@
     //allow events hash to specify view, collection and model events
     //as well as DOM events. Merges Thorax.View.events with this.events
     delegateEvents: function(events) {
-      //undelegateEvents does not exist in some copies of backbone tagged 0.5.3
-      if (this.undelegateEvents) {
-        this.undelegateEvents();
-      }
-      this._processEvents(this.constructor.events);
+      this.undelegateEvents && this.undelegateEvents();
+      //bindModelAndCollectionEvents on this.constructor.events and this.events
+      //done in _configure
+      this.registerEvents(this.constructor.events);
       if (this.events) {
-        this._processEvents(this.events);
+        this.registerEvents(this.events);
       }
       if (events) {
-        this._processEvents(events);
+        this.registerEvents(events);
         bindModelAndCollectionEvents.call(this, events);
       }
     },
 
-    _bindEventHandler: function(callback) {
-      var method = typeof callback === 'function' ? callback : this[callback];
-      if (!method) {
-        console.error('Event "' + callback + '" does not exist');
-      }
-      return _.bind(method, this);
+    registerEvents: function(events) {
+      processEvents.call(this, events).forEach(this._addEvent, this);
     },
 
-    _processEvents: function(events) {
-      if (_.isFunction(events)) {
-        events = events.call(this);
+    //params may contain:
+    //- name
+    //- originalName
+    //- selector
+    //- type "view" || "DOM"
+    //- handler
+    _addEvent: function(params) {
+      if (params.nested) {
+        this._childEvents.push(params);
       }
-      for (var name in events) {
-        if (name !== 'model' && name !== 'collection') {
-          if (_.isArray(events[name])) {
-            for (var i = 0; i < events[name].length; ++i) {
-              processEvent.call(this, name, events[name][i]);
-            }
-          } else {
-            processEvent.call(this, name, events[name]);
-          }
+      if (params.type === 'view') {
+        this.bind(params.name, params.handler, this);
+      } else {
+        var boundHandler = containHandlerToCurentView(bindEventHandler.call(this, params.handler), this.cid);
+        if (params.selector) {
+          $(this.el).delegate(params.selector, params.name, boundHandler);
+        } else {
+          $(this.el).bind(params.name, boundHandler);
         }
       }
     },
 
     _shouldFetch: function(model_or_collection, options) {
-      return model_or_collection.url && options.fetch;
+      return model_or_collection.url && options.fetch && (
+        typeof model_or_collection.isPopulated === 'undefined' || !model_or_collection.isPopulated()
+      );
     },
   
     setModel: function(model, options) {
@@ -384,6 +397,7 @@
       });
       
       this.collection = collection;
+      this.collection.cid = _.uniqueId('collection');
       this.setCollectionOptions(options);
   
       if (this.collection) {
@@ -432,8 +446,13 @@
       return item.attributes;
     },
 
-    render: function() {
-      var output = this.template(this.name + '.handlebars', this.context(this.model));
+    emptyContext: function() {},
+
+    render: function(output) {
+      if (typeof output === 'undefined') {
+        ensureViewHasName.call(this);
+        output = this.template(this.name, this.context(this.model));
+      }
       this.html(output);
       if (!this._renderCount) {
         this._renderCount = 1;
@@ -447,52 +466,43 @@
     renderCollection: function() {
       this.render();
       var collection_element = getCollectionElement.call(this);
-      if (this.collection.length == 0) {
+      collection_element.attr(collection_cid_attribute_name, this.collection.cid);
+      if (this.collection.length === 0 && this.collection.isPopulated()) {
         appendEmpty.call(this);
       } else {
-        var cids = [];
-        var elements = _.compact(this.collection.map(function(model, i) {
-          cids.push(model.cid);
-          return this.renderItem(model, i);
-        }, this));
-        if (elements[0] && elements[0].el) {
-          collection_element.empty();
-          elements.forEach(function(view) {
-            this._views[view.cid] = view;
-            collection_element.append(view.el);
-          }, this);
-        } else {
-          collection_element.html(elements.join(''));
-        }
-        collection_element.children().each(function(i) {
-          this.setAttribute(model_cid_attribute_name, cids[i]);
-        });
-
-        appendViews.call(this, collection_element);
+        this.collection.forEach(this.appendItem, this);
       }
       this.trigger('rendered:collection', collection_element);
     },
-  
+
     renderItem: function(item, i) {
-      return this.template(this.name + '-item.handlebars', this.itemContext(item, i));
+      ensureViewHasName.call(this);
+      return this.template(this.name + '-item', this.itemContext(item, i));
     },
   
     renderEmpty: function() {
-      return this.template(this.name + '-empty.handlebars');
+      ensureViewHasName.call(this);
+      return this.template(this.name + '-empty', this.emptyContext());
     },
 
     //appendItem(model [,index])
-    //appendItem(html_string, index) only first node will be used
+    //appendItem(html_string, index)
     //appendItem(view, index)
-    appendItem: function(model, index) {
-      // if a transition from/to empty could happen, re-render
-      if (this.collection.length <= 1) {
-        this.renderCollection();
+    appendItem: function(model, index, options) {
+      //empty item
+      if (!model) {
         return;
       }
 
       var item_view,
-        collection_element = getCollectionElement.call(this)[0];
+          collection_element = getCollectionElement.call(this);
+
+      options = options || {};
+
+      //if index argument is a view
+      if (index && index.el) {
+        index = collection_element.find('> *').indexOf(index.el) + 1;
+      }
 
       //if argument is a view, or html string
       if (model.el || typeof model === 'string') {
@@ -503,45 +513,32 @@
       }
 
       if (item_view) {
+
         if (item_view.cid) {
-          this._views[item_view.cid] = item_view.cid;
+          this._views[item_view.cid] = item_view;
         }
+
+        var item_element = item_view.el ? [item_view.el] : _.filter($(item_view), function(node) {
+          //filter out top level whitespace nodes
+          return node.nodeType === ELEMENT_NODE_TYPE;
+        });
+
+        $(item_element).attr(model_cid_attribute_name, model.cid);
         var previous_model = index > 0 ? this.collection.at(index - 1) : false;
-        var item_element;
-        if (item_view.el) {
-          item_element = item_view.el;
+        if (!previous_model) {
+          collection_element.prepend(item_element);
         } else {
-          //renderItem returned string
-          item_element = this._createItemElement();
-          item_element.innerHTML = item_view;
-          var element_nodes = _.filter(item_element.childNodes, function(node) {
-            return node.nodeType === ELEMENT_NODE_TYPE;
-          });
-          if (element_nodes.length === 1) {
-            item_element = element_nodes[0];
-          }
+          //use last() as appendItem can accept multiple nodes from a template
+          collection_element.find('[' + model_cid_attribute_name + '="' + previous_model.cid + '"]').last().after(item_element);
         }
 
-        if (item_element) {
-          $(item_element).attr(model_cid_attribute_name, model.cid);
-          if (!previous_model) {
-            collection_element.insertBefore(item_element, collection_element.firstChild);
-          } else {
-            var previous_model_element = $(collection_element).find('[' + model_cid_attribute_name + '="' + previous_model.cid + '"]');
-            if (previous_model_element[0]) {
-              collection_element.insertBefore(item_element, previous_model_element[0].nextSibling);
-            }
-          }
+        appendViews.call(this, item_element);
 
-          appendViews.call(this, item_element);
+        if (!options.silent) {
           this.trigger('rendered:item', item_element);
         }
       }
       return item_view;
-    },
-
-    _createItemElement: function() {
-      return this.make('div');
     },
   
     freeze: function(options) {
@@ -607,9 +604,9 @@
           });
         }
       });
-
-      this.trigger('serialize', attributes);
   
+      this.trigger('serialize', attributes);
+
       if (options.validate) {
         var errors = this.validateInput(attributes) || [];
         this.trigger('validate', attributes, errors);
@@ -675,20 +672,6 @@
       this.trigger('populate', attributes);
     },
   
-    _checkFirstRadio: function(){
-      // TODO : Use _.groupBy after upgrading to the latest underscore
-      var fields = {};
-      _.each(this.$('input[type=radio]:not([disabled])'), function(el) {
-        var col = fields[el.name] = fields[el.name] || [];
-        col.push(el);
-      });
-      _.each(fields, function(elements, name) {
-        if (!_.detect(elements, function(element) { return element.checked; })) {
-          elements[0].checked = true;
-        }
-      });
-    },
-  
     //perform form validation, implemented by child class
     validateInput: function() {},
   
@@ -718,7 +701,7 @@
   }, {
     registerHelper: function(name, callback) {
       this[name] = callback;
-      Handlebars.registerHelper(name, this[name]);
+      TemplateEngine.registerHelper(name, this[name]);
     },
     registerMixin: function(name, callback, methods) {
       scope.Mixins[name] = [callback, methods];
@@ -769,11 +752,21 @@
       scope.Views[child.prototype.name] = child;
     }
     child.mixins = _.clone(this.mixins);
-    child.events = _.clone(this.events);
-    child.events.model = _.clone(this.events.model);
-    child.events.collection = _.clone(this.events.collection);
+    cloneEvents(this, child, 'events');
+    cloneEvents(this.events, child.events, 'model');
+    cloneEvents(this.events, child.events, 'collection');
     return child;
   };
+
+  function cloneEvents(source, target, key) {
+    source[key] = _.clone(target[key]);
+    //need to deep clone events array
+    _.each(source[key], function(value, _key) {
+      if (_.isArray(value)) {
+        target[key][_key] = _.clone(value);
+      }
+    });
+  }
 
   Thorax.View.registerEvents({
     //built in dom events
@@ -826,12 +819,16 @@
       'load:start': function(message, background) {
         this.trigger('load:start', message, background);
       },
-      'load:end': function(message, background) {
-        this.trigger('load:end', message, background);
+      'load:end': function(background) {
+        this.trigger('load:end', background);
       }
     },
     collection: {
       add: function(model, collection) {
+        //if collection was empty, clear empty view
+        if (this.collection.length === 1) {
+          getCollectionElement.call(this).empty();
+        }
         this.appendItem(model, collection.indexOf(model));
       },
       remove: function(model) {
@@ -858,8 +855,8 @@
       'load:start': function(message, background) {
         this.trigger('load:start', message, background);
       },
-      'load:end': function(message, background) {
-        this.trigger('load:end', message, background);
+      'load:end': function(background) {
+        this.trigger('load:end', background);
       }
     }
   });
@@ -869,13 +866,26 @@
       return '';
     }
     var instance = Thorax._currentTemplateContext.view(view, options ? options.hash : {});
-    return new Handlebars.SafeString('<div ' + view_placeholder_attribute_name + '="' + instance.cid + '"></div>');
+    return TemplateEngine.safeString('<div ' + view_placeholder_attribute_name + '="' + instance.cid + '"></div>');
   });
   
   Thorax.View.registerHelper('template', function(name, options) {
     var context = _.extend({}, this, options ? options.hash : {});
     var output = Thorax.View.prototype.template.call(Thorax._currentTemplateContext, name, context);
-    return new Handlebars.SafeString(output);
+    return TemplateEngine.safeString(output);
+  });
+
+  Thorax.View.registerHelper('collection', function(options) {
+    var collectionHelperOptions = _.clone(options.hash),
+        tag = (collectionHelperOptions.tag || 'div');
+    collectionHelperOptions[collection_cid_attribute_name] = "";
+    if (collectionHelperOptions.tag) {
+      delete collectionHelperOptions.tag;
+    }
+    var htmlAttributes = _.map(collectionHelperOptions, function(value, key) {
+      return key + '="' + value + '"';
+    }).join(' ');
+    return TemplateEngine.safeString('<' + tag + ' ' + htmlAttributes + '></' + tag + '>');
   });
 
   Thorax.View.registerHelper('link', function(url) {
@@ -884,6 +894,12 @@
 
   //private Thorax.View methods
 
+  function ensureViewHasName() {
+    if (!this.name) {
+      throw new Error(this.cid + " requires a 'name' attribute.");
+    }
+  }
+
   function onModelChange() {
     if (this._modelOptions.render) {
       this.render();
@@ -891,11 +907,11 @@
     if (this._modelOptions.populate) {
       this.populate();
     }
-  };
+  }
 
   function onCollectionReset() {
     this.renderCollection();
-  };
+  }
 
   function containHandlerToCurentView(handler, cid) {
     return function(event) {
@@ -904,53 +920,93 @@
         handler(event);
       }
     };
-  };
+  }
 
   //model/collection events, to be bound/unbound on setModel/setCollection
   function processModelOrCollectionEvent(events, type) {
     for (var _name in events[type] || {}) {
       if (_.isArray(events[type][_name])) {
         for (var i = 0; i < events[type][_name].length; ++i) {
-          this._events[type].push([_name, this._bindEventHandler(events[type][_name][i])]);
+          this._events[type].push([_name, bindEventHandler.call(this, events[type][_name][i])]);
         }
       } else {
-        this._events[type].push([_name, this._bindEventHandler(events[type][_name])]);
+        this._events[type].push([_name, bindEventHandler.call(this, events[type][_name])]);
       }
     }
-  };
+  }
 
-  //used by _processEvents
+  //used by processEvents
   var domEvents = [
     'mousedown', 'mouseup', 'mousemove', 'mouseover', 'mouseout',
     'touchstart', 'touchend', 'touchmove',
     'click', 'dblclick',
     'keyup', 'keydown', 'keypress',
+    'submit',
     'focus', 'blur'
   ];
 
-  function processEvent(name, handler) {
-    if (name.match(/,/)) {
-      _.each(name.split(/,/), _.bind(function(fragment) {
-        processEvent.call(this, fragment.replace(/(^[\s]+|[\s]+$)/g, ''), handler);
-      }, this));
-    } else {
-      if (!name.match(/\s+/) && domEvents.indexOf(name) === -1) {
-        //view events
-        this.bind(name, this._bindEventHandler(handler));
-      } else {
-        //DOM events
-        var match = name.match(eventSplitter);
-        var eventName = match[1] + '.delegateEvents' + this.cid, selector = match[2];
-        if (selector === '') {
-          $(this.el).bind(eventName, containHandlerToCurentView(this._bindEventHandler(handler), this.cid));
+  function bindEventHandler(callback) {
+    var method = typeof callback === 'function' ? callback : this[callback];
+    if (!method) {
+      throw new Error('Event "' + callback + '" does not exist');
+    }
+    return _.bind(method, this);
+  }
+
+  function processEvents(events) {
+    if (_.isFunction(events)) {
+      events = events.call(this);
+    }
+    var processedEvents = [];
+    for (var name in events) {
+      if (name !== 'model' && name !== 'collection') {
+        if (name.match(/,/)) {
+          name.split(/,/).forEach(function(fragment) {
+            processEventItem.call(this, fragment.replace(/(^[\s]+|[\s]+$)/g, ''), events[name], processedEvents);
+          }, this);
         } else {
-          $(this.el).delegate(selector, eventName, containHandlerToCurentView(this._bindEventHandler(handler), this.cid));
+          processEventItem.call(this, name, events[name], processedEvents);
         }
       }
     }
-  };
+    return processedEvents;
+  }
 
-  //used by Thorax.View.addEvents for global event registration
+  function processEventItem(name, handler, target) {
+    if (_.isArray(handler)) {
+      for (var i = 0; i < handler.length; ++i) {
+        target.push(eventParamsFromEventItem.call(this, name, handler[i]));
+      }
+    } else {
+      target.push(eventParamsFromEventItem.call(this, name, handler));
+    }
+  }
+
+  var eventSplitter = /^(nested\s+)?(\S+)(?:\s+(.+))?/;
+
+  function eventParamsFromEventItem(name, handler) {
+    var params = {
+      originalName: name,
+      handler: typeof handler === 'string' ? this[handler] : handler
+    };
+    var match = eventSplitter.exec(name);
+    params.nested = !!match[1];
+    params.name = match[2];
+    if (isDOMEvent(params.name)) {
+      params.type = 'DOM';
+      params.name += '.delegateEvents' + this.cid;
+      params.selector = match[3];
+    } else {
+      params.type = 'view';
+    }
+    return params;
+  }
+
+  function isDOMEvent(name) {
+    return !(!name.match(/\s+/) && domEvents.indexOf(name) === -1);
+  }
+
+  //used by Thorax.View.registerEvents for global event registration
   function addEvent(target, name, handler) {
     if (!target[name]) {
       target[name] = [];
@@ -962,11 +1018,11 @@
     } else {
       target[name].push(handler);
     }
-  };
+  }
 
   function resetSubmitState() {
     this.$('form').removeAttr('data-submit-wait');
-  };
+  }
 
   //called with context of input
   function getInputValue() {
@@ -987,7 +1043,7 @@
     } else {
       return this.value;
     }
-  };
+  }
 
   //calls a callback with the correct object fragment and key from a compound name
   function objectAndKeyFromAttributesAndName(attributes, name, options, callback) {
@@ -1005,7 +1061,7 @@
     }
     key = keys[keys.length - 1].replace(']', '');
     callback.call(this, object, key);
-  };
+  }
 
   function eachNamedInput(options, iterator, context) {
     var i = 0;
@@ -1015,7 +1071,7 @@
         ++i;
       }
     });
-  };
+  }
 
   function bindModelAndCollectionEvents(events) {
     if (!this._events) {
@@ -1026,18 +1082,17 @@
     }
     processModelOrCollectionEvent.call(this, events, 'model');
     processModelOrCollectionEvent.call(this, events, 'collection');
-  };
+  }
 
   function getCollectionElement() {
-    var selector = this._collectionSelector || '.collection';
+    var selector = this._collectionSelector || default_collection_selector;
     var element = this.$(selector);
     if (element.length === 0) {
-      console.error(this.name + '._collectionSelector: "' + selector + '" returned empty, returning ' + this.name + '.el');
       return $(this.el);
     } else {
       return element;
     }
-  };
+  }
 
   function preserveCollectionElement(callback) {
     var old_collection_element = getCollectionElement.call(this);
@@ -1047,7 +1102,7 @@
       new_collection_element[0].parentNode.insertBefore(old_collection_element[0], new_collection_element[0]);
       new_collection_element[0].parentNode.removeChild(new_collection_element[0]);
     }
-  };
+  }
 
   function appendViews(scope) {
     var self = this;
@@ -1068,7 +1123,7 @@
         el.parentNode.removeChild(el);
       }
     });
-  };
+  }
 
   function destroyChildViews() {
     for (var id in this._views || {}) {
@@ -1077,21 +1132,13 @@
       }
       this._views[id] = null;
     }
-  };
+  }
 
   function appendEmpty() {
-    var empty_view = this.renderEmpty() || '';
-    if (empty_view.cid) {
-      this._views[empty_view.cid] = empty_view
-    }
-    var collection_element = getCollectionElement.call(this);
-    if (collection_element.length) {
-      collection_element.empty().append(empty_view.el || empty_view || '');
-      this.trigger('rendered:empty', collection_element);
-    }
-
-    appendViews.call(this);
-  };
+    getCollectionElement.call(this).empty();
+    this.appendItem(this.renderEmpty(), 0, {silent: true});
+    this.trigger('rendered:empty');
+  }
 
   function applyMixin(mixin) {
     if (_.isArray(mixin)) {
@@ -1099,7 +1146,7 @@
     } else {
       this.mixin(mixin);
     }
-  };
+  }
   
   //main layout class, instance of which is available on scope.layout
   Thorax.Layout = Backbone.View.extend({
@@ -1117,55 +1164,35 @@
     
     setView: function(view, params){
       var old_view = this.view;
-
       if (view == old_view){
         return false;
       }
-      
       this.trigger('change:view:start', view, old_view);
-
       old_view && old_view.trigger('deactivated');
-
-      view.trigger('activated', params || {});
-
+      view && view.trigger('activated', params || {});
       if (old_view && old_view.el && old_view.el.parentNode) {
         $(old_view.el).remove();
       }
-
       //make sure the view has been rendered at least once
-      if (!view._renderCount) {
-        view.render();
-      }
-
-      this.views.appendChild(view.el);
-  
+      view && !view._renderCount && view.render();
+      view && this.views.appendChild(view.el);
       window.scrollTo(0, minimumScrollYOffset);
-
       this.view = view;
-  
-      // Execute the events on the next iter. This gives things a chance
-      // to settle and also protects us from NPEs in callback resulting in
-      // unremoved listeners
-      setTimeout(_.bind(function() {
-        if (old_view) {
-          old_view.destroy();
-        }
-        this.view.trigger('ready');
-        this.trigger('change:view:end', view, old_view);
-      }, this));      
-
+      old_view && old_view.destroy();
+      this.view && this.view.trigger('ready');
+      this.trigger('change:view:end', view, old_view);
       return view;
     },
 
     anchorClick: function(event) {
-      var target = $(event.target);
+      var target = $(event.currentTarget);
       if (target.attr("data-external")) {
         return;
       }
       var href = target.attr("href");
       // Route anything that starts with # or / (excluding //domain urls)
       if (href && (href[0] === '#' || (href[0] === '/' && href[1] !== '/'))) {
-        Backbone.history.navigate(href, true);
+        Backbone.history.navigate(href, {trigger: true});
         event.preventDefault();
       }
     }
@@ -1189,22 +1216,30 @@
     bindToRoute: bindToRoute
   });
 
-  function bindToRoute(callback, failback) {
+  function bindToRoute(callback, failback, background) {
     var fragment = Backbone.history.getFragment(),
         completed;
 
     function finalizer(isCanceled) {
+      var same = fragment === Backbone.history.getFragment();
+
       if (completed) {
         // Prevent multiple execution, i.e. we were canceled but the success callback still runs
+        return;
+      }
+
+      if (isCanceled && same) {
+        // Ignore the first route event if we are running in newer versions of backbone
+        // where the route operation is a postfix operation.
         return;
       }
 
       completed = true;
       Backbone.history.unbind('route', resetLoader);
 
-      scope.trigger('load:end');
+      background || scope.trigger('load:end');
       var args = Array.prototype.slice.call(arguments, 1);
-      if (!isCanceled && fragment === Backbone.history.getFragment()) {
+      if (!isCanceled && same) {
         callback.apply(this, args);
       } else {
         failback && failback.apply(this, args);
@@ -1214,27 +1249,24 @@
     var resetLoader = _.bind(finalizer, this, true);
     Backbone.history.bind('route', resetLoader);
 
-    scope.trigger('load:start');
+    background || scope.trigger('load:start');
     return _.bind(finalizer, this, false);
   }
 
-  Thorax.Collection = Backbone.Collection.extend({
-    fetch: function(options) {
-      fetchQueue.call(this, options || {}, Backbone.Collection.prototype.fetch);
-    },
-    sync: sync,
-    load: loadData
-  });
-
-  Thorax.Collection.extend = function(protoProps, classProps) {
-    var child = Backbone.Collection.extend.call(this, protoProps, classProps);
-    if (child.prototype.name) {
-      scope.Collections[child.prototype.name] = child;
-    }
-    return child;
-  };
-
   Thorax.Model = Backbone.Model.extend({
+    isPopulated: function() {
+      // We are populated if we have attributes set
+      var attributes = _.clone(this.attributes);
+      var defaults = _.isFunction(this.defaults) ? this.defaults() : (this.defaults || {});
+      for (var default_key in defaults) {
+        if (attributes[default_key] != defaults[default_key]) {
+          return true;
+        }
+        delete attributes[default_key];
+      }
+      var keys = _.keys(attributes);
+      return keys.length > 1 || (keys.length === 1 && keys[0] !== 'id');
+    },
     fetch: function(options) {
       fetchQueue.call(this, options || {}, Backbone.Model.prototype.fetch);
     },
@@ -1250,25 +1282,48 @@
     return child;
   };
 
+  Thorax.Collection = Backbone.Collection.extend({
+    model: Thorax.Model,
+    isPopulated: function() {
+      return this._fetched || this.length > 0;
+    },
+    fetch: function(options) {
+      options = options || {};
+      var success = options.success;
+      options.success = function(collection, response) {
+        collection._fetched = true;
+        success && success(collection, response);
+      };
+      fetchQueue.call(this, options || {}, Backbone.Collection.prototype.fetch);
+    },
+    reset: function(models, options) {
+      this._fetched = !!models;
+      return Backbone.Collection.prototype.reset.call(this, models, options);
+    },
+    sync: sync,
+    load: loadData
+  });
+
+  Thorax.Collection.extend = function(protoProps, classProps) {
+    var child = Backbone.Collection.extend.call(this, protoProps, classProps);
+    if (child.prototype.name) {
+      scope.Collections[child.prototype.name] = child;
+    }
+    return child;
+  };
+
   function sync(method, model_or_collection, options) {
-    var success, error;
-    if (options.success) {
-      success = options.success;
-      options.success = function() {
-        model_or_collection.trigger('load:end');
-        return success.apply(this, arguments);
-      };
-    }
-    if (options.error) {
-      error = options.error;
-      options.error = function() {
-        model_or_collection.trigger('load:end');
-        return error.apply(this, arguments);
-      };
-    }
-    model_or_collection.trigger('load:start');
-    return Backbone.sync.apply(this, arguments);
+    var complete = options.complete;
+    options.complete = function() {
+      complete && complete.apply(this, arguments);
+      model_or_collection.trigger('load:end', options.background);
+    };
+    model_or_collection.trigger('load:start', undefined, options.background);
+    var request = Backbone.sync.apply(this, arguments);
+    this.trigger('request', request);
+    return request;
   }
+  Thorax.sync = sync;
 
   function loadData(callback, failback, options) {
     if (this.isPopulated()) {
@@ -1279,10 +1334,11 @@
       options = failback;
       failback = false;
     }
+    options = options || {};
 
     function finalizer(isError) {
       this.unbind('error', errorHandler);
-      if (isError) {
+      if (isError && !options.background) {
         scope.trigger('load:end');
       }
       failback && failback.apply(this, arguments);
@@ -1296,11 +1352,18 @@
           this.unbind('error', errorHandler);
           callback.apply(this, arguments);
         }, this),
-        _.bind(finalizer, this, false))
+        _.bind(finalizer, this, false),
+        options.background)
     }));
   }
 
   function fetchQueue(options, $super) {
+    if (options.resetQueue) {
+      // WARN: Should ensure that loaders are protected from out of band data
+      //    when using this option
+      this.fetchQueue = undefined;
+    }
+
     if (!this.fetchQueue) {
       // Kick off the request
       this.fetchQueue = [options];
@@ -1333,4 +1396,4 @@
       }
     }
   }
-}).call(this);
+}).call(this, this);
