@@ -1185,7 +1185,7 @@
     },
 
     anchorClick: function(event) {
-      var target = $(event.target);
+      var target = $(event.currentTarget);
       if (target.attr("data-external")) {
         return;
       }
