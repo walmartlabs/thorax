@@ -594,4 +594,9 @@ The example project includes a server script that will start an express server w
 - added templatePathPrefix option to configure()
 - unit tests!
 - added nested event keyword
+- added _addEvent method for subclasses to customize event registration
+- registerEvents is now an instance method in addition to a class method
+- added emptyContext method, called from renderEmpty
+- checks for view.name property are now lazy
+- exceptions are now thrown instead of using console.error
 
