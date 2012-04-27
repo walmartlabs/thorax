@@ -589,4 +589,9 @@ The example project includes a server script that will start an express server w
 
 ### 1.1
 
-- added {{collection}} helper, _collectionSelector is now deprecated and internally defaults to "[data-collection-cid], for backwards compatibility set it to ".collection" in your view classes.
+- added {{collection}} helper
+- _collectionSelector is now deprecated and internally defaults to [data-collection-cid], for backwards compatibility set it to ".collection" in your view classes
+- added templatePathPrefix option to configure()
+- unit tests!
+- added nested event keyword
+

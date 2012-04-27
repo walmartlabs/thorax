@@ -32,7 +32,7 @@ http.get(options, function(response) {
       //replace "overview" with "thorax"
       window.$(window.$('#content h2')[0]).after('<h1 id="title">Thorax</h1>').remove();
       //add github buttons
-      window.$('#title').after('<iframe src="http://markdotto.github.com/github-buttons/github-btn.html?user=walmartlabs&repo=thorax&type=watch&count=false&size=large" allowtransparency="true" frameborder="0" scrolling="0" width="170px" height="30px"></iframe>');
+      window.$('#content p:first').after('<iframe src="http://markdotto.github.com/github-buttons/github-btn.html?user=walmartlabs&repo=thorax&type=watch&count=false&size=large" allowtransparency="true" frameborder="0" scrolling="0" width="170px" height="30px"></iframe>');
       //needed styles
       window.$('head').append('<style>' + fs.readFileSync(path.join(__dirname, 'extra-styles.css')).toString() + '</style>');
       //remove appended jquery

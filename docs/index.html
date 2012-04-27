@@ -17,7 +17,7 @@
   background-repeat:no-repeat;
   padding-left:80px;
   font-size:72px;
-  padding-bottom:0;
+  padding-bottom:10px;
   margin-bottom:0;
   color:#333;
 }
@@ -169,11 +169,11 @@
               </li>
             
               <li>
-                <a href="#templating/render-view-render">render </a>
+                <a href="#templating/render-view-render-content">render </a>
               </li>
             
               <li>
-                <a href="#templating/setmodel-view-setmodel-model">setModel </a>
+                <a href="#templating/setmodel-view-setmodel-model-options">setModel </a>
               </li>
             
               <li>
@@ -182,10 +182,6 @@
             
               <li>
                 <a href="#templating/setcollection-view-setcollection-collection-options">setCollection </a>
-              </li>
-            
-              <li>
-                <a href="#templating/_collectionselector-view-_collectionselector">_collectionSelector </a>
               </li>
             
               <li>
@@ -326,31 +322,12 @@
   
     <a href="http://github.com/walmartlabs/thorax" id="github-ribbon"><img src="https://a248.e.akamai.net/assets.github.com/img/7afbc8b248c68eb468279e8c17986ad46549fb71/687474703a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub"></a>
   
-  <h1 id="title">Thorax</h1><iframe src="http://markdotto.github.com/github-buttons/github-btn.html?user=walmartlabs&amp;repo=thorax&amp;type=watch&amp;count=false&amp;size=large" allowtransparency="true" frameborder="0" scrolling="0" width="170px" height="30px"></iframe>
-<p>An opinionated Backbone application framework,
+  <h1 id="title">Thorax</h1>
+<p>An opinionated Backbone application framework providing a filesystem structure, on demand module loading, model and collection view binding, inheritable view and DOM events, data loading helpers, form serialization / population and validation. Built using <a href="http://documentcloud.github.com/backbone/">Backbone</a>, <a href="http://documentcloud.github.com/underscore/">Underscore</a>, <a href="https://github.com/madrobby/zepto">Zepto</a>, <a href="http://www.handlebarsjs.com/">Handlebars</a>, <a href="http://learnboost.github.com/stylus/">Stylus</a> and <a href="http://walmartlabs.github.com/lumbar">Lumbar</a>.
 
-</p>
-<ul>
-<li>data loading</li>
-<li>form serialization and validation</li>
-<li>model and collection binding</li>
-<li>inheritable view and DOM events</li>
-<li>routers and layouts</li>
-<li>handlebars integration</li>
-</ul>
-<p>Thorax is built on:
-
-</p>
-<ul>
-<li><a href="http://documentcloud.github.com/backbone/">Backbone</a> - the core framework that Thorax builds on</li>
-<li><a href="http://documentcloud.github.com/underscore/">Underscore</a> - to make sure you have your JavaScript utility belt with you</li>
-<li><a href="https://github.com/madrobby/zepto">Zepto</a> - bitesize mobile DOM goodness</li>
-<li><a href="http://www.handlebarsjs.com/">Handlebars</a> - to make sure you have the best mustache for <a href="http://us.movember.com/">movember</a></li>
-<li><a href="http://learnboost.github.com/stylus/">Stylus</a> - for the cleanest CSS experience around</li>
-<li><a href="http://walmartlabs.github.com/lumbar">Lumbar</a> - our own library for seemless packaging so you are deploy-ready</li>
-</ul>
+</p><iframe src="http://markdotto.github.com/github-buttons/github-btn.html?user=walmartlabs&amp;repo=thorax&amp;type=watch&amp;count=false&amp;size=large" allowtransparency="true" frameborder="0" scrolling="0" width="170px" height="30px"></iframe>
 <h3 id="overview/quick-start">Quick Start</h3>
-<p>Thorax can be used <a href="https://github.com/walmartlabs/thorax/blob/master/thorax.js">standalone (40kb)</a> but is designed to work best with <a href="http://walmartlabs.github.com/lumbar">Lumbar</a>. The easiest way to setup a new Thoax + Lumbar project is with the thorax command line tool or by <a href="https://github.com/walmartlabs/thorax-example">downloading the sample project</a> it creates. To use the command line tools you'll need <a href="http://nodejs.org/">node</a> (we recommend using <a href="https://github.com/creationix/nvm">nvm</a> to install node) and <a href="http://npmjs.org/">npm</a>. If you are on a mac you'll need <a href="http://itunes.apple.com/us/app/xcode/id448457090?mt=12">Xcode</a> installed to run gcc.
+<p>Thorax can be used <a href="https://github.com/walmartlabs/thorax/blob/master/thorax.js">standalone</a> but is designed to work best with <a href="http://walmartlabs.github.com/lumbar">Lumbar</a>. The easiest way to setup a new Thoax + Lumbar project is with the thorax command line tool or by <a href="https://github.com/walmartlabs/thorax-example">downloading the sample project</a> it creates. To use the command line tools you'll need <a href="http://nodejs.org/">node</a> (we recommend using <a href="https://github.com/creationix/nvm">nvm</a> to install node) and <a href="http://npmjs.org/">npm</a>. If you are on a mac you'll need <a href="https://developer.apple.com/xcode/">Xcode</a> installed to run gcc.
 
 </p>
 <pre><code><span class="title">npm</span> install -g lumbar thorax
@@ -358,7 +335,7 @@
 <span class="title">cd</span> project-name
 <span class="title">lumbar</span> build lumbar.json public
 <span class="title">bin</span>/server <span class="number">8000</span></code></pre>
-<p>This will create a hello world project, for a more complete example clone the <a href="https://github.com/walmartlabs/thorax-todos">Thorax Todos</a> project. <a href="http://walmartlabs.github.com/thorax-todos/">Thorax Todos live demo</a>.
+<p>This will create a hello world project, for a more complete example clone the <a href="https://github.com/walmartlabs/thorax-todos">Thorax Todos</a> project (<a href="http://walmartlabs.github.com/thorax-todos/">demo</a>).
 
 </p>
 <h3 id="overview/project-structure">Project Structure</h3>
@@ -426,7 +403,7 @@
 <li><code>change:view:end</code> - old view destroyed, new view in DOM and ready</li>
 </ul>
 <h3 id="routers-layout/view-lifecycle-events">View Lifecycle Events</h3>
-<p>By calling <code>Application.layout.setView</code> on a given view various events will be triggered on that view.
+<p>By calling <code>Application.layout.setView</code> on a given view various events will be triggered on that view and the previous view.
 
 </p>
 <ul>
@@ -546,7 +523,7 @@ Subclass.registerEvents({
   //events <span class="keyword">for</span> <span class="keyword">all</span> instances <span class="keyword">and</span> subclasses <span class="keyword">of</span> Subclass
 });</code></pre>
 <h3 id="events/unregisterevents-application-view-unregisterevents-event" class="signature">unregisterEvents <em>Application.View.unregisterEvents([event])</em></h3>
-<p>Unregister events for all instances and subclasses of Application.View. Note that calling <code>unregisterEvents</code> on <code>Application.View</code> will unregister the built in events that make <code>setModel</code> and <code>setCollection</code> work. 
+<p>Unregister events for all instances and subclasses of a given view class. Note that calling <code>unregisterEvents</code> on <code>Application.View</code> will unregister the built in events that make <code>setModel</code> and <code>setCollection</code> work. 
 
 </p>
 <pre><code>Subclass.unregisterEvents(); //all events
@@ -631,12 +608,20 @@ console.log(view.template({
 <p>Replace the HTML in a given view. The collection element and the child views appended by the <code>{{view}}</code> helper will be automatically preserved if present.
 
 </p>
-<h3 id="templating/render-view-render" class="signature">render <em>view.render()</em></h3>
+<h3 id="templating/render-view-render-content" class="signature">render <em>view.render([content])</em></h3>
 <p>Render a template with the filename of the view's <code>name</code> attribute (sans extension), calling <code>view.html()</code> with the result. Triggers the <code>rendered</code> event.
 
 </p>
-<h3 id="templating/setmodel-view-setmodel-model" class="signature">setModel <em>view.setModel(model)</em></h3>
-<p>Set the <em>model</em> attribute of the view, triggering some customizable behaviors:
+<p>To implement custom rendering behavior in a subclass override the method and pass a <code>content</code> argument to render which may be an HTML string, DOM Element or an array of DOM Elements.
+
+</p>
+<pre><code><span class="keyword">var</span> ChildView = Application.View.extend({
+  render: <span class="function"><span class="keyword">function</span><span class="params">()</span> {</span>
+    <span class="keyword">return</span> Application.View.prototype.render.call(<span class="keyword">this</span>, <span class="string">'content'</span>);
+  }
+});</code></pre>
+<h3 id="templating/setmodel-view-setmodel-model-options" class="signature">setModel <em>view.setModel(model, options)</em></h3>
+<p>Set the <em>model</em> attribute of the view. Dep
 
 </p>
 <ul>
@@ -670,7 +655,7 @@ console.log(view.template({
   }
 });</code></pre>
 <h3 id="templating/setcollection-view-setcollection-collection-options" class="signature">setCollection <em>view.setCollection(collection [,options])</em></h3>
-<p>Set the <em>collection</em> attribute of the view. This will bind events on collection <code>add</code>, <code>remove</code> and <code>reset</code>, updating the collection element (specified by <code>_collectionSelector</code>) as needed. <code>options</code> may contain: 
+<p>Set the <em>collection</em> attribute of the view. This will bind events on collection <code>add</code>, <code>remove</code> and <code>reset</code>, updating the collection element (specified by the <code>collection</code> view helper) as needed. <code>options</code> may contain: 
 
 </p>
 <ul>
@@ -689,6 +674,10 @@ console.log(view.template({
 <p>You can use the <code>thorax collection-view $module-name $view-name</code> command to auto generate the view files, templates and lumbar.json entries.
 
 </p>
+<p>To display a collection in your template use the <code>{{collection}}</code> view helper. You can pass a custom <code>tag</code> name (defaults to "div") or any HTML attributes.
+
+</p>
+<pre><code>{{collection tag=<span class="string">"ul"</span> <span class="class"><span class="keyword">class</span>="<span class="id">my</span>-<span class="id">list</span>"}}</span></code></pre>
 <p>The following events will be triggered when the collection is rendered:
 
 </p>
@@ -697,17 +686,6 @@ console.log(view.template({
 <li><code>rendered:item</code> - called for each item rendered in a non empty collection after <code>renderCollection</code> is called, receives the item element or view after it has been rendered</li>
 <li><code>rendered:empty</code> - called when <code>renderCollection</code> is called with an empty collection, receives the the collection element</li>
 </ul>
-<h3 id="templating/_collectionselector-view-_collectionselector" class="signature">_collectionSelector <em>view._collectionSelector</em></h3>
-<p>A string specifying the CSS selector used to select the collection element. The collection element is not auto generated and must be present in your template. <code>_collectionSelector</code> defaults to <code>.collection</code>
-
-</p>
-<pre><code><span class="constant">Application</span>.<span class="constant">View</span>.<span class="identifier"><span class="keymethods">extend</span></span>({
-  <span class="identifier"><span class="keymethods">name</span></span><span class="symbol">:</span> <span class="string">'view-name'</span>,
-  <span class="constant">_collectionSelector</span><span class="symbol">:</span> <span class="string">'.custom-collection'</span>
-});
-
-<span class="regexp">//</span> <span class="identifier">templates</span>/<span class="identifier">view</span>-<span class="identifier"><span class="keymethods">name</span></span>.<span class="identifier">handlebars</span>
-&lt;<span class="identifier"><span class="keymethods">div</span></span> <span class="class"><span class="keyword">class</span>="<span class="title">custom</span>-<span class="title">collection</span>"<span class="inheritance">&lt;</span>/<span class="title">div</span></span></code></pre>
 <h3 id="templating/itemcontext-view-itemcontext-model-index" class="signature">itemContext <em>view.itemContext(model, index)</em></h3>
 <p>Just like the <code>context</code> method, but called for each item in the collection.
 
@@ -726,17 +704,15 @@ console.log(view.template({
   });
 }
 
-
-
 renderItem: <span class="function"><span class="keyword">function</span><span class="params">(model, i)</span> {</span>
-  <span class="keyword">return</span> <span class="keyword">this</span>.template(<span class="keyword">this</span>.name + <span class="string">'-item.handlebars'</span>, <span class="keyword">this</span>.itemContext(model, i));
+  <span class="keyword">return</span> <span class="keyword">this</span>.template(<span class="keyword">this</span>.name + <span class="string">'-item'</span>, <span class="keyword">this</span>.itemContext(model, i));
 }</code></pre>
 <h3 id="templating/renderempty-view-renderempty" class="signature">renderEmpty <em>view.renderEmpty()</em></h3>
 <p>Override this method to specify what happens when <code>renderCollection</code> is called when the collection is empty. May return a string or another view. The default implementation is:
 
 </p>
 <pre><code>renderEmpty: <span class="keyword">function</span>() {
-  <span class="keyword">return</span> this.template(this.name + <span class="literal">'-empty.handlebars'</span>);
+  <span class="keyword">return</span> this.template(this.name + <span class="literal">'-empty'</span>);
 }</code></pre>
 <h3 id="templating/appenditem-view-appenditem-item-index" class="signature">appendItem <em>view.appendItem(item [,index])</em></h3>
 <p>Append and item at a given index. If no index is passed the index of the model in the current collection will be used, if the first argument is not a model, 0 will be used. Item may be:
