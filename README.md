@@ -1,27 +1,11 @@
 
 ## Overview
 
-An opinionated Backbone application framework,
-
-- data loading
-- form serialization and validation
-- model and collection binding
-- inheritable view and DOM events
-- routers and layouts
-- handlebars integration
-
-Thorax is built on:
-
-- [Backbone](http://documentcloud.github.com/backbone/) - the core framework that Thorax builds on
-- [Underscore](http://documentcloud.github.com/underscore/) - to make sure you have your JavaScript utility belt with you
-- [Zepto](https://github.com/madrobby/zepto) - bitesize mobile DOM goodness
-- [Handlebars](http://www.handlebarsjs.com/) - to make sure you have the best mustache for [movember](http://us.movember.com/)
-- [Stylus](http://learnboost.github.com/stylus/) - for the cleanest CSS experience around
-- [Lumbar](http://walmartlabs.github.com/lumbar) - our own library for seemless packaging so you are deploy-ready
+An opinionated Backbone application framework providing a filesystem structure, on demand module loading, model and collection view binding, inheritable view and DOM events, data loading helpers, form serialization / population and validation. Built using [Backbone](http://documentcloud.github.com/backbone/), [Underscore](http://documentcloud.github.com/underscore/), [Zepto](https://github.com/madrobby/zepto), [Handlebars](http://www.handlebarsjs.com/), [Stylus](http://learnboost.github.com/stylus/) and [Lumbar](http://walmartlabs.github.com/lumbar).
 
 ### Quick Start
 
-Thorax can be used [standalone (40kb)](https://github.com/walmartlabs/thorax/blob/master/thorax.js) but is designed to work best with [Lumbar](http://walmartlabs.github.com/lumbar). The easiest way to setup a new Thoax + Lumbar project is with the thorax command line tool or by [downloading the sample project](https://github.com/walmartlabs/thorax-example) it creates. To use the command line tools you'll need [node](http://nodejs.org/) (we recommend using [nvm](https://github.com/creationix/nvm) to install node) and [npm](http://npmjs.org/). If you are on a mac you'll need [Xcode](http://itunes.apple.com/us/app/xcode/id448457090?mt=12) installed to run gcc.
+Thorax can be used [standalone](https://github.com/walmartlabs/thorax/blob/master/thorax.js) but is designed to work best with [Lumbar](http://walmartlabs.github.com/lumbar). The easiest way to setup a new Thoax + Lumbar project is with the thorax command line tool or by [downloading the sample project](https://github.com/walmartlabs/thorax-example) it creates. To use the command line tools you'll need [node](http://nodejs.org/) (we recommend using [nvm](https://github.com/creationix/nvm) to install node) and [npm](http://npmjs.org/). If you are on a mac you'll need [Xcode](https://developer.apple.com/xcode/) installed to run gcc.
 
     npm install -g lumbar thorax
     thorax create project-name
@@ -29,7 +13,7 @@ Thorax can be used [standalone (40kb)](https://github.com/walmartlabs/thorax/blo
     lumbar build lumbar.json public
     bin/server 8000
 
-This will create a hello world project, for a more complete example clone the [Thorax Todos](https://github.com/walmartlabs/thorax-todos) project. [Thorax Todos live demo](http://walmartlabs.github.com/thorax-todos/).
+This will create a hello world project, for a more complete example clone the [Thorax Todos](https://github.com/walmartlabs/thorax-todos) project ([demo](http://walmartlabs.github.com/thorax-todos/)).
 
 ### Project Structure
 
@@ -95,7 +79,7 @@ This will trigger two events on the `Application.layout` object, both of which w
 
 ### View Lifecycle Events
 
-By calling `Application.layout.setView` on a given view various events will be triggered on that view.
+By calling `Application.layout.setView` on a given view various events will be triggered on that view and the previous view.
 
 - `initialize:before` - during constructor call, before *initialize* has been called
 - `initialize:after` - during construcor call, after *initialize* has been called
@@ -214,7 +198,7 @@ Add events to all instances of a view. Accepts a hash in the same format as desc
 
 ### unregisterEvents *Application.View.unregisterEvents([event])*
 
-Unregister events for all instances and subclasses of Application.View. Note that calling `unregisterEvents` on `Application.View` will unregister the built in events that make `setModel` and `setCollection` work. 
+Unregister events for all instances and subclasses of a given view class. Note that calling `unregisterEvents` on `Application.View` will unregister the built in events that make `setModel` and `setCollection` work. 
 
     Subclass.unregisterEvents(); //all events
     Application.View.unregisterEvents('click a');
@@ -303,13 +287,21 @@ This method is also available as a template helper which can receive a string na
 
 Replace the HTML in a given view. The collection element and the child views appended by the `{{view}}` helper will be automatically preserved if present.
 
-### render *view.render()*
+### render *view.render([content])*
 
 Render a template with the filename of the view's `name` attribute (sans extension), calling `view.html()` with the result. Triggers the `rendered` event.
 
-### setModel *view.setModel(model)*
+To implement custom rendering behavior in a subclass override the method and pass a `content` argument to render which may be an HTML string, DOM Element or an array of DOM Elements.
 
-Set the *model* attribute of the view, triggering some customizable behaviors:
+    var ChildView = Application.View.extend({
+      render: function() {
+        return Application.View.prototype.render.call(this, 'content');
+      }
+    });
+
+### setModel *view.setModel(model, options)*
+
+Set the *model* attribute of the view. Dep
 
 - `fetch` - auto fetch the model if empty, defaults to true, if an object is passed it will be used as the options to `fetch`
 - `success` - a callback to call when fetch() succeeds, defaults to false
@@ -343,7 +335,7 @@ Specify this function to override what attributes will be passed from a model se
 
 ### setCollection *view.setCollection(collection [,options])*
 
-Set the *collection* attribute of the view. This will bind events on collection `add`, `remove` and `reset`, updating the collection element (specified by `_collectionSelector`) as needed. `options` may contain: 
+Set the *collection* attribute of the view. This will bind events on collection `add`, `remove` and `reset`, updating the collection element (specified by the `collection` view helper) as needed. `options` may contain: 
 
 - `fetch` - auto fetch, defaults to true, if an object is passed it will be used as the options to `fetch`
 - `success` - a callback to call when fetch() succeeds, defaults to false
@@ -357,23 +349,15 @@ Collection rendering assumes that the following templates will be present.
 
 You can use the `thorax collection-view $module-name $view-name` command to auto generate the view files, templates and lumbar.json entries.
 
+To display a collection in your template use the `{{collection}}` view helper. You can pass a custom `tag` name (defaults to "div") or any HTML attributes.
+
+    {{collection tag="ul" class="my-list"}}
+
 The following events will be triggered when the collection is rendered:
 
 - `rendered:collection` - called when `renderCollection` is called, receives the the collection element
 - `rendered:item` - called for each item rendered in a non empty collection after `renderCollection` is called, receives the item element or view after it has been rendered
 - `rendered:empty` - called when `renderCollection` is called with an empty collection, receives the the collection element
-
-### _collectionSelector *view._collectionSelector*
-
-A string specifying the CSS selector used to select the collection element. The collection element is not auto generated and must be present in your template. `_collectionSelector` defaults to `.collection`
-
-    Application.View.extend({
-      name: 'view-name',
-      _collectionSelector: '.custom-collection'
-    });
-
-    // templates/view-name.handlebars
-    <div class="custom-collection"></div>
 
 ### itemContext *view.itemContext(model, index)*
 
@@ -393,10 +377,8 @@ Override this method to specify how an item is rendered. May return a string or 
       });
     }
 
-
-
     renderItem: function(model, i) {
-      return this.template(this.name + '-item.handlebars', this.itemContext(model, i));
+      return this.template(this.name + '-item', this.itemContext(model, i));
     }
 
 ### renderEmpty *view.renderEmpty()*
@@ -404,7 +386,7 @@ Override this method to specify how an item is rendered. May return a string or 
 Override this method to specify what happens when `renderCollection` is called when the collection is empty. May return a string or another view. The default implementation is:
   
     renderEmpty: function() {
-      return this.template(this.name + '-empty.handlebars');
+      return this.template(this.name + '-empty');
     }
 
 ### appendItem *view.appendItem(item [,index])*
