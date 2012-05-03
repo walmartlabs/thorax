@@ -12,8 +12,14 @@
     "node": ">=0.4.7"
   },
   "dependencies": {
+    "connect": "*",
     "optimist": "~0.2",
     "handlebars": "~1.0"
+  },
+  "scripts": {
+    "start": "node test/bin/server.js . 8083",
+
+    "test": "phantomjs test/bin/run-qunit.js 'http://localhost:8083/test/index.html'"
   },
   "bin": {
     "thorax": "./bin/thorax"
