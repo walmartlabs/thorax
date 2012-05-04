@@ -449,11 +449,12 @@
     emptyContext: function() {},
 
     render: function(output) {
-      if (typeof output === 'undefined') {
+      if (typeof output === 'undefined' || (!_.isElement(output) && !_.isArray(output) && !(output && output.el) && typeof output !== 'string')) {
         ensureViewHasName.call(this);
         output = this.template(this.name, this.context(this.model));
       }
-      this.html(output);
+      //accept a view, string, or DOM element
+      this.html((output && output.el) || output);
       if (!this._renderCount) {
         this._renderCount = 1;
       } else {

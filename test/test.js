@@ -239,12 +239,27 @@ $(function() {
     });
     c.render();
 
+    var d = new Thorax.View({
+      render: function() {
+        var view = new Thorax.View({
+          render: function() {
+            Thorax.View.prototype.render.call(this, '<p>d</p>');
+          }
+        });
+        view.render();
+        Thorax.View.prototype.render.call(this, view);
+      }
+    });
+    d.render();
+
     equal(a._renderCount, 1, '_renderCount incrimented');
     equal(b._renderCount, 1, '_renderCount incrimented');
     equal(c._renderCount, 1, '_renderCount incrimented');
+    equal(d._renderCount, 1, '_renderCount incrimented');
     equal(a.$('p').html(), 'a', 'parent render accepts string');
     equal(b.$('p').html(), 'b', 'parent render accepts dom array');
     equal(c.$('p').html(), 'c', 'parent render accepts dom element');
+    equal(d.$('p').html(), 'd', 'parent render accepts view');
   });
   
   test("Inheritable events", function() {
