@@ -125,6 +125,10 @@ $(function() {
       equal(renderedEmptyCount, 1, 'rendered:empty event count');
       matchCids(clonedLetterCollection);
 
+      var oldLength = view.$('li').length;
+      clonedLetterCollection.reset(clonedLetterCollection.models);
+      equal(oldLength, view.$('li').length, 'Reset does not cause change in number of rendered items')
+
       //freeze
       view.freeze();
       clonedLetterCollection.remove(clonedLetterCollection.models);

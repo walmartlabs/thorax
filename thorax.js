@@ -466,7 +466,7 @@
 
     renderCollection: function() {
       this.render();
-      var collection_element = getCollectionElement.call(this);
+      var collection_element = getCollectionElement.call(this).empty();
       collection_element.attr(collection_cid_attribute_name, this.collection.cid);
       if (this.collection.length === 0 && this.collection.isPopulated()) {
         appendEmpty.call(this);
