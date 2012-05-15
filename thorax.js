@@ -234,7 +234,13 @@
         instance = name;
       }
       this._views[instance.cid] = instance;
-      this._childEvents.forEach(instance._addEvent, instance);
+      this._childEvents.forEach(function(params) {
+        params = _.clone(params);
+        if (!params.parent) {
+          params.parent = this;
+        }
+        instance._addEvent(params);
+      }, this);
       return instance;
     },
     
@@ -318,7 +324,11 @@
         this._childEvents.push(params);
       }
       if (params.type === 'view') {
-        this.bind(params.name, params.handler, this);
+        if (params.nested) {
+          this.bind(params.name, _.bind(params.handler, params.parent || this, this));
+        } else {
+          this.bind(params.name, params.handler, this);
+        }
       } else {
         var boundHandler = containHandlerToCurentView(bindEventHandler.call(this, params.handler), this.cid);
         if (params.selector) {

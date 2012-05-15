@@ -464,16 +464,19 @@ $(function() {
       events: {
         'nested test': function() {
           ++testTriggerCount;
+          equal(this.cid, parent.cid, 'scope is always the declaring view');
         }
       },
       initialize: function() {
         this.view(this.child = new Thorax.View());
+        this.child.view(this.child.child = new Thorax.View());
       }
     });
     parent = new Parent();
     parent.trigger('test');
     parent.child.trigger('test');
-    equal(testTriggerCount, 2, 'test nested view events');
+    parent.child.child.trigger('test');
+    equal(testTriggerCount, 3, 'test nested view events');
   });
   
   test("serialize() / populate()", function() {
