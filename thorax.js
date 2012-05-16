@@ -857,7 +857,7 @@
     'touchstart', 'touchend', 'touchmove',
     'click', 'dblclick',
     'keyup', 'keydown', 'keypress',
-    'submit',
+    'submit', 'change',
     'focus', 'blur'
   ];
 
