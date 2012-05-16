@@ -831,9 +831,10 @@
 
   function containHandlerToCurentView(handler, cid) {
     return function(event) {
+      var target = this; // this is set to event's element
       var containing_view_element = $(event.target).closest('[' + view_name_attribute_name + ']');
       if (!containing_view_element.length || containing_view_element[0].getAttribute(view_cid_attribute_name) == cid) {
-        handler(event);
+        handler(event, target);
       }
     };
   }
