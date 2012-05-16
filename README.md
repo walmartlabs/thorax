@@ -5,7 +5,7 @@ An opinionated Backbone application framework providing a filesystem structure, 
 
 ### Quick Start
 
-Thorax can be used [standalone](https://github.com/walmartlabs/thorax/blob/master/thorax.js) but is designed to work best with [Lumbar](http://walmartlabs.github.com/lumbar). The easiest way to setup a new Thoax + Lumbar project is with the thorax command line tool or by [downloading the sample project](https://github.com/walmartlabs/thorax-example) it creates. To use the command line tools you'll need [node](http://nodejs.org/) (we recommend using [nvm](https://github.com/creationix/nvm) to install node) and [npm](http://npmjs.org/). If you are on a mac you'll need [Xcode](https://developer.apple.com/xcode/) installed to run gcc.
+Thorax can be used [standalone](https://github.com/walmartlabs/thorax/blob/master/thorax.js) but is designed to work best with [Lumbar](http://walmartlabs.github.com/lumbar). The easiest way to setup a new Thoax + Lumbar project is with the thorax command line tool or by [downloading the sample project](https://github.com/walmartlabs/thorax-example) it creates. To use the command line tools you'll need [node](http://nodejs.org/) and [npm](http://npmjs.org/).
 
     npm install -g lumbar thorax
     thorax create project-name
@@ -90,43 +90,15 @@ By calling `Application.layout.setView` on a given view various events will be t
 
 ## Loading Data
 
-Various components in Thorax trigger two load events: `load:start` and `load:end`. They will be triggered in the following circumstances:
-
-- on a model or collection when `sync` is called (via `fetch`, `save`, etc)
-- on a view, when model or collection has been set on the view with `setModel` or `setCollection` and the model or collection triggers the event
-- on the `Application` object when a module is loaded, or when `model/collection.load` is called
-
-To implement both modal (blocking) and inline load indicators in your application:
-
-    Application.bind('load:start', function() {
-      //show modal loading indicator
-    });
-    Application.bind('load:end', function() {
-      //hide modal loading indicator
-    });
-
-    Application.View.registerEvents({
-      'load:start': function() {
-        //show inline loading indicator
-      },
-      'load:end': function() {
-        //hide inline loading indicator
-      }
-    });
-
 ### load *model/collection.load(callback [,failback [,options]])*
 
-Use this method when you need to display a blocking load indicator or can't set the next view until the requested data has loaded.
-
-Calls `fetch` on the model or collection, triggering `load:start` and `load:end` on both the model / collection and the `Application` object. `callback` and `failback` will be used as arguments to `bindToRoute`. `options` will be passed to the `fetch` call on the model or collection if present.
+Calls `fetch` on the model or collection ensuring the callbacks will only be called if the route does not change. `callback` and `failback` will be used as arguments to `bindToRoute`. `options` will be passed to the `fetch` call on the model or collection if present.
 
     routerMethod: function(id) {
       var view = this.view('view/name');
       var model = new Application.Model({id: id});
-      //will trigger load:start on Application, model.fetch call
       model.load(_.bind(function() {
         //callback only called if browser still on this route
-        //load:end triggered on Application
         view.setModel(model);
         this.setView(view);
       }, this), function() {

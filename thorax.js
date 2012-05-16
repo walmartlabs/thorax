@@ -56,72 +56,7 @@
 
     },
     //used by "template" and "view" template helpers, not thread safe though it shouldn't matter in browser land
-    _currentTemplateContext: false,
-
-    // Loading indicator helper. Note that only one load handler pair may be defined per object.
-    throttleLoadStart: function(start) {
-      return function(message, background) {
-        var self = this;
-
-        if (!self._loadStart) {
-          var loadingTimeout = self._loadingTimeoutDuration;
-          if (loadingTimeout === void 0) {
-            // If we are running on a non-view object pull the default timeout
-            loadingTimeout = Thorax.View.prototype._loadingTimeoutDuration;
-          }
-
-          self._loadStart = {
-            timeout: setTimeout(function() {
-                self._loadStart.run = true;
-                start.call(self, self._loadStart.message, self._loadStart.background);
-              },
-              loadingTimeout*1000),
-            message: message,
-            background: background,
-            pending: 1
-          };
-        } else {
-          clearTimeout(self._loadStart.endTimeout);
-          self._loadStart.pending++;
-
-          self._loadStart.message = message;
-          self._loadStart.background  = self._loadStart.background && background;
-        }
-      };
-    },
-    throttleLoadEnd: function(end, timeout) {
-      return function(background) {
-        var self = this;
-        if (self._loadStart) {
-          self._loadStart.pending--;
-
-          // Reset the end timeout
-          clearTimeout(self._loadStart.endTimeout);
-          if (typeof timeout === 'undefined') {
-            timeout = 100;
-          }
-          var callback = function(){
-            if (self._loadStart.pending <= 0) {
-              var run = self._loadStart.run;
-
-              // If stopping make sure we don't run a start
-              clearTimeout(self._loadStart.timeout);
-              self._loadStart = undefined;
-
-              if (run) {
-                // Emit the end behavior, but only if there is a paired start
-                end.call(self, background);
-              }
-            }
-          };
-          if (timeout) {
-            self._loadStart.endTimeout = setTimeout(callback, timeout);
-          } else {
-            callback();
-          }
-        }
-      };
-    }
+    _currentTemplateContext: false
   };
 
   //private vars for Thorax.View
@@ -366,14 +301,10 @@
         this.model.trigger('set', this.model, old_model);
     
         if (this._shouldFetch(this.model, this._modelOptions)) {
-          this.model.fetch(_.extend({}, _.isObject(this._modelOptions.fetch) ? this._modelOptions.fetch : {}, {
-            ignoreErrors: this.ignoreFetchError,
-            success: _.once(_.bind(function(){
-              if (this._modelOptions.success) {
-                this._modelOptions.success(model);
-              }
-            },this))
-          }));
+          var success = this._modelOptions.success;
+          this.model.load(function(){
+              success && success(model);
+            }, this._modelOptions);
         } else {
           //want to trigger built in event handler (render() + populate())
           //without triggering event on model
@@ -418,14 +349,10 @@
         this.collection.trigger('set', this.collection, old_collection);
 
         if (this._shouldFetch(this.collection, this._collectionOptions)) {
-          this.collection.fetch(_.extend({}, _.isObject(this._collectionOptions.fetch) ? this._collectionOptions.fetch : {}, {
-            ignoreErrors: this.ignoreFetchError,
-            success: _.once(_.bind(function(){
-              if (this._collectionOptions.success) {
-                this._collectionOptions.success(this.collection);
-              }
-            },this))
-          }));
+          var success = this._collectionOptions.success;
+          this.collection.load(function(){
+              success && success(this.collection);
+            }, this._collectionOptions);
         } else {
           //want to trigger built in event handler (render())
           //without triggering event on collection
@@ -700,10 +627,6 @@
       destroyChildViews.call(this);
     },
 
-    //loading config
-    _loadingClassName: 'loading',
-    _loadingTimeoutDuration: 0.33,
-
     scrollTo: function(x, y) {
       y = y || minimumScrollYOffset;
       window.scrollTo(x, y);
@@ -812,12 +735,6 @@
     deactivated: function() {
       resetSubmitState.call(this);
     },
-    'load:start': Thorax.throttleLoadStart(function(message, background) {
-      $(this.el).addClass(this._loadingClassName);
-    }),
-    'load:end': Thorax.throttleLoadEnd(function(message, background) {
-      $(this.el).removeClass(this._loadingClassName);
-    }),
     model: {
       error: function(model, errors){
         if (this._modelOptions.errors) {
@@ -826,12 +743,6 @@
       },
       change: function() {
         onModelChange.call(this);
-      },
-      'load:start': function(message, background) {
-        this.trigger('load:start', message, background);
-      },
-      'load:end': function(background) {
-        this.trigger('load:end', background);
       }
     },
     collection: {
@@ -862,12 +773,6 @@
         if (this._collectionOptions.errors) {
           this.trigger('error', message);
         }
-      },
-      'load:start': function(message, background) {
-        this.trigger('load:start', message, background);
-      },
-      'load:end': function(background) {
-        this.trigger('load:end', background);
       }
     }
   });
@@ -1227,7 +1132,7 @@
     bindToRoute: bindToRoute
   });
 
-  function bindToRoute(callback, failback, background) {
+  function bindToRoute(callback, failback) {
     var fragment = Backbone.history.getFragment(),
         completed;
 
@@ -1248,7 +1153,6 @@
       completed = true;
       Backbone.history.unbind('route', resetLoader);
 
-      background || scope.trigger('load:end');
       var args = Array.prototype.slice.call(arguments, 1);
       if (!isCanceled && same) {
         callback.apply(this, args);
@@ -1260,7 +1164,6 @@
     var resetLoader = _.bind(finalizer, this, true);
     Backbone.history.bind('route', resetLoader);
 
-    background || scope.trigger('load:start');
     return _.bind(finalizer, this, false);
   }
 
@@ -1281,7 +1184,6 @@
     fetch: function(options) {
       fetchQueue.call(this, options || {}, Backbone.Model.prototype.fetch);
     },
-    sync: sync,
     load: loadData
   });
 
@@ -1311,7 +1213,6 @@
       this._fetched = !!models;
       return Backbone.Collection.prototype.reset.call(this, models, options);
     },
-    sync: sync,
     load: loadData
   });
 
@@ -1323,19 +1224,6 @@
     return child;
   };
 
-  function sync(method, model_or_collection, options) {
-    var complete = options.complete;
-    options.complete = function() {
-      complete && complete.apply(this, arguments);
-      model_or_collection.trigger('load:end', options.background);
-    };
-    model_or_collection.trigger('load:start', undefined, options.background);
-    var request = Backbone.sync.apply(this, arguments);
-    this.trigger('request', request);
-    return request;
-  }
-  Thorax.sync = sync;
-
   function loadData(callback, failback, options) {
     if (this.isPopulated()) {
       return callback(this);
@@ -1345,27 +1233,11 @@
       options = failback;
       failback = false;
     }
-    options = options || {};
 
-    function finalizer(isError) {
-      this.unbind('error', errorHandler);
-      if (isError && !options.background) {
-        scope.trigger('load:end');
-      }
-      failback && failback.apply(this, arguments);
-    }
-
-    var errorHandler = _.bind(finalizer, this, true);
-    this.bind('error', errorHandler);
-
-    this.fetch(_.extend({}, options || {}, {
-      success: bindToRoute(_.bind(function() {
-          this.unbind('error', errorHandler);
-          callback.apply(this, arguments);
-        }, this),
-        _.bind(finalizer, this, false),
-        options.background)
-    }));
+    this.fetch(_.defaults({
+      success: bindToRoute(callback, failback && _.bind(failback, this, false)),
+      error: failback && _.bind(failback, this, true)
+    }, options));
   }
 
   function fetchQueue(options, $super) {
