@@ -34,295 +34,296 @@
   font-family: Consolas,"Andale Mono WT","Andale Mono","Lucida Console","Lucida Sans Typewriter","DejaVu Sans Mono","Bitstream Vera Sans Mono","Liberation Mono","Nimbus Mono L",Monaco,"Courier New",Courier,monospace;
 }
 </style></head>
-  <body><div id="nav">
-  
-    <div id="header">
-      <a href="#" id="logo">thorax</a>
-    </div>
-  
-  <ul id="sections">
+  <body><div id="container">
+  <div id="nav">
     
-      <li>
-        <a href="#overview">Overview</a>
-        
-          <ul>
-            
-              <li>
-                <a href="#overview/quick-start">Quick Start</a>
-              </li>
-            
-              <li>
-                <a href="#overview/project-structure">Project Structure</a>
-              </li>
-            
-          </ul>
-        
-      </li>
-    
-      <li>
-        <a href="#configuration">Configuration</a>
-        
-          <ul>
-            
-              <li>
-                <a href="#configuration/modules">Modules</a>
-              </li>
-            
-              <li>
-                <a href="#configuration/configure-thorax-configure-options">configure </a>
-              </li>
-            
-          </ul>
-        
-      </li>
-    
-      <li>
-        <a href="#routers-layout">Routers &amp; Layout</a>
-        
-          <ul>
-            
-              <li>
-                <a href="#routers-layout/create-application-router-create-module-protoprops-classprops">create </a>
-              </li>
-            
-              <li>
-                <a href="#routers-layout/view-router-view-name-attributes">view </a>
-              </li>
-            
-              <li>
-                <a href="#routers-layout/setview-application-layout-setview-view">setView </a>
-              </li>
-            
-              <li>
-                <a href="#routers-layout/view-lifecycle-events">View Lifecycle Events</a>
-              </li>
-            
-          </ul>
-        
-      </li>
-    
-      <li>
-        <a href="#loading-data">Loading Data</a>
-        
-          <ul>
-            
-              <li>
-                <a href="#loading-data/load-model-collection-load-callback-failback-options">load </a>
-              </li>
-            
-              <li>
-                <a href="#loading-data/bindtoroute-router-bindtoroute-callback-failback">bindToRoute </a>
-              </li>
-            
-          </ul>
-        
-      </li>
-    
-      <li>
-        <a href="#events">Events</a>
-        
-          <ul>
-            
-              <li>
-                <a href="#events/events-application-view-events">events </a>
-              </li>
-            
-              <li>
-                <a href="#events/freeze-view-freeze-options">freeze </a>
-              </li>
-            
-              <li>
-                <a href="#events/registerevents-application-view-registerevents-events">registerEvents </a>
-              </li>
-            
-              <li>
-                <a href="#events/unregisterevents-application-view-unregisterevents-event">unregisterEvents </a>
-              </li>
-            
-          </ul>
-        
-      </li>
-    
-      <li>
-        <a href="#templating">Templating</a>
-        
-          <ul>
-            
-              <li>
-                <a href="#templating/name-view-name">name </a>
-              </li>
-            
-              <li>
-                <a href="#templating/registerhelper-application-view-registerhelper-name-callback">registerHelper </a>
-              </li>
-            
-              <li>
-                <a href="#templating/template-view-template-name-attributes">template </a>
-              </li>
-            
-              <li>
-                <a href="#templating/view-view-view-name-attributes">view </a>
-              </li>
-            
-              <li>
-                <a href="#templating/html-view-html-content">html </a>
-              </li>
-            
-              <li>
-                <a href="#templating/render-view-render-content">render </a>
-              </li>
-            
-              <li>
-                <a href="#templating/setmodel-view-setmodel-model-options">setModel </a>
-              </li>
-            
-              <li>
-                <a href="#templating/context-view-context-model">context </a>
-              </li>
-            
-              <li>
-                <a href="#templating/setcollection-view-setcollection-collection-options">setCollection </a>
-              </li>
-            
-              <li>
-                <a href="#templating/itemcontext-view-itemcontext-model-index">itemContext </a>
-              </li>
-            
-              <li>
-                <a href="#templating/rendercollection-view-rendercollection">renderCollection </a>
-              </li>
-            
-              <li>
-                <a href="#templating/renderitem-view-renderitem-model-index">renderItem </a>
-              </li>
-            
-              <li>
-                <a href="#templating/renderempty-view-renderempty">renderEmpty </a>
-              </li>
-            
-              <li>
-                <a href="#templating/appenditem-view-appenditem-item-index">appendItem </a>
-              </li>
-            
-          </ul>
-        
-      </li>
-    
-      <li>
-        <a href="#form-handling">Form Handling</a>
-        
-          <ul>
-            
-              <li>
-                <a href="#form-handling/serialize-view-serialize-event-callback-options">serialize </a>
-              </li>
-            
-              <li>
-                <a href="#form-handling/populate-view-populate-attributes">populate </a>
-              </li>
-            
-              <li>
-                <a href="#form-handling/validateinput-view-validateinput-attributes">validateInput </a>
-              </li>
-            
-          </ul>
-        
-      </li>
-    
-      <li>
-        <a href="#mixins">Mixins</a>
-        
-          <ul>
-            
-              <li>
-                <a href="#mixins/registermixin-application-view-registermixin-name-callback-methods">registerMixin </a>
-              </li>
-            
-              <li>
-                <a href="#mixins/mixin-view-mixin-name">mixin </a>
-              </li>
-            
-          </ul>
-        
-      </li>
-    
-      <li>
-        <a href="#command-line-interface">Command Line Interface</a>
-        
-          <ul>
-            
-              <li>
-                <a href="#command-line-interface/create-thorax-create-project-name">create </a>
-              </li>
-            
-              <li>
-                <a href="#command-line-interface/router-thorax-router-module-name">router </a>
-              </li>
-            
-              <li>
-                <a href="#command-line-interface/view-thorax-view-module-name-view-name">view </a>
-              </li>
-            
-              <li>
-                <a href="#command-line-interface/collection-view-thorax-collection-view-module-name-view-name">collection-view </a>
-              </li>
-            
-              <li>
-                <a href="#command-line-interface/model-thorax-model-module-name-model-name">model </a>
-              </li>
-            
-              <li>
-                <a href="#command-line-interface/collection-thorax-collection-module-name-collection-name">collection </a>
-              </li>
-            
-              <li>
-                <a href="#command-line-interface/watch-lumbar-watch-lumbar-json-location-output-directory">watch </a>
-              </li>
-            
-              <li>
-                <a href="#command-line-interface/build-lumbar-build-lumbar-json-location-output-dir">build </a>
-              </li>
-            
-              <li>
-                <a href="#command-line-interface/server-bin-server-port-number">server </a>
-              </li>
-            
-          </ul>
-        
-      </li>
-    
-      <li>
-        <a href="#change-log">Change Log</a>
-        
-          <ul>
-            
-              <li>
-                <a href="#change-log/1-1">1.1</a>
-              </li>
-            
-          </ul>
-        
-      </li>
-    
-  </ul>
-  
-    <div class="extra" id="github">
-      <a href="https://github.com/walmartlabs/thorax">Source on Github</a>
-    </div>
-    
-      <div class="extra" id="github-issues">
-        <a href="https://github.com/walmartlabs/thorax/issues">Issues</a>
+      <div id="header">
+        <a href="#" id="logo">thorax</a>
       </div>
     
+    <ul id="sections">
+      
+        <li>
+          <a href="#overview">Overview</a>
+          
+            <ul>
+              
+                <li>
+                  <a href="#overview/quick-start">Quick Start</a>
+                </li>
+              
+                <li>
+                  <a href="#overview/project-structure">Project Structure</a>
+                </li>
+              
+            </ul>
+          
+        </li>
+      
+        <li>
+          <a href="#configuration">Configuration</a>
+          
+            <ul>
+              
+                <li>
+                  <a href="#configuration/modules">Modules</a>
+                </li>
+              
+                <li>
+                  <a href="#configuration/configure-thorax-configure-options">configure </a>
+                </li>
+              
+            </ul>
+          
+        </li>
+      
+        <li>
+          <a href="#routers-layout">Routers &amp; Layout</a>
+          
+            <ul>
+              
+                <li>
+                  <a href="#routers-layout/create-application-router-create-module-protoprops-classprops">create </a>
+                </li>
+              
+                <li>
+                  <a href="#routers-layout/view-router-view-name-attributes">view </a>
+                </li>
+              
+                <li>
+                  <a href="#routers-layout/setview-application-layout-setview-view">setView </a>
+                </li>
+              
+                <li>
+                  <a href="#routers-layout/view-lifecycle-events">View Lifecycle Events</a>
+                </li>
+              
+            </ul>
+          
+        </li>
+      
+        <li>
+          <a href="#loading-data">Loading Data</a>
+          
+            <ul>
+              
+                <li>
+                  <a href="#loading-data/load-model-collection-load-callback-failback-options">load </a>
+                </li>
+              
+                <li>
+                  <a href="#loading-data/bindtoroute-router-bindtoroute-callback-failback">bindToRoute </a>
+                </li>
+              
+            </ul>
+          
+        </li>
+      
+        <li>
+          <a href="#events">Events</a>
+          
+            <ul>
+              
+                <li>
+                  <a href="#events/events-application-view-events">events </a>
+                </li>
+              
+                <li>
+                  <a href="#events/freeze-view-freeze-options">freeze </a>
+                </li>
+              
+                <li>
+                  <a href="#events/registerevents-application-view-registerevents-events">registerEvents </a>
+                </li>
+              
+                <li>
+                  <a href="#events/unregisterevents-application-view-unregisterevents-event">unregisterEvents </a>
+                </li>
+              
+            </ul>
+          
+        </li>
+      
+        <li>
+          <a href="#templating">Templating</a>
+          
+            <ul>
+              
+                <li>
+                  <a href="#templating/name-view-name">name </a>
+                </li>
+              
+                <li>
+                  <a href="#templating/registerhelper-application-view-registerhelper-name-callback">registerHelper </a>
+                </li>
+              
+                <li>
+                  <a href="#templating/template-view-template-name-attributes">template </a>
+                </li>
+              
+                <li>
+                  <a href="#templating/view-view-view-name-attributes">view </a>
+                </li>
+              
+                <li>
+                  <a href="#templating/html-view-html-content">html </a>
+                </li>
+              
+                <li>
+                  <a href="#templating/render-view-render-content">render </a>
+                </li>
+              
+                <li>
+                  <a href="#templating/setmodel-view-setmodel-model-options">setModel </a>
+                </li>
+              
+                <li>
+                  <a href="#templating/context-view-context-model">context </a>
+                </li>
+              
+                <li>
+                  <a href="#templating/setcollection-view-setcollection-collection-options">setCollection </a>
+                </li>
+              
+                <li>
+                  <a href="#templating/itemcontext-view-itemcontext-model-index">itemContext </a>
+                </li>
+              
+                <li>
+                  <a href="#templating/rendercollection-view-rendercollection">renderCollection </a>
+                </li>
+              
+                <li>
+                  <a href="#templating/renderitem-view-renderitem-model-index">renderItem </a>
+                </li>
+              
+                <li>
+                  <a href="#templating/renderempty-view-renderempty">renderEmpty </a>
+                </li>
+              
+                <li>
+                  <a href="#templating/appenditem-view-appenditem-item-index">appendItem </a>
+                </li>
+              
+            </ul>
+          
+        </li>
+      
+        <li>
+          <a href="#form-handling">Form Handling</a>
+          
+            <ul>
+              
+                <li>
+                  <a href="#form-handling/serialize-view-serialize-event-callback-options">serialize </a>
+                </li>
+              
+                <li>
+                  <a href="#form-handling/populate-view-populate-attributes">populate </a>
+                </li>
+              
+                <li>
+                  <a href="#form-handling/validateinput-view-validateinput-attributes">validateInput </a>
+                </li>
+              
+            </ul>
+          
+        </li>
+      
+        <li>
+          <a href="#mixins">Mixins</a>
+          
+            <ul>
+              
+                <li>
+                  <a href="#mixins/registermixin-application-view-registermixin-name-callback-methods">registerMixin </a>
+                </li>
+              
+                <li>
+                  <a href="#mixins/mixin-view-mixin-name">mixin </a>
+                </li>
+              
+            </ul>
+          
+        </li>
+      
+        <li>
+          <a href="#command-line-interface">Command Line Interface</a>
+          
+            <ul>
+              
+                <li>
+                  <a href="#command-line-interface/create-thorax-create-project-name">create </a>
+                </li>
+              
+                <li>
+                  <a href="#command-line-interface/router-thorax-router-module-name">router </a>
+                </li>
+              
+                <li>
+                  <a href="#command-line-interface/view-thorax-view-module-name-view-name">view </a>
+                </li>
+              
+                <li>
+                  <a href="#command-line-interface/collection-view-thorax-collection-view-module-name-view-name">collection-view </a>
+                </li>
+              
+                <li>
+                  <a href="#command-line-interface/model-thorax-model-module-name-model-name">model </a>
+                </li>
+              
+                <li>
+                  <a href="#command-line-interface/collection-thorax-collection-module-name-collection-name">collection </a>
+                </li>
+              
+                <li>
+                  <a href="#command-line-interface/watch-lumbar-watch-lumbar-json-location-output-directory">watch </a>
+                </li>
+              
+                <li>
+                  <a href="#command-line-interface/build-lumbar-build-lumbar-json-location-output-dir">build </a>
+                </li>
+              
+                <li>
+                  <a href="#command-line-interface/server-bin-server-port-number">server </a>
+                </li>
+              
+            </ul>
+          
+        </li>
+      
+        <li>
+          <a href="#change-log">Change Log</a>
+          
+            <ul>
+              
+                <li>
+                  <a href="#change-log/1-1">1.1</a>
+                </li>
+              
+            </ul>
+          
+        </li>
+      
+    </ul>
     
-  
-  
-</div>
-<div id="content">
-  
-    <a href="http://github.com/walmartlabs/thorax" id="github-ribbon"><img src="https://a248.e.akamai.net/assets.github.com/img/7afbc8b248c68eb468279e8c17986ad46549fb71/687474703a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub"></a>
-  
-  <h1 id="title">Thorax</h1>
+      <div class="extra" id="github">
+        <a href="https://github.com/walmartlabs/thorax">Source on Github</a>
+      </div>
+      
+        <div class="extra" id="github-issues">
+          <a href="https://github.com/walmartlabs/thorax/issues">Issues</a>
+        </div>
+      
+      
+    
+    
+  </div>
+  <div id="content">
+    
+      <a href="http://github.com/walmartlabs/thorax" id="github-ribbon"><img src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"></a>
+    
+    <h1 id="title">Thorax</h1>
 <p>An opinionated Backbone application framework providing a filesystem structure, on demand module loading, model and collection view binding, inheritable view and DOM events, data loading helpers, form serialization / population and validation. Built using <a href="http://documentcloud.github.com/backbone/">Backbone</a>, <a href="http://documentcloud.github.com/underscore/">Underscore</a>, <a href="https://github.com/madrobby/zepto">Zepto</a>, <a href="http://www.handlebarsjs.com/">Handlebars</a>, <a href="http://learnboost.github.com/stylus/">Stylus</a> and <a href="http://walmartlabs.github.com/lumbar">Lumbar</a>.
 
 </p><iframe src="http://markdotto.github.com/github-buttons/github-btn.html?user=walmartlabs&amp;repo=thorax&amp;type=watch&amp;count=false&amp;size=large" allowtransparency="true" frameborder="0" scrolling="0" width="170px" height="30px"></iframe>
@@ -911,5 +912,6 @@ Application.View.extend({
 <li>added {{collection}} helper, _collectionSelector is now deprecated and internally defaults to "[data-collection-cid], for backwards compatibility set it to ".collection" in your view classes.</li>
 </ul>
 
+  </div>
 </div></body>
 </html>
