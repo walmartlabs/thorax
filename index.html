@@ -66,10 +66,6 @@
             <ul>
               
                 <li>
-                  <a href="#configuration/modules">Modules</a>
-                </li>
-              
-                <li>
                   <a href="#configuration/configure-thorax-configure-options">configure </a>
                 </li>
               
@@ -91,11 +87,19 @@
                 </li>
               
                 <li>
+                  <a href="#routers-layout/layout-application-layout">layout </a>
+                </li>
+              
+                <li>
                   <a href="#routers-layout/setview-application-layout-setview-view">setView </a>
                 </li>
               
                 <li>
                   <a href="#routers-layout/view-lifecycle-events">View Lifecycle Events</a>
+                </li>
+              
+                <li>
+                  <a href="#routers-layout/anchorclick-application-layout-anchorclick">anchorClick </a>
                 </li>
               
             </ul>
@@ -129,7 +133,7 @@
                 </li>
               
                 <li>
-                  <a href="#events/freeze-view-freeze-options">freeze </a>
+                  <a href="#events/nested-nested-eventname-selector">nested </a>
                 </li>
               
                 <li>
@@ -138,6 +142,14 @@
               
                 <li>
                   <a href="#events/unregisterevents-application-view-unregisterevents-event">unregisterEvents </a>
+                </li>
+              
+                <li>
+                  <a href="#events/freeze-view-freeze-options">freeze </a>
+                </li>
+              
+                <li>
+                  <a href="#events/_addevent-view-_addevent-params">_addEvent </a>
                 </li>
               
             </ul>
@@ -199,6 +211,10 @@
               
                 <li>
                   <a href="#templating/renderempty-view-renderempty">renderEmpty </a>
+                </li>
+              
+                <li>
+                  <a href="#templating/emptycontext-view-emptycontext">emptyContext </a>
                 </li>
               
                 <li>
@@ -298,6 +314,10 @@
             <ul>
               
                 <li>
+                  <a href="#change-log/1-2">1.2</a>
+                </li>
+              
+                <li>
                   <a href="#change-log/1-1">1.1</a>
                 </li>
               
@@ -328,7 +348,7 @@
 
 </p><iframe src="http://markdotto.github.com/github-buttons/github-btn.html?user=walmartlabs&amp;repo=thorax&amp;type=watch&amp;count=false&amp;size=large" allowtransparency="true" frameborder="0" scrolling="0" width="170px" height="30px"></iframe>
 <h3 id="overview/quick-start">Quick Start</h3>
-<p>Thorax can be used <a href="https://github.com/walmartlabs/thorax/blob/master/thorax.js">standalone</a> but is designed to work best with <a href="http://walmartlabs.github.com/lumbar">Lumbar</a>. The easiest way to setup a new Thoax + Lumbar project is with the thorax command line tool or by <a href="https://github.com/walmartlabs/thorax-example">downloading the sample project</a> it creates. To use the command line tools you'll need <a href="http://nodejs.org/">node</a> (we recommend using <a href="https://github.com/creationix/nvm">nvm</a> to install node) and <a href="http://npmjs.org/">npm</a>. If you are on a mac you'll need <a href="https://developer.apple.com/xcode/">Xcode</a> installed to run gcc.
+<p>Thorax can be used <a href="https://github.com/walmartlabs/thorax/blob/master/thorax.js">standalone</a> but is designed to work best with <a href="http://walmartlabs.github.com/lumbar">Lumbar</a>. The easiest way to setup a new Thoax + Lumbar project is with the thorax command line tool or by <a href="https://github.com/walmartlabs/thorax-example">downloading the sample project</a> it creates. To use the command line tools you'll need <a href="http://nodejs.org/">node</a> and <a href="http://npmjs.org/">npm</a>.
 
 </p>
 <pre><code><span class="title">npm</span> install -g lumbar thorax
@@ -351,13 +371,6 @@
 <li><code>thorax.json</code> - configuration for the <a href="#command">command line interface</a></li>
 </ul>
 <h2 id="configuration">Configuration</h2>
-<h3 id="configuration/modules">Modules</h3>
-<p>In your <code>lumbar.json</code> file you can specify the modules that compose your application. Any files inside of the <code>base</code> module will always be present, while files specified in other modules will only be loaded when a route from that module has been visited. <a href="http://walmartlabs.github.com/lumbar">See the Lumbar docs</a> for a detailed explanation.
-
-</p>
-<p>Any configuration should be done inside of <code>js/init.js</code>. The <code>Application</code> object will not exist yet, you can reference it as <code>exports</code>.
-
-</p>
 <h3 id="configuration/configure-thorax-configure-options" class="signature">configure <em>Thorax.configure(options)</em></h3>
 <p>Start Thorax and create the <code>Application.layout</code> object.
 
@@ -368,11 +381,10 @@
 <li><code>templatePathPrefix</code> - Path where your templates are located. Defaults to "templates/"</li>
 </ul>
 <h2 id="routers-layout">Routers &amp; Layout</h2>
-<p>Thorax + Lumbar expects that you create one router of the same name as the module, per module. In the example project there is a <code>hello-world</code> module and a corresponding <code>js/routers/hello-world.js</code> file.
-
+<p>In your <code>lumbar.json</code> file you can specify the modules that compose your application. Each module is composed of routes, scripts, styles and templates. Thorax + Lumbar creates an internal router that listens to all routes in the application, lazily loading modules then calling a method on the router in that module as you would normally expect in a Backbone application.
 </p>
 <h3 id="routers-layout/create-application-router-create-module-protoprops-classprops" class="signature">create <em>Application.Router.create(module, protoProps [,classProps])</em></h3>
-<p>Returns an <code>Application.Router</code> subclass. The module object will be automatically available inside the router file assuming it is part of a module.
+<p>Generate an <code>Application.Router</code> subclass. The <code>module</code> object will be automatically available inside the router file. Thorax expects that you create one router of the same name as the module, per module. In the example project there is a <code>hello-world</code> module and a corresponding <code>js/routers/hello-world.js</code> file.
 
 </p>
 <pre><code><span class="tag">Application</span><span class="class">.Router</span><span class="class">.create</span>(<span class="tag">module</span>, <span class="rules">{
@@ -385,8 +397,12 @@
 <p>Create a new view instance, looking it up by the <code>name</code> property in the view's class definition.
 
 </p>
+<h3 id="routers-layout/layout-application-layout" class="signature">layout <em>Application.layout</em></h3>
+<p>Displays and manages views. By default there is only one layout object, <code>Application.layout</code> which is created then attached to the page when <code>Thorax.configure</code> is called. Additional layout objects having all of the same functionality as <code>Application.layout</code> can be created by calling <code>new Thorax.Layout()</code>.
+
+</p>
 <h3 id="routers-layout/setview-application-layout-setview-view" class="signature">setView <em>Application.layout.setView(view)</em></h3>
-<p>Append the view to the <code>Application.layout</code> object, displaying it on the page. This method is aliased to <code>Application.Router.prototype.setView</code> making it available as <code>this.setView</code> inside of router methods:
+<p>Append the view to the <code>Application.layout</code> object, displaying it on the page.
 
 </p>
 <pre><code>routerMethod: <span class="function"><span class="keyword">function</span><span class="params">(id)</span> {</span>
@@ -394,9 +410,9 @@
   view.bind(<span class="string">'ready'</span>, <span class="function"><span class="keyword">function</span><span class="params">()</span> {</span>
     view.$(<span class="string">'input:first'</span>)[<span class="number">0</span>].focus();
   });
-  <span class="keyword">this</span>.setView(view);
+  Application.layout.setView(view);
 }</code></pre>
-<p>This will trigger two events on the <code>Application.layout</code> object, both of which will receive the new view and the old view (if present):
+<p>This will trigger two events on the <code>layout</code> object, both of which will receive the new view and the old view (if present):
 
 </p>
 <ul>
@@ -404,7 +420,7 @@
 <li><code>change:view:end</code> - old view destroyed, new view in DOM and ready</li>
 </ul>
 <h3 id="routers-layout/view-lifecycle-events">View Lifecycle Events</h3>
-<p>By calling <code>Application.layout.setView</code> on a given view various events will be triggered on that view and the previous view.
+<p>By calling <code>setView</code> on a layout object various events will be triggered on the view passed and the previous view that was passed if any.
 
 </p>
 <ul>
@@ -415,49 +431,27 @@
 <li><code>deactivated</code> - <em>setView</em> called with the next view, <em>view.el</em> still attached to parent</li>
 <li><code>destroyed</code> - after the <em>view.el</em> has been removed from parent, immediately before <em>view.el</em> and child views are destroyed</li>
 </ul>
+<h3 id="routers-layout/anchorclick-application-layout-anchorclick" class="signature">anchorClick <em>Application.layout.anchorClick</em></h3>
+<p>Layout objects listen for <code>click a</code> on all elements inside them (therefore inside any views passed to <code>setView</code>), triggering the corresponding route if one matches when clicked. Add a <code>data-external</code> attribute on links you want to be ignored by anchorClick.
+
+</p>
+<pre><code><span class="tag">&lt;<span class="title">a</span> <span class="attribute">href</span>=<span class="value">"#/internal"</span></span>Internal<span class="tag">&lt;/<span class="title">a</span></span>
+<span class="tag">&lt;<span class="title">a</span> <span class="attribute">href</span>=<span class="value">"/external"</span> <span class="attribute">data-external</span>=<span class="value">"true"</span></span>External<span class="tag">&lt;/<span class="title">a</span></span></code></pre>
 <h2 id="loading-data">Loading Data</h2>
-<p>Various components in Thorax trigger two load events: <code>load:start</code> and <code>load:end</code>. They will be triggered in the following circumstances:
+<p>Thorax is primarily a view framework but provides <code>Thorax.Model</code> and <code>Thorax.Collection</code> classes which should be used when passed to <code>setModel</code> or <code>setCollection</code>. These are subclassed as <code>Application.Model</code> and <code>Application.Collection</code> in all of the example projects.
 
 </p>
-<ul>
-<li>on a model or collection when <code>sync</code> is called (via <code>fetch</code>, <code>save</code>, etc)</li>
-<li>on a view, when model or collection has been set on the view with <code>setModel</code> or <code>setCollection</code> and the model or collection triggers the event</li>
-<li>on the <code>Application</code> object when a module is loaded, or when <code>model/collection.load</code> is called</li>
-</ul>
-<p>To implement both modal (blocking) and inline load indicators in your application:
-
-</p>
-<pre><code>Application.bind(<span class="literal">'load:start'</span>, <span class="keyword">function</span>() {
-  //show modal loading indicator
-});
-Application.bind(<span class="literal">'load:end'</span>, <span class="keyword">function</span>() {
-  //hide modal loading indicator
-});
-
-Application.View.registerEvents({
-  <span class="literal">'load:start'</span>: <span class="keyword">function</span>() {
-    //show inline loading indicator
-  },
-  <span class="literal">'load:end'</span>: <span class="keyword">function</span>() {
-    //hide inline loading indicator
-  }
-});</code></pre>
 <h3 id="loading-data/load-model-collection-load-callback-failback-options" class="signature">load <em>model/collection.load(callback [,failback [,options]])</em></h3>
-<p>Use this method when you need to display a blocking load indicator or can't set the next view until the requested data has loaded.
-
-</p>
-<p>Calls <code>fetch</code> on the model or collection, triggering <code>load:start</code> and <code>load:end</code> on both the model / collection and the <code>Application</code> object. <code>callback</code> and <code>failback</code> will be used as arguments to <code>bindToRoute</code>. <code>options</code> will be passed to the <code>fetch</code> call on the model or collection if present.
+<p>Calls <code>fetch</code> on the model or collection ensuring the callbacks will only be called if the route does not change. <code>callback</code> and <code>failback</code> will be used as arguments to <code>bindToRoute</code>. <code>options</code> will be passed to the <code>fetch</code> call on the model or collection if present.
 
 </p>
 <pre><code>routerMethod: <span class="function"><span class="keyword">function</span><span class="params">(id)</span> {</span>
   <span class="keyword">var</span> view = <span class="keyword">this</span>.view(<span class="string">'view/name'</span>);
   <span class="keyword">var</span> model = <span class="keyword">new</span> Application.Model({id: id});
-  <span class="comment">//will trigger load:start on Application, model.fetch call</span>
   model.load(_.bind(<span class="function"><span class="keyword">function</span><span class="params">()</span> {</span>
     <span class="comment">//callback only called if browser still on this route</span>
-    <span class="comment">//load:end triggered on Application</span>
     view.setModel(model);
-    <span class="keyword">this</span>.setView(view);
+    Application.layout.setView(view);
   }, <span class="keyword">this</span>), <span class="function"><span class="keyword">function</span><span class="params">()</span> {</span>
     <span class="comment">//failback only called if browser has left this route</span>
   });
@@ -504,10 +498,23 @@ Application.View.registerEvents({
   _onClick: <span class="function"><span class="keyword">function</span><span class="params">(event)</span>{</span>},
   _onChange: <span class="function"><span class="keyword">function</span><span class="params">()</span>{</span>}
 });</code></pre>
-<h3 id="events/freeze-view-freeze-options" class="signature">freeze <em>view.freeze([options])</em></h3>
-<p><code>setModel</code> and <code>setCollection</code> add event handlers to the view, call freeze to remove them. <code>options</code> may contain a <code>model</code> or <code>collection</code> key that should contain the model or collection that was set with <code>setModel</code> or <code>setCollection</code>.
+<h3 id="events/nested-nested-eventname-selector" class="signature">nested <em>nested eventName [selector]</em></h3>
+<p>If a view has child views, the parent view by default will only listen for events triggered directly on the parent or DOM elements belonging directly to the parent, and not the children. The <code>nested</code> keyword can be used in the <code>events</code> hash or in a hash passed to <code>registerEvents</code> to listen for events triggered by the parents or it's children. 
 
 </p>
+<pre><code>Application.View.extend({
+  name: <span class="string">'parent'</span>,
+  events: {
+    <span class="string">'nested eventName'</span>: <span class="function"><span class="keyword">function</span><span class="params">(view, arg)</span> {</span>
+      <span class="comment">//called with a context of parent, the triggering</span>
+      <span class="comment">//view is always passed as the first argument followed</span>
+      <span class="comment">//by any other arguments passed to trigger, if any</span>
+    },
+    <span class="string">'nested click'</span>: <span class="function"><span class="keyword">function</span><span class="params">(event)</span> {</span>
+      <span class="comment">//always called with a context of parent</span>
+    }
+  }
+});</code></pre>
 <h3 id="events/registerevents-application-view-registerevents-events" class="signature">registerEvents <em>Application.View.registerEvents(events)</em></h3>
 <p>Add events to all instances of a view. Accepts a hash in the same format as described in <code>Application.View.events</code>
 
@@ -530,8 +537,24 @@ Subclass.registerEvents({
 <pre><code>Subclass.unregisterEvents(); //all events
 Application.View.unregisterEvents(<span class="comment">'click a');</span>
 Application.View.unregisterEvents(<span class="comment">'model', 'change');</span></code></pre>
+<h3 id="events/freeze-view-freeze-options" class="signature">freeze <em>view.freeze([options])</em></h3>
+<p><code>setModel</code> and <code>setCollection</code> add event handlers to the view, call freeze to remove them. <code>options</code> may contain a <code>model</code> or <code>collection</code> key that should contain the model or collection that was set with <code>setModel</code> or <code>setCollection</code>.
+
+</p>
+<h3 id="events/_addevent-view-_addevent-params" class="signature">_addEvent <em>view._addEvent(params)</em></h3>
+<p>This method is never called directly, but can be specified to override the behavior of the <code>events</code> hash or a hash passed to <code>registerEvents</code>. For each event passed <code>_addEvent</code> will be called with a hash containing:
+
+</p>
+<ul>
+<li>type "view" || "DOM"</li>
+<li>name (DOM events will begin with ".delegateEvents")</li>
+<li>originalName</li>
+<li>selector (DOM events only)</li>
+<li>handler</li>
+<li>nested (Boolean)</li>
+</ul>
 <h2 id="templating">Templating</h2>
-<p>Lumbar + Thorax uses <a href="http://www.handlebarsjs.com">Handlebars</a> as the built in templating language.
+<p>Thorax provides deep integration with <a href="http://www.handlebarsjs.com">Handlebars</a>. By default one view maps to one Handlebars template of the same name. View attributes are made automatically availble to template as are model attributes if a model was set on a view with <code>setModel</code>. Views having a collection set via <code>setCollection</code> will look for corresponding <code>view-name-item.handlebars</code> and <code>view-name-empty.handlebars</code> templates. The <code>view</code> and <code>template</code> helpers are provided to allow the direct inclusion of other views or templates inside of templates.
 
 </p>
 <h3 id="templating/name-view-name" class="signature">name <em>view.name</em></h3>
@@ -546,19 +569,25 @@ Application.View.unregisterEvents(<span class="comment">'model', 'change');</spa
 
 </p>
 <pre><code><span class="title">var</span> <span class="class"><span class="keyword">instance</span> = this.view('view-name');</span></code></pre>
-<h3 id="templating/registerhelper-application-view-registerhelper-name-callback" class="signature">registerHelper <em>Application.View.registerHelper(name, callback)</em></h3>
-<p>Register a new helper that will be available in all handlebars templates
+<p>Each DOM element on the page containing a view will have the name set on the <code>data-view-name</code> attribute, allowing you to style your views with the following selector:
 
 </p>
-<pre><code>Application.View.registerHelper('bold', function(content, options) {
-  //options.hash contains key, value pairs from named / html arguments
-  //to the helper
-  return '<span class="tag">&lt;<span class="title">b</span></span>' + content + '<span class="tag">&lt;/<span class="title">b</span></span>';
+<pre><code><span class="attr_selector">[data-view-name="view-name"]</span> <span class="rules">{
+  <span class="rule"><span class="attribute">font-size</span>:<span class="value"> <span class="number">2</span>em</span>;</span>
+<span class="rule">}</span></span></code></pre>
+<h3 id="templating/registerhelper-application-view-registerhelper-name-callback" class="signature">registerHelper <em>Application.View.registerHelper(name, callback)</em></h3>
+<p>Register a new helper that will be available in all handlebars templates. HTML generated from helpers should always be returned in a new <code>Handlebars.SafeString</code> object.
+
+</p>
+<pre><code>Application.View.registerHelper(<span class="string">'bold'</span>, <span class="function"><span class="keyword">function</span><span class="params">(content, options)</span> {</span>
+  <span class="comment">//options.hash contains key, value pairs from named / html arguments</span>
+  <span class="comment">//to the helper</span>
+  <span class="keyword">return</span> <span class="keyword">new</span> Handlebars.SafeString(<span class="string">'&lt;b'</span> + content + <span class="string">'&lt;/b'</span>);
 });
 
-<span class="variable">{{bold "Text"}}</span></code></pre>
+{{bold <span class="string">"Text"</span>}}</code></pre>
 <h3 id="templating/template-view-template-name-attributes" class="signature">template <em>view.template(name [,attributes])</em></h3>
-<p>Synchronously render a given template by file name sans extension. <code>render</code> and <code>renderCollection</code> both use this method. The scope inside of a template will contain all of the non function attributes of a view (which can be passed to the view constructor) and a <code>cid</code> attribute which is a unique id for each rendering of a given template.
+<p>Render a given template by file name sans extension. <code>render</code> and <code>renderCollection</code> both use this method. The scope inside of a template will contain all of the non function attributes of a view (which can be passed to the view constructor) and a <code>cid</code> attribute which is a unique id for each rendering of a given template.
 
 </p>
 <pre><code>var klass = Application.View.extend({
@@ -616,13 +645,14 @@ console.log(view.template({
 <p>To implement custom rendering behavior in a subclass override the method and pass a <code>content</code> argument to render which may be an HTML string, DOM Element or an array of DOM Elements.
 
 </p>
-<pre><code><span class="keyword">var</span> ChildView = Application.View.extend({
-  render: <span class="function"><span class="keyword">function</span><span class="params">()</span> {</span>
-    <span class="keyword">return</span> Application.View.prototype.render.call(<span class="keyword">this</span>, <span class="string">'content'</span>);
-  }
+<pre><code><span class="tag">Application</span><span class="class">.View</span><span class="class">.extend</span>(<span class="rules">{
+  <span class="rule"><span class="attribute">name</span>:<span class="value"> <span class="string">'child'</span>,
+  render: <span class="function">function()</span> {
+    return Application.View.prototype.render.<span class="function">call(this, <span class="string">'content'</span>)</span></span>;</span>
+  <span class="rule">}</span></span>
 });</code></pre>
 <h3 id="templating/setmodel-view-setmodel-model-options" class="signature">setModel <em>view.setModel(model, options)</em></h3>
-<p>Set the <em>model</em> attribute of the view. Dep
+<p>Set the *model<code> attribute of the view. By default when the model is populated (either when it is passed to </code>setModel<code> or after it is fetched) the </code>render<code> will be called on the view, with the view's attributes and the model's </code>attributes<code> available inside of the template. A </code>change<code> event on the model (often triggered by the model's </code>set<code> method) will cause the view to call </code>render` again.
 
 </p>
 <ul>
@@ -668,13 +698,10 @@ console.log(view.template({
 
 </p>
 <ul>
-<li><code>templates/name.handlebars</code></li>
-<li><code>templates/name-item.handlebars</code> - must have exactly one outer element</li>
-<li><code>templates/name-empty.handlebars</code></li>
+<li><code>templates/name.handlebars</code> - must contain the {{collection helper}}</li>
+<li><code>templates/name-item.handlebars</code> - must have at least one outer HTML element</li>
+<li><code>templates/name-empty.handlebars</code> - must have at least one outer HTML element</li>
 </ul>
-<p>You can use the <code>thorax collection-view $module-name $view-name</code> command to auto generate the view files, templates and lumbar.json entries.
-
-</p>
 <p>To display a collection in your template use the <code>{{collection}}</code> view helper. You can pass a custom <code>tag</code> name (defaults to "div") or any HTML attributes.
 
 </p>
@@ -715,8 +742,12 @@ renderItem: <span class="function"><span class="keyword">function</span><span cl
 <pre><code>renderEmpty: <span class="keyword">function</span>() {
   <span class="keyword">return</span> this.template(this.name + <span class="literal">'-empty'</span>);
 }</code></pre>
+<h3 id="templating/emptycontext-view-emptycontext" class="signature">emptyContext <em>view.emptyContext()</em></h3>
+<p>Just like the <code>context</code> method, but called when <code>renderEmpty</code> is called.
+
+</p>
 <h3 id="templating/appenditem-view-appenditem-item-index" class="signature">appendItem <em>view.appendItem(item [,index])</em></h3>
-<p>Append and item at a given index. If no index is passed the index of the model in the current collection will be used, if the first argument is not a model, 0 will be used. Item may be:
+<p>Append and item at a given index. If no index is passed the index of the model in the current collection will be used, if the first argument is not a model, 0 will be used. <code>item</code> may be:
 
 </p>
 <ul>
@@ -838,7 +869,8 @@ Application.View.extend({
 <p>Create a new thorax project. All other thorax commands are run from inside the project directory.
 
 </p>
-<pre><code><span class="title">cd</span> todos</code></pre>
+<pre><code><span class="title">thorax</span> create todos
+<span class="title">cd</span> todos</code></pre>
 <h3 id="command-line-interface/router-thorax-router-module-name" class="signature">router <em>thorax router $module-name</em></h3>
 <p>Generate a router class and a module of the same name. A module is defined in <em>lumbar.json</em> and is composed of models, collections, views, templates, styles and a single router. Lumbar combines these files into a single js and single css file which are lazily loaded when one of the module's route's is visited. Running:
 
@@ -907,9 +939,24 @@ Application.View.extend({
 </p>
 <pre><code>.<span class="regexp">/bin/server</span> <span class="number">8000</span></code></pre>
 <h2 id="change-log">Change Log</h2>
+<h3 id="change-log/1-2">1.2</h3>
+<ul>
+<li>load:start and load:end handling have been moved into a plugin</li>
+<li>nested event keyword now works with views, the callback will always be called with the context of the declaring view and will always recieve the triggering view as the first argument</li>
+<li>empty() the collection element before renderCollection()</li>
+</ul>
 <h3 id="change-log/1-1">1.1</h3>
 <ul>
-<li>added {{collection}} helper, _collectionSelector is now deprecated and internally defaults to "[data-collection-cid], for backwards compatibility set it to ".collection" in your view classes.</li>
+<li>added {{collection}} helper</li>
+<li>_collectionSelector is now deprecated and internally defaults to [data-collection-cid], for backwards compatibility set it to ".collection" in your view classes</li>
+<li>added templatePathPrefix option to configure()</li>
+<li>unit tests!</li>
+<li>added nested event keyword</li>
+<li>added _addEvent method for subclasses to customize event registration</li>
+<li>registerEvents is now an instance method in addition to a class method</li>
+<li>added emptyContext method, called from renderEmpty</li>
+<li>checks for view.name property are now lazy</li>
+<li>exceptions are now thrown instead of using console.error</li>
 </ul>
 
   </div>
