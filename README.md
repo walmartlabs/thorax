@@ -28,12 +28,6 @@ This will create a hello world project, for a more complete example clone the [T
 
 ## Configuration
 
-### Modules
-
-In your `lumbar.json` file you can specify the modules that compose your application. Any files inside of the `base` module will always be present, while files specified in other modules will only be loaded when a route from that module has been visited. [See the Lumbar docs](http://walmartlabs.github.com/lumbar) for a detailed explanation.
-
-Any configuration should be done inside of `js/init.js`. The `Application` object will not exist yet, you can reference it as `exports`.
-
 ### configure *Thorax.configure(options)*
 
 Start Thorax and create the `Application.layout` object.
@@ -44,11 +38,10 @@ Start Thorax and create the `Application.layout` object.
 
 ## Routers & Layout
 
-Thorax + Lumbar expects that you create one router of the same name as the module, per module. In the example project there is a `hello-world` module and a corresponding `js/routers/hello-world.js` file.
-
+In your `lumbar.json` file you can specify the modules that compose your application. Each module is composed of routes, scripts, styles and templates. Thorax + Lumbar creates an internal router that listens to all routes in the application, lazily loading modules then calling a method on the router in that module as you would normally expect in a Backbone application.
 ### create *Application.Router.create(module, protoProps [,classProps])*
 
-Returns an `Application.Router` subclass. The module object will be automatically available inside the router file assuming it is part of a module.
+Generate an `Application.Router` subclass. The `module` object will be automatically available inside the router file. Thorax expects that you create one router of the same name as the module, per module. In the example project there is a `hello-world` module and a corresponding `js/routers/hello-world.js` file.
 
     Application.Router.create(module, {
       index: function() {}
@@ -60,26 +53,30 @@ Each router method should redirect to another router method or call `Application
 
 Create a new view instance, looking it up by the `name` property in the view's class definition.
 
+### layout *Application.layout*
+
+Displays and manages views. By default there is only one layout object, `Application.layout` which is created then attached to the page when `Thorax.configure` is called. Additional layout objects having all of the same functionality as `Application.layout` can be created by calling `new Thorax.Layout()`.
+
 ### setView *Application.layout.setView(view)*
 
-Append the view to the `Application.layout` object, displaying it on the page. This method is aliased to `Application.Router.prototype.setView` making it available as `this.setView` inside of router methods:
+Append the view to the `Application.layout` object, displaying it on the page.
 
     routerMethod: function(id) {
       var view = this.view('view/name');
       view.bind('ready', function() {
         view.$('input:first')[0].focus();
       });
-      this.setView(view);
+      Application.layout.setView(view);
     }
 
-This will trigger two events on the `Application.layout` object, both of which will receive the new view and the old view (if present):
+This will trigger two events on the `layout` object, both of which will receive the new view and the old view (if present):
 
 - `change:view:start` - immediately after `setView` call
 - `change:view:end` - old view destroyed, new view in DOM and ready
 
 ### View Lifecycle Events
 
-By calling `Application.layout.setView` on a given view various events will be triggered on that view and the previous view.
+By calling `setView` on a layout object various events will be triggered on the view passed and the previous view that was passed if any.
 
 - `initialize:before` - during constructor call, before *initialize* has been called
 - `initialize:after` - during construcor call, after *initialize* has been called
@@ -88,7 +85,16 @@ By calling `Application.layout.setView` on a given view various events will be t
 - `deactivated` - *setView* called with the next view, *view.el* still attached to parent
 - `destroyed` - after the *view.el* has been removed from parent, immediately before *view.el* and child views are destroyed
 
+### anchorClick *Application.layout.anchorClick*
+
+Layout objects listen for `click a` on all elements inside them (therefore inside any views passed to `setView`), triggering the corresponding route if one matches when clicked. Add a `data-external` attribute on links you want to be ignored by anchorClick.
+
+    <a href="#/internal">Internal</a>
+    <a href="/external" data-external="true">External</a>
+
 ## Loading Data
+
+Thorax is primarily a view framework but provides `Thorax.Model` and `Thorax.Collection` classes which should be used when passed to `setModel` or `setCollection`. These are subclassed as `Application.Model` and `Application.Collection` in all of the example projects.
 
 ### load *model/collection.load(callback [,failback [,options]])*
 
@@ -100,7 +106,7 @@ Calls `fetch` on the model or collection ensuring the callbacks will only be cal
       model.load(_.bind(function() {
         //callback only called if browser still on this route
         view.setModel(model);
-        this.setView(view);
+        Application.layout.setView(view);
       }, this), function() {
         //failback only called if browser has left this route
       });
@@ -148,9 +154,23 @@ An example of a view implementing all of the above:
       _onChange: function(){}
     });
 
-### freeze *view.freeze([options])*
+### nested *nested eventName [selector]*
 
-`setModel` and `setCollection` add event handlers to the view, call freeze to remove them. `options` may contain a `model` or `collection` key that should contain the model or collection that was set with `setModel` or `setCollection`.
+If a view has child views, the parent view by default will only listen for events triggered directly on the parent or DOM elements belonging directly to the parent, and not the children. The `nested` keyword can be used in the `events` hash or in a hash passed to `registerEvents` to listen for events triggered by the parents or it's children. 
+
+    Application.View.extend({
+      name: 'parent',
+      events: {
+        'nested eventName': function(view, arg) {
+          //called with a context of parent, the triggering
+          //view is always passed as the first argument followed
+          //by any other arguments passed to trigger, if any
+        },
+        'nested click': function(event) {
+          //always called with a context of parent
+        }
+      }
+    });
 
 ### registerEvents *Application.View.registerEvents(events)*
 
@@ -176,9 +196,24 @@ Unregister events for all instances and subclasses of a given view class. Note t
     Application.View.unregisterEvents('click a');
     Application.View.unregisterEvents('model', 'change');
 
+### freeze *view.freeze([options])*
+
+`setModel` and `setCollection` add event handlers to the view, call freeze to remove them. `options` may contain a `model` or `collection` key that should contain the model or collection that was set with `setModel` or `setCollection`.
+
+### _addEvent *view._addEvent(params)*
+
+This method is never called directly, but can be specified to override the behavior of the `events` hash or a hash passed to `registerEvents`. For each event passed `_addEvent` will be called with a hash containing:
+
+- type "view" || "DOM"
+- name (DOM events will begin with ".delegateEvents")
+- originalName
+- selector (DOM events only)
+- handler
+- nested (Boolean)
+
 ## Templating
 
-Lumbar + Thorax uses [Handlebars](http://www.handlebarsjs.com) as the built in templating language.
+Thorax provides deep integration with [Handlebars](http://www.handlebarsjs.com). By default one view maps to one Handlebars template of the same name. View attributes are made automatically availble to template as are model attributes if a model was set on a view with `setModel`. Views having a collection set via `setCollection` will look for corresponding `view-name-item.handlebars` and `view-name-empty.handlebars` templates. The `view` and `template` helpers are provided to allow the direct inclusion of other views or templates inside of templates.
 
 ### name *view.name*
 
@@ -193,21 +228,27 @@ Every view descending from Application.View must have a name attribute. `render`
 
     var instance = this.view('view-name');
 
+Each DOM element on the page containing a view will have the name set on the `data-view-name` attribute, allowing you to style your views with the following selector:
+    
+    [data-view-name="view-name"] {
+      font-size: 2em;
+    }
+
 ### registerHelper *Application.View.registerHelper(name, callback)*
 
-Register a new helper that will be available in all handlebars templates
+Register a new helper that will be available in all handlebars templates. HTML generated from helpers should always be returned in a new `Handlebars.SafeString` object.
 
     Application.View.registerHelper('bold', function(content, options) {
       //options.hash contains key, value pairs from named / html arguments
       //to the helper
-      return '<b>' + content + '</b>';
+      return new Handlebars.SafeString('<b>' + content + '</b>');
     });
 
     {{bold "Text"}}
 
 ### template *view.template(name [,attributes])*
 
-Synchronously render a given template by file name sans extension. `render` and `renderCollection` both use this method. The scope inside of a template will contain all of the non function attributes of a view (which can be passed to the view constructor) and a `cid` attribute which is a unique id for each rendering of a given template.
+Render a given template by file name sans extension. `render` and `renderCollection` both use this method. The scope inside of a template will contain all of the non function attributes of a view (which can be passed to the view constructor) and a `cid` attribute which is a unique id for each rendering of a given template.
     
     var klass = Application.View.extend({
       name: 'view-name'
@@ -265,7 +306,8 @@ Render a template with the filename of the view's `name` attribute (sans extensi
 
 To implement custom rendering behavior in a subclass override the method and pass a `content` argument to render which may be an HTML string, DOM Element or an array of DOM Elements.
 
-    var ChildView = Application.View.extend({
+    Application.View.extend({
+      name: 'child',
       render: function() {
         return Application.View.prototype.render.call(this, 'content');
       }
@@ -273,7 +315,7 @@ To implement custom rendering behavior in a subclass override the method and pas
 
 ### setModel *view.setModel(model, options)*
 
-Set the *model* attribute of the view. Dep
+Set the *model` attribute of the view. By default when the model is populated (either when it is passed to `setModel` or after it is fetched) the `render` will be called on the view, with the view's attributes and the model's `attributes` available inside of the template. A `change` event on the model (often triggered by the model's `set` method) will cause the view to call `render` again.
 
 - `fetch` - auto fetch the model if empty, defaults to true, if an object is passed it will be used as the options to `fetch`
 - `success` - a callback to call when fetch() succeeds, defaults to false
@@ -315,11 +357,9 @@ Set the *collection* attribute of the view. This will bind events on collection 
 
 Collection rendering assumes that the following templates will be present.
 
-- `templates/name.handlebars`
-- `templates/name-item.handlebars` - must have exactly one outer element
-- `templates/name-empty.handlebars`
-
-You can use the `thorax collection-view $module-name $view-name` command to auto generate the view files, templates and lumbar.json entries.
+- `templates/name.handlebars` - must contain the {{collection helper}}
+- `templates/name-item.handlebars` - must have at least one outer HTML element
+- `templates/name-empty.handlebars` - must have at least one outer HTML element
 
 To display a collection in your template use the `{{collection}}` view helper. You can pass a custom `tag` name (defaults to "div") or any HTML attributes.
 
@@ -361,9 +401,13 @@ Override this method to specify what happens when `renderCollection` is called w
       return this.template(this.name + '-empty');
     }
 
+### emptyContext *view.emptyContext()*
+
+Just like the `context` method, but called when `renderEmpty` is called.
+
 ### appendItem *view.appendItem(item [,index])*
 
-Append and item at a given index. If no index is passed the index of the model in the current collection will be used, if the first argument is not a model, 0 will be used. Item may be:
+Append and item at a given index. If no index is passed the index of the model in the current collection will be used, if the first argument is not a model, 0 will be used. `item` may be:
 
 - a model which will be passed to `renderItem`
 - an arbitrary html string which should contain exactly one outer element
@@ -485,7 +529,8 @@ It is possible to use the main [thorax.js](https://github.com/walmartlabs/thorax
 ### create *thorax create $project-name*
 
 Create a new thorax project. All other thorax commands are run from inside the project directory.
-
+    
+    thorax create todos
     cd todos
 
 ### router *thorax router $module-name*
@@ -558,6 +603,12 @@ The example project includes a server script that will start an express server w
     ./bin/server 8000
 
 ## Change Log
+
+### 1.2
+
+- load:start and load:end handling have been moved into a plugin
+- nested event keyword now works with views, the callback will always be called with the context of the declaring view and will always recieve the triggering view as the first argument
+- empty() the collection element before renderCollection()
 
 ### 1.1
 
