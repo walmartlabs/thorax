@@ -10,8 +10,7 @@ Thorax can be used [standalone](https://github.com/walmartlabs/thorax/blob/maste
     npm install -g lumbar thorax
     thorax create project-name
     cd project-name
-    lumbar build lumbar.json public
-    bin/server 8000
+    npm start
 
 This will create a hello world project, for a more complete example clone the [Thorax Todos](https://github.com/walmartlabs/thorax-todos) project ([demo](http://walmartlabs.github.com/thorax-todos/)).
 
@@ -584,23 +583,9 @@ Generate a collection class. Running:
 - creates: app/collections/todo-list.js
 - adds the appropriate JSON fragments in the *main* module in *lumbar.json*
 
-### watch *lumbar watch $lumbar-json-location $output-directory*
+### start *npm start*
 
-Watches all files, generating the appropriate JavaScript or CSS in the `output-directory` when changes occur.
-
-    lumbar watch ./lumbar.json ./public
-
-### build *lumbar build $lumbar-json-location $output-dir*
-
-Just like watch, but runs once then exits.
-
-    lumbar build ./lumbar.json ./public
-
-### server *bin/server $port-number*
-
-The example project includes a server script that will start an express server with a static provider for the `public` directory of your project.
-
-    ./bin/server 8000
+Starts your thorax application on port 8000, auto generating new JavaScript and CSS modules in `public` as source files in your application change.
 
 ## Change Log
 
