@@ -629,8 +629,24 @@
 
     scrollTo: function(x, y) {
       y = y || minimumScrollYOffset;
-      window.scrollTo(x, y);
+      function _scrollTo() {
+        window.scrollTo(x, y);
+      }
+      if ($.os && $.os.ios) {
+        // a defer is required for ios
+        _.defer(_scrollTo);
+      } else {
+        _scrollTo();
+      }
       return [x, y];
+    },
+
+    scrollToTop: function() {
+      if ($.os && $.os.android) {
+        return this.scrollTo(0, 1);
+      } else {
+        return this.scrollTo(0, 0);
+      }
     }
   }, {
     registerHelper: function(name, callback) {
