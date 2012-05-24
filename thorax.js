@@ -1026,8 +1026,8 @@
       return;
     }
 
-    $('[' + view_placeholder_attribute_name + ']', scope || self.el).forEach(function(el) {
-      var view = self._views[el.getAttribute(view_placeholder_attribute_name)];
+    $('[' + view_placeholder_attribute_name + ']', scope || self.el).each(function() {
+      var view = self._views[this.getAttribute(view_placeholder_attribute_name)];
       if (view) {
         //has the view been rendered at least once? if not call render().
         //subclasses overriding render() that do not call the parent's render()
@@ -1035,8 +1035,8 @@
         if (!view._renderCount) {
           view.render();
         }
-        el.parentNode.insertBefore(view.el, el);
-        el.parentNode.removeChild(el);
+        this.parentNode.insertBefore(view.el, this);
+        this.parentNode.removeChild(this);
       }
     });
   }
