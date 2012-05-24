@@ -642,11 +642,7 @@
     },
 
     scrollToTop: function() {
-      if ($.os && $.os.android) {
-        return this.scrollTo(0, 1);
-      } else {
-        return this.scrollTo(0, 0);
-      }
+      return this.scrollTo(0, ($.os && $.os.android) ? 1 : 0);
     }
   }, {
     registerHelper: function(name, callback) {
