@@ -642,7 +642,8 @@
     },
 
     scrollToTop: function() {
-      return this.scrollTo(0, ($.os && $.os.android) ? 1 : 0);
+      // android will use height of 1 because of minimumScrollYOffset
+      return this.scrollTo(0, 0);
     }
   }, {
     registerHelper: function(name, callback) {
