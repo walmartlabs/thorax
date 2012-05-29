@@ -265,6 +265,53 @@ $(function() {
     equal(c.$('p').html(), 'c', 'parent render accepts dom element');
     equal(d.$('p').html(), 'd', 'parent render accepts view');
   });
+
+  test("template passed to constructor and view block", function() {
+    var view = new Thorax.View({
+      template: '<p>{{key}}</p>',
+      key: 'value'
+    });
+    view.render();
+    equal(view.$('p').html(), 'value');
+
+    var view = new (Thorax.View.extend({
+      template: '<p>{{key}}</p>',
+      key: 'value'
+    }));
+    view.render();
+    equal(view.$('p').html(), 'value');
+
+    var Child = Thorax.View.extend({
+      template: '<div class="child-a">{{key}}</div>',
+      key: 'value'
+    });
+
+    var a = new Child;
+    var b = new Child;
+
+    var parent = new Thorax.View({
+      template: '<div class="parent">{{#view b}}<div class="child-b">{{key}}</div>{{/view}}{{view a}}</div>',
+      a: a,
+      b: b
+    });
+    parent.render();
+    equal(parent.$('.child-a').html(), 'value');
+    equal(parent.$('.child-b').html(), 'value');
+
+    //ensure that override does not persist to view itself
+    b.render();
+    equal(b.$('.child-a').html(), 'value');
+
+    //test nesting
+    var outer = new Thorax.View({
+      template: '<div class="a">{{#view inner}}<div class="b">{{#view child}}<div class="c">value</div>{{/view}}</div>{{/view}}</div>',
+      inner: new Thorax.View({
+        child: new Thorax.View
+      })
+    });
+    outer.render();
+    equal(outer.$('.c').html(), 'value');
+  });
   
   test("Inheritable events", function() {
     var Parent = Thorax.View.extend({}),

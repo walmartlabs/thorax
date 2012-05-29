@@ -92,7 +92,13 @@
       //this.options is removed in Thorax.View, we merge passed
       //properties directly with the view and template context
       _.extend(this, options || {});
-            
+
+      //compile a string template if it is set as this.template
+      if (typeof this.template === 'string') {
+        this._template = TemplateEngine.compile(this.template);
+        this.template = renderTemplate;
+      }
+      
       //will be called again by Backbone.View(), after _configure() is complete but safe to call twice
       this._ensureElement();
 
@@ -180,29 +186,7 @@
       return instance;
     },
     
-    template: function(file, data, ignoreErrors) {      
-      var view_context = {};
-      for (var key in this) {
-        if (typeof this[key] !== 'function') {
-          view_context[key] = this[key];
-        }
-      }
-      data = _.extend({}, view_context, data || {}, {
-        cid: _.uniqueId('t'),
-        _view: this
-      });
-
-      var template = this.loadTemplate(file, data, scope);
-      if (!template) {
-        if (ignoreErrors) {
-          return ''
-        } else {
-          throw new Error('Unable to find template ' + file);
-        }
-      } else {
-        return template(data);
-      }
-    },
+    template: renderTemplate,
 
     loadTemplate: function(file, data, scope) {
       var fileName = templatePathPrefix + file + (file.match(TemplateEngine.extensionRegExp) ? '' : '.' + TemplateEngine.extension);
@@ -387,8 +371,9 @@
 
     render: function(output) {
       if (typeof output === 'undefined' || (!_.isElement(output) && !_.isArray(output) && !(output && output.el) && typeof output !== 'string')) {
-        ensureViewHasName.call(this);
-        output = this.template(this.name, this.context(this.model));
+        output = this.template(this._template || getViewName.call(this), this.context(this.model));
+      } else if (typeof output === 'function') {
+        output = this.template(output, this.context(this.model));
       }
       //accept a view, string, or DOM element
       this.html((output && output.el) || output);
@@ -414,13 +399,11 @@
     },
 
     renderItem: function(item, i) {
-      ensureViewHasName.call(this);
-      return this.template(this.name + '-item', this.itemContext(item, i));
+      return this.template(getViewName.call(this) + '-item', this.itemContext(item, i));
     },
   
     renderEmpty: function() {
-      ensureViewHasName.call(this);
-      return this.template(this.name + '-empty', this.emptyContext());
+      return this.template(getViewName.call(this) + '-empty', this.emptyContext());
     },
 
     //appendItem(model [,index])
@@ -789,13 +772,18 @@
       }
     }
   });
-
+  
+  var viewTemplateOverrides = {};
   Thorax.View.registerHelper('view', function(view, options) {
     if (!view) {
       return '';
     }
-    var instance = this._view.view(view, options ? options.hash : {});
-    return TemplateEngine.safeString('<div ' + view_placeholder_attribute_name + '="' + instance.cid + '"></div>');
+    var instance = this._view.view(view, options ? options.hash : {}),
+        placeholder_id = instance.cid + '-' + _.uniqueId('placeholder');
+    if (options.fn) {
+      viewTemplateOverrides[placeholder_id] = options.fn;
+    }
+    return TemplateEngine.safeString('<div ' + view_placeholder_attribute_name + '="' + placeholder_id + '"></div>');
   });
   
   Thorax.View.registerHelper('template', function(name, options) {
@@ -822,10 +810,42 @@
   });
 
   //private Thorax.View methods
-
-  function ensureViewHasName() {
+  function getViewName() {
     if (!this.name) {
       throw new Error(this.cid + " requires a 'name' attribute.");
+    } else {
+      return this.name;
+    }
+  }
+
+  function getTemplateContext(data) {
+    var view_context = {};
+    for (var key in this) {
+      if (typeof this[key] !== 'function') {
+        view_context[key] = this[key];
+      }
+    }
+    return _.extend({}, view_context, data || {}, {
+      cid: _.uniqueId('t'),
+      _view: this
+    });
+  }
+
+  function renderTemplate(file, data, ignoreErrors) {
+    data = getTemplateContext.call(this, data);
+    if (typeof file === 'function') {
+      template = file;
+    } else {
+      template = this.loadTemplate(file, data, scope);
+    }
+    if (!template) {
+      if (ignoreErrors) {
+        return ''
+      } else {
+        throw new Error('Unable to find template ' + file);
+      }
+    } else {
+      return template(data);
     }
   }
 
@@ -1040,13 +1060,15 @@
     }
 
     $('[' + view_placeholder_attribute_name + ']', scope || self.el).forEach(function(el) {
-      var view = self._views[el.getAttribute(view_placeholder_attribute_name)];
+      var placeholder_id = el.getAttribute(view_placeholder_attribute_name),
+          cid = placeholder_id.replace(/\-placeholder\d+$/, '');
+          view = self._views[cid];
       if (view) {
         //has the view been rendered at least once? if not call render().
         //subclasses overriding render() that do not call the parent's render()
         //or set _rendered may be rendered twice but will not error
         if (!view._renderCount) {
-          view.render();
+          view.render(viewTemplateOverrides[placeholder_id] && viewTemplateOverrides[placeholder_id](getTemplateContext.call(view)));
         }
         el.parentNode.insertBefore(view.el, el);
         el.parentNode.removeChild(el);
