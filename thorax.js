@@ -76,6 +76,7 @@
   Backbone.View = function(options) {
     this._childEvents = [];
     this.cid = _.uniqueId('view');
+    this._modelsOrCollectionsToFreeze = {};
     this._configure(options || {});
     this._ensureElement();
     this.delegateEvents();
@@ -269,15 +270,15 @@
   
       var old_model = this.model;
 
-      this.freeze({
-        model: old_model, //may be false
-        collection: false
-      });
-    
+      if (old_model) {
+        this.freeze(old_model);
+      }
+
       this.model = model;
       this.setModelOptions(options);
   
       if (this.model) {
+        this._modelsOrCollectionsToFreeze[this.model.cid] = this.model;
         this._events.model.forEach(function(event) {
           this.model.bind(event[0], event[1]);
         }, this);
@@ -316,16 +317,16 @@
     setCollection: function(collection, options) {
       var old_collection = this.collection;
 
-      this.freeze({
-        model: false, //may be false
-        collection: old_collection
-      });
+      if (old_collection) {
+        this.freeze(old_collection);
+      }
       
       this.collection = collection;
       this.collection.cid = _.uniqueId('collection');
       this.setCollectionOptions(options);
   
       if (this.collection) {
+        this._modelsOrCollectionsToFreeze[this.collection.cid] = this.collection;
         this._events.collection.forEach(function(event) {
           this.collection.bind(event[0], event[1]);
         }, this);
@@ -462,27 +463,14 @@
       return item_view;
     },
   
-    freeze: function(options) {
-      var model, collection;
-      if (typeof options === 'undefined') {
-        model = this.model;
-        collection = this.collection;
-      } else {
-        model = options.model;
-        collection = options.collection;
-      }
-
-      if (collection && this._events && this._events.collection) {
-        this._events.collection.forEach(function(event) {
-          collection.unbind(event[0], event[1]);
+    freeze: function(modelOrCollection) {
+      var objectsToFreeze = (modelOrCollection && this._modelsOrCollectionsToFreeze[modelOrCollection.cid]) || this._modelsOrCollectionsToFreeze;
+      _.each(objectsToFreeze, function(objectToFreeze) {
+        var isModel = objectToFreeze.attributes && objectToFreeze.changed;
+        this._events[isModel ? 'model' : 'collection'].forEach(function(event) {
+          objectToFreeze.unbind(event[0], event[1]);
         }, this);
-      }
-
-      if (model && this._events && this._events.model) {
-        this._events.model.forEach(function(event) {
-          model.unbind(event[0], event[1]);
-        }, this);
-      }
+      }, this);
     },
   
     //serializes a form present in the view, returning the serialized data
@@ -604,6 +592,7 @@
       }
       this.unbind();
       this._events = {};
+      this._modelsOrCollectionsToFreeze = {};
       this.el = null;
       this.collection = null;
       this.model = null;
@@ -1058,7 +1047,6 @@
     if (!self._views) {
       return;
     }
-
     $('[' + view_placeholder_attribute_name + ']', scope || self.el).forEach(function(el) {
       var placeholder_id = el.getAttribute(view_placeholder_attribute_name),
           cid = placeholder_id.replace(/\-placeholder\d+$/, '');

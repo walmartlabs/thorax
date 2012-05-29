@@ -38,6 +38,7 @@ Start Thorax and create the `Application.layout` object.
 ## Routers & Layout
 
 In your `lumbar.json` file you can specify the modules that compose your application. Each module is composed of routes, scripts, styles and templates. Thorax + Lumbar creates an internal router that listens to all routes in the application, lazily loading modules then calling a method on the router in that module as you would normally expect in a Backbone application.
+
 ### create *Application.Router.create(module, protoProps [,classProps])*
 
 Generate an `Application.Router` subclass. The `module` object will be automatically available inside the router file. Thorax expects that you create one router of the same name as the module, per module. In the example project there is a `hello-world` module and a corresponding `js/routers/hello-world.js` file.
@@ -195,9 +196,9 @@ Unregister events for all instances and subclasses of a given view class. Note t
     Application.View.unregisterEvents('click a');
     Application.View.unregisterEvents('model', 'change');
 
-### freeze *view.freeze([options])*
+### freeze *view.freeze([modelOrCollection])*
 
-`setModel` and `setCollection` add event handlers to the view, call freeze to remove them. `options` may contain a `model` or `collection` key that should contain the model or collection that was set with `setModel` or `setCollection`.
+Remove the event listeners on a given model or collection added from the view's `events.model` or `events.collection` hashes when `setModel` or `bindCollection` was called. Calling `freeze` with no arguments will remove all listeners added on all models or collections passed to `setModel` or `setCollection`.
 
 ### _addEvent *view._addEvent(params)*
 
@@ -212,11 +213,11 @@ This method is never called directly, but can be specified to override the behav
 
 ## Templating
 
-Thorax provides deep integration with [Handlebars](http://www.handlebarsjs.com). By default one view maps to one Handlebars template of the same name. View attributes are made automatically availble to template as are model attributes if a model was set on a view with `setModel`. Views having a collection set via `setCollection` will look for corresponding `view-name-item.handlebars` and `view-name-empty.handlebars` templates. The `view` and `template` helpers are provided to allow the direct inclusion of other views or templates inside of templates.
+Thorax provides deep integration with [Handlebars](http://www.handlebarsjs.com). By default one view maps to one Handlebars template of the same name. View attributes are made automatically availble to template as are model attributes if a model was set on a view with `setModel`.
 
 ### name *view.name*
 
-Every view descending from Application.View must have a name attribute. `render` will look for a corresponding handlebars template of the same name.
+Every view descending from Application.View should have a name attribute. `render` will look for a corresponding handlebars template of the same name.
 
     Application.View.extend({
       name: 'view-name'
@@ -249,10 +250,8 @@ Register a new helper that will be available in all handlebars templates. HTML g
 
 Render a given template by file name sans extension. `render` and `renderCollection` both use this method. The scope inside of a template will contain all of the non function attributes of a view (which can be passed to the view constructor) and a `cid` attribute which is a unique id for each rendering of a given template.
     
-    var klass = Application.View.extend({
-      name: 'view-name'
-    });
-    var view = new klass({
+    var view = new Application.View({
+      name: 'view-name',
       title: 'The Title'
     });    
     console.log(view.template({
@@ -263,7 +262,16 @@ Render a given template by file name sans extension. `render` and `renderCollect
     <h1>{{title}}</h1>
     <p>{{body}}</p>
 
-This method is also available as a template helper, it will only render the template as a string, if there is a corresponding view it will **not** be initialized. The scope of the current template will be carried inward to the rendred template. 
+If a string `template` attribute is present in either the prototype or constructor of a view it will be passed to `Handlebars.compile` and used by `render`.
+
+    var view = new Application.View({
+      template: '<p>{{title}}</p>',
+      title: 'The Title'
+    });
+    view.render();
+    view.html() === '<p>The Title</p>';
+
+The `template` method is also available as a template helper, it will only render the template as a string, if there is a corresponding view it will **not** be initialized. The scope of the current template will be carried inward to the rendred template. 
     
     {{template "header" key="value"}}
     <h1>{{title}}</h1>
@@ -295,13 +303,24 @@ This method is also available as a template helper which can receive a string na
     <p>{{body}}</p>
     {{view "footer"}}
 
+When used as a block helper the content of the block will be used to override the template of the view. The context of the block will be the view passed to the `view` method:
+
+    {{#view header}}
+      custom header
+    {{/view}} 
+
 ### html *view.html([content])*
 
 Replace the HTML in a given view. The collection element and the child views appended by the `{{view}}` helper will be automatically preserved if present.
 
 ### render *view.render([content])*
 
-Render a template with the filename of the view's `name` attribute (sans extension), calling `view.html()` with the result. Triggers the `rendered` event.
+Render a template with the filename of the view's `name` attribute (sans extension), calling `view.html()` with the result. Triggers the `rendered` event. It is usually not necessary to call this method manually, it will be called when:
+
+- setModel is called
+- when a model triggers a `change` event
+- when a view is passed to `Application.layout.setView`
+- when a view is embedded in another view with the `view` helper
 
 To implement custom rendering behavior in a subclass override the method and pass a `content` argument to render which may be an HTML string, DOM Element or an array of DOM Elements.
 
