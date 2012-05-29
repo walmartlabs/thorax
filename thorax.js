@@ -76,7 +76,7 @@
   Backbone.View = function(options) {
     this._childEvents = [];
     this.cid = _.uniqueId('view');
-    this._modelsOrCollectionsToFreeze = {};
+    this._boundCollectionsByCid = {};
     this._configure(options || {});
     this._ensureElement();
     this.delegateEvents();
@@ -199,10 +199,10 @@
         return this.el.innerHTML;
       } else {
         var element;
-        if (this._collectionOptions && this._renderCount) {
-          //preserveCollectionElement calls the callback after it has a reference
+        if (this._collectionOptionsByCid && this._renderCount) {
+          //preserveCollectionElements calls the callback after it has a reference
           //to the collection element, calls the callback, then re-appends the element
-          preserveCollectionElement.call(this, function() {
+          preserveCollectionElements.call(this, function() {
             element = $(this.el).html(html);
           });
         } else {
@@ -273,12 +273,11 @@
       if (old_model) {
         this.freeze(old_model);
       }
-
-      this.model = model;
-      this.setModelOptions(options);
   
-      if (this.model) {
-        this._modelsOrCollectionsToFreeze[this.model.cid] = this.model;
+      if (model) {
+        this.model = model;
+        this.setModelOptions(options);
+
         this._events.model.forEach(function(event) {
           this.model.bind(event[0], event[1]);
         }, this);
@@ -313,51 +312,58 @@
       _.extend(this._modelOptions, options || {});
       return this._modelOptions;
     },
+
       
     setCollection: function(collection, options) {
+      this.bindCollection('collection', collection, options);
+    },
+
+    bindCollection: function(key, collection, options) {
       var old_collection = this.collection;
 
       if (old_collection) {
         this.freeze(old_collection);
       }
       
-      this.collection = collection;
-      this.collection.cid = _.uniqueId('collection');
-      this.setCollectionOptions(options);
+      this[key] = collection;
   
-      if (this.collection) {
-        this._modelsOrCollectionsToFreeze[this.collection.cid] = this.collection;
-        this._events.collection.forEach(function(event) {
-          this.collection.bind(event[0], event[1]);
-        }, this);
-      
-        this.collection.trigger('set', this.collection, old_collection);
+      if (collection) {
+        collection.cid = collection.cid || _.uniqueId('collection');
+        options = this.setCollectionOptions(collection, options);
 
-        if (this._shouldFetch(this.collection, this._collectionOptions)) {
-          var success = this._collectionOptions.success;
-          this.collection.load(function(){
-              success && success(this.collection);
-            }, this._collectionOptions);
+        this._boundCollectionsByCid[collection.cid] = collection;
+        this._events.collection.forEach(function(event) {
+          collection.bind(event[0], event[1]);
+        });
+      
+        collection.trigger('set', collection, old_collection);
+
+        if (this._shouldFetch(collection, options)) {
+          var success = options.success;
+          collection.load(function(){
+              success && success(collection);
+            }, options);
         } else {
           //want to trigger built in event handler (render())
           //without triggering event on collection
-          onCollectionReset.call(this);
+          onCollectionReset.call(this, collection);
         }
       }
   
       return this;
     },
 
-    setCollectionOptions: function(options) {
-      if (!this._collectionOptions) {
-        this._collectionOptions = {
-          fetch: true,
-          success: false,
-          errors: true
-        };
+    setCollectionOptions: function(collection, options) {
+      if (!this._collectionOptionsByCid) {
+        this._collectionOptionsByCid = {};
       }
-      _.extend(this._collectionOptions, options || {});
-      return this._collectionOptions;
+      this._collectionOptionsByCid[collection.cid] = {
+        fetch: true,
+        success: false,
+        errors: true
+      };
+      _.extend(this._collectionOptionsByCid[collection.cid], options || {});
+      return this._collectionOptionsByCid[collection.cid];
     },
 
     context: function(model) {
@@ -387,16 +393,16 @@
       return output;
     },
 
-    renderCollection: function() {
-      this.render();
+    renderCollection: function(collection) {
+      ensureRendered.call(this);
       var collection_element = getCollectionElement.call(this).empty();
       collection_element.attr(collection_cid_attribute_name, this.collection.cid);
-      if (this.collection.length === 0 && this.collection.isPopulated()) {
+      if (collection.length === 0 && collection.isPopulated()) {
         appendEmpty.call(this);
       } else {
-        this.collection.forEach(this.appendItem, this);
+        collection.forEach(this.appendItem, this);
       }
-      this.trigger('rendered:collection', collection_element);
+      this.trigger('rendered:collection', collection_element, collection);
     },
 
     renderItem: function(item, i) {
@@ -464,13 +470,18 @@
     },
   
     freeze: function(modelOrCollection) {
-      var objectsToFreeze = (modelOrCollection && this._modelsOrCollectionsToFreeze[modelOrCollection.cid]) || this._modelsOrCollectionsToFreeze;
-      _.each(objectsToFreeze, function(objectToFreeze) {
-        var isModel = objectToFreeze.attributes && objectToFreeze.changed;
-        this._events[isModel ? 'model' : 'collection'].forEach(function(event) {
-          objectToFreeze.unbind(event[0], event[1]);
+      if (this.model && (modelOrCollection === this.model || !modelOrCollection)) {
+        this._events.model.forEach(function(event) {
+          this.model.unbind(event[0], event[1]);
         }, this);
-      }, this);
+      }
+      for (var cid in this._boundCollectionsByCid) {
+        if (!modelOrCollection || this._boundCollectionsByCid[cid] === modelOrCollection) {
+          this._events.collection.forEach(function(event) {
+            this._boundCollectionsByCid[cid].unbind(event[0], event[1]);
+          }, this);
+        }
+      }
     },
   
     //serializes a form present in the view, returning the serialized data
@@ -592,7 +603,7 @@
       }
       this.unbind();
       this._events = {};
-      this._modelsOrCollectionsToFreeze = {};
+      this._boundCollectionsByCid = {};
       this.el = null;
       this.collection = null;
       this.model = null;
@@ -738,7 +749,7 @@
         }
         this.appendItem(model, collection.indexOf(model));
       },
-      remove: function(model) {
+      remove: function(model, collection) {
         this.$('[' + model_cid_attribute_name + '="' + model.cid + '"]').remove();
         for (var cid in this._views) {
           if (this._views[cid].model && this._views[cid].model.cid === model.cid) {
@@ -751,11 +762,11 @@
           appendEmpty.call(this);
         }
       },
-      reset: function() {
-        onCollectionReset.call(this);
+      reset: function(collection) {
+        onCollectionReset.call(this, collection);
       },
       error: function(collection, message) {
-        if (this._collectionOptions.errors) {
+        if (this._collectionOptionsByCid[collection.cid].errors) {
           this.trigger('error', message);
         }
       }
@@ -807,6 +818,10 @@
     }
   }
 
+  function ensureRendered() {
+    !this._renderCount && this.render();
+  }
+
   function getTemplateContext(data) {
     var view_context = {};
     for (var key in this) {
@@ -847,8 +862,8 @@
     }
   }
 
-  function onCollectionReset() {
-    this.renderCollection();
+  function onCollectionReset(collection) {
+    this.renderCollection(collection);
   }
 
   function containHandlerToCurentView(handler, cid) {
@@ -1032,7 +1047,8 @@
     }
   }
 
-  function preserveCollectionElement(callback) {
+  function preserveCollectionElements(callback) {
+
     var old_collection_element = getCollectionElement.call(this);
     callback.call(this);
     var new_collection_element = getCollectionElement.call(this);
@@ -1052,11 +1068,12 @@
           cid = placeholder_id.replace(/\-placeholder\d+$/, '');
           view = self._views[cid];
       if (view) {
-        //has the view been rendered at least once? if not call render().
-        //subclasses overriding render() that do not call the parent's render()
-        //or set _rendered may be rendered twice but will not error
-        if (!view._renderCount) {
-          view.render(viewTemplateOverrides[placeholder_id] && viewTemplateOverrides[placeholder_id](getTemplateContext.call(view)));
+        //see if the {{#view}} helper declared an override for the view
+        //if not, ensure the view has been rendered at least once
+        if (viewTemplateOverrides[placeholder_id]) {
+          view.render(viewTemplateOverrides[placeholder_id](getTemplateContext.call(view)));
+        } else {
+          ensureRendered.call(view);
         }
         el.parentNode.insertBefore(view.el, el);
         el.parentNode.removeChild(el);
@@ -1113,7 +1130,7 @@
         $(old_view.el).remove();
       }
       //make sure the view has been rendered at least once
-      view && !view._renderCount && view.render();
+      view && ensureRendered.call(view);
       view && this.views.appendChild(view.el);
       window.scrollTo(0, minimumScrollYOffset);
       this.view = view;
