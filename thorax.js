@@ -23,6 +23,9 @@
     },
     registerHelper: function(name, callback) {
       return Handlebars.registerHelper(name, callback);
+    },
+    compile: function(source) {
+      return Handlebars.compile(source);
     }
   };
   TemplateEngine.extensionRegExp = new RegExp('\\.' + TemplateEngine.extension + '$');
@@ -54,9 +57,7 @@
         el: options && options.layout || '.layout'
       });
 
-    },
-    //used by "template" and "view" template helpers, not thread safe though it shouldn't matter in browser land
-    _currentTemplateContext: false
+    }
   };
 
   //private vars for Thorax.View
@@ -179,9 +180,7 @@
       return instance;
     },
     
-    template: function(file, data, ignoreErrors) {
-      Thorax._currentTemplateContext = this;
-      
+    template: function(file, data, ignoreErrors) {      
       var view_context = {};
       for (var key in this) {
         if (typeof this[key] !== 'function') {
@@ -189,7 +188,8 @@
         }
       }
       data = _.extend({}, view_context, data || {}, {
-        cid: _.uniqueId('t')
+        cid: _.uniqueId('t'),
+        _view: this
       });
 
       var template = this.loadTemplate(file, data, scope);
@@ -794,13 +794,13 @@
     if (!view) {
       return '';
     }
-    var instance = Thorax._currentTemplateContext.view(view, options ? options.hash : {});
+    var instance = this._view.view(view, options ? options.hash : {});
     return TemplateEngine.safeString('<div ' + view_placeholder_attribute_name + '="' + instance.cid + '"></div>');
   });
   
   Thorax.View.registerHelper('template', function(name, options) {
     var context = _.extend({}, this, options ? options.hash : {});
-    var output = Thorax.View.prototype.template.call(Thorax._currentTemplateContext, name, context);
+    var output = Thorax.View.prototype.template.call(this._view, name, context);
     return TemplateEngine.safeString(output);
   });
 
