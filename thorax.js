@@ -439,7 +439,7 @@
 
       //if index argument is a view
       if (index && index.el) {
-        index = collection_element.find('> *').indexOf(index.el) + 1;
+        index = collection_element.children().indexOf(index.el) + 1;
       }
 
       //if argument is a view, or html string
@@ -1039,8 +1039,8 @@
       return;
     }
 
-    $('[' + view_placeholder_attribute_name + ']', scope || self.el).each(function() {
-      var view = self._views[this.getAttribute(view_placeholder_attribute_name)];
+    $('[' + view_placeholder_attribute_name + ']', scope || self.el).forEach(function(el) {
+      var view = self._views[el.getAttribute(view_placeholder_attribute_name)];
       if (view) {
         //has the view been rendered at least once? if not call render().
         //subclasses overriding render() that do not call the parent's render()
@@ -1048,8 +1048,8 @@
         if (!view._renderCount) {
           view.render();
         }
-        this.parentNode.insertBefore(view.el, this);
-        this.parentNode.removeChild(this);
+        el.parentNode.insertBefore(view.el, el);
+        el.parentNode.removeChild(el);
       }
     });
   }
@@ -1265,7 +1265,8 @@
       this.fetchQueue = [options];
       options = _.defaults({
         success: flushQueue(this, this.fetchQueue, 'success'),
-        error: flushQueue(this, this.fetchQueue, 'error')
+        error: flushQueue(this, this.fetchQueue, 'error'),
+        complete: flushQueue(this, this.fetchQueue, 'complete')
       }, options);
       $super.call(this, options);
     } else {
