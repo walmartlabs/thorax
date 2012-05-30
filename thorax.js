@@ -76,6 +76,7 @@
     this._childEvents = [];
     this.cid = _.uniqueId('view');
     this._boundCollectionsByCid = {};
+    this._renderCount = 0;
     this._configure(options || {});
     this._ensureElement();
     this.delegateEvents();
@@ -198,7 +199,7 @@
         return this.el.innerHTML;
       } else {
         var element;
-        if (_.keys(this._boundCollectionsByCid).length && this._renderCount) {
+        if (this._renderCount) {
           //preserveCollectionElements calls the callback after it has a reference
           //to the collection element, calls the callback, then re-appends the element
           preserveCollectionElements.call(this, function() {
@@ -385,11 +386,7 @@
       }
       //accept a view, string, or DOM element
       this.html((output && output.el) || output);
-      if (!this._renderCount) {
-        this._renderCount = 1;
-      } else {
-        ++this._renderCount;
-      }
+      ++this._renderCount;
       this.trigger('rendered');
       return output;
     },
@@ -758,17 +755,21 @@
     },
     collection: {
       add: function(model, collection) {
+        var collection_element = getCollectionElement.call(this, collection);
         //if collection was empty, clear empty view
-        if (collection.length === 1) {
-          getCollectionElement.call(this, collection).empty();
+        if (collection.length === 1 && collection_element.length) {
+          collection_element.empty();
         }
         if (this._collectionOptionsByCid[collection.cid].renderOnEmptyStateChange) {
           this.render();
         }
-        this.appendItem(collection, model, collection.indexOf(model));
+        if (collection_element.length) {
+          this.appendItem(collection, model, collection.indexOf(model));
+        }
       },
       remove: function(model, collection) {
-        getCollectionElement.call(this, collection).find('[' + model_cid_attribute_name + '="' + model.cid + '"]').remove();
+        var collection_element = getCollectionElement.call(this, collection);
+        collection_element.find('[' + model_cid_attribute_name + '="' + model.cid + '"]').remove();
         for (var cid in this._views) {
           if (this._views[cid].model && this._views[cid].model.cid === model.cid) {
             this._views[cid].destroy();
@@ -776,7 +777,7 @@
             break;
           }
         }
-        if (collection.length === 0) {
+        if (collection.length === 0 && collection_element.length) {
           appendEmpty.call(this, collection);
         }
         if (this._collectionOptionsByCid[collection.cid].renderOnEmptyStateChange) {
@@ -842,7 +843,7 @@
       empty = !this._view.model || (this._view.model && !this._view.model.isPopulated());
     } else {
       ensureCollectionIsBound.call(this._view, collection);
-      empty = collection.isPopulated();
+      empty = !collection.isPopulated();
       this._view._collectionOptionsByCid[collection.cid].renderOnEmptyStateChange = true;
     }
     return empty ? options.fn(this) : options.inverse(this);
@@ -1095,13 +1096,8 @@
 
   function getCollectionElement(collection) {
     //DEPRECATION: this._collectionSelector for backwards compatibility with < 1.3
-    var selector = this._collectionSelector || '[' + collection_cid_attribute_name + '="' + collection.cid + '"]',
-        element = this.$(selector);
-    if (element.length === 0) {
-      return $(this.el);
-    } else {
-      return element;
-    }
+    var selector = this._collectionSelector || '[' + collection_cid_attribute_name + '="' + collection.cid + '"]';
+    return this.$(selector);
   }
 
   function preserveCollectionElements(callback) {

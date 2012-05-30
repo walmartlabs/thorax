@@ -174,6 +174,17 @@ $(function() {
     equal(emptyModelView.html(), 'empty');
     emptyModelView.model.set({key: 'value'});
     equal(emptyModelView.html(), 'not empty');
+    var emptyCollectionView = new Thorax.View({
+      template: '{{#empty myCollection}}empty{{else}}not empty{{/empty}}',
+      myCollection: new Thorax.Collection()
+    });
+    emptyCollectionView.render();
+    equal(emptyCollectionView.html(), 'empty');
+    var model = new Thorax.Model();
+    emptyCollectionView.myCollection.add(model);
+    equal(emptyCollectionView.html(), 'not empty');
+    emptyCollectionView.myCollection.remove(model);
+    equal(emptyCollectionView.html(), 'empty');
   });
 
   test("Child views", function() {
