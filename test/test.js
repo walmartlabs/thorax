@@ -186,31 +186,35 @@ $(function() {
 
   test("nested collection helper", function() {
     var blogModel = new Thorax.Model();
+    Thorax.View.extend({
+      name: 'CommentsView',
+      template: '{{#collection comments}}<p>{{comment}}</p>{{/collection}}'
+    });
     var view = new Thorax.View({
-      template: '{{#collection posts name="outer"}}<h2>{{title}}</h2>{{#collection comments name="inner"}}<p>{{comment}}</p>{{/collection}}{{/collection}}',
+      template: '{{#empty posts}}empty{{else}}{{#collection posts name="outer"}}<h2>{{title}}</h2>{{view "CommentsView" comments=comments}}</div>{{/collection}}{{/empty}}',
       model: blogModel
     });
-    //equal(view.html(), 'empty');
-    console.log('--------');
+    equal(view.html(), 'empty');
+    var comments1 = new Thorax.Collection([
+      new Thorax.Model({comment: 'comment one'}),
+      new Thorax.Model({comment: 'comment two'})
+    ]);
+    var comments2 = new Thorax.Collection([
+      new Thorax.Model({comment: 'comment three'}),
+      new Thorax.Model({comment: 'comment four'})
+    ]);
     blogModel.set({
       posts: new Thorax.Collection([
         new Thorax.Model({
           title: 'title one',
-          comments: new Thorax.Collection([
-            new Thorax.Model({comment: 'comment one'}),
-            new Thorax.Model({comment: 'comment two'})
-          ])
+          comments: comments1
         }),
         new Thorax.Model({
           title: 'title two',
-          comments: new Thorax.Collection([
-            new Thorax.Model({comment: 'comment three'}),
-            new Thorax.Model({comment: 'comment four'})
-          ])
+          comments: comments2
         })
       ])
     });
-    console.log('',view._collectionOptionsByCid);
     equal(view.$('h2').length, 2);
     equal(view.$('h2')[0].innerHTML, 'title one');
     equal(view.$('h2')[1].innerHTML, 'title two');
@@ -219,6 +223,7 @@ $(function() {
     equal(view.$('p')[1].innerHTML, 'comment two');
     equal(view.$('p')[2].innerHTML, 'comment three');
     equal(view.$('p')[3].innerHTML, 'comment four');
+    ok(1);
   });
 
   test("graceful failure of empty collection with no empty template", function() {

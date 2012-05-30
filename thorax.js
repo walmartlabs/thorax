@@ -409,7 +409,6 @@
         collection = this.collection;
       }
       var collection_options = this._collectionOptionsByCid[collection.cid];
-      console.log(this, collection_options, item, i, item.attributes, collection_options['item-template']);
       return this.template(collection_options['item-template'] || getViewName.call(this) + '-item', this.itemContext(item, i));
     },
   
@@ -844,20 +843,14 @@
       collection = this._view.collection;
     }
     //end DEPRECATION
-
-    console.log('collection', this, options && options.hash.name, collection && collection.models && collection.models[0] && collection.models[0].attributes, arguments.length, this._view);
-    
     if (collection) {
-      ensureCollectionIsBound.call(this._view, collection);
-      var collectionOptions = this._view._collectionOptionsByCid[collection.cid];
       var collectionOptionsToExtend = {
         'item-template': options.fn || options.hash['item-template'],
         'empty-template': options.hash['empty-template'],
         'item-view': options.hash['item-view'],
         'empty-view': options.hash['empty-view']
       };
-      _.extend(collectionOptions, collectionOptionsToExtend);
-  
+      ensureCollectionIsBound.call(this._view, collection, collectionOptionsToExtend);
       var collectionHelperOptions = _.clone(options.hash),
           tag = (collectionHelperOptions.tag || 'div');
       _.keys(collectionOptionsToExtend).forEach(function(key) {
@@ -922,9 +915,11 @@
     !this._renderCount && this.render();
   }
 
-  function ensureCollectionIsBound(collection) {
+  function ensureCollectionIsBound(collection, options) {
     if (!this._boundCollectionsByCid[collection.cid]) {
-      this.bindCollection(collection);
+      this.bindCollection(collection, options);
+    } else if (options) {
+      _.extend(this._collectionOptionsByCid[collection.cid], options);
     }
   }
 
