@@ -372,20 +372,14 @@
       return model ? model.attributes : {};
     },
 
-    itemContext: function(item, i) {
-      return item.attributes;
-    },
-
-    emptyContext: function() {},
-
     render: function(output) {
       if (typeof output === 'undefined' || (!_.isElement(output) && !_.isArray(output) && !(output && output.el) && typeof output !== 'string')) {
         output = this.template(this._template || getViewName.call(this), this.context(this.model));
       } else if (typeof output === 'function') {
         output = this.template(output, this.context(this.model));
       }
-      //accept a view, string, or DOM element
-      this.html((output && output.el) || output);
+      //accept a view, string, Handlebars.SafeString or DOM element
+      this.html((output && output.el) || (output && output.string) || output);
       ++this._renderCount;
       this.trigger('rendered');
       return output;
@@ -409,13 +403,31 @@
       this.trigger('rendered:collection', collection_element, collection);
     },
 
-    renderItem: function(item, i) {
-      return this.template(getViewName.call(this) + '-item', this.itemContext(item, i));
+    //DEPRECATION: backwards compatibility with < 1.3, will become private
+    renderItem: function(item, i, collection) {
+      if (!collection) {
+        collection = this.collection;
+      }
+      var collection_options = this._collectionOptionsByCid[collection.cid];
+      return this.template(collection_options.itemTemplate || getViewName.call(this) + '-item', this.itemContext(item, i));
     },
   
-    renderEmpty: function() {
-      return this.template(getViewName.call(this) + '-empty', this.emptyContext());
+    //DEPRECATION: backwards compatibility with < 1.3, will become private
+    renderEmpty: function(collection) {
+      if (!collection) {
+        collection = this.collection;
+      }
+      var collection_options = this._collectionOptionsByCid[collection.cid];
+      return this.template(collection_options.emptyTemplate || getViewName.call(this) + '-empty', this.emptyContext());
     },
+
+    //DEPRECATION: backwards compatibility with < 1.3, will become private
+    itemContext: function(item, i) {
+      return item.attributes;
+    },
+    
+    //DEPRECATION: backwards compatibility with < 1.3, will become private
+    emptyContext: function() {},
 
     //appendItem(collection, model [,index])
     //appendItem(collection, html_string, index)
@@ -449,7 +461,7 @@
         item_view = model;
       } else {
         index = index || collection.indexOf(model) || 0;
-        item_view = this.renderItem(model, index);
+        item_view = this.renderItem(model, index, collection);
       }
 
       if (item_view) {
@@ -823,9 +835,20 @@
     //end DEPRECATION
 
     ensureCollectionIsBound.call(this._view, collection);
+    var collectionOptions = this._collectionOptionsByCid[collection.cid];
+    var collectionOptionsToExtend = {
+      itemTemplate: options.fn || options.hash.itemTemplate,
+      emptyTemplate: options.hash.emptyTemplate,
+      itemView: options.hash.itemView,
+      emptyView: options.hash.emptyView
+    };
+    _.extend(collectionOptions, collectionOptionsToExtend);
 
     var collectionHelperOptions = _.clone(options.hash),
         tag = (collectionHelperOptions.tag || 'div');
+    _.keys(collectionOptionsToExtend).forEach(function(key) {
+      delete collectionHelperOptions[key];
+    });
     collectionHelperOptions[collection_cid_attribute_name] = collection.cid;
     if (collectionHelperOptions.tag) {
       delete collectionHelperOptions.tag;
@@ -1151,8 +1174,8 @@
 
   function appendEmpty(collection) {
     getCollectionElement.call(this, collection).empty();
-    this.appendItem(collection, this.renderEmpty(), 0, {silent: true});
-    this.trigger('rendered:empty');
+    this.appendItem(collection, this.renderEmpty(collection), 0, {silent: true});
+    this.trigger('rendered:empty', collection);
   }
 
   function applyMixin(mixin) {

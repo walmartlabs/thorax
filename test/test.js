@@ -61,6 +61,7 @@ $(function() {
     equal(c.el.firstChild.innerHTML, 'c', 'manual render');
   });
 
+  //DEPRECATION: supports syntax for < 1.3
   test("Collection View binding", function() {
     function runCollectionTests(view, indexMultiplier) {
       function matchCids(collection) {
@@ -158,6 +159,12 @@ $(function() {
       }
     }));
     runCollectionTests(viewReturningMultiple, 2);
+
+    var viewWithBlockCollectionHelper = new Thorax.View({
+      template: '{{#collection tag="ul" emptyTemplate="letter-empty"}}<li>{{letter}}</li>{{/collection}}'
+    });
+    runCollectionTests(viewWithBlockCollectionHelper, 1);
+
   });
 
   test("empty helper", function() {
