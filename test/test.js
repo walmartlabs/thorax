@@ -184,6 +184,43 @@ $(function() {
     equal(view.$('li').length, letterCollection.models.length * 2);
   });
 
+  test("nested collection helper", function() {
+    var blogModel = new Thorax.Model();
+    var view = new Thorax.View({
+      template: '{{#collection posts name="outer"}}<h2>{{title}}</h2>{{#collection comments name="inner"}}<p>{{comment}}</p>{{/collection}}{{/collection}}',
+      model: blogModel
+    });
+    //equal(view.html(), 'empty');
+    console.log('--------');
+    blogModel.set({
+      posts: new Thorax.Collection([
+        new Thorax.Model({
+          title: 'title one',
+          comments: new Thorax.Collection([
+            new Thorax.Model({comment: 'comment one'}),
+            new Thorax.Model({comment: 'comment two'})
+          ])
+        }),
+        new Thorax.Model({
+          title: 'title two',
+          comments: new Thorax.Collection([
+            new Thorax.Model({comment: 'comment three'}),
+            new Thorax.Model({comment: 'comment four'})
+          ])
+        })
+      ])
+    });
+    console.log('',view._collectionOptionsByCid);
+    equal(view.$('h2').length, 2);
+    equal(view.$('h2')[0].innerHTML, 'title one');
+    equal(view.$('h2')[1].innerHTML, 'title two');
+    equal(view.$('p').length, 4);
+    equal(view.$('p')[0].innerHTML, 'comment one');
+    equal(view.$('p')[1].innerHTML, 'comment two');
+    equal(view.$('p')[2].innerHTML, 'comment three');
+    equal(view.$('p')[3].innerHTML, 'comment four');
+  });
+
   test("graceful failure of empty collection with no empty template", function() {
     var view = new Thorax.View({
       template: '{{collection item-template="letter-item"}}',

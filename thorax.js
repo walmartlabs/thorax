@@ -409,6 +409,7 @@
         collection = this.collection;
       }
       var collection_options = this._collectionOptionsByCid[collection.cid];
+      console.log(this, collection_options, item, i, item.attributes, collection_options['item-template']);
       return this.template(collection_options['item-template'] || getViewName.call(this) + '-item', this.itemContext(item, i));
     },
   
@@ -844,29 +845,35 @@
     }
     //end DEPRECATION
 
-    ensureCollectionIsBound.call(this._view, collection);
-    var collectionOptions = this._view._collectionOptionsByCid[collection.cid];
-    var collectionOptionsToExtend = {
-      'item-template': options.fn || options.hash['item-template'],
-      'empty-template': options.hash['empty-template'],
-      'item-view': options.hash['item-view'],
-      'empty-view': options.hash['empty-view']
-    };
-    _.extend(collectionOptions, collectionOptionsToExtend);
-
-    var collectionHelperOptions = _.clone(options.hash),
-        tag = (collectionHelperOptions.tag || 'div');
-    _.keys(collectionOptionsToExtend).forEach(function(key) {
-      delete collectionHelperOptions[key];
-    });
-    collectionHelperOptions[collection_cid_attribute_name] = collection.cid;
-    if (collectionHelperOptions.tag) {
-      delete collectionHelperOptions.tag;
+    console.log('collection', this, options && options.hash.name, collection && collection.models && collection.models[0] && collection.models[0].attributes, arguments.length, this._view);
+    
+    if (collection) {
+      ensureCollectionIsBound.call(this._view, collection);
+      var collectionOptions = this._view._collectionOptionsByCid[collection.cid];
+      var collectionOptionsToExtend = {
+        'item-template': options.fn || options.hash['item-template'],
+        'empty-template': options.hash['empty-template'],
+        'item-view': options.hash['item-view'],
+        'empty-view': options.hash['empty-view']
+      };
+      _.extend(collectionOptions, collectionOptionsToExtend);
+  
+      var collectionHelperOptions = _.clone(options.hash),
+          tag = (collectionHelperOptions.tag || 'div');
+      _.keys(collectionOptionsToExtend).forEach(function(key) {
+        delete collectionHelperOptions[key];
+      });
+      collectionHelperOptions[collection_cid_attribute_name] = collection.cid;
+      if (collectionHelperOptions.tag) {
+        delete collectionHelperOptions.tag;
+      }
+      var htmlAttributes = _.map(collectionHelperOptions, function(value, key) {
+        return key + '="' + value + '"';
+      }).join(' ');
+      return TemplateEngine.safeString('<' + tag + ' ' + htmlAttributes + '></' + tag + '>');
+    } else {
+      return '';
     }
-    var htmlAttributes = _.map(collectionHelperOptions, function(value, key) {
-      return key + '="' + value + '"';
-    }).join(' ');
-    return TemplateEngine.safeString('<' + tag + ' ' + htmlAttributes + '></' + tag + '>');
   });
 
   Thorax.View.registerHelper('empty', function(collection, options) {
@@ -875,9 +882,13 @@
       options = arguments[0];
       empty = !this._view.model || (this._view.model && !this._view.model.isPopulated());
     } else {
-      ensureCollectionIsBound.call(this._view, collection);
-      empty = !collection.isPopulated();
-      this._view._collectionOptionsByCid[collection.cid].renderOnEmptyStateChange = true;
+      if (!collection) {
+        empty = true;
+      } else {
+        ensureCollectionIsBound.call(this._view, collection);
+        empty = !collection.isPopulated();
+        this._view._collectionOptionsByCid[collection.cid].renderOnEmptyStateChange = true;
+      }
     }
     if (empty) {
       this._view.trigger('rendered:empty', collection);
