@@ -160,6 +160,22 @@ $(function() {
     runCollectionTests(viewReturningMultiple, 2);
   });
 
+  test("empty helper", function() {
+    var emptyView = new Thorax.View({
+      template: '{{#empty}}empty{{else}}not empty{{/empty}}'
+    });
+    emptyView.render();
+    equal(emptyView.html(), 'empty');
+    var emptyModelView = new Thorax.View({
+      template: '{{#empty}}empty{{else}}not empty{{/empty}}',
+      model: new Thorax.Model()
+    });
+    emptyModelView.render();
+    equal(emptyModelView.html(), 'empty');
+    emptyModelView.model.set({key: 'value'});
+    equal(emptyModelView.html(), 'not empty');
+  });
+
   test("Child views", function() {
     var childRenderedCount = 0,
         parentRenderedCount = 0;

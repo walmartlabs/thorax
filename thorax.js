@@ -66,7 +66,6 @@
       view_placeholder_attribute_name = 'data-view-tmp',
       model_cid_attribute_name = 'data-model-cid',
       collection_cid_attribute_name = 'data-collection-cid',
-      default_collection_selector = '[' + collection_cid_attribute_name + ']',
       old_backbone_view = Backbone.View,
       //android scrollTo(0, 0) shows url bar, scrollTo(0, 1) hides it
       minimumScrollYOffset = (navigator.userAgent.toLowerCase().indexOf("android") > -1) ? 1 : 0,
@@ -199,7 +198,7 @@
         return this.el.innerHTML;
       } else {
         var element;
-        if (this._collectionOptionsByCid && this._renderCount) {
+        if (_.keys(this._boundCollectionsByCid).length && this._renderCount) {
           //preserveCollectionElements calls the callback after it has a reference
           //to the collection element, calls the callback, then re-appends the element
           preserveCollectionElements.call(this, function() {
@@ -260,7 +259,9 @@
     },
 
     _shouldFetch: function(model_or_collection, options) {
-      return model_or_collection.url && options.fetch && (
+      var url = (!model_or_collection.collection && getValue(model_or_collection, 'urlRoot')
+        || model_or_collection.collection && getValue(model_or_collection.collection, 'url'));
+      return url && options.fetch && (
         typeof model_or_collection.isPopulated === 'undefined' || !model_or_collection.isPopulated()
       );
     },
@@ -313,19 +314,19 @@
       return this._modelOptions;
     },
 
-      
+    //DEPRECATION: backwards compatibility with < 1.3
     setCollection: function(collection, options) {
-      this.bindCollection('collection', collection, options);
+      this.collection = collection;
+      this.bindCollection(collection, options);
     },
+    //end deprecation
 
-    bindCollection: function(key, collection, options) {
+    bindCollection: function(collection, options) {
       var old_collection = this.collection;
 
       if (old_collection) {
         this.freeze(old_collection);
       }
-      
-      this[key] = collection;
   
       if (collection) {
         collection.cid = collection.cid || _.uniqueId('collection');
@@ -394,13 +395,19 @@
     },
 
     renderCollection: function(collection) {
-      ensureRendered.call(this);
-      var collection_element = getCollectionElement.call(this).empty();
-      collection_element.attr(collection_cid_attribute_name, this.collection.cid);
+      //DEPRECATION: backwards compatibility with < 1.3
+      if (!collection) {
+        collection = this.collection;
+      }
+      //end DEPRECATION
+      this.render();
+      var collection_element = getCollectionElement.call(this, collection).empty();
       if (collection.length === 0 && collection.isPopulated()) {
-        appendEmpty.call(this);
+        appendEmpty.call(this, collection);
       } else {
-        collection.forEach(this.appendItem, this);
+        collection.forEach(function(item, i) {
+          this.appendItem(collection, item, i);
+        }, this);
       }
       this.trigger('rendered:collection', collection_element, collection);
     },
@@ -413,17 +420,25 @@
       return this.template(getViewName.call(this) + '-empty', this.emptyContext());
     },
 
-    //appendItem(model [,index])
-    //appendItem(html_string, index)
-    //appendItem(view, index)
-    appendItem: function(model, index, options) {
+    //appendItem(collection, model [,index])
+    //appendItem(collection, html_string, index)
+    //appendItem(collection, view, index)
+    appendItem: function(collection, model, index, options) {
+      //DEPRECATION: backwards compatibility with < 1.3
+      if (typeof collection.length === 'undefined' && !collection.models) {
+        collection = this.collection;
+        model = arguments[0];
+        index = arguments[1];
+        options = arguments[2];
+      }
+
       //empty item
       if (!model) {
         return;
       }
 
       var item_view,
-          collection_element = getCollectionElement.call(this);
+          collection_element = getCollectionElement.call(this, collection);
 
       options = options || {};
 
@@ -436,7 +451,7 @@
       if (model.el || typeof model === 'string') {
         item_view = model;
       } else {
-        index = index || this.collection.indexOf(model) || 0;
+        index = index || collection.indexOf(model) || 0;
         item_view = this.renderItem(model, index);
       }
 
@@ -452,7 +467,7 @@
         });
 
         $(item_element).attr(model_cid_attribute_name, model.cid);
-        var previous_model = index > 0 ? this.collection.at(index - 1) : false;
+        var previous_model = index > 0 ? collection.at(index - 1) : false;
         if (!previous_model) {
           collection_element.prepend(item_element);
         } else {
@@ -744,13 +759,16 @@
     collection: {
       add: function(model, collection) {
         //if collection was empty, clear empty view
-        if (this.collection.length === 1) {
-          getCollectionElement.call(this).empty();
+        if (collection.length === 1) {
+          getCollectionElement.call(this, collection).empty();
         }
-        this.appendItem(model, collection.indexOf(model));
+        if (this._collectionOptionsByCid[collection.cid].renderOnEmptyStateChange) {
+          this.render();
+        }
+        this.appendItem(collection, model, collection.indexOf(model));
       },
       remove: function(model, collection) {
-        this.$('[' + model_cid_attribute_name + '="' + model.cid + '"]').remove();
+        getCollectionElement.call(this, collection).find('[' + model_cid_attribute_name + '="' + model.cid + '"]').remove();
         for (var cid in this._views) {
           if (this._views[cid].model && this._views[cid].model.cid === model.cid) {
             this._views[cid].destroy();
@@ -758,8 +776,11 @@
             break;
           }
         }
-        if (this.collection.length === 0) {
-          appendEmpty.call(this);
+        if (collection.length === 0) {
+          appendEmpty.call(this, collection);
+        }
+        if (this._collectionOptionsByCid[collection.cid].renderOnEmptyStateChange) {
+          this.render();
         }
       },
       reset: function(collection) {
@@ -792,10 +813,19 @@
     return TemplateEngine.safeString(output);
   });
 
-  Thorax.View.registerHelper('collection', function(options) {
+  Thorax.View.registerHelper('collection', function(collection, options) {
+    //DEPRECATION: backwards compatibility with < 1.3
+    if (arguments.length === 1) {
+      options = collection;
+      collection = this._view.collection;
+    }
+    //end DEPRECATION
+
+    ensureCollectionIsBound.call(this._view, collection);
+
     var collectionHelperOptions = _.clone(options.hash),
         tag = (collectionHelperOptions.tag || 'div');
-    collectionHelperOptions[collection_cid_attribute_name] = "";
+    collectionHelperOptions[collection_cid_attribute_name] = collection.cid;
     if (collectionHelperOptions.tag) {
       delete collectionHelperOptions.tag;
     }
@@ -803,6 +833,19 @@
       return key + '="' + value + '"';
     }).join(' ');
     return TemplateEngine.safeString('<' + tag + ' ' + htmlAttributes + '></' + tag + '>');
+  });
+
+  Thorax.View.registerHelper('empty', function(collection, options) {
+    var empty;
+    if (!options) {
+      options = arguments[0];
+      empty = !this._view.model || (this._view.model && !this._view.model.isPopulated());
+    } else {
+      ensureCollectionIsBound.call(this._view, collection);
+      empty = collection.isPopulated();
+      this._view._collectionOptionsByCid[collection.cid].renderOnEmptyStateChange = true;
+    }
+    return empty ? options.fn(this) : options.inverse(this);
   });
 
   Thorax.View.registerHelper('link', function(url) {
@@ -818,8 +861,21 @@
     }
   }
 
+  function getValue(object, prop) {
+    if (!(object && object[prop])) {
+      return null;
+    }
+    return _.isFunction(object[prop]) ? object[prop]() : object[prop];
+  }
+
   function ensureRendered() {
     !this._renderCount && this.render();
+  }
+
+  function ensureCollectionIsBound(collection) {
+    if (!this._boundCollectionsByCid[collection.cid]) {
+      this.bindCollection(collection);
+    }
   }
 
   function getTemplateContext(data) {
@@ -1037,9 +1093,10 @@
     processModelOrCollectionEvent.call(this, events, 'collection');
   }
 
-  function getCollectionElement() {
-    var selector = this._collectionSelector || default_collection_selector;
-    var element = this.$(selector);
+  function getCollectionElement(collection) {
+    //DEPRECATION: this._collectionSelector for backwards compatibility with < 1.3
+    var selector = this._collectionSelector || '[' + collection_cid_attribute_name + '="' + collection.cid + '"]',
+        element = this.$(selector);
     if (element.length === 0) {
       return $(this.el);
     } else {
@@ -1048,13 +1105,19 @@
   }
 
   function preserveCollectionElements(callback) {
-
-    var old_collection_element = getCollectionElement.call(this);
+    var old_collection_elements_by_cid = {},
+        cid;
+    for (cid in this._boundCollectionsByCid) {
+      old_collection_elements_by_cid[cid] = getCollectionElement.call(this, this._boundCollectionsByCid[cid]);
+    }
     callback.call(this);
-    var new_collection_element = getCollectionElement.call(this);
-    if (old_collection_element.length && new_collection_element.length) {
-      new_collection_element[0].parentNode.insertBefore(old_collection_element[0], new_collection_element[0]);
-      new_collection_element[0].parentNode.removeChild(new_collection_element[0]);
+    for (cid in this._boundCollectionsByCid) {
+      var new_collection_element = getCollectionElement.call(this, this._boundCollectionsByCid[cid]),
+          old_collection_element = old_collection_elements_by_cid[cid];
+      if (old_collection_element.length && new_collection_element.length) {
+        new_collection_element[0].parentNode.insertBefore(old_collection_element[0], new_collection_element[0]);
+        new_collection_element[0].parentNode.removeChild(new_collection_element[0]);
+      }
     }
   }
 
@@ -1090,9 +1153,9 @@
     }
   }
 
-  function appendEmpty() {
-    getCollectionElement.call(this).empty();
-    this.appendItem(this.renderEmpty(), 0, {silent: true});
+  function appendEmpty(collection) {
+    getCollectionElement.call(this, collection).empty();
+    this.appendItem(collection, this.renderEmpty(), 0, {silent: true});
     this.trigger('rendered:empty');
   }
 
