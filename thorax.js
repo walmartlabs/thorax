@@ -409,7 +409,7 @@
         collection = this.collection;
       }
       var collection_options = this._collectionOptionsByCid[collection.cid];
-      return this.template(collection_options.itemTemplate || getViewName.call(this) + '-item', this.itemContext(item, i));
+      return this.template(collection_options['item-template'] || getViewName.call(this) + '-item', this.itemContext(item, i));
     },
   
     //DEPRECATION: backwards compatibility with < 1.3, will become private
@@ -418,14 +418,24 @@
         collection = this.collection;
       }
       var collection_options = this._collectionOptionsByCid[collection.cid];
-      return this.template(collection_options.emptyTemplate || getViewName.call(this) + '-empty', this.emptyContext());
+      var emptyTemplate = collection_options['empty-template'];
+      if (!emptyTemplate) {
+        var name = getViewName.call(this, true);
+        if (name) {
+          emptyTemplate = this.loadTemplate(name + '-empty', {}, scope);
+        }
+        if (!emptyTemplate) {
+          return;
+        }
+      }
+      return this.template(emptyTemplate, this.emptyContext());
     },
 
     //DEPRECATION: backwards compatibility with < 1.3, will become private
     itemContext: function(item, i) {
       return item.attributes;
     },
-    
+
     //DEPRECATION: backwards compatibility with < 1.3, will become private
     emptyContext: function() {},
 
@@ -835,12 +845,12 @@
     //end DEPRECATION
 
     ensureCollectionIsBound.call(this._view, collection);
-    var collectionOptions = this._collectionOptionsByCid[collection.cid];
+    var collectionOptions = this._view._collectionOptionsByCid[collection.cid];
     var collectionOptionsToExtend = {
-      itemTemplate: options.fn || options.hash.itemTemplate,
-      emptyTemplate: options.hash.emptyTemplate,
-      itemView: options.hash.itemView,
-      emptyView: options.hash.emptyView
+      'item-template': options.fn || options.hash['item-template'],
+      'empty-template': options.hash['empty-template'],
+      'item-view': options.hash['item-view'],
+      'empty-view': options.hash['empty-view']
     };
     _.extend(collectionOptions, collectionOptionsToExtend);
 
@@ -869,7 +879,12 @@
       empty = !collection.isPopulated();
       this._view._collectionOptionsByCid[collection.cid].renderOnEmptyStateChange = true;
     }
-    return empty ? options.fn(this) : options.inverse(this);
+    if (empty) {
+      this._view.trigger('rendered:empty', collection);
+      return options.fn(this);
+    } else {
+      return options.inverse(this);
+    }
   });
 
   Thorax.View.registerHelper('link', function(url) {
@@ -877,10 +892,10 @@
   });
 
   //private Thorax.View methods
-  function getViewName() {
-    if (!this.name) {
+  function getViewName(silent) {
+    if (!this.name && !silent) {
       throw new Error(this.cid + " requires a 'name' attribute.");
-    } else {
+    } else if (this.name) {
       return this.name;
     }
   }

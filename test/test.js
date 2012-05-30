@@ -161,10 +161,45 @@ $(function() {
     runCollectionTests(viewReturningMultiple, 2);
 
     var viewWithBlockCollectionHelper = new Thorax.View({
-      template: '{{#collection tag="ul" emptyTemplate="letter-empty"}}<li>{{letter}}</li>{{/collection}}'
+      template: '{{#collection tag="ul" empty-template="letter-empty"}}<li>{{letter}}</li>{{/collection}}'
     });
     runCollectionTests(viewWithBlockCollectionHelper, 1);
 
+
+    //var viewWithBlockCollectionHelperWithViews = new Thorax.View({
+    //  template: '{{#collection tag="ul" emptyTemplate="letter-empty"}}<li>{{letter}}</li>{{/collection}}'
+    //});
+    //runCollectionTests(viewWithBlockCollectionHelperWithViews, 1);
+    //letter-empty
+
+  });
+
+  test("multiple collections", function() {
+    var view = new Thorax.View({
+      template: '{{collection a tag="ul" item-template="letter-item"}}{{collection b tag="ul" item-template="letter-item"}}',
+      a: new Thorax.Collection(letterCollection.models),
+      b: new Thorax.Collection(letterCollection.models)
+    });
+    view.render();
+    equal(view.$('li').length, letterCollection.models.length * 2);
+  });
+
+  test("graceful failure of empty collection with no empty template", function() {
+    var view = new Thorax.View({
+      template: '{{collection item-template="letter-item"}}',
+      collection: new Thorax.Collection({
+        isPopulated: function() {
+          return true;
+        }
+      })
+    });
+    view.render();
+    view = new Thorax.View({
+      template: '{{collection item-template="letter-item"}}',
+      collection: new Thorax.Collection
+    });
+    view.render();
+    ok(true);
   });
 
   test("empty helper", function() {
