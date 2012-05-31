@@ -408,8 +408,15 @@
       if (!collection) {
         collection = this.collection;
       }
-      var collection_options = this._collectionOptionsByCid[collection.cid];
-      return this.template(collection_options['item-template'] || getViewName.call(this) + '-item', this.itemContext(item, i));
+      var collection_options = this._collectionOptionsByCid[collection.cid],
+          context = this.itemContext(item, i);
+      if (collection_options['item-view']) {
+        var view = this.view(collection_options['item-view'], context);
+        view.render(collection_options['item-template']);
+        return view;
+      } else {
+        return this.template(collection_options['item-template'] || getViewName.call(this) + '-item', context);
+      }
     },
   
     //DEPRECATION: backwards compatibility with < 1.3, will become private
@@ -417,18 +424,25 @@
       if (!collection) {
         collection = this.collection;
       }
-      var collection_options = this._collectionOptionsByCid[collection.cid];
-      var emptyTemplate = collection_options['empty-template'];
-      if (!emptyTemplate) {
-        var name = getViewName.call(this, true);
-        if (name) {
-          emptyTemplate = this.loadTemplate(name + '-empty', {}, scope);
-        }
+      var collection_options = this._collectionOptionsByCid[collection.cid],
+          context = this.emptyContext();
+      if (collection_options['empty-view']) {
+        var view = this.view(collection_options['empty-view'], context);
+        view.render(collection_options['empty-template']);
+        return view;
+      } else {
+        var emptyTemplate = collection_options['empty-template'];
         if (!emptyTemplate) {
-          return;
+          var name = getViewName.call(this, true);
+          if (name) {
+            emptyTemplate = this.loadTemplate(name + '-empty', {}, scope);
+          }
+          if (!emptyTemplate) {
+            return;
+          }
         }
       }
-      return this.template(emptyTemplate, this.emptyContext());
+      return this.template(emptyTemplate, context);
     },
 
     //DEPRECATION: backwards compatibility with < 1.3, will become private

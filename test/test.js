@@ -30,6 +30,10 @@ $(function() {
     name: 'letter-item'
   });
 
+  var LetterEmptyView = Thorax.View.extend({
+    name: 'letter-empty'
+  });
+
   test("isPopulated()", function() {
     ok(letterCollection.isPopulated());
     ok(letterCollection.at(0).isPopulated());
@@ -165,13 +169,25 @@ $(function() {
     });
     runCollectionTests(viewWithBlockCollectionHelper, 1);
 
+    var viewWithBlockCollectionHelperWithViews = new Thorax.View({
+      template: '{{collection tag="ul" empty-template="letter-empty" item-view="letter-item"}}'
+    });
+    runCollectionTests(viewWithBlockCollectionHelperWithViews, 1);
 
-    //var viewWithBlockCollectionHelperWithViews = new Thorax.View({
-    //  template: '{{#collection tag="ul" emptyTemplate="letter-empty"}}<li>{{letter}}</li>{{/collection}}'
-    //});
-    //runCollectionTests(viewWithBlockCollectionHelperWithViews, 1);
-    //letter-empty
+    var viewWithBlockCollectionHelperWithViewsAndBlock = new Thorax.View({
+      template: '{{#collection tag="ul" empty-template="letter-empty" item-view="letter-item"}}<li class="testing">{{letter}}</li>{{/collection}}'
+    });
+    runCollectionTests(viewWithBlockCollectionHelperWithViewsAndBlock, 1);
 
+    var viewWithCollectionHelperWithEmptyView = new Thorax.View({
+      template: '{{collection tag="ul" empty-view="letter-empty" item-template="letter-item"}}'
+    });
+    runCollectionTests(viewWithCollectionHelperWithEmptyView, 1);
+
+    var viewWithCollectionHelperWithEmptyViewAndBlock = new Thorax.View({
+      template: '{{collection tag="ul" empty-templatve="letter-empty" empty-view="letter-empty" item-template="letter-item"}}'
+    });
+    runCollectionTests(viewWithCollectionHelperWithEmptyViewAndBlock, 1);
   });
 
   test("multiple collections", function() {
@@ -187,11 +203,11 @@ $(function() {
   test("nested collection helper", function() {
     var blogModel = new Thorax.Model();
     Thorax.View.extend({
-      name: 'CommentsView',
+      name: 'Comments',
       template: '{{#collection comments}}<p>{{comment}}</p>{{/collection}}'
     });
     var view = new Thorax.View({
-      template: '{{#empty posts}}empty{{else}}{{#collection posts name="outer"}}<h2>{{title}}</h2>{{view "CommentsView" comments=comments}}</div>{{/collection}}{{/empty}}',
+      template: '{{#empty posts}}empty{{else}}{{#collection posts name="outer"}}<h2>{{title}}</h2>{{view "Comments" comments=comments}}</div>{{/collection}}{{/empty}}',
       model: blogModel
     });
     equal(view.html(), 'empty');
@@ -223,7 +239,15 @@ $(function() {
     equal(view.$('p')[1].innerHTML, 'comment two');
     equal(view.$('p')[2].innerHTML, 'comment three');
     equal(view.$('p')[3].innerHTML, 'comment four');
-    ok(1);
+
+    comments2.add(new Thorax.Model({comment: 'comment five'}));
+    equal(view.$('p')[4].innerHTML, 'comment five');
+
+    blogModel.attributes.posts.add(new Thorax.Model({
+      title: 'title three'
+    }));
+    equal(view.$('h2').length, 3);
+    equal(view.$('h2')[2].innerHTML, 'title three');
   });
 
   test("graceful failure of empty collection with no empty template", function() {
