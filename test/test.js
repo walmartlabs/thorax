@@ -61,6 +61,29 @@ $(function() {
     equal(c.el.firstChild.innerHTML, 'c', 'manual render');
   });
 
+
+  function watchViewCollectionEvents(view) {
+    var ret = {
+      renderedItem: 0,
+      renderedCollection: 0,
+      renderedEmpty: 0,
+      rendered: 0
+    };
+
+    view.on('rendered', function() { ret.rendered++; });
+    view.on('rendered:collection', function() { ret.renderedCollection++; });
+    view.on('rendered:item', function() { ret.renderedItem++; });
+    view.on('rendered:empty', function() { ret.renderedEmpty++; });
+
+    return ret;
+  }
+  function eventCount(events, rendered, renderedCollection, renderedItem, renderedEmpty) {
+    equal(events.rendered, rendered, 'rendered event count');
+    equal(events.renderedCollection, renderedCollection, 'rendered:collection event count');
+    equal(events.renderedItem, renderedItem, 'rendered:item event count');
+    equal(events.renderedEmpty, renderedEmpty, 'rendered:empty event count');
+  }
+
   test("Collection View binding", function() {
     function runCollectionTests(view, indexMultiplier) {
       function matchCids(collection) {
@@ -70,32 +93,14 @@ $(function() {
       }
 
       ok(!view.el.firstChild, 'no render until setCollection');
-      var clonedLetterCollection = new Thorax.Collection(letterCollection.models),
-          renderedItemCount = 0,
-          renderedCollectionCount = 0,
-          renderedEmptyCount = 0,
-          renderedCount = 0;
+      var clonedLetterCollection = new Thorax.Collection(letterCollection.models);
 
-      view.on('rendered', function() {
-        ++renderedCount;
-      });
-      view.on('rendered:collection', function() {
-        ++renderedCollectionCount;
-      });
-      view.on('rendered:item', function() {
-        ++renderedItemCount;
-      });
-      view.on('rendered:empty', function() {
-        ++renderedEmptyCount;
-      });
+      var events = watchViewCollectionEvents(view);
 
       view.setCollection(clonedLetterCollection);
       equal(view.$('li').length, 4 * indexMultiplier, 'rendered node length matches collection length');
       equal(view.$('li')[0 * indexMultiplier].innerHTML + view.$('li')[3 * indexMultiplier].innerHTML, 'ad', 'rendered nodes in correct order');
-      equal(renderedCount, 1, 'rendered event count');
-      equal(renderedCollectionCount, 1, 'rendered:collection event count');
-      equal(renderedItemCount, 4, 'rendered:item event count');
-      equal(renderedEmptyCount, 0, 'rendered:empty event count');
+      eventCount(events, 1, 1, 4, 0);
       matchCids(clonedLetterCollection);
 
       //reorder
@@ -107,10 +112,7 @@ $(function() {
       equal(view.$('li')[2 * indexMultiplier].innerHTML, 'e', 'collection and nodes maintain sort order');
       clonedLetterCollection.add(new LetterModel({letter: 'a'}), {at: 0});
       equal(view.$('li')[0 * indexMultiplier].innerHTML, 'a', 'collection and nodes maintain sort order');
-      equal(renderedCount, 1, 'rendered event count');
-      equal(renderedCollectionCount, 1, 'rendered:collection event count');
-      equal(renderedItemCount, 6, 'rendered:item event count');
-      equal(renderedEmptyCount, 0, 'rendered:empty event count');
+      eventCount(events, 1, 1, 6, 0);
       matchCids(clonedLetterCollection);
 
       //empty
@@ -119,10 +121,7 @@ $(function() {
       clonedLetterCollection.add(new LetterModel({letter: 'a'}));
       equal(view.$('li').length, 1 * indexMultiplier, 'transition from empty to one item');
       equal(view.$('li')[0 * indexMultiplier].innerHTML, 'a', 'transition from empty to one item');
-      equal(renderedCount, 1, 'rendered event count');
-      equal(renderedCollectionCount, 1, 'rendered:collection event count');
-      equal(renderedItemCount, 7, 'rendered:item event count');
-      equal(renderedEmptyCount, 1, 'rendered:empty event count');
+      eventCount(events, 1, 1, 7, 1);
       matchCids(clonedLetterCollection);
 
       var oldLength = view.$('li').length;
@@ -132,7 +131,7 @@ $(function() {
       //freeze
       view.freeze();
       clonedLetterCollection.remove(clonedLetterCollection.models);
-      equal(renderedEmptyCount, 1, 'rendered:empty event count');
+      equal(events.renderedEmpty, 1, 'rendered:empty event count');
       equal(view.$('li')[0 * indexMultiplier].innerHTML, 'a', 'transition from empty to one item');
     }
 
