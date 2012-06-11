@@ -159,6 +159,26 @@ $(function() {
     runCollectionTests(viewReturningMultiple, 2);
   });
 
+  test('renderItem filtering', function() {
+    var view = new (LetterCollectionView.extend({
+      renderItem: function(model, i) {
+        if (i % 3 === 0) {
+          return this.template('letter-multiple-item', model.attributes);
+        }
+      }
+    }));
+
+    var events = watchViewCollectionEvents(view);
+
+    view.setCollection(new Thorax.Collection(letterCollection.models));
+    equal(view.$('li').length, 2 * 2, 'rendered node length matches collection length');
+    equal(view.el.innerText, 'aadd', 'rendered nodes in correct order');
+    eventCount(events, 1, 1, 2, 0);
+    view.collection.forEach(function(model, i) {
+      equal(view.$('[data-model-cid="' + model.cid + '"]').length, i % 3 ? 0: 2, 'match CIDs');
+    });
+  });
+
   test("Child views", function() {
     var childRenderedCount = 0,
         parentRenderedCount = 0;
