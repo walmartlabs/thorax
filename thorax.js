@@ -462,12 +462,31 @@
         });
 
         $(item_element).attr(model_cid_attribute_name, model.cid);
-        var previous_model = index > 0 ? this.collection.at(index - 1) : false;
-        if (!previous_model) {
-          collection_element.prepend(item_element);
-        } else {
+
+        // Not all items may have been inserted into the DOM tree so we need to
+        // walk the tree to find the proper parent. This has a pathological case
+        // where the last model is inserted into an empty container, but this
+        // should be the exception rather than the norm. Implementors who
+        // are dealing with this case in the sort of volume that would have
+        // siginficant performance impact should consider subcollections rather
+        // than filtered renderItem implementations
+        var insertIndex = index,
+            inserted = false;
+        while (!inserted && insertIndex > 0) {
+          var previous_model = this.collection.at(--insertIndex);
+          if (!previous_model) {
+            break;
+          }
+
           //use last() as appendItem can accept multiple nodes from a template
-          collection_element.find('[' + model_cid_attribute_name + '="' + previous_model.cid + '"]').last().after(item_element);
+          var previousElement = collection_element.find('[' + model_cid_attribute_name + '="' + previous_model.cid + '"]');
+          if (previousElement.length) {
+            previousElement.last().after(item_element);
+            inserted = true;
+          }
+        }
+        if (!inserted) {
+          collection_element.prepend(item_element);
         }
 
         appendViews.call(this, item_element);
