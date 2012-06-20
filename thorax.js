@@ -554,19 +554,15 @@
       
       //callback has context of element
       eachNamedInput.call(this, options, function() {
-        var value = getInputValue.call(this), type = this.type;
+        var value = getInputValue.call(this);
         if (typeof value !== 'undefined') {
           objectAndKeyFromAttributesAndName(attributes, this.name, {mode: 'serialize'}, function(object, key) {
-            if (type == "checkbox") {
-              if (!object[key]) {
-                object[key] = value;
-              } else if (object[key].constructor === Array) {
-                object[key].push(value);
-              } else {
-                object[key] = [object[key], value];
-              }
-            } else {
+            if (!object[key]) {
               object[key] = value;
+            } else if (_.isArray(object[key])) {
+              object[key].push(value);
+            } else {
+              object[key] = [object[key], value];
             }
           });
         }
