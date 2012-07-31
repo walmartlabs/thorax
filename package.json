@@ -1,9 +1,11 @@
 {
-  "name": "thorax",
-  "version": "1.2.3",
-  "description": "Strengthening your Backbone",
-  "keywords": ["mobile", "backbone"],
-  "author": "Ryan Eastridge <ryan@syntacticx.com> (http://syntacticx.com)",
+  "name": "handlebones",
+  "version": "2.0.0b1",
+  "description": "Handlebars + Backbone",
+  "keywords": ["backbone", "handlebars"],
+  "authors": [
+    "Ryan Eastridge <ryan@syntacticx.com> (http://syntacticx.com)"
+  ],
   "repository": {
     "type": "git",
     "url": "git://github.com/walmartlabs/thorax.git"
@@ -12,17 +14,22 @@
     "node": ">=0.4.7"
   },
   "dependencies": {
-    "connect": "*",
-    "optimist": "~0.2",
-    "handlebars": "~1.0"
+    "fs-watch-tree": "0.2.0"
   },
   "scripts": {
-    "start": "node test/bin/server.js . 8083",
-
-    "test": "phantomjs test/bin/run-qunit.js 'http://localhost:8083/test/index.html'"
+    "start": "node bin/test-server.js . 8083",
+    "test": "phantomjs bin/run-qunit.js 'http://localhost:8083/zepto.html' 'http://localhost:8083/jquery.html'"
+  },
+  "plugins": {
+    "bind": ["events", "model"],
+    "collection": ["events", "model", "fragment"],
+    "event": [],
+    "form": ["model"],
+    "helpers": [],
+    "loading": ["events", "model", "collection"],
+    "model": ["events"]
   },
   "bin": {
-    "thorax": "./bin/thorax"
-  },
-  "main": "./thorax.js"
+    "thorax": "bin/thorax"
+  }
 }
