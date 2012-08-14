@@ -37,7 +37,7 @@
   $(function() {
     $(document).on('click', '[' + callMethodAttributeName + ']', function(event) {
       var target = $(event.target),
-          view = target.view(),
+          view = target.view({helper: false}),
           methodName = target.attr(callMethodAttributeName);
       view[methodName].call(view, event);
     });
