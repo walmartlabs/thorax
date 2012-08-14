@@ -1,6 +1,3 @@
-//require 'thorax'
-//require 'events'
-
 (function() {
 
   var root = this,
