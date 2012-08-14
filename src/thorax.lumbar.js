@@ -6,14 +6,15 @@
 
   Backbone.History.prototype.start = function() {
     //if this is a lumbar app, setup the module loader
-    this.initBackboneLoader && this.initBackboneLoader();
+    //this file must be included in the base module
+    module.exports && module.exports.initBackboneLoader && module.exports.initBackboneLoader();
     return _start.apply(this, arguments);
   };
 
   Thorax.addModuleMethods = function(module) {
+    var router;
     module.router = function(protoProps) {
-      var router = Thorax.router(module.name, null, true);
-      if (arguments.length === 0) {
+      if (router || arguments.length === 0) {
         return router;
       }
       if (!router) {
@@ -25,13 +26,9 @@
           protoProps.name = module.name;
           protoProps.routes = module.routes;
         }
-        return new Thorax.router(module.name, protoProps);
-      } else {
-        _.extend(router, protoProps);
-        return router;
+        return router = new (Thorax.router(module.name, protoProps));
       }
     };
   };
-
 
 })();
