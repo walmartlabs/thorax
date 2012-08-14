@@ -1,4 +1,5 @@
 (function() {
+  
   var root = this,
       Backbone = root.Backbone,
       Thorax = root.Thorax,
@@ -24,7 +25,7 @@
     }
   });
 
-  Thorax.Util.createRegistry('_routers', 'router', 'Router');
+  Thorax.Util.createRegistry(Thorax, '_routers', 'router', 'Router');
 
   function onRoute(router, name) {
     if (this === router) {
