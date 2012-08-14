@@ -344,7 +344,7 @@
   
   Handlebars.registerHelper('template', function(name, options) {
     var context = _.extend({}, this, options ? options.hash : {});
-    var output = Handlebars.View.prototype.renderTemplate.call(this._view, name, context);
+    var output = Thorax.View.prototype.renderTemplate.call(this._view, name, context);
     return new Handlebars.SafeString(output);
   });
 
