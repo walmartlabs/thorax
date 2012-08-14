@@ -19,6 +19,7 @@
       ELEMENT_NODE_TYPE = 1;
 
   Thorax.Collection = Backbone.Collection.extend({
+    model: Thorax.Model || Backbone.Model,
     isEmpty: function() {
       if (this.length > 0) {
         return false;
