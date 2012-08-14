@@ -22,7 +22,7 @@
     Thorax = root.Thorax = {};
   }
 
-  Thorax.VERSION = '0.0.1';
+  Thorax.VERSION = '2.0.0b1';
 
   var handlebarsExtension = 'handlebars',
       handlebarsExtensionRegExp = new RegExp('\\.' + handlebarsExtension + '$'),
@@ -178,7 +178,7 @@
       object[cacheName] = {};
       object[methodName] = function(name, value, ignoreErrors) {
         if (!value) {
-          return registryGet(object, '_views', name, ignoreErrors);
+          return registryGet(object, cacheName, name, ignoreErrors);
         } else {
           if (value.cid && !value.name) {
             value.name = name;
