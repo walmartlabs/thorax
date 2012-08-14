@@ -478,15 +478,5 @@
     var el = $(this).closest(selector);
     return (el && Thorax._viewsIndexedByCid[el.attr(viewCidAttributeName)]) || false;
   };
-
-  //contain a result set to a given view
-  $.fn.filterToView = function(view) {
-    return this.not(function() {
-      var parents = $(this).parents('[' + viewCidAttributeName + ']');
-      return _.any(parents, function(parent) {
-        return parent.getAttribute(viewCidAttributeName) != view.cid;
-      });
-    });
-  };
-
+  
 })();
