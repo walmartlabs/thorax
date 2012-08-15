@@ -602,20 +602,6 @@ $(function(){
     loadingViewWithModel.model.loadEnd();
     this.clock.tick(loadEndTimeout);
     equal(loadingViewWithModel.$('p').html(), 'not loading');
-
-    var loadingViewWithModelExplicitlyCalled = new Thorax.View({
-      template: '{{#loading model}}<p>loading</p>{{else}}<p>not loading</p>{{/loading}}',
-      model: new Thorax.Model()
-    });
-    loadingViewWithModelExplicitlyCalled.render();
-    equal(loadingViewWithModelExplicitlyCalled.$('p').html(), 'not loading');
-    loadingViewWithModelExplicitlyCalled.model.loadStart();
-    equal(loadingViewWithModelExplicitlyCalled.$('p').html(), 'not loading');
-    this.clock.tick(loadStartTimeout);
-    equal(loadingViewWithModelExplicitlyCalled.$('p').html(), 'loading');
-    loadingViewWithModelExplicitlyCalled.model.loadEnd();
-    this.clock.tick(loadEndTimeout);
-    equal(loadingViewWithModelExplicitlyCalled.$('p').html(), 'not loading');
   });
 
   test("loading-template and loading-view collection helper options", function() {
