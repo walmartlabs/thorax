@@ -8,26 +8,6 @@
     rootObject = obj;
   };
   
-  /**
-   * load:start / load:end handler.
-   *
-   * Generates an load:start event handler that when triggered will
-   * then monitor the associated object for a load:end event. If the
-   * duration between the start and and the end events exceed
-   * `_loadingTimeoutDuration` then the `start` and `end` callbacks
-   * will be triggered at the appropriate times to allow the display
-   * of a loading UI.
-   *
-   * Example:
-   *    object.on('load:start', Thorax.loadHandler(
-   *      function(message, background, object) {
-   *        element.addClass('loading');
-   *      },
-   *      function(background, object) {
-   *        element.removeClass('loading');
-   *      }));
-   *
-   */
   Thorax.loadHandler = function(start, end) {
     return function(message, background, object) {
       var self = this;
@@ -413,11 +393,7 @@
   
   // Helpers
   
-  Handlebars.registerViewHelper('loading', function(collectionOrModel, view) {
-    if (arguments.length === 1) {
-      view = collectionOrModel;
-      collectionOrModel = false;
-    }
+  Handlebars.registerViewHelper('loading', function(view) {
     _render = view.render;
     view.render = function() {
       if (view.parent.$el.hasClass(view.parent._loadingClassName)) {
