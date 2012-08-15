@@ -1,25 +1,13 @@
 An opinionated, battle tested [Backbone](http://backbonejs.org/) + [Handlebars](http://handlebarsjs.com/) framework to build large scale web applications. 
 
-## Quick Start
-
-    var Application = new Thorax.Application();
-    Application.start();
-    Application.setView(new Thorax.View({
-      template: "Hello world!"
-    }));
-    $("body").append(Application.el);
-
-
-Thorax can be used standalone in any JavaScript environment, but here are a few boilerplate projects to get you started in the environment of your choice:
-
-<table cellpadding="0" cellspacing="0" border="0" width="100%" id="downloads" style="padding:0; margin:0;">
+<table cellpadding="0" cellspacing="0" border="0" width="100%" id="downloads">
   <tr>
     <td width="33%">
       <h3>Standalone</h3>
       <p>Open the <code>index.html</code> file from the downloaded project in your browser.</p>
     </td>
     <td width="33%">
-      <h3>Node</h3>
+      <h3>Node + <a href="http://walmartlabs.github.com/lumbar">Lumbar</a></h3>
       <p>Run <code>npm start</code> from the downloaded project.</p>
     </td>
     <td width="33%">
@@ -33,6 +21,14 @@ Thorax can be used standalone in any JavaScript environment, but here are a few 
     <td width="33%"><a href="https://github.com/downloads/walmartlabs/thorax/thorax-rails.zip" class="btn">Download 2.0.0b1</a></td>
   </tr>
 </table>
+
+Thorax can be used standalone in any JavaScript environment in addition the boilerplate projects provided above.
+
+    var view = new Thorax.View({
+      template: "Hello world!"
+    });
+    view.render();
+    $("body").append(view.el);
 
 ## Editable Examples
 
