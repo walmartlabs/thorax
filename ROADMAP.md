@@ -2,6 +2,18 @@
 
 ## 2.1
 
+### create method and singletons
+
+Examine wether a `create` method should be standard across all classes to use as an alternative for the `new` keyword, so that this syntax works:
+
+    Application.view('my-view').create();
+
+Presently this results in incorrect behavior (language flaw):
+
+    new Application.view('my-view');
+
+Should also encapsulate various singleton behaviors in Phoenix into `instance` or other relevant methods.
+
 ### mobile plugin
 
 Create a mobile plugin which includes the fastclick and tap-highlight implementations in Phoenix in addition to the default behaviors present in Phoenix & Thorax 1.2 such as:
