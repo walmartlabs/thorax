@@ -39,46 +39,53 @@ if (phantom.args.length === 0 || phantom.args.length > 2) {
     phantom.exit();
 }
 
-var page = new WebPage();
+var argCount = phantom.args.length;
+Array.prototype.slice.call(phantom.args).forEach(function(arg) {
+    var page = new WebPage();
 
-// Route "console.log()" calls from within the Page context to the main Phantom context (i.e. current "this")
-page.onConsoleMessage = function(msg) {
-    console.log(msg);
-};
+    // Route "console.log()" calls from within the Page context to the main Phantom context (i.e. current "this")
+    page.onConsoleMessage = function(msg) {
+        console.log(msg);
+    };
 
-console.log('testing ' + phantom.args[0]);
-page.open(phantom.args[0], function(status){
-    if (status !== "success") {
-        console.log("Unable to access network");
-        phantom.exit();
-    } else {
-        waitFor(function(){
-            return page.evaluate(function(){
-                var el = document.getElementById('qunit-testresult');
-                if (el && el.innerText.match('completed')) {
-                    return true;
+    page.open(arg, function(status){
+        if (status !== "success") {
+            console.log("Unable to access network");
+            phantom.exit();
+        } else {
+            waitFor(function(){
+                return page.evaluate(function(){
+                    var el = document.getElementById('qunit-testresult');
+                    if (el && el.innerText.match('completed')) {
+                        return true;
+                    }
+                    return false;
+                });
+            }, function(){
+                var failedNum = page.evaluate(function(){
+                    var failed = document.querySelectorAll('#qunit-tests > .fail');
+                    for (var i = 0, len = failed.length; i < len; i++) {
+                      var el = failed[i];
+    
+                      var name = el.getElementsByTagName('strong')[0];
+    
+                      console.log('failed: ' + name.innerText);
+                    }
+    
+                    var el = document.getElementById('qunit-testresult');
+                    try {
+                        console.log(el.innerText);
+                        return el.getElementsByClassName('failed')[0].innerHTML;
+                    } catch (e) { }
+                    return 10000;
+                });
+                --argCount;
+                if (parseInt(failedNum, 10) > 0) {
+                  phantom.exit(1);
+                } else if (argCount === 0) {
+                  phantom.exit(0);
                 }
-                return false;
             });
-        }, function(){
-            var failedNum = page.evaluate(function(){
-                var failed = document.querySelectorAll('#qunit-tests > .fail');
-                for (var i = 0, len = failed.length; i < len; i++) {
-                  var el = failed[i];
-
-                  var name = el.getElementsByTagName('strong')[0];
-
-                  console.log('failed: ' + name.innerText);
-                }
-
-                var el = document.getElementById('qunit-testresult');
-                try {
-                    console.log(el.innerText);
-                    return el.getElementsByClassName('failed')[0].innerHTML;
-                } catch (e) { }
-                return 10000;
-            });
-            phantom.exit((parseInt(failedNum, 10) > 0) ? 1 : 0);
-        });
-    }
+        }
+    });
 });
