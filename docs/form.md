@@ -31,8 +31,7 @@ Each form input in your application should contain a corresponding label. Since 
     <label for="{{cid}}-last-name"/>
     <input name="address[street]" value="123 Chestnut" id="{{cid}}-address[street]"/>
 
-    Phoenix.View.extend({
-      name: "address-form",
+    new Thorax.View({
       events: {
         "submit form": "_handleSubmit"
       },
