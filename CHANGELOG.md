@@ -51,6 +51,8 @@ The signatures of exisiting methods were not changed and the unit tests for exis
 
 Added `link`, `url` and `button` helpers.
 
+Previously all `click a` events would trigger the `Backbone.history.navigate` behavior. This is now opt in via the `link` helper.
+
 ### Collection Plugin
 
 Collection handling has been completely re-written and is not backwards compatible. The new collection helper must be used. Multiple collections and multiple displays of the same collection may now be present in the same view. Each collection helper will generate a `CollectionView`instance. Specific migrations:
