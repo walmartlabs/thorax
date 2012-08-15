@@ -2,6 +2,16 @@
 
 ## 2.1
 
+### Document and test mixin plugin
+
+### re-add nested event keyword or other implementation
+
+Need ability to remove containHandlerToCurrentView and allow view events to be observable on all children. For now use view.$el.on()
+
+### re-add unregisterEvents as off for class events
+
+Need to add tests as previous implementation was untested and unpredictable.
+
 ### create method and singletons
 
 Examine wether a `create` method should be standard across all classes to use as an alternative for the `new` keyword, so that this syntax works:
