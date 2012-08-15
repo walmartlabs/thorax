@@ -18,3 +18,13 @@ Declare a router class definition for the module. Routes to match the methods ar
         Application.setView(view);
       }
     });
+
+A specific `Thorax.Router` or `Thorax.ViewController` instance may also be passed:
+
+    module.router(new Thorax.ViewController({
+      index: function() {
+        var klass = Application.view('hello-world/index');
+        var view = new klass();
+        this.setView(view);
+      }
+    }));

@@ -1,7 +1,7 @@
 Thorax Model Plugin
 ===================
 
-Adds model binding to Thorax.View and necessary support methods to Thorax.Model.
+Adds model binding to Thorax.View and necessary support methods to Thorax.Model, but does not implement any significant model or sync functionality.
 
 ## Thorax.Model
 
