@@ -481,6 +481,38 @@ $(function() {
     equal(emptyCollectionView.$('[data-view-helper]').html(), 'empty');
   });
 
+  test("item-context & empty-context", function() {
+    var view = new Thorax.View({
+      collection: letterCollection,
+      template: "{{#collection this.collection item-context=itemContext}}<span>{{test}}</span>{{/collection}}",
+      itemContext: function(model, i) {
+        return {
+          test: 'testing'
+        };
+      }
+    });
+    view.render();
+    equal(view.$('span').length, letterCollection.length);
+    equal(view.$('span')[0].innerHTML, 'testing');
+
+    view = new Thorax.View({
+      collection: new (Thorax.Collection.extend({
+        url: false,
+        isEmpty: function() {
+          return true;
+        }
+      })),
+      template: "{{#collection this.collection empty-context=\"emptyContext\"}}{{test}}{{else}}<b>{{test}}</b>{{/collection}}",
+      emptyContext: function() {
+        return {
+          test: 'testing'
+        }
+      }
+    });
+    view.render();
+    equal(view.$('b')[0].innerHTML, 'testing');
+  });
+
   test("helper and local scope collision", function() {
     var child = new Thorax.View({
       collection: letterCollection,

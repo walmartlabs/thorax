@@ -213,17 +213,34 @@
       ++this._renderCount;
     },
     renderEmpty: function() {
-      var context = (this.emptyContext && this.emptyContext()) || {};
+      var viewOptions = {};
       if (this.options['empty-view']) {
-        var view = Thorax.Util.getViewInstance(this.options['empty-view'], context);
+        if (this.options['empty-context']) {
+          viewOptions.context = _.bind(function() {
+            return (_.isFunction(this.options['empty-context'])
+              ? this.options['empty-context']
+              : this.parent[this.options['empty-context']]
+            ).call(this.parent);
+          }, this);
+        }
+        var view = Thorax.Util.getViewInstance(this.options['empty-view'], viewOptions);
         if (this.options['empty-template']) {
-          view.render(this.renderTemplate(this.options['empty-template'], context));
+          view.render(this.renderTemplate(this.options['empty-template'], viewOptions.context ? viewOptions.context() : {}));
         } else {
           view.render();
         }
         return view;
       } else {
         var emptyTemplate = this.options['empty-template'] || (this.parent.name && this._loadTemplate(this.parent.name + '-empty', true));
+        var context;
+        if (this.options['empty-context']) {
+          context = (_.isFunction(this.options['empty-context'])
+            ? this.options['empty-context']
+            : this.parent[this.options['empty-context']]
+          ).call(this.parent);
+        } else {
+          context = {};
+        }
         return emptyTemplate && this.renderTemplate(emptyTemplate, context);
       }
     },
@@ -233,8 +250,13 @@
           model: model
         };
         //itemContext deprecated
-        if (this.itemContext) {
-          viewOptions.context = this.itemContext;
+        if (this.options['item-context']) {
+          viewOptions.context = _.bind(function() {
+            return (_.isFunction(this.options['item-context'])
+              ? this.options['item-context']
+              : this.parent[this.options['item-context']]
+            ).call(this.parent, model, i);
+          }, this);
         }
         if (this.options['item-template']) {
           viewOptions.template = this.options['item-template'];
@@ -247,7 +269,16 @@
         if (!itemTemplate) {
           throw new Error('collection helper in View: ' + (this.parent.name || this.parent.cid) + ' requires an item template.');
         }
-        return this.renderTemplate(itemTemplate, (this.itemContext && this.itemContext(model, i)) || model.attributes);
+        var context;
+        if (this.options['item-context']) {
+          context = (_.isFunction(this.options['item-context'])
+            ? this.options['item-context']
+            : this.parent[this.options['item-context']]
+          ).call(this.parent, model, i);
+        } else {
+          context = model.attributes;
+        }
+        return this.renderTemplate(itemTemplate, context);
       }
     },
     appendEmpty: function() {
@@ -327,6 +358,8 @@
         'empty-template': view.inverse && view.inverse !== Handlebars.VM.noop ? view.inverse : view.options['empty-template'],
         'item-view': view.options['item-view'],
         'empty-view': view.options['empty-view'],
+        'item-context': view.options['item-context'],
+        'empty-context': view.options['empty-context'],
         filter: view.options['filter']
       });
       view._bindCollection(collection);
