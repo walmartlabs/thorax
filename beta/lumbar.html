@@ -1,0 +1,88 @@
+
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thorax: Lumbar Plugin</title>
+    
+    <link rel="stylesheet" type="text/css" href="screen.css">
+    
+    
+
+    
+
+    <!-- Typekit -->
+    
+      <script type="text/javascript">
+        (function() {
+          var config = {
+            kitId: 'hjp0pft',
+            scriptTimeout: 3000
+          };
+          var h=document.getElementsByTagName("html")[0];h.className+=" wf-loading";var t=setTimeout(function(){h.className=h.className.replace(/( |^)wf-loading( |$)/g,"");h.className+=" wf-inactive"},config.scriptTimeout);var tk=document.createElement("script");tk.src='//use.typekit.net/'+config.kitId+'.js';tk.type="text/javascript";tk.async="true";tk.onload=tk.onreadystatechange=function(){var a=this.readyState;if(a&&a!="complete"&&a!="loaded")return;clearTimeout(t);try{Typekit.load(config)}catch(b){}};var s=document.getElementsByTagName("script")[0];s.parentNode.insertBefore(tk,s)
+        })();
+      </script>
+    
+  </head>
+  <body><div id="container">
+  <div id="nav">
+    
+      <div id="header">
+        <a href="index.html" id="logo">Thorax<span>Lumbar Plugin</span></a>
+      </div>
+    
+    <ul id="sections">
+      
+        <li>
+          <a href="#module-methods">Module methods</a>
+          
+            <ul>
+              
+                <li>
+                  <a href="#module-methods/router-module-router-protoprops">router </a>
+                </li>
+              
+            </ul>
+          
+        </li>
+      
+    </ul><div class="header"><a href="#">Plugins</a></div><ul class="sections"><li><a href="collection.html">Collection</a></li><li><a href="event.html">Event</a></li><li><a href="form.html">Form</a></li><li><a href="helpers.html">Helpers</a></li><li><a href="loading.html">Loading</a></li><li><a href="lumbar.html">Lumbar</a></li><li><a href="model.html">Model</a></li><li><a href="view-controller.html">ViewController</a></li></ul>
+    
+    
+  </div>
+  <div id="content">
+    
+    <h1>Thorax Lumbar Plugin</h1>
+<p>Lumbar allows you to build module based Backbone applications and is included in the <a href="https://github.com/downloads/walmartlabs/thorax/thorax-node.zip">Thorax for Node download</a>. For more information see the [<a href="http://walmartlabs.github.com/lumbar">http://walmartlabs.github.com/lumbar</a>] documentation.
+
+</p>
+<h2 id="module-methods">Module methods</h2>
+<p>Each Lumbar module assumes you will have one router per module, which will have a <code>module</code> variable automatically available inside of it. 
+
+</p>
+<h3 id="module-methods/router-module-router-protoprops" class="signature">router <em>module.router(protoProps)</em></h3>
+<p>Declare a router class definition for the module. Routes to match the methods are defined in the <code>lumbar.json</code> file. From the Thorax for node <code>js/routers/hello-world.js</code> file:
+
+</p>
+<pre><code>module.router({
+  index: <span class="keyword">function</span>() {
+    <span class="keyword">var</span> klass = Application.view(<span class="string">'hello-world/index'</span>);
+    <span class="keyword">var</span> view = <span class="keyword">new</span> klass();
+    Application.setView(view);
+  }
+});</code></pre>
+<p>A specific <code>Thorax.Router</code> or <code>Thorax.ViewController</code> instance may also be passed:
+
+</p>
+<pre><code>module.router(<span class="keyword">new</span> Thorax.ViewController({
+  index: <span class="keyword">function</span>() {
+    <span class="keyword">var</span> klass = Application.view(<span class="string">'hello-world/index'</span>);
+    <span class="keyword">var</span> view = <span class="keyword">new</span> klass();
+    <span class="keyword">this</span>.setView(view);
+  }
+}));</code></pre>
+
+  <p>Copyright 2012 <a href="http://walmartlabs.com">@WalmartLabs</a></p></div>
+</div><a href="https://github.com/walmartlabs/thorax"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"></a></body>
+</html>

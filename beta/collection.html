@@ -1,0 +1,243 @@
+
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thorax: Collection Plugin</title>
+    
+    <link rel="stylesheet" type="text/css" href="screen.css">
+    
+    
+
+    
+
+    <!-- Typekit -->
+    
+      <script type="text/javascript">
+        (function() {
+          var config = {
+            kitId: 'hjp0pft',
+            scriptTimeout: 3000
+          };
+          var h=document.getElementsByTagName("html")[0];h.className+=" wf-loading";var t=setTimeout(function(){h.className=h.className.replace(/( |^)wf-loading( |$)/g,"");h.className+=" wf-inactive"},config.scriptTimeout);var tk=document.createElement("script");tk.src='//use.typekit.net/'+config.kitId+'.js';tk.type="text/javascript";tk.async="true";tk.onload=tk.onreadystatechange=function(){var a=this.readyState;if(a&&a!="complete"&&a!="loaded")return;clearTimeout(t);try{Typekit.load(config)}catch(b){}};var s=document.getElementsByTagName("script")[0];s.parentNode.insertBefore(tk,s)
+        })();
+      </script>
+    
+  </head>
+  <body><div id="container">
+  <div id="nav">
+    
+      <div id="header">
+        <a href="index.html" id="logo">Thorax<span>Collection Plugin</span></a>
+      </div>
+    
+    <ul id="sections">
+      
+        <li>
+          <a href="#view-helpers">View Helpers</a>
+          
+            <ul>
+              
+                <li>
+                  <a href="#view-helpers/collection-collection-collectionobj-options">collection </a>
+                </li>
+              
+                <li>
+                  <a href="#view-helpers/empty-empty-collection">empty </a>
+                </li>
+              
+            </ul>
+          
+        </li>
+      
+        <li>
+          <a href="#view-events">View Events</a>
+          
+        </li>
+      
+        <li>
+          <a href="#thorax-collectionview">Thorax.CollectionView</a>
+          
+            <ul>
+              
+                <li>
+                  <a href="#thorax-collectionview/appenditem-view-appenditem-modelorview-index">appendItem </a>
+                </li>
+              
+            </ul>
+          
+        </li>
+      
+        <li>
+          <a href="#thorax-collection">Thorax.Collection</a>
+          
+            <ul>
+              
+                <li>
+                  <a href="#thorax-collection/collection-thorax-collection-name-protoprops">collection </a>
+                </li>
+              
+                <li>
+                  <a href="#thorax-collection/isempty-collection-isempty">isEmpty </a>
+                </li>
+              
+                <li>
+                  <a href="#thorax-collection/ispopulated-collection-ispopulated">isPopulated </a>
+                </li>
+              
+            </ul>
+          
+        </li>
+      
+        <li>
+          <a href="#extras">Extras</a>
+          
+            <ul>
+              
+                <li>
+                  <a href="#extras/collection-event-target-collection">$.collection </a>
+                </li>
+              
+            </ul>
+          
+        </li>
+      
+        <li>
+          <a href="#events">Events</a>
+          
+            <ul>
+              
+                <li>
+                  <a href="#events/rendered-collection-rendred-collection-collectionview-collection">rendered:collection </a>
+                </li>
+              
+                <li>
+                  <a href="#events/rendered-item-rendered-item-collectionview-collection-model-itemelement-index">rendered:item </a>
+                </li>
+              
+                <li>
+                  <a href="#events/rendered-empty-rendered-empty-collectionview-collection">rendered:empty </a>
+                </li>
+              
+            </ul>
+          
+        </li>
+      
+    </ul><div class="header"><a href="#">Plugins</a></div><ul class="sections"><li><a href="collection.html">Collection</a></li><li><a href="event.html">Event</a></li><li><a href="form.html">Form</a></li><li><a href="helpers.html">Helpers</a></li><li><a href="loading.html">Loading</a></li><li><a href="lumbar.html">Lumbar</a></li><li><a href="model.html">Model</a></li><li><a href="view-controller.html">ViewController</a></li></ul>
+    
+    
+  </div>
+  <div id="content">
+    
+    <h1>Thorax Collection Plugin</h1>
+<p>Adds view helpers and classes to support collection bindings in. See the <a href="http://jsfiddle.net/HAdxJ/">Todos example</a> to see the collection plugin in action.
+
+</p>
+<h2 id="view-helpers">View Helpers</h2>
+<h3 id="view-helpers/collection-collection-collectionobj-options" class="signature">collection <em>{{collection [collectionObj] [options]}}</em></h3>
+<p>Creates and embeds a <code>CollectionView</code> instance, updating when items are added, removed or changed in the collection. If a block is passed it will be used as the <code>item-template</code>, which will be called with a context of the <code>model.attributes</code> for each model in the collection.
+
+</p>
+<pre><code><span class="variable">{{#collection cats}}</span>
+  <span class="variable">{{name}}</span>
+<span class="variable">{{/collection}}</span></code></pre>
+<p>Options may be arbitrary HTML attributes, a <code>tag</code> option to specify the type of tag containing the collection, or any of the following:
+
+</p>
+<ul>
+<li><code>item-template</code> - <em>required</em> A template to display for each model. If a block is specified it will become the item-template. Defaults to view.name + '-item'</li>
+<li><code>item-view</code> - A view to create for each model. Defaults to view.name + '-item'</li>
+<li><code>item-context</code> - A function in the declaring view to specify the context for an item-template, recieves model and index as arguments.</li>
+<li><code>empty-template</code> - A template to display when the collection is empty. If an inverse block is specified it will become the empty-template. Defaults to view.name + '-empty'</li>
+<li><code>empty-view</code> - A view to display when the collection is empty. Defaults to view.name + '-empty'</li>
+<li><code>empty-context</code> - A function in the declaring view to specify the context that the empty-template is rendered with.</li>
+<li><code>loading-template</code> - Only available if the loading plugin has been included. A template to append when the collection is loading.</li>
+<li><code>loading-view</code> - Only available if loading plugin has been included. A view to append when the collection is loading</li>
+<li><code>filter</code> - A method on the view to filter which items are rendered. Recieves (model, index) and must return boolean.</li>
+</ul>
+<p>Any of the options can be specified as variables in addition to strings:
+
+</p>
+<pre><code>{{<span class="title">collection</span> cats item-view=itemViewClass}}</code></pre>
+<p><code>CollectionView</code> instances are created via a helper and not directly in a JavaScript API, so to get a reference to them you need to use the <code>helper:collection</code> event:
+
+</p>
+<pre><code><span class="tag">view</span><span class="class">.on</span>("<span class="tag">helper</span><span class="pseudo">:collection"</span>, <span class="tag">function</span>(<span class="tag">collection</span>, <span class="tag">collectionView</span>) <span class="rules">{
+
+<span class="rule">}</span></span>);</code></pre>
+<h3 id="view-helpers/empty-empty-collection" class="signature">empty <em>{{#empty [collection]}}</em></h3>
+<p>Creates and embeds a <code>HelperView</code> that will be updated dependening on wether the collection is empty or not. If no collection is specified it will default to the view's model if present.
+
+</p>
+<pre><code><span class="variable">{{#empty cats}}</span>
+  No cats!
+<span class="variable">{{else}}</span>
+  <span class="variable">{{#collection cats}}</span><span class="variable">{{/collection}}</span>
+<span class="variable">{{/empty}}</span></code></pre>
+<p>To embed a row within a <code>collection</code> helper if it the collection is empty the <code>empty-view</code>, <code>empty-template</code> or <code>else</code> block of the <code>collection</code> helper can be used:
+
+</p>
+<pre><code><span class="variable">{{#collection cats}}</span>
+  A cat.
+<span class="variable">{{else}}</span>
+  No cats!
+<span class="variable">{{/collection}}</span></code></pre>
+<h2 id="view-events">View Events</h2>
+<p>The collection plugin extends the events plugin by allowing a <code>collection</code> hash of events to be specified in the View <code>events</code> object or to a view's <code>on</code> method. When a collection is bound to a view with the collection helper any events on the collection can be observed by the view in this way. For instance to observe any collection <code>reset</code> event when it is bound to any view:
+
+</p>
+<pre><code><span class="tag">Thorax</span><span class="class">.View</span><span class="class">.on</span>(<span class="rules">{
+  <span class="rule"><span class="attribute">collection</span>:<span class="value"> {
+    reset: <span class="function">function()</span> {
+      //<span class="string">"this"</span> will refer to the view
+    </span>}</span></span>
+  }
+});</code></pre>
+<p>The <code>collection</code> helper itself is implemented in this way.
+
+</p>
+<h2 id="thorax-collectionview">Thorax.CollectionView</h2>
+<p>A <code>Thorax.View</code> subclass generated each time a <code>collection</code> helper is used.
+
+</p>
+<h3 id="thorax-collectionview/appenditem-view-appenditem-modelorview-index" class="signature">appendItem <em>view.appendItem(modelOrView [,index])</em></h3>
+<p>Append a model (which will used to generate a new <code>item-view</code>) or a view at a given index in the <code>CollectionView</code>. If passing a view as the first argument <code>index</code> may be a model which will be used to look up the index.
+
+</p>
+<h2 id="thorax-collection">Thorax.Collection</h2>
+<h3 id="thorax-collection/collection-thorax-collection-name-protoprops" class="signature">collection <em>Thorax.collection(name [,protoProps])</em></h3>
+<p>Get or set a collection class.
+
+</p>
+<h3 id="thorax-collection/isempty-collection-isempty" class="signature">isEmpty <em>collection.isEmpty()</em></h3>
+<p>Used by the <code>empty</code> helper and the <code>empty-template</code> and <code>empty-item</code> options of the <code>collection</code> helper to check wether a collection is empty. A collection is only treated as empty if it <code>isPopulated</code> and zero length.
+
+</p>
+<h3 id="thorax-collection/ispopulated-collection-ispopulated" class="signature">isPopulated <em>collection.isPopulated()</em></h3>
+<p>Used by the <code>collection</code> helper to determine wether or not to fetch the collection.
+
+
+</p>
+<h2 id="extras">Extras</h2>
+<h3 id="extras/collection-event-target-collection" class="signature">$.collection <em>$(event.target).collection()</em></h3>
+<p>Get a reference to the nearest bound collection. Can be used with any <code>$</code> object but most useful when dealing with event handlers.
+
+</p>
+<pre><code>$(event<span class="preprocessor">.target</span>)<span class="preprocessor">.collection</span>()<span class="comment">;</span></code></pre>
+<h2 id="events">Events</h2>
+<h3 id="events/rendered-collection-rendred-collection-collectionview-collection" class="signature">rendered:collection <em>rendred:collection(collectionView, collection)</em></h3>
+<p>Triggered on the view calling the <code>collection</code> helper every time <code>render</code> is called on the <code>CollectionView</code>.
+
+</p>
+<h3 id="events/rendered-item-rendered-item-collectionview-collection-model-itemelement-index" class="signature">rendered:item <em>rendered:item(collectionView, collection, model, itemElement, index)</em></h3>
+<p>Triggered on the view calling the <code>collection</code> helper every time an item is rendered in the <code>CollectionView</code>.
+
+</p>
+<h3 id="events/rendered-empty-rendered-empty-collectionview-collection" class="signature">rendered:empty <em>rendered:empty(collectionView, collection)</em></h3>
+<p>Triggered on the view calling the <code>collection</code> helper every time the <code>empty-view</code> or <code>empty-template</code> is rendered in the <code>CollectionView</code>.
+</p>
+
+  <p>Copyright 2012 <a href="http://walmartlabs.com">@WalmartLabs</a></p></div>
+</div><a href="https://github.com/walmartlabs/thorax"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"></a></body>
+</html>

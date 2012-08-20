@@ -1,0 +1,231 @@
+
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thorax: Loading Plugin</title>
+    
+    <link rel="stylesheet" type="text/css" href="screen.css">
+    
+    
+
+    
+
+    <!-- Typekit -->
+    
+      <script type="text/javascript">
+        (function() {
+          var config = {
+            kitId: 'hjp0pft',
+            scriptTimeout: 3000
+          };
+          var h=document.getElementsByTagName("html")[0];h.className+=" wf-loading";var t=setTimeout(function(){h.className=h.className.replace(/( |^)wf-loading( |$)/g,"");h.className+=" wf-inactive"},config.scriptTimeout);var tk=document.createElement("script");tk.src='//use.typekit.net/'+config.kitId+'.js';tk.type="text/javascript";tk.async="true";tk.onload=tk.onreadystatechange=function(){var a=this.readyState;if(a&&a!="complete"&&a!="loaded")return;clearTimeout(t);try{Typekit.load(config)}catch(b){}};var s=document.getElementsByTagName("script")[0];s.parentNode.insertBefore(tk,s)
+        })();
+      </script>
+    
+  </head>
+  <body><div id="container">
+  <div id="nav">
+    
+      <div id="header">
+        <a href="index.html" id="logo">Thorax<span>Loading Plugin</span></a>
+      </div>
+    
+    <ul id="sections">
+      
+        <li>
+          <a href="#queueing">Queueing</a>
+          
+        </li>
+      
+        <li>
+          <a href="#thorax-util">Thorax.Util</a>
+          
+            <ul>
+              
+                <li>
+                  <a href="#thorax-util/bindtoroute-thorax-util-bindtoroute-callback-failback">bindToRoute </a>
+                </li>
+              
+            </ul>
+          
+        </li>
+      
+        <li>
+          <a href="#thorax-model-collection">Thorax.Model &amp; Collection</a>
+          
+            <ul>
+              
+                <li>
+                  <a href="#thorax-model-collection/load-object-load-callback-failback-options">load </a>
+                </li>
+              
+            </ul>
+          
+        </li>
+      
+        <li>
+          <a href="#thorax">Thorax</a>
+          
+            <ul>
+              
+                <li>
+                  <a href="#thorax/loadhandler-thorax-loadhandler-startcallback-endcallback">loadHandler </a>
+                </li>
+              
+                <li>
+                  <a href="#thorax/setrootobject-thorax-setrootobject-obj">setRootObject </a>
+                </li>
+              
+            </ul>
+          
+        </li>
+      
+        <li>
+          <a href="#events">Events</a>
+          
+            <ul>
+              
+                <li>
+                  <a href="#events/load-start-load-start-message-background-target">load:start </a>
+                </li>
+              
+                <li>
+                  <a href="#events/load-end-load-end-target">load:end </a>
+                </li>
+              
+            </ul>
+          
+        </li>
+      
+        <li>
+          <a href="#thorax-view">Thorax.View</a>
+          
+            <ul>
+              
+                <li>
+                  <a href="#thorax-view/_loadingclassname-view-_loadingclassname">_loadingClassName </a>
+                </li>
+              
+                <li>
+                  <a href="#thorax-view/_loadingtimeoutduration-view-_loadingtimeoutduration">_loadingTimeoutDuration </a>
+                </li>
+              
+                <li>
+                  <a href="#thorax-view/_loadingtimeoutendduration-view-_loadingtimeoutendduration">_loadingTimeoutEndDuration </a>
+                </li>
+              
+            </ul>
+          
+        </li>
+      
+        <li>
+          <a href="#view-helpers">View Helpers</a>
+          
+            <ul>
+              
+                <li>
+                  <a href="#view-helpers/loading-loading">loading </a>
+                </li>
+              
+            </ul>
+          
+        </li>
+      
+    </ul><div class="header"><a href="#">Plugins</a></div><ul class="sections"><li><a href="collection.html">Collection</a></li><li><a href="event.html">Event</a></li><li><a href="form.html">Form</a></li><li><a href="helpers.html">Helpers</a></li><li><a href="loading.html">Loading</a></li><li><a href="lumbar.html">Lumbar</a></li><li><a href="model.html">Model</a></li><li><a href="view-controller.html">ViewController</a></li></ul>
+    
+    
+  </div>
+  <div id="content">
+    
+    <h1>Thorax Loading Plugin</h1>
+<p>Helpers and methods to load your data in an orderly manner.
+
+</p>
+<h2 id="queueing">Queueing</h2>
+<p>TODO: explanation of flushQueue, fetchQueue, resetQueue
+
+</p>
+<h2 id="thorax-util">Thorax.Util</h2>
+<h3 id="thorax-util/bindtoroute-thorax-util-bindtoroute-callback-failback" class="signature">bindToRoute <em>Thorax.Util.bindToRoute(callback [,failback])</em></h3>
+<p>Used by <code>model.load</code> and <code>collection.load</code>. Binds the callback to the current route. If the browser navigtates to another route in the time between when the callback is bound and when it is executed, callback will not be called. Else failback will be called if present.
+
+</p>
+<pre><code>routerMethod: <span class="reserved">function</span>() {
+  <span class="reserved">var</span> callback = Thorax.Util.bindToRoute(<span class="reserved">function</span>() {
+    //callback called <span class="keyword">if</span> browser <span class="keyword">is</span> still <span class="literal">on</span> route
+  });
+  setTimeout(callback, <span class="number">5000</span>);
+}</code></pre>
+<h2 id="thorax-model-collection">Thorax.Model &amp; Collection</h2>
+<p>When the loading plugin is used both <code>fetch</code> and <code>load</code> on a <code>Thorax.Model</code> or <code>Thorax.Collection</code> will trigger <code>load:start</code> and <code>load:end</code> events. Pass <code>background: true</code> as an option to either method to prevent the event from being triggered on the <code>rootObject</code>.
+
+</p>
+<h3 id="thorax-model-collection/load-object-load-callback-failback-options" class="signature">load <em>object.load(callback [,failback] [,options])</em></h3>
+<p>Calls <code>fetch</code> on the model or collection ensuring the callbacks will only be called if the route does not change.<code>callback</code> and <code>failback</code> will be used as arguments to <code>bindToRoute</code>. <code>options</code> will be passed to the <code>fetch</code> call on the model or collection if present.
+
+</p>
+<pre><code><span class="label">routerMethod:</span> function(id) {
+  var view = new (Application<span class="preprocessor">.view</span>(<span class="string">"view/name"</span>))<span class="comment">;</span>
+  var model = new Application<span class="preprocessor">.Model</span>({id: id})<span class="comment">;</span>
+  model<span class="preprocessor">.load</span>(function() {
+    //callback only called if browser still on this route
+    view<span class="preprocessor">.setModel</span>(model)<span class="comment">;</span>
+    Application<span class="preprocessor">.layout</span><span class="preprocessor">.setView</span>(view)<span class="comment">;</span>
+  }, function() {
+    //failback only called if browser has left this route
+  })<span class="comment">;</span>
+}</code></pre>
+<h2 id="thorax">Thorax</h2>
+<h3 id="thorax/loadhandler-thorax-loadhandler-startcallback-endcallback" class="signature">loadHandler <em>Thorax.loadHandler(startCallback, endCallback)</em></h3>
+<p>Generates an <code>load:start</code> event handler that when triggered will then monitor the associated object for a <code>load:end</code> event. If the duration between the start and and the end events exceed <code>_loadingTimeoutDuration</code> then the <code>start</code> and <code>end</code> callbacks will be triggered at the appropriate times to allow the display of a loading UI.
+
+</p>
+<pre><code>Application<span class="preprocessor">.on</span>(<span class="string">"load:start"</span>, Thorax<span class="preprocessor">.loadHandler</span>(
+  function(message, background, object) {
+    Application.$el<span class="preprocessor">.addClass</span>(<span class="string">"loading"</span>)<span class="comment">;</span>
+  },
+  function(background, object) {
+    Application.$el<span class="preprocessor">.removeClass</span>(<span class="string">"loading"</span>)<span class="comment">;</span>
+  }))<span class="comment">;</span></code></pre>
+<h3 id="thorax/setrootobject-thorax-setrootobject-obj" class="signature">setRootObject <em>Thorax.setRootObject(obj)</em></h3>
+<p>Set the root object that will recieve <code>load:start</code> and <code>load:end</code> events if the <code>load:start</code> was not a <code>background</code> event. If creating a new <code>Thorax.Application</code> the Application object will automatically set itself as the root object.
+
+</p>
+<h2 id="events">Events</h2>
+<h3 id="events/load-start-load-start-message-background-target" class="signature">load:start <em>load:start(message, background, target)</em></h3>
+<p>Triggered by <code>fetch</code> or <code>load</code> in a <code>Thorax.Model</code> or <code>Thorax.Collection</code>.
+
+</p>
+<h3 id="events/load-end-load-end-target" class="signature">load:end <em>load:end(target)</em></h3>
+<p>Triggered by <code>fetch</code> or <code>load</code> in a <code>Thorax.Model</code> or <code>Thorax.Collection</code>. Never observe this directly, always use <code>Thorax.loadHandler</code> on <code>load:start</code>.
+
+</p>
+<h2 id="thorax-view">Thorax.View</h2>
+<h3 id="thorax-view/_loadingclassname-view-_loadingclassname" class="signature">_loadingClassName <em>view._loadingClassName</em></h3>
+<p>Class name to add and remove from a view's <code>el</code> when it is loading. Defaults to <code>loading</code>.
+
+</p>
+<h3 id="thorax-view/_loadingtimeoutduration-view-_loadingtimeoutduration" class="signature">_loadingTimeoutDuration <em>view._loadingTimeoutDuration</em></h3>
+<p>Timeout duration in seconds before a <code>load:start</code> callback will be triggered. Defaults to 0.33 seconds. If for instance the <code>load:end</code> event was triggered 0.32 seconds after the <code>load:start</code> event the <code>load:start</code> callback would not be called.
+
+</p>
+<h3 id="thorax-view/_loadingtimeoutendduration-view-_loadingtimeoutendduration" class="signature">_loadingTimeoutEndDuration <em>view._loadingTimeoutEndDuration</em></h3>
+<p>Just like <code>_loadingTimeoutDuration</code> but applies to <code>load:end</code>. Defaults to 0.10 seconds.
+
+</p>
+<h2 id="view-helpers">View Helpers</h2>
+<h3 id="view-helpers/loading-loading" class="signature">loading <em>{{#loading}}</em></h3>
+<p>A block helper to use when the view is loading. For collection specific loading the <code>collection</code> helper accepts <code>loading-view</code> and <code>loading-template</code> options to append an item in a collection when it is loading.
+
+</p>
+<pre><code>{{<span class="comment">#loading}}</span>
+  View <span class="keyword">is</span> loading a model <span class="keyword">or</span> collection.
+{{<span class="keyword">else</span>}}
+  View <span class="keyword">is</span> <span class="keyword">not</span> loading a model <span class="keyword">or</span> collection.
+{{/loading}}</code></pre>
+
+  <p>Copyright 2012 <a href="http://walmartlabs.com">@WalmartLabs</a></p></div>
+</div><a href="https://github.com/walmartlabs/thorax"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"></a></body>
+</html>

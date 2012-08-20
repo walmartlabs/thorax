@@ -1,0 +1,84 @@
+
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thorax: Helpers Plugin</title>
+    
+    <link rel="stylesheet" type="text/css" href="screen.css">
+    
+    
+
+    
+
+    <!-- Typekit -->
+    
+      <script type="text/javascript">
+        (function() {
+          var config = {
+            kitId: 'hjp0pft',
+            scriptTimeout: 3000
+          };
+          var h=document.getElementsByTagName("html")[0];h.className+=" wf-loading";var t=setTimeout(function(){h.className=h.className.replace(/( |^)wf-loading( |$)/g,"");h.className+=" wf-inactive"},config.scriptTimeout);var tk=document.createElement("script");tk.src='//use.typekit.net/'+config.kitId+'.js';tk.type="text/javascript";tk.async="true";tk.onload=tk.onreadystatechange=function(){var a=this.readyState;if(a&&a!="complete"&&a!="loaded")return;clearTimeout(t);try{Typekit.load(config)}catch(b){}};var s=document.getElementsByTagName("script")[0];s.parentNode.insertBefore(tk,s)
+        })();
+      </script>
+    
+  </head>
+  <body><div id="container">
+  <div id="nav">
+    
+      <div id="header">
+        <a href="index.html" id="logo">Thorax<span>Helpers Plugin</span></a>
+      </div>
+    
+    <ul id="sections">
+      
+        <li>
+          <a href="#view-helpers">View Helpers</a>
+          
+            <ul>
+              
+                <li>
+                  <a href="#view-helpers/button-button-methodname-htmlattributes">button </a>
+                </li>
+              
+                <li>
+                  <a href="#view-helpers/url-url-urlstring">url </a>
+                </li>
+              
+                <li>
+                  <a href="#view-helpers/link-link-url-htmlattributes">link </a>
+                </li>
+              
+            </ul>
+          
+        </li>
+      
+    </ul><div class="header"><a href="#">Plugins</a></div><ul class="sections"><li><a href="collection.html">Collection</a></li><li><a href="event.html">Event</a></li><li><a href="form.html">Form</a></li><li><a href="helpers.html">Helpers</a></li><li><a href="loading.html">Loading</a></li><li><a href="lumbar.html">Lumbar</a></li><li><a href="model.html">Model</a></li><li><a href="view-controller.html">ViewController</a></li></ul>
+    
+    
+  </div>
+  <div id="content">
+    
+    <h1>Thorax Helpers Plugin</h1>
+<h2 id="view-helpers">View Helpers</h2>
+<h3 id="view-helpers/button-button-methodname-htmlattributes" class="signature">button <em>{{#button methodName [htmlAttributes]}}</em></h3>
+<p>Creates a <code>button</code> tag that will call the specified methodName on the view when clicked. Arbitrary HTML attributes can also be specified.
+
+</p>
+<pre><code>{{#button <span class="string">"methodName"</span> <span class="class"><span class="keyword">class</span>="btn"}}<span class="type">Click</span> <span class="type">Me</span>{{/button}}</span></code></pre>
+<h3 id="view-helpers/url-url-urlstring" class="signature">url <em>{{url urlString}}</em></h3>
+<p>Prepends "#" if <code>Backbone.history.pushSate</code> is disabled, and resolves any url paramters with the current conext. For example if the context had an <code>id</code> attribute <code>:id</code> would be replaced with the value of <code>id</code>
+
+</p>
+<pre><code>{{<span class="title">url</span> <span class="string">"articles/:id"</span>}}</code></pre>
+<h3 id="view-helpers/link-link-url-htmlattributes" class="signature">link <em>{{#link url [htmlAttributes]}}</em></h3>
+<p>Creates an <code>a</code> tag that will call <code>Backbone.history.navigate()</code> with the given url when clicked. Passes the <code>url</code> parameter to the <code>url</code> helper with the current context. Do not use this method for creating external links.
+
+</p>
+<pre><code>{{#link <span class="string">"articles/:id"</span> <span class="class"><span class="keyword">class</span>="article-link"}}<span class="type">Link</span> <span class="type">Text</span>{{/link}}</span></code></pre>
+
+  <p>Copyright 2012 <a href="http://walmartlabs.com">@WalmartLabs</a></p></div>
+</div><a href="https://github.com/walmartlabs/thorax"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"></a></body>
+</html>
