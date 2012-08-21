@@ -1,6 +1,12 @@
 # Change Log
 
-## 2.0
+## 2.0.0b2
+
+### Collection Helper
+
+- `item-context` and `empty-context` will try to use `itemContext` and `emptyContext` functions as defaults if they are available on the declaring view
+
+## 2.0.0b1
 
 Thorax has been split into a variety of plugins for a better separation of concerns, the base thorax.js file now only deals with Backbone + Handlebars integration.
 
