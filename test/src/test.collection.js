@@ -484,7 +484,21 @@ $(function() {
   test("item-context & empty-context", function() {
     var view = new Thorax.View({
       collection: letterCollection,
-      template: "{{#collection this.collection item-context=itemContext}}<span>{{test}}</span>{{/collection}}",
+      template: "{{#collection this.collection item-context=myItemContext}}<span>{{test}}</span>{{/collection}}",
+      myItemContext: function(model, i) {
+        return {
+          test: 'testing'
+        };
+      }
+    });
+    view.render();
+    equal(view.$('span').length, letterCollection.length);
+    equal(view.$('span')[0].innerHTML, 'testing');
+
+    //will use default
+    view = new Thorax.View({
+      collection: letterCollection,
+      template: "{{#collection this.collection}}<span>{{test}}</span>{{/collection}}",
       itemContext: function(model, i) {
         return {
           test: 'testing'
@@ -502,7 +516,25 @@ $(function() {
           return true;
         }
       })),
-      template: "{{#collection this.collection empty-context=\"emptyContext\"}}{{test}}{{else}}<b>{{test}}</b>{{/collection}}",
+      template: "{{#collection this.collection empty-context=\"myEmptyContext\"}}{{test}}{{else}}<b>{{test}}</b>{{/collection}}",
+      myEmptyContext: function() {
+        return {
+          test: 'testing'
+        }
+      }
+    });
+    view.render();
+    equal(view.$('b')[0].innerHTML, 'testing');
+
+    //uses default
+    view = new Thorax.View({
+      collection: new (Thorax.Collection.extend({
+        url: false,
+        isEmpty: function() {
+          return true;
+        }
+      })),
+      template: "{{#collection this.collection}}{{test}}{{else}}<b>{{test}}</b>{{/collection}}",
       emptyContext: function() {
         return {
           test: 'testing'

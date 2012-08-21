@@ -358,8 +358,8 @@
         'empty-template': view.inverse && view.inverse !== Handlebars.VM.noop ? view.inverse : view.options['empty-template'],
         'item-view': view.options['item-view'],
         'empty-view': view.options['empty-view'],
-        'item-context': view.options['item-context'],
-        'empty-context': view.options['empty-context'],
+        'item-context': view.options['item-context'] || view.parent.itemContext,
+        'empty-context': view.options['empty-context'] || view.parent.emptyContext,
         filter: view.options['filter']
       });
       view._bindCollection(collection);
