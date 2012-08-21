@@ -1,3 +1,5 @@
+Current version: 1.2.3  
+[2.0 Beta Now Available](http://walmartlabs.github.com/thorax/beta/)
 
 ## Overview
 
