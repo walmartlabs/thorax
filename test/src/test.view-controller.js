@@ -58,6 +58,16 @@ $(function() {
     equal(bEventCounter.destroyed, 1, 'lifecycle event: destroyed');
   });
 
+  test("Layout can set view el", function() {
+    $('body').append('<div id="test-target-container"><div id="test-target"></div></div>');
+    var view = new Thorax.LayoutView({
+      el: $('#test-target')[0]
+    });
+    view.render();
+    equal(view.el.parentNode, $('#test-target-container')[0]);
+    $('#test-target-container').remove();
+  });
+
   test("Application can have template", function() {
     var a = new Thorax.Application({
       template: '<div class="outer">{{layout}}</div>'
