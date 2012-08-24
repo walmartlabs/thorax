@@ -338,6 +338,7 @@ $(function() {
     });
     view.render();
     equal(view.$('[data-view-helper]')[2].innerHTML, 'value');
+    delete Handlebars.helpers.test;
   });
 
   test("$.fn.view", function() {
