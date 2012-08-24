@@ -123,6 +123,18 @@ $(function() {
     equal(parentRenderedCount, 4);
     equal(childRenderedCount, 3);
   });
+
+  test("can set view el", function() {
+    $('body').append('<div id="test-target-container"><div id="test-target"></div></div>');
+    var view = new Thorax.View({
+      template: 'testing123',
+      el: $('#test-target')[0]
+    });
+    view.render();
+    equal($('#test-target-container > #test-target')[0].innerHTML, 'testing123');
+    equal(view.el.parentNode, $('#test-target-container')[0]);
+    $('#test-target-container').remove();
+  });
   
   test("template function can be specified", function() {
     var childReturningString = new Thorax.View({
