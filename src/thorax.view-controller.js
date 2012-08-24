@@ -9,6 +9,7 @@
   //Router
   Thorax.Router = Backbone.Router.extend({
     initialize: function() {
+      Backbone.history || (Backbone.history = new Backbone.History);
       Backbone.history.on('route', onRoute, this);
       //router does not have a built in destroy event
       //but ViewController does
@@ -122,13 +123,11 @@
   Thorax.ViewController = Thorax.LayoutView.extend();
   _.extend(Thorax.ViewController.prototype, Thorax.Router.prototype, {
     initialize: function() {
-      Thorax.setRootObject && Thorax.setRootObject(this);
-
       Thorax.Router.prototype.initialize.call(this);
       //set the ViewController as the view on the parent
       //if a parent was specified
       this.on('route:before', function(router, name) {
-        if (this.parent) {
+        if (this.parent && this.parent.getView) {
           if (this.parent.getView() !== this) {
             this.parent.setView(this, {
               destroy: false
@@ -151,6 +150,8 @@
 
     name: 'application',
     initialize: function(options) {
+      Thorax.setRootObject && Thorax.setRootObject(this);
+      
       //ensure backbone history has started
       Backbone.history || (Backbone.history = new Backbone.History);
   
