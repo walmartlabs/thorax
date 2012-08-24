@@ -68,30 +68,6 @@ $(function() {
     $('#test-target-container').remove();
   });
 
-  test("Application can have template", function() {
-    var a = new Thorax.Application({
-      template: '<div class="outer">{{layout}}</div>'
-    });
-    a.render();
-    equal(a.$('.inner').length, 0);
-    a.setView(new Thorax.View({
-      template: '<div class="inner"></div>'
-    }));
-    equal(a.$('.outer').length, 1);
-    equal(a.$('.inner').length, 1);
-
-    Thorax.template('application', '<div class="outer">{{layout}}</div>');
-    var b = new Thorax.Application();
-    b.render();
-    equal(b.$('.inner').length, 0);
-    b.setView(new Thorax.View({
-      template: '<div class="inner"></div>'
-    }));
-    equal(b.$('.outer').length, 1);
-    equal(b.$('.inner').length, 1);
-    delete Thorax._templates.application;
-  });
-
   test('layouts with templates and {{layout}}', function() {
     var layoutWithTemplate = new Thorax.LayoutView({
       template: '<div class="outer">{{layout}}</div>'
