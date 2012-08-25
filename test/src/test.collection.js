@@ -2,10 +2,10 @@ $(function() {
 
   QUnit.module('Thorax Collection Helper');
 
-  Thorax.template('letter', '{{collection tag="ul"}}');
-  Thorax.template('letter-item', '<li>{{letter}}</li>');
-  Thorax.template('letter-empty', '<li>empty</li>');
-  Thorax.template('letter-multiple-item', '<li>{{letter}}</li><li>{{letter}}</li>');
+  Thorax.templates['letter'] = '{{collection tag="ul"}}';
+  Thorax.templates['letter-item'] = '<li>{{letter}}</li>';
+  Thorax.templates['letter-empty'] = '<li>empty</li>';
+  Thorax.templates['letter-multiple-item'] = '<li>{{letter}}</li><li>{{letter}}</li>';
 
   var LetterModel = Thorax.Model.extend({});
   var letterCollection = new (Thorax.Collection.extend({
@@ -13,9 +13,9 @@ $(function() {
   }))(['a','b','c','d'].map(function(letter) {
     return {letter: letter};
   }));
-  var LetterCollectionView = Thorax.view('letter', {});
-  var LetterItemView = Thorax.view('letter-item', {});
-  var LetterEmptyView = Thorax.view('letter-empty', {});
+  var LetterCollectionView = Thorax.View.extend({name: 'letter'});
+  var LetterItemView = Thorax.View.extend({name: 'letter-item'});
+  var LetterEmptyView = Thorax.View.extend({name: 'letter-empty'});
 
   test("isPopulated", function() {
     ok(letterCollection.isPopulated());
@@ -174,7 +174,8 @@ $(function() {
     view.render();
     equal(view.$('li').length, letterCollection.models.length * 4);
 
-    var SubViewWithSameCollection = Thorax.view('sub-view-with-same-collection', {
+    var SubViewWithSameCollection = Thorax.View.extend({
+      name: 'sub-view-with-same-collection',
       template: '{{collection a tag="ul" item-template="letter-item"}}'
     });
     var view = new Thorax.View({
@@ -328,7 +329,8 @@ $(function() {
     }
 
     //test with embedded view
-    Thorax.view('comments', {
+    Thorax.View.extend({
+      name: 'comments',
       template: '{{#collection comments}}<p>{{comment}}</p>{{#collection authors}}<span>{{author}}</span>{{/collection}}{{/collection}}'
     });
     var view = new Thorax.View({

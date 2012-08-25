@@ -31,7 +31,8 @@
     }
   });
 
-  Thorax.Util.createRegistry(Thorax, '_models', 'model', 'Model');
+  Thorax.Models = {};
+  Thorax.Util.createRegistryWrapper(Thorax.Model, Thorax.Models);
 
   Thorax.Util.extendConstructor(Thorax, 'View', function($super, options) {
     $super.call(this, options);

@@ -45,7 +45,8 @@
     }
   });
   
-  Thorax.Util.createRegistry(Thorax, '_collections', 'collection', 'Collection');
+  Thorax.Collections = {};
+  Thorax.Util.createRegistryWrapper(Thorax.Collection, Thorax.Collections);
 
   function addEvents(target, source) {
     _.each(source, function(callback, eventName) {

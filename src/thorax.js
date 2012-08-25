@@ -32,20 +32,11 @@
       viewHelperAttributeName = 'data-view-helper',
       elementPlaceholderAttributeName = 'data-element-tmp';
 
-  //registry
-  function registryGet(object, type, name, ignoreErrors) {
-    if (!object[type][name] && !ignoreErrors) {
-      throw new Error(type + ': ' + name + ' does not exist.');
-    } else {
-      return object[type][name];
-    }
-  }
-
   _.extend(Thorax, {
     templatePathPrefix: '',
     //view instances
     _viewsIndexedByCid: {},
-    _templates: {},
+    templates: {},
     template: function(name, value, ignoreErrors) {
       var pathPrefix = Thorax.templatePathPrefix;
       //append templatePathPrefix if getting
@@ -59,17 +50,28 @@
         name = pathPrefix + name;
       }
       if (!value) {
-        return registryGet(this, '_templates', name, ignoreErrors);
+        return Thorax.Util.registryGet(this, 'templates', name, ignoreErrors);
       } else {
-        return Thorax._templates[name] = typeof value === 'string' ? Handlebars.compile(value) : value;
+        return Thorax.templates[name] = typeof value === 'string' ? Handlebars.compile(value) : value;
       }
     }
   });
 
   Thorax.Util = {
+    registryGet: function(object, type, name, ignoreErrors) {
+      if (!object[type][name] && !ignoreErrors) {
+        throw new Error(type + ': ' + name + ' does not exist.');
+      } else {
+        var value = object[type][name];
+        if (type === 'templates' && typeof value === 'string') {
+          value = object[type][name] = Handlebars.compile(value);
+        }
+        return value;
+      }
+    },
     getViewInstance: function(name, attributes) {
       if (typeof name === 'string') {
-        var klass = Thorax.view(name);
+        var klass = Thorax.Util.registryGet(Thorax, 'Views', name, false);
         return klass.cid ? _.extend(klass, attributes || {}) : new klass(attributes);
       } else if (typeof name === 'function') {
         return new name(attributes);
@@ -174,25 +176,15 @@
       }
       return htmlAttributes;
     },
-    createRegistry: function(object, cacheName, methodName, klassName) {
-      object[cacheName] = {};
-      object[methodName] = function(name, value, ignoreErrors) {
-        if (!value) {
-          return registryGet(object, cacheName, name, ignoreErrors);
-        } else {
-          if (value.cid && !value.name) {
-            value.name = name;
-            return object[cacheName][name] = value;
-          } else {
-            if (!value.prototype) {
-              value = object[klassName].extend(value);
-            }
-            value.name = name;
-            value.prototype.name = name;
-            return object[cacheName][name] = value;
-          }
+    createRegistryWrapper: function(klass, hash) {
+      var $super = klass.extend;
+      klass.extend = function() {
+        var child = $super.apply(this, arguments);
+        if (child.prototype.name) {
+          hash[child.prototype.name] = child;
         }
-      }
+        return child;
+      };
     }
   };
 
@@ -211,7 +203,7 @@
         this.template = Handlebars.compile(this.template);
       } else if (this.name && !this.template) {
         //fetch the template 
-        this.template = Thorax.template(this.name, null, true);
+        this.template = Thorax.Util.registryGet(Thorax, 'templates', this.name, true);
       }
     },
   
@@ -253,7 +245,7 @@
         if (!this.template) {
           //if the name was set after the view was created try one more time to fetch a template
           if (this.name) {
-            this.template = Thorax.template(this.name, null, true);
+            this.template = Thorax.Util.registryGet(Thorax, 'templates', this.name, true);
           }
           if (!this.template) {
             throw new Error('View ' + (this.name || this.cid) + '.render() was called with no content and no template set on the view.');
@@ -301,7 +293,7 @@
     },
     
     _loadTemplate: function(file, ignoreErrors) {
-      return Thorax.template(file, null, ignoreErrors);
+      return Thorax.Util.registryGet(Thorax, 'templates', file, ignoreErrors);
     },
 
     ensureRendered: function() {
@@ -319,8 +311,9 @@
       }
     }
   });
-
-  Thorax.Util.createRegistry(Thorax, '_views', 'view', 'View');
+  
+  Thorax.Views = {};
+  Thorax.Util.createRegistryWrapper(Thorax.View, Thorax.Views);
 
   //helpers
   Handlebars.registerHelper('super', function() {
@@ -331,7 +324,7 @@
         if (!parent.name) {
           throw new Error('Cannot use super helper when parent has no name or template.');
         }
-        template = Thorax.template(parent.name);
+        template = Thorax.Util.registryGet(Thorax, 'templates', parent.name, false);
       }
       if (typeof template === 'string') {
         template = Handlebars.compile(template);

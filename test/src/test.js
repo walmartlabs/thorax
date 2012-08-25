@@ -4,44 +4,29 @@ $(function() {
   Backbone.history = new Backbone.History();
   Backbone.history.start();
 
-  Thorax.template('parent', '<div>{{view child}}</div>');
-  Thorax.template('child', '<div>{{value}}</div>');
+  Thorax.templates['parent'] = '<div>{{view child}}</div>';
+  Thorax.templates['child'] = '<div>{{value}}</div>';
 
   test("registry", function() {
-    raises(function() {
-      Thorax.view('a-name');
-    }, 'throws error when view does not exist');
-    var viewClass = Thorax.view('a-name', {}, {});
+    var viewClass = Thorax.View.extend({name: 'a-name'}, {});
     equal(viewClass.prototype.name, 'a-name', 'sets a name attribute on view class');
     equal((new viewClass).name, 'a-name', 'sets a name attribute on view instance');
-    var viewClassB = Thorax.view('b-name', viewClass.extend({
-      key: 'value'
-    }));
-    equal(viewClassB.prototype.key, 'value', 'can accept a class as a value');
-    Thorax.view('b-name', viewClass.extend({
-      key: 'value2'
-    }));
-    equal(Thorax.view('b-name').prototype.key, 'value2', 'will overwrite a previous class when passed a new one');
-    Thorax.view('a-name', {
+    var viewClassB = viewClass.extend({
+      name: 'b-name',
       key: 'value'
     });
-    equal(Thorax.view('a-name').prototype.key, 'value', 'registry will extend an existing class prototype');
-
-    Thorax.template('test-a', '<p>{{key}}</p>');
-    Thorax.template('test-b', Handlebars.compile('<p>{{key}}</p>'));
-
-    equal(Thorax.template('test-a')({key:'value'}), '<p>value</p>', 'will compile a string to a template');
-    equal(Thorax.template('test-b')({key:'value'}), '<p>value</p>', 'will accept a template function');
-
-    var instance = new Thorax.View();
-    Thorax.view('singleton', instance);
-    equal(Thorax.view('singleton'), instance, 'can set singleton');
-
-    //view instance get's name, bad practice, but more predictable
-    instance = Thorax.view('test-singleton', new Thorax.View());
-    equal(instance.name, 'test-singleton', 'view instance is assigned a name when passed to registry');
+    equal(viewClassB.prototype.key, 'value', 'can accept a class as a value');
+    viewClass.extend({
+      name: 'b-name',
+      key: 'value2'
+    });
+    equal(Thorax.Views['b-name'].prototype.key, 'value2', 'will overwrite a previous class when passed a new one');
+    Thorax.View.extend({
+      name: 'a-name',
+      key: 'value'
+    });
+    equal(Thorax.Views['a-name'].prototype.key, 'value', 'registry will extend an existing class prototype');
   });
-
 
   test("shouldFetch", function() {
     var options = {fetch: true};
@@ -80,14 +65,16 @@ $(function() {
   test("child views", function() {
     var childRenderedCount = 0,
         parentRenderedCount = 0;
-    var Child = Thorax.view('child', {
+    var Child = Thorax.View.extend({
+      name: 'child',
       initialize: function() {
         this.on('rendered', function() {
           ++childRenderedCount;
         });
       }
     });
-    var Parent = Thorax.view('parent', {
+    var Parent = Thorax.View.extend({
+      name: 'parent',
       initialize: function() {
         this.on('rendered', function() {
           ++parentRenderedCount;
@@ -95,7 +82,7 @@ $(function() {
         this.childModel = new Backbone.Model({
           value: 'a'
         });
-        this.child = new (Thorax.view('child'))({
+        this.child = new Thorax.Views['child']({
           model: this.childModel
         });
       }
@@ -163,8 +150,10 @@ $(function() {
 
   test("super helper", function() {
     var parent, child;
-    var t = Thorax.template('super-named-test', '<div class="parent"></div>');
-    parent = Thorax.view('super-named-test', {});
+    var t = Thorax.templates['super-named-test'] = '<div class="parent"></div>';
+    parent = Thorax.View.extend({
+      name: 'super-named-test'
+    });
     child = new (parent.extend({
       template: '<div class="child"></div>{{super}}'
     }));
@@ -172,7 +161,8 @@ $(function() {
     equal(child.$('.parent').length, 1);
     equal(child.$('.child').length, 1);
 
-    parent = Thorax.view('super-test', {
+    parent = Thorax.View.extend({
+      name: 'super-test',
       template: '<div class="parent"></div>'
     });
     child = new (parent.extend({

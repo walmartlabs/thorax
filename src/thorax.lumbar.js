@@ -18,15 +18,11 @@
         return router;
       }
       if (!router) {
-        if (protoProps.prototype) {
-          protoProps.prototype.name = module.name;
-          protoProps.prototype.routes = module.routes;
-          protoProps = new protoProps;
-        } else {
-          protoProps.name = module.name;
-          protoProps.routes = module.routes;
-        }
-        return router = new (Thorax.router(module.name, protoProps));
+        var klass = Thorax.Router.extend(_.extend({
+          name: module.name,
+          routes: module.routes
+        }));
+        return router = new klass;
       }
     };
   };

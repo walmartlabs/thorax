@@ -100,7 +100,7 @@ $(function() {
         parentClickedCount = 0;
     
     var Child = Thorax.View.extend({
-      template: Thorax.template('child'),
+      template: Thorax.templates['child'],
       events: {
         'click div': function() {
           ++childClickedCount;
@@ -109,7 +109,7 @@ $(function() {
     });
     
     var Parent = Thorax.View.extend({
-      template: Thorax.template('parent'),
+      template: Thorax.templates['parent'],
       events: {
         'click div': function() {
           ++parentClickedCount;

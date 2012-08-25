@@ -26,7 +26,8 @@
     }
   });
 
-  Thorax.Util.createRegistry(Thorax, '_routers', 'router', 'Router');
+  Thorax.Routers = {};
+  Thorax.Util.createRegistryWrapper(Thorax.Router, Thorax.Routers);
 
   function onRoute(router, name) {
     if (this === router) {
@@ -45,7 +46,7 @@
       //so need to put this here so the template will be picked up
       var layoutTemplate;
       if (this.name) {
-        layoutTemplate = Thorax.template(this.name, null, true);
+        layoutTemplate = Thorax.Util.registryGet(Thorax, 'templates', this.name, true);
       }
       //a template is optional in a layout
       if (output || this[templateAttributeName] || layoutTemplate) {
@@ -67,7 +68,7 @@
         destroy: true
       }, options || {});
       if (typeof view === 'string') {
-        view = new (Thorax.view(view));
+        view = new (Thorax.Util.registryGet(Thorax, 'Views', view, false));
       }
       this.ensureRendered();
       var oldView = this._view;
