@@ -28,7 +28,7 @@ function compileTemplates(templatesDir, outputFile, applicationName) {
     var output = filenames.map(function(filename) {
       var content = fs.readFileSync(path.join(target, filename)).toString();
       content = addslashes(content).replace(/(\r\n|\n|\r)/gm, "\\n");
-      return (applicationName || 'Thorax') + '.template("' + filename + '", "' + content + '");\n';
+      return (applicationName || 'Thorax') + '.templates["' + filename.replace(/\.[a-zA-Z0-9]+$/, '') + '"] = "' + content + '";\n';
     }).join('');
     fs.writeFileSync(outputFile, output);
     console.log('Inlined templates from ' + templatesDir + ' into ' + outputFile);
