@@ -37,28 +37,28 @@
     //view instances
     _viewsIndexedByCid: {},
     templates: {},
-    template: function(name, value, ignoreErrors) {
-      var pathPrefix = Thorax.templatePathPrefix;
-      //append templatePathPrefix if getting
-      if (!value) {
-        name = pathPrefix + name;
-      }
-      //always remove handlebars extension wether setting or getting
-      name = name.replace(handlebarsExtensionRegExp, '');
-      //append the template path prefix if it is missing
-      if (pathPrefix && pathPrefix.length && name && name.substr(0, pathPrefix.length) !== pathPrefix) {
-        name = pathPrefix + name;
-      }
-      if (!value) {
-        return Thorax.Util.registryGet(this, 'templates', name, ignoreErrors);
-      } else {
-        return Thorax.templates[name] = typeof value === 'string' ? Handlebars.compile(value) : value;
-      }
-    }
+    Views: {}
   });
 
   Thorax.Util = {
+    createRegistryWrapper: function(klass, hash) {
+      var $super = klass.extend;
+      klass.extend = function() {
+        var child = $super.apply(this, arguments);
+        if (child.prototype.name) {
+          hash[child.prototype.name] = child;
+        }
+        return child;
+      };
+    },
     registryGet: function(object, type, name, ignoreErrors) {
+      if (type === 'templates') {
+        //append the template path prefix if it is missing
+        var pathPrefix = Thorax.templatePathPrefix;
+        if (pathPrefix && pathPrefix.length && name && name.substr(0, pathPrefix.length) !== pathPrefix) {
+          name = pathPrefix + name;
+        }
+      }
       if (!object[type][name] && !ignoreErrors) {
         throw new Error(type + ': ' + name + ' does not exist.');
       } else {
@@ -175,16 +175,6 @@
         htmlAttributes.id = options.id;
       }
       return htmlAttributes;
-    },
-    createRegistryWrapper: function(klass, hash) {
-      var $super = klass.extend;
-      klass.extend = function() {
-        var child = $super.apply(this, arguments);
-        if (child.prototype.name) {
-          hash[child.prototype.name] = child;
-        }
-        return child;
-      };
     }
   };
 
@@ -312,7 +302,6 @@
     }
   });
   
-  Thorax.Views = {};
   Thorax.Util.createRegistryWrapper(Thorax.View, Thorax.Views);
 
   //helpers
