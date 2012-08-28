@@ -92,7 +92,7 @@ $(function() {
     equal(parent.$('[data-view-name="child"] > div').html(), 'a', 'view embedded');
     equal(parentRenderedCount, 1);
     equal(childRenderedCount, 1);
-  
+
     parent.render();
     equal(parent.$('[data-view-name="child"] > div').html(), 'a', 'view embedded');
     equal(parentRenderedCount, 2, 're-render of parent does not render child');

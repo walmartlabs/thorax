@@ -14,20 +14,21 @@
     "node": ">=0.4.7"
   },
   "dependencies": {
-    "fs-watch-tree": "0.2.0"
+    "fs-watch-tree": "0.2.0",
+    "handlebars": "1.0.x"
   },
   "scripts": {
     "start": "node bin/test-server.js . 8083",
     "test": "phantomjs bin/run-qunit.js 'http://localhost:8083/zepto.html' 'http://localhost:8083/jquery.html'"
   },
   "plugins": {
-    "bind": ["events", "model"],
-    "collection": ["events", "model", "fragment"],
     "event": [],
-    "form": ["model"],
+    "model": ["event"],
+    "collection": ["event", "model"],
     "helpers": [],
-    "loading": ["events", "model", "collection"],
-    "model": ["events"]
+    "form": ["model"],
+    "view-controller": [],
+    "loading": ["event", "model", "collection"]
   },
   "bin": {
     "thorax": "bin/thorax"

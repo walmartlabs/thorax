@@ -40,6 +40,7 @@ $(function() {
     });
     
     var ChildTwo = Parent.extend({});
+    console.log(Child._events);
     equal(Child._events[originalLength - 0][1], 1, 'ensure events are not shared between children');
     equal(Child._events.length - originalLength, 2, 'ensure events are not shared between children');
     equal(ChildTwo._events[originalLength - 0][1], 1, 'ensure events are not shared between children');
