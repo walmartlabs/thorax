@@ -30,9 +30,8 @@ function onRoute(router, name) {
 //layout
 var layoutCidAttributeName = 'data-layout-cid';
 
-function generateRenderLayout(templateAttributeName) {
-  templateAttributeName = templateAttributeName || 'template';
-  return function(output) {
+Thorax.LayoutView = Thorax.View.extend({
+  render: function(output) {
     //TODO: fixme, lumbar inserts templates after JS, most of the time this is fine
     //but Application will be created in init.js (unlike most views)
     //so need to put this here so the template will be picked up
@@ -41,19 +40,15 @@ function generateRenderLayout(templateAttributeName) {
       layoutTemplate = Thorax.Util.registryGet(Thorax, 'templates', this.name, true);
     }
     //a template is optional in a layout
-    if (output || this[templateAttributeName] || layoutTemplate) {
+    if (output || this.template || layoutTemplate) {
       //but if present, it must have embedded an element containing layoutCidAttributeName 
-      var response = Thorax.View.prototype.render.call(this, output || this[templateAttributeName] || layoutTemplate);
+      var response = Thorax.View.prototype.render.call(this, output || this.template || layoutTemplate);
       ensureLayoutViewsTargetElement.call(this);
       return response;
     } else {
       ensureLayoutCid.call(this);
     }
-  }
-}
-
-Thorax.LayoutView = Thorax.View.extend({
-  render: generateRenderLayout(),
+  },
   setView: function(view, options) {
     options = _.extend({
       scroll: true,
