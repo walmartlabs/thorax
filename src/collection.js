@@ -37,6 +37,20 @@ Thorax.Collection = Backbone.Collection.extend({
 Thorax.Collections = {};
 Thorax.Util.createRegistryWrapper(Thorax.Collection, Thorax.Collections);
 
+{{#inject "extend"}}
+  Thorax.Util._cloneEvents(this, child, '_collectionEvents');
+{{/inject}}
+
+{{#inject "configure"}}
+  this._collectionEvents = [];
+{{/inject}}
+
+{{#inject "on"}}
+  if (eventName === 'collection' && typeof callback === 'object') {
+    return addEvents(this._collectionEvents, callback);
+  }
+{{/inject}}
+
 Thorax.View._collectionEvents = [];
 
 function addEvents(target, source) {

@@ -174,22 +174,7 @@ Thorax.Util = {
 };
 
 Thorax.View = Backbone.View.extend({
-  //this is a hack to prevent 
-  delegateEvents: function() {
-    //this 
-    if (!this._hasDelegatedEvents) {
-      this._hasDelegatedEvents = true;
-      if (this.model) {
-        //need to null this.model so setModel will not treat
-        //it as the old model and immediately return
-        var model = this.model;
-        this.model = null;
-        this.setModel(model);
-      }
-
-    }
-    return Backbone.View.prototype.delegateEvents.apply(this, arguments);
-  },
+  
 
   _configure: function(options) {
     Thorax._viewsIndexedByCid[this.cid] = this;
@@ -207,30 +192,33 @@ Thorax.View = Backbone.View.extend({
       //fetch the template 
       this.template = Thorax.Util.registryGet(Thorax, 'templates', this.name, true);
     }
+    
+  //HelperView will not have mixins so need to check
+  if (this.constructor.mixins) {
+    //mixins
+    for (var i = 0; i < this.constructor.mixins.length; ++i) {
+      applyMixin.call(this, this.constructor.mixins[i]);
+    }
+    if (this.mixins) {
+      for (var i = 0; i < this.mixins.length; ++i) {
+        applyMixin.call(this, this.mixins[i]);
+      }
+    }
+  }
 
-    //HelperView will not have mixins so need to check
-    if (this.constructor.mixins) {
-      //mixins
-      for (var i = 0; i < this.constructor.mixins.length; ++i) {
-        applyMixin.call(this, this.constructor.mixins[i]);
-      }
-      if (this.mixins) {
-        for (var i = 0; i < this.mixins.length; ++i) {
-          applyMixin.call(this, this.mixins[i]);
-        }
-      }
-    }
-    //_events not present on HelperView
-    this.constructor._events && this.constructor._events.forEach(function(event) {
-      this.on.apply(this, event);
+  //_events not present on HelperView
+  this.constructor._events && this.constructor._events.forEach(function(event) {
+    this.on.apply(this, event);
+  }, this);
+  if (this.events) {
+    _.each(Thorax.Util.getValue(this, 'events'), function(handler, eventName) {
+      this.on(eventName, handler, this);
     }, this);
-    if (this.events) {
-      _.each(Thorax.Util.getValue(this, 'events'), function(handler, eventName) {
-        this.on(eventName, handler, this);
-      }, this);
-    }
-    this._modelEvents = [];
-    this._collectionEvents = [];
+  }
+
+  this._modelEvents = [];
+
+  this._collectionEvents = [];
 
   },
 
@@ -341,9 +329,13 @@ Thorax.View = Backbone.View.extend({
 
 Thorax.View.extend = function() {
   var child = Backbone.View.extend.apply(this, arguments);
+  
   child.mixins = _.clone(this.mixins);
+
   Thorax.Util._cloneEvents(this, child, '_events');
+
   Thorax.Util._cloneEvents(this, child, '_modelEvents');
+
   Thorax.Util._cloneEvents(this, child, '_collectionEvents');
 
   return child;
@@ -508,6 +500,10 @@ $.fn.view = function(options) {
   return (el && Thorax._viewsIndexedByCid[el.attr(viewCidAttributeName)]) || false;
 };
 
+
+
+
+
 _.extend(Thorax.View, {
   mixins: [],
   mixin: function(mixin) {
@@ -527,17 +523,21 @@ var _destroy = Thorax.View.prototype.destroy,
   _on = Thorax.View.prototype.on,
   _delegateEvents = Thorax.View.prototype.delegateEvents;
 
+
+
+
+
 _.extend(Thorax.View, {
   _events: [],
   on: function(eventName, callback) {
-    if (eventName === 'model' && typeof callback === 'object') {
-      return addEvents(this._modelEvents, callback);
-    }
     
-    if (eventName === 'collection' && typeof callback === 'object') {
-      return addEvents(this._collectionEvents, callback);
-    }
-    
+  if (eventName === 'model' && typeof callback === 'object') {
+    return addEvents(this._modelEvents, callback);
+  }
+
+  if (eventName === 'collection' && typeof callback === 'object') {
+    return addEvents(this._collectionEvents, callback);
+  }
 
     if (typeof eventName === 'object') {
       _.each(eventName, function(value, key) {
@@ -583,14 +583,14 @@ _.extend(Thorax.View.prototype, {
     return response;
   },
   on: function(eventName, handler, context) {
-    if (eventName === 'model' && typeof callback === 'object') {
-      return addEvents(this._modelEvents, callback);
-    }
     
-    if (eventName === 'collection' && typeof callback === 'object') {
-      return addEvents(this._collectionEvents, callback);
-    }
-    
+  if (eventName === 'model' && typeof callback === 'object') {
+    return addEvents(this._modelEvents, callback);
+  }
+
+  if (eventName === 'collection' && typeof callback === 'object') {
+    return addEvents(this._collectionEvents, callback);
+  }
 
     if (typeof eventName === 'object') {
       //events in {name:handler} format
@@ -633,14 +633,20 @@ _.extend(Thorax.View.prototype, {
       this.on(events);
     }
     this._eventsToDelegate && this._eventsToDelegate.forEach(this._addEvent, this);
-      if (this.model) {
-        //need to null this.model so setModel will not treat
-        //it as the old model and immediately return
-        var model = this.model;
-        this.model = null;
-        this.setModel(model);
-      }
+    //this is a hack so that initialize does not need to
+    //be specified or called by child views
+    if (!this._hasDelegatedEvents) {
+      this._hasDelegatedEvents = true;
+      
+  if (this.model) {
+    //need to null this.model so setModel will not treat
+    //it as the old model and immediately return
+    var model = this.model;
+    this.model = null;
+    this.setModel(model);
+  }
 
+    }
   },
   //params may contain:
   //- name
@@ -746,6 +752,14 @@ Thorax.Model = Backbone.Model.extend({
 
 Thorax.Models = {};
 Thorax.Util.createRegistryWrapper(Thorax.Model, Thorax.Models);
+
+
+
+
+
+
+
+
 
 Thorax.View._modelEvents = [];
 
@@ -930,6 +944,12 @@ Thorax.Collection = Backbone.Collection.extend({
 
 Thorax.Collections = {};
 Thorax.Util.createRegistryWrapper(Thorax.Collection, Thorax.Collections);
+
+
+
+
+
+
 
 Thorax.View._collectionEvents = [];
 

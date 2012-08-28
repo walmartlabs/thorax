@@ -4,7 +4,8 @@
   "description": "Handlebars + Backbone",
   "keywords": ["backbone", "handlebars"],
   "authors": [
-    "Ryan Eastridge <ryan@syntacticx.com> (http://syntacticx.com)"
+    "Ryan Eastridge <ryan@eastridge.xxx> (http://eastridge.xxx)",
+    "Kevin Decker <kpdecker@gmail.com> (http://incaseofstairs.com)"
   ],
   "repository": {
     "type": "git",

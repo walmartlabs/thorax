@@ -2,10 +2,26 @@ var _destroy = Thorax.View.prototype.destroy,
   _on = Thorax.View.prototype.on,
   _delegateEvents = Thorax.View.prototype.delegateEvents;
 
+{{#inject "configure"}}
+  //_events not present on HelperView
+  this.constructor._events && this.constructor._events.forEach(function(event) {
+    this.on.apply(this, event);
+  }, this);
+  if (this.events) {
+    _.each(Thorax.Util.getValue(this, 'events'), function(handler, eventName) {
+      this.on(eventName, handler, this);
+    }, this);
+  }
+{{/inject}}
+
+{{#inject "extend"}}
+  Thorax.Util._cloneEvents(this, child, '_events');
+{{/inject}}
+
 _.extend(Thorax.View, {
   _events: [],
   on: function(eventName, callback) {
-{{{override.on}}}
+    {{{override.on}}}
     if (typeof eventName === 'object') {
       _.each(eventName, function(value, key) {
         this.on(key, value);
@@ -50,7 +66,7 @@ _.extend(Thorax.View.prototype, {
     return response;
   },
   on: function(eventName, handler, context) {
-{{{override.on}}}
+    {{{override.on}}}
     if (typeof eventName === 'object') {
       //events in {name:handler} format
       if (arguments.length === 1) {
@@ -92,7 +108,12 @@ _.extend(Thorax.View.prototype, {
       this.on(events);
     }
     this._eventsToDelegate && this._eventsToDelegate.forEach(this._addEvent, this);
-{{{override.constructor-after}}}
+    //this is a hack so that initialize does not need to
+    //be specified or called by child views
+    if (!this._hasDelegatedEvents) {
+      this._hasDelegatedEvents = true;
+      {{{override.constructor-after}}}
+    }
   },
   //params may contain:
   //- name

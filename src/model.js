@@ -25,6 +25,30 @@ Thorax.Model = Backbone.Model.extend({
 Thorax.Models = {};
 Thorax.Util.createRegistryWrapper(Thorax.Model, Thorax.Models);
 
+{{#inject "constructor-after"}}
+  if (this.model) {
+    //need to null this.model so setModel will not treat
+    //it as the old model and immediately return
+    var model = this.model;
+    this.model = null;
+    this.setModel(model);
+  }
+{{/inject}}
+
+{{#inject "configure"}}
+  this._modelEvents = [];
+{{/inject}}
+
+{{#inject "extend"}}
+  Thorax.Util._cloneEvents(this, child, '_modelEvents');
+{{/inject}}
+
+{{#inject "on"}}
+  if (eventName === 'model' && typeof callback === 'object') {
+    return addEvents(this._modelEvents, callback);
+  }
+{{/inject}}
+
 Thorax.View._modelEvents = [];
 
 function addEvents(target, source) {

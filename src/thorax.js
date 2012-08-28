@@ -172,15 +172,17 @@ Thorax.Util = {
 };
 
 Thorax.View = Backbone.View.extend({
-  //this is a hack to prevent 
-  delegateEvents: function() {
-    //this 
-    if (!this._hasDelegatedEvents) {
-      this._hasDelegatedEvents = true;
-{{{override.constructor-after}}}
-    }
-    return Backbone.View.prototype.delegateEvents.apply(this, arguments);
-  },
+  {{^has-plugin "event"}}
+    //this is a hack so that initialize does not need to
+    //be specified or called by child views
+    delegateEvents: function() {
+      if (!this._hasDelegatedEvents) {
+        this._hasDelegatedEvents = true;
+        {{{override.constructor-after}}}
+      }
+      return Backbone.View.prototype.delegateEvents.apply(this, arguments);
+    },
+  {{/has-plugin}}
 
   _configure: function(options) {
     Thorax._viewsIndexedByCid[this.cid] = this;
@@ -198,8 +200,7 @@ Thorax.View = Backbone.View.extend({
       //fetch the template 
       this.template = Thorax.Util.registryGet(Thorax, 'templates', this.name, true);
     }
-
-{{{override.configure}}}
+    {{{override.configure}}}
   },
 
   _ensureElement : function() {
@@ -309,7 +310,7 @@ Thorax.View = Backbone.View.extend({
 
 Thorax.View.extend = function() {
   var child = Backbone.View.extend.apply(this, arguments);
-{{{override.extend}}}
+  {{{override.extend}}}
   return child;
 };
 

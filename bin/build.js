@@ -10,7 +10,20 @@ var templateCache = {},
       configure: '',
       extend: '',
       on: ''
-    };
+    },
+    includedPlugins = ['thorax'];
+
+handlebars.registerHelper('has-plugin', function(name, options) {
+  if (includedPlugins.indexOf(name) === -1) {
+    return options.inverse(this);
+  } else {
+    return options.fn(this);
+  }
+});
+
+handlebars.registerHelper('inject', function(name, options) {
+  override[name] += options.fn(this);
+});
 
 function renderTemplate(name, data) {
   if (!templateCache[name]) {
@@ -37,15 +50,9 @@ function loadOverrides(plugin) {
     return;
   }
   loadedOverrides.push(plugin);
-  var folderPath = path.join(__dirname, '..', 'src', plugin);
-  if (path.existsSync(folderPath)) {
-    fs.readdirSync(folderPath).forEach(function(overrideFile) {
-      if (overrideFile.match(/\.js$/)) {
-        var overrideFilePath = path.join(folderPath, overrideFile);
-        override[overrideFile.replace(/\.js$/, '')] += fs.readFileSync(overrideFilePath).toString();
-      }
-    });
-  }
+  //rendering the template will cause block helpers to execute
+  //collecting the injected overrides
+  renderTemplate(plugin);
 }
 
 module.exports = function(plugins) {
@@ -56,27 +63,33 @@ module.exports = function(plugins) {
     }
   }
 
-  var requiredPlugins = [],
-      outputOrder = ['thorax'],
-      output = '';
+  var output = '';
 
+  //loop through first to get a complete list of plugins
+  //for the "has-plugin" helper
   plugins.forEach(function(plugin) {
-    loadOverrides(plugin);
     var deps = packageJSON.plugins[plugin] || [];
     if (deps.length) {
       deps.forEach(function(dep) {
-        if (outputOrder.indexOf(dep) === -1) {
-          outputOrder.push(dep);
-          loadOverrides(dep);
+        if (includedPlugins.indexOf(dep) === -1) {
+          includedPlugins.push(dep);
         }
       });
     }
-    if (outputOrder.indexOf(plugin) === -1) {
-      outputOrder.push(plugin);
+    if (includedPlugins.indexOf(plugin) === -1) {
+      includedPlugins.push(plugin);
     }
   });
 
-  outputOrder.forEach(function(item) {
+  //load overrides
+  includedPlugins.forEach(function(plugin) {
+    //rendering the template will cause block helpers to execute
+    //collecting the injected overrides
+    renderTemplate(plugin);
+  });
+
+  //now render
+  includedPlugins.forEach(function(item) {
     output += renderTemplate(item) + '\n';
   });
 
