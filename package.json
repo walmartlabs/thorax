@@ -22,6 +22,7 @@
     "test": "phantomjs bin/run-qunit.js 'http://localhost:8083/zepto.html' 'http://localhost:8083/jquery.html'"
   },
   "plugins": {
+    "mixin": [],
     "event": [],
     "model": ["event"],
     "collection": ["event", "model"],
