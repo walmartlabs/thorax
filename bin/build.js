@@ -54,6 +54,12 @@ function loadOverrides(plugin) {
   renderTemplate(plugin);
 }
 
+function getLicense() {
+  return fs.readFileSync(path.join(__dirname, '..', 'LICENSE')).toString().split('\n').map(function(line){
+    return '// ' + line;
+  }).join('\n') + '\n';
+}
+
 module.exports = function(plugins) {
   if (!plugins.length) {
     plugins = [];
@@ -92,7 +98,7 @@ module.exports = function(plugins) {
     output += renderTemplate(item) + '\n';
   });
 
-  writeFile('thorax', renderTemplate('fragments/scope', {
+  writeFile('thorax', getLicense() + renderTemplate('fragments/scope', {
     'yield': output
   }));
 };
