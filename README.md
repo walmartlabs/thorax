@@ -16,13 +16,13 @@ An opinionated, battle tested [Backbone](http://backbonejs.org/) + [Handlebars](
     </td>
   </tr>
   <tr>
-    <td width="33%"><a href="https://github.com/downloads/walmartlabs/thorax/thorax-html.zip" class="btn">Download 2.0.0b1</a></td>
-    <td width="33%"><a href="https://github.com/downloads/walmartlabs/thorax/thorax-node.zip" class="btn btn-primary">Download 2.0.0b1</a></td>
-    <td width="33%"><a href="https://github.com/downloads/walmartlabs/thorax/thorax-rails.zip" class="btn">Download 2.0.0b1</a></td>
+    <td width="33%"><a href="https://github.com/downloads/walmartlabs/thorax/thorax-html.zip" class="btn">Download 2.0.0b2</a></td>
+    <td width="33%"><a href="https://github.com/downloads/walmartlabs/thorax/thorax-node.zip" class="btn btn-primary">Download 2.0.0b2</a></td>
+    <td width="33%"><a href="https://github.com/downloads/walmartlabs/thorax/thorax-rails.zip" class="btn">Download 2.0.0b2</a></td>
   </tr>
 </table>
 
-Thorax can be used standalone in any JavaScript environment in addition the boilerplate projects provided above.
+Thorax can be used standalone in any JavaScript environment in addition the [boilerplate projects](https://github.com/walmartlabs/thorax-boilerplate) provided above.
 
     var view = new Thorax.View({
       template: "Hello world!"
@@ -32,56 +32,60 @@ Thorax can be used standalone in any JavaScript environment in addition the boil
 
 ## Editable Examples
 
-All of the examples use the [same sample data](https://raw.github.com/gist/3353451/6ae32d360523c996fc9085252509ed3cec0851ca/thorax.sample-data.js) and many use functionality found in plugins.
+All of the examples use the [same sample data](https://raw.github.com/gist/3504663/d1e6321e9fdb69ff47d636eab5df5e52acb64ae0/gistfile1.txt) and many use functionality found in plugins.
 
-- [Todos](http://jsfiddle.net/HAdxJ/)
-- [$.model](http://jsfiddle.net/bydS9/)
-- [Context](http://jsfiddle.net/3brkX/)
-- [view & template helpers](http://jsfiddle.net/d7DKF/)
-- [empty helper](http://jsfiddle.net/rTtP5/)
-- [freeze](http://jsfiddle.net/GUL8v/)
-- [LayoutView](http://jsfiddle.net/Y8AMu/)
-- [registerViewHelper](http://jsfiddle.net/dG2JE/)
+- [Todos](http://jsfiddle.net/AhKp3/)
+- [$.model](http://jsfiddle.net/e3CML/)
+- [Context](http://jsfiddle.net/5p2mw/)
+- [view & template helpers](http://jsfiddle.net/aaNxq/)
+- [empty helper](http://jsfiddle.net/xFrrT/)
+- [freeze](http://jsfiddle.net/hBjje/)
+- [LayoutView](http://jsfiddle.net/7BmCw/)
+- [registerViewHelper](http://jsfiddle.net/SxxZh/)
 
-## Thorax
+## Registry
 
-The root `Thorax` object acts as a registry for classes and templates.
+Thorax creates a special hash for each type of class to store all subclasses in your application. The use of `Thorax.Views` and `Thorax.templates` is required to allow the `view`, `template` and other helper methods to operate, but the use of the others are optional and provided for consitency.
 
-### template *Thorax.template(name [,content])*
+<table cellpadding="0" cellspacing="0" border="0" width="100%">
+  <thead>
+    <tr>
+      <th>Class</th>
+      <th>Registry</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>Thorax.View</td><td>Thorax.Views</td></tr>
+    <tr><td>Thorax.Model</td><td>Thorax.Models</td></tr>
+    <tr><td>Thorax.Collection</td><td>Thorax.Collections</td></tr>
+    <tr><td>Thorax.Router</td><td>Thorax.Routers</td></tr>
+    <tr><td>templates</td><td>Thorax.templates</td></tr>
+  </tbody>
+</table>
 
-Get or set a template by name. If using the included node or Rails downloads any `.handlebars` files will automatically be available by name sans extension. Any helpers dealing with templates will assume templates were set in this manner.
+### name *klass.prototype.name*
 
-    //set a template
-    Thorax.template("list-o-cats", "{{#collection cats}}{{/collection}}");
+If a `name` property is passed to any Thorax classes' `extend` method the resulting class will be automatically set in the corresponding registry.
 
-    //get a template
-    var template = Thorax.template("list-o-cats");
+    //set class
+    Thorax.View.extend({
+      name: "my-view"
+    });
 
-### view *Thorax.view(name [,protoProps])*
+    //get class
+    Thorax.Views["my-view"]
 
-Get or set a view class by name. Any helpers dealing with views will assume views were set in this manner.
+### templates *Thorax.templates*
 
-    //create a new Thorax.View subclass
-    var ListOCatsView = Thorax.view('list-o-cats', {});
-    ListOCatsView.name; //list-o-cats
+A hash of templates, used by various Thorax helpers. If using the node or Rails boilerplate projects this hash will be automatically generated from the files in your `templates` directories. To manually add a template to the hash:
 
-    //or use a specific subclass
-    Thorax.view('my-subclass', SubclassView.extend({}));
+    Thorax.templates['my-template-name'] = Handlebars.compile('template string');
 
-    //retrieve a view class
-    var ListOCatsView = Thorax.view('list-o-cats');
-    var view = new ListOCatsView();
-    //template will be auto assigned if possible
-    view.template == Thorax.template("list-o-cats");
-
-    //don't use the new keyword directly:
-    new Thorax.view('list-o-cats'); //NO
-    var view = Thorax.view('list-o-cats');
-    new view(); //YES
+If a `View` has the same `name` as a template in the `templates` hash, it's `template' property will be automatically assigned.
 
 ## Thorax.View
 
-The base `Thorax.View` implementation is concerned only with Handlebars + Backbone integration. A variety of additional functionality is provided by the various included plugins. 
+The base `Thorax.View` implementation is concerned only with Handlebars + Backbone integration. A variety of additional functionality is provided by the various included plugins. The boilerplate projects have a build of Thorax with all plugins included.
 
     var view = new Thorax.View({
       template: "{{key}}",
@@ -89,10 +93,6 @@ The base `Thorax.View` implementation is concerned only with Handlebars + Backbo
     });
     view.render();
     $('body').append(view.el);
-
-### name *view.name*
-
-The name of the view, which may be manually set or automatically set when the class is created with `Thorax.view`.
 
 ### children *view.children*
 
@@ -201,6 +201,25 @@ Get a reference to the nearest parent view. Pass `helper: false` to options to e
     $(event.target).view()
 
 ## Command Line
+
+To use the command line utilities:
+
+    npm install -g thorax
+
+### build *thorax build [plugin] [plugin...]*
+
+Build a custom version of Thorax using a list of any of the given plugins:
+
+- mixin
+- event
+- model
+- collection
+- helpers
+- form
+- view-controller
+- loading
+
+Not specifying any plugins will build a version with all plugins.
 
 ### templates *thorax templates ./templates ./templates.js*
 
