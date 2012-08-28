@@ -22,15 +22,18 @@ _.extend(Thorax.View, {
   _events: [],
   on: function(eventName, callback) {
     {{{override.on}}}
+    //accept on({"rendered": handler})
     if (typeof eventName === 'object') {
       _.each(eventName, function(value, key) {
         this.on(key, value);
       }, this);
     } else {
+      //accept on({"rendered": [handler, handler]})
       if (_.isArray(callback)) {
         callback.forEach(function(cb) {
           this._events.push([eventName, cb]);
         }, this);
+      //accept on("rendered", handler)
       } else {
         this._events.push([eventName, callback]);
       }
@@ -68,12 +71,13 @@ _.extend(Thorax.View.prototype, {
   on: function(eventName, handler, context) {
     {{{override.on}}}
     if (typeof eventName === 'object') {
-      //events in {name:handler} format
+      //accept on({"rendered": handler})
       if (arguments.length === 1) {
         _.each(eventName, function(value, key) {
           this.on(key, value, this);
         }, this);
       //events on other objects to auto dispose of when view frozen
+      //on(targetObj, 'eventName', handler, context)
       } else if (arguments.length > 1) {
         if (!this._eventArgumentsToUnbind) {
           this._eventArgumentsToUnbind = [];
@@ -83,6 +87,8 @@ _.extend(Thorax.View.prototype, {
         args[0].on.apply(args[0], args.slice(1));
       }
     } else {
+      //accept on("rendered", handler, context)
+      //accept on("click a", handler, context)
       (_.isArray(handler) ? handler : [handler]).forEach(function(handler) {
         var params = eventParamsFromEventItem(eventName, handler, context || this);
         if (params.type === 'DOM') {
