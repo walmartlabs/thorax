@@ -305,13 +305,13 @@ Thorax.View = Backbone.View.extend({
       return element;
     }
   }
-}, {
-  extend: function() {
-    var child = Backbone.View.extend.apply(this, arguments);
-{{{override.extend}}}
-    return child;
-  }
 });
+
+Thorax.View.extend = function() {
+  var child = Backbone.View.extend.apply(this, arguments);
+{{{override.extend}}}
+  return child;
+};
 
 Thorax.Util.createRegistryWrapper(Thorax.View, Thorax.Views);
 

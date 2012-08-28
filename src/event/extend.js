@@ -1,1 +1,1 @@
-    Thorax.Util._cloneEvents(this, child, '_events');
+  Thorax.Util._cloneEvents(this, child, '_events');

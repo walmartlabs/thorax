@@ -208,6 +208,18 @@ Thorax.View = Backbone.View.extend({
       this.template = Thorax.Util.registryGet(Thorax, 'templates', this.name, true);
     }
 
+    //HelperView will not have mixins so need to check
+    if (this.constructor.mixins) {
+      //mixins
+      for (var i = 0; i < this.constructor.mixins.length; ++i) {
+        applyMixin.call(this, this.constructor.mixins[i]);
+      }
+      if (this.mixins) {
+        for (var i = 0; i < this.mixins.length; ++i) {
+          applyMixin.call(this, this.mixins[i]);
+        }
+      }
+    }
     //_events not present on HelperView
     this.constructor._events && this.constructor._events.forEach(function(event) {
       this.on.apply(this, event);
@@ -325,16 +337,17 @@ Thorax.View = Backbone.View.extend({
       return element;
     }
   }
-}, {
-  extend: function() {
-    var child = Backbone.View.extend.apply(this, arguments);
-    Thorax.Util._cloneEvents(this, child, '_events');
-    Thorax.Util._cloneEvents(this, child, '_modelEvents');
-    Thorax.Util._cloneEvents(this, child, '_collectionEvents');
-
-    return child;
-  }
 });
+
+Thorax.View.extend = function() {
+  var child = Backbone.View.extend.apply(this, arguments);
+  child.mixins = _.clone(this.mixins);
+  Thorax.Util._cloneEvents(this, child, '_events');
+  Thorax.Util._cloneEvents(this, child, '_modelEvents');
+  Thorax.Util._cloneEvents(this, child, '_collectionEvents');
+
+  return child;
+};
 
 Thorax.Util.createRegistryWrapper(Thorax.View, Thorax.Views);
 
@@ -494,6 +507,21 @@ $.fn.view = function(options) {
   var el = $(this).closest(selector);
   return (el && Thorax._viewsIndexedByCid[el.attr(viewCidAttributeName)]) || false;
 };
+
+_.extend(Thorax.View, {
+  mixins: [],
+  mixin: function(mixin) {
+    this.mixins.push(mixin);
+  }
+});
+
+function applyMixin(mixin) {
+  if (_.isArray(mixin)) {
+    this.mixin.apply(this, mixin);
+  } else {
+    this.mixin(mixin);
+  }
+}
 
 var _destroy = Thorax.View.prototype.destroy,
   _on = Thorax.View.prototype.on,
@@ -1553,9 +1581,8 @@ function onRoute(router, name) {
 //layout
 var layoutCidAttributeName = 'data-layout-cid';
 
-function generateRenderLayout(templateAttributeName) {
-  templateAttributeName = templateAttributeName || 'template';
-  return function(output) {
+Thorax.LayoutView = Thorax.View.extend({
+  render: function(output) {
     //TODO: fixme, lumbar inserts templates after JS, most of the time this is fine
     //but Application will be created in init.js (unlike most views)
     //so need to put this here so the template will be picked up
@@ -1564,19 +1591,15 @@ function generateRenderLayout(templateAttributeName) {
       layoutTemplate = Thorax.Util.registryGet(Thorax, 'templates', this.name, true);
     }
     //a template is optional in a layout
-    if (output || this[templateAttributeName] || layoutTemplate) {
+    if (output || this.template || layoutTemplate) {
       //but if present, it must have embedded an element containing layoutCidAttributeName 
-      var response = Thorax.View.prototype.render.call(this, output || this[templateAttributeName] || layoutTemplate);
+      var response = Thorax.View.prototype.render.call(this, output || this.template || layoutTemplate);
       ensureLayoutViewsTargetElement.call(this);
       return response;
     } else {
       ensureLayoutCid.call(this);
     }
-  }
-}
-
-Thorax.LayoutView = Thorax.View.extend({
-  render: generateRenderLayout(),
+  },
   setView: function(view, options) {
     options = _.extend({
       scroll: true,

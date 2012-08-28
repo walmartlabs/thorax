@@ -1,1 +1,1 @@
-    child.mixins = _.clone(this.mixins);
+  child.mixins = _.clone(this.mixins);
