@@ -25,7 +25,7 @@ Thorax.Model = Backbone.Model.extend({
 Thorax.Models = {};
 Thorax.Util.createRegistryWrapper(Thorax.Model, Thorax.Models);
 
-{{#inject "constructor-after"}}
+{{#inject "constructor"}}
   if (this.model) {
     //need to null this.model so setModel will not treat
     //it as the old model and immediately return

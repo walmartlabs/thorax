@@ -174,8 +174,19 @@ Thorax.Util = {
 };
 
 Thorax.View = Backbone.View.extend({
-  
+  constructor: function() {
+    var response = Thorax.View.__super__.constructor.apply(this, arguments);
+    
+  if (this.model) {
+    //need to null this.model so setModel will not treat
+    //it as the old model and immediately return
+    var model = this.model;
+    this.model = null;
+    this.setModel(model);
+  }
 
+    return response;
+  },
   _configure: function(options) {
     Thorax._viewsIndexedByCid[this.cid] = this;
     this.children = {};
@@ -539,15 +550,18 @@ _.extend(Thorax.View, {
     return addEvents(this._collectionEvents, callback);
   }
 
+    //accept on({"rendered": handler})
     if (typeof eventName === 'object') {
       _.each(eventName, function(value, key) {
         this.on(key, value);
       }, this);
     } else {
+      //accept on({"rendered": [handler, handler]})
       if (_.isArray(callback)) {
         callback.forEach(function(cb) {
           this._events.push([eventName, cb]);
         }, this);
+      //accept on("rendered", handler)
       } else {
         this._events.push([eventName, callback]);
       }
@@ -593,12 +607,13 @@ _.extend(Thorax.View.prototype, {
   }
 
     if (typeof eventName === 'object') {
-      //events in {name:handler} format
+      //accept on({"rendered": handler})
       if (arguments.length === 1) {
         _.each(eventName, function(value, key) {
           this.on(key, value, this);
         }, this);
       //events on other objects to auto dispose of when view frozen
+      //on(targetObj, 'eventName', handler, context)
       } else if (arguments.length > 1) {
         if (!this._eventArgumentsToUnbind) {
           this._eventArgumentsToUnbind = [];
@@ -608,6 +623,8 @@ _.extend(Thorax.View.prototype, {
         args[0].on.apply(args[0], args.slice(1));
       }
     } else {
+      //accept on("rendered", handler, context)
+      //accept on("click a", handler, context)
       (_.isArray(handler) ? handler : [handler]).forEach(function(handler) {
         var params = eventParamsFromEventItem(eventName, handler, context || this);
         if (params.type === 'DOM') {
@@ -633,20 +650,6 @@ _.extend(Thorax.View.prototype, {
       this.on(events);
     }
     this._eventsToDelegate && this._eventsToDelegate.forEach(this._addEvent, this);
-    //this is a hack so that initialize does not need to
-    //be specified or called by child views
-    if (!this._hasDelegatedEvents) {
-      this._hasDelegatedEvents = true;
-      
-  if (this.model) {
-    //need to null this.model so setModel will not treat
-    //it as the old model and immediately return
-    var model = this.model;
-    this.model = null;
-    this.setModel(model);
-  }
-
-    }
   },
   //params may contain:
   //- name

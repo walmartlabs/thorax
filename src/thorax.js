@@ -172,18 +172,11 @@ Thorax.Util = {
 };
 
 Thorax.View = Backbone.View.extend({
-  {{^has-plugin "event"}}
-    //this is a hack so that initialize does not need to
-    //be specified or called by child views
-    delegateEvents: function() {
-      if (!this._hasDelegatedEvents) {
-        this._hasDelegatedEvents = true;
-        {{{override.constructor-after}}}
-      }
-      return Backbone.View.prototype.delegateEvents.apply(this, arguments);
-    },
-  {{/has-plugin}}
-
+  constructor: function() {
+    var response = Thorax.View.__super__.constructor.apply(this, arguments);
+    {{{override.constructor}}}
+    return response;
+  },
   _configure: function(options) {
     Thorax._viewsIndexedByCid[this.cid] = this;
     this.children = {};

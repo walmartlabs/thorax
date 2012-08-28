@@ -114,12 +114,6 @@ _.extend(Thorax.View.prototype, {
       this.on(events);
     }
     this._eventsToDelegate && this._eventsToDelegate.forEach(this._addEvent, this);
-    //this is a hack so that initialize does not need to
-    //be specified or called by child views
-    if (!this._hasDelegatedEvents) {
-      this._hasDelegatedEvents = true;
-      {{{override.constructor-after}}}
-    }
   },
   //params may contain:
   //- name

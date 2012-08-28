@@ -5,8 +5,7 @@ var fs = require('fs'),
 
 var templateCache = {},
     override = {
-      'constructor-before': '',
-      'constructor-after': '',
+      'constructor': '',
       configure: '',
       extend: '',
       on: ''
