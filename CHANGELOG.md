@@ -2,8 +2,6 @@
 
 ## 2.0.0b2
 
-### Collection Helper
-
 - `item-context` and `empty-context` will try to use `itemContext` and `emptyContext` functions as defaults if they are available on the declaring view
 - a build system was created, some method overrides are now done via code templates with handlebars instead of in JS, resulting in smaller wire size and less computational overhead
 - added `build` command
