@@ -17,7 +17,7 @@ if (typeof exports !== 'undefined') {
   Thorax = this.Thorax = {};
 }
 
-Thorax.VERSION = '2.0.0b1';
+Thorax.VERSION = '2.0.0b2';
 
 var handlebarsExtension = 'handlebars',
     handlebarsExtensionRegExp = new RegExp('\\.' + handlebarsExtension + '$'),
