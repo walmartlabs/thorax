@@ -1,6 +1,6 @@
 # Thorax Roadmap
 
-## 2.1
+## 2.0.0 final
 
 ### Document and test mixin plugin
 
@@ -53,7 +53,7 @@ Add {{bind}} and {{bindAttr}} helpers ala ember. Want to change the following im
 - [implementation](https://gist.github.com/3351803)
 - [tests](https://gist.github.com/3351815)
 
-## 2.2
+## 2.1
 
 ### Inspector Plugin & lumbar.json editor
 
