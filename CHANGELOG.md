@@ -5,6 +5,11 @@
 ### Collection Helper
 
 - `item-context` and `empty-context` will try to use `itemContext` and `emptyContext` functions as defaults if they are available on the declaring view
+- a build system was created, some method overrides are now done via code templates with handlebars instead of in JS, resulting in smaller wire size and less computational overhead
+- added `build` command
+- thorax.lumbar plugin was removed, functionality was moved to boilerplate projects
+- `Application` class was removed, functionality was moved to boilerplate projects
+- registry methods (`Thorax.view`, `Thorax.model`, etc) were removed, `name` property now has special meaning when passed to `extend` methods such as `Thorax.View.extend`
 
 ## 2.0.0b1
 
@@ -14,8 +19,6 @@ Thorax has been split into a variety of plugins for a better separation of conce
 
 - template has been renamed to renderTemplate
 - templates may now be specified as part of the class definition as a string via the `template` attribute
-- the preffered way to set a view is now Thorax.view(name, protoProps), rather than saying Application.Views.Name = klass; Set Application.Views = Thorax._views; for backwards compatibility
-- the preffered way to set a template is now Thorax.template(name, templateStr) rather than Application.templates[name] = templateStr; Set Application.templates = Thorax._templates; for backwards compatibility
 - Thorax.configure() has been removed and repalced with an Application class, the equivelent code would be:
 
     var Application = new Thorax.Application();
