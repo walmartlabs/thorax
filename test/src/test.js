@@ -26,6 +26,25 @@ $(function() {
       key: 'value'
     });
     equal(Thorax.Views['a-name'].prototype.key, 'value', 'registry will extend an existing class prototype');
+    
+    //test nested
+    Thorax.Views.Outer = {
+      Inner: Thorax.View.extend({
+        template: 'inner'
+      }),
+      More: {
+        Nested: Thorax.View.extend({
+          template: 'nested'
+        })
+      }
+    };
+
+    var view = new Thorax.View({
+      template: '<p>{{view "Outer.Inner" tag="span"}}</p><div>{{view "Outer.More.Nested" tag="span"}}</div>'
+    });
+    view.render();
+    equal(view.$('p > span').html(), 'inner', 'test nested registryGet');
+    equal(view.$('div > span').html(), 'nested', 'test nested registryGet');
   });
 
   test("shouldFetch", function() {

@@ -74,17 +74,30 @@ Thorax.Util = {
         name = pathPrefix + name;
       }
     }
-    if (!object[type][name] && !ignoreErrors) {
+    var target = object[type],
+        value;
+    if (name.match(/\./)) {
+      var bits = name.split(/\./);
+      name = bits.pop();
+      bits.forEach(function(key) {
+        target = target[key];
+      });
+    } else {
+      value = target[name];
+    }
+    if (!target && !ignoreErrors) {
       throw new Error(type + ': ' + name + ' does not exist.');
     } else {
-      var value = object[type][name];
+      var value = target[name];
       if (type === 'templates' && typeof value === 'string') {
-        value = object[type][name] = Handlebars.compile(value);
+        value = target[name] = Handlebars.compile(value);
       }
       return value;
     }
   },
   getViewInstance: function(name, attributes) {
+    attributes['class'] && (attributes.className = attributes['class']);
+    attributes.tag && (attributes.tagName = attributes.tag);
     if (typeof name === 'string') {
       var klass = Thorax.Util.registryGet(Thorax, 'Views', name, false);
       return klass.cid ? _.extend(klass, attributes || {}) : new klass(attributes);
