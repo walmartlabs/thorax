@@ -27,7 +27,7 @@ Handlebars.registerHelper('link', function(url, options) {
 });
 
 $(function() {
-  $(document).on('click', '[' + callMethodAttributeName + ']', function(event) {
+  $(document).on({{#has-plugin "mobile"}}Thorax._fastClickEventName{{else}}'click'{{/has-plugin}}, '[' + callMethodAttributeName + ']', function(event) {
     var target = $(event.target),
         view = target.view({helper: false}),
         methodName = target.attr(callMethodAttributeName);

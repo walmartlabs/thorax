@@ -1,5 +1,10 @@
 # Change Log
 
+## 2.0.0b3
+
+- `Thorax.Util.shouldFetch` will now gracefully support Backbone.Model and Backbone.Collection instances
+- allow Backbone.Model and Backbone.Collection instances to be passed to `_loadModel` and `_loadCollection`
+
 ## 2.0.0b2
 
 - `item-context` and `empty-context` will try to use `itemContext` and `emptyContext` functions as defaults if they are available on the declaring view

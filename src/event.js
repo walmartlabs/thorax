@@ -155,6 +155,13 @@ var domEvents = [
   'keyup', 'keydown', 'keypress',
   'submit', 'change',
   'focus', 'blur'
+  {{#has-plugin "mobile"}}
+    ,
+    'singleTap', 'doubleTap', 'longTap',
+    'swipe',
+    'swipeUp', 'swipeDown',
+    'swipeLeft', 'swipeRight'
+  {{/has-plugin}}
 ];
 var domEventRegexp = new RegExp('^(' + domEvents.join('|') + ')');
 

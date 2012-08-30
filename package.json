@@ -30,7 +30,8 @@
     "helpers": [],
     "form": ["model"],
     "view-controller": [],
-    "loading": ["event", "model", "collection"]
+    "loading": ["event", "model", "collection"],
+    "mobile": ["event"]
   },
   "bin": {
     "thorax": "bin/thorax"

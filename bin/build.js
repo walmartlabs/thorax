@@ -64,7 +64,9 @@ module.exports = function(plugins) {
   if (!plugins.length) {
     plugins = [];
     for (var name in packageJSON.plugins) {
-      plugins.push(name);
+      if (name !== 'mobile') {
+        plugins.push(name);
+      }
     }
   }
 

@@ -1,128 +1,253 @@
-//Router
-Thorax.Router = Backbone.Router.extend({
-  initialize: function() {
-    Backbone.history || (Backbone.history = new Backbone.History);
-    Backbone.history.on('route', onRoute, this);
-    //router does not have a built in destroy event
-    //but ViewController does
-    this.on('destroyed', function() {
-      Backbone.history.off('route', onRoute, this);
-    });
-  },
-  route: function(route, name, callback) {
-    //add a route:before event that is fired before the callback is called
-    return Backbone.Router.prototype.route.call(this, route, name, function() {
-      this.trigger.apply(this, ['route:before', name].concat(Array.prototype.slice.call(arguments)));
-      return callback.apply(this, arguments);
-    });
+
+var minimumScrollYOffset = (navigator.userAgent.toLowerCase().indexOf("android") > -1) ? 1 : 0,
+
+Thorax.Util.scrollTo = function(x, y) {
+  y = y || minimumScrollYOffset;
+  function _scrollTo() {
+    window.scrollTo(x, y);
+  }
+  if ($.os && $.os.ios) {
+    // a defer is required for ios
+    _.defer(_scrollTo);
+  } else {
+    _scrollTo();
+  }
+  return [x, y];
+};
+  
+Thorax.Util.scrollToTop = function() {
+  // android will use height of 1 because of minimumScrollYOffset in scrollTo()
+  return this.scrollTo(0, 0);
+};
+
+//built in dom events
+Thorax.View.on({
+  'submit form': function(event) {
+    // Hide any virtual keyboards that may be lingering around
+    var focused = $(':focus')[0];
+    focused && focused.blur();
   }
 });
 
-Thorax.Routers = {};
-Thorax.Util.createRegistryWrapper(Thorax.Router, Thorax.Routers);
+//removal of click delay on mobile webkit
+var TAP_RANGE = 5;    // +-5px is still considered a tap
 
-function onRoute(router, name) {
-  if (this === router) {
-    this.trigger.apply(this, ['route'].concat(Array.prototype.slice.call(arguments, 1)));
-  }
-}
+Thorax._fastClickEventName = 'click';
 
-//layout
-var layoutCidAttributeName = 'data-layout-cid';
+if ('ontouchstart' in document.documentElement) {
+  Thorax._fastClickEventName = 'fast-click';
 
-Thorax.LayoutView = Thorax.View.extend({
-  render: function(output) {
-    //TODO: fixme, lumbar inserts templates after JS, most of the time this is fine
-    //but Application will be created in init.js (unlike most views)
-    //so need to put this here so the template will be picked up
-    var layoutTemplate;
-    if (this.name) {
-      layoutTemplate = Thorax.Util.registryGet(Thorax, 'templates', this.name, true);
-    }
-    //a template is optional in a layout
-    if (output || this.template || layoutTemplate) {
-      //but if present, it must have embedded an element containing layoutCidAttributeName 
-      var response = Thorax.View.prototype.render.call(this, output || this.template || layoutTemplate);
-      ensureLayoutViewsTargetElement.call(this);
-      return response;
+  var start,
+      clickRedRum;
+  
+  function onTouchStart(event) {
+    if (event.touches.length === 1) {
+      var touch = event.touches[0];
+      start = {x: touch.clientX, y: touch.clientY};
     } else {
-      ensureLayoutCid.call(this);
+      start = false;
     }
-  },
-  setView: function(view, options) {
-    options = _.extend({
-      scroll: true,
-      destroy: true
-    }, options || {});
-    if (typeof view === 'string') {
-      view = new (Thorax.Util.registryGet(Thorax, 'Views', view, false));
-    }
-    this.ensureRendered();
-    var oldView = this._view;
-    if (view == oldView){
-      return false;
-    }
-    if (options.destroy) {
-      view._shouldDestroyOnNextSetView = true;
-    }
-    this.trigger('change:view:start', view, oldView, options);
-    oldView && oldView.trigger('deactivated', options);
-    view && view.trigger('activated', options);
-    if (oldView && oldView.el && oldView.el.parentNode) {
-      oldView.$el.remove();
-    }
-    //make sure the view has been rendered at least once
-    view && view.ensureRendered();
-    view && getLayoutViewsTargetElement.call(this).appendChild(view.el);
-    this._view = view;
-    oldView && oldView._shouldDestroyOnNextSetView && oldView.destroy();
-    this._view && this._view.trigger('ready', options);
-    this.trigger('change:view:end', view, oldView, options);
-    return view;
-  },
-
-  getView: function() {
-    return this._view;
+    clickRedRum = false;
   }
-});
-
-Handlebars.registerHelper('layout', function(options) {
-  options.hash[layoutCidAttributeName] = this._view.cid;
-  return new Handlebars.SafeString(Thorax.Util.tag.call(this, options.hash, '', this));
-});
-
-function ensureLayoutCid() {
-  ++this._renderCount;
-  //set the layoutCidAttributeName on this.$el if there was no template
-  this.$el.attr(layoutCidAttributeName, this.cid);
-}
-
-function ensureLayoutViewsTargetElement() {
-  if (!this.$('[' + layoutCidAttributeName + '="' + this.cid + '"]')[0]) {
-    throw new Error('No layout element found in ' + (this.name || this.cid));
+  
+  function onTouchMove() {
+    if (event.touches.length > 1) {
+      start = false;
+    }
   }
+  
+  function onTouchEnd(event) {
+    var touch = event.changedTouches[0];
+    if (start
+        && Math.abs(touch.clientX-start.x) <= TAP_RANGE
+        && Math.abs(touch.clientY-start.y) <= TAP_RANGE) {
+      var target = touch.target;
+  
+      // see if target element or ancestor is disabled as click would not be triggered in this case
+      var disabled = !!($(target).closest('[disabled]').length);
+      if (!disabled) {
+        event = $.Event(Thorax.fastClick, {original: event});
+        $(target).trigger(event);
+        if (!event.defaultPrevented && ( target.control || target.htmlFor )) {
+          if (target.control) {
+            $(target.control).trigger(event);
+          } else {
+            $("#" + target.htmlFor).trigger(event);
+          }
+        }
+        if (event.defaultPrevented) {
+          // If the fast-click was handled, prevent futher operations
+          clickRedRum = true;
+          event.original.preventDefault();
+          defaultPrevented = true;
+        } 
+      }
+    }
+  }
+  
+  function clickKiller(event) {
+    if (clickRedRum) {
+      event.preventDefault();
+      event.stopPropagation();
+      clickRedRum = false;
+    }
+  }
+  
+  document.body.addEventListener('touchstart', onTouchStart, true);
+  document.body.addEventListener('touchmove', onTouchMove, true);
+  document.body.addEventListener('touchend', onTouchEnd, true);
+  document.body.addEventListener('click', clickKiller, true);  
 }
 
-function getLayoutViewsTargetElement() {
-  return this.$('[' + layoutCidAttributeName + '="' + this.cid + '"]')[0] || this.el[0] || this.el;
-}
+//tap highlight
 
-//ViewController
-Thorax.ViewController = Thorax.LayoutView.extend();
-_.extend(Thorax.ViewController.prototype, Thorax.Router.prototype, {
-  initialize: function() {
-    Thorax.Router.prototype.initialize.call(this);
-    //set the ViewController as the view on the parent
-    //if a parent was specified
-    this.on('route:before', function(router, name) {
-      if (this.parent && this.parent.getView) {
-        if (this.parent.getView() !== this) {
-          this.parent.setView(this, {
-            destroy: false
-          });
+$.fn.tapHoldAndEnd = function(selector, callbackStart, callbackEnd) {
+  function triggerEvent(obj, eventType, callback, event) {
+    var originalType = event.type,
+        result;
+
+    event.type = eventType;
+    if (callback) {
+      result = callback.call(obj, event);
+    }
+    event.type = originalType;
+    return result;
+  }
+
+  var timers = [];
+  return this.each(function() {
+    var thisObject = this,
+        tapHoldStart = false,
+        $this = $(thisObject);
+
+    $this.on('touchstart', selector, function(event) {
+      tapHoldStart = false;
+      var origEvent = event,
+          timer;
+
+      function clearTapTimer(event) {
+        clearTimeout(timer);
+             
+        if (tapHoldStart) {
+          var retval = false;
+          if (event) {
+            // We aren't sending any end events for touchcancel cases,
+            // prevent an exception
+            retval = triggerEvent(thisObject, 'tapHoldEnd', callbackEnd, event);
+          }
+          if (retval === false) {
+            _.each(timers, clearTimeout);
+            timers = [];
+          } 
         }
       }
-    }, this);
-    this._bindRoutes();
+
+      $(document).one('touchcancel', function() {
+        clearTapTimer();
+
+        $this.off('touchmove', selector, clearTapTimer);
+        $this.off('touchend', selector, clearTapTimer);
+      });
+
+      $this.on('touchend', selector, clearTapTimer);
+      $this.on('touchmove', selector, clearTapTimer);
+
+      timer = setTimeout(function() {
+        tapHoldStart = true;
+        var retval = triggerEvent(thisObject, 'tapHoldStart', callbackStart, origEvent);
+        if (retval === false) {
+          _.each(timers, clearTimeout);
+          timers = [];
+        } 
+      }, 150);
+      timers.push(timer);
+    });
+  });
+};
+
+var tapHighlight = exports.tapHighlight = 'active',
+    useNativeHighlight = true;
+
+Thorax.configureTapHighlight = function(useNative) {
+  useNativeHighlight = useNative;
+};
+
+var NATIVE_TAPPABLE = {
+  'A': true,
+  'INPUT': true,
+  'BUTTON': true,
+  'SELECT': true,
+  'TEXTAREA': true
+};
+
+function fixupTapHighlight(scope) {
+  _.each(this._domEvents || [], function(bind) {
+    var components = bind.split(' '),
+        selector = components.slice(1).join(' ') || undefined;  // Needed to make zepto happy
+
+    if (components[0] === 'click') {
+      // !selector case is for root click handlers on the view, i.e. 'click'
+      $(selector || this.el, selector && (scope || this.el)).forEach(function(el) {
+        var $el = $(el).data('tappable', true);
+
+        if (useNativeHighlight && !NATIVE_TAPPABLE[el.tagName]) {
+          // Add an explicit NOP bind to allow tap-highlight support
+          $el.on('click', false);
+        }
+      });
+    }
+  }, this);
+}
+
+Thorax.View.prototype.tapHighlightStart = function(event) {
+  var target = event.currentTarget,
+      tagName = target && target.tagName.toLowerCase();
+
+  // User input controls may be visually part of a larger group. For these cases
+  // we want to give priority to any parent that may provide a focus operation.
+  if (tagName === 'input' || tagName === 'select' || tagName === 'textarea') {
+    target = $(target).closest('[data-tappable=true]')[0] || target;
   }
+
+  if (target) {
+    $(target).addClass(tapHighlight);
+    return false;
+  }
+};
+
+Thorax.View.prototype.tapHighlightEnd = function(event) {
+  $('.' + tapHighlight).removeClass(tapHighlight);
+};
+
+Thorax.View.on({
+  'rendered': fixupTapHighlight,
+  'rendered:collection': fixupTapHighlight,
+  'rendered:item': fixupTapHighlight,
+  'rendered:empty': fixupTapHighlight
 });
+
+var _setElement = Thorax.View.prototype.setElement,
+    tapHighlightSelector = '[data-tappable=true], a, input, button, select, textarea';
+Thorax.View.prototype.setElement = function() {
+  var response = _setElement.apply(this, arguments);
+  if (!this.noTapHighlight) {
+    if (!useNativeHighlight) {
+      this.$el.tapHoldAndEnd(tapHighlightSelector, 
+        _.bind(this.tapHighlightStart, this),
+        _.bind(this.tapHighlightEnd, this));
+    }
+  }
+  return response;
+};
+
+var _addEvent = Thorax.View.prototype._addEvent;
+Thorax.View.prototype._addEvent = function(params) {
+  this._domEvents = this._domEvents || [];
+  if (params.type === "DOM") {
+    this._domEvents.push(params.originalName);
+  }
+  if ('ontouchstart' in document.documentElement) {
+    params.name = params.name.replace(/^click\b/, Thorax._fastClickEventName);
+  }
+  return _addEvent.call(this, params);
+};
