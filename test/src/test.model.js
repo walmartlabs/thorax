@@ -1,6 +1,27 @@
 $(function() {
 
-  QUnit.module('Thorax Model Binding');
+  QUnit.module('Thorax Model');
+
+  test("shouldFetch", function() {
+    [Thorax, Backbone].forEach(function(type) {
+      var options = {fetch: true};
+      var a = new (type.Model.extend());
+      ok(!Thorax.Util.shouldFetch(a, options));
+  
+      var b = new (type.Model.extend({urlRoot: '/'}));
+      ok(!!Thorax.Util.shouldFetch(b, options));
+
+      var c = new (type.Model.extend({urlRoot: '/'}));
+      c.set({key: 'value'});
+      ok(!Thorax.Util.shouldFetch(c, options));
+  
+      var d = new (type.Collection.extend());
+      ok(!Thorax.Util.shouldFetch(d, options));
+  
+      var e = new (type.Collection.extend({url: '/'}));
+      ok(!!Thorax.Util.shouldFetch(e, options));
+    });
+  });
 
   test("model view binding", function() {
     var modelA = new Thorax.Model({letter: 'a'});

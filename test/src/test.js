@@ -47,25 +47,6 @@ $(function() {
     equal(view.$('div > span').html(), 'nested', 'test nested registryGet');
   });
 
-  test("shouldFetch", function() {
-    var options = {fetch: true};
-    var a = new (Thorax.Model.extend());
-    ok(!Thorax.Util.shouldFetch(a, options));
-
-    var b = new (Thorax.Model.extend({urlRoot: '/'}));
-    ok(!!Thorax.Util.shouldFetch(b, options));
-
-    var c = new (Thorax.Model.extend({urlRoot: '/'}));
-    c.set({key: 'value'});
-    ok(!Thorax.Util.shouldFetch(c, options));
-
-    var d = new (Thorax.Collection.extend());
-    ok(!Thorax.Util.shouldFetch(d, options));
-
-    var e = new (Thorax.Collection.extend({url: '/'}));
-    ok(!!Thorax.Util.shouldFetch(e, options));
-  });
-
   test("context may be an object", function() {
     var view = new (Thorax.View.extend({
       context: {

@@ -166,14 +166,19 @@ Thorax.View.on({
 });
 
 Thorax.Util.shouldFetch = function(modelOrCollection, options) {
-  var getValue = Thorax.Util.getValue;
-  var url = (
-    (!modelOrCollection.collection && getValue(modelOrCollection, 'urlRoot')) ||
-    (modelOrCollection.collection && getValue(modelOrCollection.collection, 'url')) ||
-    (!modelOrCollection.collection && modelOrCollection._byCid && modelOrCollection._byId && getValue(modelOrCollection, 'url'))
-  );
-  return url && options.fetch && (
-    typeof modelOrCollection.isPopulated === 'undefined' || !modelOrCollection.isPopulated()
+  var getValue = Thorax.Util.getValue,
+      isCollection = !modelOrCollection.collection && modelOrCollection._byCid && modelOrCollection._byId;
+      url = (
+        (!modelOrCollection.collection && getValue(modelOrCollection, 'urlRoot')) ||
+        (modelOrCollection.collection && getValue(modelOrCollection.collection, 'url')) ||
+        (isCollection && getValue(modelOrCollection, 'url'))
+      );
+  return url && options.fetch && !(
+    (modelOrCollection.isPopulated && modelOrCollection.isPopulated()) ||
+    (isCollection
+      ? Thorax.Collection && Thorax.Collection.prototype.isPopulated.call(modelOrCollection)
+      : Thorax.Model.prototype.isPopulated.call(modelOrCollection)
+    )
   );
 };
 
