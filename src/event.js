@@ -90,7 +90,7 @@ _.extend(Thorax.View.prototype, {
       //accept on("rendered", handler, context)
       //accept on("click a", handler, context)
       (_.isArray(handler) ? handler : [handler]).forEach(function(handler) {
-        var params = eventParamsFromEventItem(eventName, handler, context || this);
+        var params = eventParamsFromEventItem.call(this, eventName, handler, context || this);
         if (params.type === 'DOM') {
           //will call _addEvent during delegateEvents()
           if (!this._eventsToDelegate) {

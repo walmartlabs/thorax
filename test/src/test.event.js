@@ -2,6 +2,23 @@ $(function() {
 
   QUnit.module('Thorax Event');
 
+  test("don't break existing event hash", function() {
+    expect(2);
+    var view = new Thorax.View({
+      events: {
+        test1: 'test1',
+        test2: function() {
+          ok(true);
+        }
+      },
+      test1: function() {
+        ok(true);
+      }
+    });
+    view.trigger('test1');
+    view.trigger('test2');
+  });
+
   //ensure view.on('viewEventOne viewEventTwo') still works
   test("Inheritable events", function() {
     var originalLength = Thorax.View._events.length;
