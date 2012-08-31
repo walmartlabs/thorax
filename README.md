@@ -2,23 +2,28 @@ An opinionated, battle tested [Backbone](http://backbonejs.org/) + [Handlebars](
 
 <table cellpadding="0" cellspacing="0" border="0" width="100%" id="downloads">
   <tr>
-    <td width="33%">
+    <td width="25%">
       <h3>Standalone</h3>
       <p>Open the <code>index.html</code> file from the downloaded project in your browser.</p>
     </td>
-    <td width="33%">
+    <td width="25%">
       <h3>Node + <a href="http://walmartlabs.github.com/lumbar">Lumbar</a></h3>
       <p>Run <code>npm start</code> from the downloaded project.</p>
     </td>
-    <td width="33%">
+    <td width="25%">
+      <h3>Mobile</a></h3>
+      <p>Run <code>npm start</code> from the downloaded project.</p>
+    </td>
+    <td width="25%">
       <h3>Rails</h3>
       <p>Run <code>rails server</code> from the downloaded project.</p>
     </td>
   </tr>
   <tr>
-    <td width="33%"><a href="https://github.com/downloads/walmartlabs/thorax/thorax-html.zip" class="btn">Download 2.0.0b2</a></td>
-    <td width="33%"><a href="https://github.com/downloads/walmartlabs/thorax/thorax-node.zip" class="btn btn-primary">Download 2.0.0b2</a></td>
-    <td width="33%"><a href="https://github.com/downloads/walmartlabs/thorax/thorax-rails.zip" class="btn">Download 2.0.0b2</a></td>
+    <td width="25%"><a href="https://github.com/downloads/walmartlabs/thorax/thorax-html.zip" class="btn">Download 2.0.0b3</a></td>
+    <td width="25%"><a href="https://github.com/downloads/walmartlabs/thorax/thorax-node.zip" class="btn btn-primary">Download 2.0.0b3</a></td>
+    <td width="25%"><a href="https://github.com/downloads/walmartlabs/thorax/thorax-mobile.zip" class="btn">Download 2.0.0b3</a></td>
+    <td width="25%"><a href="https://github.com/downloads/walmartlabs/thorax/thorax-rails.zip" class="btn">Download 2.0.0b3</a></td>
   </tr>
 </table>
 
@@ -32,7 +37,7 @@ Thorax can be used standalone in any JavaScript environment in addition the [boi
 
 ## Editable Examples
 
-All of the examples use the [same sample data](https://raw.github.com/gist/3504663/d1e6321e9fdb69ff47d636eab5df5e52acb64ae0/gistfile1.txt) and many use functionality found in plugins.
+All of the examples use the [same sample data](https://raw.github.com/gist/3504663/d1e6321e9fdb69ff47d636eab5df5e52acb64ae0/gistfile1.txt).
 
 - [Todos](http://jsfiddle.net/AhKp3/)
 - [$.model](http://jsfiddle.net/e3CML/)
@@ -206,7 +211,7 @@ To use the command line utilities:
 
     npm install -g thorax
 
-### build *thorax build [plugin] [plugin...]*
+### build *thorax build target [plugin] [plugin...]*
 
 Build a custom version of Thorax using a list of any of the given plugins:
 
@@ -218,8 +223,13 @@ Build a custom version of Thorax using a list of any of the given plugins:
 - form
 - view-controller
 - loading
+- mobile
 
-Not specifying any plugins will build a version with all plugins.
+Not specifying any plugins will build a version with all plugins except mobile. To build a version of Thorax with all plugins including the mobile plugin run:
+
+    thorax build ./thorax.js --mobile
+
+
 
 ### templates *thorax templates ./templates ./templates.js*
 

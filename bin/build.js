@@ -37,8 +37,7 @@ function renderTemplate(name, data) {
   return templateCache[name](data);
 }
 
-function writeFile(name, output) {
-  var filename = path.join(__dirname, '..', 'dist', name) + '.js';
+function writeFile(filename, output) {
   fs.writeFileSync(filename, output);
   console.log('Wrote: ' + filename);
 }
@@ -60,9 +59,8 @@ function getLicense() {
   }).join('\n') + '\n';
 }
 
-module.exports = function(plugins) {
+module.exports = function(target, plugins) {
   var buildMobile = false;
-  console.log(plugins);
   if (plugins.indexOf('--mobile') !== -1) {
     plugins = [];
     buildMobile = true;
@@ -107,7 +105,7 @@ module.exports = function(plugins) {
     output += renderTemplate(item) + '\n';
   });
 
-  writeFile('thorax', getLicense() + renderTemplate('fragments/scope', {
+  writeFile(target, getLicense() + renderTemplate('fragments/scope', {
     'yield': output
   }));
 };
