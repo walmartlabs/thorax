@@ -1,5 +1,5 @@
 
-var minimumScrollYOffset = (navigator.userAgent.toLowerCase().indexOf("android") > -1) ? 1 : 0,
+var minimumScrollYOffset = $.os.android ? 1 : 0;
 
 Thorax.Util.scrollTo = function(x, y) {
   y = y || minimumScrollYOffset;
@@ -30,13 +30,27 @@ Thorax.View.on({
 });
 
 //removal of click delay on mobile webkit
-var TAP_RANGE = 5;    // +-5px is still considered a tap
+var TAP_RANGE = 5,    // +-5px is still considered a tap
+    isMobile = 'ontouchstart' in document.documentElement;
 
 Thorax._fastClickEventName = 'click';
+Thorax.configureFastClick = function(useFastClick) {
+  if (useFastClick && isMobile) {
+    Thorax._fastClickEventName = 'fast-click' :;
+    document.body.addEventListener('touchstart', onTouchStart, true);
+    document.body.addEventListener('touchmove', onTouchMove, true);
+    document.body.addEventListener('touchend', onTouchEnd, true);
+    document.body.addEventListener('click', clickKiller, true);  
+  } else {
+    Thorax._fastClickEventName =  'click';
+    document.body.removeEventListener('touchstart', onTouchStart, true);
+    document.body.removeEventListener('touchmove', onTouchMove, true);
+    document.body.removeEventListener('touchend', onTouchEnd, true);
+    document.body.removeEventListener('click', clickKiller, true);  
+  }
+};
 
-if ('ontouchstart' in document.documentElement) {
-  Thorax._fastClickEventName = 'fast-click';
-
+if (isMobile) {
   var start,
       clickRedRum;
   
@@ -66,7 +80,7 @@ if ('ontouchstart' in document.documentElement) {
       // see if target element or ancestor is disabled as click would not be triggered in this case
       var disabled = !!($(target).closest('[disabled]').length);
       if (!disabled) {
-        event = $.Event(Thorax.fastClick, {original: event});
+        event = $.Event(Thorax._fastClickEventName, {original: event});
         $(target).trigger(event);
         if (!event.defaultPrevented && ( target.control || target.htmlFor )) {
           if (target.control) {
@@ -92,11 +106,8 @@ if ('ontouchstart' in document.documentElement) {
       clickRedRum = false;
     }
   }
-  
-  document.body.addEventListener('touchstart', onTouchStart, true);
-  document.body.addEventListener('touchmove', onTouchMove, true);
-  document.body.addEventListener('touchend', onTouchEnd, true);
-  document.body.addEventListener('click', clickKiller, true);  
+
+  Thorax.configureFastClick(isMobile);
 }
 
 //tap highlight
@@ -165,9 +176,7 @@ $.fn.tapHoldAndEnd = function(selector, callbackStart, callbackEnd) {
   });
 };
 
-var tapHighlight = exports.tapHighlight = 'active',
-    useNativeHighlight = true;
-
+var useNativeHighlight = true;
 Thorax.configureTapHighlight = function(useNative) {
   useNativeHighlight = useNative;
 };
@@ -199,25 +208,27 @@ function fixupTapHighlight(scope) {
   }, this);
 }
 
-Thorax.View.prototype.tapHighlightStart = function(event) {
-  var target = event.currentTarget,
-      tagName = target && target.tagName.toLowerCase();
-
-  // User input controls may be visually part of a larger group. For these cases
-  // we want to give priority to any parent that may provide a focus operation.
-  if (tagName === 'input' || tagName === 'select' || tagName === 'textarea') {
-    target = $(target).closest('[data-tappable=true]')[0] || target;
+_.extend(Thorax.View.prototype, {
+  _tapHighlightClassName: 'active',
+  _tapHighlightStart: function(event) {
+    var target = event.currentTarget,
+        tagName = target && target.tagName.toLowerCase();
+  
+    // User input controls may be visually part of a larger group. For these cases
+    // we want to give priority to any parent that may provide a focus operation.
+    if (tagName === 'input' || tagName === 'select' || tagName === 'textarea') {
+      target = $(target).closest('[data-tappable=true]')[0] || target;
+    }
+  
+    if (target) {
+      $(target).addClass(this._tapHighlightClassName);
+      return false;
+    }
+  },
+  _tapHighlightEnd: function(event) {
+    $('.' + tapHighlight).removeClass(this._tapHighlightClassName);
   }
-
-  if (target) {
-    $(target).addClass(tapHighlight);
-    return false;
-  }
-};
-
-Thorax.View.prototype.tapHighlightEnd = function(event) {
-  $('.' + tapHighlight).removeClass(tapHighlight);
-};
+});
 
 Thorax.View.on({
   'rendered': fixupTapHighlight,
@@ -233,8 +244,8 @@ Thorax.View.prototype.setElement = function() {
   if (!this.noTapHighlight) {
     if (!useNativeHighlight) {
       this.$el.tapHoldAndEnd(tapHighlightSelector, 
-        _.bind(this.tapHighlightStart, this),
-        _.bind(this.tapHighlightEnd, this));
+        _.bind(this._tapHighlightStart, this),
+        _.bind(this._tapHighlightEnd, this));
     }
   }
   return response;
