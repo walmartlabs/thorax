@@ -20,10 +20,10 @@ Thorax.loadHandler = function(start, end) {
     }
 
     if (!self._loadStart) {
-      var loadingTimeout = self._loadingTimeoutDuration;
+      var loadingTimeout = self.loadingTimeoutDuration;
       if (loadingTimeout === void 0) {
         // If we are running on a non-view object pull the default timeout
-        loadingTimeout = Thorax.View.prototype._loadingTimeoutDuration;
+        loadingTimeout = Thorax.View.prototype.loadingTimeoutDuration;
       }
 
       self._loadStart = _.extend({
@@ -47,10 +47,10 @@ Thorax.loadHandler = function(start, end) {
     object.bind(loadEnd, function endCallback() {
       object.off(loadEnd, endCallback);
 
-      var loadingEndTimeout = self._loadingTimeoutEndDuration;
+      var loadingEndTimeout = self.loadingTimeoutEndDuration;
       if (loadingEndTimeout === void 0) {
         // If we are running on a non-view object pull the default timeout
-        loadingEndTimeout = Thorax.View.prototype._loadingTimeoutEndDuration;
+        loadingEndTimeout = Thorax.View.prototype.loadingTimeoutEndDuration;
       }
 
       var events = self._loadStart.events,
@@ -109,9 +109,9 @@ Thorax.forwardLoadEvents = function(source, dest, once) {
 Thorax.mixinLoadable = function(target, useParent) {
   _.extend(target, {  
     //loading config
-    _loadingClassName: 'loading',
-    _loadingTimeoutDuration: 0.33,
-    _loadingTimeoutEndDuration: 0.10,
+    loadingClassName: 'loading',
+    loadingTimeoutDuration: 0.33,
+    loadingTimeoutEndDuration: 0.10,
   
     // Propagates loading view parameters to the AJAX layer
     onLoadStart: function(message, background, object) {
@@ -119,7 +119,7 @@ Thorax.mixinLoadable = function(target, useParent) {
       if (!that.nonBlockingLoad && !background && rootObject) {
         rootObject.trigger(loadStart, message, background, object);
       }
-      $(that.el).addClass(that._loadingClassName);
+      $(that.el).addClass(that.loadingClassName);
       //used by loading helpers
       if (that._loadingCallbacks) {
         that._loadingCallbacks.forEach(function(callback) {
@@ -129,7 +129,7 @@ Thorax.mixinLoadable = function(target, useParent) {
     },
     onLoadEnd: function(background, object) {
       var that = useParent ? this.parent : this;
-      $(that.el).removeClass(that._loadingClassName);
+      $(that.el).removeClass(that.loadingClassName);
       //used by loading helpers
       if (that._loadingCallbacks) {
         that._loadingCallbacks.forEach(function(callback) {
@@ -404,7 +404,7 @@ Thorax.View.on({
 Handlebars.registerViewHelper('loading', function(view) {
   _render = view.render;
   view.render = function() {
-    if (view.parent.$el.hasClass(view.parent._loadingClassName)) {
+    if (view.parent.$el.hasClass(view.parent.loadingClassName)) {
       return _render.call(this, view.fn);
     } else {
       return _render.call(this, view.inverse);
