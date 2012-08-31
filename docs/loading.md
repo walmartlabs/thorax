@@ -70,17 +70,17 @@ Triggered by `fetch` or `load` in a `Thorax.Model` or `Thorax.Collection`. Never
 
 ## Thorax.View
 
-### loadingClassName *view.loadingClassName*
+### _loadingClassName *view._loadingClassName*
 
 Class name to add and remove from a view's `el` when it is loading. Defaults to `loading`.
 
-### loadingTimeoutDuration *view.loadingTimeoutDuration*
+### _loadingTimeoutDuration *view._loadingTimeoutDuration*
 
 Timeout duration in seconds before a `load:start` callback will be triggered. Defaults to 0.33 seconds. If for instance the `load:end` event was triggered 0.32 seconds after the `load:start` event the `load:start` callback would not be called.
 
-### loadingTimeoutEndDuration *view.loadingTimeoutEndDuration*
+### _loadingTimeoutEndDuration *view._loadingTimeoutEndDuration*
 
-Just like `loadingTimeoutDuration` but applies to `load:end`. Defaults to 0.10 seconds.
+Just like `_loadingTimeoutDuration` but applies to `load:end`. Defaults to 0.10 seconds.
 
 ## View Helpers
 
