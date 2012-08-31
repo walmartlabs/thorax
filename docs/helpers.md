@@ -9,6 +9,10 @@ Creates a `button` tag that will call the specified methodName on the view when 
 
     {{#button "methodName" class="btn"}}Click Me{{/button}}
 
+The tag name may also be specified:
+
+    {{#button "methodName" tag="a" class="btn"}}A Link{{/button}}
+
 ### url *{{url urlString}}*
 
 Prepends "#" if `Backbone.history.pushSate` is disabled, and resolves any url paramters with the current conext. For example if the context had an `id` attribute `:id` would be replaced with the value of `id`
