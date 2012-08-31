@@ -61,10 +61,16 @@ function getLicense() {
 }
 
 module.exports = function(plugins) {
+  var buildMobile = false;
+  if (plugins.indexOf('--mobile') !== -1) {
+    plugins = [];
+    buildMobile = true;
+  }
+
   if (!plugins.length) {
     plugins = [];
     for (var name in packageJSON.plugins) {
-      if (name !== 'mobile') {
+      if (name !== 'mobile' || (name === 'mobile' && buildMobile)) {
         plugins.push(name);
       }
     }
