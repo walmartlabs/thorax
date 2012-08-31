@@ -37,7 +37,7 @@ if (typeof exports !== 'undefined') {
   Thorax = this.Thorax = {};
 }
 
-Thorax.VERSION = '2.0.0b2';
+Thorax.VERSION = '2.0.0b3';
 
 var handlebarsExtension = 'handlebars',
     handlebarsExtensionRegExp = new RegExp('\\.' + handlebarsExtension + '$'),
@@ -724,6 +724,7 @@ var domEvents = [
   'keyup', 'keydown', 'keypress',
   'submit', 'change',
   'focus', 'blur'
+  
 ];
 var domEventRegexp = new RegExp('^(' + domEvents.join('|') + ')');
 
