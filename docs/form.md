@@ -19,7 +19,7 @@ Thorax provides helpers to assist with form handling, but makes no user interfac
 
 ### serialize *view.serialize([event], callback [,options])*
 
-Serializes a form. `callback` will receive the attributes from the form and will only be called if `validateInput` returns nothing or an empty array. If an `event` is passed a check will be run to prevent duplicate submission. `options` may contain:
+Serializes a form. `callback` will receive the attributes from the form, followed by a `release` method which must be called before the form can be submitted again. `callback` will only be called if `validateInput` returns nothing or an empty array. `options` may contain:
 
 - `set` - defaults to true, wether or not to set the attributes if valid on a model if one was set with `setModel`
 - `validate - defaults to true, wether or not to call `validateInput` during serialization
@@ -28,18 +28,20 @@ Each form input in your application should contain a corresponding label. Since 
     
     <label for="{{cid}}-last-name"/>
     <input name="last-name" id="{{cid}}-last-name" value="Beastridge"/>
-    <label for="{{cid}}-last-name"/>
+    <label for="{{cid}}-address[street]"/>
     <input name="address[street]" value="123 Chestnut" id="{{cid}}-address[street]"/>
 
     new Thorax.View({
       events: {
-        "submit form": "_handleSubmit"
-      },
-      _handleSubmit: function(event) {
-        this.serialize(event, function(attributes) {
-          attributes["last-name"] === "Beastridge";
-          attributes.address.street === "123 Chestnut";
-        });
+        "submit form": function(event) {
+          this.serialize(event, function(attributes, release) {
+            attributes["last-name"] === "Beastridge";
+            attributes.address.street === "123 Chestnut";
+            //form is locked to prevent duplicate submission
+            //until release is called
+            release();
+          });
+        }
       }
     });
 
@@ -51,7 +53,7 @@ Each form input in your application should contain a corresponding label. Since 
 
 If your view uses inputs with non standard names (or no names, multiple inputs with the same name, etc), use the `serialize` event:
 
-    this.bind('serialize', _.bind(function(attributes) {
+    this.on('serialize', _.bind(function(attributes) {
       attributes.custom = this.$('.my-input').val();
     }, this));
 
