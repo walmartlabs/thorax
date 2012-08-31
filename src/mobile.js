@@ -36,13 +36,13 @@ var TAP_RANGE = 5,    // +-5px is still considered a tap
 Thorax._fastClickEventName = 'click';
 Thorax.configureFastClick = function(useFastClick) {
   if (useFastClick && isMobile) {
-    Thorax._fastClickEventName = 'fast-click' :;
+    Thorax._fastClickEventName = 'fast-click';
     document.body.addEventListener('touchstart', onTouchStart, true);
     document.body.addEventListener('touchmove', onTouchMove, true);
     document.body.addEventListener('touchend', onTouchEnd, true);
     document.body.addEventListener('click', clickKiller, true);  
   } else {
-    Thorax._fastClickEventName =  'click';
+    Thorax._fastClickEventName = 'click';
     document.body.removeEventListener('touchstart', onTouchStart, true);
     document.body.removeEventListener('touchmove', onTouchMove, true);
     document.body.removeEventListener('touchend', onTouchEnd, true);
