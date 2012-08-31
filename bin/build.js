@@ -40,7 +40,7 @@ function renderTemplate(name, data) {
 function writeFile(name, output) {
   var filename = path.join(__dirname, '..', 'dist', name) + '.js';
   fs.writeFileSync(filename, output);
-  console.log('generated ' + filename);
+  console.log('Wrote: ' + filename);
 }
 
 var loadedOverrides = [];
@@ -62,6 +62,7 @@ function getLicense() {
 
 module.exports = function(plugins) {
   var buildMobile = false;
+  console.log(plugins);
   if (plugins.indexOf('--mobile') !== -1) {
     plugins = [];
     buildMobile = true;
@@ -75,7 +76,7 @@ module.exports = function(plugins) {
       }
     }
   }
-
+  console.log('Building Thorax with:', plugins);
   var output = '';
 
   //loop through first to get a complete list of plugins
