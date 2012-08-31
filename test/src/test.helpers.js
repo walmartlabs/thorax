@@ -36,13 +36,28 @@ $(function() {
   });
 
   test("button and link helpers", function() {
+    var callCount = 0;
     var view = new Thorax.View({
-      someMethod: function(){},
+      someMethod: function(){
+        ++callCount;
+      },
       template: '{{#button "someMethod"}}Button{{/button}}{{#link "href"}}content{{/link}}'
     });
     view.render();
     equal(view.$('button').html(),'Button');
     equal(view.$('a').html(),'content');
     equal(view.$('a').attr('href'),'#href');
+
+    $('body').append(view.el);
+    this.clock.restore();  
+    expect(4);
+    stop();
+    setTimeout(function() {
+      $(view.$('button')[0]).trigger('click');
+      equal(callCount, 1);
+      $(view.el).remove();
+      start();
+    }, 2);
   });
+
 });
