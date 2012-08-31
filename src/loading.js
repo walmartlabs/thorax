@@ -404,7 +404,7 @@ Thorax.View.on({
 Handlebars.registerViewHelper('loading', function(view) {
   _render = view.render;
   view.render = function() {
-    if (view.parent.$el.hasClass(view.parent.loadingClassName)) {
+    if (view.parent.$el.hasClass(view.parent._loadingClassName)) {
       return _render.call(this, view.fn);
     } else {
       return _render.call(this, view.inverse);
