@@ -2,6 +2,9 @@
 
 ## 2.0.0b3
 
+- added mobile plugin
+- allow nested objects in any registry to allow: {{view "Nested.Object"}}
+- `thorax build` command now requires a target filename as the first argument
 - `Thorax.Util.shouldFetch` will now gracefully support Backbone.Model and Backbone.Collection instances
 - allow Backbone.Model and Backbone.Collection instances to be passed to `_loadModel` and `_loadCollection`
 
