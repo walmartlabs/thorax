@@ -162,7 +162,7 @@
             <ul>
               
                 <li>
-                  <a href="#command-line/build-thorax-build-plugin-plugin">build </a>
+                  <a href="#command-line/build-thorax-build-target-plugin-plugin">build </a>
                 </li>
               
                 <li>
@@ -207,7 +207,7 @@
           
         </li>
       
-    </ul><div class="header"><a href="#">Plugins</a></div><ul class="sections"><li><a href="collection.html">Collection</a></li><li><a href="event.html">Event</a></li><li><a href="form.html">Form</a></li><li><a href="helpers.html">Helpers</a></li><li><a href="loading.html">Loading</a></li><li><a href="model.html">Model</a></li><li><a href="view-controller.html">ViewController</a></li></ul>
+    </ul><div class="header"><a href="#">Plugins</a></div><ul class="sections"><li><a href="collection.html">Collection</a></li><li><a href="event.html">Event</a></li><li><a href="form.html">Form</a></li><li><a href="helpers.html">Helpers</a></li><li><a href="loading.html">Loading</a></li><li><a href="mobile.html">Mobile</a></li><li><a href="model.html">Model</a></li><li><a href="view-controller.html">ViewController</a></li></ul>
     
     
   </div>
@@ -218,23 +218,28 @@
 </p>
 <table cellpadding="0" cellspacing="0" border="0" width="100%" id="downloads">
   <tr>
-    <td width="33%">
+    <td width="25%">
       <h3>Standalone</h3>
       <p>Open the <code>index.html</code> file from the downloaded project in your browser.</p>
     </td>
-    <td width="33%">
+    <td width="25%">
       <h3>Node + <a href="http://walmartlabs.github.com/lumbar">Lumbar</a></h3>
       <p>Run <code>npm start</code> from the downloaded project.</p>
     </td>
-    <td width="33%">
+    <td width="25%">
+      <h3>Mobile</h3>
+      <p>Run <code>npm start</code> from the downloaded project.</p>
+    </td>
+    <td width="25%">
       <h3>Rails</h3>
       <p>Run <code>rails server</code> from the downloaded project.</p>
     </td>
   </tr>
   <tr>
-    <td width="33%"><a href="https://github.com/downloads/walmartlabs/thorax/thorax-html.zip" class="btn">Download 2.0.0b2</a></td>
-    <td width="33%"><a href="https://github.com/downloads/walmartlabs/thorax/thorax-node.zip" class="btn btn-primary">Download 2.0.0b2</a></td>
-    <td width="33%"><a href="https://github.com/downloads/walmartlabs/thorax/thorax-rails.zip" class="btn">Download 2.0.0b2</a></td>
+    <td width="25%"><a href="https://github.com/downloads/walmartlabs/thorax/thorax-html.zip" class="btn">Download 2.0.0b3</a></td>
+    <td width="25%"><a href="https://github.com/downloads/walmartlabs/thorax/thorax-node.zip" class="btn btn-primary">Download 2.0.0b3</a></td>
+    <td width="25%"><a href="https://github.com/downloads/walmartlabs/thorax/thorax-mobile.zip" class="btn">Download 2.0.0b3</a></td>
+    <td width="25%"><a href="https://github.com/downloads/walmartlabs/thorax/thorax-rails.zip" class="btn">Download 2.0.0b3</a></td>
   </tr>
 </table>
 
@@ -247,7 +252,7 @@
 view<span class="preprocessor">.render</span>()<span class="comment">;</span>
 $(<span class="string">"body"</span>)<span class="preprocessor">.append</span>(view<span class="preprocessor">.el</span>)<span class="comment">;</span></code></pre>
 <h2 id="editable-examples">Editable Examples</h2>
-<p>All of the examples use the <a href="https://raw.github.com/gist/3504663/d1e6321e9fdb69ff47d636eab5df5e52acb64ae0/gistfile1.txt">same sample data</a> and many use functionality found in plugins.
+<p>All of the examples use the <a href="https://raw.github.com/gist/3504663/d1e6321e9fdb69ff47d636eab5df5e52acb64ae0/gistfile1.txt">same sample data</a>.
 
 </p>
 <ul>
@@ -401,7 +406,7 @@ view.<span class="keyword">render</span>(<span class="string">'custom html'</spa
 </span>}</span></span>);</code></pre>
 <h2 id="">$</h2>
 <h3 id="/view-event-target-view-options" class="signature">$.view <em>$(event.target).view([options])</em></h3>
-<p>Get a reference to the nearest parent view. Pass <code>helper: false</code> to options to exclude <code>HelperView</code>s from the lookup. Collection views and any helper created with <code>registerViewHelper</code> will generate a <code>HelperView</code>.
+<p>Get a reference to the nearest parent view. Pass <code>helper: false</code> to options to exclude <code>HelperView</code>s from the lookup. <code>$.model</code> and <code>$.collection</code> will also be available if you include the model and collection plugins.
 
 </p>
 <pre><code>$(event<span class="variable">.target</span>)<span class="variable">.view</span>()</code></pre>
@@ -410,7 +415,7 @@ view.<span class="keyword">render</span>(<span class="string">'custom html'</spa
 
 </p>
 <pre><code><span class="title">npm</span> install -g thorax</code></pre>
-<h3 id="command-line/build-thorax-build-plugin-plugin" class="signature">build <em>thorax build [plugin] [plugin...]</em></h3>
+<h3 id="command-line/build-thorax-build-target-plugin-plugin" class="signature">build <em>thorax build target [plugin] [plugin...]</em></h3>
 <p>Build a custom version of Thorax using a list of any of the given plugins:
 
 </p>
@@ -423,10 +428,12 @@ view.<span class="keyword">render</span>(<span class="string">'custom html'</spa
 <li>form</li>
 <li>view-controller</li>
 <li>loading</li>
+<li>mobile</li>
 </ul>
-<p>Not specifying any plugins will build a version with all plugins.
+<p>Not specifying any plugins will build a version with all plugins except mobile. To build a version of Thorax with all plugins including the mobile plugin run:
 
 </p>
+<pre><code><span class="title">thorax</span> build ./thorax.js <span class="comment">--mobile</span></code></pre>
 <h3 id="command-line/templates-thorax-templates-templates-templates-js" class="signature">templates <em>thorax templates ./templates ./templates.js</em></h3>
 <p>If using Thorax outside of the provided node or Rails downloads you can inline a directory of templates into a single file by running the <code>thorax templates</code> command.
 
@@ -478,7 +485,7 @@ view.<span class="literal">on</span>(<span class="string">'helper:collection'</s
     <tr><td><code>data-collection-empty</code></td><td>Set to "true" or "false" depending on wether the bound collection <code>isEmpty</code></td></tr>
     <tr><td><code>data-model-cid</code></td><td>A view's <code>el</code> if a model was bound to the view or each item element inside of elements generated by the collection helper</td></tr>
     <tr><td><code>data-model-name</code></td><td>Same as above, only present if the model is named</td></tr>
-    <tr><td><code>data-layout-cid</code></td><td>The element generated by the <code>layout</code> helper or <code>el</code> inside of a <code>LayoutView</code>, <code>ViewController</code> or <code>Application</code> instance</td></tr>
+    <tr><td><code>data-layout-cid</code></td><td>The element generated by the <code>layout</code> helper or <code>el</code> inside of a <code>LayoutView</code> or <code>ViewController</code> instance</td></tr>
     <tr><td><code>data-helper-name</code></td><td>Elements generated by various helpers including <code>collection</code> and <code>empty</code> from the collection plugin</td></tr>
     <tr><td><code>data-call-method</code></td><td>Elements generated by the <code>link</code> and <code>button</code> helpers</td></tr>
   </tbody>
@@ -487,7 +494,7 @@ view.<span class="literal">on</span>(<span class="string">'helper:collection'</s
 <p>When creating CSS selectors it's recommended to use the generated attributes (especially <code>data-view-name</code>) rather than assigning custom IDs or class names for the sole purpose of styling.
 
 </p>
-<pre><code>[<span class="typedef"><span class="keyword">data</span>-view-name="application"] <span class="container">{
+<pre><code>[<span class="typedef"><span class="keyword">data</span>-view-name="my-view-name"] <span class="container">{
   <span class="title">border</span>: 1<span class="title">px</span> <span class="title">solid</span> #<span class="title">ccc</span>;
 }</span></span></code></pre>
 

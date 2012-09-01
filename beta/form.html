@@ -55,7 +55,7 @@
           
         </li>
       
-    </ul><div class="header"><a href="#">Plugins</a></div><ul class="sections"><li><a href="collection.html">Collection</a></li><li><a href="event.html">Event</a></li><li><a href="form.html">Form</a></li><li><a href="helpers.html">Helpers</a></li><li><a href="loading.html">Loading</a></li><li><a href="model.html">Model</a></li><li><a href="view-controller.html">ViewController</a></li></ul>
+    </ul><div class="header"><a href="#">Plugins</a></div><ul class="sections"><li><a href="collection.html">Collection</a></li><li><a href="event.html">Event</a></li><li><a href="form.html">Form</a></li><li><a href="helpers.html">Helpers</a></li><li><a href="loading.html">Loading</a></li><li><a href="mobile.html">Mobile</a></li><li><a href="model.html">Model</a></li><li><a href="view-controller.html">ViewController</a></li></ul>
     
     
   </div>
@@ -78,7 +78,7 @@
   }
 })<span class="comment">;</span></code></pre>
 <h3 id="form-handling/serialize-view-serialize-event-callback-options" class="signature">serialize <em>view.serialize([event], callback [,options])</em></h3>
-<p>Serializes a form. <code>callback</code> will receive the attributes from the form and will only be called if <code>validateInput</code> returns nothing or an empty array. If an <code>event</code> is passed a check will be run to prevent duplicate submission. <code>options</code> may contain:
+<p>Serializes a form. <code>callback</code> will receive the attributes from the form, followed by a <code>release</code> method which must be called before the form can be submitted again. <code>callback</code> will only be called if <code>validateInput</code> returns nothing or an empty array. <code>options</code> may contain:
 
 </p>
 <ul>
@@ -90,18 +90,20 @@
 </p>
 <pre><code><span class="tag">&lt;<span class="title">label</span> <span class="attribute">for</span>=<span class="value">"<span class="variable">{{cid}}</span>-last-name"</span>/</span>
 <span class="tag">&lt;<span class="title">input</span> <span class="attribute">name</span>=<span class="value">"last-name"</span> <span class="attribute">id</span>=<span class="value">"<span class="variable">{{cid}}</span>-last-name"</span> <span class="attribute">value</span>=<span class="value">"Beastridge"</span>/</span>
-<span class="tag">&lt;<span class="title">label</span> <span class="attribute">for</span>=<span class="value">"<span class="variable">{{cid}}</span>-last-name"</span>/</span>
+<span class="tag">&lt;<span class="title">label</span> <span class="attribute">for</span>=<span class="value">"<span class="variable">{{cid}}</span>-address[street]"</span>/</span>
 <span class="tag">&lt;<span class="title">input</span> <span class="attribute">name</span>=<span class="value">"address[street]"</span> <span class="attribute">value</span>=<span class="value">"123 Chestnut"</span> <span class="attribute">id</span>=<span class="value">"<span class="variable">{{cid}}</span>-address[street]"</span>/</span>
 
 new Thorax.View({
   events: {
-    "submit form": "_handleSubmit"
-  },
-  _handleSubmit: function(event) {
-    this.serialize(event, function(attributes) {
-      attributes["last-name"] === "Beastridge";
-      attributes.address.street === "123 Chestnut";
-    });
+    "submit form": function(event) {
+      this.serialize(event, function(attributes, release) {
+        attributes["last-name"] === "Beastridge";
+        attributes.address.street === "123 Chestnut";
+        //form is locked to prevent duplicate submission
+        //until release is called
+        release();
+      });
+    }
   }
 });</code></pre>
 <p><code>serialize</code> Triggers the following events:
@@ -115,7 +117,7 @@ new Thorax.View({
 <p>If your view uses inputs with non standard names (or no names, multiple inputs with the same name, etc), use the <code>serialize</code> event:
 
 </p>
-<pre><code><span class="keyword">this</span>.bind(<span class="string">'serialize'</span>, _.bind(<span class="keyword">function</span>(attributes) {
+<pre><code><span class="keyword">this</span>.<span class="literal">on</span>(<span class="string">'serialize'</span>, _.bind(<span class="reserved">function</span>(attributes) {
   attributes.custom = <span class="keyword">this</span>.$(<span class="string">'.my-input'</span>).val();
 }, <span class="keyword">this</span>));</code></pre>
 <h3 id="form-handling/populate-view-populate-attributes" class="signature">populate <em>view.populate([attributes])</em></h3>
