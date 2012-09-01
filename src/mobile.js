@@ -176,7 +176,8 @@ $.fn.tapHoldAndEnd = function(selector, callbackStart, callbackEnd) {
   });
 };
 
-var useNativeHighlight = true;
+//only enable on android
+var useNativeHighlight = !$.os.android;
 Thorax.configureTapHighlight = function(useNative) {
   useNativeHighlight = useNative;
 };
