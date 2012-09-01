@@ -205,39 +205,6 @@ Get a reference to the nearest parent view. Pass `helper: false` to options to e
 
     $(event.target).view()
 
-## Command Line
-
-To use the command line utilities:
-
-    npm install -g thorax
-
-### build *thorax build target [plugin] [plugin...]*
-
-Build a custom version of Thorax using a list of any of the given plugins:
-
-- mixin
-- event
-- model
-- collection
-- helpers
-- form
-- view-controller
-- loading
-- mobile
-
-Not specifying any plugins will build a version with all plugins except mobile. To build a version of Thorax with all plugins including the mobile plugin run:
-
-    thorax build ./thorax.js --mobile
-
-
-
-### templates *thorax templates ./templates ./templates.js*
-
-If using Thorax outside of the provided node or Rails downloads you can inline a directory of templates into a single file by running the `thorax templates` command.
-
-    npm install -g thorax
-    thorax templates ./templates-dir ./templates.js
-
 ## Events
 
 ### destroyed *destroyed ()*
@@ -295,3 +262,34 @@ When creating CSS selectors it's recommended to use the generated attributes (es
     [data-view-name="my-view-name"] {
       border: 1px solid #ccc;
     }
+
+## Command Line
+
+To use the command line utilities:
+
+    npm install -g thorax
+
+### build *thorax build target [plugin] [plugin...]*
+
+Build a custom version of Thorax using a list of any of the given plugins:
+
+- mixin
+- event
+- model
+- collection
+- helpers
+- form
+- view-controller
+- loading
+- mobile
+
+Not specifying any plugins will build a version with all plugins except mobile. To build a version of Thorax with all plugins including the mobile plugin run:
+
+    thorax build ./thorax.js --mobile
+
+### templates *thorax templates ./templates ./templates.js*
+
+If using Thorax outside of the provided node or Rails downloads you can inline a directory of templates into a single file by running the `thorax templates` command.
+
+    npm install -g thorax
+    thorax templates ./templates-dir ./templates.js
