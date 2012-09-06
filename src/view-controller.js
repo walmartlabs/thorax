@@ -62,7 +62,7 @@ Thorax.LayoutView = Thorax.View.extend({
     if (view == oldView){
       return false;
     }
-    if (options.destroy) {
+    if (options.destroy && view) {
       view._shouldDestroyOnNextSetView = true;
     }
     this.trigger('change:view:start', view, oldView, options);
