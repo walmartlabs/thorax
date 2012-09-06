@@ -115,7 +115,9 @@ $(function() {
     this.clock.restore();
     var callCount = 0;
     var parent = new Thorax.View({
+      name: 'parent-event-dom-test',
       child: new Thorax.View({
+        name: 'child-event-dom-test',
         events: {
           'click .test': function() {
             ++callCount;
