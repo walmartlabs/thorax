@@ -157,6 +157,21 @@ $(function() {
     runCollectionTests(viewWithCollectionHelperWithEmptyViewAndBlock, 1, 'block helper with empty view and block');
   });
 
+  test("programmatic access to CollectionView", function() {
+    var parent = new Thorax.View({
+      template: '{{view child}}' 
+    });
+    parent.child = new Thorax.CollectionView({
+      tagName: 'ul',
+      parent: parent,
+      'item-template': 'letter-item'
+    });
+    parent.child.setCollection(letterCollection);
+    parent.render();
+    equal(parent.$('ul').length, 1);
+    equal(parent.$('li').length, letterCollection.length);
+  });
+
   test("multiple collections", function() {
     var view = new Thorax.View({
       template: '{{collection a tag="ul" item-template="letter-item"}}{{collection b tag="ul" item-template="letter-item"}}',

@@ -29,7 +29,7 @@ Any of the options can be specified as variables in addition to strings:
 
     {{collection cats item-view=itemViewClass}}
 
-`CollectionView` instances are created via a helper and not directly in a JavaScript API, so to get a reference to them you need to use the `helper:collection` event:
+`CollectionView` instances are usually created via a helper and not directly in JavaScript. If you need a reference to a specific CollectionView you can create it directly (see `Thorax.CollectionView` below) or use the `helper:collection` event when creating them via a helper:
 
     view.on("helper:collection", function(collection, collectionView) {
 
@@ -69,7 +69,26 @@ The `collection` helper itself is implemented in this way.
 
 ## Thorax.CollectionView
 
-A `Thorax.View` subclass generated each time a `collection` helper is used.
+A `CollectionView` class is automatically generated each time a `collection` helper is used. A CollectionView may also be created in JavaScript and appended as a child view with the `view` helper. The constructor will accept any options that the `collection` helper accepts, though any template or view names must be the actual names and not inline templates.
+
+    var parent = new Thorax.View({
+      initialize: function() {
+        this.myCollectionView = new Thorax.CollectionView({
+          parent: this,
+          "item-template": "item-template-name"
+        });
+        child.setCollection(myCollection);
+      },
+      template: "{{view myCollectionView}}"
+    });
+
+### setCollection *view.setCollection(collection, options)*
+
+If directly creating a CollectionView instance, the collection property may be set by passing `collection` to the constructor, or by calling this method. The following options may be passed when calling this method:
+
+- `fetch`: wether or not to try to call `fetch` on the collection if `shouldFetch` returns true
+- `success`: a callback to be called when the
+- `errors`: wether or not to trigger an `error` event on the CollectionView and it's parent when an `error` event is triggered on the collection
 
 ### appendItem *view.appendItem(modelOrView [,index])*
 

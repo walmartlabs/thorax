@@ -457,3 +457,8 @@ Thorax.View.on('helper:collection', function(view) {
     view.on(view.collection, 'load:start', callback);
   }
 });
+
+if (Thorax.CollectionView) {
+  Thorax.CollectionView._optionNames.push('loading-template');
+  Thorax.CollectionView._optionNames.push('loading-view');
+}

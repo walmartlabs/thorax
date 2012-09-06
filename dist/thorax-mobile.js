@@ -1013,7 +1013,21 @@ function addEvents(target, source) {
   });
 }
 
+//collection view is meant to be initialized via the collection
+//helper but can alternatively be initialized programatically
+//constructor function handles this case, no logic except for
+//super() call will be exectued when initialized via collection helper
+
 Thorax.CollectionView = Thorax.HelperView.extend({
+  constructor: function(options) {
+    Thorax.CollectionView.__super__.constructor.call(this, options);
+    //collection helper will initialize this.options, so need to mimic
+    this.options || (this.options = {});
+    this.collection && this.setCollection(this.collection);
+    Thorax.CollectionView._optionNames.forEach(function(optionName) {
+      options[optionName] && (this.options[optionName] = options[optionName]);
+    }, this);
+  },
   _setCollectionOptions: function(collection, options) {
     return _.extend({
       fetch: true,
@@ -1021,7 +1035,7 @@ Thorax.CollectionView = Thorax.HelperView.extend({
       errors: true
     }, options || {});
   },
-  _bindCollection: function(collection) {
+  setCollection: function(collection, options) {
     this.collection = collection;
     if (collection) {
       collection.cid = collection.cid || _.uniqueId('collection');
@@ -1029,7 +1043,7 @@ Thorax.CollectionView = Thorax.HelperView.extend({
       if (collection.name) {
         this.$el.attr(collectionNameAttributeName, collection.name);
       }
-      this.options = this._setCollectionOptions(collection, this.options);
+      this.options = this._setCollectionOptions(collection, _.extend({}, this.options, options));
       bindCollectionEvents.call(this, collection, this.parent._collectionEvents);
       bindCollectionEvents.call(this, collection, this.parent.constructor._collectionEvents);
       collection.trigger('set', collection);
@@ -1217,6 +1231,16 @@ Thorax.CollectionView = Thorax.HelperView.extend({
   }
 });
 
+Thorax.CollectionView._optionNames = [
+  'item-template',
+  'empty-template',
+  'item-view',
+  'empty-view',
+  'item-context',
+  'empty-context',
+  'filter'
+];
+
 function bindCollectionEvents(collection, events) {
   events.forEach(function(event) {
     this.on(collection, event[0], function() {
@@ -1279,16 +1303,15 @@ Handlebars.registerViewHelper('collection', Thorax.CollectionView, function(coll
     collection = this._view.collection;
   }
   if (collection) {
+    //item-view and empty-view may also be passed, but have no defaults
     _.extend(view.options, {
       'item-template': view.template && view.template !== Handlebars.VM.noop ? view.template : view.options['item-template'],
       'empty-template': view.inverse && view.inverse !== Handlebars.VM.noop ? view.inverse : view.options['empty-template'],
-      'item-view': view.options['item-view'],
-      'empty-view': view.options['empty-view'],
       'item-context': view.options['item-context'] || view.parent.itemContext,
       'empty-context': view.options['empty-context'] || view.parent.emptyContext,
       filter: view.options['filter']
     });
-    view._bindCollection(collection);
+    view.setCollection(collection);
   }
 });
 
@@ -1681,7 +1704,7 @@ Thorax.LayoutView = Thorax.View.extend({
     if (view == oldView){
       return false;
     }
-    if (options.destroy) {
+    if (options.destroy && view) {
       view._shouldDestroyOnNextSetView = true;
     }
     this.trigger('change:view:start', view, oldView, options);
@@ -2205,6 +2228,11 @@ Thorax.View.on('helper:collection', function(view) {
     view.on(view.collection, 'load:start', callback);
   }
 });
+
+if (Thorax.CollectionView) {
+  Thorax.CollectionView._optionNames.push('loading-template');
+  Thorax.CollectionView._optionNames.push('loading-view');
+}
 
 
 var minimumScrollYOffset = $.os.android ? 1 : 0;
