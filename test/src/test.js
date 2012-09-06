@@ -111,6 +111,36 @@ $(function() {
     equal(childRenderedCount, 3);
   });
 
+  test("child view re-render will keep dom events intact", function() {
+    this.clock.restore();
+    var callCount = 0;
+    var parent = new Thorax.View({
+      child: new Thorax.View({
+        events: {
+          'click .test': function() {
+            ++callCount;
+          }
+        },
+        template: "<div class=\"test\"></div>"
+      }),
+      template: "{{view child}}"
+    });
+    parent.render();
+    document.body.appendChild(parent.el);
+    expect(3);
+    stop();
+    setTimeout(function() {
+      parent.child.$('.test').trigger('click');
+      equal(callCount, 1);
+      parent.render();
+      equal(callCount, 1);
+      parent.child.$('.test').trigger('click');
+      equal(callCount, 2);
+      $(parent.el).remove();
+      start();
+    }, 2);
+  });
+
   test("can set view el", function() {
     $('body').append('<div id="test-target-container"><div id="test-target"></div></div>');
     var view = new Thorax.View({
