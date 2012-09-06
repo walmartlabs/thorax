@@ -1,7 +1,7 @@
 $(function() {
   QUnit.module("Thorax ViewController");
 
-  test("Layout", function() {
+  test("LayoutView", function() {
     var a = new Thorax.View({
       render: function() {
         Thorax.View.prototype.render.call(this, 'a');
@@ -58,6 +58,42 @@ $(function() {
     equal(bEventCounter.destroyed, 1, 'lifecycle event: destroyed');
   });
 
+  test("LayoutView destroy will destroy child view", function() {
+    var callCounts = {
+      parent: 0,
+      layout: 0,
+      child: 0
+    };
+    var parent = new Thorax.View({
+      events: {
+        destroyed: function() {
+          ++callCounts.parent;
+        }
+      },
+      template: "{{view this.layout}}",
+      layout: new Thorax.LayoutView({
+        events: {
+          destroyed: function() {
+            ++callCounts.layout;
+          }
+        }
+      }),
+    });
+    parent.render();
+    parent.layout.setView(new Thorax.View({
+      template: "",
+      events: {
+        destroyed: function() {
+          ++callCounts.child;
+        }
+      }
+    }));
+    parent.destroy();
+    equal(callCounts.parent, 1);
+    equal(callCounts.layout, 1);
+    equal(callCounts.child, 1);
+  });
+  
   test("Layout can set view el", function() {
     $('body').append('<div id="test-target-container"><div id="test-target"></div></div>');
     var view = new Thorax.LayoutView({
