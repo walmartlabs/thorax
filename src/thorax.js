@@ -439,6 +439,13 @@ Thorax.View.prototype._appendViews = function(scope, callback) {
         view.ensureRendered();
       }
       $(el).replaceWith(view.el);
+      //TODO: jQuery has trouble with delegateEvents() when
+      //the child dom node is detached then re-attached
+      if (typeof jQuery !== 'undefined' && $ === jQuery) {
+        if (this._renderCount > 1) {
+          view.delegateEvents();
+        }
+      }
       callback && callback(view.el);
     }
   }, this);
