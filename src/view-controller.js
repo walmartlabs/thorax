@@ -1,13 +1,19 @@
 //Router
+function initializeRouter() {
+  Backbone.history || (Backbone.history = new Backbone.History);
+  Backbone.history.on('route', onRoute, this);
+  //router does not have a built in destroy event
+  //but ViewController does
+  this.on('destroyed', function() {
+    Backbone.history.off('route', onRoute, this);
+  });
+}
+
 Thorax.Router = Backbone.Router.extend({
-  initialize: function() {
-    Backbone.history || (Backbone.history = new Backbone.History);
-    Backbone.history.on('route', onRoute, this);
-    //router does not have a built in destroy event
-    //but ViewController does
-    this.on('destroyed', function() {
-      Backbone.history.off('route', onRoute, this);
-    });
+  constructor: function() {
+    var response = Thorax.Router.__super__.constructor.apply(this, arguments);
+    initializeRouter.call(this);
+    return response;
   },
   route: function(route, name, callback) {
     //add a route:before event that is fired before the callback is called
@@ -110,10 +116,11 @@ function getLayoutViewsTargetElement() {
 }
 
 //ViewController
-Thorax.ViewController = Thorax.LayoutView.extend();
-_.extend(Thorax.ViewController.prototype, Thorax.Router.prototype, {
-  initialize: function() {
-    Thorax.Router.prototype.initialize.call(this);
+Thorax.ViewController = Thorax.LayoutView.extend({
+  constructor: function() {
+    var response = Thorax.ViewController.__super__.constructor.apply(this, arguments);
+    this._bindRoutes();
+    initializeRouter.call(this);
     //set the ViewController as the view on the parent
     //if a parent was specified
     this.on('route:before', function(router, name) {
@@ -125,6 +132,7 @@ _.extend(Thorax.ViewController.prototype, Thorax.Router.prototype, {
         }
       }
     }, this);
-    this._bindRoutes();
+    return response;
   }
 });
+_.extend(Thorax.ViewController.prototype, Thorax.Router.prototype);

@@ -152,8 +152,25 @@ $(function() {
       equal(name, 'test');
     });
     viewControllerB.navigate('test', {trigger: true});
-    equal(callCount, 1, 'route event triggered');
+    equal(callCount, 1, 'route event triggered on ViewController');
     
+    var test2CallCount = 0,
+        test2RouteCallCount = 0;
+    var router = new (Thorax.Router.extend({
+      routes: {
+        "test2": "test2"
+      },
+      test2: function() {
+        ++test2CallCount;
+      }
+    }));
+    router.on('route', function() {
+      ++test2RouteCallCount;
+    });
+    router.navigate('test2', {trigger: true});
+    equal(test2CallCount, 1, 'route called on Router');
+    equal(test2RouteCallCount, 1, 'route event triggered on Router');
+
     var c = new Thorax.ViewController({
       routes: {
         'one': 'one',
