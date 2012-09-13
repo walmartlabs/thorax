@@ -416,8 +416,9 @@ Handlebars.registerHelper('template', function(name, options) {
 //view helper
 var viewTemplateOverrides = {};
 Handlebars.registerHelper('view', function(view, options) {
-  if (!view) {
-    return '';
+  if (arguments.length === 1) {
+    options = view;
+    view = Thorax.View;
   }
   var instance = Thorax.Util.getViewInstance(view, options ? options.hash : {}),
       placeholder_id = instance.cid + '-' + _.uniqueId('placeholder');

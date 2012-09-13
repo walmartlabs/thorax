@@ -109,6 +109,13 @@ $(function() {
     parent.model.set({value: 'c'});
     equal(parentRenderedCount, 4);
     equal(childRenderedCount, 3);
+
+    //anonymous child views
+    parent = new Thorax.View({
+      template: '{{#view tag="span" key="value"}}{{key}}{{/view}}'
+    });
+    parent.render();
+    equal(parent.$('span')[0].innerHTML, 'value', 'anonymous child views');
   });
 
   test("child view re-render will keep dom events intact", function() {
