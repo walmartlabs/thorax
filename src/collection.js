@@ -41,7 +41,7 @@ Thorax.Util.createRegistryWrapper(Thorax.Collection, Thorax.Collections);
   Thorax.Util._cloneEvents(this, child, '_collectionEvents');
 {{/inject}}
 
-{{#inject "configure"}}
+{{#inject "beforeConfigure"}}
   this._collectionEvents = [];
 {{/inject}}
 

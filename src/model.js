@@ -35,7 +35,7 @@ Thorax.Util.createRegistryWrapper(Thorax.Model, Thorax.Models);
   }
 {{/inject}}
 
-{{#inject "configure"}}
+{{#inject "beforeConfigure"}}
   this._modelEvents = [];
 {{/inject}}
 

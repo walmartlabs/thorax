@@ -68,16 +68,16 @@ _.extend(Thorax.View.prototype, {
     this.freeze();
     return response;
   },
-  on: function(eventName, handler, context) {
+  on: function(eventName, callback, context) {
     {{{override.on}}}
     if (typeof eventName === 'object') {
-      //accept on({"rendered": handler})
+      //accept on({"rendered": callback})
       if (arguments.length === 1) {
         _.each(eventName, function(value, key) {
           this.on(key, value, this);
         }, this);
       //events on other objects to auto dispose of when view frozen
-      //on(targetObj, 'eventName', handler, context)
+      //on(targetObj, 'eventName', callback, context)
       } else if (arguments.length > 1) {
         if (!this._eventArgumentsToUnbind) {
           this._eventArgumentsToUnbind = [];
@@ -87,10 +87,10 @@ _.extend(Thorax.View.prototype, {
         args[0].on.apply(args[0], args.slice(1));
       }
     } else {
-      //accept on("rendered", handler, context)
-      //accept on("click a", handler, context)
-      (_.isArray(handler) ? handler : [handler]).forEach(function(handler) {
-        var params = eventParamsFromEventItem.call(this, eventName, handler, context || this);
+      //accept on("rendered", callback, context)
+      //accept on("click a", callback, context)
+      (_.isArray(callback) ? callback : [callback]).forEach(function(callback) {
+        var params = eventParamsFromEventItem.call(this, eventName, callback, context || this);
         if (params.type === 'DOM') {
           //will call _addEvent during delegateEvents()
           if (!this._eventsToDelegate) {
