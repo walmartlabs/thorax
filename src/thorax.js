@@ -191,7 +191,7 @@ Thorax.View = Backbone.View.extend({
     return response;
   },
   _configure: function(options) {
-    {{override.beforeConfigure}}
+    {{{override.beforeConfigure}}}
 
     Thorax._viewsIndexedByCid[this.cid] = this;
     this.children = {};
