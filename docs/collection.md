@@ -59,13 +59,14 @@ The collection plugin extends the events plugin by allowing a `collection` hash 
 
     Thorax.View.on({
       collection: {
-        reset: function() {
-          //"this" will refer to the view
+        reset: function(collectionView) {
+          //"this" will refer to the view which called
+          //the collection helper
         }
       }
     });
 
-The `collection` helper itself is implemented in this way.
+Each collection event callback is called with the generated collection view prepended to the arguments.
 
 ## Thorax.CollectionView
 

@@ -386,10 +386,10 @@ Thorax.View.on({
       }),
 
   collection: {
-    'load:start': function(message, background, object) {
+    'load:start': function(collectionView, message, background, object) {
       //this refers to the collection view, we want to trigger on
       //the parent view which originally bound the collection
-      this.parent.trigger(loadStart, message, background, object);
+      this.trigger(loadStart, message, background, object);
     }
   },
   model: {

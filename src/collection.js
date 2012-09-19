@@ -286,54 +286,56 @@ function bindCollectionEvents(collection, events) {
     this.on(collection, event[0], function() {
       //getEventCallback will resolve if it is a string or a method
       //and return a method
-      return getEventCallback(event[1], this.parent).apply(this, arguments);
+      var args = _.toArray(arguments);
+      args.unshift(this);
+      return getEventCallback(event[1], this.parent).apply(this.parent, args);
     }, this);
   }, this);
 }
 
 Thorax.View.on({
   collection: {
-    add: function(model, collection) {
+    add: function(collectionView, model, collection) {
       if (collection.length === 1) {
-        if(this.$el.length) {
-          this.$el.removeAttr(collectionEmptyAttributeName);
-          this.$el.empty();
+        if(collectionView.$el.length) {
+          collectionView.$el.removeAttr(collectionEmptyAttributeName);
+          collectionView.$el.empty();
         }
       }
-      if (this.$el.length) {
+      if (collectionView.$el.length) {
         var index = collection.indexOf(model);
-        if (!this.options.filter || this.options.filter &&
-          (typeof this.options.filter === 'string'
-              ? this.parent[this.options.filter]
-              : this.options.filter).call(this.parent, model, index)
+        if (!collectionView.options.filter || collectionView.options.filter &&
+          (typeof collectionView.options.filter === 'string'
+              ? this[collectionView.options.filter]
+              : collectionView.options.filter).call(this, model, index)
           ) {
-          this.appendItem(model, index);
+          collectionView.appendItem(model, index);
         }
       }
     },
-    remove: function(model, collection) {
-      this.$el.find('[' + modelCidAttributeName + '="' + model.cid + '"]').remove();
-      for (var cid in this.children) {
-        if (this.children[cid].model && this.children[cid].model.cid === model.cid) {
-          this.children[cid].destroy();
-          delete this.children[cid];
+    remove: function(collectionView, model, collection) {
+      collectionView.$el.find('[' + modelCidAttributeName + '="' + model.cid + '"]').remove();
+      for (var cid in collectionView.children) {
+        if (collectionView.children[cid].model && collectionView.children[cid].model.cid === model.cid) {
+          collectionView.children[cid].destroy();
+          delete collectionView.children[cid];
           break;
         }
       }
       if (collection.length === 0) {
-        if (this.$el.length) {
-          this.$el.attr(collectionEmptyAttributeName, true);
-          this.appendEmpty();
+        if (collectionView.$el.length) {
+          collectionView.$el.attr(collectionEmptyAttributeName, true);
+          collectionView.appendEmpty();
         }
       }
     },
-    reset: function(collection) {
-      this.reset();
+    reset: function(collectionView, collection) {
+      collectionView.reset();
     },
-    error: function(message) {
-      if (this.options.errors) {
+    error: function(collectionView, message) {
+      if (collectionView.options.errors) {
+        collectionView.trigger('error', message);
         this.trigger('error', message);
-        this.parent.trigger('error', message);
       }
     }
   }
