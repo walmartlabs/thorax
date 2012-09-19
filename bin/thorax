@@ -6,7 +6,7 @@ if (args[0] === 'templates') {
   var compileTemplates = require(path.join(__dirname, 'watch-templates.js'));
   compileTemplates(args[1] || path.join(process.cwd(), 'templates'), args[2] || path.join(process.cwd(), 'templates.js'), args[3]);
 } else if(args[0] === 'build') {
-  require(path.join(__dirname, 'build.js'))(args[1], args.slice(2));
+  require(path.join(__dirname, 'build.js'))(args[1] || './dist/thorax.js', args.slice(2) || []);
 } else {
   console.log('Unrecognized command: ' + args[0]);
 }
