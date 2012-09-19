@@ -53,18 +53,6 @@ Thorax.Util.createRegistryWrapper(Thorax.Collection, Thorax.Collections);
 
 Thorax.View._collectionEvents = [];
 
-function addEvents(target, source) {
-  _.each(source, function(callback, eventName) {
-    if (_.isArray(callback)) {
-      callback.forEach(function(cb) {
-        target.push([eventName, cb]);
-      }, this);
-    } else {
-      target.push([eventName, callback]);
-    }
-  });
-}
-
 //collection view is meant to be initialized via the collection
 //helper but can alternatively be initialized programatically
 //constructor function handles this case, no logic except for
