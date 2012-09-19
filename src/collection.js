@@ -284,7 +284,9 @@ Thorax.CollectionView._optionNames = [
 function bindCollectionEvents(collection, events) {
   events.forEach(function(event) {
     this.on(collection, event[0], function() {
-      return event[1].apply(this, arguments);
+      //getEventCallback will resolve if it is a string or a method
+      //and return a method
+      return getEventCallback(event[1], this.parent).apply(this, arguments);
     }, this);
   }, this);
 }

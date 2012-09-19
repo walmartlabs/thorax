@@ -221,6 +221,12 @@ Thorax.View = Backbone.View.extend({
     return response;
   },
   _configure: function(options) {
+    
+  this._modelEvents = [];
+
+  this._collectionEvents = [];
+
+
     Thorax._viewsIndexedByCid[this.cid] = this;
     this.children = {};
     this._renderCount = 0;
@@ -259,10 +265,6 @@ Thorax.View = Backbone.View.extend({
       this.on(eventName, handler, this);
     }, this);
   }
-
-  this._modelEvents = [];
-
-  this._collectionEvents = [];
 
   },
 
@@ -903,15 +905,25 @@ _.extend(Thorax.View.prototype, {
   }
 });
 
+function getEventCallback(callback, context) {
+  if (typeof callback === 'function') {
+    return callback;
+  } else {
+    return context[callback];
+  }
+}
+
 function bindModelEvents(events) {
   events.forEach(function(event) {
-    this.model.on(event[0], event[1], event[2] || this);
+    //getEventCallback will resolve if it is a string or a method
+    //and return a method
+    this.model.on(event[0], getEventCallback(event[1], this), event[2] || this);
   }, this);
 }
 
 function unbindModelEvents(events) {
   events.forEach(function(event) {
-    this.model.off(event[0], event[1], event[2] || this);
+    this.model.off(event[0], getEventCallback(event[1], this), event[2] || this);
   }, this);
 }
 
@@ -1008,18 +1020,6 @@ Thorax.Util.createRegistryWrapper(Thorax.Collection, Thorax.Collections);
 
 
 Thorax.View._collectionEvents = [];
-
-function addEvents(target, source) {
-  _.each(source, function(callback, eventName) {
-    if (_.isArray(callback)) {
-      callback.forEach(function(cb) {
-        target.push([eventName, cb]);
-      }, this);
-    } else {
-      target.push([eventName, callback]);
-    }
-  });
-}
 
 //collection view is meant to be initialized via the collection
 //helper but can alternatively be initialized programatically
@@ -1252,7 +1252,9 @@ Thorax.CollectionView._optionNames = [
 function bindCollectionEvents(collection, events) {
   events.forEach(function(event) {
     this.on(collection, event[0], function() {
-      return event[1].apply(this, arguments);
+      //getEventCallback will resolve if it is a string or a method
+      //and return a method
+      return getEventCallback(event[1], this.parent).apply(this, arguments);
     }, this);
   }, this);
 }

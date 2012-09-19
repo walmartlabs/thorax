@@ -80,6 +80,7 @@ $(function() {
       test2: 0
     };
     var view = new Thorax.View({
+      template: '',
       events: {
         model: {
           all: function() {

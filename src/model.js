@@ -140,15 +140,25 @@ _.extend(Thorax.View.prototype, {
   }
 });
 
+function getEventCallback(callback, context) {
+  if (typeof callback === 'function') {
+    return callback;
+  } else {
+    return context[callback];
+  }
+}
+
 function bindModelEvents(events) {
   events.forEach(function(event) {
-    this.model.on(event[0], event[1], event[2] || this);
+    //getEventCallback will resolve if it is a string or a method
+    //and return a method
+    this.model.on(event[0], getEventCallback(event[1], this), event[2] || this);
   }, this);
 }
 
 function unbindModelEvents(events) {
   events.forEach(function(event) {
-    this.model.off(event[0], event[1], event[2] || this);
+    this.model.off(event[0], getEventCallback(event[1], this), event[2] || this);
   }, this);
 }
 
