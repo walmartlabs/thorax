@@ -72,4 +72,36 @@ $(function() {
     equal(view.html(), 'value');
     equal(view.$el.model(), model);
   });
+
+  test("model events", function() {
+    var callCounter = {
+      all: 0,
+      test1: 0,
+      test2: 0
+    };
+    var view = new Thorax.View({
+      events: {
+        model: {
+          all: function() {
+            ++callCounter.all;
+          },
+          test1: 'test1',
+          test2: function() {
+            ++callCounter.test2;
+          }
+        }
+      },
+      test1: function() {
+        ++callCounter.test1;
+      }
+    });
+    var model = new Thorax.Model();
+    view.setModel(model, {fetch: false});
+    var oldAllCount = Number(callCounter.all);
+    model.trigger('test1');
+    model.trigger('test2');
+    equal(callCounter.all - oldAllCount, 2);
+    equal(callCounter.test1, 1);
+    equal(callCounter.test2, 1);
+  });
 });

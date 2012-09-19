@@ -585,4 +585,38 @@ $(function() {
     equal(view.$('li:first-child').model(), letterCollection.models[0]);
   });
 
+  test("collection events", function() {
+    var callCounter = {
+      all: 0,
+      test1: 0,
+      test2: 0
+    };
+    var collection = new Thorax.Collection();
+    var view = new Thorax.View({
+      collection: collection,
+      template: '{{collection this.collection}}',
+      events: {
+        collection: {
+          all: function() {
+            ++callCounter.all;
+          },
+          test1: 'test1',
+          test2: function() {
+            ++callCounter.test2;
+          }
+        }
+      },
+      test1: function() {
+        ++callCounter.test1;
+      }
+    });
+    view.render();
+    var oldAllCount = callCounter.all;
+    collection.trigger('test1');
+    collection.trigger('test2');
+    equal(callCounter.all - oldAllCount, 2);
+    equal(callCounter.test1, 1);
+    equal(callCounter.test2, 1);
+  });
+
 });
