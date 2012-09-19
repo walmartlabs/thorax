@@ -1,5 +1,10 @@
 # Change Log
 
+## 2.0.0b4
+
+- allowed creation of `CollectionView` classes in JavaScript direclty (previously could only be created via the collection helper)
+- `Thorax.Router` and `Thorax.ViewController` now use a constructor override so that super.initialize() does not need to be invoked when overriding `initialize`
+
 ## 2.0.0b3
 
 - added mobile plugin
