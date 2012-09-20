@@ -23,7 +23,7 @@ Options may be arbitrary HTML attributes, a `tag` option to specify the type of 
 - `empty-context` - A function in the declaring view to specify the context that the empty-template is rendered with. If the view has an `emptyContext` function it will be used as the default.
 - `loading-template` - Only available if the loading plugin has been included. A template to append when the collection is loading.
 - `loading-view` - Only available if loading plugin has been included. A view to append when the collection is loading
-- `filter` - A method on the view to filter which items are rendered. Recieves (model, index) and must return boolean.
+- `filter` - A method on the view, which will filter which items are rendered. Recieves (model, index) and must return boolean. The filter will be applied when models' fire a change event, or models are added and removed from the collection. To force a collection to re-filter, trigger a `filter` event on the collection.
 
 Any of the options can be specified as variables in addition to strings:
 

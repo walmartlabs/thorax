@@ -1062,15 +1062,6 @@ Thorax.CollectionView = Thorax.HelperView.extend({
         //without triggering event on collection
         this.reset();
       }
-      //if we rendered with item views model changes will be observed
-      //by the generated item view but if we rendered with templates
-      //then model changes need to be bound as nothing is watching
-      if (!this.options['item-view']) {
-        this.on(collection, 'change', function(model) {
-          this.$el.find('[' + modelCidAttributeName + '="' + model.cid +'"]').remove();
-          this.appendItem(model, collection.indexOf(model));
-        }, this);
-      }
     }
     return this;
   },
@@ -1135,6 +1126,26 @@ Thorax.CollectionView = Thorax.HelperView.extend({
     }
     return itemView;
   },
+  //updateItem only useful if there is no item view, otherwise
+  //itemView.render() provideds the same functionality
+  updateItem: function(model) {
+    var viewEl = this.$('[' + modelCidAttributeName + '="' + model.cid + '"]');
+    var index = this.$('[' + modelCidAttributeName + ']').index(viewEl[0]);
+    this.removeItem(model);
+    this.appendItem(model);
+  },
+  removeItem: function(model) {
+    var viewEl = this.$('[' + modelCidAttributeName + '="' + model.cid + '"]');
+    if (!viewEl.length) {
+      return false;
+    }
+    var viewCid = viewEl.attr(viewCidAttributeName);
+    if (this.children[viewCid]) {
+      delete this.children[viewCid];
+    }
+    viewEl.remove();
+    return true;
+  },
   reset: function() {
     this.render();
   },
@@ -1147,11 +1158,7 @@ Thorax.CollectionView = Thorax.HelperView.extend({
       } else {
         this.$el.removeAttr(collectionEmptyAttributeName);
         this.collection.forEach(function(item, i) {
-          if (!this.options.filter || this.options.filter &&
-            (typeof this.options.filter === 'string'
-                ? this.parent[this.options.filter]
-                : this.options.filter).call(this.parent, item, i)
-            ) {
+          if (filterCollectionItem(this.parent, this, item, i)) {
             this.appendItem(item, i);
           }
         }, this);
@@ -1261,22 +1268,71 @@ function bindCollectionEvents(collection, events) {
   }, this);
 }
 
+function handleChangeFromEmptyToNotEmpty() {
+  if (this.collection.length === 1) {
+    if(this.$el.length) {
+      this.$el.removeAttr(collectionEmptyAttributeName);
+      this.$el.empty();
+    }
+  }
+}
+
+function handleChangeFromNotEmptyToEmpty() {
+  if (this.collection.length === 0) {
+    if (this.$el.length) {
+      this.$el.attr(collectionEmptyAttributeName, true);
+      this.appendEmpty();
+    }
+  }
+}
+
+function filterCollectionItem(view, collectionView, item, i) {
+  return (!collectionView.options.filter || collectionView.options.filter &&
+    (typeof collectionView.options.filter === 'string'
+        ? view[collectionView.options.filter]
+        : collectionView.options.filter).call(view, item, i)
+    );
+}
+
 Thorax.View.on({
   collection: {
-    add: function(collectionView, model, collection) {
-      if (collection.length === 1) {
-        if(collectionView.$el.length) {
-          collectionView.$el.removeAttr(collectionEmptyAttributeName);
-          collectionView.$el.empty();
+    filter: function(collectionView) {
+      if (collectionView.options.filter) {
+        collectionView.render();
+      }
+    },
+    change: function(collectionView, model) {
+      function updateItem() {
+        collectionView.updateItem(model);
+      }
+
+      //if we rendered with item views, model changes will be observed
+      //by the generated item view but if we rendered with templates
+      //then model changes need to be bound as nothing is watching
+      if (!collectionView.options['item-view'] && !collectionView.options.filter) {
+        updateItem();
+      } else if (collectionView.options.filter) {
+        var filterCallback = (typeof collectionView.options.filter === 'string'
+          ? this[collectionView.options.filter]
+          : collectionView.options.filter);
+        var shouldBeVisible = filterCallback.call(this, model, collectionView.collection.indexOf(model));
+        var isVisible = !!collectionView.$('[' + modelCidAttributeName + '="' + model.cid + '"]').length;
+        if (!isVisible && shouldBeVisible) {
+          //TODO: filtered indexing is not taken into account, need to re-render
+          //to ensure proper order until filtered indexing is cached / calculated
+          collectionView.render();
+        } else if (isVisible && !shouldBeVisible) {
+          collectionView.removeItem(model);
+        } else if (isVisible && shouldBeVisible) {
+          updateItem();
         }
       }
+    },
+    add: function(collectionView, model, collection) {
+      handleChangeFromEmptyToNotEmpty.call(collectionView);
       if (collectionView.$el.length) {
         var index = collection.indexOf(model);
-        if (!collectionView.options.filter || collectionView.options.filter &&
-          (typeof collectionView.options.filter === 'string'
-              ? this[collectionView.options.filter]
-              : collectionView.options.filter).call(this, model, index)
-          ) {
+        if (filterCollectionItem(this, collectionView, model, index)) {
           collectionView.appendItem(model, index);
         }
       }
@@ -1290,12 +1346,7 @@ Thorax.View.on({
           break;
         }
       }
-      if (collection.length === 0) {
-        if (collectionView.$el.length) {
-          collectionView.$el.attr(collectionEmptyAttributeName, true);
-          collectionView.appendEmpty();
-        }
-      }
+      handleChangeFromNotEmptyToEmpty.call(collectionView);
     },
     reset: function(collectionView, collection) {
       collectionView.reset();

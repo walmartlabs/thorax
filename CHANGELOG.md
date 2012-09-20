@@ -2,6 +2,7 @@
 
 ## 2.0.0b4
 
+- collection "filter" option now applied when model change event is triggered
 - collection event change: when using view.on({collection: events}) syntax, `CollectionView` instances are now prepended to the array of arguments passed and the callback is now called with the context of the delcaring view 
 - allowed creation of `CollectionView` classes in JavaScript direclty (previously could only be created via the collection helper)
 - `Thorax.Router` and `Thorax.ViewController` now use a constructor override so that super.initialize() does not need to be invoked when overriding `initialize`
