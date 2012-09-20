@@ -1106,7 +1106,15 @@ Thorax.CollectionView = Thorax.HelperView.extend({
         this.$el.prepend(itemElement);
       } else {
         //use last() as appendItem can accept multiple nodes from a template
-        this.$el.find('[' + modelCidAttributeName + '="' + previousModel.cid + '"]').last().after(itemElement);
+        var last = this.$el.find('[' + modelCidAttributeName + '="' + previousModel.cid + '"]').last();
+        if (last.length) {
+          last.after(itemElement);
+        } else {
+          //TODO: this is a hack to make item filtering work since the previous
+          //query may not find an element if it was filtered, should re-write
+          //filtering and tests to use hide/show
+          this.$el.prepend(itemElement);
+        }
       }
       this._appendViews(null, function(el) {
         el.setAttribute(modelCidAttributeName, model.cid);
@@ -1123,8 +1131,6 @@ Thorax.CollectionView = Thorax.HelperView.extend({
   //updateItem only useful if there is no item view, otherwise
   //itemView.render() provideds the same functionality
   updateItem: function(model) {
-    var viewEl = this.$('[' + modelCidAttributeName + '="' + model.cid + '"]');
-    var index = this.$('[' + modelCidAttributeName + ']').index(viewEl[0]);
     this.removeItem(model);
     this.appendItem(model);
   },
@@ -1152,9 +1158,7 @@ Thorax.CollectionView = Thorax.HelperView.extend({
       } else {
         this.$el.removeAttr(collectionEmptyAttributeName);
         this.collection.forEach(function(item, i) {
-          if (filterCollectionItem(this.parent, this, item, i)) {
-            this.appendItem(item, i);
-          }
+          this.appendItem(item, i);
         }, this);
       }
       this.parent.trigger('rendered:collection', this, this.collection);
@@ -1262,6 +1266,27 @@ function bindCollectionEvents(collection, events) {
   }, this);
 }
 
+function applyVisibilityFilter() {
+  if (this.options.filter) {
+    this.collection.forEach(function(model) {
+      applyItemVisiblityFilter.call(this, model);
+    }, this);
+  }
+}
+
+function applyItemVisiblityFilter(model) {
+  if (this.options.filter) {
+    $('[' + modelCidAttributeName + '="' + model.cid + '"]')[itemShouldBeVisible.call(this, model) ? 'show' : 'hide']();
+  }
+}
+
+function itemShouldBeVisible(model, i) {
+  return (typeof this.options.filter === 'string'
+    ? this.parent[this.options.filter]
+    : this.options.filter).call(this.parent, model, this.collection.indexOf(model))
+  ;
+}
+
 function handleChangeFromEmptyToNotEmpty() {
   if (this.collection.length === 1) {
     if(this.$el.length) {
@@ -1280,55 +1305,26 @@ function handleChangeFromNotEmptyToEmpty() {
   }
 }
 
-function filterCollectionItem(view, collectionView, item, i) {
-  return (!collectionView.options.filter || collectionView.options.filter &&
-    (typeof collectionView.options.filter === 'string'
-        ? view[collectionView.options.filter]
-        : collectionView.options.filter).call(view, item, i)
-    );
-}
-
 Thorax.View.on({
   collection: {
     filter: function(collectionView) {
-      if (collectionView.options.filter) {
-        collectionView.render();
-      }
+      applyVisibilityFilter.call(collectionView);
     },
     change: function(collectionView, model) {
-      function updateItem() {
-        collectionView.updateItem(model);
-      }
-
       //if we rendered with item views, model changes will be observed
       //by the generated item view but if we rendered with templates
       //then model changes need to be bound as nothing is watching
-      if (!collectionView.options['item-view'] && !collectionView.options.filter) {
-        updateItem();
-      } else if (collectionView.options.filter) {
-        var filterCallback = (typeof collectionView.options.filter === 'string'
-          ? this[collectionView.options.filter]
-          : collectionView.options.filter);
-        var shouldBeVisible = filterCallback.call(this, model, collectionView.collection.indexOf(model));
-        var isVisible = !!collectionView.$('[' + modelCidAttributeName + '="' + model.cid + '"]').length;
-        if (!isVisible && shouldBeVisible) {
-          //TODO: filtered indexing is not taken into account, need to re-render
-          //to ensure proper order until filtered indexing is cached / calculated
-          collectionView.render();
-        } else if (isVisible && !shouldBeVisible) {
-          collectionView.removeItem(model);
-        } else if (isVisible && shouldBeVisible) {
-          updateItem();
-        }
+      if (!collectionView.options['item-view']) {
+        collectionView.updateItem(model);
       }
+      applyItemVisiblityFilter.call(collectionView, model);
     },
     add: function(collectionView, model, collection) {
       handleChangeFromEmptyToNotEmpty.call(collectionView);
       if (collectionView.$el.length) {
         var index = collection.indexOf(model);
-        if (filterCollectionItem(this, collectionView, model, index)) {
-          collectionView.appendItem(model, index);
-        }
+        collectionView.appendItem(model, index);
+        applyItemVisiblityFilter.call(collectionView, model);
       }
     },
     remove: function(collectionView, model, collection) {
