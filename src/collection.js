@@ -145,14 +145,7 @@ Thorax.CollectionView = Thorax.HelperView.extend({
       } else {
         //use last() as appendItem can accept multiple nodes from a template
         var last = this.$el.find('[' + modelCidAttributeName + '="' + previousModel.cid + '"]').last();
-        if (last.length) {
-          last.after(itemElement);
-        } else {
-          //TODO: this is a hack to make item filtering work since the previous
-          //query may not find an element if it was filtered, should re-write
-          //filtering and tests to use hide/show
-          this.$el.prepend(itemElement);
-        }
+        last.after(itemElement);
       }
       this._appendViews(null, function(el) {
         el.setAttribute(modelCidAttributeName, model.cid);
@@ -163,6 +156,7 @@ Thorax.CollectionView = Thorax.HelperView.extend({
       if (!options.silent) {
         this.parent.trigger('rendered:item', this, this.collection, model, itemElement, index);
       }
+      applyItemVisiblityFilter.call(this, model);
     }
     return itemView;
   },
@@ -200,6 +194,7 @@ Thorax.CollectionView = Thorax.HelperView.extend({
         }, this);
       }
       this.parent.trigger('rendered:collection', this, this.collection);
+      applyVisibilityFilter.call(this);
     }
     ++this._renderCount;
   },
@@ -362,7 +357,6 @@ Thorax.View.on({
       if (collectionView.$el.length) {
         var index = collection.indexOf(model);
         collectionView.appendItem(model, index);
-        applyItemVisiblityFilter.call(collectionView, model);
       }
     },
     remove: function(collectionView, model, collection) {
