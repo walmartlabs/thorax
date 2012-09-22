@@ -262,6 +262,18 @@ $(function() {
   });
 
   test("filter what items are rendered in a collection", function() {
+    //zepto does not support the :visible selector, so emulate
+    function isVisible(elem){
+      elem = $(elem);
+      return !!(elem.width() || elem.height()) && elem.css("display") !== "none";
+    }
+
+    function filterVisible(arr) {
+      return _.select(arr, function(el) {
+        return isVisible(el);
+      });
+    }
+
     var view = new Thorax.View({
       template: '{{#collection filter="filterCollection" tag="ul"}}<li>{{key}}</li>{{/collection}}',
       collection: new Thorax.Collection(),
@@ -271,39 +283,39 @@ $(function() {
     });
     view.render();
     document.body.appendChild(view.el);
-    equal(view.$('li:visible').length, 0);
+    equal(filterVisible(view.$('li')).length, 0);
     var a = new Thorax.Model({key: 'a'});
     view.collection.reset([a]);
-    equal(view.$('li:visible').length, 1);
-    equal(view.$('li:visible')[0].innerHTML, 'a');
+    equal(filterVisible(view.$('li')).length, 1);
+    equal(filterVisible(view.$('li'))[0].innerHTML, 'a');
     var b = new Thorax.Model({key: 'b'});
     view.collection.add(b);
-    equal(view.$('li:visible').length, 2);
-    equal(view.$('li:visible')[1].innerHTML, 'b');
+    equal(filterVisible(view.$('li')).length, 2);
+    equal(filterVisible(view.$('li'))[1].innerHTML, 'b');
     var c = new Thorax.Model({key: 'c'});
     view.collection.add(c);
-    equal(view.$('li:visible').length, 2, 'add item that should not be included');
-    equal(view.$('li:visible')[1].innerHTML, 'b', 'add item that should not be included');
+    equal(filterVisible(view.$('li')).length, 2, 'add item that should not be included');
+    equal(filterVisible(view.$('li'))[1].innerHTML, 'b', 'add item that should not be included');
     c.set({key: 'b'});
-    equal(view.$('li:visible').length, 3, 'set item not included to be included');
-    equal(view.$('li:visible')[1].innerHTML, 'b', 'set item not included to be included');
-    equal(view.$('li:visible')[2].innerHTML, 'b', 'set item not included to be included');
+    equal(filterVisible(view.$('li')).length, 3, 'set item not included to be included');
+    equal(filterVisible(view.$('li'))[1].innerHTML, 'b', 'set item not included to be included');
+    equal(filterVisible(view.$('li'))[2].innerHTML, 'b', 'set item not included to be included');
     c.set({key: 'c'});
-    equal(view.$('li:visible').length, 2, 'set item that is included to not be included');
-    equal(view.$('li:visible')[1].innerHTML, 'b', 'set item that is included to not be included');
+    equal(filterVisible(view.$('li')).length, 2, 'set item that is included to not be included');
+    equal(filterVisible(view.$('li'))[1].innerHTML, 'b', 'set item that is included to not be included');
     a.set({key: 'x'});
-    equal(view.$('li:visible').length, 1, 'set first included item to not be included');
-    equal(view.$('li:visible')[0].innerHTML, 'b', 'set first included item to not be included');
+    equal(filterVisible(view.$('li')).length, 1, 'set first included item to not be included');
+    equal(filterVisible(view.$('li'))[0].innerHTML, 'b', 'set first included item to not be included');
     a.set({key: 'a'});
-    equal(view.$('li:visible').length, 2);
-    equal(view.$('li:visible')[0].innerHTML, 'a', 'set first item not included to be included');
-    equal(view.$('li:visible')[1].innerHTML, 'b', 'set first item not included to be included');
+    equal(filterVisible(view.$('li')).length, 2);
+    equal(filterVisible(view.$('li'))[0].innerHTML, 'a', 'set first item not included to be included');
+    equal(filterVisible(view.$('li'))[1].innerHTML, 'b', 'set first item not included to be included');
     a.set({key: 'a'});
-    equal(view.$('li:visible')[0].innerHTML, 'a', 'items maintain order when updated when filter is present');
-    equal(view.$('li:visible')[1].innerHTML, 'b', 'items maintain order when updated when filter is present');
+    equal(filterVisible(view.$('li'))[0].innerHTML, 'a', 'items maintain order when updated when filter is present');
+    equal(filterVisible(view.$('li'))[1].innerHTML, 'b', 'items maintain order when updated when filter is present');
     b.set({key: 'b'});
-    equal(view.$('li:visible')[0].innerHTML, 'a', 'items maintain order when updated when filter is present');
-    equal(view.$('li:visible')[1].innerHTML, 'b', 'items maintain order when updated when filter is present');
+    equal(filterVisible(view.$('li'))[0].innerHTML, 'a', 'items maintain order when updated when filter is present');
+    equal(filterVisible(view.$('li'))[1].innerHTML, 'b', 'items maintain order when updated when filter is present');
     view.$el.remove();
 
   });
