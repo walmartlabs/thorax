@@ -1,6 +1,6 @@
 var _destroy = Thorax.View.prototype.destroy,
-  _on = Thorax.View.prototype.on,
-  _delegateEvents = Thorax.View.prototype.delegateEvents;
+    _on = Thorax.View.prototype.on,
+    _delegateEvents = Thorax.View.prototype.delegateEvents;
 
 {{#inject "configure"}}
   //_events not present on HelperView
@@ -124,10 +124,10 @@ _.extend(Thorax.View.prototype, {
   _addEvent: function(params) {
     if (params.type === 'view') {
       params.name.split(/\s+/).forEach(function(name) {
-        _on.call(this, name, params.handler, params.context || this);
+        _on.call(this, name, bindEventHandler.call(this, 'view-event:' + params.name, params.handler), params.context || this);
       }, this);
     } else {
-      var boundHandler = containHandlerToCurentView(bindEventHandler.call(this, params.handler), this.cid);
+      var boundHandler = containHandlerToCurentView(bindEventHandler.call(this, 'dom-event:' + params.name, params.handler), this.cid);
       if (params.selector) {
         //TODO: determine why collection views and some nested views
         //need defered event delegation
@@ -174,12 +174,18 @@ function containHandlerToCurentView(handler, cid) {
   }
 }
 
-function bindEventHandler(callback) {
+function bindEventHandler(eventName, callback) {
   var method = typeof callback === 'function' ? callback : this[callback];
   if (!method) {
-    throw new Error('Event "' + callback + '" does not exist');
+    throw new Error('Event "' + callback + '" does not exist ' + (this.name || this.cid) + ':' + eventName);
   }
-  return _.bind(method, this);
+  return _.bind(function() {
+    try {
+      method.apply(this, arguments);
+    } catch (e) {
+      Thorax.onException('thorax-exception: ' + (this.name || this.cid) + ':' + eventName, e);
+    }
+  }, this);
 }
 
 function eventParamsFromEventItem(name, handler, context) {

@@ -30,7 +30,16 @@ _.extend(Thorax, {
   //view instances
   _viewsIndexedByCid: {},
   templates: {},
-  Views: {}
+  //view classes
+  Views: {},
+  //certain error prone pieces of code (on Android only it seems)
+  //are wrapped in a try catch block, then trigger this handler in
+  //the catch, with the name of the function or event that was
+  //trying to be executed. Override this with a custom handler
+  //to debug / log / etc
+  onException: function(name, err) {
+    throw err;
+  }
 });
 
 Thorax.Util = {

@@ -388,4 +388,37 @@ $(function() {
     equal(parent.$('div.child').view(), child);
   });
 
+  test("onException", function() {
+    this.clock.restore();
+    var oldOnException = Thorax.onException;
+    var view = new Thorax.View({
+      events: {
+        test: function() {
+          throw new Error('view error');
+        },
+        'click div': function() {
+          throw new Error('dom error');
+        }
+      },
+      template: '<div></div>'
+    });
+    view.render();
+    document.body.appendChild(view.el);
+    expect(2);
+    stop();
+    //timeouts are needed due to jQuery delegation bugs
+    setTimeout(function() {
+      Thorax.onException = function(errorName, e) {
+        ok(errorName.match(/click/));
+      };
+      view.$('div').trigger('click');
+      Thorax.onException = function(errorName, e) {
+        ok(errorName.match(/test/));
+      };
+      view.trigger('test');
+      Thorax.onException = oldOnException;
+      view.$el.remove();
+      start();
+    }, 25);
+  });
 });

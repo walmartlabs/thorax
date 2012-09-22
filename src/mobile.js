@@ -55,47 +55,55 @@ if (isMobile) {
       clickRedRum;
   
   function onTouchStart(event) {
-    if (event.touches.length === 1) {
-      var touch = event.touches[0];
-      start = {x: touch.clientX, y: touch.clientY};
-    } else {
-      start = false;
+    try {
+      if (event.touches.length === 1) {
+        var touch = event.touches[0];
+        start = {x: touch.clientX, y: touch.clientY};
+      } else {
+        start = false;
+      }
+      clickRedRum = false;
+    } catch(e) {
+      Thorax.onException('fast-click start', e);
     }
-    clickRedRum = false;
   }
   
   function onTouchMove() {
-    if (event.touches.length > 1) {
+    if (!event.touches || event.touches.length > 1) {
       start = false;
     }
   }
   
   function onTouchEnd(event) {
-    var touch = event.changedTouches[0];
-    if (start
-        && Math.abs(touch.clientX-start.x) <= TAP_RANGE
-        && Math.abs(touch.clientY-start.y) <= TAP_RANGE) {
-      var target = touch.target;
-  
-      // see if target element or ancestor is disabled as click would not be triggered in this case
-      var disabled = !!($(target).closest('[disabled]').length);
-      if (!disabled) {
-        event = $.Event(Thorax._fastClickEventName, {original: event});
-        $(target).trigger(event);
-        if (!event.defaultPrevented && ( target.control || target.htmlFor )) {
-          if (target.control) {
-            $(target.control).trigger(event);
-          } else {
-            $("#" + target.htmlFor).trigger(event);
+    try {
+      var touch = event.changedTouches[0];
+      if (start
+          && Math.abs(touch.clientX-start.x) <= TAP_RANGE
+          && Math.abs(touch.clientY-start.y) <= TAP_RANGE) {
+        var target = touch.target;
+      
+        // see if target element or ancestor is disabled as click would not be triggered in this case
+        var disabled = !!($(target).closest('[disabled]').length);
+        if (!disabled) {
+          event = $.Event(Thorax._fastClickEventName, {original: event});
+          $(target).trigger(event);
+          if (!event.defaultPrevented && ( target.control || target.htmlFor )) {
+            if (target.control) {
+              $(target.control).trigger(event);
+            } else {
+              $("#" + target.htmlFor).trigger(event);
+            }
           }
+          if (event.defaultPrevented) {
+            // If the fast-click was handled, prevent futher operations
+            clickRedRum = true;
+            event.original.preventDefault();
+            defaultPrevented = true;
+          } 
         }
-        if (event.defaultPrevented) {
-          // If the fast-click was handled, prevent futher operations
-          clickRedRum = true;
-          event.original.preventDefault();
-          defaultPrevented = true;
-        } 
       }
+    } catch(e) {
+      Thorax.onException('fast-click end', e);
     }
   }
   
@@ -231,6 +239,7 @@ _.extend(Thorax.View.prototype, {
   }
 });
 
+//TODO: examine if these are still needed
 Thorax.View.on({
   'rendered': fixupTapHighlight,
   'rendered:collection': fixupTapHighlight,
@@ -240,13 +249,22 @@ Thorax.View.on({
 
 var _setElement = Thorax.View.prototype.setElement,
     tapHighlightSelector = '[data-tappable=true], a, input, button, select, textarea';
+
 Thorax.View.prototype.setElement = function() {
   var response = _setElement.apply(this, arguments);
   if (!this.noTapHighlight) {
     if (!useNativeHighlight) {
-      this.$el.tapHoldAndEnd(tapHighlightSelector, 
-        _.bind(this._tapHighlightStart, this),
-        _.bind(this._tapHighlightEnd, this));
+      var self = this;
+      function exec(name) {
+        return function() {
+          try {
+            self[name].apply(self, arguments);
+          } catch(e) {
+            Thorax.onException(name, e);
+          }
+        };
+      }
+      this.$el.tapHoldAndEnd(tapHighlightSelector, exec('_tapHighlightStart'), exec('_tapHighlightEnd'));
     }
   }
   return response;

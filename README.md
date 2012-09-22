@@ -234,6 +234,7 @@ Triggered when a given view helper creates a new `HelperView` instance.
     });
 
 ## HTML Attributes
+
 Thorax and it's view helpers generate a number of custom HTML attributes that may be useful in debugging or generating CSS selectors to be used as arguments to `$` or to create CSS. The `*-cid` attributes are generally used only internally. See `$.model`, `$.collection` and `$.view` to get a reference to objects directly from the DOM. The `*-name` attributes will only be present if the given objects have a `name` property.</p>
 
 <table class="table table-bordered table-striped">
@@ -293,3 +294,15 @@ If using Thorax outside of the provided node or Rails downloads you can inline a
 
     npm install -g thorax
     thorax templates ./templates-dir ./templates.js
+
+## Error Handling
+
+### onException *Thorax.onException(name, error)*
+
+Bound DOM event handlers in Thorax are wrapped with a try / catch block, calling this function if an error is caught. This hook is provided primarily to allow for easier debugging in Android environments where it is difficult to determine the source of the error. The default error handler is simply:
+  
+    function(name, error) {
+      throw error;
+    }
+
+Override this function with your own logging / debugging handler. `name` will be the event name where the error was thrown.

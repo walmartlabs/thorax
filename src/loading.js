@@ -13,8 +13,12 @@ Thorax.loadHandler = function(start, end) {
     function startLoadTimeout() {
       clearTimeout(self._loadStart.timeout);
       self._loadStart.timeout = setTimeout(function() {
-          self._loadStart.run = true;
-          start.call(self, self._loadStart.message, self._loadStart.background, self._loadStart);
+          try {
+            self._loadStart.run = true;
+            start.call(self, self._loadStart.message, self._loadStart.background, self._loadStart);
+          } catch(e) {
+            Thorax.onException('loadStart', e);
+          }
         },
         loadingTimeout*1000);
     }
@@ -59,19 +63,23 @@ Thorax.loadHandler = function(start, end) {
         events.splice(index, 1);
       }
       if (!events.length) {
-        self._loadStart.endTimeout = setTimeout(function(){
-          if (!events.length) {
-            var run = self._loadStart.run;
-
-            if (run) {
-              // Emit the end behavior, but only if there is a paired start
-              end.call(self, self._loadStart.background, self._loadStart);
-              self._loadStart.trigger(loadEnd, self._loadStart);
+        self._loadStart.endTimeout = setTimeout(function() {
+          try {
+            if (!events.length) {
+              var run = self._loadStart.run;
+  
+              if (run) {
+                // Emit the end behavior, but only if there is a paired start
+                end.call(self, self._loadStart.background, self._loadStart);
+                self._loadStart.trigger(loadEnd, self._loadStart);
+              }
+  
+              // If stopping make sure we don't run a start
+              clearTimeout(self._loadStart.timeout);
+              self._loadStart = undefined;
             }
-
-            // If stopping make sure we don't run a start
-            clearTimeout(self._loadStart.timeout);
-            self._loadStart = undefined;
+          } catch(e) {
+            Thorax.onException('loadEnd', e);
           }
         }, loadingEndTimeout * 1000);
       }
