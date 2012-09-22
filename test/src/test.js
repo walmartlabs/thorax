@@ -215,6 +215,16 @@ $(function() {
     equal(child.$('.child').length, 1);
   });
 
+  test("template yield", function() {
+    Thorax.templates['yield-child'] = '<span>{{yield}}</span>';
+    Thorax.templates['yield-parent'] = '<p>{{#template "yield-child"}}content{{/template}}</p>';
+    var view = new Thorax.View({
+      name: 'yield-parent'
+    });
+    view.render();
+    equal(view.$('p > span').html(), 'content');
+  });
+
   test("element helper", function() {
     var a = document.createElement('li');
     a.innerHTML = 'one';

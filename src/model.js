@@ -64,12 +64,6 @@ function addEvents(target, source) {
 }
 
 _.extend(Thorax.View.prototype, {
-  _getContext: function(attributes) {
-    return _.extend({}, Thorax.Util.getValue(this, 'context', this.model), attributes || {}, {
-      cid: _.uniqueId('t'),
-      _view: this
-    });
-  },
   context: function() {
     return _.extend({}, _context.call(this), (this.model && this.model.attributes) || {});
   },

@@ -328,10 +328,14 @@ Thorax.View = Backbone.View.extend({
   },
 
   _getContext: function(attributes) {
-    return _.extend({}, Thorax.Util.getValue(this, 'context'), attributes || {}, {
+    var data = _.extend({}, Thorax.Util.getValue(this, 'context'), attributes || {}, {
       cid: _.uniqueId('t'),
+      yield: function() {
+        return data.fn && data.fn(data);
+      },
       _view: this
     });
+    return data;
   },
 
   renderTemplate: function(file, data, ignoreErrors) {
@@ -410,7 +414,7 @@ Handlebars.registerHelper('super', function() {
 });
 
 Handlebars.registerHelper('template', function(name, options) {
-  var context = _.extend({}, this, options ? options.hash : {});
+  var context = _.extend({fn: options && options.fn}, this, options ? options.hash : {});
   var output = Thorax.View.prototype.renderTemplate.call(this._view, name, context);
   return new Handlebars.SafeString(output);
 });
@@ -829,12 +833,6 @@ function addEvents(target, source) {
 }
 
 _.extend(Thorax.View.prototype, {
-  _getContext: function(attributes) {
-    return _.extend({}, Thorax.Util.getValue(this, 'context', this.model), attributes || {}, {
-      cid: _.uniqueId('t'),
-      _view: this
-    });
-  },
   context: function() {
     return _.extend({}, _context.call(this), (this.model && this.model.attributes) || {});
   },
