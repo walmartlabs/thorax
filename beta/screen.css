@@ -517,7 +517,7 @@ a {
 #content tbody tr:nth-child(2n) {
   background: #f5f5f5;
 }
-@media only screen and (-webkit-min-device-pixel-ratio: 1.5), only screen and (min--moz-device-pixel-ratio: 1.5), only screen and (min-device-pixel-ratio: 1.5), only screen and (max-width : 480px) {
+@media only screen and (min-device-pixel-ratio: 1.5) and (max-width : 480px), only screen and (max-width : 480px) {
   #nav {
     position: static;
     width: 100%;
