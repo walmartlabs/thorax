@@ -44,6 +44,7 @@ _.extend(Thorax.View, {
 
 _.extend(Thorax.View.prototype, {
   freeze: function(options) {
+    {{{override.freeze}}}
     options = _.defaults(options || {}, {
       dom: true,
       children: true

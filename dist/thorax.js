@@ -619,6 +619,9 @@ _.extend(Thorax.View, {
 
 _.extend(Thorax.View.prototype, {
   freeze: function(options) {
+    
+  this.model && this._unbindModelEvents();
+
     options = _.defaults(options || {}, {
       dom: true,
       children: true
@@ -784,9 +787,7 @@ function eventParamsFromEventItem(name, handler, context) {
 }
 
 var modelCidAttributeName = 'data-model-cid',
-    modelNameAttributeName = 'data-model-name',
-    _freeze = Thorax.View.prototype.freeze,
-    _context = Thorax.View.prototype.context;
+    modelNameAttributeName = 'data-model-name';
 
 Thorax.Model = Backbone.Model.extend({
   isEmpty: function() {
@@ -818,6 +819,8 @@ Thorax.Util.createRegistryWrapper(Thorax.Model, Thorax.Models);
 
 
 
+
+
 Thorax.View._modelEvents = [];
 
 function addEvents(target, source) {
@@ -834,11 +837,7 @@ function addEvents(target, source) {
 
 _.extend(Thorax.View.prototype, {
   context: function() {
-    return _.extend({}, _context.call(this), (this.model && this.model.attributes) || {});
-  },
-  freeze: function(options) {
-    this.model && this._unbindModelEvents();
-    _freeze.call(this, options);
+    return _.extend({}, this, (this.model && this.model.attributes) || {});
   },
   _bindModelEvents: function() {
     bindModelEvents.call(this, this.constructor._modelEvents);
