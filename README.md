@@ -158,6 +158,15 @@ Embed a template inside of another, as a string. An associated view (if any) wil
 
     {{template "path/to/template" key="value"}}
 
+If a block is used, the template will have a variable named `yield` available that will contain the contents of the block.
+
+    {{#template "child"}}
+      content in the block will be available in a variable 
+      named "yield" inside the template "child"
+    {{/template}}
+
+This is useful when a child template will be called from multiple different parents.
+
 ### view *{{view name [options]}}*
 
 Embed one view in another. The first argument may be the name of a new view to initialize or a reference to a view that has already been initialized.

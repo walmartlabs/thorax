@@ -2,6 +2,8 @@
 
 ## 2.0.0b4
 
+- add `template` helper block capture and `yield` variable
+- added `Thorax.onException` hook for easier android debugging
 - collection `filter` option now hides or shows elements instead of adding or removing them
 - collection `filter` option now applied when model change event is triggered
 - collection event change: when using view.on({collection: events}) syntax, `CollectionView` instances are now prepended to the array of arguments passed and the callback is now called with the context of the delcaring view 
