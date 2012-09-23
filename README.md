@@ -20,10 +20,10 @@ An opinionated, battle tested [Backbone](http://backbonejs.org/) + [Handlebars](
     </td>
   </tr>
   <tr>
-    <td width="25%"><a href="https://github.com/downloads/walmartlabs/thorax/thorax-html.zip" class="btn">Download 2.0.0b3</a></td>
-    <td width="25%"><a href="https://github.com/downloads/walmartlabs/thorax/thorax-node.zip" class="btn btn-primary">Download 2.0.0b3</a></td>
-    <td width="25%"><a href="https://github.com/downloads/walmartlabs/thorax/thorax-mobile.zip" class="btn">Download 2.0.0b3</a></td>
-    <td width="25%"><a href="https://github.com/downloads/walmartlabs/thorax/thorax-rails.zip" class="btn">Download 2.0.0b3</a></td>
+    <td width="25%"><a href="https://github.com/downloads/walmartlabs/thorax/thorax-html.zip" class="btn">Download 2.0.0b4</a></td>
+    <td width="25%"><a href="https://github.com/downloads/walmartlabs/thorax/thorax-lumbar.zip" class="btn btn-primary">Download 2.0.0b4</a></td>
+    <td width="25%"><a href="https://github.com/downloads/walmartlabs/thorax/thorax-mobile.zip" class="btn">Download 2.0.0b4</a></td>
+    <td width="25%"><a href="https://github.com/downloads/walmartlabs/thorax/thorax-rails.zip" class="btn">Download 2.0.0b4</a></td>
   </tr>
 </table>
 
@@ -295,7 +295,7 @@ Build a custom version of Thorax using a list of any of the given plugins:
 
 Not specifying any plugins will build a version with all plugins except mobile. To build a version of Thorax with all plugins including the mobile plugin run:
 
-    thorax build ./thorax.js --mobile
+    thorax build ./thorax-mobile.js --mobile
 
 ### templates *thorax templates ./templates ./templates.js*
 
