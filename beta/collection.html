@@ -62,6 +62,10 @@
             <ul>
               
                 <li>
+                  <a href="#thorax-collectionview/setcollection-view-setcollection-collection-options">setCollection </a>
+                </li>
+              
+                <li>
                   <a href="#thorax-collectionview/appenditem-view-appenditem-modelorview-index">appendItem </a>
                 </li>
               
@@ -154,13 +158,13 @@
 <li><code>empty-context</code> - A function in the declaring view to specify the context that the empty-template is rendered with. If the view has an <code>emptyContext</code> function it will be used as the default.</li>
 <li><code>loading-template</code> - Only available if the loading plugin has been included. A template to append when the collection is loading.</li>
 <li><code>loading-view</code> - Only available if loading plugin has been included. A view to append when the collection is loading</li>
-<li><code>filter</code> - A method on the view to filter which items are rendered. Recieves (model, index) and must return boolean.</li>
+<li><code>filter</code> - A method on the view, which will filter which items are rendered. Recieves (model, index) and must return boolean. The filter will be applied when models' fire a change event, or models are added and removed from the collection. To force a collection to re-filter, trigger a <code>filter</code> event on the collection.</li>
 </ul>
 <p>Any of the options can be specified as variables in addition to strings:
 
 </p>
 <pre><code>{{<span class="title">collection</span> cats item-view=itemViewClass}}</code></pre>
-<p><code>CollectionView</code> instances are created via a helper and not directly in a JavaScript API, so to get a reference to them you need to use the <code>helper:collection</code> event:
+<p><code>CollectionView</code> instances are usually created via a helper and not directly in JavaScript. If you need a reference to a specific CollectionView you can create it directly (see <code>Thorax.CollectionView</code> below) or use the <code>helper:collection</code> event when creating them via a helper:
 
 </p>
 <pre><code><span class="tag">view</span><span class="class">.on</span>("<span class="tag">helper</span><span class="pseudo">:collection"</span>, <span class="tag">function</span>(<span class="tag">collection</span>, <span class="tag">collectionView</span>) <span class="rules">{
@@ -189,18 +193,38 @@
 </p>
 <pre><code><span class="tag">Thorax</span><span class="class">.View</span><span class="class">.on</span>(<span class="rules">{
   <span class="rule"><span class="attribute">collection</span>:<span class="value"> {
-    reset: <span class="function">function()</span> {
-      //<span class="string">"this"</span> will refer to the view
+    reset: <span class="function">function(collectionView)</span> {
+      //<span class="string">"this"</span> will refer to the view which called
+      //the collection helper
     </span>}</span></span>
   }
 });</code></pre>
-<p>The <code>collection</code> helper itself is implemented in this way.
+<p>Each collection event callback is called with the generated collection view prepended to the arguments.
 
 </p>
 <h2 id="thorax-collectionview">Thorax.CollectionView</h2>
-<p>A <code>Thorax.View</code> subclass generated each time a <code>collection</code> helper is used.
+<p>A <code>CollectionView</code> class is automatically generated each time a <code>collection</code> helper is used. A CollectionView may also be created in JavaScript and appended as a child view with the <code>view</code> helper. The constructor will accept any options that the <code>collection</code> helper accepts, though any template or view names must be the actual names and not inline templates.
 
 </p>
+<pre><code>var parent = new Thorax<span class="preprocessor">.View</span>({
+  initialize: function() {
+    this<span class="preprocessor">.myCollectionView</span> = new Thorax<span class="preprocessor">.CollectionView</span>({
+      parent: this,
+      <span class="string">"item-template"</span>: <span class="string">"item-template-name"</span>
+    })<span class="comment">;</span>
+    child<span class="preprocessor">.setCollection</span>(myCollection)<span class="comment">;</span>
+  },
+  template: <span class="string">"{{view myCollectionView}}"</span>
+})<span class="comment">;</span></code></pre>
+<h3 id="thorax-collectionview/setcollection-view-setcollection-collection-options" class="signature">setCollection <em>view.setCollection(collection, options)</em></h3>
+<p>If directly creating a CollectionView instance, the collection property may be set by passing <code>collection</code> to the constructor, or by calling this method. The following options may be passed when calling this method:
+
+</p>
+<ul>
+<li><code>fetch</code>: wether or not to try to call <code>fetch</code> on the collection if <code>shouldFetch</code> returns true</li>
+<li><code>success</code>: a callback to be called when the</li>
+<li><code>errors</code>: wether or not to trigger an <code>error</code> event on the CollectionView and it's parent when an <code>error</code> event is triggered on the collection</li>
+</ul>
 <h3 id="thorax-collectionview/appenditem-view-appenditem-modelorview-index" class="signature">appendItem <em>view.appendItem(modelOrView [,index])</em></h3>
 <p>Append a model (which will used to generate a new <code>item-view</code>) or a view at a given index in the <code>CollectionView</code>. If passing a view as the first argument <code>index</code> may be a model which will be used to look up the index.
 

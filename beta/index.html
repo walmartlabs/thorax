@@ -157,23 +157,6 @@
         </li>
       
         <li>
-          <a href="#command-line">Command Line</a>
-          
-            <ul>
-              
-                <li>
-                  <a href="#command-line/build-thorax-build-target-plugin-plugin">build </a>
-                </li>
-              
-                <li>
-                  <a href="#command-line/templates-thorax-templates-templates-templates-js">templates </a>
-                </li>
-              
-            </ul>
-          
-        </li>
-      
-        <li>
           <a href="#events">Events</a>
           
             <ul>
@@ -207,6 +190,36 @@
           
         </li>
       
+        <li>
+          <a href="#command-line">Command Line</a>
+          
+            <ul>
+              
+                <li>
+                  <a href="#command-line/build-thorax-build-target-plugin-plugin">build </a>
+                </li>
+              
+                <li>
+                  <a href="#command-line/templates-thorax-templates-templates-templates-js">templates </a>
+                </li>
+              
+            </ul>
+          
+        </li>
+      
+        <li>
+          <a href="#error-handling">Error Handling</a>
+          
+            <ul>
+              
+                <li>
+                  <a href="#error-handling/onexception-thorax-onexception-name-error">onException </a>
+                </li>
+              
+            </ul>
+          
+        </li>
+      
     </ul><div class="header"><a href="#">Plugins</a></div><ul class="sections"><li><a href="collection.html">Collection</a></li><li><a href="event.html">Event</a></li><li><a href="form.html">Form</a></li><li><a href="helpers.html">Helpers</a></li><li><a href="loading.html">Loading</a></li><li><a href="mobile.html">Mobile</a></li><li><a href="model.html">Model</a></li><li><a href="view-controller.html">ViewController</a></li></ul>
     
     
@@ -236,10 +249,10 @@
     </td>
   </tr>
   <tr>
-    <td width="25%"><a href="https://github.com/downloads/walmartlabs/thorax/thorax-html.zip" class="btn">Download 2.0.0b3</a></td>
-    <td width="25%"><a href="https://github.com/downloads/walmartlabs/thorax/thorax-node.zip" class="btn btn-primary">Download 2.0.0b3</a></td>
-    <td width="25%"><a href="https://github.com/downloads/walmartlabs/thorax/thorax-mobile.zip" class="btn">Download 2.0.0b3</a></td>
-    <td width="25%"><a href="https://github.com/downloads/walmartlabs/thorax/thorax-rails.zip" class="btn">Download 2.0.0b3</a></td>
+    <td width="25%"><a href="https://github.com/downloads/walmartlabs/thorax/thorax-html.zip" class="btn">Download 2.0.0b4</a></td>
+    <td width="25%"><a href="https://github.com/downloads/walmartlabs/thorax/thorax-lumbar.zip" class="btn btn-primary">Download 2.0.0b4</a></td>
+    <td width="25%"><a href="https://github.com/downloads/walmartlabs/thorax/thorax-mobile.zip" class="btn">Download 2.0.0b4</a></td>
+    <td width="25%"><a href="https://github.com/downloads/walmartlabs/thorax/thorax-rails.zip" class="btn">Download 2.0.0b4</a></td>
   </tr>
 </table>
 
@@ -368,6 +381,16 @@ view.<span class="keyword">render</span>(<span class="string">'custom html'</spa
 
 </p>
 <pre><code>{{<span class="title">template</span> <span class="string">"path/to/template"</span> key=<span class="string">"value"</span>}}</code></pre>
+<p>If a block is used, the template will have a variable named <code>yield</code> available that will contain the contents of the block.
+
+</p>
+<pre><code>{{#<span class="keyword">template</span> <span class="string">"child"</span>}}
+  content <span class="keyword">in</span> the block will be available <span class="keyword">in</span> a variable 
+  named <span class="string">"yield"</span> inside the <span class="keyword">template</span> <span class="string">"child"</span>
+{{/<span class="keyword">template</span>}}</code></pre>
+<p>This is useful when a child template will be called from multiple different parents.
+
+</p>
 <h3 id="view-helpers/view-view-name-options" class="signature">view <em>{{view name [options]}}</em></h3>
 <p>Embed one view in another. The first argument may be the name of a new view to initialize or a reference to a view that has already been initialized.
 
@@ -410,36 +433,6 @@ view.<span class="keyword">render</span>(<span class="string">'custom html'</spa
 
 </p>
 <pre><code>$(event<span class="variable">.target</span>)<span class="variable">.view</span>()</code></pre>
-<h2 id="command-line">Command Line</h2>
-<p>To use the command line utilities:
-
-</p>
-<pre><code><span class="title">npm</span> install -g thorax</code></pre>
-<h3 id="command-line/build-thorax-build-target-plugin-plugin" class="signature">build <em>thorax build target [plugin] [plugin...]</em></h3>
-<p>Build a custom version of Thorax using a list of any of the given plugins:
-
-</p>
-<ul>
-<li>mixin</li>
-<li>event</li>
-<li>model</li>
-<li>collection</li>
-<li>helpers</li>
-<li>form</li>
-<li>view-controller</li>
-<li>loading</li>
-<li>mobile</li>
-</ul>
-<p>Not specifying any plugins will build a version with all plugins except mobile. To build a version of Thorax with all plugins including the mobile plugin run:
-
-</p>
-<pre><code><span class="title">thorax</span> build ./thorax.js <span class="comment">--mobile</span></code></pre>
-<h3 id="command-line/templates-thorax-templates-templates-templates-js" class="signature">templates <em>thorax templates ./templates ./templates.js</em></h3>
-<p>If using Thorax outside of the provided node or Rails downloads you can inline a directory of templates into a single file by running the <code>thorax templates</code> command.
-
-</p>
-<pre><code><span class="title">npm</span> install -g thorax
-<span class="title">thorax</span> templates ./templates-dir ./templates.js</code></pre>
 <h2 id="events">Events</h2>
 <h3 id="events/destroyed-destroyed" class="signature">destroyed <em>destroyed ()</em></h3>
 <p>Triggered when the <code>destroy</code> method is called.
@@ -497,6 +490,46 @@ view.<span class="literal">on</span>(<span class="string">'helper:collection'</s
 <pre><code>[<span class="typedef"><span class="keyword">data</span>-view-name="my-view-name"] <span class="container">{
   <span class="title">border</span>: 1<span class="title">px</span> <span class="title">solid</span> #<span class="title">ccc</span>;
 }</span></span></code></pre>
+<h2 id="command-line">Command Line</h2>
+<p>To use the command line utilities:
+
+</p>
+<pre><code><span class="title">npm</span> install -g thorax</code></pre>
+<h3 id="command-line/build-thorax-build-target-plugin-plugin" class="signature">build <em>thorax build target [plugin] [plugin...]</em></h3>
+<p>Build a custom version of Thorax using a list of any of the given plugins:
+
+</p>
+<ul>
+<li>mixin</li>
+<li>event</li>
+<li>model</li>
+<li>collection</li>
+<li>helpers</li>
+<li>form</li>
+<li>view-controller</li>
+<li>loading</li>
+<li>mobile</li>
+</ul>
+<p>Not specifying any plugins will build a version with all plugins except mobile. To build a version of Thorax with all plugins including the mobile plugin run:
+
+</p>
+<pre><code><span class="title">thorax</span> build ./thorax-mobile.js <span class="comment">--mobile</span></code></pre>
+<h3 id="command-line/templates-thorax-templates-templates-templates-js" class="signature">templates <em>thorax templates ./templates ./templates.js</em></h3>
+<p>If using Thorax outside of the provided node or Rails downloads you can inline a directory of templates into a single file by running the <code>thorax templates</code> command.
+
+</p>
+<pre><code><span class="title">npm</span> install -g thorax
+<span class="title">thorax</span> templates ./templates-dir ./templates.js</code></pre>
+<h2 id="error-handling">Error Handling</h2>
+<h3 id="error-handling/onexception-thorax-onexception-name-error" class="signature">onException <em>Thorax.onException(name, error)</em></h3>
+<p>Bound DOM event handlers in Thorax are wrapped with a try / catch block, calling this function if an error is caught. This hook is provided primarily to allow for easier debugging in Android environments where it is difficult to determine the source of the error. The default error handler is simply:
+
+</p>
+<pre><code><span class="function"><span class="title">function</span><span class="params">(name, error)</span> {
+  <span class="title">throw</span> <span class="title">error</span>;
+}</span></code></pre>
+<p>Override this function with your own logging / debugging handler. <code>name</code> will be the event name where the error was thrown.
+</p>
 
   <p>Copyright 2012 <a href="http://walmartlabs.com">@WalmartLabs</a></p></div>
 </div><a href="https://github.com/walmartlabs/thorax"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"></a></body>
