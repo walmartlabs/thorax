@@ -1,5 +1,9 @@
 # Change Log
 
+## 2.0.0b5
+
+- add `trigger` attribute option to button and link helpers
+
 ## 2.0.0b4
 
 - add `template` helper block capture and `yield` variable

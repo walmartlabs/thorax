@@ -13,6 +13,14 @@ The tag name may also be specified:
 
     {{#button "methodName" tag="a" class="btn"}}A Link{{/button}}
 
+A `trigger` attribute will trigger an event on the declaring view:
+
+    {{#button trigger="eventName"}}Button{{/button}}
+
+A button can have both a `trigger` attribute and a method to call:
+
+    {{#button "methodName" trigger="eventName"}}Button{{/button}}
+
 ### url *{{url urlString}}*
 
 Prepends "#" if `Backbone.history.pushSate` is disabled, and resolves any url paramters with the current conext. For example if the context had an `id` attribute `:id` would be replaced with the value of `id`
@@ -25,3 +33,10 @@ Creates an `a` tag that will call `Backbone.history.navigate()` with the given u
 
     {{#link "articles/:id" class="article-link"}}Link Text{{/link}}
 
+To call a method from an `a` tag use the `button` helper:
+
+    {{#button "methodName" tag="a"}}My Link{{/button}}
+
+Like the `button` helper, a `trigger` attribute may be specified that will trigger an event on the delcaring view in addition to navigating to the specified url:
+
+    {{#link "articles/:id" trigger="customEvent"}}Link Text{{/link}}

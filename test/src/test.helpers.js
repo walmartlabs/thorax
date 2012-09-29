@@ -36,12 +36,17 @@ $(function() {
   });
 
   test("button and link helpers", function() {
-    var callCount = 0;
+    var callCount = 0, eventCallCount = 0;
     var view = new Thorax.View({
+      events: {
+        testEvent: function() {
+          ++eventCallCount;
+        }
+      },
       someMethod: function(){
         ++callCount;
       },
-      template: '{{#button "someMethod"}}Button{{/button}}{{#link "href"}}content{{/link}}'
+      template: '{{#button "someMethod"}}Button{{/button}}{{#button trigger="testEvent"}}Button 2{{/button}}{{#link "href"}}content{{/link}}'
     });
     view.render();
     equal(view.$('button').html(),'Button');
@@ -50,10 +55,14 @@ $(function() {
 
     $('body').append(view.el);
     this.clock.restore();  
-    expect(4);
+    expect(7);
     stop();
     setTimeout(function() {
       $(view.$('button')[0]).trigger('click');
+      equal(callCount, 1);
+      equal(eventCallCount, 0);
+      $(view.$('button')[1]).trigger('click');
+      equal(eventCallCount, 1);
       equal(callCount, 1);
       $(view.el).remove();
       start();
