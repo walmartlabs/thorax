@@ -45,11 +45,76 @@ $(function() {
       return ['error'];
     };
     var errorCallbackCallCount = 0;
-    view.bind('error', function() {
+    view.on('error', function() {
       ++errorCallbackCallCount;
     });
     ok(!view.serialize());
     equal(errorCallbackCallCount, 1, "error event triggered when validateInput returned errors");
+  });
+
+  test("nested serialize / populate", function() {
+    //the test has a child view and a mock helper view fragment
+    //the child view should act as a child view, the view fragment
+    //should act as a part of the parent view
+    var mockViewHelperFragment = '<div data-view-cid="mock" data-view-helper="mock"><input name="childKey"></div>';
+    var view = new Thorax.View({
+      child: new Thorax.View({
+        template: '<input name="childKey">'
+      }),
+      template: '<input name="parentKey">{{view child}}' + mockViewHelperFragment
+    });
+    view.render();
+    var model = new Backbone.Model({
+      parentKey: 'parentValue',
+      childKey: 'childValue'
+    });
+    view.setModel(model);
+    equal(view.$('input[name="parentKey"]').val(), 'parentValue');
+    equal(view.$('input[name="childKey"]').val(), 'childValue');
+
+    view.populate({
+      parentKey: '',
+      childKey: ''
+    });
+    equal(view.$('input[name="parentKey"]').val(), '');
+    equal(view.$('input[name="childKey"]').val(), '');
+
+    view.setModel(false);
+    view.setModel(model, {
+      populate: {
+        children: false
+      }
+    });
+    equal(view.$('input[name="parentKey"]')[0].value, 'parentValue');
+    equal(view.$('input[name="childKey"]')[1].value, 'childValue');
+    equal(view.$('input[name="childKey"]')[0].value, '');
+
+    view.populate({
+      parentKey: '',
+      childKey: ''
+    });
+    view.populate(model.attributes, {
+      children: false
+    });
+    equal(view.$('input[name="parentKey"]')[0].value, 'parentValue');
+    equal(view.$('input[name="childKey"]')[1].value, 'childValue');
+    equal(view.$('input[name="childKey"]')[0].value, '');
+
+    view.$('input[name="childKey"]')[0].value = 'childValue';
+
+    //multuple childKey inputs should be serialized so there should be an array
+    equal(view.serialize({
+      children: true
+    }).childKey[0], 'childValue');
+
+    view.$('input[name="childKey"]')[0].value = '';
+
+    //no children so only one childKey
+    equal(view.serialize({
+      children: false
+    }).childKey, 'childValue');
+
+
   });
 
 });

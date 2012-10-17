@@ -23,6 +23,7 @@ Serializes a form. `callback` will receive the attributes from the form, followe
 
 - `set` - defaults to true, wether or not to set the attributes if valid on a model if one was set with `setModel`
 - `validate - defaults to true, wether or not to call `validateInput` during serialization
+- `children` - defaults to true, wether or not to serialize inputs in child views
 
 Each form input in your application should contain a corresponding label. Since you may want to re-use the same form multiple times in the same view a `cid` attribute with a unique value is provided to each render call of each template:
     
@@ -57,9 +58,9 @@ If your view uses inputs with non standard names (or no names, multiple inputs w
       attributes.custom = this.$('.my-input').val();
     }, this));
 
-### populate *view.populate([attributes])*
+### populate *view.populate([attributes] [,options])*
 
-Populate the form fields in the view with the given attributes. The keys of the attributes should correspond to the names of the inputs. `populate` is automatically called with the response from `view.context(view.model.attributes)` when `setModel` is called.
+Populate the form fields in the view with the given attributes. The keys of the attributes should correspond to the names of the inputs. `populate` is automatically called with the response from `view.context()` when `setModel` is called. By default this is just `model.attributes`.
 
     view.populate({
       "last-name": "Beastridge"
@@ -73,6 +74,12 @@ Populate the form fields in the view with the given attributes. The keys of the 
     this.bind('populate', _.bind(function(attributes) {
       this.$('.my-input').val(attributes.custom);
     }, this));
+
+To prevent child views from having their inputs populated use:
+
+    view.populate(object, {
+      children: false
+    });
 
 ### validateInput *view.validateInput(attributes)*
 

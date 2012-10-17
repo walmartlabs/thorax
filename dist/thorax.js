@@ -1503,7 +1503,7 @@ if (Thorax.View.prototype._setModelOptions) {
       _onModelChange: function() {
         var response = _onModelChange.call(this);
         if (this._modelOptions.populate) {
-          this.populate(this.model.attributes);
+          this.populate(this.model.attributes, this._modelOptions.populate === true ? {} : this._modelOptions.populate);
         }
         return response;
       },
@@ -1546,8 +1546,9 @@ _.extend(Thorax.View.prototype, {
 
     options = _.extend({
       set: true,
-      validate: true
-    },options || {});
+      validate: true,
+      children: true
+    }, options || {});
 
     var attributes = options.attributes || {};
     
@@ -1614,10 +1615,13 @@ _.extend(Thorax.View.prototype, {
   },
 
   //populate a form from the passed attributes or this.model if present
-  populate: function(attributes) {
+  populate: function(attributes, options) {
+    options = _.extend({
+      children: true
+    }, options || {});
     var value, attributes = attributes || this._getContext(this.model);
     //callback has context of element
-    eachNamedInput.call(this, {}, function() {
+    eachNamedInput.call(this, options, function() {
       objectAndKeyFromAttributesAndName.call(this, attributes, this.name, {mode: 'populate'}, function(object, key) {
         if (object && typeof (value = object[key]) !== 'undefined') {
           //will only execute if we have a name that matches the structure in attributes
@@ -1674,10 +1678,21 @@ Thorax.View.on({
     resetSubmitState.call(this);
   }
 })
-
+/*
+  var selector = '[' + viewCidAttributeName + ']';
+  if (!options.helper) {
+    selector += ':not([' + viewHelperAttributeName + '])';
+  }
+*/
 function eachNamedInput(options, iterator, context) {
-  var i = 0;
+  var i = 0, cid = this.cid;
   this.$('select,input,textarea', options.root || this.el).each(function() {
+    if (!options.children) {
+      var closestViewEl = $(this).closest('[ '+ viewCidAttributeName + ']:not([' + viewHelperAttributeName + '])');
+      if (cid !== closestViewEl.attr(viewCidAttributeName)) {
+        return;
+      }
+    }
     if (this.type !== 'button' && this.type !== 'cancel' && this.type !== 'submit' && this.name && this.name !== '') {
       iterator.call(context || this, i, this);
       ++i;

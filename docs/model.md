@@ -42,7 +42,7 @@ Set the `model` attribute of a view, triggering certain behaviors based on the o
 - **fetch** - Boolean, wether to fetch the model when it is set, defaults to true.
 - **success** - Callback on fetch success, defaults to noop
 - **render** - Render on the view on model:change? Defaults to true
-- **populate** - Call `populate` with the model's attributes when it is set? Defaults to true
+- **populate** - Call `populate` with the model's attributes when it is set? Defaults to true. Pass `populate: {children: false}` to prevent child views from having their inputs populated.
 - **errors** - When the model triggers an `error` event, trigger the event on the view? Defaults to true
 
 The following are equivelent:
