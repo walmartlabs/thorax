@@ -128,7 +128,10 @@ _.extend(Thorax.View.prototype, {
         _on.call(this, name, bindEventHandler.call(this, 'view-event:' + params.name, params.handler), params.context || this);
       }, this);
     } else {
-      var boundHandler = containHandlerToCurentView(bindEventHandler.call(this, 'dom-event:' + params.name, params.handler), this.cid);
+      var boundHandler = bindEventHandler.call(this, 'dom-event:' + params.name, params.handler);
+      if (!params.nested) {
+        boundHandler = containHandlerToCurentView(boundHandler, this.cid);
+      }
       if (params.selector) {
         //TODO: determine why collection views and some nested views
         //need defered event delegation
@@ -147,7 +150,7 @@ _.extend(Thorax.View.prototype, {
   }
 });
 
-var eventSplitter = /^(\S+)(?:\s+(.+))?/;
+var eventSplitter = /^(nested\s+)?(\S+)(?:\s+(.+))?/;
 
 var domEvents = [
   'mousedown', 'mouseup', 'mousemove', 'mouseover', 'mouseout',
@@ -196,9 +199,10 @@ function eventParamsFromEventItem(name, handler, context) {
   };
   if (name.match(domEventRegexp)) {
     var match = eventSplitter.exec(name);
-    params.name = match[1];
+    params.nested = !!match[1];
+    params.name = match[2];
     params.type = 'DOM';
-    params.selector = match[2];
+    params.selector = match[3];
   } else {
     params.name = name;
     params.type = 'view';

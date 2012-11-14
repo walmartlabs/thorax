@@ -73,6 +73,10 @@ DOM events observed in this way will only operate on the view itself. If the vie
 
 Will only listen for clicks on `a` elements within the view. If the view has children that has `a` elements, this handler will not observe clicks on them.
 
+DOM events may be prefixed with the special keyword `nested` which will apply the event to all elements in child views:
+
+    view.on('nested click a', function() {})
+
 ## Events
 
 ### freeze *freeze*

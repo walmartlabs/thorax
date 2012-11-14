@@ -713,7 +713,10 @@ _.extend(Thorax.View.prototype, {
         _on.call(this, name, bindEventHandler.call(this, 'view-event:' + params.name, params.handler), params.context || this);
       }, this);
     } else {
-      var boundHandler = containHandlerToCurentView(bindEventHandler.call(this, 'dom-event:' + params.name, params.handler), this.cid);
+      var boundHandler = bindEventHandler.call(this, 'dom-event:' + params.name, params.handler);
+      if (!params.nested) {
+        boundHandler = containHandlerToCurentView(boundHandler, this.cid);
+      }
       if (params.selector) {
         //TODO: determine why collection views and some nested views
         //need defered event delegation
@@ -732,7 +735,7 @@ _.extend(Thorax.View.prototype, {
   }
 });
 
-var eventSplitter = /^(\S+)(?:\s+(.+))?/;
+var eventSplitter = /^(nested\s+)?(\S+)(?:\s+(.+))?/;
 
 var domEvents = [
   'mousedown', 'mouseup', 'mousemove', 'mouseover', 'mouseout',
@@ -781,9 +784,10 @@ function eventParamsFromEventItem(name, handler, context) {
   };
   if (name.match(domEventRegexp)) {
     var match = eventSplitter.exec(name);
-    params.name = match[1];
+    params.nested = !!match[1];
+    params.name = match[2];
     params.type = 'DOM';
-    params.selector = match[2];
+    params.selector = match[3];
   } else {
     params.name = name;
     params.type = 'view';
@@ -1509,7 +1513,7 @@ if (Thorax.View.prototype._setModelOptions) {
       _onModelChange: function() {
         var response = _onModelChange.call(this);
         if (this._modelOptions.populate) {
-          this.populate(this.model.attributes);
+          this.populate(this.model.attributes, this._modelOptions.populate === true ? {} : this._modelOptions.populate);
         }
         return response;
       },
@@ -1552,8 +1556,9 @@ _.extend(Thorax.View.prototype, {
 
     options = _.extend({
       set: true,
-      validate: true
-    },options || {});
+      validate: true,
+      children: true
+    }, options || {});
 
     var attributes = options.attributes || {};
     
@@ -1620,10 +1625,13 @@ _.extend(Thorax.View.prototype, {
   },
 
   //populate a form from the passed attributes or this.model if present
-  populate: function(attributes) {
+  populate: function(attributes, options) {
+    options = _.extend({
+      children: true
+    }, options || {});
     var value, attributes = attributes || this._getContext(this.model);
     //callback has context of element
-    eachNamedInput.call(this, {}, function() {
+    eachNamedInput.call(this, options, function() {
       objectAndKeyFromAttributesAndName.call(this, attributes, this.name, {mode: 'populate'}, function(object, key) {
         if (object && typeof (value = object[key]) !== 'undefined') {
           //will only execute if we have a name that matches the structure in attributes
@@ -1680,10 +1688,21 @@ Thorax.View.on({
     resetSubmitState.call(this);
   }
 })
-
+/*
+  var selector = '[' + viewCidAttributeName + ']';
+  if (!options.helper) {
+    selector += ':not([' + viewHelperAttributeName + '])';
+  }
+*/
 function eachNamedInput(options, iterator, context) {
-  var i = 0;
+  var i = 0, cid = this.cid;
   this.$('select,input,textarea', options.root || this.el).each(function() {
+    if (!options.children) {
+      var closestViewEl = $(this).closest('[ '+ viewCidAttributeName + ']:not([' + viewHelperAttributeName + '])');
+      if (cid !== closestViewEl.attr(viewCidAttributeName)) {
+        return;
+      }
+    }
     if (this.type !== 'button' && this.type !== 'cancel' && this.type !== 'submit' && this.name && this.name !== '') {
       iterator.call(context || this, i, this);
       ++i;
