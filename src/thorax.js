@@ -353,6 +353,12 @@ Handlebars.registerHelper('each', function(context, options) {
   return ret;
 });
 
+Handlebars.registerHelper('with', function(context, options) {
+  return options.fn(this._view ? _.extend({
+    _view: this._view
+  }, context) : context);
+});
+
 //helpers
 Handlebars.registerHelper('super', function() {
   var parent = this._view.constructor && this._view.constructor.__super__;
