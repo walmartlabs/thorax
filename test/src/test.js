@@ -135,6 +135,14 @@ $(function() {
     equal(parent.$('div').get(1).innerHTML, 'b');
   });
 
+  test("fail silently when no view initialized", function() {
+    var parent = new Thorax.View({
+      template: "{{view child}}"
+    });
+    parent.render();
+    equal(parent.$el.html(), '');
+  });
+
   test("child view re-render will keep dom events intact", function() {
     this.clock.restore();
     var callCount = 0;

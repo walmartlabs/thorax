@@ -353,6 +353,7 @@ Handlebars.registerHelper('each', function(context, options) {
   return ret;
 });
 
+//override handlebars "with" helper to provide "_view"
 Handlebars.registerHelper('with', function(context, options) {
   return options.fn(this._view ? _.extend({
     _view: this._view
@@ -392,8 +393,11 @@ Handlebars.registerHelper('view', function(view, options) {
     options = view;
     view = Thorax.View;
   }
-  var instance = Thorax.Util.getViewInstance(view, options ? options.hash : {}),
-      placeholder_id = instance.cid + '-' + _.uniqueId('placeholder');
+  var instance = Thorax.Util.getViewInstance(view, options ? options.hash : {});
+  if (!instance) {
+    return '';
+  }
+  var placeholder_id = instance.cid + '-' + _.uniqueId('placeholder');
   this._view._addChild(instance);
   this._view.trigger('child', instance);
   if (options.fn) {
