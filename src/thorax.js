@@ -337,6 +337,22 @@ Thorax.View.extend = function() {
 
 Thorax.Util.createRegistryWrapper(Thorax.View, Thorax.Views);
 
+//override handlebars "each" helper to provide "_view"
+Handlebars.registerHelper('each', function(context, options) {
+  var fn = options.fn, inverse = options.inverse;
+  var ret = "";
+  if (context && context.length > 0) {
+    for (var i = 0, j = context.length; i < j; i++) {
+      ret = ret + fn(this._view ? _.extend({
+        _view: this._view
+      }, context[i]) : context[i]);
+    }
+  } else {
+    ret = inverse(this);
+  }
+  return ret;
+});
+
 //helpers
 Handlebars.registerHelper('super', function() {
   var parent = this._view.constructor && this._view.constructor.__super__;

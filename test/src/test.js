@@ -118,6 +118,23 @@ $(function() {
     equal(parent.$('span')[0].innerHTML, 'value', 'anonymous child views');
   });
 
+  test("child views within #each", function() {
+    var parent = new Thorax.View({
+      template: '{{#each views}}{{view this}}{{/each}}',
+      views: [
+        new Thorax.View({
+          template: "a"
+        }),
+        new Thorax.View({
+          template: "b"
+        })
+      ]
+    });
+    parent.render();
+    equal(parent.$('div').get(0).innerHTML, 'a');
+    equal(parent.$('div').get(1).innerHTML, 'b');
+  });
+
   test("child view re-render will keep dom events intact", function() {
     this.clock.restore();
     var callCount = 0;

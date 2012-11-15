@@ -393,6 +393,22 @@ Thorax.View.extend = function() {
 
 Thorax.Util.createRegistryWrapper(Thorax.View, Thorax.Views);
 
+//override handlebars "each" helper to provide "_view"
+Handlebars.registerHelper('each', function(context, options) {
+  var fn = options.fn, inverse = options.inverse;
+  var ret = "";
+  if (context && context.length > 0) {
+    for (var i = 0, j = context.length; i < j; i++) {
+      ret = ret + fn(this._view ? _.extend({
+        _view: this._view
+      }, context[i]) : context[i]);
+    }
+  } else {
+    ret = inverse(this);
+  }
+  return ret;
+});
+
 //helpers
 Handlebars.registerHelper('super', function() {
   var parent = this._view.constructor && this._view.constructor.__super__;
@@ -710,10 +726,10 @@ _.extend(Thorax.View.prototype, {
   _addEvent: function(params) {
     if (params.type === 'view') {
       params.name.split(/\s+/).forEach(function(name) {
-        _on.call(this, name, bindEventHandler.call(this, 'view-event:' + params.name, params.handler), params.context || this);
+        _on.call(this, name, bindEventHandler.call(this, 'view-event:' + params.originalName, params.handler), params.context || this);
       }, this);
     } else {
-      var boundHandler = bindEventHandler.call(this, 'dom-event:' + params.name, params.handler);
+      var boundHandler = bindEventHandler.call(this, 'dom-event:' + params.originalName, params.handler);
       if (!params.nested) {
         boundHandler = containHandlerToCurentView(boundHandler, this.cid);
       }
@@ -958,12 +974,12 @@ Thorax.Util.shouldFetch = function(modelOrCollection, options) {
   );
 };
 
-$.fn.model = function() {
+$.fn.model = function(view) {
   var $this = $(this),
       modelElement = $this.closest('[' + modelCidAttributeName + ']'),
       modelCid = modelElement && modelElement.attr(modelCidAttributeName);
   if (modelCid) {
-    var view = $this.view();
+    var view = view || $this.view();
     if (view && view.model && view.model.cid === modelCid) {
       return view.model || false;
     }
