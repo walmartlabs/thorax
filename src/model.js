@@ -184,12 +184,12 @@ Thorax.Util.shouldFetch = function(modelOrCollection, options) {
   );
 };
 
-$.fn.model = function() {
+$.fn.model = function(view) {
   var $this = $(this),
       modelElement = $this.closest('[' + modelCidAttributeName + ']'),
       modelCid = modelElement && modelElement.attr(modelCidAttributeName);
   if (modelCid) {
-    var view = $this.view();
+    var view = view || $this.view();
     if (view && view.model && view.model.cid === modelCid) {
       return view.model || false;
     }
