@@ -94,6 +94,11 @@ Thorax.Util = {
       return name;
     }
   },
+
+  getTemplate: function(file, ignoreErrors) {
+    return Thorax.Util.registryGet(Thorax, 'templates', file, ignoreErrors);
+  },
+
   getValue: function (object, prop) {
     if (!(object && object[prop])) {
       return null;
@@ -296,7 +301,7 @@ Thorax.View = Backbone.View.extend({
     if (typeof file === 'function') {
       template = file;
     } else {
-      template = this._loadTemplate(file);
+      template = Thorax.Util.getTemplate(file);
     }
     if (!template) {
       if (ignoreErrors) {
@@ -309,10 +314,6 @@ Thorax.View = Backbone.View.extend({
     }
   },
   
-  _loadTemplate: function(file, ignoreErrors) {
-    return Thorax.Util.registryGet(Thorax, 'templates', file, ignoreErrors);
-  },
-
   ensureRendered: function() {
     !this._renderCount && this.render();
   },

@@ -116,6 +116,11 @@ Thorax.Util = {
       return name;
     }
   },
+
+  getTemplate: function(file, ignoreErrors) {
+    return Thorax.Util.registryGet(Thorax, 'templates', file, ignoreErrors);
+  },
+
   getValue: function (object, prop) {
     if (!(object && object[prop])) {
       return null;
@@ -344,7 +349,7 @@ Thorax.View = Backbone.View.extend({
     if (typeof file === 'function') {
       template = file;
     } else {
-      template = this._loadTemplate(file);
+      template = Thorax.Util.getTemplate(file);
     }
     if (!template) {
       if (ignoreErrors) {
@@ -357,10 +362,6 @@ Thorax.View = Backbone.View.extend({
     }
   },
   
-  _loadTemplate: function(file, ignoreErrors) {
-    return Thorax.Util.registryGet(Thorax, 'templates', file, ignoreErrors);
-  },
-
   ensureRendered: function() {
     !this._renderCount && this.render();
   },
@@ -1212,7 +1213,7 @@ Thorax.CollectionView = Thorax.HelperView.extend({
       }
       return view;
     } else {
-      var emptyTemplate = this.options['empty-template'] || (this.parent.name && this._loadTemplate(this.parent.name + '-empty', true));
+      var emptyTemplate = this.options['empty-template'] || (this.parent.name && Thorax.Util.getTemplate(this.parent.name + '-empty', true));
       var context;
       if (this.options['empty-context']) {
         context = (_.isFunction(this.options['empty-context'])
@@ -1246,7 +1247,7 @@ Thorax.CollectionView = Thorax.HelperView.extend({
       view.ensureRendered();
       return view;
     } else {
-      var itemTemplate = this.options['item-template'] || (this.parent.name && this.parent._loadTemplate(this.parent.name + '-item', true));
+      var itemTemplate = this.options['item-template'] || (this.parent.name && Thorax.Util.getTemplate(this.parent.name + '-item', true));
       if (!itemTemplate) {
         throw new Error('collection helper in View: ' + (this.parent.name || this.parent.cid) + ' requires an item template.');
       }

@@ -54,8 +54,10 @@ The following are equivelent:
 
 ## $
 
-### $.model *$(event.target).model()*
+### $.model *$(event.target).model([view])*
 
 Get a reference to the nearest bound model.
 
     $(event.target).model()
+
+Passing a view instance will limit the lookup to just that view.
