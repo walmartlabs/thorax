@@ -247,13 +247,11 @@ Thorax.View = Backbone.View.extend({
     });
     this.trigger('destroyed');
     delete Thorax._viewsIndexedByCid[this.cid];
-    _.each(this.children, function(child) {
-      if (options.children) {
+    if (options.children) {
+      _.each(this.children, function(child) {
         child.parent = null;
         child.destroy();
-      }
-    });
-    if (options.children) {
+      });
       this.children = {};
     }
   },
