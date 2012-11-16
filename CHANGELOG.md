@@ -3,7 +3,9 @@
 ## 2.0.0b5
 
 - add `trigger` attribute option to button and link helpers
-
+- Fail silently when #view helper does not find a view instance (1.x behavior)
+- `$.model` now accepts a view as an optional argument 
+- `Thorax.View.prototype._loadTemplate` renamed to `Thorax.Util.getTemplate`
 ## 2.0.0b4
 
 - add `template` helper block capture and `yield` variable
