@@ -43,7 +43,7 @@ Thorax.LayoutView = Thorax.View.extend({
     //so need to put this here so the template will be picked up
     var layoutTemplate;
     if (this.name) {
-      layoutTemplate = Thorax.Util.registryGet(Thorax, 'templates', this.name, true);
+      layoutTemplate = Thorax.Util.getTemplate(this.name, true);
     }
     //a template is optional in a layout
     if (output || this.template || layoutTemplate) {

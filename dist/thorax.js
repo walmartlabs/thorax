@@ -254,7 +254,7 @@ Thorax.View = Backbone.View.extend({
       this.template = Handlebars.compile(this.template);
     } else if (this.name && !this.template) {
       //fetch the template 
-      this.template = Thorax.Util.registryGet(Thorax, 'templates', this.name, true);
+      this.template = Thorax.Util.getTemplate(this.name, true);
     }
     
   //HelperView will not have mixins so need to check
@@ -311,7 +311,7 @@ Thorax.View = Backbone.View.extend({
       if (!this.template) {
         //if the name was set after the view was created try one more time to fetch a template
         if (this.name) {
-          this.template = Thorax.Util.registryGet(Thorax, 'templates', this.name, true);
+          this.template = Thorax.Util.getTemplate(this.name, true);
         }
         if (!this.template) {
           throw new Error('View ' + (this.name || this.cid) + '.render() was called with no content and no template set on the view.');
@@ -426,7 +426,7 @@ Handlebars.registerHelper('super', function() {
       if (!parent.name) {
         throw new Error('Cannot use super helper when parent has no name or template.');
       }
-      template = Thorax.Util.registryGet(Thorax, 'templates', parent.name, false);
+      template = Thorax.Util.getTemplate(parent.name, false);
     }
     if (typeof template === 'string') {
       template = Handlebars.compile(template);
@@ -1798,7 +1798,7 @@ Thorax.LayoutView = Thorax.View.extend({
     //so need to put this here so the template will be picked up
     var layoutTemplate;
     if (this.name) {
-      layoutTemplate = Thorax.Util.registryGet(Thorax, 'templates', this.name, true);
+      layoutTemplate = Thorax.Util.getTemplate(this.name, true);
     }
     //a template is optional in a layout
     if (output || this.template || layoutTemplate) {
