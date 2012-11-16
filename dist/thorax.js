@@ -1007,8 +1007,6 @@ var _fetch = Backbone.Collection.prototype.fetch,
     collectionCidAttributeName = 'data-collection-cid',
     collectionNameAttributeName = 'data-collection-name',
     collectionEmptyAttributeName = 'data-collection-empty',
-    modelCidAttributeName = 'data-model-cid',
-    modelNameAttributeName = 'data-model-name',
     ELEMENT_NODE_TYPE = 1;
 
 Thorax.Collection = Backbone.Collection.extend({
