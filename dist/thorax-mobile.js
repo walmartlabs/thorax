@@ -116,6 +116,11 @@ Thorax.Util = {
       return name;
     }
   },
+
+  getTemplate: function(file, ignoreErrors) {
+    return Thorax.Util.registryGet(Thorax, 'templates', file, ignoreErrors);
+  },
+
   getValue: function (object, prop) {
     if (!(object && object[prop])) {
       return null;
@@ -249,7 +254,7 @@ Thorax.View = Backbone.View.extend({
       this.template = Handlebars.compile(this.template);
     } else if (this.name && !this.template) {
       //fetch the template 
-      this.template = Thorax.Util.registryGet(Thorax, 'templates', this.name, true);
+      this.template = Thorax.Util.getTemplate(this.name, true);
     }
     
   //HelperView will not have mixins so need to check
@@ -290,13 +295,11 @@ Thorax.View = Backbone.View.extend({
     });
     this.trigger('destroyed');
     delete Thorax._viewsIndexedByCid[this.cid];
-    _.each(this.children, function(child) {
-      if (options.children) {
+    if (options.children) {
+      _.each(this.children, function(child) {
         child.parent = null;
         child.destroy();
-      }
-    });
-    if (options.children) {
+      });
       this.children = {};
     }
   },
@@ -306,7 +309,7 @@ Thorax.View = Backbone.View.extend({
       if (!this.template) {
         //if the name was set after the view was created try one more time to fetch a template
         if (this.name) {
-          this.template = Thorax.Util.registryGet(Thorax, 'templates', this.name, true);
+          this.template = Thorax.Util.getTemplate(this.name, true);
         }
         if (!this.template) {
           throw new Error('View ' + (this.name || this.cid) + '.render() was called with no content and no template set on the view.');
@@ -344,7 +347,7 @@ Thorax.View = Backbone.View.extend({
     if (typeof file === 'function') {
       template = file;
     } else {
-      template = this._loadTemplate(file);
+      template = Thorax.Util.getTemplate(file);
     }
     if (!template) {
       if (ignoreErrors) {
@@ -357,10 +360,6 @@ Thorax.View = Backbone.View.extend({
     }
   },
   
-  _loadTemplate: function(file, ignoreErrors) {
-    return Thorax.Util.registryGet(Thorax, 'templates', file, ignoreErrors);
-  },
-
   ensureRendered: function() {
     !this._renderCount && this.render();
   },
@@ -393,6 +392,29 @@ Thorax.View.extend = function() {
 
 Thorax.Util.createRegistryWrapper(Thorax.View, Thorax.Views);
 
+//override handlebars "each" helper to provide "_view"
+Handlebars.registerHelper('each', function(context, options) {
+  var fn = options.fn, inverse = options.inverse;
+  var ret = "";
+  if (context && context.length > 0) {
+    for (var i = 0, j = context.length; i < j; i++) {
+      ret = ret + fn(this._view ? _.extend({
+        _view: this._view
+      }, context[i]) : context[i]);
+    }
+  } else {
+    ret = inverse(this);
+  }
+  return ret;
+});
+
+//override handlebars "with" helper to provide "_view"
+Handlebars.registerHelper('with', function(context, options) {
+  return options.fn(this._view ? _.extend({
+    _view: this._view
+  }, context) : context);
+});
+
 //helpers
 Handlebars.registerHelper('super', function() {
   var parent = this._view.constructor && this._view.constructor.__super__;
@@ -402,7 +424,7 @@ Handlebars.registerHelper('super', function() {
       if (!parent.name) {
         throw new Error('Cannot use super helper when parent has no name or template.');
       }
-      template = Thorax.Util.registryGet(Thorax, 'templates', parent.name, false);
+      template = Thorax.Util.getTemplate(parent.name, false);
     }
     if (typeof template === 'string') {
       template = Handlebars.compile(template);
@@ -426,8 +448,11 @@ Handlebars.registerHelper('view', function(view, options) {
     options = view;
     view = Thorax.View;
   }
-  var instance = Thorax.Util.getViewInstance(view, options ? options.hash : {}),
-      placeholder_id = instance.cid + '-' + _.uniqueId('placeholder');
+  var instance = Thorax.Util.getViewInstance(view, options ? options.hash : {});
+  if (!instance) {
+    return '';
+  }
+  var placeholder_id = instance.cid + '-' + _.uniqueId('placeholder');
   this._view._addChild(instance);
   this._view.trigger('child', instance);
   if (options.fn) {
@@ -710,10 +735,10 @@ _.extend(Thorax.View.prototype, {
   _addEvent: function(params) {
     if (params.type === 'view') {
       params.name.split(/\s+/).forEach(function(name) {
-        _on.call(this, name, bindEventHandler.call(this, 'view-event:' + params.name, params.handler), params.context || this);
+        _on.call(this, name, bindEventHandler.call(this, 'view-event:' + params.originalName, params.handler), params.context || this);
       }, this);
     } else {
-      var boundHandler = bindEventHandler.call(this, 'dom-event:' + params.name, params.handler);
+      var boundHandler = bindEventHandler.call(this, 'dom-event:' + params.originalName, params.handler);
       if (!params.nested) {
         boundHandler = containHandlerToCurentView(boundHandler, this.cid);
       }
@@ -964,12 +989,12 @@ Thorax.Util.shouldFetch = function(modelOrCollection, options) {
   );
 };
 
-$.fn.model = function() {
+$.fn.model = function(view) {
   var $this = $(this),
       modelElement = $this.closest('[' + modelCidAttributeName + ']'),
       modelCid = modelElement && modelElement.attr(modelCidAttributeName);
   if (modelCid) {
-    var view = $this.view();
+    var view = view || $this.view();
     if (view && view.model && view.model.cid === modelCid) {
       return view.model || false;
     }
@@ -986,8 +1011,6 @@ var _fetch = Backbone.Collection.prototype.fetch,
     collectionCidAttributeName = 'data-collection-cid',
     collectionNameAttributeName = 'data-collection-name',
     collectionEmptyAttributeName = 'data-collection-empty',
-    modelCidAttributeName = 'data-model-cid',
-    modelNameAttributeName = 'data-model-name',
     ELEMENT_NODE_TYPE = 1;
 
 Thorax.Collection = Backbone.Collection.extend({
@@ -1192,7 +1215,7 @@ Thorax.CollectionView = Thorax.HelperView.extend({
       }
       return view;
     } else {
-      var emptyTemplate = this.options['empty-template'] || (this.parent.name && this._loadTemplate(this.parent.name + '-empty', true));
+      var emptyTemplate = this.options['empty-template'] || (this.parent.name && Thorax.Util.getTemplate(this.parent.name + '-empty', true));
       var context;
       if (this.options['empty-context']) {
         context = (_.isFunction(this.options['empty-context'])
@@ -1226,7 +1249,7 @@ Thorax.CollectionView = Thorax.HelperView.extend({
       view.ensureRendered();
       return view;
     } else {
-      var itemTemplate = this.options['item-template'] || (this.parent.name && this.parent._loadTemplate(this.parent.name + '-item', true));
+      var itemTemplate = this.options['item-template'] || (this.parent.name && Thorax.Util.getTemplate(this.parent.name + '-item', true));
       if (!itemTemplate) {
         throw new Error('collection helper in View: ' + (this.parent.name || this.parent.cid) + ' requires an item template.');
       }
@@ -1777,7 +1800,7 @@ Thorax.LayoutView = Thorax.View.extend({
     //so need to put this here so the template will be picked up
     var layoutTemplate;
     if (this.name) {
-      layoutTemplate = Thorax.Util.registryGet(Thorax, 'templates', this.name, true);
+      layoutTemplate = Thorax.Util.getTemplate(this.name, true);
     }
     //a template is optional in a layout
     if (output || this.template || layoutTemplate) {
