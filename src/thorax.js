@@ -17,9 +17,7 @@ if (typeof exports !== 'undefined') {
 
 Thorax.VERSION = '{{version}}';
 
-var handlebarsExtension = 'handlebars',
-    handlebarsExtensionRegExp = new RegExp('\\.' + handlebarsExtension + '$'),
-    viewNameAttributeName = 'data-view-name',
+var viewNameAttributeName = 'data-view-name',
     viewCidAttributeName = 'data-view-cid',
     viewPlaceholderAttributeName = 'data-view-tmp',
     viewHelperAttributeName = 'data-view-helper',
