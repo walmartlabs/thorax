@@ -21,6 +21,10 @@ A button can have both a `trigger` attribute and a method to call:
 
     {{#button "methodName" trigger="eventName"}}Button{{/button}}
 
+The method may also be specified as a `method` attribute:
+
+    {{#button method="methodName"}}Button{{/button}}
+
 ### url *{{url urlString}}*
 
 Prepends "#" if `Backbone.history.pushSate` is disabled, and resolves any url paramters with the current conext. For example if the context had an `id` attribute `:id` would be replaced with the value of `id`
@@ -40,3 +44,7 @@ To call a method from an `a` tag use the `button` helper:
 Like the `button` helper, a `trigger` attribute may be specified that will trigger an event on the delcaring view in addition to navigating to the specified url:
 
     {{#link "articles/:id" trigger="customEvent"}}Link Text{{/link}}
+
+The href attribute is required but may also be specified as an attribute:
+
+    {{#link href="articles/:id"}}Link Test{{/link}}

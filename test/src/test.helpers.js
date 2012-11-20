@@ -35,6 +35,15 @@ $(function() {
     equal(view.$('a').attr('href'), '#/a/c');
   });
 
+  test("option hash required arguments for button and link", function() {
+    var view = new Thorax.View({
+      template: '{{#link href="a"}}{{/link}}{{#button method="b"}}{{/button}}'
+    });
+    view.render();
+    equal(view.$('a').attr('href'), '#a');
+    equal(view.$('button').attr('data-call-method'), 'b');
+  });
+
   test("button and link helpers", function() {
     var callCount = 0, eventCallCount = 0;
     var view = new Thorax.View({
