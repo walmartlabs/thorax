@@ -117,6 +117,9 @@ Thorax.Util = {
           match,
           ret = [];
       function deref(token, scope) {
+        if (token.match(/^("|')/) && token.match(/("|')$/)) {
+          return token.replace(/(^("|')|('|")$)/g, '');
+        }
         var segments = token.split('.'),
             len = segments.length;
         for (var i = 0; scope && i < len; i++) {
@@ -131,7 +134,7 @@ Thorax.Util = {
           var params = match[1].split(/\s+/);
           if (params.length > 1) {
             var helper = params.shift();
-            params = params.map(function(param) { return deref(param, scope); });
+            params = _.map(params, function(param) { return deref(param, scope); });
             if (Handlebars.helpers[helper]) {
               ret.push(Handlebars.helpers[helper].apply(scope, params));
             } else {
