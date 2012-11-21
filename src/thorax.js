@@ -192,7 +192,7 @@ Thorax.Util = {
 
 Thorax.View = Backbone.View.extend({
   constructor: function() {
-    var response = Thorax.View.__super__.constructor.apply(this, arguments);
+    var response = Backbone.View.apply(this, arguments);
     {{{override.constructor}}}
     return response;
   },
