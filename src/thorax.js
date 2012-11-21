@@ -1,5 +1,3 @@
-var Thorax;
-
 //support zepto.forEach on jQuery
 if (!$.fn.forEach) {
   $.fn.forEach = function(iterator, context) {
@@ -9,21 +7,14 @@ if (!$.fn.forEach) {
   }
 }
 
-if (typeof exports !== 'undefined') {
-  Thorax = exports;
-} else {
-  Thorax = this.Thorax = {};
-}
-
-Thorax.VERSION = '{{version}}';
-
 var viewNameAttributeName = 'data-view-name',
     viewCidAttributeName = 'data-view-cid',
     viewPlaceholderAttributeName = 'data-view-tmp',
     viewHelperAttributeName = 'data-view-helper',
     elementPlaceholderAttributeName = 'data-element-tmp';
 
-_.extend(Thorax, {
+var Thorax = this.Thorax = {
+  VERSION: '{{version}}',
   templatePathPrefix: '',
   //view instances
   _viewsIndexedByCid: {},
@@ -38,7 +29,7 @@ _.extend(Thorax, {
   onException: function(name, err) {
     throw err;
   }
-});
+};
 
 Thorax.Util = {
   createRegistryWrapper: function(klass, hash) {
