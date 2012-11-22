@@ -810,7 +810,7 @@ _.extend(Thorax.View.prototype, {
           this.$el.on(name, params.selector, boundHandler);
         }
       } else {
-        this.$el.on(name, boundHandler);
+        this.$el.on(params.name, boundHandler);
       }
     }
   }
@@ -990,6 +990,16 @@ _.extend(Thorax.View.prototype, {
         success: false,
         render: true,
         errors: true
+        // Begin injected code from "src/form.js"
+  , populate: true 
+
+// End injected code
+// Begin injected code from "src/loading.js"
+    , ignoreErrors: this.ignoreFetchError
+    , background: this.nonBlockingLoad
+  
+// End injected code
+
       };
     }
     _.extend(this._modelOptions, options || {});
@@ -1135,6 +1145,12 @@ Thorax.CollectionView = Thorax.HelperView.extend({
       fetch: true,
       success: false,
       errors: true
+      // Begin injected code from "src/loading.js"
+    , ignoreErrors: this.ignoreFetchError
+    , background: this.nonBlockingLoad
+  
+// End injected code
+
     }, options || {});
   },
   setCollection: function(collection, options) {
@@ -1618,19 +1634,12 @@ if (Thorax.View.prototype._setModelOptions) {
           this.populate(this.model.attributes, this._modelOptions.populate === true ? {} : this._modelOptions.populate);
         }
         return response;
-      },
-      _setModelOptions: function(options) {
-        if (!options) {
-          options = {};
-        }
-        if (!('populate' in options)) {
-          options.populate = true;
-        }
-        return _setModelOptions.call(this, options);
       }
     });
   })();
 }
+
+
 
 _.extend(Thorax.View.prototype, {
   //serializes a form present in the view, returning the serialized data
@@ -2321,16 +2330,8 @@ if (Thorax.Router) {
 //
 
 if (Thorax.Model) {
-  (function() {
-    // Propagates loading view parameters to the AJAX layer
-    var _setModelOptions = Thorax.View.prototype._setModelOptions;
-    Thorax.View.prototype._setModelOptions = function(options) {
-      return _setModelOptions.call(this, _.defaults({
-        ignoreErrors: this.ignoreFetchError,
-        background: this.nonBlockingLoad
-      }, options || {}));
-    };
-  })();
+  // Propagates loading view parameters to the AJAX layer
+  
 
   Thorax.View.prototype._loadModel = function(model, options) {
     if (model.load) {
@@ -2348,13 +2349,7 @@ if (Thorax.Collection) {
   Thorax.mixinLoadableEvents(Thorax.CollectionView.prototype);
 
   // Propagates loading view parameters to the AJAX layer
-  var _setCollectionOptions = Thorax.CollectionView.prototype._setCollectionOptions;
-  Thorax.CollectionView.prototype._setCollectionOptions = function(collection, options) {
-    return _setCollectionOptions.call(this, collection, _.defaults({
-      ignoreErrors: this.ignoreFetchError,
-      background: this.nonBlockingLoad
-    }, options || {}));
-  };
+  
 
   Thorax.CollectionView.prototype._loadCollection = function(collection, options) {
     if (collection.load) {
