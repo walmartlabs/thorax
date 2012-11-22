@@ -142,7 +142,7 @@ _.extend(Thorax.View.prototype, {
           this.$el.on(name, params.selector, boundHandler);
         }
       } else {
-        this.$el.on(name, boundHandler);
+        this.$el.on(params.name, boundHandler);
       }
     }
   }
