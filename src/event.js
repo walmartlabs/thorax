@@ -18,6 +18,10 @@ var _destroy = Thorax.View.prototype.destroy,
   Thorax.Util._cloneEvents(this, child, '_events');
 {{/inject}}
 
+{{#inject "destroy"}}
+  this.freeze();
+{{/inject}}
+
 _.extend(Thorax.View, {
   _events: [],
   on: function(eventName, callback) {
@@ -63,11 +67,6 @@ _.extend(Thorax.View.prototype, {
         child.freeze(options);
       }, this);
     }
-  },
-  destroy: function() {
-    var response = _destroy.apply(this, arguments);
-    this.freeze();
-    return response;
   },
   on: function(eventName, callback, context) {
     {{{override.on}}}
