@@ -1,5 +1,4 @@
-var _destroy = Thorax.View.prototype.destroy,
-    _on = Thorax.View.prototype.on,
+var _on = Thorax.View.prototype.on,
     _delegateEvents = Thorax.View.prototype.delegateEvents;
 
 {{#inject "configure"}}
