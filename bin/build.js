@@ -5,6 +5,7 @@ var fs = require('fs'),
 
 var templateCache = {},
     override = {
+      destroy: '',
       freeze: '',
       beforeConfigure: '',
       'constructor': '',
@@ -23,10 +24,15 @@ handlebars.registerHelper('has-plugin', function(name, options) {
 });
 
 handlebars.registerHelper('inject', function(name, options) {
+  override[name] += '// Begin injected code from "src/' + currentTemplateName + '.js"';
   override[name] += options.fn(this);
+  override[name] += '\n// End injected code\n';
 });
 
+var currentTemplateName;
+
 function renderTemplate(name, data) {
+  currentTemplateName = name;
   if (!templateCache[name]) {
     var filename = path.join(__dirname, '..', 'src', name) + '.js';
     templateCache[name] = handlebars.compile(fs.readFileSync(filename).toString());
@@ -104,7 +110,9 @@ module.exports = function(target, plugins) {
 
   //now render
   includedPlugins.forEach(function(item) {
+    output += '// Begin "src/' + item + '.js"\n'
     output += renderTemplate(item) + '\n';
+    output += '\n// End "src/' + item + '.js"\n\n'
   });
 
   writeFile(target, getLicense() + renderTemplate('fragments/scope', {
