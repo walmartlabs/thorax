@@ -71,6 +71,7 @@ Thorax.CollectionView = Thorax.HelperView.extend({
       fetch: true,
       success: false,
       errors: true
+      {{{override.collection-options}}}
     }, options || {});
   },
   setCollection: function(collection, options) {

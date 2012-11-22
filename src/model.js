@@ -125,6 +125,7 @@ _.extend(Thorax.View.prototype, {
         success: false,
         render: true,
         errors: true
+        {{{override.model-options}}}
       };
     }
     _.extend(this._modelOptions, options || {});

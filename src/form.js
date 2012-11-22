@@ -9,19 +9,14 @@ if (Thorax.View.prototype._setModelOptions) {
           this.populate(this.model.attributes, this._modelOptions.populate === true ? {} : this._modelOptions.populate);
         }
         return response;
-      },
-      _setModelOptions: function(options) {
-        if (!options) {
-          options = {};
-        }
-        if (!('populate' in options)) {
-          options.populate = true;
-        }
-        return _setModelOptions.call(this, options);
       }
     });
   })();
 }
+
+{{#inject "model-options"}}
+  , populate: true 
+{{/inject}}
 
 _.extend(Thorax.View.prototype, {
   //serializes a form present in the view, returning the serialized data

@@ -338,16 +338,11 @@ if (Thorax.Router) {
 //
 
 if (Thorax.Model) {
-  (function() {
-    // Propagates loading view parameters to the AJAX layer
-    var _setModelOptions = Thorax.View.prototype._setModelOptions;
-    Thorax.View.prototype._setModelOptions = function(options) {
-      return _setModelOptions.call(this, _.defaults({
-        ignoreErrors: this.ignoreFetchError,
-        background: this.nonBlockingLoad
-      }, options || {}));
-    };
-  })();
+  // Propagates loading view parameters to the AJAX layer
+  {{#inject "model-options"}}
+    , ignoreErrors: this.ignoreFetchError
+    , background: this.nonBlockingLoad
+  {{/inject}}
 
   Thorax.View.prototype._loadModel = function(model, options) {
     if (model.load) {
@@ -365,13 +360,10 @@ if (Thorax.Collection) {
   Thorax.mixinLoadableEvents(Thorax.CollectionView.prototype);
 
   // Propagates loading view parameters to the AJAX layer
-  var _setCollectionOptions = Thorax.CollectionView.prototype._setCollectionOptions;
-  Thorax.CollectionView.prototype._setCollectionOptions = function(collection, options) {
-    return _setCollectionOptions.call(this, collection, _.defaults({
-      ignoreErrors: this.ignoreFetchError,
-      background: this.nonBlockingLoad
-    }, options || {}));
-  };
+  {{#inject "collection-options"}}
+    , ignoreErrors: this.ignoreFetchError
+    , background: this.nonBlockingLoad
+  {{/inject}}
 
   Thorax.CollectionView.prototype._loadCollection = function(collection, options) {
     if (collection.load) {
