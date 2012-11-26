@@ -4,7 +4,7 @@ $(function() {
 
   test("url helper", function() {
     var view = new Thorax.View({
-      template: '<a href="{{url "/a/{{b}}"}}"></a>'
+      template: '<a href="{{url "/a/{{b}}" expand-tokens=true}}"></a>'
     });
     view.render();
     equal(view.$('a').attr('href'), '#/a/');

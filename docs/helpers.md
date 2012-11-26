@@ -25,11 +25,11 @@ The method may also be specified as a `method` attribute:
 
     {{#button method="methodName"}}Button{{/button}}
 
-### url *{{url urlString}}*
+### url *{{url urlString expand-tokens=bool}}*
 
-Prepends "#" if `Backbone.history.pushSate` is disabled or prepends `Backbone.history.root` if it is enabled, then resolves any handlebars tokens with the current context. For example if the context had an `id` attribute `{{id}}` would be replaced with the value of `id`:
+Prepends "#" if `Backbone.history.pushSate` is disabled or prepends `Backbone.history.root` if it is enabled. If `expand-tokens=true` is passed, then any handlebars tokens will be resolved with the current context. For example if the context had an `id` attribute `{{id}}` would be replaced with the value of `id`:
 
-    {{url "articles/{{id}}"}}
+    {{url "articles/{{id}}" expand-tokens=true}}
 
 Multiple arguments can be passed and will be joined with a "/":
 
