@@ -1,12 +1,14 @@
-
-var minimumScrollYOffset = $.os.android ? 1 : 0;
+var isMobile = 'ontouchstart' in document.documentElement,
+    isiOS = navigator.userAgent.match(/(iPhone|iPod|iPad)/i),
+    isAndroid = navigator.userAgent.toLowerCase().indexOf("android") > -1 ? 1 : 0,
+    minimumScrollYOffset = isAndroid ? 1 : 0;
 
 Thorax.Util.scrollTo = function(x, y) {
   y = y || minimumScrollYOffset;
   function _scrollTo() {
     window.scrollTo(x, y);
   }
-  if ($.os && $.os.ios) {
+  if (isiOS) {
     // a defer is required for ios
     _.defer(_scrollTo);
   } else {
@@ -30,8 +32,7 @@ Thorax.View.on({
 });
 
 //removal of click delay on mobile webkit
-var TAP_RANGE = 5,    // +-5px is still considered a tap
-    isMobile = 'ontouchstart' in document.documentElement;
+var TAP_RANGE = 5;    // +-5px is still considered a tap
 
 Thorax._fastClickEventName = 'click';
 Thorax.configureFastClick = function(useFastClick) {
@@ -190,7 +191,7 @@ $.fn.tapHoldAndEnd = function(selector, callbackStart, callbackEnd) {
 };
 
 //only enable on android
-var useNativeHighlight = !$.os.android;
+var useNativeHighlight = !isAndroid;
 Thorax.configureTapHighlight = function(useNative) {
   useNativeHighlight = useNative;
 };
