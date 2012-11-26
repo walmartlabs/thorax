@@ -27,9 +27,13 @@ The method may also be specified as a `method` attribute:
 
 ### url *{{url urlString}}*
 
-Prepends "#" if `Backbone.history.pushSate` is disabled, and resolves any url paramters with the current conext. For example if the context had an `id` attribute `:id` would be replaced with the value of `id`
+Prepends "#" if `Backbone.history.pushSate` is disabled or prepends `Backbone.history.root` if it is enabled, then resolves any handlebars tokens with the current context. For example if the context had an `id` attribute `{{id}}` would be replaced with the value of `id`:
 
-    {{url "articles/:id"}}
+    {{url "articles/{{id}}"}}
+
+Multiple arguments can be passed and will be joined with a "/":
+
+    {{url "articles" id}}
 
 ### link *{{#link url [htmlAttributes]}}*
 

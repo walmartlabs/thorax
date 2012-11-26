@@ -4,23 +4,6 @@ $(function() {
 
   test("url helper", function() {
     var view = new Thorax.View({
-      template: '<a href="{{url "/a/:b"}}"></a>'
-    });
-    view.render();
-    equal(view.$('a').attr('href'), '#/a/:b');
-    view.b = 'b';
-    view.render();
-    equal(view.$('a').attr('href'), '#/a/b');
-    view.b = false;
-    view.setModel(new Backbone.Model({
-      b: 'c'
-    }));
-    equal(view.$('a').attr('href'), '#/a/c');
-    view.setModel(false);
-    view.render();
-    equal(view.$('a').attr('href'), '#/a/:b');
-
-    var view = new Thorax.View({
       template: '<a href="{{url "/a/{{b}}"}}"></a>'
     });
     view.render();
@@ -33,6 +16,13 @@ $(function() {
       b: 'c'
     }));
     equal(view.$('a').attr('href'), '#/a/c');
+
+    var view = new Thorax.View({
+      template: '<a href="{{url "a" b}}"></a>',
+      b: 'c'
+    });
+    view.render();
+    equal(view.$('a').attr('href'), '#a/c');
   });
 
   test("option hash required arguments for button and link", function() {

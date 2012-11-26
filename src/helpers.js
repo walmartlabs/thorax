@@ -1,17 +1,14 @@
-var paramMatcher = /:(\w+)/g,
-    callMethodAttributeName = 'data-call-method',
+var callMethodAttributeName = 'data-call-method',
     triggerEventAttributeName = 'data-trigger-event';
 
-Handlebars.registerHelper('url', function(url) {
-  var matches = url.match(paramMatcher),
+Handlebars.registerHelper('url', function(fragment) {
+  var fragment,
       context = this;
-  if (matches) {
-    url = url.replace(paramMatcher, function(match, key) {
-      return context[key] ? Thorax.Util.getValue(context, key) : match;
-    });
+  if (arguments.length > 2) {
+    fragment = _.map(_.head(arguments, arguments.length - 1), encodeURIComponent).join('/');
   }
-  url = Thorax.Util.expandToken(url, context);
-  return (Backbone.history._hasPushState ? Backbone.history.options.root : '#') + url;
+  fragment = Thorax.Util.expandToken(fragment, context);
+  return (Backbone.history._hasPushState ? Backbone.history.options.root : '#') + fragment;
 });
 
 Handlebars.registerHelper('button', function(method, options) {
