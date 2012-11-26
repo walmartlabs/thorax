@@ -216,29 +216,26 @@ Thorax.Util = {
 Thorax.View = Backbone.View.extend({
   constructor: function() {
     var response = Backbone.View.apply(this, arguments);
+    
     // Begin injected code from "src/model.js"
-  if (this.model) {
-    //need to null this.model so setModel will not treat
-    //it as the old model and immediately return
-    var model = this.model;
-    this.model = null;
-    this.setModel(model);
-  }
-
-// End injected code
-
+    if (this.model) {
+      //need to null this.model so setModel will not treat
+      //it as the old model and immediately return
+      var model = this.model;
+      this.model = null;
+      this.setModel(model);
+    }
+      // End injected code
     return response;
   },
   _configure: function(options) {
+    
     // Begin injected code from "src/model.js"
-  this._modelEvents = [];
-
-// End injected code
-// Begin injected code from "src/collection.js"
-  this._collectionEvents = [];
-
-// End injected code
-
+    this._modelEvents = [];
+    // End injected code
+    // Begin injected code from "src/collection.js"
+    this._collectionEvents = [];
+      // End injected code
 
     Thorax._viewsIndexedByCid[this.cid] = this;
     this.children = {};
@@ -255,25 +252,23 @@ Thorax.View = Backbone.View.extend({
       //fetch the template 
       this.template = Thorax.Util.getTemplate(this.name, true);
     }
+    
     // Begin injected code from "src/mixin.js"
-  //HelperView will not have mixins so need to check
-  this.constructor.mixins && _.each(this.constructor.mixins, this.mixin, this);
-  this.mixins && _.each(this.mixins, this.mixin, this);
-
-// End injected code
-// Begin injected code from "src/event.js"
-  //_events not present on HelperView
-  this.constructor._events && this.constructor._events.forEach(function(event) {
-    this.on.apply(this, event);
-  }, this);
-  if (this.events) {
-    _.each(Thorax.Util.getValue(this, 'events'), function(handler, eventName) {
-      this.on(eventName, handler, this);
+    //HelperView will not have mixins so need to check
+    this.constructor.mixins && _.each(this.constructor.mixins, this.mixin, this);
+    this.mixins && _.each(this.mixins, this.mixin, this);
+    // End injected code
+    // Begin injected code from "src/event.js"
+    //_events not present on HelperView
+    this.constructor._events && this.constructor._events.forEach(function(event) {
+      this.on.apply(this, event);
     }, this);
-  }
-
-// End injected code
-
+    if (this.events) {
+      _.each(Thorax.Util.getValue(this, 'events'), function(handler, eventName) {
+        this.on(eventName, handler, this);
+      }, this);
+    }
+      // End injected code
   },
 
   _ensureElement : function() {
@@ -305,11 +300,10 @@ Thorax.View = Backbone.View.extend({
       });
       this.children = {};
     }
+    
     // Begin injected code from "src/event.js"
-  this.freeze();
-
-// End injected code
-
+    this.freeze();
+      // End injected code
   },
 
   render: function(output) {
@@ -386,23 +380,19 @@ Thorax.View = Backbone.View.extend({
 
 Thorax.View.extend = function() {
   var child = Backbone.View.extend.apply(this, arguments);
+  
   // Begin injected code from "src/mixin.js"
   child.mixins = _.clone(this.mixins);
-
-// End injected code
-// Begin injected code from "src/event.js"
+  // End injected code
+  // Begin injected code from "src/event.js"
   Thorax.Util._cloneEvents(this, child, '_events');
-
-// End injected code
-// Begin injected code from "src/model.js"
+  // End injected code
+  // Begin injected code from "src/model.js"
   Thorax.Util._cloneEvents(this, child, '_modelEvents');
-
-// End injected code
-// Begin injected code from "src/collection.js"
+  // End injected code
+  // Begin injected code from "src/collection.js"
   Thorax.Util._cloneEvents(this, child, '_collectionEvents');
-
-// End injected code
-
+    // End injected code
   return child;
 };
 
@@ -664,19 +654,17 @@ var _on = Thorax.View.prototype.on,
 _.extend(Thorax.View, {
   _events: [],
   on: function(eventName, callback) {
+    
     // Begin injected code from "src/model.js"
-  if (eventName === 'model' && typeof callback === 'object') {
-    return addEvents(this._modelEvents, callback);
-  }
-
-// End injected code
-// Begin injected code from "src/collection.js"
-  if (eventName === 'collection' && typeof callback === 'object') {
-    return addEvents(this._collectionEvents, callback);
-  }
-
-// End injected code
-
+    if (eventName === 'model' && typeof callback === 'object') {
+      return addEvents(this._modelEvents, callback);
+    }
+    // End injected code
+    // Begin injected code from "src/collection.js"
+    if (eventName === 'collection' && typeof callback === 'object') {
+      return addEvents(this._collectionEvents, callback);
+    }
+      // End injected code
     //accept on({"rendered": handler})
     if (typeof eventName === 'object') {
       _.each(eventName, function(value, key) {
@@ -699,11 +687,10 @@ _.extend(Thorax.View, {
 
 _.extend(Thorax.View.prototype, {
   freeze: function(options) {
+    
     // Begin injected code from "src/model.js"
-  this.model && this._unbindModelEvents();
-
-// End injected code
-
+    this.model && this._unbindModelEvents();
+      // End injected code
     options = _.defaults(options || {}, {
       dom: true,
       children: true
@@ -724,19 +711,17 @@ _.extend(Thorax.View.prototype, {
     }
   },
   on: function(eventName, callback, context) {
+    
     // Begin injected code from "src/model.js"
-  if (eventName === 'model' && typeof callback === 'object') {
-    return addEvents(this._modelEvents, callback);
-  }
-
-// End injected code
-// Begin injected code from "src/collection.js"
-  if (eventName === 'collection' && typeof callback === 'object') {
-    return addEvents(this._collectionEvents, callback);
-  }
-
-// End injected code
-
+    if (eventName === 'model' && typeof callback === 'object') {
+      return addEvents(this._modelEvents, callback);
+    }
+    // End injected code
+    // Begin injected code from "src/collection.js"
+    if (eventName === 'collection' && typeof callback === 'object') {
+      return addEvents(this._collectionEvents, callback);
+    }
+      // End injected code
     if (typeof eventName === 'object') {
       //accept on({"rendered": callback})
       if (arguments.length === 1) {
@@ -976,9 +961,16 @@ _.extend(Thorax.View.prototype, {
     return this;
   },
   _onModelChange: function() {
+    // !this._modelOptions will be true when setModel(false) is called
     if (!this._modelOptions || (this._modelOptions && this._modelOptions.render)) {
       this.render();
     }
+    
+    // Begin injected code from "src/form.js"
+    if (this._modelOptions && this._modelOptions.populate) {
+      this.populate(this.model.attributes, this._modelOptions.populate === true ? {} : this._modelOptions.populate);
+    }
+      // End injected code
   },
   _loadModel: function(model, options) {
     model.fetch(options);
@@ -990,16 +982,14 @@ _.extend(Thorax.View.prototype, {
         success: false,
         render: true,
         errors: true
+            
         // Begin injected code from "src/form.js"
-  , populate: true 
-
-// End injected code
-// Begin injected code from "src/loading.js"
-    , ignoreErrors: this.ignoreFetchError
-    , background: this.nonBlockingLoad
-  
-// End injected code
-
+        , populate: true 
+        // End injected code
+        // Begin injected code from "src/loading.js"
+          , ignoreErrors: this.ignoreFetchError
+          , background: this.nonBlockingLoad
+            // End injected code
       };
     }
     _.extend(this._modelOptions, options || {});
@@ -1145,12 +1135,11 @@ Thorax.CollectionView = Thorax.HelperView.extend({
       fetch: true,
       success: false,
       errors: true
+        
       // Begin injected code from "src/loading.js"
-    , ignoreErrors: this.ignoreFetchError
-    , background: this.nonBlockingLoad
-  
-// End injected code
-
+        , ignoreErrors: this.ignoreFetchError
+        , background: this.nonBlockingLoad
+          // End injected code
     }, options || {});
   },
   setCollection: function(collection, options) {
@@ -1546,20 +1535,23 @@ $.fn.collection = function(view) {
 // End "src/collection.js"
 
 // Begin "src/helpers.js"
-var paramMatcher = /:(\w+)/g,
-    callMethodAttributeName = 'data-call-method',
+var callMethodAttributeName = 'data-call-method',
     triggerEventAttributeName = 'data-trigger-event';
 
 Handlebars.registerHelper('url', function(url) {
-  var matches = url.match(paramMatcher),
-      context = this;
-  if (matches) {
-    url = url.replace(paramMatcher, function(match, key) {
-      return context[key] ? Thorax.Util.getValue(context, key) : match;
-    });
+  var fragment;
+  if (arguments.length > 2) {
+    fragment = _.map(_.head(arguments, arguments.length - 1), encodeURIComponent).join('/');
+  } else {
+    var options = arguments[1],
+        hash = (options && options.hash) || options;
+    if (hash && hash['expand-tokens']) {
+      fragment = Thorax.Util.expandToken(url, this);
+    } else {
+      fragment = url;
+    }
   }
-  url = Thorax.Util.expandToken(url, context);
-  return (Backbone.history._hasPushState ? Backbone.history.options.root : '#') + url;
+  return (Backbone.history._hasPushState ? Backbone.history.options.root : '#') + fragment;
 });
 
 Handlebars.registerHelper('button', function(method, options) {
@@ -1593,18 +1585,32 @@ Handlebars.registerHelper('link', function(url, options) {
   return new Handlebars.SafeString(Thorax.Util.tag.call(this, options.hash, options.fn ? options.fn(this) : '', this));
 });
 
-$(function() {
-  $(document).on(Thorax._fastClickEventName, '[' + callMethodAttributeName + '], [' + triggerEventAttributeName + ']', function(event) {
-    var target = $(event.target),
-        view = target.view({helper: false}),
-        methodName = target.attr(callMethodAttributeName),
-        eventName = target.attr(triggerEventAttributeName),
-        methodResponse = false;
-    methodName && (methodResponse = view[methodName].call(view, event));
-    eventName && view.trigger(eventName, event);
-    target.tagName === "A" && methodResponse === false && event.preventDefault();
-  });
-});
+var clickSelector = '[' + callMethodAttributeName + '], [' + triggerEventAttributeName + ']';
+
+function handleClick(event) {
+  var target = $(event.target),
+      view = target.view({helper: false}),
+      methodName = target.attr(callMethodAttributeName),
+      eventName = target.attr(triggerEventAttributeName),
+      methodResponse = false;
+  methodName && (methodResponse = view[methodName].call(view, event));
+  eventName && view.trigger(eventName, event);
+  target.tagName === "A" && methodResponse === false && event.preventDefault();
+}
+
+var lastClickHandlerEventName;
+
+function registerClickHandler() {
+  unregisterClickHandler();
+  lastClickHandlerEventName = Thorax._fastClickEventName || 'click';
+  $(document).on(lastClickHandlerEventName, clickSelector, handleClick);
+}
+
+function unregisterClickHandler() {
+  lastClickHandlerEventName && $(document).off(lastClickHandlerEventName, clickSelector, handleClick);
+}
+
+
 
 Thorax.View.prototype._anchorClick = function(event) {
   var target = $(event.currentTarget),
@@ -1623,21 +1629,7 @@ Thorax.View.prototype._anchorClick = function(event) {
 // End "src/helpers.js"
 
 // Begin "src/form.js"
-if (Thorax.View.prototype._setModelOptions) {
-  (function() {
-    var _onModelChange = Thorax.View.prototype._onModelChange,
-      _setModelOptions = Thorax.View.prototype._setModelOptions;
-    _.extend(Thorax.View.prototype, {
-      _onModelChange: function() {
-        var response = _onModelChange.call(this);
-        if (this._modelOptions.populate) {
-          this.populate(this.model.attributes, this._modelOptions.populate === true ? {} : this._modelOptions.populate);
-        }
-        return response;
-      }
-    });
-  })();
-}
+
 
 
 
@@ -1668,7 +1660,8 @@ _.extend(Thorax.View.prototype, {
     options = _.extend({
       set: true,
       validate: true,
-      children: true
+      children: true,
+      silent: true
     }, options || {});
 
     var attributes = options.attributes || {};
@@ -1706,7 +1699,7 @@ _.extend(Thorax.View.prototype, {
     }
 
     if (options.set && this.model) {
-      if (!this.model.set(attributes, {silent: true})) {
+      if (!this.model.set(attributes, {silent: options.silent})) {
         return false;
       };
     }
@@ -1798,13 +1791,8 @@ Thorax.View.on({
   deactivated: function() {
     resetSubmitState.call(this);
   }
-})
-/*
-  var selector = '[' + viewCidAttributeName + ']';
-  if (!options.helper) {
-    selector += ':not([' + viewHelperAttributeName + '])';
-  }
-*/
+});
+
 function eachNamedInput(options, iterator, context) {
   var i = 0, cid = this.cid;
   this.$('select,input,textarea', options.root || this.el).each(function() {
@@ -1933,6 +1921,9 @@ Thorax.LayoutView = Thorax.View.extend({
     this._view = view;
     oldView && (delete this.children[oldView.cid]);
     oldView && oldView._shouldDestroyOnNextSetView && oldView.destroy();
+    
+      options.scroll && Thorax.Util.scrollTo(0, 0);
+    
     this._view && this._view.trigger('ready', options);
     this.trigger('change:view:end', view, oldView, options);
     return view;
@@ -2453,15 +2444,17 @@ if (Thorax.CollectionView) {
 // End "src/loading.js"
 
 // Begin "src/mobile.js"
-
-var minimumScrollYOffset = $.os.android ? 1 : 0;
+var isMobile = 'ontouchstart' in document.documentElement,
+    isiOS = navigator.userAgent.match(/(iPhone|iPod|iPad)/i),
+    isAndroid = navigator.userAgent.toLowerCase().indexOf("android") > -1 ? 1 : 0,
+    minimumScrollYOffset = isAndroid ? 1 : 0;
 
 Thorax.Util.scrollTo = function(x, y) {
   y = y || minimumScrollYOffset;
   function _scrollTo() {
     window.scrollTo(x, y);
   }
-  if ($.os && $.os.ios) {
+  if (isiOS) {
     // a defer is required for ios
     _.defer(_scrollTo);
   } else {
@@ -2485,24 +2478,25 @@ Thorax.View.on({
 });
 
 //removal of click delay on mobile webkit
-var TAP_RANGE = 5,    // +-5px is still considered a tap
-    isMobile = 'ontouchstart' in document.documentElement;
+var TAP_RANGE = 5;    // +-5px is still considered a tap
 
 Thorax._fastClickEventName = 'click';
 Thorax.configureFastClick = function(useFastClick) {
+  var body = document.body;
   if (useFastClick && isMobile) {
     Thorax._fastClickEventName = 'fast-click';
-    document.body.addEventListener('touchstart', onTouchStart, true);
-    document.body.addEventListener('touchmove', onTouchMove, true);
-    document.body.addEventListener('touchend', onTouchEnd, true);
-    document.body.addEventListener('click', clickKiller, true);  
+    body.addEventListener('touchstart', onTouchStart, true);
+    body.addEventListener('touchmove', onTouchMove, true);
+    body.addEventListener('touchend', onTouchEnd, true);
+    body.addEventListener('click', clickKiller, true);  
   } else {
     Thorax._fastClickEventName = 'click';
-    document.body.removeEventListener('touchstart', onTouchStart, true);
-    document.body.removeEventListener('touchmove', onTouchMove, true);
-    document.body.removeEventListener('touchend', onTouchEnd, true);
-    document.body.removeEventListener('click', clickKiller, true);  
+    body.removeEventListener('touchstart', onTouchStart, true);
+    body.removeEventListener('touchmove', onTouchMove, true);
+    body.removeEventListener('touchend', onTouchEnd, true);
+    body.removeEventListener('click', clickKiller, true);  
   }
+  registerClickHandler && registerClickHandler();
 };
 
 if (isMobile) {
@@ -2571,7 +2565,10 @@ if (isMobile) {
   }
 
   Thorax.configureFastClick(isMobile);
+} else {
+  registerClickHandler && registerClickHandler();
 }
+
 
 //tap highlight
 
@@ -2640,7 +2637,7 @@ $.fn.tapHoldAndEnd = function(selector, callbackStart, callbackEnd) {
 };
 
 //only enable on android
-var useNativeHighlight = !$.os.android;
+var useNativeHighlight = !isAndroid;
 Thorax.configureTapHighlight = function(useNative) {
   useNativeHighlight = useNative;
 };
@@ -2728,12 +2725,8 @@ Thorax.View.prototype.setElement = function() {
 var _addEvent = Thorax.View.prototype._addEvent;
 Thorax.View.prototype._addEvent = function(params) {
   this._domEvents = this._domEvents || [];
-  if (params.type === "DOM") {
-    this._domEvents.push(params.originalName);
-  }
-  if ('ontouchstart' in document.documentElement) {
-    params.name = params.name.replace(/^click\b/, Thorax._fastClickEventName);
-  }
+  (params.type === "DOM") && this._domEvents.push(params.originalName);
+  isMobile && (params.name = params.name.replace(/^click\b/, Thorax._fastClickEventName));
   return _addEvent.call(this, params);
 };
 
