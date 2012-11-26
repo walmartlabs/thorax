@@ -24,6 +24,7 @@ Serializes a form. `callback` will receive the attributes from the form, followe
 - `set` - defaults to true, wether or not to set the attributes if valid on a model if one was set with `setModel`
 - `validate - defaults to true, wether or not to call `validateInput` during serialization
 - `children` - defaults to true, wether or not to serialize inputs in child views
+- `silent` - defaults to true, wether or not to pass `silent: true` to `model.set`
 
 Each form input in your application should contain a corresponding label. Since you may want to re-use the same form multiple times in the same view a `cid` attribute with a unique value is provided to each render call of each template:
     

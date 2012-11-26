@@ -35,7 +35,8 @@ _.extend(Thorax.View.prototype, {
     options = _.extend({
       set: true,
       validate: true,
-      children: true
+      children: true,
+      silent: true
     }, options || {});
 
     var attributes = options.attributes || {};
@@ -73,7 +74,7 @@ _.extend(Thorax.View.prototype, {
     }
 
     if (options.set && this.model) {
-      if (!this.model.set(attributes, {silent: true})) {
+      if (!this.model.set(attributes, {silent: options.silent})) {
         return false;
       };
     }

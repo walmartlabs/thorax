@@ -50,7 +50,6 @@ function indent(content, amount) {
 }
 
 handlebars.registerHelper('override', function(key, options) {
-  console.log('override helper called',key,override[key].length);
   return indent(override[key], options.hash.indent);
 });
 
