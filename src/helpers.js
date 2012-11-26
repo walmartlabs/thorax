@@ -45,18 +45,34 @@ Handlebars.registerHelper('link', function(url, options) {
   return new Handlebars.SafeString(Thorax.Util.tag.call(this, options.hash, options.fn ? options.fn(this) : '', this));
 });
 
-$(function() {
-  $(document).on({{#has-plugin "mobile"}}Thorax._fastClickEventName{{else}}'click'{{/has-plugin}}, '[' + callMethodAttributeName + '], [' + triggerEventAttributeName + ']', function(event) {
-    var target = $(event.target),
-        view = target.view({helper: false}),
-        methodName = target.attr(callMethodAttributeName),
-        eventName = target.attr(triggerEventAttributeName),
-        methodResponse = false;
-    methodName && (methodResponse = view[methodName].call(view, event));
-    eventName && view.trigger(eventName, event);
-    target.tagName === "A" && methodResponse === false && event.preventDefault();
-  });
-});
+var clickSelector = '[' + callMethodAttributeName + '], [' + triggerEventAttributeName + ']';
+
+function handleClick(event) {
+  var target = $(event.target),
+      view = target.view({helper: false}),
+      methodName = target.attr(callMethodAttributeName),
+      eventName = target.attr(triggerEventAttributeName),
+      methodResponse = false;
+  methodName && (methodResponse = view[methodName].call(view, event));
+  eventName && view.trigger(eventName, event);
+  target.tagName === "A" && methodResponse === false && event.preventDefault();
+}
+
+var lastClickHandlerEventName;
+
+function registerClickHandler() {
+  unregisterClickHandler();
+  lastClickHandlerEventName = Thorax._fastClickEventName || 'click';
+  $(document).on(lastClickHandlerEventName, clickSelector, handleClick);
+}
+
+function unregisterClickHandler() {
+  lastClickHandlerEventName && $(document).off(lastClickHandlerEventName, clickSelector, handleClick);
+}
+
+{{^has-plugin "mobile"}}
+  $(registerClickHandler);
+{{/has-plugin}}
 
 Thorax.View.prototype._anchorClick = function(event) {
   var target = $(event.currentTarget),

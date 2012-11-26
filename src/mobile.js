@@ -35,19 +35,21 @@ var TAP_RANGE = 5,    // +-5px is still considered a tap
 
 Thorax._fastClickEventName = 'click';
 Thorax.configureFastClick = function(useFastClick) {
+  var body = document.body;
   if (useFastClick && isMobile) {
     Thorax._fastClickEventName = 'fast-click';
-    document.body.addEventListener('touchstart', onTouchStart, true);
-    document.body.addEventListener('touchmove', onTouchMove, true);
-    document.body.addEventListener('touchend', onTouchEnd, true);
-    document.body.addEventListener('click', clickKiller, true);  
+    body.addEventListener('touchstart', onTouchStart, true);
+    body.addEventListener('touchmove', onTouchMove, true);
+    body.addEventListener('touchend', onTouchEnd, true);
+    body.addEventListener('click', clickKiller, true);  
   } else {
     Thorax._fastClickEventName = 'click';
-    document.body.removeEventListener('touchstart', onTouchStart, true);
-    document.body.removeEventListener('touchmove', onTouchMove, true);
-    document.body.removeEventListener('touchend', onTouchEnd, true);
-    document.body.removeEventListener('click', clickKiller, true);  
+    body.removeEventListener('touchstart', onTouchStart, true);
+    body.removeEventListener('touchmove', onTouchMove, true);
+    body.removeEventListener('touchend', onTouchEnd, true);
+    body.removeEventListener('click', clickKiller, true);  
   }
+  registerClickHandler && registerClickHandler();
 };
 
 if (isMobile) {
@@ -116,7 +118,10 @@ if (isMobile) {
   }
 
   Thorax.configureFastClick(isMobile);
+} else {
+  registerClickHandler && registerClickHandler();
 }
+
 
 //tap highlight
 
@@ -273,11 +278,7 @@ Thorax.View.prototype.setElement = function() {
 var _addEvent = Thorax.View.prototype._addEvent;
 Thorax.View.prototype._addEvent = function(params) {
   this._domEvents = this._domEvents || [];
-  if (params.type === "DOM") {
-    this._domEvents.push(params.originalName);
-  }
-  if ('ontouchstart' in document.documentElement) {
-    params.name = params.name.replace(/^click\b/, Thorax._fastClickEventName);
-  }
+  (params.type === "DOM") && this._domEvents.push(params.originalName);
+  isMobile && (params.name = params.name.replace(/^click\b/, Thorax._fastClickEventName));
   return _addEvent.call(this, params);
 };
