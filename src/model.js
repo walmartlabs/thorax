@@ -111,9 +111,11 @@ _.extend(Thorax.View.prototype, {
     return this;
   },
   _onModelChange: function() {
+    // !this._modelOptions will be true when setModel(false) is called
     if (!this._modelOptions || (this._modelOptions && this._modelOptions.render)) {
       this.render();
     }
+    {{{override "model-change" indent=4}}}
   },
   _loadModel: function(model, options) {
     model.fetch(options);
@@ -125,7 +127,7 @@ _.extend(Thorax.View.prototype, {
         success: false,
         render: true,
         errors: true
-        {{{override.model-options}}}
+        {{{override "model-options" indent=8}}}
       };
     }
     _.extend(this._modelOptions, options || {});

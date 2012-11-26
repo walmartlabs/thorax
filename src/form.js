@@ -1,21 +1,11 @@
-if (Thorax.View.prototype._setModelOptions) {
-  (function() {
-    var _onModelChange = Thorax.View.prototype._onModelChange,
-      _setModelOptions = Thorax.View.prototype._setModelOptions;
-    _.extend(Thorax.View.prototype, {
-      _onModelChange: function() {
-        var response = _onModelChange.call(this);
-        if (this._modelOptions.populate) {
-          this.populate(this.model.attributes, this._modelOptions.populate === true ? {} : this._modelOptions.populate);
-        }
-        return response;
-      }
-    });
-  })();
-}
-
 {{#inject "model-options"}}
   , populate: true 
+{{/inject}}
+
+{{#inject "model-change"}}
+  if (this._modelOptions && this._modelOptions.populate) {
+    this.populate(this.model.attributes, this._modelOptions.populate === true ? {} : this._modelOptions.populate);
+  }
 {{/inject}}
 
 _.extend(Thorax.View.prototype, {
