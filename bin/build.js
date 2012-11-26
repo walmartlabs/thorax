@@ -7,6 +7,7 @@ var templateCache = {},
     override = {
       'collection-options': '',
       'model-options': '',
+      'model-change': '',
       destroy: '',
       freeze: '',
       beforeConfigure: '',
@@ -25,10 +26,38 @@ handlebars.registerHelper('has-plugin', function(name, options) {
   }
 });
 
+function indent(content, amount) {
+  amount = amount || 0;
+  amount -= 2;
+  function spaces(spaceAmount) {
+    var spaces = '';
+    for (var i = 0; i < spaceAmount; ++i) {
+      spaces += ' ';
+    }
+    return spaces
+  }
+  var lines = content.split('\n');
+  return lines.map(function(line, i) {
+    var spaceAmount = amount;
+    if (i === 0) {
+      spaceAmount -= 2;
+    }
+    if (i === lines.length - 1) {
+      spaceAmount += 2;
+    }
+    return spaces(spaceAmount) + line;
+  }).join('\n');
+}
+
+handlebars.registerHelper('override', function(key, options) {
+  console.log('override helper called',key,override[key].length);
+  return indent(override[key], options.hash.indent);
+});
+
 handlebars.registerHelper('inject', function(name, options) {
-  override[name] += '// Begin injected code from "src/' + currentTemplateName + '.js"';
+  override[name] += '\n  // Begin injected code from "src/' + currentTemplateName + '.js"';
   override[name] += options.fn(this);
-  override[name] += '\n// End injected code\n';
+  override[name] += '  // End injected code';
 });
 
 var currentTemplateName;
@@ -41,7 +70,6 @@ function renderTemplate(name, data) {
   }
   data = data || {};
   data.version = packageJSON.version;
-  data.override = override;
   data.ldelim = '{';
   data.rdelim = '}';
   return templateCache[name](data);

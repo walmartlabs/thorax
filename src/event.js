@@ -24,7 +24,7 @@ var _on = Thorax.View.prototype.on,
 _.extend(Thorax.View, {
   _events: [],
   on: function(eventName, callback) {
-    {{{override.on}}}
+    {{{override "on" indent=4}}}
     //accept on({"rendered": handler})
     if (typeof eventName === 'object') {
       _.each(eventName, function(value, key) {
@@ -47,7 +47,7 @@ _.extend(Thorax.View, {
 
 _.extend(Thorax.View.prototype, {
   freeze: function(options) {
-    {{{override.freeze}}}
+    {{{override "freeze" indent=4}}}
     options = _.defaults(options || {}, {
       dom: true,
       children: true
@@ -68,7 +68,7 @@ _.extend(Thorax.View.prototype, {
     }
   },
   on: function(eventName, callback, context) {
-    {{{override.on}}}
+    {{{override "on" indent=4}}}
     if (typeof eventName === 'object') {
       //accept on({"rendered": callback})
       if (arguments.length === 1) {

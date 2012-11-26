@@ -193,11 +193,11 @@ Thorax.Util = {
 Thorax.View = Backbone.View.extend({
   constructor: function() {
     var response = Backbone.View.apply(this, arguments);
-    {{{override.constructor}}}
+    {{{override "constructor" indent=4}}}
     return response;
   },
   _configure: function(options) {
-    {{{override.beforeConfigure}}}
+    {{{override "beforeConfigure" indent=4}}}
 
     Thorax._viewsIndexedByCid[this.cid] = this;
     this.children = {};
@@ -214,7 +214,7 @@ Thorax.View = Backbone.View.extend({
       //fetch the template 
       this.template = Thorax.Util.getTemplate(this.name, true);
     }
-    {{{override.configure}}}
+    {{{override "configure" indent=4}}}
   },
 
   _ensureElement : function() {
@@ -246,7 +246,7 @@ Thorax.View = Backbone.View.extend({
       });
       this.children = {};
     }
-    {{{override.destroy}}}
+    {{{override "destroy" indent=4}}}
   },
 
   render: function(output) {
@@ -323,7 +323,7 @@ Thorax.View = Backbone.View.extend({
 
 Thorax.View.extend = function() {
   var child = Backbone.View.extend.apply(this, arguments);
-  {{{override.extend}}}
+  {{{override "extend" indent=2}}}
   return child;
 };
 
