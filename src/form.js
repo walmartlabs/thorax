@@ -165,7 +165,7 @@ Thorax.View.on({
   deactivated: function() {
     resetSubmitState.call(this);
   }
-})
+});
 
 function eachNamedInput(options, iterator, context) {
   var i = 0, cid = this.cid;
