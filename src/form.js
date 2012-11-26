@@ -166,12 +166,7 @@ Thorax.View.on({
     resetSubmitState.call(this);
   }
 })
-/*
-  var selector = '[' + viewCidAttributeName + ']';
-  if (!options.helper) {
-    selector += ':not([' + viewHelperAttributeName + '])';
-  }
-*/
+
 function eachNamedInput(options, iterator, context) {
   var i = 0, cid = this.cid;
   this.$('select,input,textarea', options.root || this.el).each(function() {
