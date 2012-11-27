@@ -48,7 +48,7 @@ Thorax.loadHandler = function(start, end) {
     }
 
     self._loadStart.events.push(object);
-    object.bind(loadEnd, function endCallback() {
+    object.on(loadEnd, function endCallback() {
       object.off(loadEnd, endCallback);
 
       var loadingEndTimeout = self._loadingTimeoutEndDuration;
