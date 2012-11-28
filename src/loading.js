@@ -443,8 +443,12 @@ Handlebars.registerViewHelper('loading', function(view) {
           collection: view.collection
         });
       }
-      view.appendItem(item, view.collection.length);
-      view.$el.children().last().attr('data-loading-element', view.collection.cid);
+      var index = view.options['loading-placement']
+        ? view.options['loading-placement'].call(view.parent, view)
+        : view.collection.length
+      ;
+      view.appendItem(item, index);
+      view.$el.children().eq(index).attr('data-loading-element', view.collection.cid);
     }, this), _.bind(function() {
       view.$el.find('[data-loading-element="' + view.collection.cid + '"]').remove();
     }, this));

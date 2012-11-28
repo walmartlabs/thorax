@@ -287,6 +287,7 @@ var collectionOptionNames = [
   {{#has-plugin "loading"}}
   , 'loading-template'
   , 'loading-view'
+  , 'loading-placement'
   {{/has-plugin}}
 ];
 
