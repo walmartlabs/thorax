@@ -62,7 +62,7 @@ Thorax.CollectionView = Thorax.HelperView.extend({
     //collection helper will initialize this.options, so need to mimic
     this.options || (this.options = {});
     this.collection && this.setCollection(this.collection);
-    Thorax.CollectionView._optionNames.forEach(function(optionName) {
+    collectionOptionNames.forEach(function(optionName) {
       options[optionName] && (this.options[optionName] = options[optionName]);
     }, this);
   },
@@ -276,7 +276,7 @@ Thorax.CollectionView = Thorax.HelperView.extend({
   }
 });
 
-Thorax.CollectionView._optionNames = [
+var collectionOptionNames = [
   'item-template',
   'empty-template',
   'item-view',
@@ -284,6 +284,10 @@ Thorax.CollectionView._optionNames = [
   'item-context',
   'empty-context',
   'filter'
+  {{#has-plugin "loading"}}
+  , 'loading-template'
+  , 'loading-view'
+  {{/has-plugin}}
 ];
 
 function bindCollectionEvents(collection, events) {
@@ -396,6 +400,7 @@ Handlebars.registerViewHelper('collection', Thorax.CollectionView, function(coll
       filter: view.options['filter']
     });
     view.setCollection(collection);
+    {{{override "collection-helper" indent=4}}}
   }
 });
 

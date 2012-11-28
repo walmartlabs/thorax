@@ -419,14 +419,8 @@ Handlebars.registerViewHelper('loading', function(view) {
   view.render();
 });
 
-//add "loading-view" and "loading-template" options to collection helper
-Thorax.View.on('helper:collection', function(view) {
-  if (arguments.length === 2) {
-    view = arguments[1];
-  }
-  if (!view.collection) {
-    view.collection = view.parent.collection;
-  }
+{{#inject "collection-helper"}}
+  //add "loading-view" and "loading-template" options to collection helper
   if (view.options['loading-view'] || view.options['loading-template']) {
     var item;
     var callback = Thorax.loadHandler(_.bind(function() {
@@ -456,9 +450,4 @@ Thorax.View.on('helper:collection', function(view) {
     }, this));
     view.on(view.collection, 'load:start', callback);
   }
-});
-
-if (Thorax.CollectionView) {
-  Thorax.CollectionView._optionNames.push('loading-template');
-  Thorax.CollectionView._optionNames.push('loading-view');
-}
+{{/inject}}
