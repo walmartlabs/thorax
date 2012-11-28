@@ -169,6 +169,7 @@ $(function() {
     parent.child.setCollection(letterCollection);
     parent.render();
     equal(parent.$('ul').length, 1);
+    equal(parent.child.parent, parent);
     equal(parent.$('li').length, letterCollection.length);
   });
 

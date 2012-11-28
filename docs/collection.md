@@ -71,15 +71,15 @@ Each collection event callback is called with the generated collection view prep
 
 ## Thorax.CollectionView
 
-A `CollectionView` class is automatically generated each time a `collection` helper is used. A CollectionView may also be created in JavaScript and appended as a child view with the `view` helper. The constructor will accept any options that the `collection` helper accepts, though any template or view names must be the actual names and not inline templates.
+A `CollectionView` class is automatically generated each time a `collection` helper is used. A CollectionView may also be created in JavaScript and appended as a child view with the `view` helper. The constructor will accept any options that the `collection` helper accepts, though any template or view names must be the actual names and not inline templates. The `parent` attribute of the `CollectionView` is required in the constructor and is not automatically set for you as it would be when using the `collection` helper.
 
-    var parent = new Thorax.View({
+    var view = new Thorax.View({
       initialize: function() {
         this.myCollectionView = new Thorax.CollectionView({
           parent: this,
           "item-template": "item-template-name"
         });
-        child.setCollection(myCollection);
+        this.myCollectionView.setCollection(myCollection);
       },
       template: "{{view myCollectionView}}"
     });
