@@ -1120,7 +1120,7 @@ Thorax.CollectionView = Thorax.HelperView.extend({
     //collection helper will initialize this.options, so need to mimic
     this.options || (this.options = {});
     this.collection && this.setCollection(this.collection);
-    Thorax.CollectionView._optionNames.forEach(function(optionName) {
+    collectionOptionNames.forEach(function(optionName) {
       options[optionName] && (this.options[optionName] = options[optionName]);
     }, this);
   },
@@ -1338,7 +1338,7 @@ Thorax.CollectionView = Thorax.HelperView.extend({
   }
 });
 
-Thorax.CollectionView._optionNames = [
+var collectionOptionNames = [
   'item-template',
   'empty-template',
   'item-view',
@@ -1346,6 +1346,10 @@ Thorax.CollectionView._optionNames = [
   'item-context',
   'empty-context',
   'filter'
+  
+  , 'loading-template'
+  , 'loading-view'
+  
 ];
 
 function bindCollectionEvents(collection, events) {
@@ -1458,6 +1462,39 @@ Handlebars.registerViewHelper('collection', Thorax.CollectionView, function(coll
       filter: view.options['filter']
     });
     view.setCollection(collection);
+    
+    // Begin injected code from "src/loading.js"
+    //add "loading-view" and "loading-template" options to collection helper
+    if (view.options['loading-view'] || view.options['loading-template']) {
+      var item;
+      var callback = Thorax.loadHandler(_.bind(function() {
+        if (view.collection.length === 0) {
+          view.$el.empty();
+        }
+        if (view.options['loading-view']) {
+          var instance = Thorax.Util.getViewInstance(view.options['loading-view'], {
+            collection: view.collection
+          });
+          view._addChild(instance);
+          if (view.options['loading-template']) {
+            instance.render(view.options['loading-template']);
+          } else {
+            instance.render();
+          }
+          item = instance;
+        } else {
+          item = view.renderTemplate(view.options['loading-template'], {
+            collection: view.collection
+          });
+        }
+        view.appendItem(item, view.collection.length);
+        view.$el.children().last().attr('data-loading-element', view.collection.cid);
+      }, this), _.bind(function() {
+        view.$el.find('[data-loading-element="' + view.collection.cid + '"]').remove();
+      }, this));
+      view.on(view.collection, 'load:start', callback);
+    }
+      // End injected code
   }
 });
 
@@ -2025,7 +2062,7 @@ Thorax.loadHandler = function(start, end) {
     }
 
     self._loadStart.events.push(object);
-    object.bind(loadEnd, function endCallback() {
+    object.on(loadEnd, function endCallback() {
       object.off(loadEnd, endCallback);
 
       var loadingEndTimeout = self._loadingTimeoutEndDuration;
@@ -2390,49 +2427,6 @@ Handlebars.registerViewHelper('loading', function(view) {
   view.render();
 });
 
-//add "loading-view" and "loading-template" options to collection helper
-Thorax.View.on('helper:collection', function(view) {
-  if (arguments.length === 2) {
-    view = arguments[1];
-  }
-  if (!view.collection) {
-    view.collection = view.parent.collection;
-  }
-  if (view.options['loading-view'] || view.options['loading-template']) {
-    var item;
-    var callback = Thorax.loadHandler(_.bind(function() {
-      if (view.collection.length === 0) {
-        view.$el.empty();
-      }
-      if (view.options['loading-view']) {
-        var instance = Thorax.Util.getViewInstance(view.options['loading-view'], {
-          collection: view.collection
-        });
-        view._addChild(instance);
-        if (view.options['loading-template']) {
-          instance.render(view.options['loading-template']);
-        } else {
-          instance.render();
-        }
-        item = instance;
-      } else {
-        item = view.renderTemplate(view.options['loading-template'], {
-          collection: view.collection
-        });
-      }
-      view.appendItem(item, view.collection.length);
-      view.$el.children().last().attr('data-loading-element', view.collection.cid);
-    }, this), _.bind(function() {
-      view.$el.find('[data-loading-element="' + view.collection.cid + '"]').remove();
-    }, this));
-    view.on(view.collection, 'load:start', callback);
-  }
-});
-
-if (Thorax.CollectionView) {
-  Thorax.CollectionView._optionNames.push('loading-template');
-  Thorax.CollectionView._optionNames.push('loading-view');
-}
 
 
 // End "src/loading.js"
