@@ -96,6 +96,10 @@ If directly creating a CollectionView instance, the collection property may be s
 
 Append a model (which will used to generate a new `item-view`) or a view at a given index in the `CollectionView`. If passing a view as the first argument `index` may be a model which will be used to look up the index.
 
+### removeItem *view.removeItem(model)*
+
+### updateItem *view.updateItem(model)*
+
 ## Thorax.Collection
 
 ### collection *Thorax.collection(name [,protoProps])*
