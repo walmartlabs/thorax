@@ -81,6 +81,7 @@ _.extend(Thorax.View.prototype, {
     unbindModelEvents.call(this, model, this._modelEvents);
   },
   addModel: function(model, options) {
+    this._models.push(model);
     var modelOptions = this._setModelOptions(model, options);
     this._bindModelEvents(model, modelOptions);
     if (Thorax.Util.shouldFetch(this.model, modelOptions)) {
