@@ -658,4 +658,19 @@ $(function() {
     equal(callCounter.test2, 1);
   });
 
+  test("pass CollectionView to Layout", function() {
+    var layout = new Thorax.LayoutView();
+    var collection = new Thorax.Collection([new Thorax.Model({
+      key: 'value'
+    })]);
+    var view = new Thorax.CollectionView({
+      tagName: 'ul',
+      parent: layout,
+      'item-template': Handlebars.compile('<li>{{key}}</li>')
+    });
+    view.setCollection(collection);
+    layout.setView(view);
+    equal(layout.$('li').html(), 'value');
+  });
+
 });
