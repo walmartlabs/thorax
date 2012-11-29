@@ -3,8 +3,8 @@
 {{/inject}}
 
 {{#inject "model-change"}}
-  if (this._modelOptions && this._modelOptions.populate) {
-    this.populate(this.model.attributes, this._modelOptions.populate === true ? {} : this._modelOptions.populate);
+  if (modelOptions && modelOptions.populate) {
+    this.populate(model.attributes, modelOptions.populate === true ? {} : modelOptions.populate);
   }
 {{/inject}}
 
