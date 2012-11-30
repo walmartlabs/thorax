@@ -169,9 +169,10 @@ var domEventRegexp = new RegExp('^(' + domEvents.join('|') + ')');
 
 function containHandlerToCurentView(handler, cid) {
   return function(event) {
+    var target = this;
     var view = $(event.target).view({helper: false});
     if (view && view.cid == cid) {
-      handler(event);
+      handler(event, target);
     }
   }
 }
