@@ -1,6 +1,6 @@
 {
   "mixins": {
-    "thorax-jquery": {
+    "thorax": {
       "scripts": [
         {"src": "lib/jquery.js", "global": true},
         {"src": "lib/underscore.js", "global": true},
