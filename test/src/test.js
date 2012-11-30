@@ -284,9 +284,9 @@ $(function() {
 
   test("local view functions are called in template scope", function() {
     var child = new Thorax.View({
-      template: '{{key "value"}}',
-      key: function(value) {
-        return value;
+      template: '{{key}}',
+      key: function() {
+        return 'value';
       }
     });
     child.render();
