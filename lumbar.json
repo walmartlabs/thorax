@@ -1,0 +1,27 @@
+{
+  "mixins": {
+    "thorax-jquery": {
+      "scripts": [
+        {"src": "lib/jquery.js", "global": true},
+        {"src": "lib/underscore.js", "global": true},
+        {"src": "lib/backbone.js", "global": true},
+        {"src": "lib/handlebars.js", "global": true},
+        {"src": "dist/thorax.js", "global": true}
+      ]
+    },
+
+    "thorax-mobile": {
+      "scripts": [
+        {"src": "lib/zepto.js", "global": true},
+        {"src": "lib/underscore.js", "global": true},
+        {"src": "lib/backbone.js", "global": true},
+        {"src": "lib/handlebars.runtime.js", "global": true},
+        {"src": "dist/thorax-mobile.js", "global": true}
+      ]
+    }
+  },
+
+  "templates": {
+    "template": "{{{templateCache}}}['{{{without-extension name}}}'] = '{{{data}}}';",
+  }
+}
