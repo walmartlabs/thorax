@@ -1,6 +1,6 @@
 {
   "name": "thorax",
-  "version": "2.0.0b4",
+  "version": "2.0.0b5",
   "description": "Handlebars + Backbone",
   "keywords": ["backbone", "handlebars"],
   "authors": [
@@ -17,6 +17,9 @@
   "dependencies": {
     "fs-watch-tree": "0.2.0",
     "handlebars": "1.0.x"
+  },
+  "devDependencies": {
+    "connect": "2.7.0"
   },
   "scripts": {
     "start": "node bin/test-server.js . 8083",
