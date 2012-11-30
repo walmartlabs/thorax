@@ -2,10 +2,15 @@
 
 ## 2.0.0b5
 
-- add `trigger` attribute option to button and link helpers
+- `expand-tokens=true` is now required in the `url` helper to expand handlebars tokens inside a url
+- Added `loading-placement` option to the `collection-helper`
+- DOM event handlers now recieve the original context (if the handler had been registered with $.on) as the second argument
+- Added bower support
+- Add `trigger` attribute option to button and link helpers
 - Fail silently when #view helper does not find a view instance (1.x behavior)
 - `$.model` now accepts a view as an optional argument 
 - `Thorax.View.prototype._loadTemplate` renamed to `Thorax.Util.getTemplate`
+
 ## 2.0.0b4
 
 - add `template` helper block capture and `yield` variable
