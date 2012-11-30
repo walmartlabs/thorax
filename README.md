@@ -1,42 +1,7 @@
 An opinionated, battle tested [Backbone](http://backbonejs.org/) + [Handlebars](http://handlebarsjs.com/) framework to build large scale web applications. 
 
 Downloads
-
-<table cellpadding="0" cellspacing="0" border="0" width="100%" id="downloads">
-  <thead>
-    <tr>
-      <th width="33%">Downloads</th>
-      <th width="33%">Sample Applications</th>
-      <th width="33%">Live Apps</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td width="33%">
-        <ul>
-          <li><a href="https://github.com/walmartlabs/thorax/blob/master/dist/thorax.js">thorax.js</a></li>
-          <li><a href="https://github.com/downloads/walmartlabs/thorax/thorax-html.zip">HTML Only Boilerplate</a></li>
-          <li><a href="https://github.com/downloads/walmartlabs/thorax/thorax-lumbar.zip">Lumbar Boilerplate (Node)</a></li>
-          <li><a href="https://github.com/downloads/walmartlabs/thorax/thorax-mobile.zip">Mobile Boilerplate (Node)</a></li>
-          <li><a href="https://github.com/downloads/walmartlabs/thorax/thorax-rails.zip">Rails Boilerplate</a></li>
-        </ul>
-      </td>
-      <td width="33%">
-        <ul>
-          <li><a href="#">Contact Editor</a> | <a href="#">Source</a></li>
-          <li><a href="#">TodoMVC</a> | <a href="#">Source</a></li>
-          <li><a href="#">TodoMVC for Lumbar</a> | <a href="#">Source</a></li>
-          <li><a href="#">TodoMVC for Require.js</a> | <a href="#">Source</a></li>
-        </ul>
-      </td>
-      <td width="33%">
-        <ul>
-          <li><a href="http://m.walmart.com/r/phoenix">Walmart Mobile</a></li>
-        </ul>
-      </td>
-    </tr>
-  </tbody>
-</table>
+---------
 
 <table cellpadding="0" cellspacing="0" border="0" width="100%" id="downloads">
   <tr>
