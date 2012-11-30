@@ -1,8 +1,5 @@
 An opinionated, battle tested [Backbone](http://backbonejs.org/) + [Handlebars](http://handlebarsjs.com/) framework to build large scale web applications. 
 
-Downloads
----------
-
 <table cellpadding="0" cellspacing="0" border="0" width="100%" id="downloads">
   <tr>
     <td width="25%">
@@ -23,12 +20,14 @@ Downloads
     </td>
   </tr>
   <tr>
-    <td width="25%"><a href="https://github.com/downloads/walmartlabs/thorax/thorax-html.zip" class="btn">Download 2.0.0b4</a></td>
-    <td width="25%"><a href="https://github.com/downloads/walmartlabs/thorax/thorax-lumbar.zip" class="btn btn-primary">Download 2.0.0b4</a></td>
-    <td width="25%"><a href="https://github.com/downloads/walmartlabs/thorax/thorax-mobile.zip" class="btn">Download 2.0.0b4</a></td>
-    <td width="25%"><a href="https://github.com/downloads/walmartlabs/thorax/thorax-rails.zip" class="btn">Download 2.0.0b4</a></td>
+    <td width="25%"><a href="https://github.com/downloads/walmartlabs/thorax/thorax-html.zip" class="btn">Download 2.0.0b5</a></td>
+    <td width="25%"><a href="https://github.com/downloads/walmartlabs/thorax/thorax-lumbar.zip" class="btn btn-primary">Download 2.0.0b5</a></td>
+    <td width="25%"><a href="https://github.com/downloads/walmartlabs/thorax/thorax-mobile.zip" class="btn">Download 2.0.0b5</a></td>
+    <td width="25%"><a href="https://github.com/downloads/walmartlabs/thorax/thorax-rails.zip" class="btn">Download 2.0.0b5</a></td>
   </tr>
 </table>
+
+**Thorax 2 is presently in beta, the [stable source](https://github.com/walmartlabs/thorax/tree/1.2) and [documentation](http://walmartlabs.github.com/thorax/stable) are still available.**
 
 Thorax can be used standalone in any JavaScript environment in addition the [boilerplate projects](https://github.com/walmartlabs/thorax-boilerplate) provided above.
 
@@ -38,18 +37,44 @@ Thorax can be used standalone in any JavaScript environment in addition the [boi
     view.render();
     $("body").append(view.el);
 
-## Editable Examples
+<table cellpadding="0" cellspacing="0" border="0" width="100%">
+  <thead>
+    <tr>
+      <th>Editable Examples</th>
+      <th>Resources</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td width="50%">
+        <p>All of the examples use the <a href="https://raw.github.com/gist/3504663/d1e6321e9fdb69ff47d636eab5df5e52acb64ae0/gistfile1.txt">same sample data</a>.</p>
+        <ul>
+          <li><a href="http://jsfiddle.net/M3qjv/">Simple Todos</a></li>
+          <li><a href="http://jsfiddle.net/qwyvx/">$.model</a></li>
+          <li><a href="http://jsfiddle.net/5sWA8/">Context</a></li>
+          <li><a href="http://jsfiddle.net/x3qMU/">view &amp; template helpers</a></li>
+          <li><a href="http://jsfiddle.net/wCbHk/">empty helper</a></li>
+          <li><a href="http://jsfiddle.net/Kaths/">freeze</a></li>
+          <li><a href="http://jsfiddle.net/KX5bC/">LayoutView</a></li>
+          <li><a href="http://jsfiddle.net/AMBgp/">registerViewHelper</a></li>
+        </ul>
+      </td>
+      <td style="vertical-align:top;" width="50%">
+        <ul>
+          <li>
+            <a href="http://todomvc.com/labs/architecture-examples/thorax/">Thorax TodoMVC</a>
+            <ul>
+              <li><a href="https://github.com/addyosmani/todomvc/tree/gh-pages/labs/architecture-examples/thorax">Standalone Source</a></li>
+              <li><a href="https://github.com/addyosmani/todomvc/tree/gh-pages/labs/dependency-examples/thorax_lumbar">Thorax + Lumbar Source</a></li>
+              <li><a href="https://github.com/addyosmani/todomvc/tree/gh-pages/labs/dependency-examples/thorax_require">Thorax + Require.js Source</a>
+            </ul>
+          </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
 
-All of the examples use the [same sample data](https://raw.github.com/gist/3504663/d1e6321e9fdb69ff47d636eab5df5e52acb64ae0/gistfile1.txt).
-
-- [Todos](http://jsfiddle.net/M3qjv/)
-- [$.model](http://jsfiddle.net/qwyvx/)
-- [Context](http://jsfiddle.net/5sWA8/)
-- [view & template helpers](http://jsfiddle.net/x3qMU/)
-- [empty helper](http://jsfiddle.net/wCbHk/)
-- [freeze](http://jsfiddle.net/Kaths/)
-- [LayoutView](http://jsfiddle.net/KX5bC/)
-- [registerViewHelper](http://jsfiddle.net/AMBgp/)
 
 ## Registry
 
