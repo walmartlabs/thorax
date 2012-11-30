@@ -6,6 +6,7 @@ $(function() {
 
   Thorax.templates['parent'] = '<div>{{view child}}</div>';
   Thorax.templates['child'] = '<div>{{value}}</div>';
+  Thorax.templates['extension-test.handlebars'] = '123';
 
   test("registry", function() {
     var viewClass = Thorax.View.extend({name: 'a-name'}, {});
@@ -45,6 +46,12 @@ $(function() {
     view.render();
     equal(view.$('p > span').html(), 'inner', 'test nested registryGet');
     equal(view.$('div > span').html(), 'nested', 'test nested registryGet');
+
+    view = new Thorax.View({
+      name: 'extension-test'
+    });
+    view.render();
+    equal(view.html(), '123');
   });
 
   test("context may be an object", function() {
