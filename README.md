@@ -42,14 +42,14 @@ Thorax can be used standalone in any JavaScript environment in addition the [boi
 
 All of the examples use the [same sample data](https://raw.github.com/gist/3504663/d1e6321e9fdb69ff47d636eab5df5e52acb64ae0/gistfile1.txt).
 
-- [Todos](http://jsfiddle.net/AhKp3/)
-- [$.model](http://jsfiddle.net/e3CML/)
-- [Context](http://jsfiddle.net/5p2mw/)
-- [view & template helpers](http://jsfiddle.net/aaNxq/)
-- [empty helper](http://jsfiddle.net/xFrrT/)
-- [freeze](http://jsfiddle.net/hBjje/)
-- [LayoutView](http://jsfiddle.net/7BmCw/)
-- [registerViewHelper](http://jsfiddle.net/SxxZh/)
+- [Todos](http://jsfiddle.net/M3qjv/)
+- [$.model](http://jsfiddle.net/qwyvx/)
+- [Context](http://jsfiddle.net/5sWA8/)
+- [view & template helpers](http://jsfiddle.net/x3qMU/)
+- [empty helper](http://jsfiddle.net/wCbHk/)
+- [freeze](http://jsfiddle.net/Kaths/)
+- [LayoutView](http://jsfiddle.net/KX5bC/)
+- [registerViewHelper](http://jsfiddle.net/AMBgp/)
 
 ## Registry
 
