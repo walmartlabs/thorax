@@ -44,7 +44,7 @@
                 </li>
               
                 <li>
-                  <a href="#view-helpers/url-url-urlstring">url </a>
+                  <a href="#view-helpers/url-url-urlstring-expand-tokens-bool">url </a>
                 </li>
               
                 <li>
@@ -55,7 +55,7 @@
           
         </li>
       
-    </ul><div class="header"><a href="#">Plugins</a></div><ul class="sections"><li><a href="collection.html">Collection</a></li><li><a href="event.html">Event</a></li><li><a href="form.html">Form</a></li><li><a href="helpers.html">Helpers</a></li><li><a href="loading.html">Loading</a></li><li><a href="model.html">Model</a></li><li><a href="view-controller.html">ViewController</a></li></ul>
+    </ul><div class="header"><a href="#">Plugins</a></div><ul class="sections"><li><a href="collection.html">Collection</a></li><li><a href="event.html">Event</a></li><li><a href="form.html">Form</a></li><li><a href="helpers.html">Helpers</a></li><li><a href="loading.html">Loading</a></li><li><a href="mobile.html">Mobile</a></li><li><a href="model.html">Model</a></li><li><a href="view-controller.html">ViewController</a></li></ul>
     
     
   </div>
@@ -68,16 +68,48 @@
 
 </p>
 <pre><code>{{#button <span class="string">"methodName"</span> <span class="class"><span class="keyword">class</span>="btn"}}<span class="type">Click</span> <span class="type">Me</span>{{/button}}</span></code></pre>
-<h3 id="view-helpers/url-url-urlstring" class="signature">url <em>{{url urlString}}</em></h3>
-<p>Prepends "#" if <code>Backbone.history.pushSate</code> is disabled, and resolves any url paramters with the current conext. For example if the context had an <code>id</code> attribute <code>:id</code> would be replaced with the value of <code>id</code>
+<p>The tag name may also be specified:
 
 </p>
-<pre><code>{{<span class="title">url</span> <span class="string">"articles/:id"</span>}}</code></pre>
+<pre><code>{{#button <span class="string">"methodName"</span> tag=<span class="string">"a"</span> <span class="class"><span class="keyword">class</span>="btn"}}<span class="type">A</span> <span class="type">Link</span>{{/button}}</span></code></pre>
+<p>A <code>trigger</code> attribute will trigger an event on the declaring view:
+
+</p>
+<pre><code><span class="variable">{{#button trigger="eventName"}}</span>Button<span class="variable">{{/button}}</span></code></pre>
+<p>A button can have both a <code>trigger</code> attribute and a method to call:
+
+</p>
+<pre><code><span class="variable">{{#button "methodName" trigger="eventName"}}</span>Button<span class="variable">{{/button}}</span></code></pre>
+<p>The method may also be specified as a <code>method</code> attribute:
+
+</p>
+<pre><code><span class="variable">{{#button method="methodName"}}</span>Button<span class="variable">{{/button}}</span></code></pre>
+<h3 id="view-helpers/url-url-urlstring-expand-tokens-bool" class="signature">url <em>{{url urlString expand-tokens=bool}}</em></h3>
+<p>Prepends "#" if <code>Backbone.history.pushSate</code> is disabled or prepends <code>Backbone.history.root</code> if it is enabled. If <code>expand-tokens=true</code> is passed, then any handlebars tokens will be resolved with the current context. For example if the context had an <code>id</code> attribute <code>{{id}}</code> would be replaced with the value of <code>id</code>:
+
+</p>
+<pre><code>{{<span class="title">url</span> <span class="string">"articles/{{id}}"</span> expand-tokens=<span class="built_in">true</span>}}</code></pre>
+<p>Multiple arguments can be passed and will be joined with a "/":
+
+</p>
+<pre><code>{{<span class="title">url</span> <span class="string">"articles"</span> id}}</code></pre>
 <h3 id="view-helpers/link-link-url-htmlattributes" class="signature">link <em>{{#link url [htmlAttributes]}}</em></h3>
 <p>Creates an <code>a</code> tag that will call <code>Backbone.history.navigate()</code> with the given url when clicked. Passes the <code>url</code> parameter to the <code>url</code> helper with the current context. Do not use this method for creating external links.
 
 </p>
 <pre><code>{{#link <span class="string">"articles/:id"</span> <span class="class"><span class="keyword">class</span>="article-link"}}<span class="type">Link</span> <span class="type">Text</span>{{/link}}</span></code></pre>
+<p>To call a method from an <code>a</code> tag use the <code>button</code> helper:
+
+</p>
+<pre><code><span class="variable">{{#button "methodName" tag="a"}}</span>My Link<span class="variable">{{/button}}</span></code></pre>
+<p>Like the <code>button</code> helper, a <code>trigger</code> attribute may be specified that will trigger an event on the delcaring view in addition to navigating to the specified url:
+
+</p>
+<pre><code><span class="variable">{{#link "articles/:id" trigger="customEvent"}}</span>Link Text<span class="variable">{{/link}}</span></code></pre>
+<p>The href attribute is required but may also be specified as an attribute:
+
+</p>
+<pre><code><span class="variable">{{#link href="articles/:id"}}</span>Link Test<span class="variable">{{/link}}</span></code></pre>
 
   <p>Copyright 2012 <a href="http://walmartlabs.com">@WalmartLabs</a></p></div>
 </div><a href="https://github.com/walmartlabs/thorax"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"></a></body>

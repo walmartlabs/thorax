@@ -83,14 +83,14 @@
             <ul>
               
                 <li>
-                  <a href="#/model-event-target-model">$.model </a>
+                  <a href="#/model-event-target-model-view">$.model </a>
                 </li>
               
             </ul>
           
         </li>
       
-    </ul><div class="header"><a href="#">Plugins</a></div><ul class="sections"><li><a href="collection.html">Collection</a></li><li><a href="event.html">Event</a></li><li><a href="form.html">Form</a></li><li><a href="helpers.html">Helpers</a></li><li><a href="loading.html">Loading</a></li><li><a href="model.html">Model</a></li><li><a href="view-controller.html">ViewController</a></li></ul>
+    </ul><div class="header"><a href="#">Plugins</a></div><ul class="sections"><li><a href="collection.html">Collection</a></li><li><a href="event.html">Event</a></li><li><a href="form.html">Form</a></li><li><a href="helpers.html">Helpers</a></li><li><a href="loading.html">Loading</a></li><li><a href="mobile.html">Mobile</a></li><li><a href="model.html">Model</a></li><li><a href="view-controller.html">ViewController</a></li></ul>
     
     
   </div>
@@ -137,7 +137,7 @@
 <li><strong>fetch</strong> - Boolean, wether to fetch the model when it is set, defaults to true.</li>
 <li><strong>success</strong> - Callback on fetch success, defaults to noop</li>
 <li><strong>render</strong> - Render on the view on model:change? Defaults to true</li>
-<li><strong>populate</strong> - Call <code>populate</code> with the model's attributes when it is set? Defaults to true</li>
+<li><strong>populate</strong> - Call <code>populate</code> with the model's attributes when it is set? Defaults to true. Pass <code>populate: {children: false}</code> to prevent child views from having their inputs populated.</li>
 <li><strong>errors</strong> - When the model triggers an <code>error</code> event, trigger the event on the view? Defaults to true</li>
 </ul>
 <p>The following are equivelent:
@@ -148,11 +148,12 @@
 })<span class="comment">;</span>
 view<span class="preprocessor">.setModel</span>(myModel)<span class="comment">;</span></code></pre>
 <h2 id="">$</h2>
-<h3 id="/model-event-target-model" class="signature">$.model <em>$(event.target).model()</em></h3>
+<h3 id="/model-event-target-model-view" class="signature">$.model <em>$(event.target).model([view])</em></h3>
 <p>Get a reference to the nearest bound model.
 
 </p>
 <pre><code>$(event<span class="variable">.target</span>)<span class="variable">.model</span>()</code></pre>
+<p>Passing a view instance will limit the lookup to just that view.</p>
 
   <p>Copyright 2012 <a href="http://walmartlabs.com">@WalmartLabs</a></p></div>
 </div><a href="https://github.com/walmartlabs/thorax"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"></a></body>

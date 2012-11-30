@@ -44,7 +44,7 @@
                 </li>
               
                 <li>
-                  <a href="#form-handling/populate-view-populate-attributes">populate </a>
+                  <a href="#form-handling/populate-view-populate-attributes-options">populate </a>
                 </li>
               
                 <li>
@@ -55,7 +55,7 @@
           
         </li>
       
-    </ul><div class="header"><a href="#">Plugins</a></div><ul class="sections"><li><a href="collection.html">Collection</a></li><li><a href="event.html">Event</a></li><li><a href="form.html">Form</a></li><li><a href="helpers.html">Helpers</a></li><li><a href="loading.html">Loading</a></li><li><a href="model.html">Model</a></li><li><a href="view-controller.html">ViewController</a></li></ul>
+    </ul><div class="header"><a href="#">Plugins</a></div><ul class="sections"><li><a href="collection.html">Collection</a></li><li><a href="event.html">Event</a></li><li><a href="form.html">Form</a></li><li><a href="helpers.html">Helpers</a></li><li><a href="loading.html">Loading</a></li><li><a href="mobile.html">Mobile</a></li><li><a href="model.html">Model</a></li><li><a href="view-controller.html">ViewController</a></li></ul>
     
     
   </div>
@@ -78,30 +78,34 @@
   }
 })<span class="comment">;</span></code></pre>
 <h3 id="form-handling/serialize-view-serialize-event-callback-options" class="signature">serialize <em>view.serialize([event], callback [,options])</em></h3>
-<p>Serializes a form. <code>callback</code> will receive the attributes from the form and will only be called if <code>validateInput</code> returns nothing or an empty array. If an <code>event</code> is passed a check will be run to prevent duplicate submission. <code>options</code> may contain:
+<p>Serializes a form. <code>callback</code> will receive the attributes from the form, followed by a <code>release</code> method which must be called before the form can be submitted again. <code>callback</code> will only be called if <code>validateInput</code> returns nothing or an empty array. <code>options</code> may contain:
 
 </p>
 <ul>
 <li><code>set</code> - defaults to true, wether or not to set the attributes if valid on a model if one was set with <code>setModel</code></li>
 <li><code>validate - defaults to true, wether or not to call </code>validateInput` during serialization</li>
+<li><code>children</code> - defaults to true, wether or not to serialize inputs in child views</li>
+<li><code>silent</code> - defaults to true, wether or not to pass <code>silent: true</code> to <code>model.set</code></li>
 </ul>
 <p>Each form input in your application should contain a corresponding label. Since you may want to re-use the same form multiple times in the same view a <code>cid</code> attribute with a unique value is provided to each render call of each template:
 
 </p>
 <pre><code><span class="tag">&lt;<span class="title">label</span> <span class="attribute">for</span>=<span class="value">"<span class="variable">{{cid}}</span>-last-name"</span>/</span>
 <span class="tag">&lt;<span class="title">input</span> <span class="attribute">name</span>=<span class="value">"last-name"</span> <span class="attribute">id</span>=<span class="value">"<span class="variable">{{cid}}</span>-last-name"</span> <span class="attribute">value</span>=<span class="value">"Beastridge"</span>/</span>
-<span class="tag">&lt;<span class="title">label</span> <span class="attribute">for</span>=<span class="value">"<span class="variable">{{cid}}</span>-last-name"</span>/</span>
+<span class="tag">&lt;<span class="title">label</span> <span class="attribute">for</span>=<span class="value">"<span class="variable">{{cid}}</span>-address[street]"</span>/</span>
 <span class="tag">&lt;<span class="title">input</span> <span class="attribute">name</span>=<span class="value">"address[street]"</span> <span class="attribute">value</span>=<span class="value">"123 Chestnut"</span> <span class="attribute">id</span>=<span class="value">"<span class="variable">{{cid}}</span>-address[street]"</span>/</span>
 
 new Thorax.View({
   events: {
-    "submit form": "_handleSubmit"
-  },
-  _handleSubmit: function(event) {
-    this.serialize(event, function(attributes) {
-      attributes["last-name"] === "Beastridge";
-      attributes.address.street === "123 Chestnut";
-    });
+    "submit form": function(event) {
+      this.serialize(event, function(attributes, release) {
+        attributes["last-name"] === "Beastridge";
+        attributes.address.street === "123 Chestnut";
+        //form is locked to prevent duplicate submission
+        //until release is called
+        release();
+      });
+    }
   }
 });</code></pre>
 <p><code>serialize</code> Triggers the following events:
@@ -115,11 +119,11 @@ new Thorax.View({
 <p>If your view uses inputs with non standard names (or no names, multiple inputs with the same name, etc), use the <code>serialize</code> event:
 
 </p>
-<pre><code><span class="keyword">this</span>.bind(<span class="string">'serialize'</span>, _.bind(<span class="keyword">function</span>(attributes) {
+<pre><code><span class="keyword">this</span>.<span class="literal">on</span>(<span class="string">'serialize'</span>, _.bind(<span class="reserved">function</span>(attributes) {
   attributes.custom = <span class="keyword">this</span>.$(<span class="string">'.my-input'</span>).val();
 }, <span class="keyword">this</span>));</code></pre>
-<h3 id="form-handling/populate-view-populate-attributes" class="signature">populate <em>view.populate([attributes])</em></h3>
-<p>Populate the form fields in the view with the given attributes. The keys of the attributes should correspond to the names of the inputs. <code>populate</code> is automatically called with the response from <code>view.context(view.model.attributes)</code> when <code>setModel</code> is called.
+<h3 id="form-handling/populate-view-populate-attributes-options" class="signature">populate <em>view.populate([attributes] [,options])</em></h3>
+<p>Populate the form fields in the view with the given attributes. The keys of the attributes should correspond to the names of the inputs. <code>populate</code> is automatically called with the response from <code>view.context()</code> when <code>setModel</code> is called. By default this is just <code>model.attributes</code>.
 
 </p>
 <pre><code>view<span class="preprocessor">.populate</span>({
@@ -134,6 +138,12 @@ new Thorax.View({
 <pre><code><span class="keyword">this</span>.bind(<span class="string">'populate'</span>, _.bind(<span class="keyword">function</span>(attributes) {
   <span class="keyword">this</span>.$(<span class="string">'.my-input'</span>).val(attributes.custom);
 }, <span class="keyword">this</span>));</code></pre>
+<p>To prevent child views from having their inputs populated use:
+
+</p>
+<pre><code><span class="tag">view</span><span class="class">.populate</span>(<span class="tag">object</span>, <span class="rules">{
+  <span class="rule"><span class="attribute">children</span>:<span class="value"> false
+</span>}</span></span>);</code></pre>
 <h3 id="form-handling/validateinput-view-validateinput-attributes" class="signature">validateInput <em>view.validateInput(attributes)</em></h3>
 <p>Validate the attributes created by <code>serialize</code>, must return an array or nothing (if valid). It's recommended that the array contain hashes with <code>name</code> and <code>message</code> attributes, but arbitrary data or objects may be passed. If the array has a zero length the attributes are considered to be valid. Returning an array with any errors will trigger the <code>error</code> event.
 

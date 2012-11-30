@@ -62,7 +62,19 @@
             <ul>
               
                 <li>
+                  <a href="#thorax-collectionview/setcollection-view-setcollection-collection-options">setCollection </a>
+                </li>
+              
+                <li>
                   <a href="#thorax-collectionview/appenditem-view-appenditem-modelorview-index">appendItem </a>
+                </li>
+              
+                <li>
+                  <a href="#thorax-collectionview/removeitem-view-removeitem-model">removeItem </a>
+                </li>
+              
+                <li>
+                  <a href="#thorax-collectionview/updateitem-view-updateitem-model">updateItem </a>
                 </li>
               
             </ul>
@@ -124,14 +136,14 @@
           
         </li>
       
-    </ul><div class="header"><a href="#">Plugins</a></div><ul class="sections"><li><a href="collection.html">Collection</a></li><li><a href="event.html">Event</a></li><li><a href="form.html">Form</a></li><li><a href="helpers.html">Helpers</a></li><li><a href="loading.html">Loading</a></li><li><a href="model.html">Model</a></li><li><a href="view-controller.html">ViewController</a></li></ul>
+    </ul><div class="header"><a href="#">Plugins</a></div><ul class="sections"><li><a href="collection.html">Collection</a></li><li><a href="event.html">Event</a></li><li><a href="form.html">Form</a></li><li><a href="helpers.html">Helpers</a></li><li><a href="loading.html">Loading</a></li><li><a href="mobile.html">Mobile</a></li><li><a href="model.html">Model</a></li><li><a href="view-controller.html">ViewController</a></li></ul>
     
     
   </div>
   <div id="content">
     
     <h1>Thorax Collection Plugin</h1>
-<p>Adds view helpers and classes to support collection bindings in. See the <a href="http://jsfiddle.net/HAdxJ/">Todos example</a> to see the collection plugin in action.
+<p>Adds view helpers and classes to support collection bindings in. See the <a href="http://jsfiddle.net/M3qjv/">Todos example</a> to see the collection plugin in action.
 
 </p>
 <h2 id="view-helpers">View Helpers</h2>
@@ -154,13 +166,14 @@
 <li><code>empty-context</code> - A function in the declaring view to specify the context that the empty-template is rendered with. If the view has an <code>emptyContext</code> function it will be used as the default.</li>
 <li><code>loading-template</code> - Only available if the loading plugin has been included. A template to append when the collection is loading.</li>
 <li><code>loading-view</code> - Only available if loading plugin has been included. A view to append when the collection is loading</li>
-<li><code>filter</code> - A method on the view to filter which items are rendered. Recieves (model, index) and must return boolean.</li>
+<li><code>loading-placement</code> - Only available if loading plugin has been included. A method on the declaring view that will recieve the collection view instance as the only argument and must return the index where the loading view or template should be placed. Defaults to <code>view.collection.length</code>, placing the view or template at the end.</li>
+<li><code>filter</code> - A method on the declaring view, which will filter which items are rendered. Recieves (model, index) and must return boolean. The filter will be applied when models' fire a change event, or models are added and removed from the collection. To force a collection to re-filter, trigger a <code>filter</code> event on the collection.</li>
 </ul>
 <p>Any of the options can be specified as variables in addition to strings:
 
 </p>
 <pre><code>{{<span class="title">collection</span> cats item-view=itemViewClass}}</code></pre>
-<p><code>CollectionView</code> instances are created via a helper and not directly in a JavaScript API, so to get a reference to them you need to use the <code>helper:collection</code> event:
+<p><code>CollectionView</code> instances are usually created via a helper and not directly in JavaScript. If you need a reference to a specific CollectionView you can create it directly (see <code>Thorax.CollectionView</code> below) or use the <code>helper:collection</code> event when creating them via a helper:
 
 </p>
 <pre><code><span class="tag">view</span><span class="class">.on</span>("<span class="tag">helper</span><span class="pseudo">:collection"</span>, <span class="tag">function</span>(<span class="tag">collection</span>, <span class="tag">collectionView</span>) <span class="rules">{
@@ -189,22 +202,44 @@
 </p>
 <pre><code><span class="tag">Thorax</span><span class="class">.View</span><span class="class">.on</span>(<span class="rules">{
   <span class="rule"><span class="attribute">collection</span>:<span class="value"> {
-    reset: <span class="function">function()</span> {
-      //<span class="string">"this"</span> will refer to the view
+    reset: <span class="function">function(collectionView)</span> {
+      //<span class="string">"this"</span> will refer to the view which called
+      //the collection helper
     </span>}</span></span>
   }
 });</code></pre>
-<p>The <code>collection</code> helper itself is implemented in this way.
+<p>Each collection event callback is called with the generated collection view prepended to the arguments.
 
 </p>
 <h2 id="thorax-collectionview">Thorax.CollectionView</h2>
-<p>A <code>Thorax.View</code> subclass generated each time a <code>collection</code> helper is used.
+<p>A <code>CollectionView</code> class is automatically generated each time a <code>collection</code> helper is used. A CollectionView may also be created in JavaScript and appended as a child view with the <code>view</code> helper. The constructor will accept any options that the <code>collection</code> helper accepts, though any template or view names must be the actual names and not inline templates. The <code>parent</code> attribute of the <code>CollectionView</code> is required in the constructor and is not automatically set for you as it would be when using the <code>collection</code> helper.
 
 </p>
+<pre><code>var view = new Thorax<span class="variable">.View</span>({
+  initialize: function() {
+    <span class="keyword">this</span><span class="variable">.myCollectionView</span> = new Thorax<span class="variable">.CollectionView</span>({
+      parent: <span class="keyword">this</span>,
+      <span class="string">"item-template"</span>: <span class="string">"item-template-name"</span>
+    });
+    <span class="keyword">this</span><span class="variable">.myCollectionView</span><span class="variable">.setCollection</span>(myCollection);
+  },
+  template: <span class="string">"{{view myCollectionView}}"</span>
+});</code></pre>
+<h3 id="thorax-collectionview/setcollection-view-setcollection-collection-options" class="signature">setCollection <em>view.setCollection(collection, options)</em></h3>
+<p>If directly creating a CollectionView instance, the collection property may be set by passing <code>collection</code> to the constructor, or by calling this method. The following options may be passed when calling this method:
+
+</p>
+<ul>
+<li><code>fetch</code>: wether or not to try to call <code>fetch</code> on the collection if <code>shouldFetch</code> returns true</li>
+<li><code>success</code>: a callback to be called when the</li>
+<li><code>errors</code>: wether or not to trigger an <code>error</code> event on the CollectionView and it's parent when an <code>error</code> event is triggered on the collection</li>
+</ul>
 <h3 id="thorax-collectionview/appenditem-view-appenditem-modelorview-index" class="signature">appendItem <em>view.appendItem(modelOrView [,index])</em></h3>
 <p>Append a model (which will used to generate a new <code>item-view</code>) or a view at a given index in the <code>CollectionView</code>. If passing a view as the first argument <code>index</code> may be a model which will be used to look up the index.
 
 </p>
+<h3 id="thorax-collectionview/removeitem-view-removeitem-model" class="signature">removeItem <em>view.removeItem(model)</em></h3>
+<h3 id="thorax-collectionview/updateitem-view-updateitem-model" class="signature">updateItem <em>view.updateItem(model)</em></h3>
 <h2 id="thorax-collection">Thorax.Collection</h2>
 <h3 id="thorax-collection/collection-thorax-collection-name-protoprops" class="signature">collection <em>Thorax.collection(name [,protoProps])</em></h3>
 <p>Get or set a collection class.

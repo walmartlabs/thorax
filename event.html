@@ -98,7 +98,7 @@
           
         </li>
       
-    </ul><div class="header"><a href="#">Plugins</a></div><ul class="sections"><li><a href="collection.html">Collection</a></li><li><a href="event.html">Event</a></li><li><a href="form.html">Form</a></li><li><a href="helpers.html">Helpers</a></li><li><a href="loading.html">Loading</a></li><li><a href="model.html">Model</a></li><li><a href="view-controller.html">ViewController</a></li></ul>
+    </ul><div class="header"><a href="#">Plugins</a></div><ul class="sections"><li><a href="collection.html">Collection</a></li><li><a href="event.html">Event</a></li><li><a href="form.html">Form</a></li><li><a href="helpers.html">Helpers</a></li><li><a href="loading.html">Loading</a></li><li><a href="mobile.html">Mobile</a></li><li><a href="model.html">Model</a></li><li><a href="view-controller.html">ViewController</a></li></ul>
     
     
   </div>
@@ -173,10 +173,22 @@ otherView.render();</code></pre>
 <p>DOM events observed in this way will only operate on the view itself. If the view embeds other views with the <code>view</code> helper that would match the event name and selector, they will be ignored. For instance declaring:
 
 </p>
-<pre><code>view.<span class="keyword">on</span>(<span class="string">'click a'</span>, <span class="keyword">function</span>()<span class="comment">{}</span>)</code></pre>
+<pre><code>view.<span class="keyword">on</span>(<span class="string">'click a'</span>, <span class="keyword">function</span>(event) <span class="comment">{}</span>)</code></pre>
 <p>Will only listen for clicks on <code>a</code> elements within the view. If the view has children that has <code>a</code> elements, this handler will not observe clicks on them.
 
 </p>
+<p>DOM events may be prefixed with the special keyword <code>nested</code> which will apply the event to all elements in child views:
+
+</p>
+<pre><code>view.<span class="keyword">on</span>(<span class="string">'nested click a'</span>, <span class="keyword">function</span>() <span class="comment">{}</span>)</code></pre>
+<p>Since the context of DOM event handlers in Thorax will always be the view, the second argument to the handler will be the <code>Element</code> object that would have been set as <code>this</code> had the handler been registered with jQuery / Zepto:
+
+</p>
+<pre><code>$(<span class="string">'a'</span>).<span class="literal">on</span>(<span class="string">'click'</span>, <span class="reserved">function</span>() {});
+view.<span class="literal">on</span>(<span class="string">'click a'</span>, <span class="reserved">function</span>(event, element) {
+  // element === what <span class="string">"this"</span> would be <span class="keyword">in</span> the
+  // first handler
+});</code></pre>
 <h2 id="events">Events</h2>
 <h3 id="events/freeze-freeze" class="signature">freeze <em>freeze</em></h3>
 <p>Triggered when the <code>freeze</code> method is called (either directly or via <code>destroy</code>). No arguments are passed.</p>
