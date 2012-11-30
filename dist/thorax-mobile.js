@@ -67,7 +67,6 @@ Thorax.Util = {
   },
   registryGet: function(object, type, name, ignoreErrors) {
     var target = object[type],
-        addedExtension = false,
         value;
     if (name.match(/\.(?!handlebars)/)) {
       var bits = name.split(/\.(?!handlebars)/);
@@ -77,16 +76,9 @@ Thorax.Util = {
       });
     }
     target && (value = target[name]);
-    if (type === 'templates' && !value) {
-      value = target[name + '.handlebars'];
-      addedExtension = true;
-    }
     if (!value && !ignoreErrors) {
       throw new Error(type + ': ' + name + ' does not exist.');
     } else {
-      if (value && type === 'templates' && typeof value === 'string') {
-        value = target[name + addedExtension ? '.handlebars' : ''] = Handlebars.compile(value);
-      }
       return value;
     }
   },
@@ -105,12 +97,25 @@ Thorax.Util = {
 
   getTemplate: function(file, ignoreErrors) {
     //append the template path prefix if it is missing
-    var pathPrefix = Thorax.templatePathPrefix;
-    if (pathPrefix && pathPrefix.length && file && name.substr(0, pathPrefix.length) !== pathPrefix) {
+    var pathPrefix = Thorax.templatePathPrefix,
+        addedExtension = false,
+        template;
+    if (pathPrefix && pathPrefix.length && file && file.substr(0, pathPrefix.length) !== pathPrefix) {
       file = pathPrefix + file;
     }
     file = file.replace(/\.handlebars$/, '');
-    return Thorax.Util.registryGet(Thorax, 'templates', file, ignoreErrors);
+    var template = Thorax.Util.registryGet(Thorax, 'templates', file, true);
+    if (!template) {
+      template = Thorax.Util.registryGet(Thorax, 'templates', file + '.handlebars', true);
+      addedExtension = true;
+    }
+    if (template && typeof template === 'string') {
+      template = Thorax.templates[file + addedExtension ? '.handlebars' : ''] = Handlebars.compile(template);
+    }
+    if (!template && !ignoreErrors) {
+      throw new Error('templates: ' + file + ' does not exist.');
+    }
+    return template;
   },
 
   getValue: function (object, prop) {
@@ -254,7 +259,6 @@ Thorax.View = Backbone.View.extend({
       this.template = Handlebars.compile(this.template);
     } else if (this.name && !this.template) {
       //fetch the template 
-      console.log('get template',this.name);
       this.template = Thorax.Util.getTemplate(this.name, true);
     }
     
