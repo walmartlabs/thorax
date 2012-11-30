@@ -22,6 +22,6 @@
   },
 
   "templates": {
-    "template": "{{{templateCache}}}['{{{without-extension name}}}'] = '{{{data}}}';",
+    "template": "Thorax.templates['{{{without-extension name}}}'] = {{handlebarsCall}}({{{data}}});"
   }
 }
