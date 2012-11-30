@@ -66,30 +66,26 @@ Thorax.Util = {
     };
   },
   registryGet: function(object, type, name, ignoreErrors) {
-    if (type === 'templates') {
-      //append the template path prefix if it is missing
-      var pathPrefix = Thorax.templatePathPrefix;
-      if (pathPrefix && pathPrefix.length && name && name.substr(0, pathPrefix.length) !== pathPrefix) {
-        name = pathPrefix + name;
-      }
-    }
     var target = object[type],
+        addedExtension = false,
         value;
-    if (name.match(/\./)) {
-      var bits = name.split(/\./);
+    if (name.match(/\.(?!handlebars)/)) {
+      var bits = name.split(/\.(?!handlebars)/);
       name = bits.pop();
       bits.forEach(function(key) {
         target = target[key];
       });
-    } else {
-      value = target[name];
     }
-    if (!target && !ignoreErrors) {
+    target && (value = target[name]);
+    if (type === 'templates' && !value) {
+      value = target[name + '.handlebars'];
+      addedExtension = true;
+    }
+    if (!value && !ignoreErrors) {
       throw new Error(type + ': ' + name + ' does not exist.');
     } else {
-      var value = target[name];
-      if (type === 'templates' && typeof value === 'string') {
-        value = target[name] = Handlebars.compile(value);
+      if (value && type === 'templates' && typeof value === 'string') {
+        value = target[name + addedExtension ? '.handlebars' : ''] = Handlebars.compile(value);
       }
       return value;
     }
@@ -108,6 +104,12 @@ Thorax.Util = {
   },
 
   getTemplate: function(file, ignoreErrors) {
+    //append the template path prefix if it is missing
+    var pathPrefix = Thorax.templatePathPrefix;
+    if (pathPrefix && pathPrefix.length && file && name.substr(0, pathPrefix.length) !== pathPrefix) {
+      file = pathPrefix + file;
+    }
+    file = file.replace(/\.handlebars$/, '');
     return Thorax.Util.registryGet(Thorax, 'templates', file, ignoreErrors);
   },
 
@@ -252,6 +254,7 @@ Thorax.View = Backbone.View.extend({
       this.template = Handlebars.compile(this.template);
     } else if (this.name && !this.template) {
       //fetch the template 
+      console.log('get template',this.name);
       this.template = Thorax.Util.getTemplate(this.name, true);
     }
     
