@@ -231,7 +231,9 @@ Thorax.View = Backbone.View.extend({
   _configure: function(options) {
     
     // Begin injected code from "src/model.js"
+    this._modelOptionsByCid = {};
     this._modelEvents = [];
+    this._models = [];
     // End injected code
     // Begin injected code from "src/collection.js"
     this._collectionEvents = [];
@@ -689,7 +691,7 @@ _.extend(Thorax.View.prototype, {
   freeze: function(options) {
     
     // Begin injected code from "src/model.js"
-    this.model && this._unbindModelEvents();
+    _.each(this._models, this.removeModel, this);
       // End injected code
     options = _.defaults(options || {}, {
       dom: true,
@@ -822,9 +824,10 @@ var domEventRegexp = new RegExp('^(' + domEvents.join('|') + ')');
 
 function containHandlerToCurentView(handler, cid) {
   return function(event) {
+    var target = this;
     var view = $(event.target).view({helper: false});
     if (view && view.cid == cid) {
-      handler(event);
+      handler(event, target);
     }
   }
 }
@@ -919,65 +922,74 @@ _.extend(Thorax.View.prototype, {
   context: function() {
     return _.extend({}, this, (this.model && this.model.attributes) || {});
   },
-  _bindModelEvents: function() {
-    bindModelEvents.call(this, this.constructor._modelEvents);
-    bindModelEvents.call(this, this._modelEvents);
+  _bindModelEvents: function(model) {
+    bindModelEvents.call(this, model, this.constructor._modelEvents);
+    bindModelEvents.call(this, model, this._modelEvents);
   },
-  _unbindModelEvents: function() {
-    this.model.trigger('freeze');
-    unbindModelEvents.call(this, this.constructor._modelEvents);
-    unbindModelEvents.call(this, this._modelEvents);
+  _unbindModelEvents: function(model) {
+    model.trigger('freeze');
+    unbindModelEvents.call(this, model, this.constructor._modelEvents);
+    unbindModelEvents.call(this, model, this._modelEvents);
+  },
+  addModel: function(model, options) {
+    this._models.push(model);
+    var modelOptions = this._setModelOptions(model, options);
+    this._bindModelEvents(model, modelOptions);
+    if (Thorax.Util.shouldFetch(this.model, modelOptions)) {
+      var success = modelOptions.success;
+      this._loadModel(this.model, modelOptions);
+    } else {
+      //want to trigger built in event handler (render() + populate())
+      //without triggering event on model
+      this._onModelChange(model);
+    }
+  },
+  removeModel: function(model) {
+    this._models = _.without(this._models, model);
+    this._unbindModelEvents(model);
+    delete this._modelOptionsByCid[model.cid];
   },
   setModel: function(model, options) {
     var oldModel = this.model;
     if (model === oldModel) {
       return this;
     }
-    oldModel && this._unbindModelEvents();
+    if (oldModel) {
+      this.removeModel(oldModel);
+    }
     if (model) {
       this.$el.attr(modelCidAttributeName, model.cid);
-      if (model.name) {
-        this.$el.attr(modelNameAttributeName, model.name);
-      }
+      model.name && this.$el.attr(modelNameAttributeName, model.name);
       this.model = model;
-      this._setModelOptions(options);
-      this._bindModelEvents(options);
+      this.addModel(model, options);
       this.model.trigger('set', this.model, oldModel);
-      if (Thorax.Util.shouldFetch(this.model, this._modelOptions)) {
-        var success = this._modelOptions.success;
-        this._loadModel(this.model, this._modelOptions);
-      } else {
-        //want to trigger built in event handler (render() + populate())
-        //without triggering event on model
-        this._onModelChange();
-      }
     } else {
-      this._modelOptions = false;
       this.model = false;
-      this._onModelChange();
+      this._onModelChange(false);
       this.$el.removeAttr(modelCidAttributeName);
       this.$el.attr(modelNameAttributeName);
     }
     return this;
   },
-  _onModelChange: function() {
+  _onModelChange: function(model) {
+    var modelOptions = model && this._modelOptionsByCid[model.cid];
     // !this._modelOptions will be true when setModel(false) is called
-    if (!this._modelOptions || (this._modelOptions && this._modelOptions.render)) {
+    if (!modelOptions || (modelOptions && modelOptions.render)) {
       this.render();
     }
     
     // Begin injected code from "src/form.js"
-    if (this._modelOptions && this._modelOptions.populate) {
-      this.populate(this.model.attributes, this._modelOptions.populate === true ? {} : this._modelOptions.populate);
+    if (modelOptions && modelOptions.populate) {
+      this.populate(model.attributes, modelOptions.populate === true ? {} : modelOptions.populate);
     }
       // End injected code
   },
   _loadModel: function(model, options) {
     model.fetch(options);
   },
-  _setModelOptions: function(options) {
-    if (!this._modelOptions) {
-      this._modelOptions = {
+  _setModelOptions: function(model, options) {
+    if (!this._modelOptionsByCid[model.cid]) {
+      this._modelOptionsByCid[model.cid] = {
         fetch: true,
         success: false,
         render: true,
@@ -992,8 +1004,8 @@ _.extend(Thorax.View.prototype, {
             // End injected code
       };
     }
-    _.extend(this._modelOptions, options || {});
-    return this._modelOptions;
+    _.extend(this._modelOptionsByCid[model.cid], options || {});
+    return this._modelOptionsByCid[model.cid];
   }
 });
 
@@ -1005,29 +1017,29 @@ function getEventCallback(callback, context) {
   }
 }
 
-function bindModelEvents(events) {
+function bindModelEvents(model, events) {
   events.forEach(function(event) {
     //getEventCallback will resolve if it is a string or a method
     //and return a method
-    this.model.on(event[0], getEventCallback(event[1], this), event[2] || this);
+    model.on(event[0], getEventCallback(event[1], this), event[2] || this);
   }, this);
 }
 
-function unbindModelEvents(events) {
+function unbindModelEvents(model, events) {
   events.forEach(function(event) {
-    this.model.off(event[0], getEventCallback(event[1], this), event[2] || this);
+    model.off(event[0], getEventCallback(event[1], this), event[2] || this);
   }, this);
 }
 
 Thorax.View.on({
   model: {
     error: function(model, errors){
-      if (this._modelOptions.errors) {
-        this.trigger('error', errors);
+      if (this._modelOptionsByCid[model.cid].errors) {
+        this.trigger('error', errors, model);
       }
     },
-    change: function() {
-      this._onModelChange();
+    change: function(model) {
+      this._onModelChange(model);
     }
   }
 });
