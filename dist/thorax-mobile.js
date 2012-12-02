@@ -2541,6 +2541,10 @@ if (isMobile) {
     }
   }
   
+  function defaultPrevented(event) {
+    return event.isDefaultPrevented ? event.isDefaultPrevented() : event.defaultPrevented;
+  }
+  
   function onTouchEnd(event) {
     try {
       var touch = event.changedTouches[0];
@@ -2554,18 +2558,18 @@ if (isMobile) {
         if (!disabled) {
           event = $.Event(Thorax._fastClickEventName, {original: event});
           $(target).trigger(event);
-          if (!event.defaultPrevented && ( target.control || target.htmlFor )) {
+          if (!defaultPrevented(event) && (target.control || target.htmlFor)) {
             if (target.control) {
               $(target.control).trigger(event);
             } else {
               $("#" + target.htmlFor).trigger(event);
             }
           }
-          if (event.defaultPrevented) {
+          if (defaultPrevented(event)) {
             // If the fast-click was handled, prevent futher operations
             clickRedRum = true;
             event.original.preventDefault();
-            defaultPrevented = true;
+            event.defaultPrevented = true;
           } 
         }
       }
