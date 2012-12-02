@@ -139,6 +139,7 @@ $(function() {
     });
     
     var parent = new Parent();
+    $('body').append(parent.el);
     parent.render();
     $(parent.$('div')[0]).trigger('click');
     equal(parentClickedCount, 1);
@@ -146,6 +147,7 @@ $(function() {
     parent.child.$('div').trigger('click');
     equal(parentClickedCount, 1);
     equal(childClickedCount, 1);
+    parent.$el.remove();
   });
 
 });
