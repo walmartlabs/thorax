@@ -131,16 +131,8 @@ _.extend(Thorax.View.prototype, {
         boundHandler = containHandlerToCurentView(boundHandler, this.cid);
       }
       if (params.selector) {
-        //TODO: determine why collection views and some nested views
-        //need defered event delegation
         var name = params.name + '.delegateEvents' + this.cid;
-        if (typeof jQuery !== 'undefined' && $ === jQuery) {
-          _.defer(_.bind(function() {
-            this.$el.on(name, params.selector, boundHandler);
-          }, this));
-        } else {
-          this.$el.on(name, params.selector, boundHandler);
-        }
+        this.$el.on(name, params.selector, boundHandler);
       } else {
         this.$el.on(params.name, boundHandler);
       }
