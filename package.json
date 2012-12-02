@@ -19,7 +19,7 @@
     "handlebars": "1.0.x"
   },
   "devDependencies": {
-    "connect": "2.7.0"
+    "express": "2.5.11"
   },
   "scripts": {
     "start": "node bin/test-server.js . 8083",
