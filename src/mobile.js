@@ -121,8 +121,12 @@ if (isMobile) {
       clickRedRum = false;
     }
   }
-
-  Thorax.configureFastClick(isMobile);
+  
+  // Use this instead of $(function() {}) so that jQuery
+  // does not register a timeout
+  $(document).ready(function() {
+    Thorax.configureFastClick(isMobile);
+  });
 } else {
   registerClickHandler && registerClickHandler();
 }
