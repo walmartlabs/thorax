@@ -112,7 +112,6 @@ $(function() {
   });
 
   test("bindToView", function() {
-    this.clock.restore();
     var childClickedCount = 0,
         parentClickedCount = 0;
     
@@ -141,21 +140,12 @@ $(function() {
     
     var parent = new Parent();
     parent.render();
-    document.body.appendChild(parent.el);
-  
-    expect(4);
-    stop();
-    setTimeout(function() {
-      $(parent.$('div')[0]).trigger('click');
-      equal(parentClickedCount, 1);
-      equal(childClickedCount, 0);
-      
-      parent.child.$('div').trigger('click');
-      equal(parentClickedCount, 1);
-      equal(childClickedCount, 1);
-      $(parent.el).remove();
-      start();
-    }, 2);
+    $(parent.$('div')[0]).trigger('click');
+    equal(parentClickedCount, 1);
+    equal(childClickedCount, 0);
+    parent.child.$('div').trigger('click');
+    equal(parentClickedCount, 1);
+    equal(childClickedCount, 1);
   });
 
 });

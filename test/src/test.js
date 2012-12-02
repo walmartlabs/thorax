@@ -151,7 +151,6 @@ $(function() {
   });
 
   test("child view re-render will keep dom events intact", function() {
-    this.clock.restore();
     var callCount = 0;
     var parent = new Thorax.View({
       name: 'parent-event-dom-test',
@@ -168,21 +167,13 @@ $(function() {
     });
     parent.render();
     document.body.appendChild(parent.el);
-    expect(2);
-    stop();
-    //timeouts (and this test) are needed due to jQuery delegation bugs
-    setTimeout(function() {
-      parent.child.$('.test').trigger('click');
-      equal(callCount, 1);
-      parent.render();
-      parent.child.delegateEvents();
-      setTimeout(function() {
-        parent.child.$('.test').trigger('click');
-        equal(callCount, 2);
-        $(parent.el).remove();
-        start();
-      }, 25);
-    }, 25);
+    parent.child.$('.test').trigger('click');
+    equal(callCount, 1);
+    parent.render();
+    parent.child.delegateEvents();
+    parent.child.$('.test').trigger('click');
+    equal(callCount, 2);
+    $(parent.el).remove();
   });
 
   test("can set view el", function() {
@@ -445,15 +436,15 @@ $(function() {
     });
     view.render();
     document.body.appendChild(view.el);
-      Thorax.onException = function(errorName, e) {
-        ok(errorName.match(/click/));
-      };
-      view.$('div').trigger('click');
-      Thorax.onException = function(errorName, e) {
-        ok(errorName.match(/test/));
-      };
-      view.trigger('test');
-      Thorax.onException = oldOnException;
-      view.$el.remove();
+    Thorax.onException = function(errorName, e) {
+      ok(errorName.match(/click/));
+    };
+    view.$('div').trigger('click');
+    Thorax.onException = function(errorName, e) {
+      ok(errorName.match(/test/));
+    };
+    view.trigger('test');
+    Thorax.onException = oldOnException;
+    view.$el.remove();
   });
 });

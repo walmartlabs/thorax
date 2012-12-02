@@ -53,19 +53,13 @@ $(function() {
     equal(view.$('a').attr('href'),'#href');
 
     $('body').append(view.el);
-    this.clock.restore();  
-    expect(7);
-    stop();
-    setTimeout(function() {
-      $(view.$('button')[0]).trigger('click');
-      equal(callCount, 1);
-      equal(eventCallCount, 0);
-      $(view.$('button')[1]).trigger('click');
-      equal(eventCallCount, 1);
-      equal(callCount, 1);
-      $(view.el).remove();
-      start();
-    }, 2);
+    $(view.$('button')[0]).trigger('click');
+    equal(callCount, 1);
+    equal(eventCallCount, 0);
+    $(view.$('button')[1]).trigger('click');
+    equal(eventCallCount, 1);
+    equal(callCount, 1);
+    $(view.el).remove();
   });
 
 });
