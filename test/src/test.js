@@ -431,7 +431,6 @@ $(function() {
   });
 
   test("onException", function() {
-    this.clock.restore();
     var oldOnException = Thorax.onException;
     var view = new Thorax.View({
       events: {
@@ -446,10 +445,6 @@ $(function() {
     });
     view.render();
     document.body.appendChild(view.el);
-    expect(2);
-    stop();
-    //timeouts are needed due to jQuery delegation bugs
-    setTimeout(function() {
       Thorax.onException = function(errorName, e) {
         ok(errorName.match(/click/));
       };
@@ -460,7 +455,5 @@ $(function() {
       view.trigger('test');
       Thorax.onException = oldOnException;
       view.$el.remove();
-      start();
-    }, 25);
   });
 });
