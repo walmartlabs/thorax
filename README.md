@@ -50,7 +50,7 @@ Thorax can be used standalone in any JavaScript environment in addition the [boi
       <td width="50%">
         <p>All of the examples use the <a href="https://raw.github.com/gist/3504663/d1e6321e9fdb69ff47d636eab5df5e52acb64ae0/gistfile1.txt">same sample data</a>.</p>
         <ul>
-          <li><a href="http://jsfiddle.net/M3qjv/">Simple Todos</a></li>
+          <li><a href="http://jsfiddle.net/vzf5L/">Simple Todos</a></li>
           <li><a href="http://jsfiddle.net/qwyvx/">$.model</a></li>
           <li><a href="http://jsfiddle.net/5sWA8/">Context</a></li>
           <li><a href="http://jsfiddle.net/x3qMU/">view &amp; template helpers</a></li>
