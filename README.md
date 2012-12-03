@@ -251,6 +251,13 @@ And the corresponding view class:
       template: ...
     });
 
+In addition, if a view class is specified as the second argument to `registerViewHelper`, the helper will always initialize a view of that class instead of a `HelperView`:
+
+    Handlebars.registerViewHelper('collection',
+      Thorax.CollectionView, function(collection, view) {
+
+    });
+
 ## Util
 
 ### tag *Thorax.Util.tag(name, htmlAttributes [,content] [,context])*
