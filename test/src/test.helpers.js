@@ -35,31 +35,19 @@ $(function() {
   });
 
   test("button and link helpers", function() {
-    var callCount = 0, eventCallCount = 0;
     var view = new Thorax.View({
       events: {
-        testEvent: function() {
-          ++eventCallCount;
-        }
+        testEvent: function() {}
       },
-      someMethod: function(){
-        ++callCount;
-      },
+      someMethod: function(){},
       template: '{{#button "someMethod"}}Button{{/button}}{{#button trigger="testEvent"}}Button 2{{/button}}{{#link "href"}}content{{/link}}'
     });
     view.render();
-    equal(view.$('button').html(),'Button');
+    equal($(view.$('button')[0]).html(),'Button');
+    equal($(view.$('button')[0]).attr('data-call-method'), 'someMethod');
+    equal($(view.$('button')[1]).attr('data-trigger-event'), 'testEvent');
     equal(view.$('a').html(),'content');
     equal(view.$('a').attr('href'),'#href');
-
-    $('body').append(view.el);
-    $(view.$('button')[0]).trigger('click');
-    equal(callCount, 1);
-    equal(eventCallCount, 0);
-    $(view.$('button')[1]).trigger('click');
-    equal(eventCallCount, 1);
-    equal(callCount, 1);
-    $(view.el).remove();
   });
 
 });
