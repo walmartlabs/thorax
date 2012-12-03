@@ -32,7 +32,8 @@ An opinionated, battle tested [Backbone](http://backbonejs.org/) + [Handlebars](
 Thorax can be used standalone in any JavaScript environment in addition the [boilerplate projects](https://github.com/walmartlabs/thorax-boilerplate) provided above.
 
     var view = new Thorax.View({
-      template: "Hello world!"
+      greeting: "Hello",
+      template: "{{greeting}} world!"
     });
     view.render();
     $("body").append(view.el);
