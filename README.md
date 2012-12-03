@@ -121,12 +121,12 @@ If a `View` has the same `name` as a template in the `templates` hash, it's `tem
 
 The base `Thorax.View` implementation is concerned only with Handlebars + Backbone integration. A variety of additional functionality is provided by the various included plugins. The boilerplate projects have a build of Thorax with all plugins included.
 
+`Thorax.View` provides mostly additive functionality over `Backbone.View` but breaks compatibility in one imporant way in that it does not use an `options` object. All properties passed to the constructor become available on the instance:
+
     var view = new Thorax.View({
-      template: "{{key}}",
       key: "value"
     });
-    view.render();
-    $('body').append(view.el);
+    view.key === "value"
 
 ### children *view.children*
 
