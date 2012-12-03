@@ -280,8 +280,8 @@ Thorax.View = Backbone.View.extend({
       // End injected code
   },
 
-  _ensureElement : function() {
-    Backbone.View.prototype._ensureElement.call(this);
+  setElement : function() {
+    Backbone.View.prototype.setElement.apply(this, arguments);
     if (this.name) {
       this.$el.attr(viewNameAttributeName, this.name);
     }
