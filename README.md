@@ -203,6 +203,13 @@ Embed one view in another. The first argument may be the name of a new view to i
     {{view "path/to/view" key="value"}}
     {{view viewInstance}}
 
+If a block is specified it will be assigned as the `template` to the view instance:
+
+    {{#view viewInstance}}
+      viewInstance will have this block
+      set as it's template property
+    {{/view}}
+
 ### element *{{element name [options]}}*
 
 Embed a DOM element in the view. This uses a placeholder technique to work, if the placeholder must be of a certain type in order to work (for instance a `tbody` inside of a `table`) specify a `tag` option.
