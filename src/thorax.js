@@ -224,12 +224,11 @@ Thorax.View = Backbone.View.extend({
     {{{override "configure" indent=4}}}
   },
 
-  _ensureElement : function() {
-    Backbone.View.prototype._ensureElement.call(this);
-    if (this.name) {
-      this.$el.attr(viewNameAttributeName, this.name);
-    }
-    this.$el.attr(viewCidAttributeName, this.cid);      
+  setElement : function() {
+    var response = Backbone.View.prototype.setElement.apply(this, arguments);
+    this.name && this.$el.attr(viewNameAttributeName, this.name);
+    this.$el.attr(viewCidAttributeName, this.cid);
+    return response;
   },
 
   _addChild: function(view) {
