@@ -362,6 +362,10 @@ Not specifying any plugins will build a version with all plugins except mobile. 
 
     thorax build ./thorax-mobile.js --mobile
 
+Not specifying any arguments will build both the mobile and regular versions of Thorax in the `dist` directory of the npm package:
+
+    thorax build
+
 ### templates *thorax templates ./templates ./templates.js*
 
 If using Thorax outside of the provided node or Rails downloads you can inline a directory of templates into a single file by running the `thorax templates` command.

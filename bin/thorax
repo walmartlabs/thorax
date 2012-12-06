@@ -1,12 +1,35 @@
 #!/usr/bin/env node
+
+// Usage:
+//
+//     thorax templates ./templates-dir ./templates-output.js
+//     thorax build
+//     thorax build ./path-to-target plugin plugin...
+//     thorax build ./dist/thorax-mobile --mobile
+
 var path = require('path'),
+    exec = require('child_process').exec,
     args = process.argv.slice(2);
 
 if (args[0] === 'templates') {
   var compileTemplates = require(path.join(__dirname, 'watch-templates.js'));
   compileTemplates(args[1] || path.join(process.cwd(), 'templates'), args[2] || path.join(process.cwd(), 'templates.js'), args[3]);
 } else if(args[0] === 'build') {
-  require(path.join(__dirname, 'build.js'))(args[1] || './dist/thorax.js', args.slice(2) || []);
+  var targetDir = path.join(__dirname, '..', 'dist');
+  if (args.length === 1) {
+    exec(__filename + ' build ' + path.join(targetDir, 'thorax.js'), function (error, stdout, stderr) {
+      console.log(stdout);
+      stderr && console.log('stderr: ' + stderr);
+      error !== null && console.log('exec error: ' + error);
+    });
+    exec(__filename + ' build ' + path.join(targetDir, 'thorax-mobile.js') + ' --mobile', function (error, stdout, stderr) {
+      console.log(stdout);
+      stderr && console.log('stderr: ' + stderr);
+      error !== null && console.log('exec error: ' + error);
+    });
+  } else {
+    require(path.join(__dirname, 'build.js'))(args[1] || path.join(targetDir, 'thorax.js'), args.slice(2) || []);
+  }
 } else {
   console.log('Unrecognized command: ' + args[0]);
 }
