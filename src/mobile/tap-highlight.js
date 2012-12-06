@@ -118,11 +118,15 @@ _.extend(Thorax.View.prototype, {
 });
 
 //TODO: examine if these are still needed
+var fixupTapHighlightCallback = function() {
+  fixupTapHighlight.call(this);
+};
+
 Thorax.View.on({
-  'rendered': fixupTapHighlight,
-  'rendered:collection': fixupTapHighlight,
-  'rendered:item': fixupTapHighlight,
-  'rendered:empty': fixupTapHighlight
+  'rendered': fixupTapHighlightCallback,
+  'rendered:collection': fixupTapHighlightCallback,
+  'rendered:item': fixupTapHighlightCallback,
+  'rendered:empty': fixupTapHighlightCallback
 });
 
 var _setElement = Thorax.View.prototype.setElement,
