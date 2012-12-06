@@ -146,12 +146,16 @@ Thorax.CollectionView = Thorax.HelperView.extend({
         var last = this.$el.find('[' + modelCidAttributeName + '="' + previousModel.cid + '"]').last();
         last.after(itemElement);
       }
-      this._appendViews(null, function(el) {
-        el.setAttribute(modelCidAttributeName, model.cid);
-      });
-      this._appendElements(null, function(el) {
-        el.setAttribute(modelCidAttributeName, model.cid);
-      });
+      {{#has-plugin "helpers/view"}}
+        this._appendViews(null, function(el) {
+          el.setAttribute(modelCidAttributeName, model.cid);
+        });
+      {{/has-plugin}}
+      {{#has-plugin "helpers/element"}}
+        this._appendElements(null, function(el) {
+          el.setAttribute(modelCidAttributeName, model.cid);
+        });
+      {{/has-plugin}}
       if (!options.silent) {
         this.parent.trigger('rendered:item', this, this.collection, model, itemElement, index);
       }
