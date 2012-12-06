@@ -33,7 +33,6 @@
     "form": ["model"],
     "view-controller": [],
     "loading": ["event", "model", "collection"],
-    "mobile": ["event"],
     "helpers/button-link": [],
     "helpers/collection": ["event", "model", "collection"],
     "helpers/element": [],
@@ -42,7 +41,8 @@
     "helpers/super": [],
     "helpers/template": [],
     "helpers/url": [],
-    "helpers/view": []
+    "helpers/view": [],
+    "mobile": ["event"]
   },
   "bin": {
     "thorax": "bin/thorax"
