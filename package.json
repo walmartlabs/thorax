@@ -30,11 +30,19 @@
     "event": [],
     "model": ["event"],
     "collection": ["event", "model"],
-    "helpers": [],
     "form": ["model"],
     "view-controller": [],
     "loading": ["event", "model", "collection"],
-    "mobile": ["event"]
+    "mobile": ["event"],
+    "helpers/button-link": [],
+    "helpers/collection": ["event", "model", "collection"],
+    "helpers/element": [],
+    "helpers/empty": ["event", "model", "collection"],
+    "helpers/loading": ["event", "model", "collection"],
+    "helpers/super": [],
+    "helpers/template": [],
+    "helpers/url": [],
+    "helpers/view": []
   },
   "bin": {
     "thorax": "bin/thorax"

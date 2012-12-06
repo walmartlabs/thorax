@@ -1,22 +1,6 @@
 var callMethodAttributeName = 'data-call-method',
     triggerEventAttributeName = 'data-trigger-event';
 
-Handlebars.registerHelper('url', function(url) {
-  var fragment;
-  if (arguments.length > 2) {
-    fragment = _.map(_.head(arguments, arguments.length - 1), encodeURIComponent).join('/');
-  } else {
-    var options = arguments[1],
-        hash = (options && options.hash) || options;
-    if (hash && hash['expand-tokens']) {
-      fragment = Thorax.Util.expandToken(url, this);
-    } else {
-      fragment = url;
-    }
-  }
-  return (Backbone.history._hasPushState ? Backbone.history.options.root : '#') + fragment;
-});
-
 Handlebars.registerHelper('button', function(method, options) {
   if (arguments.length === 1) {
     options = method;
@@ -76,16 +60,3 @@ function unregisterClickHandler() {
 {{^has-plugin "mobile"}}
   $(registerClickHandler);
 {{/has-plugin}}
-
-Thorax.View.prototype._anchorClick = function(event) {
-  var target = $(event.currentTarget),
-      href = target.attr('href');
-  // Route anything that starts with # or / (excluding //domain urls)
-  if (href && (href[0] === '#' || (href[0] === '/' && href[1] !== '/'))) {
-    Backbone.history.navigate(href, {
-      trigger: true
-    });
-    return false;
-  }
-  return true;
-};

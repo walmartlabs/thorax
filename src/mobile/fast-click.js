@@ -17,7 +17,9 @@ Thorax.configureFastClick = function(useFastClick) {
     body.removeEventListener('touchend', onTouchEnd, true);
     body.removeEventListener('click', clickKiller, true);  
   }
-  registerClickHandler && registerClickHandler();
+  {{#has-plugin "helpers/button-link"}}
+    registerClickHandler && registerClickHandler();
+  {{/has-plugin}}
 };
 
 if (isMobile) {
@@ -95,5 +97,7 @@ if (isMobile) {
     Thorax.configureFastClick(isMobile);
   });
 } else {
-  registerClickHandler && registerClickHandler();
+  {{#has-plugin "helpers/button-link"}}
+    registerClickHandler && registerClickHandler();
+  {{/has-plugin}}
 }

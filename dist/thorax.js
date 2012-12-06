@@ -37,7 +37,7 @@ var viewNameAttributeName = 'data-view-name',
     elementPlaceholderAttributeName = 'data-element-tmp';
 
 var Thorax = this.Thorax = {
-  VERSION: '2.0.0b5',
+  VERSION: '2.0.0b6',
   templatePathPrefix: '',
   //view instances
   _viewsIndexedByCid: {},
@@ -281,11 +281,10 @@ Thorax.View = Backbone.View.extend({
   },
 
   setElement : function() {
-    Backbone.View.prototype.setElement.apply(this, arguments);
-    if (this.name) {
-      this.$el.attr(viewNameAttributeName, this.name);
-    }
-    this.$el.attr(viewCidAttributeName, this.cid);      
+    var response = Backbone.View.prototype.setElement.apply(this, arguments);
+    this.name && this.$el.attr(viewNameAttributeName, this.name);
+    this.$el.attr(viewCidAttributeName, this.cid);
+    return response;
   },
 
   _addChild: function(view) {
@@ -380,10 +379,27 @@ Thorax.View = Backbone.View.extend({
       return this.el.innerHTML;
     } else {
       var element = this.$el.html(html);
-      this._appendViews();
-      this._appendElements();
+      
+        this._appendViews();
+      
+      
+        this._appendElements();
+      
       return element;
     }
+  },
+
+  _anchorClick: function(event) {
+    var target = $(event.currentTarget),
+        href = target.attr('href');
+    // Route anything that starts with # or / (excluding //domain urls)
+    if (href && (href[0] === '#' || (href[0] === '/' && href[1] !== '/'))) {
+      Backbone.history.navigate(href, {
+        trigger: true
+      });
+      return false;
+    }
+    return true;
   }
 });
 
@@ -428,54 +444,6 @@ Handlebars.registerHelper('with', function(context, options) {
   return options.fn(this._view ? _.extend({
     _view: this._view
   }, context) : context);
-});
-
-//helpers
-Handlebars.registerHelper('super', function() {
-  var parent = this._view.constructor && this._view.constructor.__super__;
-  if (parent) {
-    var template = parent.template;
-    if (!template) { 
-      if (!parent.name) {
-        throw new Error('Cannot use super helper when parent has no name or template.');
-      }
-      template = Thorax.Util.getTemplate(parent.name, false);
-    }
-    if (typeof template === 'string') {
-      template = Handlebars.compile(template);
-    }
-    return new Handlebars.SafeString(template(this));
-  } else {
-    return '';
-  }
-});
-
-Handlebars.registerHelper('template', function(name, options) {
-  var context = _.extend({fn: options && options.fn}, this, options ? options.hash : {});
-  var output = Thorax.View.prototype.renderTemplate.call(this._view, name, context);
-  return new Handlebars.SafeString(output);
-});
-
-//view helper
-var viewTemplateOverrides = {};
-Handlebars.registerHelper('view', function(view, options) {
-  if (arguments.length === 1) {
-    options = view;
-    view = Thorax.View;
-  }
-  var instance = Thorax.Util.getViewInstance(view, options ? options.hash : {});
-  if (!instance) {
-    return '';
-  }
-  var placeholder_id = instance.cid + '-' + _.uniqueId('placeholder');
-  this._view._addChild(instance);
-  this._view.trigger('child', instance);
-  if (options.fn) {
-    viewTemplateOverrides[placeholder_id] = options.fn;
-  }
-  var htmlAttributes = Thorax.Util.htmlAttributesFromOptions(options.hash);
-  htmlAttributes[viewPlaceholderAttributeName] = placeholder_id;
-  return new Handlebars.SafeString(Thorax.Util.tag.call(this, htmlAttributes));
 });
 
 Thorax.HelperView = Thorax.View.extend({
@@ -530,59 +498,6 @@ Handlebars.registerViewHelper = function(name, viewClass, callback) {
   });
   var helper = Handlebars.helpers[name];
   return helper;
-};
-  
-//called from View.prototype.html()
-Thorax.View.prototype._appendViews = function(scope, callback) {
-  (scope || this.$el).find('[' + viewPlaceholderAttributeName + ']').forEach(function(el) {
-    var placeholder_id = el.getAttribute(viewPlaceholderAttributeName),
-        cid = placeholder_id.replace(/\-placeholder\d+$/, ''),
-        view = this.children[cid];
-    //if was set with a helper
-    if (_.isFunction(view)) {
-      view = view.call(this._view);
-    }
-    if (view) {
-      //see if the view helper declared an override for the view
-      //if not, ensure the view has been rendered at least once
-      if (viewTemplateOverrides[placeholder_id]) {
-        view.render(viewTemplateOverrides[placeholder_id](view._getContext()));
-      } else {
-        view.ensureRendered();
-      }
-      $(el).replaceWith(view.el);
-      //TODO: jQuery has trouble with delegateEvents() when
-      //the child dom node is detached then re-attached
-      if (typeof jQuery !== 'undefined' && $ === jQuery) {
-        if (this._renderCount > 1) {
-          view.delegateEvents();
-        }
-      }
-      callback && callback(view.el);
-    }
-  }, this);
-};
-
-//element helper
-Handlebars.registerHelper('element', function(element, options) {
-  var cid = _.uniqueId('element'),
-      htmlAttributes = Thorax.Util.htmlAttributesFromOptions(options.hash);
-  htmlAttributes[elementPlaceholderAttributeName] = cid;
-  this._view._elementsByCid || (this._view._elementsByCid = {});
-  this._view._elementsByCid[cid] = element;
-  return new Handlebars.SafeString(Thorax.Util.tag.call(this, htmlAttributes));
-});
-
-Thorax.View.prototype._appendElements = function(scope, callback) {
-  (scope || this.$el).find('[' + elementPlaceholderAttributeName + ']').forEach(function(el) {
-    var cid = el.getAttribute(elementPlaceholderAttributeName),
-        element = this._elementsByCid[cid];
-    if (_.isFunction(element)) {
-      element = element.call(this._view);
-    }
-    $(el).replaceWith(element);
-    callback && callback(element);
-  }, this);
 };
 
 //$(selector).view() helper
@@ -1459,111 +1374,6 @@ Thorax.View.on({
   }
 });
 
-Handlebars.registerViewHelper('collection', Thorax.CollectionView, function(collection, view) {
-  if (arguments.length === 1) {
-    view = collection;
-    collection = this._view.collection;
-  }
-  if (collection) {
-    //item-view and empty-view may also be passed, but have no defaults
-    _.extend(view.options, {
-      'item-template': view.template && view.template !== Handlebars.VM.noop ? view.template : view.options['item-template'],
-      'empty-template': view.inverse && view.inverse !== Handlebars.VM.noop ? view.inverse : view.options['empty-template'],
-      'item-context': view.options['item-context'] || view.parent.itemContext,
-      'empty-context': view.options['empty-context'] || view.parent.emptyContext,
-      filter: view.options['filter']
-    });
-    view.setCollection(collection);
-    
-    // Begin injected code from "src/loading.js"
-    //add "loading-view" and "loading-template" options to collection helper
-    if (view.options['loading-view'] || view.options['loading-template']) {
-      var item;
-      var callback = Thorax.loadHandler(_.bind(function() {
-        if (view.collection.length === 0) {
-          view.$el.empty();
-        }
-        if (view.options['loading-view']) {
-          var instance = Thorax.Util.getViewInstance(view.options['loading-view'], {
-            collection: view.collection
-          });
-          view._addChild(instance);
-          if (view.options['loading-template']) {
-            instance.render(view.options['loading-template']);
-          } else {
-            instance.render();
-          }
-          item = instance;
-        } else {
-          item = view.renderTemplate(view.options['loading-template'], {
-            collection: view.collection
-          });
-        }
-        var index = view.options['loading-placement']
-          ? view.options['loading-placement'].call(view.parent, view)
-          : view.collection.length
-        ;
-        view.appendItem(item, index);
-        view.$el.children().eq(index).attr('data-loading-element', view.collection.cid);
-      }, this), _.bind(function() {
-        view.$el.find('[data-loading-element="' + view.collection.cid + '"]').remove();
-      }, this));
-      view.on(view.collection, 'load:start', callback);
-    }
-      // End injected code
-  }
-});
-
-//empty helper
-Handlebars.registerViewHelper('empty', function(collection, view) {
-  var empty, noArgument;
-  if (arguments.length === 1) {
-    view = collection;
-    collection = false;
-    noArgument = true;
-  }
-
-  var _render = view.render;
-  view.render = function() {
-    if (noArgument) {
-      empty = !this.parent.model || (this.parent.model && !this.parent.model.isEmpty());
-    } else if (!collection) {
-      empty = true;
-    } else {
-      empty = collection.isEmpty();
-    }
-    if (empty) {
-      this.parent.trigger('rendered:empty', this, collection);
-      return _render.call(this, this.template);
-    } else {
-      return _render.call(this, this.inverse);
-    }
-  };
-
-  //no model binding is necessary as model.set() will cause re-render
-  if (collection) {
-    function collectionRemoveCallback() {
-      if (collection.length === 0) {
-        view.render();
-      }
-    }
-    function collectionAddCallback() {
-      if (collection.length === 1) {
-        view.render();
-      }
-    }
-    function collectionResetCallback() {
-      view.render();
-    }
-
-    view.on(collection, 'remove', collectionRemoveCallback);
-    view.on(collection, 'add', collectionAddCallback);
-    view.on(collection, 'reset', collectionResetCallback);
-  }
-  
-  view.render();
-});
-
 //$(selector).collection() helper
 $.fn.collection = function(view) {
   var $this = $(this),
@@ -1580,102 +1390,6 @@ $.fn.collection = function(view) {
 
 
 // End "src/collection.js"
-
-// Begin "src/helpers.js"
-var callMethodAttributeName = 'data-call-method',
-    triggerEventAttributeName = 'data-trigger-event';
-
-Handlebars.registerHelper('url', function(url) {
-  var fragment;
-  if (arguments.length > 2) {
-    fragment = _.map(_.head(arguments, arguments.length - 1), encodeURIComponent).join('/');
-  } else {
-    var options = arguments[1],
-        hash = (options && options.hash) || options;
-    if (hash && hash['expand-tokens']) {
-      fragment = Thorax.Util.expandToken(url, this);
-    } else {
-      fragment = url;
-    }
-  }
-  return (Backbone.history._hasPushState ? Backbone.history.options.root : '#') + fragment;
-});
-
-Handlebars.registerHelper('button', function(method, options) {
-  if (arguments.length === 1) {
-    options = method;
-    method = options.hash.method;
-  }
-  if (!method && !options.hash.trigger) {
-    throw new Error("button helper must have a method name as the first argument or a 'trigger', or a 'method' attribute specified.");
-  }
-  options.hash.tag = options.hash.tag || options.hash.tagName || 'button';
-  options.hash.trigger && (options.hash[triggerEventAttributeName] = options.hash.trigger);
-  delete options.hash.trigger;
-  method && (options.hash[callMethodAttributeName] = method);
-  return new Handlebars.SafeString(Thorax.Util.tag.call(this, options.hash, options.fn ? options.fn(this) : '', this));
-});
-
-Handlebars.registerHelper('link', function(url, options) {
-  if (arguments.length === 1) {
-    options = url;
-    url = options.hash.href;
-  }
-  if (!url) {
-    throw new Error("link helper requires an href as the first argument or an 'href' attribute");
-  }
-  options.hash.tag = options.hash.tag || options.hash.tagName || 'a';
-  options.hash.href = Handlebars.helpers.url.call(this, url || options.hash.href);
-  options.hash.trigger && (options.hash[triggerEventAttributeName] = options.hash.trigger);
-  delete options.hash.trigger;
-  options.hash[callMethodAttributeName] = '_anchorClick';
-  return new Handlebars.SafeString(Thorax.Util.tag.call(this, options.hash, options.fn ? options.fn(this) : '', this));
-});
-
-var clickSelector = '[' + callMethodAttributeName + '], [' + triggerEventAttributeName + ']';
-
-function handleClick(event) {
-  var target = $(event.target),
-      view = target.view({helper: false}),
-      methodName = target.attr(callMethodAttributeName),
-      eventName = target.attr(triggerEventAttributeName),
-      methodResponse = false;
-  methodName && (methodResponse = view[methodName].call(view, event));
-  eventName && view.trigger(eventName, event);
-  target.tagName === "A" && methodResponse === false && event.preventDefault();
-}
-
-var lastClickHandlerEventName;
-
-function registerClickHandler() {
-  unregisterClickHandler();
-  lastClickHandlerEventName = Thorax._fastClickEventName || 'click';
-  $(document).on(lastClickHandlerEventName, clickSelector, handleClick);
-}
-
-function unregisterClickHandler() {
-  lastClickHandlerEventName && $(document).off(lastClickHandlerEventName, clickSelector, handleClick);
-}
-
-
-  $(registerClickHandler);
-
-
-Thorax.View.prototype._anchorClick = function(event) {
-  var target = $(event.currentTarget),
-      href = target.attr('href');
-  // Route anything that starts with # or / (excluding //domain urls)
-  if (href && (href[0] === '#' || (href[0] === '/' && href[1] !== '/'))) {
-    Backbone.history.navigate(href, {
-      trigger: true
-    });
-    return false;
-  }
-  return true;
-};
-
-
-// End "src/helpers.js"
 
 // Begin "src/form.js"
 
@@ -2423,8 +2137,213 @@ Thorax.View.on({
   }
 });
 
-// Helpers
 
+// End "src/loading.js"
+
+// Begin "src/helpers/button-link.js"
+var callMethodAttributeName = 'data-call-method',
+    triggerEventAttributeName = 'data-trigger-event';
+
+Handlebars.registerHelper('button', function(method, options) {
+  if (arguments.length === 1) {
+    options = method;
+    method = options.hash.method;
+  }
+  if (!method && !options.hash.trigger) {
+    throw new Error("button helper must have a method name as the first argument or a 'trigger', or a 'method' attribute specified.");
+  }
+  options.hash.tag = options.hash.tag || options.hash.tagName || 'button';
+  options.hash.trigger && (options.hash[triggerEventAttributeName] = options.hash.trigger);
+  delete options.hash.trigger;
+  method && (options.hash[callMethodAttributeName] = method);
+  return new Handlebars.SafeString(Thorax.Util.tag.call(this, options.hash, options.fn ? options.fn(this) : '', this));
+});
+
+Handlebars.registerHelper('link', function(url, options) {
+  if (arguments.length === 1) {
+    options = url;
+    url = options.hash.href;
+  }
+  if (!url) {
+    throw new Error("link helper requires an href as the first argument or an 'href' attribute");
+  }
+  options.hash.tag = options.hash.tag || options.hash.tagName || 'a';
+  options.hash.href = Handlebars.helpers.url.call(this, url || options.hash.href);
+  options.hash.trigger && (options.hash[triggerEventAttributeName] = options.hash.trigger);
+  delete options.hash.trigger;
+  options.hash[callMethodAttributeName] = '_anchorClick';
+  return new Handlebars.SafeString(Thorax.Util.tag.call(this, options.hash, options.fn ? options.fn(this) : '', this));
+});
+
+var clickSelector = '[' + callMethodAttributeName + '], [' + triggerEventAttributeName + ']';
+
+function handleClick(event) {
+  var target = $(event.target),
+      view = target.view({helper: false}),
+      methodName = target.attr(callMethodAttributeName),
+      eventName = target.attr(triggerEventAttributeName),
+      methodResponse = false;
+  methodName && (methodResponse = view[methodName].call(view, event));
+  eventName && view.trigger(eventName, event);
+  target.tagName === "A" && methodResponse === false && event.preventDefault();
+}
+
+var lastClickHandlerEventName;
+
+function registerClickHandler() {
+  unregisterClickHandler();
+  lastClickHandlerEventName = Thorax._fastClickEventName || 'click';
+  $(document).on(lastClickHandlerEventName, clickSelector, handleClick);
+}
+
+function unregisterClickHandler() {
+  lastClickHandlerEventName && $(document).off(lastClickHandlerEventName, clickSelector, handleClick);
+}
+
+
+  $(registerClickHandler);
+
+
+// End "src/helpers/button-link.js"
+
+// Begin "src/helpers/collection.js"
+Handlebars.registerViewHelper('collection', Thorax.CollectionView, function(collection, view) {
+  if (arguments.length === 1) {
+    view = collection;
+    collection = this._view.collection;
+  }
+  if (collection) {
+    //item-view and empty-view may also be passed, but have no defaults
+    _.extend(view.options, {
+      'item-template': view.template && view.template !== Handlebars.VM.noop ? view.template : view.options['item-template'],
+      'empty-template': view.inverse && view.inverse !== Handlebars.VM.noop ? view.inverse : view.options['empty-template'],
+      'item-context': view.options['item-context'] || view.parent.itemContext,
+      'empty-context': view.options['empty-context'] || view.parent.emptyContext,
+      filter: view.options['filter']
+    });
+    view.setCollection(collection);
+
+    
+      //add "loading-view" and "loading-template" options to collection helper
+      if (view.options['loading-view'] || view.options['loading-template']) {
+        var item;
+        var callback = Thorax.loadHandler(_.bind(function() {
+          if (view.collection.length === 0) {
+            view.$el.empty();
+          }
+          if (view.options['loading-view']) {
+            var instance = Thorax.Util.getViewInstance(view.options['loading-view'], {
+              collection: view.collection
+            });
+            view._addChild(instance);
+            if (view.options['loading-template']) {
+              instance.render(view.options['loading-template']);
+            } else {
+              instance.render();
+            }
+            item = instance;
+          } else {
+            item = view.renderTemplate(view.options['loading-template'], {
+              collection: view.collection
+            });
+          }
+          var index = view.options['loading-placement']
+            ? view.options['loading-placement'].call(view.parent, view)
+            : view.collection.length
+          ;
+          view.appendItem(item, index);
+          view.$el.children().eq(index).attr('data-loading-element', view.collection.cid);
+        }, this), _.bind(function() {
+          view.$el.find('[data-loading-element="' + view.collection.cid + '"]').remove();
+        }, this));
+        view.on(view.collection, 'load:start', callback);
+      }
+    
+  }
+});
+
+
+// End "src/helpers/collection.js"
+
+// Begin "src/helpers/element.js"
+Handlebars.registerHelper('element', function(element, options) {
+  var cid = _.uniqueId('element'),
+      htmlAttributes = Thorax.Util.htmlAttributesFromOptions(options.hash);
+  htmlAttributes[elementPlaceholderAttributeName] = cid;
+  this._view._elementsByCid || (this._view._elementsByCid = {});
+  this._view._elementsByCid[cid] = element;
+  return new Handlebars.SafeString(Thorax.Util.tag.call(this, htmlAttributes));
+});
+
+Thorax.View.prototype._appendElements = function(scope, callback) {
+  (scope || this.$el).find('[' + elementPlaceholderAttributeName + ']').forEach(function(el) {
+    var cid = el.getAttribute(elementPlaceholderAttributeName),
+        element = this._elementsByCid[cid];
+    if (_.isFunction(element)) {
+      element = element.call(this._view);
+    }
+    $(el).replaceWith(element);
+    callback && callback(element);
+  }, this);
+};
+
+
+// End "src/helpers/element.js"
+
+// Begin "src/helpers/empty.js"
+Handlebars.registerViewHelper('empty', function(collection, view) {
+  var empty, noArgument;
+  if (arguments.length === 1) {
+    view = collection;
+    collection = false;
+    noArgument = true;
+  }
+
+  var _render = view.render;
+  view.render = function() {
+    if (noArgument) {
+      empty = !this.parent.model || (this.parent.model && !this.parent.model.isEmpty());
+    } else if (!collection) {
+      empty = true;
+    } else {
+      empty = collection.isEmpty();
+    }
+    if (empty) {
+      this.parent.trigger('rendered:empty', this, collection);
+      return _render.call(this, this.template);
+    } else {
+      return _render.call(this, this.inverse);
+    }
+  };
+
+  //no model binding is necessary as model.set() will cause re-render
+  if (collection) {
+    function collectionRemoveCallback() {
+      if (collection.length === 0) {
+        view.render();
+      }
+    }
+    function collectionAddCallback() {
+      if (collection.length === 1) {
+        view.render();
+      }
+    }
+    function collectionResetCallback() {
+      view.render();
+    }
+
+    view.on(collection, 'remove', collectionRemoveCallback);
+    view.on(collection, 'add', collectionAddCallback);
+    view.on(collection, 'reset', collectionResetCallback);
+  }
+  
+  view.render();
+});
+
+
+// End "src/helpers/empty.js"
+
+// Begin "src/helpers/loading.js"
 Handlebars.registerViewHelper('loading', function(view) {
   _render = view.render;
   view.render = function() {
@@ -2444,8 +2363,115 @@ Handlebars.registerViewHelper('loading', function(view) {
 });
 
 
+// End "src/helpers/loading.js"
 
-// End "src/loading.js"
+// Begin "src/helpers/super.js"
+Handlebars.registerHelper('super', function() {
+  var parent = this._view.constructor && this._view.constructor.__super__;
+  if (parent) {
+    var template = parent.template;
+    if (!template) { 
+      if (!parent.name) {
+        throw new Error('Cannot use super helper when parent has no name or template.');
+      }
+      template = Thorax.Util.getTemplate(parent.name, false);
+    }
+    if (typeof template === 'string') {
+      template = Handlebars.compile(template);
+    }
+    return new Handlebars.SafeString(template(this));
+  } else {
+    return '';
+  }
+});
+
+
+// End "src/helpers/super.js"
+
+// Begin "src/helpers/template.js"
+Handlebars.registerHelper('template', function(name, options) {
+  var context = _.extend({fn: options && options.fn}, this, options ? options.hash : {});
+  var output = Thorax.View.prototype.renderTemplate.call(this._view, name, context);
+  return new Handlebars.SafeString(output);
+});
+
+
+// End "src/helpers/template.js"
+
+// Begin "src/helpers/url.js"
+Handlebars.registerHelper('url', function(url) {
+  var fragment;
+  if (arguments.length > 2) {
+    fragment = _.map(_.head(arguments, arguments.length - 1), encodeURIComponent).join('/');
+  } else {
+    var options = arguments[1],
+        hash = (options && options.hash) || options;
+    if (hash && hash['expand-tokens']) {
+      fragment = Thorax.Util.expandToken(url, this);
+    } else {
+      fragment = url;
+    }
+  }
+  return (Backbone.history._hasPushState ? Backbone.history.options.root : '#') + fragment;
+});
+
+
+// End "src/helpers/url.js"
+
+// Begin "src/helpers/view.js"
+var viewTemplateOverrides = {};
+Handlebars.registerHelper('view', function(view, options) {
+  if (arguments.length === 1) {
+    options = view;
+    view = Thorax.View;
+  }
+  var instance = Thorax.Util.getViewInstance(view, options ? options.hash : {});
+  if (!instance) {
+    return '';
+  }
+  var placeholder_id = instance.cid + '-' + _.uniqueId('placeholder');
+  this._view._addChild(instance);
+  this._view.trigger('child', instance);
+  if (options.fn) {
+    viewTemplateOverrides[placeholder_id] = options.fn;
+  }
+  var htmlAttributes = Thorax.Util.htmlAttributesFromOptions(options.hash);
+  htmlAttributes[viewPlaceholderAttributeName] = placeholder_id;
+  return new Handlebars.SafeString(Thorax.Util.tag.call(this, htmlAttributes));
+});
+
+Thorax.View.prototype._appendViews = function(scope, callback) {
+  (scope || this.$el).find('[' + viewPlaceholderAttributeName + ']').forEach(function(el) {
+    var placeholder_id = el.getAttribute(viewPlaceholderAttributeName),
+        cid = placeholder_id.replace(/\-placeholder\d+$/, ''),
+        view = this.children[cid];
+    //if was set with a helper
+    if (_.isFunction(view)) {
+      view = view.call(this._view);
+    }
+    if (view) {
+      //see if the view helper declared an override for the view
+      //if not, ensure the view has been rendered at least once
+      if (viewTemplateOverrides[placeholder_id]) {
+        view.render(viewTemplateOverrides[placeholder_id](view._getContext()));
+      } else {
+        view.ensureRendered();
+      }
+      $(el).replaceWith(view.el);
+      //TODO: jQuery has trouble with delegateEvents() when
+      //the child dom node is detached then re-attached
+      if (typeof jQuery !== 'undefined' && $ === jQuery) {
+        if (this._renderCount > 1) {
+          view.delegateEvents();
+        }
+      }
+      callback && callback(view.el);
+    }
+  }, this);
+};
+
+
+// End "src/helpers/view.js"
 
 
 

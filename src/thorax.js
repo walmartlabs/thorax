@@ -320,10 +320,27 @@ Thorax.View = Backbone.View.extend({
       return this.el.innerHTML;
     } else {
       var element = this.$el.html(html);
-      this._appendViews();
-      this._appendElements();
+      {{#has-plugin "helpers/view"}}
+        this._appendViews();
+      {{/has-plugin}}
+      {{#has-plugin "helpers/element"}}
+        this._appendElements();
+      {{/has-plugin}}
       return element;
     }
+  },
+
+  _anchorClick: function(event) {
+    var target = $(event.currentTarget),
+        href = target.attr('href');
+    // Route anything that starts with # or / (excluding //domain urls)
+    if (href && (href[0] === '#' || (href[0] === '/' && href[1] !== '/'))) {
+      Backbone.history.navigate(href, {
+        trigger: true
+      });
+      return false;
+    }
+    return true;
   }
 });
 
@@ -356,54 +373,6 @@ Handlebars.registerHelper('with', function(context, options) {
   return options.fn(this._view ? _.extend({
     _view: this._view
   }, context) : context);
-});
-
-//helpers
-Handlebars.registerHelper('super', function() {
-  var parent = this._view.constructor && this._view.constructor.__super__;
-  if (parent) {
-    var template = parent.template;
-    if (!template) { 
-      if (!parent.name) {
-        throw new Error('Cannot use super helper when parent has no name or template.');
-      }
-      template = Thorax.Util.getTemplate(parent.name, false);
-    }
-    if (typeof template === 'string') {
-      template = Handlebars.compile(template);
-    }
-    return new Handlebars.SafeString(template(this));
-  } else {
-    return '';
-  }
-});
-
-Handlebars.registerHelper('template', function(name, options) {
-  var context = _.extend({fn: options && options.fn}, this, options ? options.hash : {});
-  var output = Thorax.View.prototype.renderTemplate.call(this._view, name, context);
-  return new Handlebars.SafeString(output);
-});
-
-//view helper
-var viewTemplateOverrides = {};
-Handlebars.registerHelper('view', function(view, options) {
-  if (arguments.length === 1) {
-    options = view;
-    view = Thorax.View;
-  }
-  var instance = Thorax.Util.getViewInstance(view, options ? options.hash : {});
-  if (!instance) {
-    return '';
-  }
-  var placeholder_id = instance.cid + '-' + _.uniqueId('placeholder');
-  this._view._addChild(instance);
-  this._view.trigger('child', instance);
-  if (options.fn) {
-    viewTemplateOverrides[placeholder_id] = options.fn;
-  }
-  var htmlAttributes = Thorax.Util.htmlAttributesFromOptions(options.hash);
-  htmlAttributes[viewPlaceholderAttributeName] = placeholder_id;
-  return new Handlebars.SafeString(Thorax.Util.tag.call(this, htmlAttributes));
 });
 
 Thorax.HelperView = Thorax.View.extend({
@@ -458,59 +427,6 @@ Handlebars.registerViewHelper = function(name, viewClass, callback) {
   });
   var helper = Handlebars.helpers[name];
   return helper;
-};
-  
-//called from View.prototype.html()
-Thorax.View.prototype._appendViews = function(scope, callback) {
-  (scope || this.$el).find('[' + viewPlaceholderAttributeName + ']').forEach(function(el) {
-    var placeholder_id = el.getAttribute(viewPlaceholderAttributeName),
-        cid = placeholder_id.replace(/\-placeholder\d+$/, ''),
-        view = this.children[cid];
-    //if was set with a helper
-    if (_.isFunction(view)) {
-      view = view.call(this._view);
-    }
-    if (view) {
-      //see if the view helper declared an override for the view
-      //if not, ensure the view has been rendered at least once
-      if (viewTemplateOverrides[placeholder_id]) {
-        view.render(viewTemplateOverrides[placeholder_id](view._getContext()));
-      } else {
-        view.ensureRendered();
-      }
-      $(el).replaceWith(view.el);
-      //TODO: jQuery has trouble with delegateEvents() when
-      //the child dom node is detached then re-attached
-      if (typeof jQuery !== 'undefined' && $ === jQuery) {
-        if (this._renderCount > 1) {
-          view.delegateEvents();
-        }
-      }
-      callback && callback(view.el);
-    }
-  }, this);
-};
-
-//element helper
-Handlebars.registerHelper('element', function(element, options) {
-  var cid = _.uniqueId('element'),
-      htmlAttributes = Thorax.Util.htmlAttributesFromOptions(options.hash);
-  htmlAttributes[elementPlaceholderAttributeName] = cid;
-  this._view._elementsByCid || (this._view._elementsByCid = {});
-  this._view._elementsByCid[cid] = element;
-  return new Handlebars.SafeString(Thorax.Util.tag.call(this, htmlAttributes));
-});
-
-Thorax.View.prototype._appendElements = function(scope, callback) {
-  (scope || this.$el).find('[' + elementPlaceholderAttributeName + ']').forEach(function(el) {
-    var cid = el.getAttribute(elementPlaceholderAttributeName),
-        element = this._elementsByCid[cid];
-    if (_.isFunction(element)) {
-      element = element.call(this._view);
-    }
-    $(el).replaceWith(element);
-    callback && callback(element);
-  }, this);
 };
 
 //$(selector).view() helper
