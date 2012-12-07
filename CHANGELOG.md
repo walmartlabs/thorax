@@ -2,6 +2,7 @@
 
 ## 2.0.0b6
 
+- `empty-context` in `collection` helper now defaults to `parent.context`
 - Revert: DOM event handlers now recieve the original context (if the handler had been registered with $.on) as the second argument
 
 ## 2.0.0b5

@@ -220,6 +220,16 @@ $(function() {
     equal(emptyCollectionView.$('[data-collection-cid]').html(), '<div>empty</div>');
   });
 
+  test("empty template defaults to parent scope", function() {
+    var view = new Thorax.View({
+      parentKey: 'value',
+      collection: new (Thorax.Collection.extend({url: false})),
+      template: '{{#collection}}item{{else}}{{parentKey}}{{/collection}}'
+    });
+    view.render();
+    equal(view.$('[data-collection-empty] div').html(), 'value');
+  });
+
   test("empty and collection helpers in the same template", function() {
     var a = new Thorax.View({
       template: '{{#empty letters}}<div class="empty">empty</div>{{/empty}}{{#collection letters}}{{letter}}{{/collection}}',

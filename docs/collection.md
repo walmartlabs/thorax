@@ -20,7 +20,7 @@ Options may be arbitrary HTML attributes, a `tag` option to specify the type of 
 - `item-context` - A function in the declaring view to specify the context for an item-template, recieves model and index as arguments. If the view has an `itemContext` function it will be used as the default.
 - `empty-template` - A template to display when the collection is empty. If an inverse block is specified it will become the empty-template. Defaults to view.name + '-empty'
 - `empty-view` - A view to display when the collection is empty. Defaults to view.name + '-empty'
-- `empty-context` - A function in the declaring view to specify the context that the empty-template is rendered with. If the view has an `emptyContext` function it will be used as the default.
+- `empty-context` - A function in the declaring view to specify the context that the empty-template is rendered with. If the view has an `emptyContext` function it will be used as the default, otherwise `parent.context` will be used by default.
 - `empty-class` - A class name to add and remove from the collection view's `el` depending on wether or not the collection is empty.
 - `loading-template` - Only available if the loading plugin has been included. A template to append when the collection is loading.
 - `loading-view` - Only available if loading plugin has been included. A view to append when the collection is loading

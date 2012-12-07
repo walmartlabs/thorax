@@ -206,7 +206,7 @@ Thorax.CollectionView = Thorax.HelperView.extend({
       emptyContext && (viewOptions.context = _.bind(getEmptyContext, this));
       var view = Thorax.Util.getViewInstance(emptyView, viewOptions);
       if (emptyTemplate) {
-        view.render(this.renderTemplate(emptyTemplate, viewOptions.context ? viewOptions.context() : {}));
+        view.render(this.renderTemplate(emptyTemplate, viewOptions.context ? viewOptions.context() : this.parent.context()));
       } else {
         view.render();
       }
@@ -214,7 +214,7 @@ Thorax.CollectionView = Thorax.HelperView.extend({
     } else {
       var emptyTemplate = emptyTemplate || (this.parent.name && Thorax.Util.getTemplate(this.parent.name + '-empty', true)),
           context;
-      context = emptyContext ? getEmptyContext.call(this) : {};
+      context = emptyContext ? getEmptyContext.call(this) : this.parent.context();
       return emptyTemplate && this.renderTemplate(emptyTemplate, context);
     }
   },
