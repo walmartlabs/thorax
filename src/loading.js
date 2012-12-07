@@ -347,7 +347,7 @@ if (Thorax.Model) {
   Thorax.View.prototype._loadModel = function(model, options) {
     if (model.load) {
       model.load(function() {
-        options.success && options.success(model);
+        options && options.success && options.success(model);
       }, options);
     } else {
       model.fetch(options);
@@ -368,7 +368,7 @@ if (Thorax.Collection) {
   Thorax.CollectionView.prototype._loadCollection = function(collection, options) {
     if (collection.load) {
       collection.load(function(){
-        options.success && options.success(collection);
+        options && options.success && options.success(collection);
       }, options);
     } else {
       collection.fetch(options);
