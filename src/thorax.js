@@ -352,15 +352,23 @@ Thorax.View.extend = function() {
 
 Thorax.Util.createRegistryWrapper(Thorax.View, Thorax.Views);
 
+function addViewToContext(source) {
+  if (this._view) {
+    var context = _.clone(source);
+    context._view = this._view;
+    return context;
+  } else {
+    return source;
+  }
+}
+
 //override handlebars "each" helper to provide "_view"
 Handlebars.registerHelper('each', function(context, options) {
   var fn = options.fn, inverse = options.inverse;
   var ret = "";
   if (context && context.length > 0) {
     for (var i = 0, j = context.length; i < j; i++) {
-      ret = ret + fn(this._view ? _.extend({
-        _view: this._view
-      }, context[i]) : context[i]);
+      ret = ret + fn(addViewToContext.call(this, context[i]));
     }
   } else {
     ret = inverse(this);
@@ -370,9 +378,7 @@ Handlebars.registerHelper('each', function(context, options) {
 
 //override handlebars "with" helper to provide "_view"
 Handlebars.registerHelper('with', function(context, options) {
-  return options.fn(this._view ? _.extend({
-    _view: this._view
-  }, context) : context);
+  return options.fn(addViewToContext.call(this, context));
 });
 
 Thorax.HelperView = Thorax.View.extend({
