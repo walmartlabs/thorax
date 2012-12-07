@@ -109,9 +109,7 @@ Thorax.CollectionView = Thorax.HelperView.extend({
     var itemView;
     options = options || {};
     //if index argument is a view
-    if (index && index.el) {
-      index = this.$el.children().indexOf(index.el) + 1;
-    }
+    index && index.el && (index = this.$el.children().indexOf(index.el) + 1);
     //if argument is a view, or html string
     if (model.el || typeof model === 'string') {
       itemView = model;
@@ -121,9 +119,7 @@ Thorax.CollectionView = Thorax.HelperView.extend({
       itemView = this.renderItem(model, index);
     }
     if (itemView) {
-      if (itemView.cid) {
-        this._addChild(itemView);
-      }
+      itemView.cid && this._addChild(itemView);
       //if the renderer's output wasn't contained in a tag, wrap it in a div
       //plain text, or a mixture of top level text nodes and element nodes
       //will get wrapped
@@ -134,9 +130,7 @@ Thorax.CollectionView = Thorax.HelperView.extend({
         //filter out top level whitespace nodes
         return node.nodeType === ELEMENT_NODE_TYPE;
       });
-      if (model) {
-        $(itemElement).attr(modelCidAttributeName, model.cid);
-      }
+      model && $(itemElement).attr(modelCidAttributeName, model.cid);
       var previousModel = index > 0 ? this.collection.at(index - 1) : false;
       if (!previousModel) {
         this.$el.prepend(itemElement);
@@ -155,9 +149,7 @@ Thorax.CollectionView = Thorax.HelperView.extend({
           el.setAttribute(modelCidAttributeName, model.cid);
         });
       {{/has-plugin}}
-      if (!options.silent) {
-        this.parent.trigger('rendered:item', this, this.collection, model, itemElement, index);
-      }
+      !options.silent && this.parent.trigger('rendered:item', this, this.collection, model, itemElement, index);
       applyItemVisiblityFilter.call(this, model);
     }
     return itemView;
@@ -199,72 +191,58 @@ Thorax.CollectionView = Thorax.HelperView.extend({
     ++this._renderCount;
   },
   renderEmpty: function() {
-    var viewOptions = {};
-    if (this.options['empty-view']) {
-      if (this.options['empty-context']) {
-        viewOptions.context = _.bind(function() {
-          return (_.isFunction(this.options['empty-context'])
-            ? this.options['empty-context']
-            : this.parent[this.options['empty-context']]
-          ).call(this.parent);
-        }, this);
-      }
-      var view = Thorax.Util.getViewInstance(this.options['empty-view'], viewOptions);
-      if (this.options['empty-template']) {
-        view.render(this.renderTemplate(this.options['empty-template'], viewOptions.context ? viewOptions.context() : {}));
+    var viewOptions = {},
+        emptyView = this.options['empty-view'],
+        emptyContext = this.options['empty-context'],
+        emptyTemplate = this.options['empty-template'];
+    function getEmptyContext() {
+      return (_.isFunction(emptyContext)
+        ? emptyContext
+        : this.parent[emptyContext]
+      ).call(this.parent);
+    }
+    if (emptyView) {
+      var viewOptions = {};
+      emptyContext && (viewOptions.context = _.bind(getEmptyContext, this));
+      var view = Thorax.Util.getViewInstance(emptyView, viewOptions);
+      if (emptyTemplate) {
+        view.render(this.renderTemplate(emptyTemplate, viewOptions.context ? viewOptions.context() : {}));
       } else {
         view.render();
       }
       return view;
     } else {
-      var emptyTemplate = this.options['empty-template'] || (this.parent.name && Thorax.Util.getTemplate(this.parent.name + '-empty', true));
-      var context;
-      if (this.options['empty-context']) {
-        context = (_.isFunction(this.options['empty-context'])
-          ? this.options['empty-context']
-          : this.parent[this.options['empty-context']]
-        ).call(this.parent);
-      } else {
-        context = {};
-      }
+      var emptyTemplate = emptyTemplate || (this.parent.name && Thorax.Util.getTemplate(this.parent.name + '-empty', true)),
+          context;
+      context = emptyContext ? getEmptyContext.call(this) : {};
       return emptyTemplate && this.renderTemplate(emptyTemplate, context);
     }
   },
   renderItem: function(model, i) {
-    if (this.options['item-view']) {
+    var itemView = this.options['item-view'],
+        itemTemplate = this.options['item-template'],
+        itemContext = this.options['item-context'];
+    function getItemContext() {
+      return (_.isFunction(itemContext)
+        ? itemContext
+        : this.parent[itemContext]
+      ).call(this.parent, model, i);
+    }
+    if (itemView) {
       var viewOptions = {
         model: model
       };
-      //itemContext deprecated
-      if (this.options['item-context']) {
-        viewOptions.context = _.bind(function() {
-          return (_.isFunction(this.options['item-context'])
-            ? this.options['item-context']
-            : this.parent[this.options['item-context']]
-          ).call(this.parent, model, i);
-        }, this);
-      }
-      if (this.options['item-template']) {
-        viewOptions.template = this.options['item-template'];
-      }
-      var view = Thorax.Util.getViewInstance(this.options['item-view'], viewOptions);
+      itemContext && (viewOptions.context = _.bind(getItemContext, this));
+      itemTemplate && (viewOptions.template = itemTemplate);
+      var view = Thorax.Util.getViewInstance(itemView, viewOptions);
       view.ensureRendered();
       return view;
     } else {
-      var itemTemplate = this.options['item-template'] || (this.parent.name && Thorax.Util.getTemplate(this.parent.name + '-item', true));
+      itemTemplate = itemTemplate || (this.parent.name && Thorax.Util.getTemplate(this.parent.name + '-item', true));
       if (!itemTemplate) {
         throw new Error('collection helper in View: ' + (this.parent.name || this.parent.cid) + ' requires an item template.');
       }
-      var context;
-      if (this.options['item-context']) {
-        context = (_.isFunction(this.options['item-context'])
-          ? this.options['item-context']
-          : this.parent[this.options['item-context']]
-        ).call(this.parent, model, i);
-      } else {
-        context = model.attributes;
-      }
-      return this.renderTemplate(itemTemplate, context);
+      return this.renderTemplate(itemTemplate, itemContext ? getItemContext.call(this) : model.attributes);
     }
   },
   appendEmpty: function() {
