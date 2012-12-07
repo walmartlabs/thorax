@@ -3,20 +3,37 @@ $(function() {
   QUnit.module('Thorax Event');
 
   test("don't break existing event hash", function() {
-    expect(2);
+    expect(6);
     var view = new Thorax.View({
+      key: 'value',
       events: {
         test1: 'test1',
         test2: function() {
+          equal(this.key, 'value');
           ok(true);
         }
       },
       test1: function() {
+        equal(this.key, 'value');
         ok(true);
       }
     });
     view.trigger('test1');
     view.trigger('test2');
+
+    view = new Thorax.View({
+      events: function() {
+        return {
+          test3: 'test3'
+        };
+      },
+      key: 'value',
+      test3: function() {
+        equal(this.key, 'value');
+        ok(true);
+      }
+    });
+    view.trigger('test3');
   });
 
   //ensure view.on('viewEventOne viewEventTwo') still works
