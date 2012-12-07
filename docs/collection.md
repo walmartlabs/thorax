@@ -21,6 +21,7 @@ Options may be arbitrary HTML attributes, a `tag` option to specify the type of 
 - `empty-template` - A template to display when the collection is empty. If an inverse block is specified it will become the empty-template. Defaults to view.name + '-empty'
 - `empty-view` - A view to display when the collection is empty. Defaults to view.name + '-empty'
 - `empty-context` - A function in the declaring view to specify the context that the empty-template is rendered with. If the view has an `emptyContext` function it will be used as the default.
+- `empty-class` - A class name to add and remove from the collection view's `el` depending on wether or not the collection is empty.
 - `loading-template` - Only available if the loading plugin has been included. A template to append when the collection is loading.
 - `loading-view` - Only available if loading plugin has been included. A view to append when the collection is loading
 - `loading-placement` - Only available if loading plugin has been included. A method on the declaring view that will recieve the collection view instance as the only argument and must return the index where the loading view or template should be placed. Defaults to `view.collection.length`, placing the view or template at the end.

@@ -601,6 +601,33 @@ $(function() {
     equal(view.$('b')[0].innerHTML, 'testing');
   });
 
+  test("empty-class option", function() {
+    var view = new Thorax.View({
+      template: "{{#collection empty-class=\"a\" tag=\"ul\"}}{{/collection}}",
+      collection: new (Thorax.Collection.extend({url: false}))
+    });
+    view.render();
+    ok(view.$('ul').hasClass('a'));
+    var model = new Thorax.Model({key: 'value'});
+    view.collection.add(model);
+    ok(!view.$('ul').hasClass('a'));
+    view.collection.remove(model);
+    ok(view.$('ul').hasClass('a'));
+
+    //with default arg
+    view = new Thorax.View({
+      template: "{{#collection tag=\"ul\"}}{{/collection}}",
+      collection: new (Thorax.Collection.extend({url: false}))
+    });
+    view.render();
+    ok(view.$('ul').hasClass('empty'));
+    var model = new Thorax.Model({key: 'value'});
+    view.collection.add(model);
+    ok(!view.$('ul').hasClass('empty'));
+    view.collection.remove(model);
+    ok(view.$('ul').hasClass('empty'));
+  });
+
   test("helper and local scope collision", function() {
     var child = new Thorax.View({
       collection: letterCollection,
