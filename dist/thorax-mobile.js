@@ -1061,6 +1061,7 @@ Thorax.CollectionView = Thorax.HelperView.extend({
     collectionOptionNames.forEach(function(optionName) {
       options[optionName] && (this.options[optionName] = options[optionName]);
     }, this);
+    !('empty-class' in this.options) && (this.options['empty-class'] = 'empty');
   },
   _setCollectionOptions: function(collection, options) {
     return _.extend({
@@ -1079,9 +1080,7 @@ Thorax.CollectionView = Thorax.HelperView.extend({
     if (collection) {
       collection.cid = collection.cid || _.uniqueId('collection');
       this.$el.attr(collectionCidAttributeName, collection.cid);
-      if (collection.name) {
-        this.$el.attr(collectionNameAttributeName, collection.name);
-      }
+      collection.name && this.$el.attr(collectionNameAttributeName, collection.name);
       this.options = this._setCollectionOptions(collection, _.extend({}, this.options, options));
       bindCollectionEvents.call(this, collection, this.parent._collectionEvents);
       bindCollectionEvents.call(this, collection, this.parent.constructor._collectionEvents);
@@ -1185,13 +1184,11 @@ Thorax.CollectionView = Thorax.HelperView.extend({
     this.render();
   },
   render: function() {
-    this.$el.empty();
     if (this.collection) {
       if (this.collection.isEmpty()) {
-        this.$el.attr(collectionEmptyAttributeName, true);
-        this.appendEmpty();
+        handleChangeFromNotEmptyToEmpty.call(this);
       } else {
-        this.$el.removeAttr(collectionEmptyAttributeName);
+        handleChangeFromEmptyToNotEmpty.call(this);
         this.collection.forEach(function(item, i) {
           this.appendItem(item, i);
         }, this);
@@ -1287,6 +1284,7 @@ var collectionOptionNames = [
   'empty-view',
   'item-context',
   'empty-context',
+  'empty-class',
   'filter'
   
   , 'loading-template'
@@ -1329,21 +1327,15 @@ function itemShouldBeVisible(model, i) {
 }
 
 function handleChangeFromEmptyToNotEmpty() {
-  if (this.collection.length === 1) {
-    if(this.$el.length) {
-      this.$el.removeAttr(collectionEmptyAttributeName);
-      this.$el.empty();
-    }
-  }
+  this.options['empty-class'] && this.$el.removeClass(this.options['empty-class']);
+  this.$el.removeAttr(collectionEmptyAttributeName);
+  this.$el.empty();
 }
 
 function handleChangeFromNotEmptyToEmpty() {
-  if (this.collection.length === 0) {
-    if (this.$el.length) {
-      this.$el.attr(collectionEmptyAttributeName, true);
-      this.appendEmpty();
-    }
-  }
+  this.options['empty-class'] && this.$el.addClass(this.options['empty-class']);
+  this.$el.attr(collectionEmptyAttributeName, true);
+  this.appendEmpty();
 }
 
 Thorax.View.on({
@@ -1361,7 +1353,7 @@ Thorax.View.on({
       applyItemVisiblityFilter.call(collectionView, model);
     },
     add: function(collectionView, model, collection) {
-      handleChangeFromEmptyToNotEmpty.call(collectionView);
+      collectionView.collection.length === 1 && collectionView.$el.length && handleChangeFromEmptyToNotEmpty.call(collectionView);
       if (collectionView.$el.length) {
         var index = collection.indexOf(model);
         collectionView.appendItem(model, index);
@@ -1376,7 +1368,7 @@ Thorax.View.on({
           break;
         }
       }
-      handleChangeFromNotEmptyToEmpty.call(collectionView);
+      collectionView.collection.length === 0 && collectionView.$el.length && handleChangeFromNotEmptyToEmpty.call(collectionView);
     },
     reset: function(collectionView, collection) {
       collectionView.reset();
