@@ -68,9 +68,6 @@ function addEvents(target, source) {
 }
 
 _.extend(Thorax.View.prototype, {
-  context: function() {
-    return _.extend({}, this, (this.model && this.model.attributes) || {});
-  },
   _bindModelEvents: function(model) {
     bindModelEvents.call(this, model, this.constructor._modelEvents);
     bindModelEvents.call(this, model, this._modelEvents);

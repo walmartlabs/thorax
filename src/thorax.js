@@ -278,7 +278,11 @@ Thorax.View = Backbone.View.extend({
   },
 
   context: function() {
-    return this;
+    {{#has-plugin "model"}}
+      return _.extend({}, this, (this.model && this.model.attributes) || {});
+    {{else}}
+      return this;
+    {{/has-plugin}}
   },
 
   _getContext: function(attributes) {
