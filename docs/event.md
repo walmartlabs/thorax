@@ -77,11 +77,11 @@ DOM events may be prefixed with the special keyword `nested` which will apply th
 
     view.on('nested click a', function() {})
 
-Since the context of DOM event handlers in Thorax will always be the view, the second argument to the handler will be the `Element` object that would have been set as `this` had the handler been registered with jQuery / Zepto:
+Thorax will add an attribute to the event named `originalContext` that will be the `Element` object that would have been set as `this` had the handler been registered with jQuery / Zepto:
 
     $('a').on('click', function() {});
-    view.on('click a', function(event, element) {
-      // element === what "this" would be in the
+    view.on('click a', function(event) {
+      // event.originalContext === what "this" would be in the
       // first handler
     });
 

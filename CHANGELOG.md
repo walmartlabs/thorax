@@ -1,5 +1,9 @@
 # Change Log
 
+## 2.0.0b6
+
+- Revert: DOM event handlers now recieve the original context (if the handler had been registered with $.on) as the second argument
+
 ## 2.0.0b5
 
 - `expand-tokens=true` is now required in the `url` helper to expand handlebars tokens inside a url
