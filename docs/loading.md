@@ -3,9 +3,13 @@ Thorax Loading Plugin
 
 Helpers and methods to load your data in an orderly manner.
 
-## Queueing
-
-TODO: explanation of flushQueue, fetchQueue, resetQueue
+TODO explanation of:
+  - flushQueue
+  - fetchQueue
+  - resetQueue
+  - nonBlockingLoad attribute
+  - background option
+  - ignoreErrors option
 
 ## Thorax.Util
 

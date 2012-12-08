@@ -39,6 +39,10 @@ Thorax.Util.createRegistryWrapper(Thorax.Model, Thorax.Models);
   this._models = [];
 {{/inject}}
 
+{{#inject "static-view-properties"}}
+  Thorax.View._modelEvents = [];
+{{/inject}}
+
 {{#inject "extend"}}
   Thorax.Util._cloneEvents(this, child, '_modelEvents');
 {{/inject}}
@@ -50,10 +54,9 @@ Thorax.Util.createRegistryWrapper(Thorax.Model, Thorax.Models);
 {{/inject}}
 
 {{#inject "freeze"}}
-  _.each(this._models, this.removeModel, this);
+  _.each(this._models, this.unbindModel, this);
 {{/inject}}
 
-Thorax.View._modelEvents = [];
 
 function addEvents(target, source) {
   _.each(source, function(callback, eventName) {
@@ -68,19 +71,11 @@ function addEvents(target, source) {
 }
 
 _.extend(Thorax.View.prototype, {
-  _bindModelEvents: function(model) {
-    bindModelEvents.call(this, model, this.constructor._modelEvents);
-    bindModelEvents.call(this, model, this._modelEvents);
-  },
-  _unbindModelEvents: function(model) {
-    model.trigger('freeze');
-    unbindModelEvents.call(this, model, this.constructor._modelEvents);
-    unbindModelEvents.call(this, model, this._modelEvents);
-  },
-  addModel: function(model, options) {
+  bindModel: function(model, options) {
     this._models.push(model);
     var modelOptions = this._setModelOptions(model, options);
-    this._bindModelEvents(model, modelOptions);
+    bindEvents.call(this, model, this.constructor._modelEvents);
+    bindEvents.call(this, model, this._modelEvents);
     if (Thorax.Util.shouldFetch(this.model, modelOptions)) {
       var success = modelOptions.success;
       this._loadModel(this.model, modelOptions);
@@ -90,9 +85,11 @@ _.extend(Thorax.View.prototype, {
       this._onModelChange(model);
     }
   },
-  removeModel: function(model) {
+  unbindModel: function(model) {
     this._models = _.without(this._models, model);
-    this._unbindModelEvents(model);
+    model.trigger('freeze');
+    unbindEvents.call(this, model, this.constructor._modelEvents);
+    unbindEvents.call(this, model, this._modelEvents);
     delete this._modelOptionsByCid[model.cid];
   },
   setModel: function(model, options) {
@@ -101,13 +98,13 @@ _.extend(Thorax.View.prototype, {
       return this;
     }
     if (oldModel) {
-      this.removeModel(oldModel);
+      this.unbindModel(oldModel);
     }
     if (model) {
       this.$el.attr(modelCidAttributeName, model.cid);
       model.name && this.$el.attr(modelNameAttributeName, model.name);
       this.model = model;
-      this.addModel(model, options);
+      this.bindModel(model, options);
       this.model.trigger('set', this.model, oldModel);
     } else {
       this.model = false;
@@ -119,14 +116,24 @@ _.extend(Thorax.View.prototype, {
   },
   _onModelChange: function(model) {
     var modelOptions = model && this._modelOptionsByCid[model.cid];
-    // !this._modelOptions will be true when setModel(false) is called
+    // !modelOptions will be true when setModel(false) is called
     if (!modelOptions || (modelOptions && modelOptions.render)) {
       this.render();
     }
     {{{override "model-change" indent=4}}}
   },
   _loadModel: function(model, options) {
-    model.fetch(options);
+    {{#has-plugin "loading"}}
+      if (model.load) {
+        model.load(function() {
+          options && options.success && options.success(model);
+        }, options);
+      } else {
+        model.fetch(options);
+      }
+    {{else}}
+      model.fetch(options);
+    {{/has-plugin}}
   },
   _setModelOptions: function(model, options) {
     if (!this._modelOptionsByCid[model.cid]) {
@@ -151,17 +158,17 @@ function getEventCallback(callback, context) {
   }
 }
 
-function bindModelEvents(model, events) {
+function bindEvents(target, events) {
   events.forEach(function(event) {
-    //getEventCallback will resolve if it is a string or a method
-    //and return a method
-    model.on(event[0], getEventCallback(event[1], this), event[2] || this);
+    // getEventCallback will resolve if it is a string or a method
+    // and return a method
+    target.on(event[0], getEventCallback(event[1], this), event[2] || this);
   }, this);
 }
 
-function unbindModelEvents(model, events) {
+function unbindEvents(target, events) {
   events.forEach(function(event) {
-    model.off(event[0], getEventCallback(event[1], this), event[2] || this);
+    target.off(event[0], getEventCallback(event[1], this), event[2] || this);
   }, this);
 }
 

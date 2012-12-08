@@ -10,15 +10,17 @@ Thorax.Mixins = {};
   child.mixins = _.clone(this.mixins);
 {{/inject}}
 
-_.extend(Thorax.View, {
-  mixins: [],
-  mixin: function(mixin) {
-    this.mixins.push(mixin);
-  },
-  registerMixin: function(name, callback, methods) {
-    Thorax.Mixins[name] = [callback, methods];
-  }
-});
+{{#inject "static-view-properties"}}
+  _.extend(Thorax.View, {
+    mixins: [],
+    mixin: function(mixin) {
+      this.mixins.push(mixin);
+    },
+    registerMixin: function(name, callback, methods) {
+      Thorax.Mixins[name] = [callback, methods];
+    }
+  });
+{{/inject}}
 
 Thorax.View.prototype.mixin = function(name) {
   if (!this._appliedMixins) {

@@ -348,6 +348,36 @@ Thorax.View = Backbone.View.extend({
   }
 });
 
+{{! All static properties must be present before any subclasses are created}}
+{{{override "static-view-properties" indent=0}}}
+
+{{#has-plugin "event"}}
+  _.extend(Thorax.View, {
+    _events: [],
+    on: function(eventName, callback) {
+      {{{override "on" indent=4}}}
+      //accept on({"rendered": handler})
+      if (typeof eventName === 'object') {
+        _.each(eventName, function(value, key) {
+          this.on(key, value);
+        }, this);
+      } else {
+        //accept on({"rendered": [handler, handler]})
+        if (_.isArray(callback)) {
+          callback.forEach(function(cb) {
+            this._events.push([eventName, cb]);
+          }, this);
+        //accept on("rendered", handler)
+        } else {
+          this._events.push([eventName, callback]);
+        }
+      }
+      return this;
+    }
+  });
+{{/has-plugin}}
+
+
 Thorax.View.extend = function() {
   var child = Backbone.View.extend.apply(this, arguments);
   {{{override "extend" indent=2}}}

@@ -333,48 +333,22 @@ if (Thorax.Router) {
   Thorax.Router.bindToRoute = Thorax.Router.prototype.bindToRoute = bindToRoute;
 }
 
-//
-// View load event handling
-//
+// Propagates loading view parameters to the AJAX layer
+{{#inject "model-options"}}
+  , ignoreErrors: this.ignoreFetchError
+  , background: this.nonBlockingLoad
+{{/inject}}
 
-if (Thorax.Model) {
-  // Propagates loading view parameters to the AJAX layer
-  {{#inject "model-options"}}
-    , ignoreErrors: this.ignoreFetchError
-    , background: this.nonBlockingLoad
-  {{/inject}}
-
-  Thorax.View.prototype._loadModel = function(model, options) {
-    if (model.load) {
-      model.load(function() {
-        options && options.success && options.success(model);
-      }, options);
-    } else {
-      model.fetch(options);
-    }
-  };
-}
-
-if (Thorax.Collection) {
+if (Thorax.CollectionView) {
   Thorax.mixinLoadable(Thorax.CollectionView.prototype);
   Thorax.mixinLoadableEvents(Thorax.CollectionView.prototype);
-
-  // Propagates loading view parameters to the AJAX layer
-  {{#inject "collection-options"}}
-    , ignoreErrors: this.ignoreFetchError
-    , background: this.nonBlockingLoad
-  {{/inject}}
-
-  Thorax.CollectionView.prototype._loadCollection = function(collection, options) {
-    if (collection.load) {
-      collection.load(function(){
-        options && options.success && options.success(collection);
-      }, options);
-    } else {
-      collection.fetch(options);
-    }
-  };
 }
+
+// Propagates loading view parameters to the AJAX layer
+{{#inject "collection-options"}}
+  , ignoreErrors: this.ignoreFetchError
+  , background: this.nonBlockingLoad
+{{/inject}}
 
 Thorax.View.on({
   'load:start': Thorax.loadHandler(
@@ -386,7 +360,7 @@ Thorax.View.on({
       }),
 
   collection: {
-    'load:start': function(collectionView, message, background, object) {
+    'load:start': function(message, background, object) {
       this.trigger(loadStart, message, background, object);
     }
   },

@@ -39,8 +39,18 @@ Thorax.Util.createRegistryWrapper(Thorax.Collection, Thorax.Collections);
   Thorax.Util._cloneEvents(this, child, '_collectionEvents');
 {{/inject}}
 
+{{#inject "static-view-properties"}}
+  Thorax.View._collectionEvents = [];
+{{/inject}}
+
 {{#inject "beforeConfigure"}}
   this._collectionEvents = [];
+  this._collectionOptionsByCid = {};
+  this._collections = [];
+{{/inject}}
+
+{{#inject "freeze"}}
+  _.each(this._collections, this.unbindCollection, this);
 {{/inject}}
 
 {{#inject "on"}}
@@ -49,12 +59,52 @@ Thorax.Util.createRegistryWrapper(Thorax.Collection, Thorax.Collections);
   }
 {{/inject}}
 
-Thorax.View._collectionEvents = [];
-
-//collection view is meant to be initialized via the collection
-//helper but can alternatively be initialized programatically
-//constructor function handles this case, no logic except for
-//super() call will be exectued when initialized via collection helper
+_.extend(Thorax.View.prototype, {
+  bindCollection: function(collection, options) {
+    // Collections do not have a cid attribute by default
+    collection.cid = collection.cid || _.uniqueId('collection');
+    this._collections.push(collection);
+    var collectionOptions = this._setCollectionOptions(collection, options);
+    bindEvents.call(this, collection, this.constructor._collectionEvents);
+    bindEvents.call(this, collection, this._collectionEvents);
+    if (Thorax.Util.shouldFetch(collection, collectionOptions)) {
+      this._loadCollection(collection);
+    } else if (collectionOptions.render) {
+      //want to trigger built in event handler (render())
+      //without triggering event on collection
+      this.render();
+    }
+  },
+  unbindCollection: function(collection) {
+    this._collections = _.without(this._collections, collection);
+    collection.trigger('freeze');
+    unbindEvents.call(this, collection, this.constructor._collectionEvents);
+    unbindEvents.call(this, collection, this._collectionEvents);
+    delete this._collectionOptionsByCid[collection.cid];
+  },
+  _setCollectionOptions: function(collection, options) {
+    return this._collectionOptionsByCid[collection.cid] = _.extend({
+      render: true,
+      fetch: true,
+      success: false,
+      errors: true
+      {{{override "collection-options" indent=6}}}
+    }, options || {});
+  },
+  _loadCollection: function(collection) {
+    {{#has-plugin "loading"}}
+      if (collection.load) {
+        collection.load(function(){
+          options && options.success && options.success(collection);
+        }, options);
+      } else {
+        collection.fetch(options);
+      }
+    {{else}}
+      collection.fetch(this.options);
+    {{/has-plugin}}
+  }
+});
 
 Thorax.CollectionView = Thorax.HelperView.extend({
   constructor: function(options) {
@@ -70,75 +120,23 @@ Thorax.CollectionView = Thorax.HelperView.extend({
     configureCollectionViewOptions(this);
     this.collection && this.setCollection(this.collection);
   },
-  _setCollectionOptions: function(collection, options) {
-    return _.extend({
-      fetch: true,
-      success: false,
-      errors: true
-      {{{override "collection-options" indent=6}}}
-    }, options || {});
-  },
   setCollection: function(collection, options) {
-    this.collection = collection;
     if (collection) {
+      this.collection = collection;
       {{#has-plugin "loading"}}
-        var loadingView = this.options['loading-view'],
-            loadingTemplate = this.options['loading-template'],
-            loadingPlacement = this.options['loading-placement'];
-        //add "loading-view" and "loading-template" options to collection helper
-        if (loadingView || loadingTemplate) {
-          var callback = Thorax.loadHandler(_.bind(function() {
-            var item;
-            if (this.collection.length === 0) {
-              this.$el.empty();
-            }
-            if (loadingView) {
-              var instance = Thorax.Util.getViewInstance(loadingView, {
-                collection: this.collection
-              });
-              this._addChild(instance);
-              if (loadingTemplate) {
-                instance.render(loadingTemplate);
-              } else {
-                instance.render();
-              }
-              item = instance;
-            } else {
-              item = this.renderTemplate(loadingTemplate, {
-                collection: this.collection
-              });
-            }
-            var index = loadingPlacement
-              ? loadingPlacement.call(this.parent, this)
-              : this.collection.length
-            ;
-            this.appendItem(item, index);
-            this.$el.children().eq(index).attr('data-loading-element', this.collection.cid);
-          }, this), _.bind(function() {
-            this.$el.find('[data-loading-element="' + this.collection.cid + '"]').remove();
-          }, this));
-          this.on(this.collection, 'load:start', callback);
-        }
+        addLoadingBehaviors.call(this);
       {{/has-plugin}}
-      collection.cid = collection.cid || _.uniqueId('collection');
+      this.bindCollection(collection, _.extend({}, this.options, options));
       this.$el.attr(collectionCidAttributeName, collection.cid);
       collection.name && this.$el.attr(collectionNameAttributeName, collection.name);
-      this.options = this._setCollectionOptions(collection, _.extend({}, this.options, options));
-      bindCollectionEvents.call(this, collection, this.parent._collectionEvents);
-      bindCollectionEvents.call(this, collection, this.parent.constructor._collectionEvents);
       collection.trigger('set', collection);
-      if (Thorax.Util.shouldFetch(collection, this.options)) {
-        this._loadCollection(collection);
-      } else {
-        //want to trigger built in event handler (render())
-        //without triggering event on collection
-        this.reset();
-      }
+    } else {
+      this.collection && this.unbindCollection(this.collection);
+      this.collection = false;
+      this.$el.removeAttr(collectionCidAttributeName);
+      this.$el.removeAttr(collectionNameAttributeName);
     }
     return this;
-  },
-  _loadCollection: function(collection) {
-    collection.fetch(this.options);
   },
   //appendItem(model [,index])
   //appendItem(html_string, index)
@@ -214,9 +212,6 @@ Thorax.CollectionView = Thorax.HelperView.extend({
     viewEl.remove();
     return true;
   },
-  reset: function() {
-    this.render();
-  },
   render: function() {
     if (this.collection) {
       if (this.collection.isEmpty()) {
@@ -229,6 +224,8 @@ Thorax.CollectionView = Thorax.HelperView.extend({
       }
       this.parent.trigger('rendered:collection', this, this.collection);
       applyVisibilityFilter.call(this);
+    } else {
+      handleChangeFromNotEmptyToEmpty.call(this);
     }
     ++this._renderCount;
   },
@@ -313,18 +310,6 @@ var collectionOptionNames = [
   {{/has-plugin}}
 ];
 
-function bindCollectionEvents(collection, events) {
-  events.forEach(function(event) {
-    this.on(collection, event[0], function() {
-      //getEventCallback will resolve if it is a string or a method
-      //and return a method
-      var args = _.toArray(arguments);
-      args.unshift(this);
-      return getEventCallback(event[1], this.parent).apply(this.parent, args);
-    }, this);
-  }, this);
-}
-
 function applyVisibilityFilter() {
   if (this.options.filter) {
     this.collection.forEach(function(model) {
@@ -358,47 +343,59 @@ function handleChangeFromNotEmptyToEmpty() {
   this.appendEmpty();
 }
 
-Thorax.View.on({
+var sharedCollectionEvents = {
   collection: {
-    filter: function(collectionView) {
-      applyVisibilityFilter.call(collectionView);
+    reset: function(collection) {
+      var options = this._collectionOptionsByCid[collection.cid];
+      options.render && this.render();
     },
-    change: function(collectionView, model) {
+    error: function(collection, message) {
+      var options = this._collectionOptionsByCid[collection.cid];
+      options.errors && this.trigger('error', message);
+    }
+  }
+};
+
+// Sub-classes have already been declared, so need
+// to call `on` on all classes that should get the
+// events
+Thorax.View.on(sharedCollectionEvents);
+Thorax.HelperView.on(sharedCollectionEvents);
+Thorax.CollectionView.on(sharedCollectionEvents);
+
+Thorax.CollectionView.on({
+  collection: {
+    filter: function() {
+      applyVisibilityFilter.call(this);
+    },
+    change: function(model) {
       //if we rendered with item views, model changes will be observed
       //by the generated item view but if we rendered with templates
       //then model changes need to be bound as nothing is watching
-      if (!collectionView.options['item-view']) {
-        collectionView.updateItem(model);
+      if (!this.options['item-view']) {
+        this.updateItem(model);
       }
-      applyItemVisiblityFilter.call(collectionView, model);
+      applyItemVisiblityFilter.call(this, model);
     },
-    add: function(collectionView, model, collection) {
-      collectionView.collection.length === 1 && collectionView.$el.length && handleChangeFromEmptyToNotEmpty.call(collectionView);
-      if (collectionView.$el.length) {
+    add: function(model, collection) {
+      this.collection.length === 1 && this.$el.length && handleChangeFromEmptyToNotEmpty.call(this);
+      if (this.$el.length) {
         var index = collection.indexOf(model);
-        collectionView.appendItem(model, index);
+        this.appendItem(model, index);
       }
     },
-    remove: function(collectionView, model, collection) {
-      collectionView.$el.find('[' + modelCidAttributeName + '="' + model.cid + '"]').remove();
-      for (var cid in collectionView.children) {
-        if (collectionView.children[cid].model && collectionView.children[cid].model.cid === model.cid) {
-          collectionView.children[cid].destroy();
-          delete collectionView.children[cid];
+    remove: function(model, collection) {
+      this.$el.find('[' + modelCidAttributeName + '="' + model.cid + '"]').remove();
+      for (var cid in this.children) {
+        if (this.children[cid].model && this.children[cid].model.cid === model.cid) {
+          this.children[cid].destroy();
+          delete this.children[cid];
           break;
         }
       }
-      collectionView.collection.length === 0 && collectionView.$el.length && handleChangeFromNotEmptyToEmpty.call(collectionView);
-    },
-    reset: function(collectionView, collection) {
-      collectionView.reset();
-    },
-    error: function(collectionView, message) {
-      if (collectionView.options.errors) {
-        collectionView.trigger('error', message);
-        this.trigger('error', message);
-      }
+      this.collection.length === 0 && this.$el.length && handleChangeFromNotEmptyToEmpty.call(this);
     }
+    // collection.reset event registered in Thorax.View class
   }
 });
 
@@ -410,6 +407,48 @@ function configureCollectionViewOptions(view) {
     'empty-class': ('empty-class' in view.options) ? view.options['empty-class'] : 'empty'
   });
 }
+
+{{#has-plugin "loading"}}
+  function addLoadingBehaviors() {
+    var loadingView = this.options['loading-view'],
+        loadingTemplate = this.options['loading-template'],
+        loadingPlacement = this.options['loading-placement'];
+    //add "loading-view" and "loading-template" options to collection helper
+    if (loadingView || loadingTemplate) {
+      var callback = Thorax.loadHandler(_.bind(function() {
+        var item;
+        if (this.collection.length === 0) {
+          this.$el.empty();
+        }
+        if (loadingView) {
+          var instance = Thorax.Util.getViewInstance(loadingView, {
+            collection: this.collection
+          });
+          this._addChild(instance);
+          if (loadingTemplate) {
+            instance.render(loadingTemplate);
+          } else {
+            instance.render();
+          }
+          item = instance;
+        } else {
+          item = this.renderTemplate(loadingTemplate, {
+            collection: this.collection
+          });
+        }
+        var index = loadingPlacement
+          ? loadingPlacement.call(this.parent, this)
+          : this.collection.length
+        ;
+        this.appendItem(item, index);
+        this.$el.children().eq(index).attr('data-loading-element', this.collection.cid);
+      }, this), _.bind(function() {
+        this.$el.find('[data-loading-element="' + this.collection.cid + '"]').remove();
+      }, this));
+      this.on(this.collection, 'load:start', callback);
+    }
+  }
+{{/has-plugin}}
 
 //$(selector).collection() helper
 $.fn.collection = function(view) {

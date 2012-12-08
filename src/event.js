@@ -21,30 +21,6 @@ var _on = Thorax.View.prototype.on,
   this.freeze();
 {{/inject}}
 
-_.extend(Thorax.View, {
-  _events: [],
-  on: function(eventName, callback) {
-    {{{override "on" indent=4}}}
-    //accept on({"rendered": handler})
-    if (typeof eventName === 'object') {
-      _.each(eventName, function(value, key) {
-        this.on(key, value);
-      }, this);
-    } else {
-      //accept on({"rendered": [handler, handler]})
-      if (_.isArray(callback)) {
-        callback.forEach(function(cb) {
-          this._events.push([eventName, cb]);
-        }, this);
-      //accept on("rendered", handler)
-      } else {
-        this._events.push([eventName, callback]);
-      }
-    }
-    return this;
-  }
-});
-
 _.extend(Thorax.View.prototype, {
   freeze: function(options) {
     {{{override "freeze" indent=4}}}

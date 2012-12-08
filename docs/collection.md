@@ -31,7 +31,7 @@ Any of the options can be specified as variables in addition to strings:
 
     {{collection cats item-view=itemViewClass}}
 
-`CollectionView` instances are usually created via a helper and not directly in JavaScript. If you need a reference to a specific CollectionView you can create it directly (see `Thorax.CollectionView` below) or use the `helper:collection` event when creating them via a helper:
+If you need a reference to a specific CollectionView you can create it directly (see `Thorax.CollectionView` below) or use the `helper:collection` event when creating them via a helper:
 
     view.on("helper:collection", function(collection, collectionView) {
 
@@ -61,14 +61,26 @@ The collection plugin extends the events plugin by allowing a `collection` hash 
 
     Thorax.View.on({
       collection: {
-        reset: function(collectionView) {
-          //"this" will refer to the view which called
-          //the collection helper
+        reset: function() {
+
         }
       }
     });
 
-Each collection event callback is called with the generated collection view prepended to the arguments.
+## Thorax.View
+
+### bindCollection *view.bindCollection(collection [, options])*
+
+Binds any events declared via `view.on({collection: events})` including the built in `reset` and `error`, then attempts to fetch the collection if it has a URL and is not yet loaded. Accepts any of the following options:
+
+- **render** - Wether to render the collection if it is populated, or render it after it has been loaded
+- **fetch** - Wether or not to try to call `fetch` on the collection if `shouldFetch` returns true
+- **success** - Callback on fetch success, defaults to noop
+- **errors** - Wether or not to trigger an `error` event on the view when an `error` event is triggered on the collection
+
+### unbindCollection *view.unbindCollection(collection [, options])*
+
+Remove the event handlers bound by `bindCollection`
 
 ## Thorax.CollectionView
 
@@ -87,11 +99,7 @@ A `CollectionView` class is automatically generated each time a `collection` hel
 
 ### setCollection *view.setCollection(collection, options)*
 
-If directly creating a CollectionView instance, the collection property may be set by passing `collection` to the constructor, or by calling this method. The following options may be passed when calling this method:
-
-- `fetch`: wether or not to try to call `fetch` on the collection if `shouldFetch` returns true
-- `success`: a callback to be called when the
-- `errors`: wether or not to trigger an `error` event on the CollectionView and it's parent when an `error` event is triggered on the collection
+If directly creating a CollectionView instance, the collection property may be set by passing `collection` to the constructor, or by calling this method. Accepts any options that the `bindCollection` method does.
 
 ### appendItem *view.appendItem(modelOrView [,index])*
 

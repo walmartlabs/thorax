@@ -2,6 +2,9 @@
 
 ## 2.0.0b6
 
+- collection events bound with `on({collection: events})` no longer recieve a `CollectionView` as the first argument as collections may be bound without a `CollectionView`
+- added `bindCollection` and `unbindCollection`
+- `addModel` and `removeModel` renamed to `bindModel` and `unbindModel`
 - `empty-context` in `collection` helper now defaults to `parent.context`
 - Revert: DOM event handlers now recieve the original context (if the handler had been registered with $.on) as the second argument
 

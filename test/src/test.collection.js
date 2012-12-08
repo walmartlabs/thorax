@@ -670,7 +670,7 @@ $(function() {
     var collection = new Thorax.Collection();
     var view = new Thorax.View({
       collection: collection,
-      template: '{{collection this.collection}}',
+      template: '',
       events: {
         collection: {
           all: function() {
@@ -686,7 +686,7 @@ $(function() {
         ++callCounter.test1;
       }
     });
-    view.render();
+    view.bindCollection(view.collection);
     var oldAllCount = callCounter.all;
     collection.trigger('test1');
     collection.trigger('test2');

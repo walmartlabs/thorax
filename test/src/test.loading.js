@@ -31,8 +31,9 @@ $(function(){
         view = new Thorax.View({
           name: 'food',
           collection: collection,
-          template: '{{#collection this.collection}}{{/collection}}'
+          template: ''
         });
+    view.bindCollection(view.collection);
     view.on('load:start', spy);
     view.render();
     ok(!$(view.el).hasClass('loading'));
@@ -77,10 +78,10 @@ $(function(){
         view = new Thorax.View({
           name: 'food',
           collection: collection,
-          template: '{{#collection this.collection}}{{/collection}}'
+          template: ''
         }),
         spy = this.spy(view, 'onLoadEnd');
-    view.render();
+    view.bindCollection(view.collection);
     collection.loadStart();
     this.clock.tick(1000);
   

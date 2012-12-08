@@ -5,6 +5,7 @@ var fs = require('fs'),
 
 var templateCache = {},
     override = {
+      'static-view-properties': '',
       'collection-options': '',
       'model-options': '',
       'model-change': '',
