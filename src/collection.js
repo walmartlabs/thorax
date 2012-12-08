@@ -65,7 +65,6 @@ Thorax.CollectionView = Thorax.HelperView.extend({
     collectionOptionNames.forEach(function(optionName) {
       options[optionName] && (this.options[optionName] = options[optionName]);
     }, this);
-    !('empty-class' in this.options) && (this.options['empty-class'] = 'empty');
   },
   _setCollectionOptions: function(collection, options) {
     return _.extend({

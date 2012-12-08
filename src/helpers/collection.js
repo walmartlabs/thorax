@@ -10,6 +10,7 @@ Handlebars.registerViewHelper('collection', Thorax.CollectionView, function(coll
       'empty-template': view.inverse && view.inverse !== Handlebars.VM.noop ? view.inverse : view.options['empty-template'],
       'item-context': view.options['item-context'] || view.parent.itemContext,
       'empty-context': view.options['empty-context'] || view.parent.emptyContext,
+      'empty-class': ('empty-class' in view.options) ? view.options['empty-class'] : 'empty',
       filter: view.options['filter']
     });
     view.setCollection(collection);
