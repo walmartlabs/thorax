@@ -61,7 +61,7 @@ Thorax.Util.createRegistryWrapper(Thorax.Model, Thorax.Models);
 function addEvents(target, source) {
   _.each(source, function(callback, eventName) {
     if (_.isArray(callback)) {
-      callback.forEach(function(cb) {
+      _.each(callback, function(cb) {
         target.push([eventName, cb]);
       }, this);
     } else {
@@ -159,7 +159,7 @@ function getEventCallback(callback, context) {
 }
 
 function bindEvents(target, events) {
-  events.forEach(function(event) {
+  _.each(events, function(event) {
     // getEventCallback will resolve if it is a string or a method
     // and return a method
     target.on(event[0], getEventCallback(event[1], this), event[2] || this);
@@ -167,7 +167,7 @@ function bindEvents(target, events) {
 }
 
 function unbindEvents(target, events) {
-  events.forEach(function(event) {
+  _.each(events, function(event) {
     target.off(event[0], getEventCallback(event[1], this), event[2] || this);
   }, this);
 }

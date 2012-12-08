@@ -48,7 +48,7 @@ Thorax.Util = {
     if (name.match(/\.(?!handlebars)/)) {
       var bits = name.split(/\.(?!handlebars)/);
       name = bits.pop();
-      bits.forEach(function(key) {
+      _.each(bits, function(key) {
         target = target[key];
       });
     }
@@ -364,7 +364,7 @@ Thorax.View = Backbone.View.extend({
       } else {
         //accept on({"rendered": [handler, handler]})
         if (_.isArray(callback)) {
-          callback.forEach(function(cb) {
+          _.each(callback, function(cb) {
             this._events.push([eventName, cb]);
           }, this);
         //accept on("rendered", handler)

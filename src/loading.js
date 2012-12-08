@@ -130,7 +130,7 @@ Thorax.mixinLoadable = function(target, useParent) {
       $(that.el).addClass(that._loadingClassName);
       //used by loading helpers
       if (that._loadingCallbacks) {
-        that._loadingCallbacks.forEach(function(callback) {
+        _.each(that._loadingCallbacks, function(callback) {
           callback();
         });
       }
@@ -140,7 +140,7 @@ Thorax.mixinLoadable = function(target, useParent) {
       $(that.el).removeClass(that._loadingClassName);
       //used by loading helpers
       if (that._loadingCallbacks) {
-        that._loadingCallbacks.forEach(function(callback) {
+        _.each(that._loadingCallbacks, function(callback) {
           callback();
         });
       }
@@ -260,7 +260,7 @@ function flushQueue(self, fetchQueue, handler) {
 
     // Flush the queue. Executes any callback handlers that
     // may have been passed in the fetch options.
-    fetchQueue.forEach(function(options) {
+    _.each(fetchQueue, function(options) {
       if (options[handler]) {
         options[handler].apply(this, args);
       }

@@ -114,7 +114,7 @@ Thorax.CollectionView = Thorax.HelperView.extend({
     }
     //collection helper will initialize this.options, so need to mimic
     this.options || (this.options = {});
-    collectionOptionNames.forEach(function(optionName) {
+    _.each(collectionOptionNames, function(optionName) {
       options[optionName] && (this.options[optionName] = options[optionName]);
     }, this);
     configureCollectionViewOptions(this);
