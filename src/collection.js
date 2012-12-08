@@ -61,10 +61,11 @@ Thorax.CollectionView = Thorax.HelperView.extend({
     Thorax.CollectionView.__super__.constructor.call(this, options);
     //collection helper will initialize this.options, so need to mimic
     this.options || (this.options = {});
-    this.collection && this.setCollection(this.collection);
     collectionOptionNames.forEach(function(optionName) {
       options[optionName] && (this.options[optionName] = options[optionName]);
     }, this);
+    configureCollectionViewOptions(this);
+    this.collection && this.setCollection(this.collection);
   },
   _setCollectionOptions: function(collection, options) {
     return _.extend({
@@ -77,6 +78,45 @@ Thorax.CollectionView = Thorax.HelperView.extend({
   setCollection: function(collection, options) {
     this.collection = collection;
     if (collection) {
+      {{#has-plugin "loading"}}
+        var loadingView = this.options['loading-view'],
+            loadingTemplate = this.options['loading-template'],
+            loadingPlacement = this.options['loading-placement'];
+        //add "loading-view" and "loading-template" options to collection helper
+        if (loadingView || loadingTemplate) {
+          var callback = Thorax.loadHandler(_.bind(function() {
+            var item;
+            if (this.collection.length === 0) {
+              this.$el.empty();
+            }
+            if (loadingView) {
+              var instance = Thorax.Util.getViewInstance(loadingView, {
+                collection: this.collection
+              });
+              this._addChild(instance);
+              if (loadingTemplate) {
+                instance.render(loadingTemplate);
+              } else {
+                instance.render();
+              }
+              item = instance;
+            } else {
+              item = this.renderTemplate(loadingTemplate, {
+                collection: this.collection
+              });
+            }
+            var index = loadingPlacement
+              ? loadingPlacement.call(this.parent, this)
+              : this.collection.length
+            ;
+            this.appendItem(item, index);
+            this.$el.children().eq(index).attr('data-loading-element', this.collection.cid);
+          }, this), _.bind(function() {
+            this.$el.find('[data-loading-element="' + this.collection.cid + '"]').remove();
+          }, this));
+          this.on(this.collection, 'load:start', callback);
+        }
+      {{/has-plugin}}
       collection.cid = collection.cid || _.uniqueId('collection');
       this.$el.attr(collectionCidAttributeName, collection.cid);
       collection.name && this.$el.attr(collectionNameAttributeName, collection.name);
@@ -358,6 +398,15 @@ Thorax.View.on({
     }
   }
 });
+
+//item-template and empty-template are configured in the collection helper
+function configureCollectionViewOptions(view) {
+  _.extend(view.options, {
+    'item-context': view.options['item-context'] || view.parent.itemContext,
+    'empty-context': view.options['empty-context'] || view.parent.emptyContext,
+    'empty-class': ('empty-class' in view.options) ? view.options['empty-class'] : 'empty'
+  });
+}
 
 //$(selector).collection() helper
 $.fn.collection = function(view) {
