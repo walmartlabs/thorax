@@ -59,6 +59,9 @@ Thorax.View._collectionEvents = [];
 Thorax.CollectionView = Thorax.HelperView.extend({
   constructor: function(options) {
     Thorax.CollectionView.__super__.constructor.call(this, options);
+    if (!this.parent) {
+      throw new Error("CollectionView requires a 'parent' view to be set");
+    }
     //collection helper will initialize this.options, so need to mimic
     this.options || (this.options = {});
     collectionOptionNames.forEach(function(optionName) {
