@@ -323,7 +323,8 @@ Thorax.View = Backbone.View.extend({
     if (typeof html === 'undefined') {
       return this.el.innerHTML;
     } else {
-      var element = this.$el.html(html);
+      this.el.innerHTML = "";
+      var element = this.$el.append(html);
       {{#has-plugin "helpers/view"}}
         this._appendViews();
       {{/has-plugin}}

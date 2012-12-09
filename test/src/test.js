@@ -175,7 +175,6 @@ $(function() {
       parent.child.$('.test').trigger('click');
       equal(callCount, 1);
       parent.render();
-      parent.child.delegateEvents();
       parent.child.$('.test').trigger('click');
       equal(callCount, 2);
       $(parent.el).remove();
