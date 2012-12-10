@@ -84,7 +84,7 @@ _.extend(Thorax.View.prototype, {
   },
   _setCollectionOptions: function(collection, options) {
     return this._collectionOptionsByCid[collection.cid] = _.extend({
-      render: true,
+      render: null, // CollectionView will override and set to true
       fetch: true,
       success: false,
       errors: true
@@ -137,6 +137,11 @@ Thorax.CollectionView = Thorax.HelperView.extend({
       this.$el.removeAttr(collectionNameAttributeName);
     }
     return this;
+  },
+  _setCollectionOptions: function() {
+    var options = Thorax.View.prototype._setCollectionOptions.apply(this, arguments);
+    options.render === null && (options.render = true);
+    return options;
   },
   //appendItem(model [,index])
   //appendItem(html_string, index)
