@@ -2009,7 +2009,7 @@ Thorax.sync = function(method, dataObj, options) {
   return this._request;
 };
 
-Thorax.routeCount = (function() {
+var globalRouteCount = (function() {
   var routeCount = 0;
   Backbone.history || (Backbone.history = new Backbone.History());
   Backbone.history.on('route', function() {
@@ -2019,11 +2019,11 @@ Thorax.routeCount = (function() {
 })();
 
 function bindToRoute(callback, failback) {
-  var routeCount = Thorax.routeCount();
+  var routeCount = globalRouteCount();
 
   function finalizer() {
     var args = Array.prototype.slice.call(arguments, 1);
-    if (routeCount === Thorax.routeCount()) {
+    if (routeCount === globalRouteCount()) {
       callback.apply(this, args);
     } else {
       failback && failback.apply(this, args);
