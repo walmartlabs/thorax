@@ -39,8 +39,18 @@ Thorax.Util.createRegistryWrapper(Thorax.Collection, Thorax.Collections);
   Thorax.Util._cloneEvents(this, child, '_collectionEvents');
 {{/inject}}
 
+{{#inject "static-view-properties"}}
+  Thorax.View._collectionEvents = [];
+{{/inject}}
+
 {{#inject "beforeConfigure"}}
   this._collectionEvents = [];
+  this._collectionOptionsByCid = {};
+  this._collections = [];
+{{/inject}}
+
+{{#inject "freeze"}}
+  _.each(this._collections, this.unbindCollection, this);
 {{/inject}}
 
 {{#inject "on"}}
@@ -49,55 +59,84 @@ Thorax.Util.createRegistryWrapper(Thorax.Collection, Thorax.Collections);
   }
 {{/inject}}
 
-Thorax.View._collectionEvents = [];
-
-//collection view is meant to be initialized via the collection
-//helper but can alternatively be initialized programatically
-//constructor function handles this case, no logic except for
-//super() call will be exectued when initialized via collection helper
-
-Thorax.CollectionView = Thorax.HelperView.extend({
-  constructor: function(options) {
-    Thorax.CollectionView.__super__.constructor.call(this, options);
-    //collection helper will initialize this.options, so need to mimic
-    this.options || (this.options = {});
-    this.collection && this.setCollection(this.collection);
-    collectionOptionNames.forEach(function(optionName) {
-      options[optionName] && (this.options[optionName] = options[optionName]);
-    }, this);
+_.extend(Thorax.View.prototype, {
+  bindCollection: function(collection, options) {
+    // Collections do not have a cid attribute by default
+    collection.cid = collection.cid || _.uniqueId('collection');
+    this._collections.push(collection);
+    var collectionOptions = this._setCollectionOptions(collection, options);
+    bindEvents.call(this, collection, this.constructor._collectionEvents);
+    bindEvents.call(this, collection, this._collectionEvents);
+    if (Thorax.Util.shouldFetch(collection, collectionOptions)) {
+      this._loadCollection(collection);
+    } else if (collectionOptions.render) {
+      //want to trigger built in event handler (render())
+      //without triggering event on collection
+      this.render();
+    }
+  },
+  unbindCollection: function(collection) {
+    this._collections = _.without(this._collections, collection);
+    collection.trigger('freeze');
+    unbindEvents.call(this, collection, this.constructor._collectionEvents);
+    unbindEvents.call(this, collection, this._collectionEvents);
+    delete this._collectionOptionsByCid[collection.cid];
   },
   _setCollectionOptions: function(collection, options) {
-    return _.extend({
+    return this._collectionOptionsByCid[collection.cid] = _.extend({
+      render: true,
       fetch: true,
       success: false,
       errors: true
       {{{override "collection-options" indent=6}}}
     }, options || {});
   },
-  setCollection: function(collection, options) {
-    this.collection = collection;
-    if (collection) {
-      collection.cid = collection.cid || _.uniqueId('collection');
-      this.$el.attr(collectionCidAttributeName, collection.cid);
-      if (collection.name) {
-        this.$el.attr(collectionNameAttributeName, collection.name);
-      }
-      this.options = this._setCollectionOptions(collection, _.extend({}, this.options, options));
-      bindCollectionEvents.call(this, collection, this.parent._collectionEvents);
-      bindCollectionEvents.call(this, collection, this.parent.constructor._collectionEvents);
-      collection.trigger('set', collection);
-      if (Thorax.Util.shouldFetch(collection, this.options)) {
-        this._loadCollection(collection);
+  _loadCollection: function(collection) {
+    {{#has-plugin "loading"}}
+      if (collection.load) {
+        collection.load(function(){
+          options && options.success && options.success(collection);
+        }, options);
       } else {
-        //want to trigger built in event handler (render())
-        //without triggering event on collection
-        this.reset();
+        collection.fetch(options);
       }
+    {{else}}
+      collection.fetch(this.options);
+    {{/has-plugin}}
+  }
+});
+
+Thorax.CollectionView = Thorax.HelperView.extend({
+  constructor: function(options) {
+    Thorax.CollectionView.__super__.constructor.call(this, options);
+    if (!this.parent) {
+      throw new Error("CollectionView requires a 'parent' view to be set");
+    }
+    //collection helper will initialize this.options, so need to mimic
+    this.options || (this.options = {});
+    _.each(collectionOptionNames, function(optionName) {
+      options[optionName] && (this.options[optionName] = options[optionName]);
+    }, this);
+    configureCollectionViewOptions(this);
+    this.collection && this.setCollection(this.collection);
+  },
+  setCollection: function(collection, options) {
+    if (collection) {
+      this.collection = collection;
+      {{#has-plugin "loading"}}
+        addLoadingBehaviors.call(this);
+      {{/has-plugin}}
+      this.bindCollection(collection, _.extend({}, this.options, options));
+      this.$el.attr(collectionCidAttributeName, collection.cid);
+      collection.name && this.$el.attr(collectionNameAttributeName, collection.name);
+      collection.trigger('set', collection);
+    } else {
+      this.collection && this.unbindCollection(this.collection);
+      this.collection = false;
+      this.$el.removeAttr(collectionCidAttributeName);
+      this.$el.removeAttr(collectionNameAttributeName);
     }
     return this;
-  },
-  _loadCollection: function(collection) {
-    collection.fetch(this.options);
   },
   //appendItem(model [,index])
   //appendItem(html_string, index)
@@ -110,9 +149,7 @@ Thorax.CollectionView = Thorax.HelperView.extend({
     var itemView;
     options = options || {};
     //if index argument is a view
-    if (index && index.el) {
-      index = this.$el.children().indexOf(index.el) + 1;
-    }
+    index && index.el && (index = this.$el.children().indexOf(index.el) + 1);
     //if argument is a view, or html string
     if (model.el || typeof model === 'string') {
       itemView = model;
@@ -122,9 +159,7 @@ Thorax.CollectionView = Thorax.HelperView.extend({
       itemView = this.renderItem(model, index);
     }
     if (itemView) {
-      if (itemView.cid) {
-        this._addChild(itemView);
-      }
+      itemView.cid && this._addChild(itemView);
       //if the renderer's output wasn't contained in a tag, wrap it in a div
       //plain text, or a mixture of top level text nodes and element nodes
       //will get wrapped
@@ -135,9 +170,7 @@ Thorax.CollectionView = Thorax.HelperView.extend({
         //filter out top level whitespace nodes
         return node.nodeType === ELEMENT_NODE_TYPE;
       });
-      if (model) {
-        $(itemElement).attr(modelCidAttributeName, model.cid);
-      }
+      model && $(itemElement).attr(modelCidAttributeName, model.cid);
       var previousModel = index > 0 ? this.collection.at(index - 1) : false;
       if (!previousModel) {
         this.$el.prepend(itemElement);
@@ -146,15 +179,17 @@ Thorax.CollectionView = Thorax.HelperView.extend({
         var last = this.$el.find('[' + modelCidAttributeName + '="' + previousModel.cid + '"]').last();
         last.after(itemElement);
       }
-      this._appendViews(null, function(el) {
-        el.setAttribute(modelCidAttributeName, model.cid);
-      });
-      this._appendElements(null, function(el) {
-        el.setAttribute(modelCidAttributeName, model.cid);
-      });
-      if (!options.silent) {
-        this.parent.trigger('rendered:item', this, this.collection, model, itemElement, index);
-      }
+      {{#has-plugin "helpers/view"}}
+        this._appendViews(null, function(el) {
+          el.setAttribute(modelCidAttributeName, model.cid);
+        });
+      {{/has-plugin}}
+      {{#has-plugin "helpers/element"}}
+        this._appendElements(null, function(el) {
+          el.setAttribute(modelCidAttributeName, model.cid);
+        });
+      {{/has-plugin}}
+      !options.silent && this.parent.trigger('rendered:item', this, this.collection, model, itemElement, index);
       applyItemVisiblityFilter.call(this, model);
     }
     return itemView;
@@ -177,93 +212,76 @@ Thorax.CollectionView = Thorax.HelperView.extend({
     viewEl.remove();
     return true;
   },
-  reset: function() {
-    this.render();
-  },
   render: function() {
-    this.$el.empty();
     if (this.collection) {
       if (this.collection.isEmpty()) {
-        this.$el.attr(collectionEmptyAttributeName, true);
-        this.appendEmpty();
+        handleChangeFromNotEmptyToEmpty.call(this);
       } else {
-        this.$el.removeAttr(collectionEmptyAttributeName);
+        handleChangeFromEmptyToNotEmpty.call(this);
         this.collection.forEach(function(item, i) {
           this.appendItem(item, i);
         }, this);
       }
       this.parent.trigger('rendered:collection', this, this.collection);
       applyVisibilityFilter.call(this);
+    } else {
+      handleChangeFromNotEmptyToEmpty.call(this);
     }
     ++this._renderCount;
   },
   renderEmpty: function() {
-    var viewOptions = {};
-    if (this.options['empty-view']) {
-      if (this.options['empty-context']) {
-        viewOptions.context = _.bind(function() {
-          return (_.isFunction(this.options['empty-context'])
-            ? this.options['empty-context']
-            : this.parent[this.options['empty-context']]
-          ).call(this.parent);
-        }, this);
-      }
-      var view = Thorax.Util.getViewInstance(this.options['empty-view'], viewOptions);
-      if (this.options['empty-template']) {
-        view.render(this.renderTemplate(this.options['empty-template'], viewOptions.context ? viewOptions.context() : {}));
+    var viewOptions = {},
+        emptyView = this.options['empty-view'],
+        emptyContext = this.options['empty-context'],
+        emptyTemplate = this.options['empty-template'];
+    function getEmptyContext() {
+      return (_.isFunction(emptyContext)
+        ? emptyContext
+        : this.parent[emptyContext]
+      ).call(this.parent);
+    }
+    if (emptyView) {
+      var viewOptions = {};
+      emptyContext && (viewOptions.context = _.bind(getEmptyContext, this));
+      var view = Thorax.Util.getViewInstance(emptyView, viewOptions);
+      if (emptyTemplate) {
+        view.render(this.renderTemplate(emptyTemplate, viewOptions.context ? viewOptions.context() : this.parent.context()));
       } else {
         view.render();
       }
       return view;
     } else {
-      var emptyTemplate = this.options['empty-template'] || (this.parent.name && Thorax.Util.getTemplate(this.parent.name + '-empty', true));
-      var context;
-      if (this.options['empty-context']) {
-        context = (_.isFunction(this.options['empty-context'])
-          ? this.options['empty-context']
-          : this.parent[this.options['empty-context']]
-        ).call(this.parent);
-      } else {
-        context = {};
-      }
+      var emptyTemplate = emptyTemplate || (this.parent.name && Thorax.Util.getTemplate(this.parent.name + '-empty', true)),
+          context;
+      context = emptyContext ? getEmptyContext.call(this) : this.parent.context();
       return emptyTemplate && this.renderTemplate(emptyTemplate, context);
     }
   },
   renderItem: function(model, i) {
-    if (this.options['item-view']) {
+    var itemView = this.options['item-view'],
+        itemTemplate = this.options['item-template'],
+        itemContext = this.options['item-context'];
+    function getItemContext() {
+      return (_.isFunction(itemContext)
+        ? itemContext
+        : this.parent[itemContext]
+      ).call(this.parent, model, i);
+    }
+    if (itemView) {
       var viewOptions = {
         model: model
       };
-      //itemContext deprecated
-      if (this.options['item-context']) {
-        viewOptions.context = _.bind(function() {
-          return (_.isFunction(this.options['item-context'])
-            ? this.options['item-context']
-            : this.parent[this.options['item-context']]
-          ).call(this.parent, model, i);
-        }, this);
-      }
-      if (this.options['item-template']) {
-        viewOptions.template = this.options['item-template'];
-      }
-      var view = Thorax.Util.getViewInstance(this.options['item-view'], viewOptions);
+      itemContext && (viewOptions.context = _.bind(getItemContext, this));
+      itemTemplate && (viewOptions.template = itemTemplate);
+      var view = Thorax.Util.getViewInstance(itemView, viewOptions);
       view.ensureRendered();
       return view;
     } else {
-      var itemTemplate = this.options['item-template'] || (this.parent.name && Thorax.Util.getTemplate(this.parent.name + '-item', true));
+      itemTemplate = itemTemplate || (this.parent.name && Thorax.Util.getTemplate(this.parent.name + '-item', true));
       if (!itemTemplate) {
         throw new Error('collection helper in View: ' + (this.parent.name || this.parent.cid) + ' requires an item template.');
       }
-      var context;
-      if (this.options['item-context']) {
-        context = (_.isFunction(this.options['item-context'])
-          ? this.options['item-context']
-          : this.parent[this.options['item-context']]
-        ).call(this.parent, model, i);
-      } else {
-        context = model.attributes;
-      }
-      return this.renderTemplate(itemTemplate, context);
+      return this.renderTemplate(itemTemplate, itemContext ? getItemContext.call(this) : model.attributes);
     }
   },
   appendEmpty: function() {
@@ -283,6 +301,7 @@ var collectionOptionNames = [
   'empty-view',
   'item-context',
   'empty-context',
+  'empty-class',
   'filter'
   {{#has-plugin "loading"}}
   , 'loading-template'
@@ -290,18 +309,6 @@ var collectionOptionNames = [
   , 'loading-placement'
   {{/has-plugin}}
 ];
-
-function bindCollectionEvents(collection, events) {
-  events.forEach(function(event) {
-    this.on(collection, event[0], function() {
-      //getEventCallback will resolve if it is a string or a method
-      //and return a method
-      var args = _.toArray(arguments);
-      args.unshift(this);
-      return getEventCallback(event[1], this.parent).apply(this.parent, args);
-    }, this);
-  }, this);
-}
 
 function applyVisibilityFilter() {
   if (this.options.filter) {
@@ -325,135 +332,123 @@ function itemShouldBeVisible(model, i) {
 }
 
 function handleChangeFromEmptyToNotEmpty() {
-  if (this.collection.length === 1) {
-    if(this.$el.length) {
-      this.$el.removeAttr(collectionEmptyAttributeName);
-      this.$el.empty();
-    }
-  }
+  this.options['empty-class'] && this.$el.removeClass(this.options['empty-class']);
+  this.$el.removeAttr(collectionEmptyAttributeName);
+  this.$el.empty();
 }
 
 function handleChangeFromNotEmptyToEmpty() {
-  if (this.collection.length === 0) {
-    if (this.$el.length) {
-      this.$el.attr(collectionEmptyAttributeName, true);
-      this.appendEmpty();
-    }
-  }
+  this.options['empty-class'] && this.$el.addClass(this.options['empty-class']);
+  this.$el.attr(collectionEmptyAttributeName, true);
+  this.appendEmpty();
 }
 
-Thorax.View.on({
+var sharedCollectionEvents = {
   collection: {
-    filter: function(collectionView) {
-      applyVisibilityFilter.call(collectionView);
+    reset: function(collection) {
+      var options = this._collectionOptionsByCid[collection.cid];
+      options.render && this.render();
     },
-    change: function(collectionView, model) {
+    error: function(collection, message) {
+      var options = this._collectionOptionsByCid[collection.cid];
+      options.errors && this.trigger('error', message);
+    }
+  }
+};
+
+// Sub-classes have already been declared, so need
+// to call `on` on all classes that should get the
+// events
+Thorax.View.on(sharedCollectionEvents);
+Thorax.HelperView.on(sharedCollectionEvents);
+Thorax.CollectionView.on(sharedCollectionEvents);
+
+Thorax.CollectionView.on({
+  collection: {
+    filter: function() {
+      applyVisibilityFilter.call(this);
+    },
+    change: function(model) {
       //if we rendered with item views, model changes will be observed
       //by the generated item view but if we rendered with templates
       //then model changes need to be bound as nothing is watching
-      if (!collectionView.options['item-view']) {
-        collectionView.updateItem(model);
+      if (!this.options['item-view']) {
+        this.updateItem(model);
       }
-      applyItemVisiblityFilter.call(collectionView, model);
+      applyItemVisiblityFilter.call(this, model);
     },
-    add: function(collectionView, model, collection) {
-      handleChangeFromEmptyToNotEmpty.call(collectionView);
-      if (collectionView.$el.length) {
+    add: function(model, collection) {
+      this.collection.length === 1 && this.$el.length && handleChangeFromEmptyToNotEmpty.call(this);
+      if (this.$el.length) {
         var index = collection.indexOf(model);
-        collectionView.appendItem(model, index);
+        this.appendItem(model, index);
       }
     },
-    remove: function(collectionView, model, collection) {
-      collectionView.$el.find('[' + modelCidAttributeName + '="' + model.cid + '"]').remove();
-      for (var cid in collectionView.children) {
-        if (collectionView.children[cid].model && collectionView.children[cid].model.cid === model.cid) {
-          collectionView.children[cid].destroy();
-          delete collectionView.children[cid];
+    remove: function(model, collection) {
+      this.$el.find('[' + modelCidAttributeName + '="' + model.cid + '"]').remove();
+      for (var cid in this.children) {
+        if (this.children[cid].model && this.children[cid].model.cid === model.cid) {
+          this.children[cid].destroy();
+          delete this.children[cid];
           break;
         }
       }
-      handleChangeFromNotEmptyToEmpty.call(collectionView);
-    },
-    reset: function(collectionView, collection) {
-      collectionView.reset();
-    },
-    error: function(collectionView, message) {
-      if (collectionView.options.errors) {
-        collectionView.trigger('error', message);
-        this.trigger('error', message);
-      }
+      this.collection.length === 0 && this.$el.length && handleChangeFromNotEmptyToEmpty.call(this);
     }
+    // collection.reset event registered in Thorax.View class
   }
 });
 
-Handlebars.registerViewHelper('collection', Thorax.CollectionView, function(collection, view) {
-  if (arguments.length === 1) {
-    view = collection;
-    collection = this._view.collection;
-  }
-  if (collection) {
-    //item-view and empty-view may also be passed, but have no defaults
-    _.extend(view.options, {
-      'item-template': view.template && view.template !== Handlebars.VM.noop ? view.template : view.options['item-template'],
-      'empty-template': view.inverse && view.inverse !== Handlebars.VM.noop ? view.inverse : view.options['empty-template'],
-      'item-context': view.options['item-context'] || view.parent.itemContext,
-      'empty-context': view.options['empty-context'] || view.parent.emptyContext,
-      filter: view.options['filter']
-    });
-    view.setCollection(collection);
-    {{{override "collection-helper" indent=4}}}
-  }
-});
+//item-template and empty-template are configured in the collection helper
+function configureCollectionViewOptions(view) {
+  _.extend(view.options, {
+    'item-context': view.options['item-context'] || view.parent.itemContext,
+    'empty-context': view.options['empty-context'] || view.parent.emptyContext,
+    'empty-class': ('empty-class' in view.options) ? view.options['empty-class'] : 'empty'
+  });
+}
 
-//empty helper
-Handlebars.registerViewHelper('empty', function(collection, view) {
-  var empty, noArgument;
-  if (arguments.length === 1) {
-    view = collection;
-    collection = false;
-    noArgument = true;
+{{#has-plugin "loading"}}
+  function addLoadingBehaviors() {
+    var loadingView = this.options['loading-view'],
+        loadingTemplate = this.options['loading-template'],
+        loadingPlacement = this.options['loading-placement'];
+    //add "loading-view" and "loading-template" options to collection helper
+    if (loadingView || loadingTemplate) {
+      var callback = Thorax.loadHandler(_.bind(function() {
+        var item;
+        if (this.collection.length === 0) {
+          this.$el.empty();
+        }
+        if (loadingView) {
+          var instance = Thorax.Util.getViewInstance(loadingView, {
+            collection: this.collection
+          });
+          this._addChild(instance);
+          if (loadingTemplate) {
+            instance.render(loadingTemplate);
+          } else {
+            instance.render();
+          }
+          item = instance;
+        } else {
+          item = this.renderTemplate(loadingTemplate, {
+            collection: this.collection
+          });
+        }
+        var index = loadingPlacement
+          ? loadingPlacement.call(this.parent, this)
+          : this.collection.length
+        ;
+        this.appendItem(item, index);
+        this.$el.children().eq(index).attr('data-loading-element', this.collection.cid);
+      }, this), _.bind(function() {
+        this.$el.find('[data-loading-element="' + this.collection.cid + '"]').remove();
+      }, this));
+      this.on(this.collection, 'load:start', callback);
+    }
   }
-
-  var _render = view.render;
-  view.render = function() {
-    if (noArgument) {
-      empty = !this.parent.model || (this.parent.model && !this.parent.model.isEmpty());
-    } else if (!collection) {
-      empty = true;
-    } else {
-      empty = collection.isEmpty();
-    }
-    if (empty) {
-      this.parent.trigger('rendered:empty', this, collection);
-      return _render.call(this, this.template);
-    } else {
-      return _render.call(this, this.inverse);
-    }
-  };
-
-  //no model binding is necessary as model.set() will cause re-render
-  if (collection) {
-    function collectionRemoveCallback() {
-      if (collection.length === 0) {
-        view.render();
-      }
-    }
-    function collectionAddCallback() {
-      if (collection.length === 1) {
-        view.render();
-      }
-    }
-    function collectionResetCallback() {
-      view.render();
-    }
-
-    view.on(collection, 'remove', collectionRemoveCallback);
-    view.on(collection, 'add', collectionAddCallback);
-    view.on(collection, 'reset', collectionResetCallback);
-  }
-  
-  view.render();
-});
+{{/has-plugin}}
 
 //$(selector).collection() helper
 $.fn.collection = function(view) {

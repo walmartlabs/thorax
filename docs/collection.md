@@ -1,7 +1,7 @@
 Thorax Collection Plugin
 ========================
 
-Adds view helpers and classes to support collection bindings in. See the [Todos example](http://jsfiddle.net/M3qjv/) to see the collection plugin in action.
+Adds view helpers and classes to support collection bindings in. See the [Todos example](http://jsfiddle.net/vzf5L/) to see the collection plugin in action.
 
 ## View Helpers
 
@@ -20,7 +20,8 @@ Options may be arbitrary HTML attributes, a `tag` option to specify the type of 
 - `item-context` - A function in the declaring view to specify the context for an item-template, recieves model and index as arguments. If the view has an `itemContext` function it will be used as the default.
 - `empty-template` - A template to display when the collection is empty. If an inverse block is specified it will become the empty-template. Defaults to view.name + '-empty'
 - `empty-view` - A view to display when the collection is empty. Defaults to view.name + '-empty'
-- `empty-context` - A function in the declaring view to specify the context that the empty-template is rendered with. If the view has an `emptyContext` function it will be used as the default.
+- `empty-context` - A function in the declaring view to specify the context that the empty-template is rendered with. If the view has an `emptyContext` function it will be used as the default, otherwise `parent.context` will be used by default.
+- `empty-class` - A class name to add and remove from the collection view's `el` depending on wether or not the collection is empty.
 - `loading-template` - Only available if the loading plugin has been included. A template to append when the collection is loading.
 - `loading-view` - Only available if loading plugin has been included. A view to append when the collection is loading
 - `loading-placement` - Only available if loading plugin has been included. A method on the declaring view that will recieve the collection view instance as the only argument and must return the index where the loading view or template should be placed. Defaults to `view.collection.length`, placing the view or template at the end.
@@ -30,7 +31,7 @@ Any of the options can be specified as variables in addition to strings:
 
     {{collection cats item-view=itemViewClass}}
 
-`CollectionView` instances are usually created via a helper and not directly in JavaScript. If you need a reference to a specific CollectionView you can create it directly (see `Thorax.CollectionView` below) or use the `helper:collection` event when creating them via a helper:
+If you need a reference to a specific CollectionView you can create it directly (see `Thorax.CollectionView` below) or use the `helper:collection` event when creating them via a helper:
 
     view.on("helper:collection", function(collection, collectionView) {
 
@@ -60,14 +61,26 @@ The collection plugin extends the events plugin by allowing a `collection` hash 
 
     Thorax.View.on({
       collection: {
-        reset: function(collectionView) {
-          //"this" will refer to the view which called
-          //the collection helper
+        reset: function() {
+
         }
       }
     });
 
-Each collection event callback is called with the generated collection view prepended to the arguments.
+## Thorax.View
+
+### bindCollection *view.bindCollection(collection [, options])*
+
+Binds any events declared via `view.on({collection: events})` including the built in `reset` and `error`, then attempts to fetch the collection if it has a URL and is not yet loaded. Accepts any of the following options:
+
+- **render** - Wether to render the collection if it is populated, or render it after it has been loaded
+- **fetch** - Wether or not to try to call `fetch` on the collection if `shouldFetch` returns true
+- **success** - Callback on fetch success, defaults to noop
+- **errors** - Wether or not to trigger an `error` event on the view when an `error` event is triggered on the collection
+
+### unbindCollection *view.unbindCollection(collection [, options])*
+
+Remove the event handlers bound by `bindCollection`
 
 ## Thorax.CollectionView
 
@@ -86,11 +99,7 @@ A `CollectionView` class is automatically generated each time a `collection` hel
 
 ### setCollection *view.setCollection(collection, options)*
 
-If directly creating a CollectionView instance, the collection property may be set by passing `collection` to the constructor, or by calling this method. The following options may be passed when calling this method:
-
-- `fetch`: wether or not to try to call `fetch` on the collection if `shouldFetch` returns true
-- `success`: a callback to be called when the
-- `errors`: wether or not to trigger an `error` event on the CollectionView and it's parent when an `error` event is triggered on the collection
+If directly creating a CollectionView instance, the collection property may be set by passing `collection` to the constructor, or by calling this method. Accepts any options that the `bindCollection` method does.
 
 ### appendItem *view.appendItem(modelOrView [,index])*
 

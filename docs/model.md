@@ -35,9 +35,9 @@ The model plugin extends the events plugin by allowing a `model` hash of events 
 
 Changes the default context available to a view to be `this` + `model.attributes` instead of just `this`.
 
-### setModel *view.setModel(model [,options])*
+### bindModel *view.bindModel(model [,options])*
 
-Set the `model` attribute of a view, triggering certain behaviors based on the options passed. Setting `model` in the construtor will automatically call `setModel`. When a model is set it will be fetched by default if it needs to be, re-rendering the view when it has succeeded. Available options:
+Binds any events declared via `view.on({model: events})` including the built in `change` and `error`, then attempts to fetch the model if it has not yet been populated. Accepts any of the following options:
 
 - **fetch** - Boolean, wether to fetch the model when it is set, defaults to true.
 - **success** - Callback on fetch success, defaults to noop
@@ -45,7 +45,13 @@ Set the `model` attribute of a view, triggering certain behaviors based on the o
 - **populate** - Call `populate` with the model's attributes when it is set? Defaults to true. Pass `populate: {children: false}` to prevent child views from having their inputs populated.
 - **errors** - When the model triggers an `error` event, trigger the event on the view? Defaults to true
 
-The following are equivelent:
+### unbindModel *view.unbindModel(model)*
+
+Unbind the model events bound bind `bindModel`.
+
+### setModel *view.setModel(model [,options])*
+
+Set the `model` attribute of a view, then bind it via `bindModel` with the passed options. In addition to the behaviors in `bindModel` the default `context` of a view includes `this.model.attributes`, so the model's attributes will become available in the template. Setting `model` in the construtor will automatically call `setModel`, so the following are equivelent:
 
     var view = new Thorax.View({
       model: myModel

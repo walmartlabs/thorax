@@ -1,6 +1,6 @@
 {
   "name": "thorax",
-  "version": "2.0.0b5",
+  "version": "2.0.0b6",
   "description": "Handlebars + Backbone",
   "keywords": ["backbone", "handlebars"],
   "authors": [
@@ -30,10 +30,18 @@
     "event": [],
     "model": ["event"],
     "collection": ["event", "model"],
-    "helpers": [],
     "form": ["model"],
     "view-controller": [],
     "loading": ["event", "model", "collection"],
+    "helpers/button-link": [],
+    "helpers/collection": ["event", "model", "collection"],
+    "helpers/element": [],
+    "helpers/empty": ["event", "model", "collection"],
+    "helpers/loading": ["event", "model", "collection"],
+    "helpers/super": [],
+    "helpers/template": [],
+    "helpers/url": [],
+    "helpers/view": [],
     "mobile": ["event"]
   },
   "bin": {

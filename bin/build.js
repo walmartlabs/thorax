@@ -5,8 +5,8 @@ var fs = require('fs'),
 
 var templateCache = {},
     override = {
+      'static-view-properties': '',
       'collection-options': '',
-      'collection-helper': '',
       'model-options': '',
       'model-change': '',
       destroy: '',
@@ -72,7 +72,12 @@ function renderTemplate(name, data) {
   data.version = packageJSON.version;
   data.ldelim = '{';
   data.rdelim = '}';
-  return templateCache[name](data);
+  var output = templateCache[name](data);
+  if (name === 'mobile') {
+    output += renderTemplate(path.join('mobile', 'fast-click'), data);
+    output += renderTemplate(path.join('mobile', 'tap-highlight'), data);
+  }
+  return output;
 }
 
 function writeFile(filename, output) {

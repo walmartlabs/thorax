@@ -130,7 +130,7 @@ Thorax.mixinLoadable = function(target, useParent) {
       $(that.el).addClass(that._loadingClassName);
       //used by loading helpers
       if (that._loadingCallbacks) {
-        that._loadingCallbacks.forEach(function(callback) {
+        _.each(that._loadingCallbacks, function(callback) {
           callback();
         });
       }
@@ -140,7 +140,7 @@ Thorax.mixinLoadable = function(target, useParent) {
       $(that.el).removeClass(that._loadingClassName);
       //used by loading helpers
       if (that._loadingCallbacks) {
-        that._loadingCallbacks.forEach(function(callback) {
+        _.each(that._loadingCallbacks, function(callback) {
           callback();
         });
       }
@@ -249,7 +249,7 @@ function flushQueue(self, fetchQueue, handler) {
 
     // Flush the queue. Executes any callback handlers that
     // may have been passed in the fetch options.
-    fetchQueue.forEach(function(options) {
+    _.each(fetchQueue, function(options) {
       if (options[handler]) {
         options[handler].apply(this, args);
       }
@@ -310,48 +310,22 @@ if (Thorax.Router) {
   Thorax.Router.bindToRoute = Thorax.Router.prototype.bindToRoute = bindToRoute;
 }
 
-//
-// View load event handling
-//
+// Propagates loading view parameters to the AJAX layer
+{{#inject "model-options"}}
+  , ignoreErrors: this.ignoreFetchError
+  , background: this.nonBlockingLoad
+{{/inject}}
 
-if (Thorax.Model) {
-  // Propagates loading view parameters to the AJAX layer
-  {{#inject "model-options"}}
-    , ignoreErrors: this.ignoreFetchError
-    , background: this.nonBlockingLoad
-  {{/inject}}
-
-  Thorax.View.prototype._loadModel = function(model, options) {
-    if (model.load) {
-      model.load(function() {
-        options.success && options.success(model);
-      }, options);
-    } else {
-      model.fetch(options);
-    }
-  };
-}
-
-if (Thorax.Collection) {
+if (Thorax.CollectionView) {
   Thorax.mixinLoadable(Thorax.CollectionView.prototype);
   Thorax.mixinLoadableEvents(Thorax.CollectionView.prototype);
-
-  // Propagates loading view parameters to the AJAX layer
-  {{#inject "collection-options"}}
-    , ignoreErrors: this.ignoreFetchError
-    , background: this.nonBlockingLoad
-  {{/inject}}
-
-  Thorax.CollectionView.prototype._loadCollection = function(collection, options) {
-    if (collection.load) {
-      collection.load(function(){
-        options.success && options.success(collection);
-      }, options);
-    } else {
-      collection.fetch(options);
-    }
-  };
 }
+
+// Propagates loading view parameters to the AJAX layer
+{{#inject "collection-options"}}
+  , ignoreErrors: this.ignoreFetchError
+  , background: this.nonBlockingLoad
+{{/inject}}
 
 Thorax.View.on({
   'load:start': Thorax.loadHandler(
@@ -363,9 +337,7 @@ Thorax.View.on({
       }),
 
   collection: {
-    'load:start': function(collectionView, message, background, object) {
-      //this refers to the collection view, we want to trigger on
-      //the parent view which originally bound the collection
+    'load:start': function(message, background, object) {
       this.trigger(loadStart, message, background, object);
     }
   },
@@ -375,60 +347,3 @@ Thorax.View.on({
     }
   }
 });
-
-// Helpers
-
-Handlebars.registerViewHelper('loading', function(view) {
-  _render = view.render;
-  view.render = function() {
-    if (view.parent.$el.hasClass(view.parent._loadingClassName)) {
-      return _render.call(this, view.fn);
-    } else {
-      return _render.call(this, view.inverse);
-    }
-  };
-  var callback = _.bind(view.render, view);
-  view.parent._loadingCallbacks = view.parent._loadingCallbacks || [];
-  view.parent._loadingCallbacks.push(callback);
-  view.on('freeze', function() {
-    view.parent._loadingCallbacks = _.without(view.parent._loadingCallbacks, callback);
-  });
-  view.render();
-});
-
-{{#inject "collection-helper"}}
-  //add "loading-view" and "loading-template" options to collection helper
-  if (view.options['loading-view'] || view.options['loading-template']) {
-    var item;
-    var callback = Thorax.loadHandler(_.bind(function() {
-      if (view.collection.length === 0) {
-        view.$el.empty();
-      }
-      if (view.options['loading-view']) {
-        var instance = Thorax.Util.getViewInstance(view.options['loading-view'], {
-          collection: view.collection
-        });
-        view._addChild(instance);
-        if (view.options['loading-template']) {
-          instance.render(view.options['loading-template']);
-        } else {
-          instance.render();
-        }
-        item = instance;
-      } else {
-        item = view.renderTemplate(view.options['loading-template'], {
-          collection: view.collection
-        });
-      }
-      var index = view.options['loading-placement']
-        ? view.options['loading-placement'].call(view.parent, view)
-        : view.collection.length
-      ;
-      view.appendItem(item, index);
-      view.$el.children().eq(index).attr('data-loading-element', view.collection.cid);
-    }, this), _.bind(function() {
-      view.$el.find('[data-loading-element="' + view.collection.cid + '"]').remove();
-    }, this));
-    view.on(view.collection, 'load:start', callback);
-  }
-{{/inject}}

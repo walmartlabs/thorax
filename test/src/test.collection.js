@@ -220,6 +220,16 @@ $(function() {
     equal(emptyCollectionView.$('[data-collection-cid]').html(), '<div>empty</div>');
   });
 
+  test("empty template defaults to parent scope", function() {
+    var view = new Thorax.View({
+      parentKey: 'value',
+      collection: new (Thorax.Collection.extend({url: false})),
+      template: '{{#collection}}item{{else}}{{parentKey}}{{/collection}}'
+    });
+    view.render();
+    equal(view.$('[data-collection-empty] div').html(), 'value');
+  });
+
   test("empty and collection helpers in the same template", function() {
     var a = new Thorax.View({
       template: '{{#empty letters}}<div class="empty">empty</div>{{/empty}}{{#collection letters}}{{letter}}{{/collection}}',
@@ -601,6 +611,33 @@ $(function() {
     equal(view.$('b')[0].innerHTML, 'testing');
   });
 
+  test("empty-class option", function() {
+    var view = new Thorax.View({
+      template: "{{#collection empty-class=\"a\" tag=\"ul\"}}{{/collection}}",
+      collection: new (Thorax.Collection.extend({url: false}))
+    });
+    view.render();
+    ok(view.$('ul').hasClass('a'));
+    var model = new Thorax.Model({key: 'value'});
+    view.collection.add(model);
+    ok(!view.$('ul').hasClass('a'));
+    view.collection.remove(model);
+    ok(view.$('ul').hasClass('a'));
+
+    //with default arg
+    view = new Thorax.View({
+      template: "{{#collection tag=\"ul\"}}{{/collection}}",
+      collection: new (Thorax.Collection.extend({url: false}))
+    });
+    view.render();
+    ok(view.$('ul').hasClass('empty'));
+    var model = new Thorax.Model({key: 'value'});
+    view.collection.add(model);
+    ok(!view.$('ul').hasClass('empty'));
+    view.collection.remove(model);
+    ok(view.$('ul').hasClass('empty'));
+  });
+
   test("helper and local scope collision", function() {
     var child = new Thorax.View({
       collection: letterCollection,
@@ -633,7 +670,7 @@ $(function() {
     var collection = new Thorax.Collection();
     var view = new Thorax.View({
       collection: collection,
-      template: '{{collection this.collection}}',
+      template: '',
       events: {
         collection: {
           all: function() {
@@ -649,7 +686,7 @@ $(function() {
         ++callCounter.test1;
       }
     });
-    view.render();
+    view.bindCollection(view.collection);
     var oldAllCount = callCounter.all;
     collection.trigger('test1');
     collection.trigger('test2');

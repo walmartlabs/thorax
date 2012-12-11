@@ -3,7 +3,7 @@ var _on = Thorax.View.prototype.on,
 
 {{#inject "configure"}}
   //_events not present on HelperView
-  this.constructor._events && this.constructor._events.forEach(function(event) {
+  this.constructor._events && _.each(this.constructor._events, function(event) {
     this.on.apply(this, event);
   }, this);
   if (this.events) {
@@ -21,30 +21,6 @@ var _on = Thorax.View.prototype.on,
   this.freeze();
 {{/inject}}
 
-_.extend(Thorax.View, {
-  _events: [],
-  on: function(eventName, callback) {
-    {{{override "on" indent=4}}}
-    //accept on({"rendered": handler})
-    if (typeof eventName === 'object') {
-      _.each(eventName, function(value, key) {
-        this.on(key, value);
-      }, this);
-    } else {
-      //accept on({"rendered": [handler, handler]})
-      if (_.isArray(callback)) {
-        callback.forEach(function(cb) {
-          this._events.push([eventName, cb]);
-        }, this);
-      //accept on("rendered", handler)
-      } else {
-        this._events.push([eventName, callback]);
-      }
-    }
-    return this;
-  }
-});
-
 _.extend(Thorax.View.prototype, {
   freeze: function(options) {
     {{{override "freeze" indent=4}}}
@@ -52,7 +28,7 @@ _.extend(Thorax.View.prototype, {
       dom: true,
       children: true
     });
-    this._eventArgumentsToUnbind && this._eventArgumentsToUnbind.forEach(function(args) {
+    this._eventArgumentsToUnbind && _.each(this._eventArgumentsToUnbind, function(args) {
       args[0].off(args[1], args[2], args[3]);
     });
     this._eventArgumentsToUnbind = [];
@@ -88,7 +64,7 @@ _.extend(Thorax.View.prototype, {
     } else {
       //accept on("rendered", callback, context)
       //accept on("click a", callback, context)
-      (_.isArray(callback) ? callback : [callback]).forEach(function(callback) {
+      _.each((_.isArray(callback) ? callback : [callback]), function(callback) {
         var params = eventParamsFromEventItem.call(this, eventName, callback, context || this);
         if (params.type === 'DOM') {
           //will call _addEvent during delegateEvents()
@@ -112,7 +88,7 @@ _.extend(Thorax.View.prototype, {
       this._eventsToDelegate = [];
       this.on(events);
     }
-    this._eventsToDelegate && this._eventsToDelegate.forEach(this._addEvent, this);
+    this._eventsToDelegate && _.each(this._eventsToDelegate, this._addEvent, this);
   },
   //params may contain:
   //- name
@@ -122,7 +98,7 @@ _.extend(Thorax.View.prototype, {
   //- handler
   _addEvent: function(params) {
     if (params.type === 'view') {
-      params.name.split(/\s+/).forEach(function(name) {
+      _.each(params.name.split(/\s+/), function(name) {
         _on.call(this, name, bindEventHandler.call(this, 'view-event:' + params.originalName, params.handler), params.context || this);
       }, this);
     } else {
@@ -161,10 +137,10 @@ var domEventRegexp = new RegExp('^(' + domEvents.join('|') + ')');
 
 function containHandlerToCurentView(handler, cid) {
   return function(event) {
-    var target = this;
     var view = $(event.target).view({helper: false});
     if (view && view.cid == cid) {
-      handler(event, target);
+      event.originalContext = this;
+      handler(event);
     }
   }
 }
