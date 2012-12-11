@@ -218,7 +218,7 @@ Thorax.View = Backbone.View.extend({
     if (typeof this.template === 'string') {
       this.template = Handlebars.compile(this.template);
     } else if (this.name && !this.template) {
-      //fetch the template 
+      //fetch the template
       this.template = Thorax.Util.getTemplate(this.name, true);
     }
     {{{override "configure" indent=4}}}
@@ -314,11 +314,11 @@ Thorax.View = Backbone.View.extend({
       return template(data);
     }
   },
-  
+
   ensureRendered: function() {
     !this._renderCount && this.render();
   },
-  
+
   html: function(html) {
     if (typeof html === 'undefined') {
       return this.el.innerHTML;
@@ -399,10 +399,16 @@ function addViewToContext(source) {
 //override handlebars "each" helper to provide "_view"
 Handlebars.registerHelper('each', function(context, options) {
   var fn = options.fn, inverse = options.inverse;
-  var ret = "";
+  var ret = "", data;
+
+  if (options.data) {
+    data = Handlebars.createFrame(options.data);
+  }
+
   if (context && context.length > 0) {
     for (var i = 0, j = context.length; i < j; i++) {
-      ret = ret + fn(addViewToContext.call(this, context[i]));
+      if (data) { data.index = i; }
+      ret = ret + fn(addViewToContext.call(this, context[i]), { data: data });
     }
   } else {
     ret = inverse(this);
