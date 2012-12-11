@@ -1895,13 +1895,13 @@ Thorax.loadHandler = function(start, end) {
           try {
             if (!events.length) {
               var run = self._loadStart.run;
-  
+
               if (run) {
                 // Emit the end behavior, but only if there is a paired start
                 end.call(self, self._loadStart.background, self._loadStart);
                 self._loadStart.trigger(loadEnd, self._loadStart);
               }
-  
+
               // If stopping make sure we don't run a start
               clearTimeout(self._loadStart.timeout);
               self._loadStart = undefined;
@@ -1943,12 +1943,12 @@ Thorax.forwardLoadEvents = function(source, dest, once) {
  * Mixing for generating load:start and load:end events.
  */
 Thorax.mixinLoadable = function(target, useParent) {
-  _.extend(target, {  
+  _.extend(target, {
     //loading config
     _loadingClassName: 'loading',
     _loadingTimeoutDuration: 0.33,
     _loadingTimeoutEndDuration: 0.10,
-  
+
     // Propagates loading view parameters to the AJAX layer
     onLoadStart: function(message, background, object) {
       var that = useParent ? this.parent : this;
@@ -2009,39 +2009,28 @@ Thorax.sync = function(method, dataObj, options) {
   return this._request;
 };
 
+Thorax.routeCount = (function() {
+  var routeCount = 0;
+  Backbone.history || (Backbone.history = new Backbone.History());
+  Backbone.history.on('route', function() {
+    routeCount++;
+  });
+  return function() { return routeCount; };
+})();
+
 function bindToRoute(callback, failback) {
-  var fragment = Backbone.history.getFragment(),
-      completed;
+  var routeCount = Thorax.routeCount();
 
-  function finalizer(isCanceled) {
-    var same = fragment === Backbone.history.getFragment();
-
-    if (completed) {
-      // Prevent multiple execution, i.e. we were canceled but the success callback still runs
-      return;
-    }
-
-    if (isCanceled && same) {
-      // Ignore the first route event if we are running in newer versions of backbone
-      // where the route operation is a postfix operation.
-      return;
-    }
-
-    completed = true;
-    Backbone.history.off('route', resetLoader);
-
+  function finalizer() {
     var args = Array.prototype.slice.call(arguments, 1);
-    if (!isCanceled && same) {
+    if (routeCount === Thorax.routeCount()) {
       callback.apply(this, args);
     } else {
       failback && failback.apply(this, args);
     }
   }
 
-  var resetLoader = _.bind(finalizer, this, true);
-  Backbone.history.on('route', resetLoader);
-
-  return _.bind(finalizer, this, false);
+  return _.bind(finalizer, this);
 }
 
 function loadData(callback, failback, options) {
@@ -2056,7 +2045,7 @@ function loadData(callback, failback, options) {
 
   this.fetch(_.defaults({
     success: bindToRoute(callback, failback && _.bind(failback, this, false)),
-    error: failback && _.bind(failback, this, true)
+    error: failback && bindToRoute(_.bind(failback, this, true))
   }, options));
 }
 
@@ -2098,7 +2087,7 @@ function flushQueue(self, fetchQueue, handler) {
     if (self.fetchQueue === fetchQueue) {
       self.fetchQueue = undefined;
     }
-  }
+  };
 }
 
 var klasses = [];
@@ -2130,6 +2119,7 @@ _.each(klasses, function(DataClass) {
         options = failback;
         failback = false;
       }
+
       options = options || {};
       if (!options.background && !this.isPopulated() && rootObject) {
         // Make sure that the global scope sees the proper load events here
@@ -2137,20 +2127,7 @@ _.each(klasses, function(DataClass) {
         Thorax.forwardLoadEvents(this, rootObject, true);
       }
 
-      var self = this;
-      loadData.call(this, callback,
-        function(isError) {
-          // Route changed, kill it
-          if (!isError) {
-            if (self._request) {
-              self._aborted = true;
-              self._request.abort();
-            }
-          }
-
-          failback && failback.apply && failback.apply(this, arguments);
-        },
-        options);
+      loadData.call(this, callback, failback, options);
     }
   });
 });
