@@ -414,7 +414,6 @@ $(function(){
     this.model.load(success, failback);
     this.requests[0].respond(0, {}, '');
 
-    this.stub(Backbone.history, 'getFragment', function() { return 'newFragment'; });
     Backbone.history.trigger('route');
 
     equal(success.callCount, 0);
@@ -428,14 +427,15 @@ $(function(){
         failback = this.spy();
 
     var fragment = 'data-bar';
-    this.stub(Backbone.history, 'getFragment', function() { return fragment; });
     this.model.load(success, failback);
 
     fragment = 'data-foo';
     Backbone.history.trigger('route');
+    this.requests[0].respond(200, {}, '{}');
 
     equal(success.callCount, 0);
-    equal(failback.callCount, 2);
+    equal(failback.callCount, 1);
+    ok(failback.alwaysCalledWith(false));
     equal(this.startSpy.callCount, 1);
     equal(this.endSpy.callCount, 1);
   });
@@ -552,7 +552,7 @@ $(function(){
     fragment = "bar";
     Backbone.history.trigger('route');
     equal(callback.callCount, 0);
-    equal(failback.callCount, 1);
+    equal(failback.callCount, 0);
 
     // make sure callback doesn't work after route has changed
     func();
@@ -565,18 +565,18 @@ $(function(){
     equal(callback.callCount, 1);
     equal(failback.callCount, 0);
 
-    // make sure callback works with initial route trigger
+    // make sure failback works with initial route trigger
     func = reset();
     Backbone.history.trigger('route');
     func();
-    equal(callback.callCount, 1);
-    equal(failback.callCount, 0);
+    equal(callback.callCount, 0);
+    equal(failback.callCount, 1);
 
     // now make sure no execution happens after route change
     fragment = "bar";
     Backbone.history.trigger('route');
-    equal(callback.callCount, 1);
-    equal(failback.callCount, 0);
+    equal(callback.callCount, 0);
+    equal(failback.callCount, 1);
 
     Backbone.history.getFragment = _getFragment;
   });
