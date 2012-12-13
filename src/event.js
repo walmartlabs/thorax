@@ -7,7 +7,7 @@ var _on = Thorax.View.prototype.on,
     this.on.apply(this, event);
   }, this);
   if (this.events) {
-    _.each(Thorax.Util.getValue(this, 'events'), function(handler, eventName) {
+    _.each(getValue(this, 'events'), function(handler, eventName) {
       this.on(eventName, handler, this);
     }, this);
   }

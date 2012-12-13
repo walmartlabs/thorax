@@ -9,6 +9,15 @@ function createRegistryWrapper(klass, hash) {
     return child;
   };
 }
+function getValue(object, prop) {
+  if (!(object && object[prop])) {
+    return null;
+  }
+  return _.isFunction(object[prop])
+    ? object[prop].apply(object, Array.prototype.slice.call(arguments, 2))
+    : object[prop];
+}
+
 function cloneEvents(source, target, key) {
   source[key] = _.clone(target[key]);
   //need to deep clone events array
@@ -73,14 +82,6 @@ Thorax.Util = {
     return template;
   },
 
-  getValue: function (object, prop) {
-    if (!(object && object[prop])) {
-      return null;
-    }
-    return _.isFunction(object[prop])
-      ? object[prop].apply(object, Array.prototype.slice.call(arguments, 2))
-      : object[prop];
-  },
   //'selector' is not present in $('<p></p>')
   //TODO: investigage a better detection method
   is$: function(obj) {

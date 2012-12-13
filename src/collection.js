@@ -15,7 +15,7 @@ Thorax.Collection = Backbone.Collection.extend({
     }
   },
   isPopulated: function() {
-    return this._fetched || this.length > 0 || (!this.length && !Thorax.Util.getValue(this, 'url'));
+    return this._fetched || this.length > 0 || (!this.length && !getValue(this, 'url'));
   },
   fetch: function(options) {
     options = options || {};

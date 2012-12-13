@@ -120,7 +120,7 @@ Thorax.View = Backbone.View.extend({
   },
 
   _getContext: function(attributes) {
-    var data = _.extend({}, Thorax.Util.getValue(this, 'context'), attributes || {}, {
+    var data = _.extend({}, getValue(this, 'context'), attributes || {}, {
       cid: _.uniqueId('t'),
       yield: function() {
         return data.fn && data.fn(data);
