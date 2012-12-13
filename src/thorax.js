@@ -4,20 +4,20 @@ if (!$.fn.forEach) {
     $.fn.each.call(this, function(index) {
       iterator.call(context || this, this, index);
     });
-  }
+  };
 }
 
 var viewNameAttributeName = 'data-view-name',
     viewCidAttributeName = 'data-view-cid',
     viewPlaceholderAttributeName = 'data-view-tmp',
-    viewHelperAttributeName = 'data-view-helper',
-    elementPlaceholderAttributeName = 'data-element-tmp';
+    viewHelperAttributeName = 'data-view-helper';
+
+//view instances
+var viewsIndexedByCid = {};
 
 var Thorax = this.Thorax = {
   VERSION: '{{version}}',
   templatePathPrefix: '',
-  //view instances
-  _viewsIndexedByCid: {},
   templates: {},
   //view classes
   Views: {},
@@ -31,172 +31,6 @@ var Thorax = this.Thorax = {
   }
 };
 
-Thorax.Util = {
-  createRegistryWrapper: function(klass, hash) {
-    var $super = klass.extend;
-    klass.extend = function() {
-      var child = $super.apply(this, arguments);
-      if (child.prototype.name) {
-        hash[child.prototype.name] = child;
-      }
-      return child;
-    };
-  },
-  registryGet: function(object, type, name, ignoreErrors) {
-    var target = object[type],
-        value;
-    if (name.match(/\.(?!handlebars)/)) {
-      var bits = name.split(/\.(?!handlebars)/);
-      name = bits.pop();
-      _.each(bits, function(key) {
-        target = target[key];
-      });
-    }
-    target && (value = target[name]);
-    if (!value && !ignoreErrors) {
-      throw new Error(type + ': ' + name + ' does not exist.');
-    } else {
-      return value;
-    }
-  },
-  getViewInstance: function(name, attributes) {
-    attributes['class'] && (attributes.className = attributes['class']);
-    attributes.tag && (attributes.tagName = attributes.tag);
-    if (typeof name === 'string') {
-      var klass = Thorax.Util.registryGet(Thorax, 'Views', name, false);
-      return klass.cid ? _.extend(klass, attributes || {}) : new klass(attributes);
-    } else if (typeof name === 'function') {
-      return new name(attributes);
-    } else {
-      return name;
-    }
-  },
-
-  getTemplate: function(file, ignoreErrors) {
-    //append the template path prefix if it is missing
-    var pathPrefix = Thorax.templatePathPrefix,
-        addedExtension = false,
-        template;
-    if (pathPrefix && pathPrefix.length && file && file.substr(0, pathPrefix.length) !== pathPrefix) {
-      file = pathPrefix + file;
-    }
-    file = file.replace(/\.handlebars$/, '');
-    var template = Thorax.Util.registryGet(Thorax, 'templates', file, true);
-    if (!template) {
-      template = Thorax.Util.registryGet(Thorax, 'templates', file + '.handlebars', true);
-      addedExtension = true;
-    }
-    if (template && typeof template === 'string') {
-      template = Thorax.templates[file + addedExtension ? '.handlebars' : ''] = Handlebars.compile(template);
-    }
-    if (!template && !ignoreErrors) {
-      throw new Error('templates: ' + file + ' does not exist.');
-    }
-    return template;
-  },
-
-  getValue: function (object, prop) {
-    if (!(object && object[prop])) {
-      return null;
-    }
-    return _.isFunction(object[prop])
-      ? object[prop].apply(object, Array.prototype.slice.call(arguments, 2))
-      : object[prop];
-  },
-  //'selector' is not present in $('<p></p>')
-  //TODO: investigage a better detection method
-  is$: function(obj) {
-    return typeof obj === 'object' && ('length' in obj);
-  },
-  expandToken: function(input, scope) {
-    {{! concatenate handlebars tokens as this file itself is a handlebars template}}
-    if (input && input.indexOf && input.indexOf('{' + '{') >= 0) {
-      var re = /(?:\{?[^{]+)|(?:\{\{([^}]+)\}\})/g,
-          match,
-          ret = [];
-      function deref(token, scope) {
-        if (token.match(/^("|')/) && token.match(/("|')$/)) {
-          return token.replace(/(^("|')|('|")$)/g, '');
-        }
-        var segments = token.split('.'),
-            len = segments.length;
-        for (var i = 0; scope && i < len; i++) {
-          if (segments[i] !== 'this') {
-            scope = scope[segments[i]];
-          }
-        }
-        return scope;
-      }
-      while (match = re.exec(input)) {
-        if (match[1]) {
-          var params = match[1].split(/\s+/);
-          if (params.length > 1) {
-            var helper = params.shift();
-            params = _.map(params, function(param) { return deref(param, scope); });
-            if (Handlebars.helpers[helper]) {
-              ret.push(Handlebars.helpers[helper].apply(scope, params));
-            } else {
-              // If the helper is not defined do nothing
-              ret.push(match[0]);
-            }
-          } else {
-            ret.push(deref(params[0], scope));
-          }
-        } else {
-          ret.push(match[0]);
-        }
-      }
-      input = ret.join('');
-    }
-    return input;
-  },
-  tag: function(attributes, content, scope) {
-    var htmlAttributes = _.clone(attributes),
-        tag = htmlAttributes.tag || htmlAttributes.tagName || 'div';
-    if (htmlAttributes.tag) {
-      delete htmlAttributes.tag;
-    }
-    if (htmlAttributes.tagName) {
-      delete htmlAttributes.tagName;
-    }
-    return '<' + tag + ' ' + _.map(htmlAttributes, function(value, key) {
-      if (typeof value === 'undefined') {
-        return '';
-      }
-      var formattedValue = value;
-      if (scope) {
-        formattedValue = Thorax.Util.expandToken(value, scope);
-      }
-      return key + '="' + Handlebars.Utils.escapeExpression(formattedValue) + '"';
-    }).join(' ') + '>' + (typeof content === 'undefined' ? '' : content) + '</' + tag + '>';
-  },
-  htmlAttributesFromOptions: function(options) {
-    var htmlAttributes = {};
-    if (options.tag) {
-      htmlAttributes.tag = options.tag;
-    }
-    if (options.tagName) {
-      htmlAttributes.tagName = options.tagName;
-    }
-    if (options['class']) {
-      htmlAttributes['class'] = options['class'];
-    }
-    if (options.id) {
-      htmlAttributes.id = options.id;
-    }
-    return htmlAttributes;
-  },
-  _cloneEvents: function(source, target, key) {
-    source[key] = _.clone(target[key]);
-    //need to deep clone events array
-    _.each(source[key], function(value, _key) {
-      if (_.isArray(value)) {
-        target[key][_key] = _.clone(value);
-      }
-    });
-  }
-};
-
 Thorax.View = Backbone.View.extend({
   constructor: function() {
     var response = Backbone.View.apply(this, arguments);
@@ -204,9 +38,16 @@ Thorax.View = Backbone.View.extend({
     return response;
   },
   _configure: function(options) {
-    {{{override "beforeConfigure" indent=4}}}
+    var self = this;
 
-    Thorax._viewsIndexedByCid[this.cid] = this;
+    // Setup object event tracking
+    _.each(inheritVars, function(obj) {
+      self[obj.name] = [];
+      if (obj.array) { self[obj.array] = []; }
+      if (obj.hash) { self[obj.hash] = {}; }
+    });
+
+    viewsIndexedByCid[this.cid] = this;
     this.children = {};
     this._renderCount = 0;
 
@@ -244,7 +85,7 @@ Thorax.View = Backbone.View.extend({
       children: true
     });
     this.trigger('destroyed');
-    delete Thorax._viewsIndexedByCid[this.cid];
+    delete viewsIndexedByCid[this.cid];
     if (options.children) {
       _.each(this.children, function(child) {
         child.parent = null;
@@ -252,7 +93,8 @@ Thorax.View = Backbone.View.extend({
       });
       this.children = {};
     }
-    {{{override "destroy" indent=4}}}
+
+    this.freeze && this.freeze();
   },
 
   render: function(output) {
@@ -286,7 +128,7 @@ Thorax.View = Backbone.View.extend({
   },
 
   _getContext: function(attributes) {
-    var data = _.extend({}, Thorax.Util.getValue(this, 'context'), attributes || {}, {
+    var data = _.extend({}, getValue(this, 'context'), attributes || {}, {
       cid: _.uniqueId('t'),
       yield: function() {
         return data.fn && data.fn(data);
@@ -306,7 +148,7 @@ Thorax.View = Backbone.View.extend({
     }
     if (!template) {
       if (ignoreErrors) {
-        return ''
+        return '';
       } else {
         throw new Error('Unable to find template ' + file);
       }
@@ -349,14 +191,15 @@ Thorax.View = Backbone.View.extend({
   }
 });
 
-{{! All static properties must be present before any subclasses are created}}
-{{{override "static-view-properties" indent=0}}}
-
 {{#has-plugin "event"}}
   _.extend(Thorax.View, {
-    _events: [],
     on: function(eventName, callback) {
-      {{{override "on" indent=4}}}
+      createInheritVars(this);
+
+      if (objectEvents(this, eventName, callback)) {
+        return this;
+      }
+
       //accept on({"rendered": handler})
       if (typeof eventName === 'object') {
         _.each(eventName, function(value, key) {
@@ -380,12 +223,16 @@ Thorax.View = Backbone.View.extend({
 
 
 Thorax.View.extend = function() {
+  createInheritVars(this);
+
   var child = Backbone.View.extend.apply(this, arguments);
-  {{{override "extend" indent=2}}}
+
+  cloneInheritVars(this, child);
+
   return child;
 };
 
-Thorax.Util.createRegistryWrapper(Thorax.View, Thorax.Views);
+createRegistryWrapper(Thorax.View, Thorax.Views);
 
 function addViewToContext(source) {
   if (this._view) {
@@ -443,7 +290,6 @@ function getParent(parent) {
 
 Handlebars.registerViewHelper = function(name, viewClass, callback) {
   if (arguments.length === 2) {
-    options = {};
     callback = arguments[1];
     viewClass = Thorax.HelperView;
   }
@@ -486,5 +332,5 @@ $.fn.view = function(options) {
     selector += ':not([' + viewHelperAttributeName + '])';
   }
   var el = $(this).closest(selector);
-  return (el && Thorax._viewsIndexedByCid[el.attr(viewCidAttributeName)]) || false;
+  return (el && viewsIndexedByCid[el.attr(viewCidAttributeName)]) || false;
 };

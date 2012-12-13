@@ -16,11 +16,11 @@ Thorax.loadHandler = function(start, end) {
           try {
             self._loadStart.run = true;
             start.call(self, self._loadStart.message, self._loadStart.background, self._loadStart);
-          } catch(e) {
+          } catch (e) {
             Thorax.onException('loadStart', e);
           }
         },
-        loadingTimeout*1000);
+        loadingTimeout * 1000);
     }
 
     if (!self._loadStart) {
@@ -67,18 +67,18 @@ Thorax.loadHandler = function(start, end) {
           try {
             if (!events.length) {
               var run = self._loadStart.run;
-  
+
               if (run) {
                 // Emit the end behavior, but only if there is a paired start
                 end.call(self, self._loadStart.background, self._loadStart);
                 self._loadStart.trigger(loadEnd, self._loadStart);
               }
-  
+
               // If stopping make sure we don't run a start
               clearTimeout(self._loadStart.timeout);
               self._loadStart = undefined;
             }
-          } catch(e) {
+          } catch (e) {
             Thorax.onException('loadEnd', e);
           }
         }, loadingEndTimeout * 1000);
@@ -115,12 +115,12 @@ Thorax.forwardLoadEvents = function(source, dest, once) {
  * Mixing for generating load:start and load:end events.
  */
 Thorax.mixinLoadable = function(target, useParent) {
-  _.extend(target, {  
+  _.extend(target, {
     //loading config
     _loadingClassName: 'loading',
     _loadingTimeoutDuration: 0.33,
     _loadingTimeoutEndDuration: 0.10,
-  
+
     // Propagates loading view parameters to the AJAX layer
     onLoadStart: function(message, background, object) {
       var that = useParent ? this.parent : this;
@@ -135,7 +135,7 @@ Thorax.mixinLoadable = function(target, useParent) {
         });
       }
     },
-    onLoadEnd: function(background, object) {
+    onLoadEnd: function(/* background, object */) {
       var that = useParent ? this.parent : this;
       $(that.el).removeClass(that._loadingClassName);
       //used by loading helpers
@@ -270,7 +270,7 @@ function flushQueue(self, fetchQueue, handler) {
     if (self.fetchQueue === fetchQueue) {
       self.fetchQueue = undefined;
     }
-  }
+  };
 }
 
 var klasses = [];
@@ -334,21 +334,19 @@ if (Thorax.Router) {
 }
 
 // Propagates loading view parameters to the AJAX layer
-{{#inject "model-options"}}
-  , ignoreErrors: this.ignoreFetchError
-  , background: this.nonBlockingLoad
-{{/inject}}
+function loadingDataOptions() {
+  return {
+    ignoreErrors: this.ignoreFetchError,
+    background: this.nonBlockingLoad
+  };
+}
+extendOptions('_setModelOptions', loadingDataOptions);
+extendOptions('_setCollectionOptions', loadingDataOptions);
 
 if (Thorax.CollectionView) {
   Thorax.mixinLoadable(Thorax.CollectionView.prototype);
   Thorax.mixinLoadableEvents(Thorax.CollectionView.prototype);
 }
-
-// Propagates loading view parameters to the AJAX layer
-{{#inject "collection-options"}}
-  , ignoreErrors: this.ignoreFetchError
-  , background: this.nonBlockingLoad
-{{/inject}}
 
 Thorax.View.on({
   'load:start': Thorax.loadHandler(

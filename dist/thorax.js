@@ -382,7 +382,8 @@ Thorax.View = Backbone.View.extend({
     if (typeof html === 'undefined') {
       return this.el.innerHTML;
     } else {
-      var element = this.$el.html(html);
+      this.el.innerHTML = "";
+      var element = this.$el.append(html);
       
         this._appendViews();
       
@@ -938,7 +939,7 @@ _.extend(Thorax.View.prototype, {
         errors: true
             
         // Begin injected code from "src/form.js"
-        , populate: true 
+        , populate: true
         // End injected code
         // Begin injected code from "src/loading.js"
         , ignoreErrors: this.ignoreFetchError
@@ -1518,7 +1519,7 @@ _.extend(Thorax.View.prototype, {
     }, options || {});
 
     var attributes = options.attributes || {};
-    
+
     //callback has context of element
     var view = this;
     var errors = [];
@@ -1556,7 +1557,7 @@ _.extend(Thorax.View.prototype, {
         return false;
       };
     }
-    
+
     callback && callback.call(this, attributes, _.bind(resetSubmitState, this));
     return attributes;
   },
@@ -1629,9 +1630,9 @@ _.extend(Thorax.View.prototype, {
 });
 
 Thorax.View.on({
-  error: function() {  
+  error: function() {
     resetSubmitState.call(this);
-  
+
     // If we errored with a model we want to reset the content but leave the UI
     // intact. If the user updates the data and serializes any overwritten data
     // will be restored.
@@ -1901,13 +1902,13 @@ Thorax.loadHandler = function(start, end) {
           try {
             if (!events.length) {
               var run = self._loadStart.run;
-  
+
               if (run) {
                 // Emit the end behavior, but only if there is a paired start
                 end.call(self, self._loadStart.background, self._loadStart);
                 self._loadStart.trigger(loadEnd, self._loadStart);
               }
-  
+
               // If stopping make sure we don't run a start
               clearTimeout(self._loadStart.timeout);
               self._loadStart = undefined;
@@ -1949,12 +1950,12 @@ Thorax.forwardLoadEvents = function(source, dest, once) {
  * Mixing for generating load:start and load:end events.
  */
 Thorax.mixinLoadable = function(target, useParent) {
-  _.extend(target, {  
+  _.extend(target, {
     //loading config
     _loadingClassName: 'loading',
     _loadingTimeoutDuration: 0.33,
     _loadingTimeoutEndDuration: 0.10,
-  
+
     // Propagates loading view parameters to the AJAX layer
     onLoadStart: function(message, background, object) {
       var that = useParent ? this.parent : this;
@@ -2358,7 +2359,7 @@ Handlebars.registerViewHelper('empty', function(collection, view) {
     view.on(collection, 'add', collectionAddCallback);
     view.on(collection, 'reset', collectionResetCallback);
   }
-  
+
   view.render();
 });
 
@@ -2392,7 +2393,7 @@ Handlebars.registerHelper('super', function() {
   var parent = this._view.constructor && this._view.constructor.__super__;
   if (parent) {
     var template = parent.template;
-    if (!template) { 
+    if (!template) {
       if (!parent.name) {
         throw new Error('Cannot use super helper when parent has no name or template.');
       }
@@ -2480,13 +2481,6 @@ Thorax.View.prototype._appendViews = function(scope, callback) {
         view.ensureRendered();
       }
       $(el).replaceWith(view.el);
-      //TODO: jQuery has trouble with delegateEvents() when
-      //the child dom node is detached then re-attached
-      if (typeof jQuery !== 'undefined' && $ === jQuery) {
-        if (this._renderCount > 1) {
-          view.delegateEvents();
-        }
-      }
       callback && callback(view.el);
     }
   }, this);

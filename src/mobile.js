@@ -16,7 +16,7 @@ Thorax.Util.scrollTo = function(x, y) {
   }
   return [x, y];
 };
-  
+
 Thorax.Util.scrollToTop = function() {
   // android will use height of 1 because of minimumScrollYOffset in scrollTo()
   return this.scrollTo(0, 0);
@@ -24,7 +24,7 @@ Thorax.Util.scrollToTop = function() {
 
 //built in dom events
 Thorax.View.on({
-  'submit form': function(event) {
+  'submit form': function(/* event */) {
     // Hide any virtual keyboards that may be lingering around
     var focused = $(':focus')[0];
     focused && focused.blur();

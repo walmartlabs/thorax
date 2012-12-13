@@ -1,5 +1,5 @@
-var _on = Thorax.View.prototype.on,
-    _delegateEvents = Thorax.View.prototype.delegateEvents;
+// Save a copy of the _on method to call as a $super method
+var _on = Thorax.View.prototype.on;
 
 {{#inject "configure"}}
   //_events not present on HelperView
@@ -7,23 +7,23 @@ var _on = Thorax.View.prototype.on,
     this.on.apply(this, event);
   }, this);
   if (this.events) {
-    _.each(Thorax.Util.getValue(this, 'events'), function(handler, eventName) {
+    _.each(getValue(this, 'events'), function(handler, eventName) {
       this.on(eventName, handler, this);
     }, this);
   }
 {{/inject}}
 
-{{#inject "extend"}}
-  Thorax.Util._cloneEvents(this, child, '_events');
-{{/inject}}
+inheritVars.event = { name: '_events' };
 
-{{#inject "destroy"}}
-  this.freeze();
-{{/inject}}
 
 _.extend(Thorax.View.prototype, {
   freeze: function(options) {
-    {{{override "freeze" indent=4}}}
+    _.each(inheritVars, function(obj) {
+      if (obj.unbind) {
+        _.each(this[obj.array], this[obj.unbind], this);
+      }
+    }, this);
+
     options = _.defaults(options || {}, {
       dom: true,
       children: true
@@ -44,7 +44,10 @@ _.extend(Thorax.View.prototype, {
     }
   },
   on: function(eventName, callback, context) {
-    {{{override "on" indent=4}}}
+    if (objectEvents(this, eventName, callback)) {
+      return this;
+    }
+
     if (typeof eventName === 'object') {
       //accept on({"rendered": callback})
       if (arguments.length === 1) {
@@ -142,7 +145,7 @@ function containHandlerToCurentView(handler, cid) {
       event.originalContext = this;
       handler(event);
     }
-  }
+  };
 }
 
 function bindEventHandler(eventName, callback) {

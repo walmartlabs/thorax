@@ -7,17 +7,17 @@ $(function() {
       var options = {fetch: true};
       var a = new (type.Model.extend());
       ok(!Thorax.Util.shouldFetch(a, options));
-  
+
       var b = new (type.Model.extend({urlRoot: '/'}));
       ok(!!Thorax.Util.shouldFetch(b, options));
 
       var c = new (type.Model.extend({urlRoot: '/'}));
       c.set({key: 'value'});
       ok(!Thorax.Util.shouldFetch(c, options));
-  
+
       var d = new (type.Collection.extend());
       ok(!Thorax.Util.shouldFetch(d, options));
-  
+
       var e = new (type.Collection.extend({url: '/'}));
       ok(!!Thorax.Util.shouldFetch(e, options));
     });
@@ -27,7 +27,7 @@ $(function() {
     var modelA = new Thorax.Model({letter: 'a'});
     var modelB = new Thorax.Model({letter: 'b'});
     var modelC = new Thorax.Model({letter: 'c'});
-    
+
     var a = new Thorax.View({
       template: '<li>{{letter}}</li>',
       model: modelA
@@ -43,7 +43,7 @@ $(function() {
     modelB.set({letter: 'B'});
     equal(b.el.firstChild.innerHTML, 'B', 'update attribute triggers render');
     modelB.set({letter: 'b'});
-    
+
     var c = new Thorax.View({
       template: '<li>{{letter}}</li>'
     });
