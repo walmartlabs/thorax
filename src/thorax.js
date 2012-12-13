@@ -190,9 +190,6 @@ Thorax.View = Backbone.View.extend({
   }
 });
 
-{{! All static properties must be present before any subclasses are created}}
-{{{override "static-view-properties" indent=0}}}
-
 {{#has-plugin "event"}}
   _.extend(Thorax.View, {
     on: function(eventName, callback) {
