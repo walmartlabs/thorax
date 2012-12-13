@@ -21,7 +21,12 @@ inheritVars.event = { name: '_events' };
 
 _.extend(Thorax.View.prototype, {
   freeze: function(options) {
-    {{{override "freeze" indent=4}}}
+    _.each(inheritVars, function(obj) {
+      if (obj.unbind) {
+        _.each(this[obj.array], this[obj.unbind], this);
+      }
+    }, this);
+
     options = _.defaults(options || {}, {
       dom: true,
       children: true

@@ -7,10 +7,8 @@ var templateCache = {},
     override = {
       'model-change': '',
       destroy: '',
-      freeze: '',
       'constructor': '',
-      configure: '',
-      extend: ''
+      configure: ''
     },
     includedPlugins = ['thorax', 'util'];
 

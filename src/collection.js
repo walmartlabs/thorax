@@ -41,12 +41,10 @@ inheritVars.collection = {
   event: true,
   name: '_collectionEvents',
   array: '_collections',
-  hash: '_collectionOptionsByCid'
-};
+  hash: '_collectionOptionsByCid',
 
-{{#inject "freeze"}}
-  _.each(this._collections, this.unbindCollection, this);
-{{/inject}}
+  unbind: 'unbindCollection'
+};
 
 _.extend(Thorax.View.prototype, {
   bindCollection: function(collection, options) {

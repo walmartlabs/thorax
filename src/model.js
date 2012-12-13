@@ -37,12 +37,11 @@ inheritVars.model = {
   event: true,
   name: '_modelEvents',
   array: '_models',
-  hash: '_modelOptionsByCid'
+  hash: '_modelOptionsByCid',
+
+  unbind: 'unbindModel'
 };
 
-{{#inject "freeze"}}
-  _.each(this._models, this.unbindModel, this);
-{{/inject}}
 
 _.extend(Thorax.View.prototype, {
   bindModel: function(model, options) {
