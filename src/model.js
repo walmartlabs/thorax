@@ -92,7 +92,6 @@ _.extend(Thorax.View.prototype, {
     if (!modelOptions || (modelOptions && modelOptions.render)) {
       this.render();
     }
-    {{{override "model-change" indent=4}}}
   },
   _loadModel: function(model, options) {
     {{#has-plugin "loading"}}

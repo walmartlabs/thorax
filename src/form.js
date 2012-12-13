@@ -1,15 +1,18 @@
-/*global viewCidAttributeName, viewHelperAttributeName */
+/*global extendOptions, extendViewMember */
+
 extendOptions('_setModelOptions', function() {
   return {
     populate: true
-  }
+  };
 });
 
-{{#inject "model-change"}}
+extendViewMember('_onModelChange', function(model) {
+  // TODO : What can we do to remove this duplication?
+  var modelOptions = model && this._modelOptionsByCid[model.cid];
   if (modelOptions && modelOptions.populate) {
     this.populate(model.attributes, modelOptions.populate === true ? {} : modelOptions.populate);
   }
-{{/inject}}
+});
 
 _.extend(Thorax.View.prototype, {
   //serializes a form present in the view, returning the serialized data

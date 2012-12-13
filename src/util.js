@@ -79,6 +79,14 @@ function addEvents(target, source) {
   });
 }
 
+function extendViewMember(name, callback) {
+  var $super = Thorax.View.prototype[name];
+  Thorax.View.prototype[name] = function() {
+    var ret = $super.apply(this, arguments);
+    callback.apply(this, arguments);
+    return ret;
+  };
+}
 function extendOptions(name, callback) {
   var $super = Thorax.View.prototype[name];
   Thorax.View.prototype[name] = function(dataObject, options) {
