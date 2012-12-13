@@ -13,9 +13,7 @@ var _on = Thorax.View.prototype.on;
   }
 {{/inject}}
 
-{{#inject "extend"}}
-  cloneEvents(this, child, '_events');
-{{/inject}}
+eventVars['event'] = { events: '_events' };
 
 {{#inject "destroy"}}
   this.freeze();

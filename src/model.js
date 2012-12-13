@@ -33,19 +33,11 @@ createRegistryWrapper(Thorax.Model, Thorax.Models);
   }
 {{/inject}}
 
-{{#inject "beforeConfigure"}}
-  this._modelOptionsByCid = {};
-  this._modelEvents = [];
-  this._models = [];
-{{/inject}}
-
-{{#inject "static-view-properties"}}
-  Thorax.View._modelEvents = [];
-{{/inject}}
-
-{{#inject "extend"}}
-  cloneEvents(this, child, '_modelEvents');
-{{/inject}}
+eventVars['model'] = {
+  events: '_modelEvents',
+  array: '_models',
+  hash: '_modelOptionsByCid'
+};
 
 {{#inject "on"}}
   if (eventName === 'model' && typeof callback === 'object') {
