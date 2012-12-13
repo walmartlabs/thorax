@@ -1,6 +1,6 @@
 //Router
 function initializeRouter() {
-  Backbone.history || (Backbone.history = new Backbone.History);
+  Backbone.history || (Backbone.history = new Backbone.History());
   Backbone.history.on('route', onRoute, this);
   //router does not have a built in destroy event
   //but ViewController does
@@ -27,7 +27,7 @@ Thorax.Router = Backbone.Router.extend({
 Thorax.Routers = {};
 Thorax.Util.createRegistryWrapper(Thorax.Router, Thorax.Routers);
 
-function onRoute(router, name) {
+function onRoute(router /* , name */) {
   if (this === router) {
     this.trigger.apply(this, ['route'].concat(Array.prototype.slice.call(arguments, 1)));
   }
@@ -61,11 +61,11 @@ Thorax.LayoutView = Thorax.View.extend({
       destroy: true
     }, options || {});
     if (typeof view === 'string') {
-      view = new (Thorax.Util.registryGet(Thorax, 'Views', view, false));
+      view = new (Thorax.Util.registryGet(Thorax, 'Views', view, false))();
     }
     this.ensureRendered();
     var oldView = this._view;
-    if (view == oldView){
+    if (view === oldView) {
       return false;
     }
     if (options.destroy && view) {
@@ -126,7 +126,7 @@ Thorax.ViewController = Thorax.LayoutView.extend({
     initializeRouter.call(this);
     //set the ViewController as the view on the parent
     //if a parent was specified
-    this.on('route:before', function(router, name) {
+    this.on('route:before', function(/* router, name */) {
       if (this.parent && this.parent.getView) {
         if (this.parent.getView() !== this) {
           this.parent.setView(this, {

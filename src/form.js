@@ -1,3 +1,4 @@
+/*global viewCidAttributeName, viewHelperAttributeName */
 {{#inject "model-options"}}
   , populate: true
 {{/inject}}
@@ -76,7 +77,7 @@ _.extend(Thorax.View.prototype, {
     if (options.set && this.model) {
       if (!this.model.set(attributes, {silent: options.silent})) {
         return false;
-      };
+      }
     }
 
     callback && callback.call(this, attributes, _.bind(resetSubmitState, this));
@@ -129,16 +130,16 @@ _.extend(Thorax.View.prototype, {
   },
 
   //perform form validation, implemented by child class
-  validateInput: function(attributes, options, errors) {},
+  validateInput: function(/* attributes, options, errors */) {},
 
-  _getInputValue: function(input, options, errors) {
+  _getInputValue: function(input /* , options, errors */) {
     if (input.type === 'checkbox' || input.type === 'radio') {
       if (input.checked) {
         return input.value;
       }
     } else if (input.multiple === true) {
       var values = [];
-      $('option',input).each(function(){
+      $('option', input).each(function() {
         if (this.selected) {
           values.push(this.value);
         }
@@ -172,7 +173,7 @@ function eachNamedInput(options, iterator, context) {
   var i = 0, cid = this.cid;
   this.$('select,input,textarea', options.root || this.el).each(function() {
     if (!options.children) {
-      var closestViewEl = $(this).closest('[ '+ viewCidAttributeName + ']:not([' + viewHelperAttributeName + '])');
+      var closestViewEl = $(this).closest('[' + viewCidAttributeName + ']:not([' + viewHelperAttributeName + '])');
       if (cid !== closestViewEl.attr(viewCidAttributeName)) {
         return;
       }
@@ -186,11 +187,15 @@ function eachNamedInput(options, iterator, context) {
 
 //calls a callback with the correct object fragment and key from a compound name
 function objectAndKeyFromAttributesAndName(attributes, name, options, callback) {
-  var key, i, object = attributes, keys = name.split('['), mode = options.mode;
-  for(i = 0; i < keys.length - 1; ++i) {
-    key = keys[i].replace(']','');
+  var key,
+      object = attributes,
+      keys = name.split('['),
+      mode = options.mode;
+
+  for (var i = 0; i < keys.length - 1; ++i) {
+    key = keys[i].replace(']', '');
     if (!object[key]) {
-      if (mode == 'serialize') {
+      if (mode === 'serialize') {
         object[key] = {};
       } else {
         return callback.call(this, false, key);

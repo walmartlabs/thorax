@@ -1,3 +1,4 @@
+/*global viewPlaceholderAttributeName */
 var viewTemplateOverrides = {};
 Handlebars.registerHelper('view', function(view, options) {
   if (arguments.length === 1) {

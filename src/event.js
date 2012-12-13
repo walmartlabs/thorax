@@ -1,5 +1,4 @@
-var _on = Thorax.View.prototype.on,
-    _delegateEvents = Thorax.View.prototype.delegateEvents;
+var _on = Thorax.View.prototype.on;
 
 {{#inject "configure"}}
   //_events not present on HelperView
@@ -142,7 +141,7 @@ function containHandlerToCurentView(handler, cid) {
       event.originalContext = this;
       handler(event);
     }
-  }
+  };
 }
 
 function bindEventHandler(eventName, callback) {
