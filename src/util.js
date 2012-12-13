@@ -12,8 +12,8 @@ function createRegistryWrapper(klass, hash) {
 function registryGet(object, type, name, ignoreErrors) {
   var target = object[type],
       value;
-  if (name.match(/\.(?!handlebars)/)) {
-    var bits = name.split(/\.(?!handlebars)/);
+  if (name.indexOf('.') >= 0) {
+    var bits = name.split(/\./);
     name = bits.pop();
     _.each(bits, function(key) {
       target = target[key];
@@ -63,21 +63,23 @@ Thorax.Util = {
   getTemplate: function(file, ignoreErrors) {
     //append the template path prefix if it is missing
     var pathPrefix = Thorax.templatePathPrefix,
-        addedExtension = false,
         template;
-    if (pathPrefix && pathPrefix.length && file && file.substr(0, pathPrefix.length) !== pathPrefix) {
+    if (pathPrefix && file.substr(0, pathPrefix.length) !== pathPrefix) {
       file = pathPrefix + file;
     }
+
+    // Without extension
     file = file.replace(/\.handlebars$/, '');
-    var template = registryGet(Thorax, 'templates', file, true);
+    template = Thorax.templates[file];
     if (!template) {
-      template = registryGet(Thorax, 'templates', file + '.handlebars', true);
-      addedExtension = true;
+      // With extension
+      file = file + '.handlebars';
+      template = Thorax.templates[file];
     }
+
     if (template && typeof template === 'string') {
-      template = Thorax.templates[file + addedExtension ? '.handlebars' : ''] = Handlebars.compile(template);
-    }
-    if (!template && !ignoreErrors) {
+      template = Thorax.templates[file] = Handlebars.compile(template);
+    } else if (!template && !ignoreErrors) {
       throw new Error('templates: ' + file + ' does not exist.');
     }
     return template;
