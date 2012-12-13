@@ -36,13 +36,25 @@ function getValue(object, prop) {
     : object[prop];
 }
 
-function cloneEvents(source, target, key) {
-  source[key] = _.clone(target[key]);
-  //need to deep clone events array
-  _.each(source[key], function(value, _key) {
-    if (_.isArray(value)) {
-      target[key][_key] = _.clone(value);
+var inheritVars = {};
+function createInheritVars(self) {
+  // Ensure that we have our static event objects
+  _.each(inheritVars, function(obj) {
+    if (!self[obj.name]) {
+      self[obj.name] = [];
     }
+  });
+}
+function cloneInheritVars(source, target) {
+  _.each(inheritVars, function(obj) {
+    var key = obj.name;
+    source[key] = _.clone(target[key]);
+    //need to deep clone events array
+    _.each(source[key], function(value, _key) {
+      if (_.isArray(value)) {
+        target[key][_key] = _.clone(value);
+      }
+    });
   });
 }
 

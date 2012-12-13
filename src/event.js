@@ -13,7 +13,7 @@ var _on = Thorax.View.prototype.on;
   }
 {{/inject}}
 
-eventVars['event'] = { events: '_events' };
+inheritVars.event = { name: '_events' };
 
 {{#inject "destroy"}}
   this.freeze();

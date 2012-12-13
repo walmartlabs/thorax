@@ -1,4 +1,4 @@
-/*global bindEvents, cloneEvents, createRegistryWrapper, getValue, unbindEvents */
+/*global bindEvents, createRegistryWrapper, getValue, unbindEvents */
 var _fetch = Backbone.Collection.prototype.fetch,
     _reset = Backbone.Collection.prototype.reset,
     collectionCidAttributeName = 'data-collection-cid',
@@ -37,8 +37,8 @@ Thorax.Collections = {};
 createRegistryWrapper(Thorax.Collection, Thorax.Collections);
 
 
-eventVars['collection'] = {
-  events: '_collectionEvents',
+inheritVars.collection = {
+  name: '_collectionEvents',
   array: '_collections',
   hash: '_collectionOptionsByCid'
 };

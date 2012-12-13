@@ -33,8 +33,8 @@ createRegistryWrapper(Thorax.Model, Thorax.Models);
   }
 {{/inject}}
 
-eventVars['model'] = {
-  events: '_modelEvents',
+inheritVars.model = {
+  name: '_modelEvents',
   array: '_models',
   hash: '_modelOptionsByCid'
 };

@@ -6,21 +6,18 @@ Thorax.Mixins = {};
   this.mixins && _.each(this.mixins, this.mixin, this);
 {{/inject}}
 
-{{#inject "extend"}}
-  child.mixins = _.clone(this.mixins);
-{{/inject}}
 
-{{#inject "static-view-properties"}}
-  _.extend(Thorax.View, {
-    mixins: [],
-    mixin: function(mixin) {
-      this.mixins.push(mixin);
-    },
-    registerMixin: function(name, callback, methods) {
-      Thorax.Mixins[name] = [callback, methods];
-    }
-  });
-{{/inject}}
+inheritVars.mixins = { name: 'mixins' };
+
+_.extend(Thorax.View, {
+  mixin: function(mixin) {
+    createInheritVars(this);
+    this.mixins.push(mixin);
+  },
+  registerMixin: function(name, callback, methods) {
+    Thorax.Mixins[name] = [callback, methods];
+  }
+});
 
 Thorax.View.prototype.mixin = function(name) {
   if (!this._appliedMixins) {

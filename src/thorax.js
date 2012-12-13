@@ -41,8 +41,8 @@ Thorax.View = Backbone.View.extend({
     var self = this;
 
     // Setup object event tracking
-    _.each(eventVars, function(obj) {
-      self[obj.events] = [];
+    _.each(inheritVars, function(obj) {
+      self[obj.name] = [];
       if (obj.array) { self[obj.array] = []; }
       if (obj.hash) { self[obj.hash] = {}; }
     });
@@ -196,7 +196,7 @@ Thorax.View = Backbone.View.extend({
 {{#has-plugin "event"}}
   _.extend(Thorax.View, {
     on: function(eventName, callback) {
-      createEventVars(this);
+      createInheritVars(this);
 
       {{{override "on" indent=4}}}
 
@@ -222,30 +222,17 @@ Thorax.View = Backbone.View.extend({
 {{/has-plugin}}
 
 
-var eventVars = {};
 Thorax.View.extend = function() {
-  createEventVars(this);
+  createInheritVars(this);
 
   var child = Backbone.View.extend.apply(this, arguments);
 
-  _.each(eventVars, function(obj) {
-    cloneEvents(this, child, obj.events);
-  }, this);
+  cloneInheritVars(this, child);
 
-  {{{override "extend" indent=2}}}
   return child;
 };
 
 createRegistryWrapper(Thorax.View, Thorax.Views);
-
-function createEventVars(self) {
-  // Ensure that we have our static event objects
-  _.each(eventVars, function(obj) {
-    if (!self[obj.events]) {
-      self[obj.events] = [];
-    }
-  });
-}
 
 function addViewToContext(source) {
   if (this._view) {
