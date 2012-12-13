@@ -1,7 +1,9 @@
 /*global viewCidAttributeName, viewHelperAttributeName */
-{{#inject "model-options"}}
-  , populate: true
-{{/inject}}
+extendOptions('_setModelOptions', function() {
+  return {
+    populate: true
+  }
+});
 
 {{#inject "model-change"}}
   if (modelOptions && modelOptions.populate) {

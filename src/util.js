@@ -79,6 +79,13 @@ function addEvents(target, source) {
   });
 }
 
+function extendOptions(name, callback) {
+  var $super = Thorax.View.prototype[name];
+  Thorax.View.prototype[name] = function(dataObject, options) {
+    return $super.call(this, dataObject, _.extend(callback.call(this, dataObject, options), options));
+  };
+}
+
 Thorax.Util = {
   getViewInstance: function(name, attributes) {
     attributes['class'] && (attributes.className = attributes['class']);

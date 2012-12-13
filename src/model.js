@@ -115,7 +115,6 @@ _.extend(Thorax.View.prototype, {
         success: false,
         render: true,
         errors: true
-        {{{override "model-options" indent=8}}}
       };
     }
     _.extend(this._modelOptionsByCid[model.cid], options || {});

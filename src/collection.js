@@ -77,7 +77,6 @@ _.extend(Thorax.View.prototype, {
       fetch: true,
       success: false,
       errors: true
-      {{{override "collection-options" indent=6}}}
     }, options || {});
   },
   _loadCollection: function(collection) {
