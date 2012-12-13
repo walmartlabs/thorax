@@ -87,7 +87,7 @@ Thorax.Util = {
       addedExtension = true;
     }
     if (template && typeof template === 'string') {
-      template = Thorax.templates[file + addedExtension ? '.handlebars' : ''] = Handlebars.compile(template);
+      template = Thorax.templates[file + addedExtension ? '.handlebars' : ''] = Handlebars.compile(template, {data: true});
     }
     if (!template && !ignoreErrors) {
       throw new Error('templates: ' + file + ' does not exist.');
@@ -216,7 +216,7 @@ Thorax.View = Backbone.View.extend({
 
     //compile a string if it is set as this.template
     if (typeof this.template === 'string') {
-      this.template = Handlebars.compile(this.template);
+      this.template = Handlebars.compile(this.template, {data: true});
     } else if (this.name && !this.template) {
       //fetch the template
       this.template = Thorax.Util.getTemplate(this.name, true);
@@ -290,8 +290,7 @@ Thorax.View = Backbone.View.extend({
       cid: _.uniqueId('t'),
       yield: function() {
         return data.fn && data.fn(data);
-      },
-      _view: this
+      }
     });
     return data;
   },
@@ -311,7 +310,7 @@ Thorax.View = Backbone.View.extend({
         throw new Error('Unable to find template ' + file);
       }
     } else {
-      return template(data);
+      return template(data, {data: {view: this}});
     }
   },
 
@@ -387,41 +386,6 @@ Thorax.View.extend = function() {
 
 Thorax.Util.createRegistryWrapper(Thorax.View, Thorax.Views);
 
-function addViewToContext(source) {
-  if (this._view) {
-    var context = _.clone(source);
-    context._view = this._view;
-    return context;
-  } else {
-    return source;
-  }
-}
-
-//override handlebars "each" helper to provide "_view"
-Handlebars.registerHelper('each', function(context, options) {
-  var fn = options.fn, inverse = options.inverse;
-  var ret = "", data;
-
-  if (options.data) {
-    data = Handlebars.createFrame(options.data);
-  }
-
-  if (context && context.length > 0) {
-    for (var i = 0, j = context.length; i < j; i++) {
-      if (data) { data.index = i; }
-      ret = ret + fn(addViewToContext.call(this, context[i]), { data: data });
-    }
-  } else {
-    ret = inverse(this);
-  }
-  return ret;
-});
-
-//override handlebars "with" helper to provide "_view"
-Handlebars.registerHelper('with', function(context, options) {
-  return options.fn(addViewToContext.call(this, context));
-});
-
 Thorax.HelperView = Thorax.View.extend({
   _ensureElement: function() {
     Thorax.View.prototype._ensureElement.apply(this, arguments);
@@ -448,13 +412,15 @@ Handlebars.registerViewHelper = function(name, viewClass, callback) {
     viewClass = Thorax.HelperView;
   }
   Handlebars.registerHelper(name, function() {
-    var args = _.toArray(arguments),
+    var args = _.toArray(arguments), 
+        declaringView = _.last(args).data.view,
         options = args.pop(),
         viewOptions = {
           template: options.fn,
           inverse: options.inverse,
           options: options.hash,
-          parent: getParent(this._view),
+          parent: getParent(declaringView),
+          declaringView: declaringView,
           _helperName: name
         };
     options.hash.id && (viewOptions.id = options.hash.id);
@@ -464,9 +430,9 @@ Handlebars.registerViewHelper = function(name, viewClass, callback) {
     options.hash.tagName && (viewOptions.tagName = options.hash.tagName);
     var instance = new viewClass(viewOptions);
     args.push(instance);
-    this._view.children[instance.cid] = instance;
-    this._view.trigger.apply(this._view, ['helper', name].concat(args));
-    this._view.trigger.apply(this._view, ['helper:' + name].concat(args));
+    declaringView.children[instance.cid] = instance;
+    declaringView.trigger.apply(declaringView, ['helper', name].concat(args));
+    declaringView.trigger.apply(declaringView, ['helper:' + name].concat(args));
     var htmlAttributes = Thorax.Util.htmlAttributesFromOptions(options.hash);
     htmlAttributes[viewPlaceholderAttributeName] = instance.cid;
     callback.apply(this, args);

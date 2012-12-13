@@ -1,5 +1,6 @@
-Handlebars.registerHelper('super', function() {
-  var parent = this._view.constructor && this._view.constructor.__super__;
+Handlebars.registerHelper('super', function(options) {
+  var declaringView = options.data.view,
+      parent = declaringView.constructor && declaringView.constructor.__super__;
   if (parent) {
     var template = parent.template;
     if (!template) { 
@@ -9,7 +10,7 @@ Handlebars.registerHelper('super', function() {
       template = Thorax.Util.getTemplate(parent.name, false);
     }
     if (typeof template === 'string') {
-      template = Handlebars.compile(template);
+      template = Handlebars.compile(template, {data: true});
     }
     return new Handlebars.SafeString(template(this));
   } else {

@@ -703,7 +703,7 @@ $(function() {
     var view = new Thorax.CollectionView({
       tagName: 'ul',
       parent: layout,
-      'item-template': Handlebars.compile('<li>{{key}}</li>')
+      'item-template': Handlebars.compile('<li>{{key}}</li>', {data: true})
     });
     view.setCollection(collection);
     layout.setView(view);

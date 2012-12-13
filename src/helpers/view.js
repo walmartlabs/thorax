@@ -1,5 +1,6 @@
 var viewTemplateOverrides = {};
 Handlebars.registerHelper('view', function(view, options) {
+  var declaringView = options.data.view;
   if (arguments.length === 1) {
     options = view;
     view = Thorax.View;
@@ -8,31 +9,30 @@ Handlebars.registerHelper('view', function(view, options) {
   if (!instance) {
     return '';
   }
-  var placeholder_id = instance.cid + '-' + _.uniqueId('placeholder');
-  this._view._addChild(instance);
-  this._view.trigger('child', instance);
+  var placeholderId = instance.cid;
+  declaringView._addChild(instance);
+  declaringView.trigger('child', instance);
   if (options.fn) {
-    viewTemplateOverrides[placeholder_id] = options.fn;
+    viewTemplateOverrides[placeholderId] = options.fn;
   }
   var htmlAttributes = Thorax.Util.htmlAttributesFromOptions(options.hash);
-  htmlAttributes[viewPlaceholderAttributeName] = placeholder_id;
+  htmlAttributes[viewPlaceholderAttributeName] = placeholderId;
   return new Handlebars.SafeString(Thorax.Util.tag.call(this, htmlAttributes));
 });
 
 Thorax.View.prototype._appendViews = function(scope, callback) {
   (scope || this.$el).find('[' + viewPlaceholderAttributeName + ']').forEach(function(el) {
-    var placeholder_id = el.getAttribute(viewPlaceholderAttributeName),
-        cid = placeholder_id.replace(/\-placeholder\d+$/, ''),
-        view = this.children[cid];
-    //if was set with a helper
-    if (_.isFunction(view)) {
-      view = view.call(this._view);
-    }
+    var placeholderId = el.getAttribute(viewPlaceholderAttributeName),
+        view = this.children[placeholderId];
     if (view) {
       //see if the view helper declared an override for the view
       //if not, ensure the view has been rendered at least once
-      if (viewTemplateOverrides[placeholder_id]) {
-        view.render(viewTemplateOverrides[placeholder_id](view._getContext()));
+      if (viewTemplateOverrides[placeholderId]) {
+        view.render(viewTemplateOverrides[placeholderId](view._getContext(), {
+          data: {
+            view: view
+          }
+        }));
       } else {
         view.ensureRendered();
       }

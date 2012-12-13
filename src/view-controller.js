@@ -98,7 +98,7 @@ Thorax.LayoutView = Thorax.View.extend({
 });
 
 Handlebars.registerHelper('layout', function(options) {
-  options.hash[layoutCidAttributeName] = this._view.cid;
+  options.hash[layoutCidAttributeName] = options.data.view.cid;
   return new Handlebars.SafeString(Thorax.Util.tag.call(this, options.hash, '', this));
 });
 
