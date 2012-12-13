@@ -1,6 +1,5 @@
 /*global createRegistryWrapper, extendViewMember, inheritVars */
-var modelCidAttributeName = 'data-model-cid',
-    modelNameAttributeName = 'data-model-name';
+var modelCidAttributeName = 'data-model-cid';
 
 Thorax.Model = Backbone.Model.extend({
   isEmpty: function() {
@@ -74,7 +73,6 @@ _.extend(Thorax.View.prototype, {
     }
     if (model) {
       this.$el.attr(modelCidAttributeName, model.cid);
-      model.name && this.$el.attr(modelNameAttributeName, model.name);
       this.model = model;
       this.bindModel(model, options);
       this.model.trigger('set', this.model, oldModel);
@@ -82,7 +80,6 @@ _.extend(Thorax.View.prototype, {
       this.model = false;
       this._onModelChange(false);
       this.$el.removeAttr(modelCidAttributeName);
-      this.$el.attr(modelNameAttributeName);
     }
     return this;
   },

@@ -2,7 +2,6 @@
 var _fetch = Backbone.Collection.prototype.fetch,
     _reset = Backbone.Collection.prototype.reset,
     collectionCidAttributeName = 'data-collection-cid',
-    collectionNameAttributeName = 'data-collection-name',
     collectionEmptyAttributeName = 'data-collection-empty',
     ELEMENT_NODE_TYPE = 1;
 
@@ -114,13 +113,11 @@ Thorax.CollectionView = Thorax.HelperView.extend({
       {{/has-plugin}}
       this.bindCollection(collection, _.extend({}, this.options, options));
       this.$el.attr(collectionCidAttributeName, collection.cid);
-      collection.name && this.$el.attr(collectionNameAttributeName, collection.name);
       collection.trigger('set', collection);
     } else {
       this.collection && this.unbindCollection(this.collection);
       this.collection = false;
       this.$el.removeAttr(collectionCidAttributeName);
-      this.$el.removeAttr(collectionNameAttributeName);
     }
     return this;
   },
