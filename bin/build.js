@@ -4,12 +4,7 @@ var fs = require('fs'),
     packageJSON = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json')));
 
 var templateCache = {},
-    override = {
-      'model-change': '',
-      destroy: '',
-      'constructor': '',
-      configure: ''
-    },
+    override = {},
     includedPlugins = ['thorax', 'util'];
 
 handlebars.registerHelper('has-plugin', function(name, options) {
