@@ -13,17 +13,17 @@ var _on = Thorax.View.prototype.on;
   }
 {{/inject}}
 
-{{#inject "extend"}}
-  cloneEvents(this, child, '_events');
-{{/inject}}
+inheritVars.event = { name: '_events' };
 
-{{#inject "destroy"}}
-  this.freeze();
-{{/inject}}
 
 _.extend(Thorax.View.prototype, {
   freeze: function(options) {
-    {{{override "freeze" indent=4}}}
+    _.each(inheritVars, function(obj) {
+      if (obj.unbind) {
+        _.each(this[obj.array], this[obj.unbind], this);
+      }
+    }, this);
+
     options = _.defaults(options || {}, {
       dom: true,
       children: true
@@ -44,7 +44,10 @@ _.extend(Thorax.View.prototype, {
     }
   },
   on: function(eventName, callback, context) {
-    {{{override "on" indent=4}}}
+    if (objectEvents(this, eventName, callback)) {
+      return this;
+    }
+
     if (typeof eventName === 'object') {
       //accept on({"rendered": callback})
       if (arguments.length === 1) {

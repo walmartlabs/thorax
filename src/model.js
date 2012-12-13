@@ -33,42 +33,15 @@ createRegistryWrapper(Thorax.Model, Thorax.Models);
   }
 {{/inject}}
 
-{{#inject "beforeConfigure"}}
-  this._modelOptionsByCid = {};
-  this._modelEvents = [];
-  this._models = [];
-{{/inject}}
+inheritVars.model = {
+  event: true,
+  name: '_modelEvents',
+  array: '_models',
+  hash: '_modelOptionsByCid',
 
-{{#inject "static-view-properties"}}
-  Thorax.View._modelEvents = [];
-{{/inject}}
+  unbind: 'unbindModel'
+};
 
-{{#inject "extend"}}
-  cloneEvents(this, child, '_modelEvents');
-{{/inject}}
-
-{{#inject "on"}}
-  if (eventName === 'model' && typeof callback === 'object') {
-    return addEvents(this._modelEvents, callback);
-  }
-{{/inject}}
-
-{{#inject "freeze"}}
-  _.each(this._models, this.unbindModel, this);
-{{/inject}}
-
-
-function addEvents(target, source) {
-  _.each(source, function(callback, eventName) {
-    if (_.isArray(callback)) {
-      _.each(callback, function(cb) {
-        target.push([eventName, cb]);
-      }, this);
-    } else {
-      target.push([eventName, callback]);
-    }
-  });
-}
 
 _.extend(Thorax.View.prototype, {
   bindModel: function(model, options) {
@@ -119,7 +92,6 @@ _.extend(Thorax.View.prototype, {
     if (!modelOptions || (modelOptions && modelOptions.render)) {
       this.render();
     }
-    {{{override "model-change" indent=4}}}
   },
   _loadModel: function(model, options) {
     {{#has-plugin "loading"}}
@@ -141,7 +113,6 @@ _.extend(Thorax.View.prototype, {
         success: false,
         render: true,
         errors: true
-        {{{override "model-options" indent=8}}}
       };
     }
     _.extend(this._modelOptionsByCid[model.cid], options || {});
