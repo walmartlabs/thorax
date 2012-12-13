@@ -42,11 +42,3 @@ Thorax.View.prototype.mixin = function(name) {
     }
   }
 };
-
-function applyMixin(mixin) {
-  if (_.isArray(mixin)) {
-    this.mixin.apply(this, mixin);
-  } else {
-    this.mixin(mixin);
-  }
-}
