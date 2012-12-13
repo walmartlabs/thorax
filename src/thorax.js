@@ -13,11 +13,12 @@ var viewNameAttributeName = 'data-view-name',
     viewHelperAttributeName = 'data-view-helper',
     elementPlaceholderAttributeName = 'data-element-tmp';
 
+//view instances
+var viewsIndexedByCid = {};
+
 var Thorax = this.Thorax = {
   VERSION: '{{version}}',
   templatePathPrefix: '',
-  //view instances
-  _viewsIndexedByCid: {},
   templates: {},
   //view classes
   Views: {},
@@ -40,7 +41,7 @@ Thorax.View = Backbone.View.extend({
   _configure: function(options) {
     {{{override "beforeConfigure" indent=4}}}
 
-    Thorax._viewsIndexedByCid[this.cid] = this;
+    viewsIndexedByCid[this.cid] = this;
     this.children = {};
     this._renderCount = 0;
 
@@ -78,7 +79,7 @@ Thorax.View = Backbone.View.extend({
       children: true
     });
     this.trigger('destroyed');
-    delete Thorax._viewsIndexedByCid[this.cid];
+    delete viewsIndexedByCid[this.cid];
     if (options.children) {
       _.each(this.children, function(child) {
         child.parent = null;
@@ -320,5 +321,5 @@ $.fn.view = function(options) {
     selector += ':not([' + viewHelperAttributeName + '])';
   }
   var el = $(this).closest(selector);
-  return (el && Thorax._viewsIndexedByCid[el.attr(viewCidAttributeName)]) || false;
+  return (el && viewsIndexedByCid[el.attr(viewCidAttributeName)]) || false;
 };
