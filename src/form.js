@@ -1,5 +1,5 @@
 {{#inject "model-options"}}
-  , populate: true 
+  , populate: true
 {{/inject}}
 
 {{#inject "model-change"}}
@@ -40,7 +40,7 @@ _.extend(Thorax.View.prototype, {
     }, options || {});
 
     var attributes = options.attributes || {};
-    
+
     //callback has context of element
     var view = this;
     var errors = [];
@@ -78,7 +78,7 @@ _.extend(Thorax.View.prototype, {
         return false;
       };
     }
-    
+
     callback && callback.call(this, attributes, _.bind(resetSubmitState, this));
     return attributes;
   },
@@ -151,9 +151,9 @@ _.extend(Thorax.View.prototype, {
 });
 
 Thorax.View.on({
-  error: function() {  
+  error: function() {
     resetSubmitState.call(this);
-  
+
     // If we errored with a model we want to reset the content but leave the UI
     // intact. If the user updates the data and serializes any overwritten data
     // will be restored.

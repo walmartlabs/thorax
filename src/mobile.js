@@ -16,7 +16,7 @@ Thorax.Util.scrollTo = function(x, y) {
   }
   return [x, y];
 };
-  
+
 Thorax.Util.scrollToTop = function() {
   // android will use height of 1 because of minimumScrollYOffset in scrollTo()
   return this.scrollTo(0, 0);

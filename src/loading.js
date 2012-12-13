@@ -67,13 +67,13 @@ Thorax.loadHandler = function(start, end) {
           try {
             if (!events.length) {
               var run = self._loadStart.run;
-  
+
               if (run) {
                 // Emit the end behavior, but only if there is a paired start
                 end.call(self, self._loadStart.background, self._loadStart);
                 self._loadStart.trigger(loadEnd, self._loadStart);
               }
-  
+
               // If stopping make sure we don't run a start
               clearTimeout(self._loadStart.timeout);
               self._loadStart = undefined;
@@ -115,12 +115,12 @@ Thorax.forwardLoadEvents = function(source, dest, once) {
  * Mixing for generating load:start and load:end events.
  */
 Thorax.mixinLoadable = function(target, useParent) {
-  _.extend(target, {  
+  _.extend(target, {
     //loading config
     _loadingClassName: 'loading',
     _loadingTimeoutDuration: 0.33,
     _loadingTimeoutEndDuration: 0.10,
-  
+
     // Propagates loading view parameters to the AJAX layer
     onLoadStart: function(message, background, object) {
       var that = useParent ? this.parent : this;
