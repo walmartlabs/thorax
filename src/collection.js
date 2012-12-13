@@ -1,3 +1,4 @@
+/*global bindEvents, createRegistryWrapper, getValue, unbindEvents */
 var _fetch = Backbone.Collection.prototype.fetch,
     _reset = Backbone.Collection.prototype.reset,
     collectionCidAttributeName = 'data-collection-cid',
@@ -17,7 +18,7 @@ Thorax.Collection = Backbone.Collection.extend({
     }
   },
   isPopulated: function() {
-    return this._fetched || this.length > 0 || (!this.length && !Thorax.Util.getValue(this, 'url'));
+    return this._fetched || this.length > 0 || (!this.length && !getValue(this, 'url'));
   },
   fetch: function(options) {
     options = options || {};
@@ -35,21 +36,17 @@ Thorax.Collection = Backbone.Collection.extend({
 });
 
 Thorax.Collections = {};
-Thorax.Util.createRegistryWrapper(Thorax.Collection, Thorax.Collections);
+createRegistryWrapper(Thorax.Collection, Thorax.Collections);
 
-{{#inject "extend"}}
-  Thorax.Util._cloneEvents(this, child, '_collectionEvents');
-{{/inject}}
 
-{{#inject "static-view-properties"}}
-  Thorax.View._collectionEvents = [];
-{{/inject}}
+inheritVars.collection = {
+  event: true,
+  name: '_collectionEvents',
+  array: '_collections',
+  hash: '_collectionOptionsByCid',
 
-{{#inject "beforeConfigure"}}
-  this._collectionEvents = [];
-  this._collectionOptionsByCid = {};
-  this._collections = [];
-{{/inject}}
+  unbind: 'unbindCollection'
+};
 
 {{#inject "constructor"}}
   if (this.collection) {
@@ -58,16 +55,6 @@ Thorax.Util.createRegistryWrapper(Thorax.Collection, Thorax.Collections);
     var collection = this.collection;
     this.collection = null;
     this.setCollection(collection);
-  }
-{{/inject}}
-
-{{#inject "freeze"}}
-  _.each(this._collections, this.unbindCollection, this);
-{{/inject}}
-
-{{#inject "on"}}
-  if (eventName === 'collection' && typeof callback === 'object') {
-    return addEvents(this._collectionEvents, callback);
   }
 {{/inject}}
 
@@ -107,7 +94,6 @@ _.extend(Thorax.View.prototype, {
       fetch: true,
       success: false,
       errors: true
-      {{{override "collection-options" indent=6}}}
     }, options || {});
   },
   _loadCollection: function(collection, options) {

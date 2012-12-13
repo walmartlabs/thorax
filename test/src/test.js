@@ -27,7 +27,7 @@ $(function() {
       key: 'value'
     });
     equal(Thorax.Views['a-name'].prototype.key, 'value', 'registry will extend an existing class prototype');
-    
+
     //test nested
     Thorax.Views.Outer = {
       Inner: Thorax.View.extend({
@@ -104,12 +104,12 @@ $(function() {
     equal(parent.$('[data-view-name="child"] > div').html(), 'a', 'view embedded');
     equal(parentRenderedCount, 2, 're-render of parent does not render child');
     equal(childRenderedCount, 1, 're-render of parent does not render child');
-  
+
     parent.childModel.set({value: 'b'});
     equal(parent.$('[data-view-name="child"] > div').html(), 'b', 'view embedded');
     equal(parentRenderedCount, 2, 're-render of child does not parent child');
     equal(childRenderedCount, 2, 're-render of child does not render parent');
-  
+
     //ensure recursion does not happen when child view has the same model
     //as parent
     parent.setModel(parent.childModel);
@@ -175,7 +175,6 @@ $(function() {
       parent.child.$('.test').trigger('click');
       equal(callCount, 1);
       parent.render();
-      parent.child.delegateEvents();
       parent.child.$('.test').trigger('click');
       equal(callCount, 2);
       $(parent.el).remove();
@@ -193,7 +192,7 @@ $(function() {
     equal(view.el.parentNode, $('#test-target-container')[0]);
     $('#test-target-container').remove();
   });
-  
+
   test("template function can be specified", function() {
     var childReturningString = new Thorax.View({
       template: function(data) {

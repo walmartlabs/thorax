@@ -5,19 +5,12 @@ var fs = require('fs'),
 
 var templateCache = {},
     override = {
-      'static-view-properties': '',
-      'collection-options': '',
-      'model-options': '',
       'model-change': '',
       destroy: '',
-      freeze: '',
-      beforeConfigure: '',
       'constructor': '',
-      configure: '',
-      extend: '',
-      on: ''
+      configure: ''
     },
-    includedPlugins = ['thorax'];
+    includedPlugins = ['thorax', 'util'];
 
 handlebars.registerHelper('has-plugin', function(name, options) {
   if (includedPlugins.indexOf(name) === -1) {
@@ -35,7 +28,7 @@ function indent(content, amount) {
     for (var i = 0; i < spaceAmount; ++i) {
       spaces += ' ';
     }
-    return spaces
+    return spaces;
   }
   var lines = content.split('\n');
   return lines.map(function(line, i) {
@@ -85,19 +78,8 @@ function writeFile(filename, output) {
   console.log('Wrote: ' + filename);
 }
 
-var loadedOverrides = [];
-function loadOverrides(plugin) {
-  if (loadedOverrides.indexOf(plugin) !== -1) {
-    return;
-  }
-  loadedOverrides.push(plugin);
-  //rendering the template will cause block helpers to execute
-  //collecting the injected overrides
-  renderTemplate(plugin);
-}
-
 function getLicense() {
-  return fs.readFileSync(path.join(__dirname, '..', 'LICENSE')).toString().split('\n').map(function(line){
+  return fs.readFileSync(path.join(__dirname, '..', 'LICENSE')).toString().split('\n').map(function(line) {
     return '// ' + line;
   }).join('\n') + '\n';
 }
@@ -145,9 +127,9 @@ module.exports = function(target, plugins) {
 
   //now render
   includedPlugins.forEach(function(item) {
-    output += '// Begin "src/' + item + '.js"\n'
+    output += '// Begin "src/' + item + '.js"\n';
     output += renderTemplate(item) + '\n';
-    output += '\n// End "src/' + item + '.js"\n\n'
+    output += '\n// End "src/' + item + '.js"\n\n';
   });
 
   writeFile(target, getLicense() + renderTemplate('fragments/scope', {

@@ -21,7 +21,7 @@ Thorax.Model = Backbone.Model.extend({
 });
 
 Thorax.Models = {};
-Thorax.Util.createRegistryWrapper(Thorax.Model, Thorax.Models);
+createRegistryWrapper(Thorax.Model, Thorax.Models);
 
 {{#inject "constructor"}}
   if (this.model) {
@@ -33,42 +33,15 @@ Thorax.Util.createRegistryWrapper(Thorax.Model, Thorax.Models);
   }
 {{/inject}}
 
-{{#inject "beforeConfigure"}}
-  this._modelOptionsByCid = {};
-  this._modelEvents = [];
-  this._models = [];
-{{/inject}}
+inheritVars.model = {
+  event: true,
+  name: '_modelEvents',
+  array: '_models',
+  hash: '_modelOptionsByCid',
 
-{{#inject "static-view-properties"}}
-  Thorax.View._modelEvents = [];
-{{/inject}}
+  unbind: 'unbindModel'
+};
 
-{{#inject "extend"}}
-  Thorax.Util._cloneEvents(this, child, '_modelEvents');
-{{/inject}}
-
-{{#inject "on"}}
-  if (eventName === 'model' && typeof callback === 'object') {
-    return addEvents(this._modelEvents, callback);
-  }
-{{/inject}}
-
-{{#inject "freeze"}}
-  _.each(this._models, this.unbindModel, this);
-{{/inject}}
-
-
-function addEvents(target, source) {
-  _.each(source, function(callback, eventName) {
-    if (_.isArray(callback)) {
-      _.each(callback, function(cb) {
-        target.push([eventName, cb]);
-      }, this);
-    } else {
-      target.push([eventName, callback]);
-    }
-  });
-}
 
 _.extend(Thorax.View.prototype, {
   bindModel: function(model, options) {
@@ -80,7 +53,6 @@ _.extend(Thorax.View.prototype, {
     bindEvents.call(this, model, this.constructor._modelEvents);
     bindEvents.call(this, model, this._modelEvents);
     if (Thorax.Util.shouldFetch(this.model, modelOptions)) {
-      var success = modelOptions.success;
       this._loadModel(this.model, modelOptions);
     } else {
       //want to trigger built in event handler (render() + populate())
@@ -130,7 +102,6 @@ _.extend(Thorax.View.prototype, {
     if (!modelOptions || (modelOptions && modelOptions.render)) {
       this.render();
     }
-    {{{override "model-change" indent=4}}}
   },
   _loadModel: function(model, options) {
     {{#has-plugin "loading"}}
@@ -155,7 +126,6 @@ _.extend(Thorax.View.prototype, {
         success: false,
         render: false, // setModel will set render to true if no default supplied
         errors: true
-        {{{override "model-options" indent=8}}}
       };
     }
     _.extend(this._modelOptionsByCid[model.cid], options || {});
@@ -187,7 +157,7 @@ function unbindEvents(target, events) {
 
 Thorax.View.on({
   model: {
-    error: function(model, errors){
+    error: function(model, errors) {
       if (this._modelOptionsByCid[model.cid].errors) {
         this.trigger('error', errors, model);
       }
@@ -199,14 +169,18 @@ Thorax.View.on({
 });
 
 Thorax.Util.shouldFetch = function(modelOrCollection, options) {
-  var getValue = Thorax.Util.getValue,
-      isCollection = !modelOrCollection.collection && modelOrCollection._byCid && modelOrCollection._byId;
+  if (!options.fetch) {
+    return;
+  }
+
+  var isCollection = !modelOrCollection.collection && modelOrCollection._byCid && modelOrCollection._byId,
       url = (
         (!modelOrCollection.collection && getValue(modelOrCollection, 'urlRoot')) ||
         (modelOrCollection.collection && getValue(modelOrCollection.collection, 'url')) ||
         (isCollection && getValue(modelOrCollection, 'url'))
       );
-  return url && options.fetch && !(
+
+  return url && !(
     (modelOrCollection.isPopulated && modelOrCollection.isPopulated()) ||
     (isCollection
       ? Thorax.Collection && Thorax.Collection.prototype.isPopulated.call(modelOrCollection)

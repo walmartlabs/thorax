@@ -1,3 +1,5 @@
+var elementPlaceholderAttributeName = 'data-element-tmp';
+
 Handlebars.registerHelper('element', function(element, options) {
   var cid = _.uniqueId('element'),
       htmlAttributes = Thorax.Util.htmlAttributesFromOptions(options.hash);
