@@ -131,14 +131,8 @@ Thorax.Util = {
     return input;
   },
   tag: function(attributes, content, scope) {
-    var htmlAttributes = _.clone(attributes),
-        tag = htmlAttributes.tag || htmlAttributes.tagName || 'div';
-    if (htmlAttributes.tag) {
-      delete htmlAttributes.tag;
-    }
-    if (htmlAttributes.tagName) {
-      delete htmlAttributes.tagName;
-    }
+    var htmlAttributes = _.omit(attributes, 'tag', 'tagName'),
+        tag = attributes.tag || attributes.tagName || 'div';
     return '<' + tag + ' ' + _.map(htmlAttributes, function(value, key) {
       if (typeof value === 'undefined') {
         return '';
