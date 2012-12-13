@@ -1,3 +1,4 @@
+// Save a copy of the _on method to call as a $super method
 var _on = Thorax.View.prototype.on;
 
 {{#inject "configure"}}
