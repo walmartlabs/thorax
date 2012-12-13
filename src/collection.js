@@ -38,6 +38,7 @@ createRegistryWrapper(Thorax.Collection, Thorax.Collections);
 
 
 inheritVars.collection = {
+  event: true,
   name: '_collectionEvents',
   array: '_collections',
   hash: '_collectionOptionsByCid'
@@ -45,12 +46,6 @@ inheritVars.collection = {
 
 {{#inject "freeze"}}
   _.each(this._collections, this.unbindCollection, this);
-{{/inject}}
-
-{{#inject "on"}}
-  if (eventName === 'collection' && typeof callback === 'object') {
-    return addEvents(this._collectionEvents, callback);
-  }
 {{/inject}}
 
 _.extend(Thorax.View.prototype, {

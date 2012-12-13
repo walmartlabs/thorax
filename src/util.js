@@ -49,12 +49,33 @@ function cloneInheritVars(source, target) {
   _.each(inheritVars, function(obj) {
     var key = obj.name;
     source[key] = _.clone(target[key]);
+
     //need to deep clone events array
     _.each(source[key], function(value, _key) {
       if (_.isArray(value)) {
         target[key][_key] = _.clone(value);
       }
     });
+  });
+}
+function objectEvents(target, eventName, callback) {
+  if (_.isObject(callback)) {
+    var spec = inheritVars[eventName];
+    if (spec && spec.event) {
+      addEvents(target[spec.name], callback);
+      return true;
+    }
+  }
+}
+function addEvents(target, source) {
+  _.each(source, function(callback, eventName) {
+    if (_.isArray(callback)) {
+      _.each(callback, function(cb) {
+        target.push([eventName, cb]);
+      });
+    } else {
+      target.push([eventName, callback]);
+    }
   });
 }
 

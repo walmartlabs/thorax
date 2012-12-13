@@ -34,33 +34,15 @@ createRegistryWrapper(Thorax.Model, Thorax.Models);
 {{/inject}}
 
 inheritVars.model = {
+  event: true,
   name: '_modelEvents',
   array: '_models',
   hash: '_modelOptionsByCid'
 };
 
-{{#inject "on"}}
-  if (eventName === 'model' && typeof callback === 'object') {
-    return addEvents(this._modelEvents, callback);
-  }
-{{/inject}}
-
 {{#inject "freeze"}}
   _.each(this._models, this.unbindModel, this);
 {{/inject}}
-
-
-function addEvents(target, source) {
-  _.each(source, function(callback, eventName) {
-    if (_.isArray(callback)) {
-      _.each(callback, function(cb) {
-        target.push([eventName, cb]);
-      }, this);
-    } else {
-      target.push([eventName, callback]);
-    }
-  });
-}
 
 _.extend(Thorax.View.prototype, {
   bindModel: function(model, options) {

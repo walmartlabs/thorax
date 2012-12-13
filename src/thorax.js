@@ -198,7 +198,9 @@ Thorax.View = Backbone.View.extend({
     on: function(eventName, callback) {
       createInheritVars(this);
 
-      {{{override "on" indent=4}}}
+      if (objectEvents(this, eventName, callback)) {
+        return this;
+      }
 
       //accept on({"rendered": handler})
       if (typeof eventName === 'object') {

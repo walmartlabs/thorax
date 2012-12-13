@@ -42,7 +42,10 @@ _.extend(Thorax.View.prototype, {
     }
   },
   on: function(eventName, callback, context) {
-    {{{override "on" indent=4}}}
+    if (objectEvents(this, eventName, callback)) {
+      return this;
+    }
+
     if (typeof eventName === 'object') {
       //accept on({"rendered": callback})
       if (arguments.length === 1) {
