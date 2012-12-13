@@ -334,21 +334,19 @@ if (Thorax.Router) {
 }
 
 // Propagates loading view parameters to the AJAX layer
-{{#inject "model-options"}}
-  , ignoreErrors: this.ignoreFetchError
-  , background: this.nonBlockingLoad
-{{/inject}}
+function loadingDataOptions() {
+  return {
+    ignoreErrors: this.ignoreFetchError,
+    background: this.nonBlockingLoad
+  };
+}
+extendOptions('_setModelOptions', loadingDataOptions);
+extendOptions('_setCollectionOptions', loadingDataOptions);
 
 if (Thorax.CollectionView) {
   Thorax.mixinLoadable(Thorax.CollectionView.prototype);
   Thorax.mixinLoadableEvents(Thorax.CollectionView.prototype);
 }
-
-// Propagates loading view parameters to the AJAX layer
-{{#inject "collection-options"}}
-  , ignoreErrors: this.ignoreFetchError
-  , background: this.nonBlockingLoad
-{{/inject}}
 
 Thorax.View.on({
   'load:start': Thorax.loadHandler(

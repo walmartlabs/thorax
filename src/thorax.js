@@ -38,7 +38,14 @@ Thorax.View = Backbone.View.extend({
     return response;
   },
   _configure: function(options) {
-    {{{override "beforeConfigure" indent=4}}}
+    var self = this;
+
+    // Setup object event tracking
+    _.each(inheritVars, function(obj) {
+      self[obj.name] = [];
+      if (obj.array) { self[obj.array] = []; }
+      if (obj.hash) { self[obj.hash] = {}; }
+    });
 
     viewsIndexedByCid[this.cid] = this;
     this.children = {};
@@ -86,7 +93,8 @@ Thorax.View = Backbone.View.extend({
       });
       this.children = {};
     }
-    {{{override "destroy" indent=4}}}
+
+    this.freeze && this.freeze();
   },
 
   render: function(output) {
@@ -183,14 +191,15 @@ Thorax.View = Backbone.View.extend({
   }
 });
 
-{{! All static properties must be present before any subclasses are created}}
-{{{override "static-view-properties" indent=0}}}
-
 {{#has-plugin "event"}}
   _.extend(Thorax.View, {
-    _events: [],
     on: function(eventName, callback) {
-      {{{override "on" indent=4}}}
+      createInheritVars(this);
+
+      if (objectEvents(this, eventName, callback)) {
+        return this;
+      }
+
       //accept on({"rendered": handler})
       if (typeof eventName === 'object') {
         _.each(eventName, function(value, key) {
@@ -214,8 +223,12 @@ Thorax.View = Backbone.View.extend({
 
 
 Thorax.View.extend = function() {
+  createInheritVars(this);
+
   var child = Backbone.View.extend.apply(this, arguments);
-  {{{override "extend" indent=2}}}
+
+  cloneInheritVars(this, child);
+
   return child;
 };
 

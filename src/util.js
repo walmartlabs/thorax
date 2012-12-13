@@ -36,14 +36,62 @@ function getValue(object, prop) {
     : object[prop];
 }
 
-function cloneEvents(source, target, key) {
-  source[key] = _.clone(target[key]);
-  //need to deep clone events array
-  _.each(source[key], function(value, _key) {
-    if (_.isArray(value)) {
-      target[key][_key] = _.clone(value);
+var inheritVars = {};
+function createInheritVars(self) {
+  // Ensure that we have our static event objects
+  _.each(inheritVars, function(obj) {
+    if (!self[obj.name]) {
+      self[obj.name] = [];
     }
   });
+}
+function cloneInheritVars(source, target) {
+  _.each(inheritVars, function(obj) {
+    var key = obj.name;
+    source[key] = _.clone(target[key]);
+
+    //need to deep clone events array
+    _.each(source[key], function(value, _key) {
+      if (_.isArray(value)) {
+        target[key][_key] = _.clone(value);
+      }
+    });
+  });
+}
+function objectEvents(target, eventName, callback) {
+  if (_.isObject(callback)) {
+    var spec = inheritVars[eventName];
+    if (spec && spec.event) {
+      addEvents(target[spec.name], callback);
+      return true;
+    }
+  }
+}
+function addEvents(target, source) {
+  _.each(source, function(callback, eventName) {
+    if (_.isArray(callback)) {
+      _.each(callback, function(cb) {
+        target.push([eventName, cb]);
+      });
+    } else {
+      target.push([eventName, callback]);
+    }
+  });
+}
+
+function extendViewMember(name, callback) {
+  var $super = Thorax.View.prototype[name];
+  Thorax.View.prototype[name] = function() {
+    var ret = $super.apply(this, arguments);
+    callback.apply(this, arguments);
+    return ret;
+  };
+}
+function extendOptions(name, callback) {
+  var $super = Thorax.View.prototype[name];
+  Thorax.View.prototype[name] = function(dataObject, options) {
+    return $super.call(this, dataObject, _.extend(callback.call(this, dataObject, options), options));
+  };
 }
 
 Thorax.Util = {

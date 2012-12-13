@@ -1,4 +1,4 @@
-/*global bindEvents, cloneEvents, createRegistryWrapper, getValue, unbindEvents */
+/*global bindEvents, createRegistryWrapper, getValue, unbindEvents */
 var _fetch = Backbone.Collection.prototype.fetch,
     _reset = Backbone.Collection.prototype.reset,
     collectionCidAttributeName = 'data-collection-cid',
@@ -36,29 +36,15 @@ Thorax.Collection = Backbone.Collection.extend({
 Thorax.Collections = {};
 createRegistryWrapper(Thorax.Collection, Thorax.Collections);
 
-{{#inject "extend"}}
-  cloneEvents(this, child, '_collectionEvents');
-{{/inject}}
 
-{{#inject "static-view-properties"}}
-  Thorax.View._collectionEvents = [];
-{{/inject}}
+inheritVars.collection = {
+  event: true,
+  name: '_collectionEvents',
+  array: '_collections',
+  hash: '_collectionOptionsByCid',
 
-{{#inject "beforeConfigure"}}
-  this._collectionEvents = [];
-  this._collectionOptionsByCid = {};
-  this._collections = [];
-{{/inject}}
-
-{{#inject "freeze"}}
-  _.each(this._collections, this.unbindCollection, this);
-{{/inject}}
-
-{{#inject "on"}}
-  if (eventName === 'collection' && typeof callback === 'object') {
-    return addEvents(this._collectionEvents, callback);
-  }
-{{/inject}}
+  unbind: 'unbindCollection'
+};
 
 _.extend(Thorax.View.prototype, {
   bindCollection: function(collection, options) {
@@ -89,7 +75,6 @@ _.extend(Thorax.View.prototype, {
       fetch: true,
       success: false,
       errors: true
-      {{{override "collection-options" indent=6}}}
     }, options || {});
   },
   _loadCollection: function(collection) {

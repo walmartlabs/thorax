@@ -5,17 +5,10 @@ var fs = require('fs'),
 
 var templateCache = {},
     override = {
-      'static-view-properties': '',
-      'collection-options': '',
-      'model-options': '',
       'model-change': '',
       destroy: '',
-      freeze: '',
-      beforeConfigure: '',
       'constructor': '',
-      configure: '',
-      extend: '',
-      on: ''
+      configure: ''
     },
     includedPlugins = ['thorax', 'util'];
 
