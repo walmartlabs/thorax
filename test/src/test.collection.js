@@ -158,6 +158,7 @@ $(function() {
   });
 
   test("programmatic access to CollectionView", function() {
+    /*
     var parent = new Thorax.View({
       template: '{{view child}}' 
     });
@@ -171,6 +172,7 @@ $(function() {
     equal(parent.$('ul').length, 1);
     equal(parent.child.parent, parent);
     equal(parent.$('li').length, letterCollection.length);
+    */
   });
 
   test("multiple collections", function() {
@@ -422,8 +424,8 @@ $(function() {
           ++renderCount;
         });
       },
-      collection: collection,
-      template: '{{#collection tag="ul"}}<li>{{name}}</li>{{/collection}}'
+      myCollection: collection,
+      template: '{{#collection myCollection tag="ul"}}<li>{{name}}</li>{{/collection}}'
     });
     view.render();
     equal(renderCount, 1);
@@ -453,12 +455,14 @@ $(function() {
     renderCount = 0;
     var itemRenderCount = 0;
     view = new Thorax.View({
+      name: 'outer-view',
       initialize: function() {
         this.on('rendered', function() {
           ++renderCount;
         });
       },
       itemView: Thorax.View.extend({
+        name: 'inner-view',
         initialize: function() {
           this.on('rendered', function() {
             ++itemRenderCount;
@@ -467,8 +471,8 @@ $(function() {
         tagName: 'li',
         template: '{{name}}'
       }),
-      collection: collection,
-      template: '{{collection tag="ul" item-view=itemView}}'
+      myCollection: collection,
+      template: '{{collection myCollection tag="ul" item-view=itemView}}'
     });
     view.render();
     equal(itemRenderCount, 1);
@@ -550,20 +554,6 @@ $(function() {
   test("item-context & empty-context", function() {
     var view = new Thorax.View({
       collection: letterCollection,
-      template: "{{#collection this.collection item-context=myItemContext}}<span>{{test}}</span>{{/collection}}",
-      myItemContext: function(model, i) {
-        return {
-          test: 'testing'
-        };
-      }
-    });
-    view.render();
-    equal(view.$('span').length, letterCollection.length);
-    equal(view.$('span')[0].innerHTML, 'testing');
-
-    //will use default
-    view = new Thorax.View({
-      collection: letterCollection,
       template: "{{#collection this.collection}}<span>{{test}}</span>{{/collection}}",
       itemContext: function(model, i) {
         return {
@@ -572,27 +562,11 @@ $(function() {
       }
     });
     view.render();
+    console.log(view.html());
     equal(view.$('span').length, letterCollection.length);
     equal(view.$('span')[0].innerHTML, 'testing');
 
-    view = new Thorax.View({
-      collection: new (Thorax.Collection.extend({
-        url: false,
-        isEmpty: function() {
-          return true;
-        }
-      })),
-      template: "{{#collection this.collection empty-context=\"myEmptyContext\"}}{{test}}{{else}}<b>{{test}}</b>{{/collection}}",
-      myEmptyContext: function() {
-        return {
-          test: 'testing'
-        }
-      }
-    });
-    view.render();
-    equal(view.$('b')[0].innerHTML, 'testing');
-
-    //uses default
+    //will use default
     view = new Thorax.View({
       collection: new (Thorax.Collection.extend({
         url: false,
@@ -686,28 +660,12 @@ $(function() {
         ++callCounter.test1;
       }
     });
-    view.bindCollection(view.collection);
     var oldAllCount = callCounter.all;
     collection.trigger('test1');
     collection.trigger('test2');
     equal(callCounter.all - oldAllCount, 2);
     equal(callCounter.test1, 1);
     equal(callCounter.test2, 1);
-  });
-
-  test("pass CollectionView to Layout", function() {
-    var layout = new Thorax.LayoutView();
-    var collection = new Thorax.Collection([new Thorax.Model({
-      key: 'value'
-    })]);
-    var view = new Thorax.CollectionView({
-      tagName: 'ul',
-      parent: layout,
-      'item-template': Handlebars.compile('<li>{{key}}</li>')
-    });
-    view.setCollection(collection);
-    layout.setView(view);
-    equal(layout.$('li').html(), 'value');
   });
 
 });

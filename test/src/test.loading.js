@@ -30,10 +30,10 @@ $(function(){
         collection = new Thorax.Collection({url: 'foo'}),
         view = new Thorax.View({
           name: 'food',
-          collection: collection,
+          myCollection: collection,
           template: ''
         });
-    view.bindCollection(view.collection);
+    view.bindCollection(view.myCollection);
     view.on('load:start', spy);
     view.render();
     ok(!$(view.el).hasClass('loading'));
@@ -77,11 +77,11 @@ $(function(){
     var collection = new Thorax.Collection({url: 'foo'}),
         view = new Thorax.View({
           name: 'food',
-          collection: collection,
+          myCollection: collection,
           template: ''
         }),
         spy = this.spy(view, 'onLoadEnd');
-    view.bindCollection(view.collection);
+    view.bindCollection(view.myCollection);
     collection.loadStart();
     this.clock.tick(1000);
   
@@ -614,8 +614,8 @@ $(function(){
       tagName: 'li'
     });
     var collectionLoadingTemplateView = new Thorax.View({
-      template: '{{#collection loading-template="collection-loading" tag="ul"}}<li class="item">{{number}}</li>{{else}}<li class="empty-item">empty</li>{{/collection}}',
-      collection: new (Thorax.Collection.extend({
+      template: '{{#collection myCollection loading-template="collection-loading" tag="ul"}}<li class="item">{{number}}</li>{{else}}<li class="empty-item">empty</li>{{/collection}}',
+      myCollection: new (Thorax.Collection.extend({
         url: false
       }))
     });
@@ -623,26 +623,26 @@ $(function(){
     equal(collectionLoadingTemplateView.$('li').length, 1);
     equal(collectionLoadingTemplateView.$('li.empty-item').length, 1);
 
-    collectionLoadingTemplateView.collection.loadStart();
+    collectionLoadingTemplateView.myCollection.loadStart();
     this.clock.tick(loadStartTimeout);
     equal(collectionLoadingTemplateView.$('li').length, 1);
     equal(collectionLoadingTemplateView.$('li.empty-item').length, 0);
     equal(collectionLoadingTemplateView.$('li.loading-item').length, 1);
-    collectionLoadingTemplateView.collection.add([{"number":"one"},{"number":"two"}]);
-    collectionLoadingTemplateView.collection.loadEnd();
+    collectionLoadingTemplateView.myCollection.add([{"number":"one"},{"number":"two"}]);
+    collectionLoadingTemplateView.myCollection.loadEnd();
     this.clock.tick(loadEndTimeout);
     equal(collectionLoadingTemplateView.$('li').length, 2);
     equal(collectionLoadingTemplateView.$('li.empty-item').length, 0);
     equal(collectionLoadingTemplateView.$('li.loading-item').length, 0);
     
-    collectionLoadingTemplateView.collection.loadStart();
+    collectionLoadingTemplateView.myCollection.loadStart();
     this.clock.tick(loadStartTimeout);
     equal(collectionLoadingTemplateView.$('li').length, 3);
     equal(collectionLoadingTemplateView.$('li.empty-item').length, 0);
     equal(collectionLoadingTemplateView.$('li.loading-item').length, 1);
     ok($(collectionLoadingTemplateView.$('li')[2]).hasClass('loading-item'));
-    collectionLoadingTemplateView.collection.add([{"number":"three"},{"number":"four"}]);
-    collectionLoadingTemplateView.collection.loadEnd();
+    collectionLoadingTemplateView.myCollection.add([{"number":"three"},{"number":"four"}]);
+    collectionLoadingTemplateView.myCollection.loadEnd();
     this.clock.tick(loadEndTimeout);
     equal(collectionLoadingTemplateView.$('li').length, 4);
     equal(collectionLoadingTemplateView.$('li.empty-item').length, 0);

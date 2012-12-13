@@ -161,8 +161,19 @@ Thorax.mixinLoadableEvents = function(target, useParent) {
   });
 };
 
-Thorax.mixinLoadable(Thorax.View.prototype);
-Thorax.mixinLoadableEvents(Thorax.View.prototype);
+var klasses = [
+  Thorax.View,
+  Thorax.HelperView,
+  Thorax.LayoutView,
+  {{#has-plugin "collection"}}
+    , Thorax.CollectionHelperView
+  {{/has-plugin}}
+];
+
+_.each(klasses, function(klass) {
+  Thorax.mixinLoadable(klass.prototype);
+  Thorax.mixinLoadableEvents(klass.prototype);
+});
 
 Thorax.sync = function(method, dataObj, options) {
   var self = this,
@@ -338,11 +349,6 @@ if (Thorax.Router) {
   , ignoreErrors: this.ignoreFetchError
   , background: this.nonBlockingLoad
 {{/inject}}
-
-if (Thorax.CollectionView) {
-  Thorax.mixinLoadable(Thorax.CollectionView.prototype);
-  Thorax.mixinLoadableEvents(Thorax.CollectionView.prototype);
-}
 
 // Propagates loading view parameters to the AJAX layer
 {{#inject "collection-options"}}

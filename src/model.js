@@ -72,6 +72,9 @@ function addEvents(target, source) {
 
 _.extend(Thorax.View.prototype, {
   bindModel: function(model, options) {
+    if (this._models.indexOf(model) !== -1) {
+      return false;
+    }
     this._models.push(model);
     var modelOptions = this._setModelOptions(model, options);
     bindEvents.call(this, model, this.constructor._modelEvents);
@@ -84,15 +87,22 @@ _.extend(Thorax.View.prototype, {
       //without triggering event on model
       this._onModelChange(model);
     }
+    return true;
   },
   unbindModel: function(model) {
+    if (this._models.indexOf(model) === -1) {
+      return false;
+    }
     this._models = _.without(this._models, model);
     model.trigger('freeze');
     unbindEvents.call(this, model, this.constructor._modelEvents);
     unbindEvents.call(this, model, this._modelEvents);
     delete this._modelOptionsByCid[model.cid];
+    return true;
   },
   setModel: function(model, options) {
+    options = options || {};
+    !('render' in options) && (options.render = true);
     var oldModel = this.model;
     if (model === oldModel) {
       return this;
@@ -126,7 +136,7 @@ _.extend(Thorax.View.prototype, {
     {{#has-plugin "loading"}}
       if (model.load) {
         model.load(function() {
-          options && options.success && options.success(model);
+          options.success && options.success(model);
         }, options);
       } else {
         model.fetch(options);
@@ -135,12 +145,15 @@ _.extend(Thorax.View.prototype, {
       model.fetch(options);
     {{/has-plugin}}
   },
+  getModelOptions: function(model) {
+    return this._modelOptionsByCid[model.cid];
+  },
   _setModelOptions: function(model, options) {
     if (!this._modelOptionsByCid[model.cid]) {
       this._modelOptionsByCid[model.cid] = {
         fetch: true,
         success: false,
-        render: true,
+        render: false, // setModel will set render to true if no default supplied
         errors: true
         {{{override "model-options" indent=8}}}
       };
