@@ -1,3 +1,4 @@
+/*global createRegistryWrapper, registryGet */
 //Router
 function initializeRouter() {
   Backbone.history || (Backbone.history = new Backbone.History());
@@ -25,7 +26,7 @@ Thorax.Router = Backbone.Router.extend({
 });
 
 Thorax.Routers = {};
-Thorax.Util.createRegistryWrapper(Thorax.Router, Thorax.Routers);
+createRegistryWrapper(Thorax.Router, Thorax.Routers);
 
 function onRoute(router /* , name */) {
   if (this === router) {

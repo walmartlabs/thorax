@@ -17,7 +17,7 @@ var templateCache = {},
       extend: '',
       on: ''
     },
-    includedPlugins = ['thorax'];
+    includedPlugins = ['thorax', 'util'];
 
 handlebars.registerHelper('has-plugin', function(name, options) {
   if (includedPlugins.indexOf(name) === -1) {
