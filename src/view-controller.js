@@ -1,3 +1,4 @@
+/*global createRegistryWrapper, registryGet */
 //Router
 function initializeRouter() {
   Backbone.history || (Backbone.history = new Backbone.History);
@@ -61,7 +62,7 @@ Thorax.LayoutView = Thorax.View.extend({
       destroy: true
     }, options || {});
     if (typeof view === 'string') {
-      view = new (Thorax.Util.registryGet(Thorax, 'Views', view, false));
+      view = new (registryGet(Thorax, 'Views', view, false))();
     }
     this.ensureRendered();
     var oldView = this._view;

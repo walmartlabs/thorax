@@ -9,6 +9,24 @@ function createRegistryWrapper(klass, hash) {
     return child;
   };
 }
+function registryGet(object, type, name, ignoreErrors) {
+  var target = object[type],
+      value;
+  if (name.match(/\.(?!handlebars)/)) {
+    var bits = name.split(/\.(?!handlebars)/);
+    name = bits.pop();
+    _.each(bits, function(key) {
+      target = target[key];
+    });
+  }
+  target && (value = target[name]);
+  if (!value && !ignoreErrors) {
+    throw new Error(type + ': ' + name + ' does not exist.');
+  } else {
+    return value;
+  }
+}
+
 function getValue(object, prop) {
   if (!(object && object[prop])) {
     return null;
@@ -29,28 +47,11 @@ function cloneEvents(source, target, key) {
 }
 
 Thorax.Util = {
-  registryGet: function(object, type, name, ignoreErrors) {
-    var target = object[type],
-        value;
-    if (name.match(/\.(?!handlebars)/)) {
-      var bits = name.split(/\.(?!handlebars)/);
-      name = bits.pop();
-      _.each(bits, function(key) {
-        target = target[key];
-      });
-    }
-    target && (value = target[name]);
-    if (!value && !ignoreErrors) {
-      throw new Error(type + ': ' + name + ' does not exist.');
-    } else {
-      return value;
-    }
-  },
   getViewInstance: function(name, attributes) {
     attributes['class'] && (attributes.className = attributes['class']);
     attributes.tag && (attributes.tagName = attributes.tag);
     if (typeof name === 'string') {
-      var Klass = Thorax.Util.registryGet(Thorax, 'Views', name, false);
+      var Klass = registryGet(Thorax, 'Views', name, false);
       return Klass.cid ? _.extend(Klass, attributes || {}) : new Klass(attributes);
     } else if (typeof name === 'function') {
       return new name(attributes);
@@ -68,9 +69,9 @@ Thorax.Util = {
       file = pathPrefix + file;
     }
     file = file.replace(/\.handlebars$/, '');
-    var template = Thorax.Util.registryGet(Thorax, 'templates', file, true);
+    var template = registryGet(Thorax, 'templates', file, true);
     if (!template) {
-      template = Thorax.Util.registryGet(Thorax, 'templates', file + '.handlebars', true);
+      template = registryGet(Thorax, 'templates', file + '.handlebars', true);
       addedExtension = true;
     }
     if (template && typeof template === 'string') {
