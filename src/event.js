@@ -1,5 +1,5 @@
-var _on = Thorax.View.prototype.on,
-    _delegateEvents = Thorax.View.prototype.delegateEvents;
+// Save a copy of the _on method to call as a $super method
+var _on = Thorax.View.prototype.on;
 
 {{#inject "configure"}}
   //_events not present on HelperView
@@ -142,7 +142,7 @@ function containHandlerToCurentView(handler, cid) {
       event.originalContext = this;
       handler(event);
     }
-  }
+  };
 }
 
 function bindEventHandler(eventName, callback) {

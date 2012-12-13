@@ -1,4 +1,4 @@
-/*global cloneEvents, createRegistryWrapper, getValue */
+/*global bindEvents, cloneEvents, createRegistryWrapper, getValue, unbindEvents */
 var _fetch = Backbone.Collection.prototype.fetch,
     _reset = Backbone.Collection.prototype.reset,
     collectionCidAttributeName = 'data-collection-cid',

@@ -24,7 +24,7 @@ $.fn.tapHoldAndEnd = function(selector, callbackStart, callbackEnd) {
 
       function clearTapTimer(event) {
         clearTimeout(timer);
-             
+
         if (tapHoldStart) {
           var retval = false;
           if (event) {
@@ -35,7 +35,7 @@ $.fn.tapHoldAndEnd = function(selector, callbackStart, callbackEnd) {
           if (retval === false) {
             _.each(timers, clearTimeout);
             timers = [];
-          } 
+          }
         }
       }
 
@@ -55,7 +55,7 @@ $.fn.tapHoldAndEnd = function(selector, callbackStart, callbackEnd) {
         if (retval === false) {
           _.each(timers, clearTimeout);
           timers = [];
-        } 
+        }
       }, 150);
       timers.push(timer);
     });
@@ -100,13 +100,13 @@ _.extend(Thorax.View.prototype, {
   _tapHighlightStart: function(event) {
     var target = event.currentTarget,
         tagName = target && target.tagName.toLowerCase();
-  
+
     // User input controls may be visually part of a larger group. For these cases
     // we want to give priority to any parent that may provide a focus operation.
     if (tagName === 'input' || tagName === 'select' || tagName === 'textarea') {
       target = $(target).closest('[data-tappable=true]')[0] || target;
     }
-  
+
     if (target) {
       $(target).addClass(this._tapHighlightClassName);
       return false;

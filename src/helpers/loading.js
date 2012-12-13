@@ -1,5 +1,5 @@
 Handlebars.registerViewHelper('loading', function(view) {
-  _render = view.render;
+  var _render = view.render;
   view.render = function() {
     if (view.parent.$el.hasClass(view.parent._loadingClassName)) {
       return _render.call(this, view.fn);

@@ -77,7 +77,6 @@ _.extend(Thorax.View.prototype, {
     bindEvents.call(this, model, this.constructor._modelEvents);
     bindEvents.call(this, model, this._modelEvents);
     if (Thorax.Util.shouldFetch(this.model, modelOptions)) {
-      var success = modelOptions.success;
       this._loadModel(this.model, modelOptions);
     } else {
       //want to trigger built in event handler (render() + populate())
@@ -174,7 +173,7 @@ function unbindEvents(target, events) {
 
 Thorax.View.on({
   model: {
-    error: function(model, errors){
+    error: function(model, errors) {
       if (this._modelOptionsByCid[model.cid].errors) {
         this.trigger('error', errors, model);
       }

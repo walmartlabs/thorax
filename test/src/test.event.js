@@ -61,18 +61,18 @@ $(function() {
     child.trigger('b');
     equal(aCount, 2);
     equal(bCount, 1);
-  
+
     //ensure events are properly cloned
     Parent = Thorax.View.extend();
     Parent.on({
       a: 1
     });
-  
+
     Child = Parent.extend({});
     Child.on({
       a: 2
     });
-    
+
     var ChildTwo = Parent.extend({});
     equal(Child._events[originalLength - 0][1], 1, 'ensure events are not shared between children');
     equal(Child._events.length - originalLength, 2, 'ensure events are not shared between children');
@@ -134,7 +134,7 @@ $(function() {
     test("bindToView", function() {
       var childClickedCount = 0,
           parentClickedCount = 0;
-      
+
       var Child = Thorax.View.extend({
         template: Thorax.templates['child'],
         events: {
@@ -143,7 +143,7 @@ $(function() {
           }
         }
       });
-      
+
       var Parent = Thorax.View.extend({
         template: Thorax.templates['parent'],
         events: {
@@ -157,7 +157,7 @@ $(function() {
           });
         }
       });
-      
+
       var parent = new Parent();
       $('body').append(parent.el);
       parent.render();

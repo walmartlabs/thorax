@@ -4,14 +4,13 @@ if (!$.fn.forEach) {
     $.fn.each.call(this, function(index) {
       iterator.call(context || this, this, index);
     });
-  }
+  };
 }
 
 var viewNameAttributeName = 'data-view-name',
     viewCidAttributeName = 'data-view-cid',
     viewPlaceholderAttributeName = 'data-view-tmp',
-    viewHelperAttributeName = 'data-view-helper',
-    elementPlaceholderAttributeName = 'data-element-tmp';
+    viewHelperAttributeName = 'data-view-helper';
 
 //view instances
 var viewsIndexedByCid = {};
@@ -141,7 +140,7 @@ Thorax.View = Backbone.View.extend({
     }
     if (!template) {
       if (ignoreErrors) {
-        return ''
+        return '';
       } else {
         throw new Error('Unable to find template ' + file);
       }
@@ -278,7 +277,6 @@ function getParent(parent) {
 
 Handlebars.registerViewHelper = function(name, viewClass, callback) {
   if (arguments.length === 2) {
-    options = {};
     callback = arguments[1];
     viewClass = Thorax.HelperView;
   }
