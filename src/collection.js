@@ -33,10 +33,10 @@ Thorax.Collection = Backbone.Collection.extend({
 });
 
 Thorax.Collections = {};
-Thorax.Util.createRegistryWrapper(Thorax.Collection, Thorax.Collections);
+createRegistryWrapper(Thorax.Collection, Thorax.Collections);
 
 {{#inject "extend"}}
-  Thorax.Util._cloneEvents(this, child, '_collectionEvents');
+  cloneEvents(this, child, '_collectionEvents');
 {{/inject}}
 
 {{#inject "static-view-properties"}}

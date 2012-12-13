@@ -14,7 +14,7 @@ var _on = Thorax.View.prototype.on,
 {{/inject}}
 
 {{#inject "extend"}}
-  Thorax.Util._cloneEvents(this, child, '_events');
+  cloneEvents(this, child, '_events');
 {{/inject}}
 
 {{#inject "destroy"}}

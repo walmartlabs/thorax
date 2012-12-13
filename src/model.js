@@ -21,7 +21,7 @@ Thorax.Model = Backbone.Model.extend({
 });
 
 Thorax.Models = {};
-Thorax.Util.createRegistryWrapper(Thorax.Model, Thorax.Models);
+createRegistryWrapper(Thorax.Model, Thorax.Models);
 
 {{#inject "constructor"}}
   if (this.model) {
@@ -44,7 +44,7 @@ Thorax.Util.createRegistryWrapper(Thorax.Model, Thorax.Models);
 {{/inject}}
 
 {{#inject "extend"}}
-  Thorax.Util._cloneEvents(this, child, '_modelEvents');
+  cloneEvents(this, child, '_modelEvents');
 {{/inject}}
 
 {{#inject "on"}}
