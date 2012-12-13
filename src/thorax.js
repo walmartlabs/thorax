@@ -93,7 +93,8 @@ Thorax.View = Backbone.View.extend({
       });
       this.children = {};
     }
-    {{{override "destroy" indent=4}}}
+
+    this.freeze && this.freeze();
   },
 
   render: function(output) {

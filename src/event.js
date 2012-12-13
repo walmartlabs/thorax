@@ -15,9 +15,6 @@ var _on = Thorax.View.prototype.on;
 
 inheritVars.event = { name: '_events' };
 
-{{#inject "destroy"}}
-  this.freeze();
-{{/inject}}
 
 _.extend(Thorax.View.prototype, {
   freeze: function(options) {
