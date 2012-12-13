@@ -6,30 +6,37 @@ Handlebars.registerHelper('button', function(method, options) {
     options = method;
     method = options.hash.method;
   }
+  var hash = options.hash,
+      expandTokens = hash['expand-tokens'];
+  delete hash['expand-tokens'];
   if (!method && !options.hash.trigger) {
     throw new Error("button helper must have a method name as the first argument or a 'trigger', or a 'method' attribute specified.");
   }
-  options.hash.tag = options.hash.tag || options.hash.tagName || 'button';
-  options.hash.trigger && (options.hash[triggerEventAttributeName] = options.hash.trigger);
-  delete options.hash.trigger;
-  method && (options.hash[callMethodAttributeName] = method);
-  return new Handlebars.SafeString(Thorax.Util.tag.call(this, options.hash, options.fn ? options.fn(this) : '', this));
+  hash.tag = hash.tag || hash.tagName || 'button';
+  hash.trigger && (hash[triggerEventAttributeName] = hash.trigger);
+  delete hash.trigger;
+  method && (hash[callMethodAttributeName] = method);
+  return new Handlebars.SafeString(Thorax.Util.tag(hash, options.fn ? options.fn(this) : '', expandTokens ? this : null));
 });
 
-Handlebars.registerHelper('link', function(url, options) {
-  if (arguments.length === 1) {
-    options = url;
-    url = options.hash.href;
-  }
-  if (!url) {
+Handlebars.registerHelper('link', function() {
+  var args = _.toArray(arguments),
+      options = args.pop(),
+      hash = options.hash,
+      // url is an array that will be passed to the url helper
+      url = args.length === 0 ? [hash.href] : args,
+      expandTokens = hash['expand-tokens'];
+  delete hash['expand-tokens'];
+  if (!url[0]) {
     throw new Error("link helper requires an href as the first argument or an 'href' attribute");
   }
-  options.hash.tag = options.hash.tag || options.hash.tagName || 'a';
-  options.hash.href = Handlebars.helpers.url.call(this, url || options.hash.href);
-  options.hash.trigger && (options.hash[triggerEventAttributeName] = options.hash.trigger);
-  delete options.hash.trigger;
-  options.hash[callMethodAttributeName] = '_anchorClick';
-  return new Handlebars.SafeString(Thorax.Util.tag.call(this, options.hash, options.fn ? options.fn(this) : '', this));
+  url.push(options);
+  hash.href = Handlebars.helpers.url.apply(this, url);
+  hash.tag = hash.tag || hash.tagName || 'a';
+  hash.trigger && (hash[triggerEventAttributeName] = options.hash.trigger);
+  delete hash.trigger;
+  hash[callMethodAttributeName] = '_anchorClick';
+  return new Handlebars.SafeString(Thorax.Util.tag(hash, options.fn ? options.fn(this) : '', expandTokens ? this : null));
 });
 
 var clickSelector = '[' + callMethodAttributeName + '], [' + triggerEventAttributeName + ']';

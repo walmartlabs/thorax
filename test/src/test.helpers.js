@@ -34,6 +34,34 @@ $(function() {
     equal(view.$('button').attr('data-call-method'), 'b');
   });
 
+  test("multiple arguments to link", function() {
+    var view = new Thorax.View({
+      template: '{{#link a b c class="test"}}link{{/link}}',
+      a: 'a',
+      b: 'b',
+      c: 'c'
+    });
+    view.render();
+    equal(view.$('a').attr('href'), '#a/b/c');
+  });
+
+  test("expand-tokens in link", function() {
+    var view = new Thorax.View({
+      template: '{{#link "a/{{key}}"}}link{{/link}}',
+      key: 'b'
+    });
+    view.render();
+    equal(view.$('a').attr('href'), '#a/{{key}}');
+
+    view = new Thorax.View({
+      template: '{{#link "a/{{key}}" expand-tokens=true}}link{{/link}}',
+      key: 'b'
+    });
+    view.render();
+    equal(view.$('a').attr('href'), '#a/b');
+    equal(view.$('a[expand-tokens]').length, 0);
+  });
+
   test("button and link helpers", function() {
     var view = new Thorax.View({
       events: {
