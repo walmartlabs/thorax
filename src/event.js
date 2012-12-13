@@ -7,14 +7,14 @@ var _on = Thorax.View.prototype.on;
     this.on.apply(this, event);
   }, this);
   if (this.events) {
-    _.each(Thorax.Util.getValue(this, 'events'), function(handler, eventName) {
+    _.each(getValue(this, 'events'), function(handler, eventName) {
       this.on(eventName, handler, this);
     }, this);
   }
 {{/inject}}
 
 {{#inject "extend"}}
-  Thorax.Util._cloneEvents(this, child, '_events');
+  cloneEvents(this, child, '_events');
 {{/inject}}
 
 {{#inject "destroy"}}

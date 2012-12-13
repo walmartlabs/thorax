@@ -170,11 +170,12 @@ Thorax.View.on({
 });
 
 function eachNamedInput(options, iterator, context) {
-  var i = 0, cid = this.cid;
+  var i = 0,
+      self = this;
+
   this.$('select,input,textarea', options.root || this.el).each(function() {
     if (!options.children) {
-      var closestViewEl = $(this).closest('[' + viewCidAttributeName + ']:not([' + viewHelperAttributeName + '])');
-      if (cid !== closestViewEl.attr(viewCidAttributeName)) {
+      if (self !== $(this).view({helper: false})) {
         return;
       }
     }

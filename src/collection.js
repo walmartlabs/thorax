@@ -1,4 +1,4 @@
-/*global bindEvents, unbindEvents */
+/*global bindEvents, cloneEvents, createRegistryWrapper, getValue, unbindEvents */
 var _fetch = Backbone.Collection.prototype.fetch,
     _reset = Backbone.Collection.prototype.reset,
     collectionCidAttributeName = 'data-collection-cid',
@@ -16,7 +16,7 @@ Thorax.Collection = Backbone.Collection.extend({
     }
   },
   isPopulated: function() {
-    return this._fetched || this.length > 0 || (!this.length && !Thorax.Util.getValue(this, 'url'));
+    return this._fetched || this.length > 0 || (!this.length && !getValue(this, 'url'));
   },
   fetch: function(options) {
     options = options || {};
@@ -34,10 +34,10 @@ Thorax.Collection = Backbone.Collection.extend({
 });
 
 Thorax.Collections = {};
-Thorax.Util.createRegistryWrapper(Thorax.Collection, Thorax.Collections);
+createRegistryWrapper(Thorax.Collection, Thorax.Collections);
 
 {{#inject "extend"}}
-  Thorax.Util._cloneEvents(this, child, '_collectionEvents');
+  cloneEvents(this, child, '_collectionEvents');
 {{/inject}}
 
 {{#inject "static-view-properties"}}
