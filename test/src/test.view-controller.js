@@ -12,7 +12,7 @@ $(function() {
       aEventCounter[eventName] || (aEventCounter[eventName] = 0);
       ++aEventCounter[eventName];
     });
-  
+
     var b = new Thorax.View({
       render: function() {
         Thorax.View.prototype.render.call(this, 'b');
@@ -27,22 +27,22 @@ $(function() {
     var layout = new Thorax.LayoutView;
 
     ok(!layout.getView(), 'layout does not start with a view');
-  
+
     layout.setView(a, {destroy: true});
     equal(layout.getView(), a, 'layout sets view');
     ok(layout.$('[data-view-cid]').length, 'layout updates HTML')
-  
+
     b.render();
     layout.setView(b, {destroy: true});
     equal(layout.getView(), b, 'layout sets view');
-  
+
     //lifecycle checks
     equal(aEventCounter.rendered, 1, 'lifecycle event: rendered');
     equal(aEventCounter.activated, 1, 'lifecycle event: activated');
     equal(aEventCounter.ready, 1, 'lifecycle event: ready');
     equal(aEventCounter.deactivated, 1, 'lifecycle event: deactivated');
     equal(aEventCounter.destroyed, 1, 'lifecycle event: destroyed');
-  
+
     equal(bEventCounter.rendered, 1, 'lifecycle event: rendered');
     equal(bEventCounter.activated, 1, 'lifecycle event: activated');
     equal(bEventCounter.ready, 1, 'lifecycle event: ready');
@@ -93,7 +93,7 @@ $(function() {
     equal(callCounts.layout, 1);
     equal(callCounts.child, 1);
   });
-  
+
   test("Layout can set view el", function() {
     $('body').append('<div id="test-target-container"><div id="test-target"></div></div>');
     var view = new Thorax.LayoutView({
@@ -153,7 +153,7 @@ $(function() {
     });
     viewControllerB.navigate('test', {trigger: true});
     equal(callCount, 1, 'route event triggered on ViewController');
-    
+
     var test2CallCount = 0,
         test2RouteCallCount = 0;
     var router = new (Thorax.Router.extend({

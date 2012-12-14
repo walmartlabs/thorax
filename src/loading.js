@@ -16,11 +16,11 @@ Thorax.loadHandler = function(start, end) {
           try {
             self._loadStart.run = true;
             start.call(self, self._loadStart.message, self._loadStart.background, self._loadStart);
-          } catch(e) {
+          } catch (e) {
             Thorax.onException('loadStart', e);
           }
         },
-        loadingTimeout*1000);
+        loadingTimeout * 1000);
     }
 
     if (!self._loadStart) {
@@ -78,7 +78,7 @@ Thorax.loadHandler = function(start, end) {
               clearTimeout(self._loadStart.timeout);
               self._loadStart = undefined;
             }
-          } catch(e) {
+          } catch (e) {
             Thorax.onException('loadEnd', e);
           }
         }, loadingEndTimeout * 1000);
@@ -135,7 +135,7 @@ Thorax.mixinLoadable = function(target, useParent) {
         });
       }
     },
-    onLoadEnd: function(background, object) {
+    onLoadEnd: function(/* background, object */) {
       var that = useParent ? this.parent : this;
       $(that.el).removeClass(that._loadingClassName);
       //used by loading helpers
@@ -333,21 +333,19 @@ if (Thorax.Router) {
 }
 
 // Propagates loading view parameters to the AJAX layer
-{{#inject "model-options"}}
-  , ignoreErrors: this.ignoreFetchError
-  , background: this.nonBlockingLoad
-{{/inject}}
+function loadingDataOptions() {
+  return {
+    ignoreErrors: this.ignoreFetchError,
+    background: this.nonBlockingLoad
+  };
+}
+extendOptions('_setModelOptions', loadingDataOptions);
+extendOptions('_setCollectionOptions', loadingDataOptions);
 
 if (Thorax.CollectionView) {
   Thorax.mixinLoadable(Thorax.CollectionView.prototype);
   Thorax.mixinLoadableEvents(Thorax.CollectionView.prototype);
 }
-
-// Propagates loading view parameters to the AJAX layer
-{{#inject "collection-options"}}
-  , ignoreErrors: this.ignoreFetchError
-  , background: this.nonBlockingLoad
-{{/inject}}
 
 Thorax.View.on({
   'load:start': Thorax.loadHandler(

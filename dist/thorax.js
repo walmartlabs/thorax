@@ -260,7 +260,7 @@ Thorax.View = Backbone.View.extend({
     if (typeof this.template === 'string') {
       this.template = Handlebars.compile(this.template);
     } else if (this.name && !this.template) {
-      //fetch the template 
+      //fetch the template
       this.template = Thorax.Util.getTemplate(this.name, true);
     }
     
@@ -373,16 +373,17 @@ Thorax.View = Backbone.View.extend({
       return template(data);
     }
   },
-  
+
   ensureRendered: function() {
     !this._renderCount && this.render();
   },
-  
+
   html: function(html) {
     if (typeof html === 'undefined') {
       return this.el.innerHTML;
     } else {
-      var element = this.$el.html(html);
+      this.el.innerHTML = "";
+      var element = this.$el.append(html);
       
         this._appendViews();
       
@@ -497,10 +498,16 @@ function addViewToContext(source) {
 //override handlebars "each" helper to provide "_view"
 Handlebars.registerHelper('each', function(context, options) {
   var fn = options.fn, inverse = options.inverse;
-  var ret = "";
+  var ret = "", data;
+
+  if (options.data) {
+    data = Handlebars.createFrame(options.data);
+  }
+
   if (context && context.length > 0) {
     for (var i = 0, j = context.length; i < j; i++) {
-      ret = ret + fn(addViewToContext.call(this, context[i]));
+      if (data) { data.index = i; }
+      ret = ret + fn(addViewToContext.call(this, context[i]), { data: data });
     }
   } else {
     ret = inverse(this);
@@ -932,7 +939,7 @@ _.extend(Thorax.View.prototype, {
         errors: true
             
         // Begin injected code from "src/form.js"
-        , populate: true 
+        , populate: true
         // End injected code
         // Begin injected code from "src/loading.js"
         , ignoreErrors: this.ignoreFetchError
@@ -1512,7 +1519,7 @@ _.extend(Thorax.View.prototype, {
     }, options || {});
 
     var attributes = options.attributes || {};
-    
+
     //callback has context of element
     var view = this;
     var errors = [];
@@ -1550,7 +1557,7 @@ _.extend(Thorax.View.prototype, {
         return false;
       };
     }
-    
+
     callback && callback.call(this, attributes, _.bind(resetSubmitState, this));
     return attributes;
   },
@@ -1623,9 +1630,9 @@ _.extend(Thorax.View.prototype, {
 });
 
 Thorax.View.on({
-  error: function() {  
+  error: function() {
     resetSubmitState.call(this);
-  
+
     // If we errored with a model we want to reset the content but leave the UI
     // intact. If the user updates the data and serializes any overwritten data
     // will be restored.
@@ -2351,7 +2358,7 @@ Handlebars.registerViewHelper('empty', function(collection, view) {
     view.on(collection, 'add', collectionAddCallback);
     view.on(collection, 'reset', collectionResetCallback);
   }
-  
+
   view.render();
 });
 
@@ -2385,7 +2392,7 @@ Handlebars.registerHelper('super', function() {
   var parent = this._view.constructor && this._view.constructor.__super__;
   if (parent) {
     var template = parent.template;
-    if (!template) { 
+    if (!template) {
       if (!parent.name) {
         throw new Error('Cannot use super helper when parent has no name or template.');
       }
@@ -2473,13 +2480,6 @@ Thorax.View.prototype._appendViews = function(scope, callback) {
         view.ensureRendered();
       }
       $(el).replaceWith(view.el);
-      //TODO: jQuery has trouble with delegateEvents() when
-      //the child dom node is detached then re-attached
-      if (typeof jQuery !== 'undefined' && $ === jQuery) {
-        if (this._renderCount > 1) {
-          view.delegateEvents();
-        }
-      }
       callback && callback(view.el);
     }
   }, this);

@@ -99,7 +99,7 @@ $(function() {
     }
 
     runCollectionTests(new LetterCollectionView(), 1, 'base');
-    
+
     //when the fragment is created bind
     function addRenderItemBinding() {
       this.on('helper:collection', function(fragment) {
@@ -114,7 +114,7 @@ $(function() {
       }
     }));
     runCollectionTests(viewReturningItemView, 1, 'renderItem returning LetterItemView');
-    
+
     var viewReturningMixed = new (LetterCollectionView.extend({
       initialize: addRenderItemBinding,
       renderItem: function(model, i) {
@@ -122,7 +122,7 @@ $(function() {
       }
     }));
     runCollectionTests(viewReturningMixed, 1, 'renderItem returning mixed');
-    
+
     var viewReturningMultiple = new (LetterCollectionView.extend({
       initialize: addRenderItemBinding,
       renderItem: function(model, i) {
@@ -130,12 +130,12 @@ $(function() {
       }
     }));
     runCollectionTests(viewReturningMultiple, 2, 'renderItem returning multiple');
-    
+
     var viewWithBlockCollectionHelper = new Thorax.View({
       template: '{{#collection tag="ul" empty-template="letter-empty"}}<li>{{letter}}</li>{{/collection}}'
     });
     runCollectionTests(viewWithBlockCollectionHelper, 1, 'block helper');
-    
+
     var viewWithBlockCollectionHelperWithViews = new Thorax.View({
       template: '{{collection tag="ul" empty-template="letter-empty" item-view="letter-item"}}'
     });
@@ -150,7 +150,7 @@ $(function() {
       template: '{{collection tag="ul" empty-view="letter-empty" item-template="letter-item"}}'
     });
     runCollectionTests(viewWithCollectionHelperWithEmptyView, 1, 'block helper with item-template');
-    
+
     var viewWithCollectionHelperWithEmptyViewAndBlock = new Thorax.View({
       template: '{{collection tag="ul" empty-template="letter-empty" empty-view="letter-empty" item-template="letter-item"}}'
     });
@@ -159,7 +159,7 @@ $(function() {
 
   test("programmatic access to CollectionView", function() {
     var parent = new Thorax.View({
-      template: '{{view child}}' 
+      template: '{{view child}}'
     });
     parent.child = new Thorax.CollectionView({
       tagName: 'ul',
@@ -239,7 +239,7 @@ $(function() {
       template: '{{#empty letters}}<div class="empty">empty a</div>{{/empty}}{{#collection letters}}{{letter}}{{else}}empty b{{/collection}}',
       letters: new Thorax.Collection()
     });
-    a.render(); 
+    a.render();
     var oldRenderCount = a._renderCount;
     equal(a.$('.empty').html(), 'empty');
     a.letters.reset(letterCollection.models);
@@ -384,7 +384,7 @@ $(function() {
 
       comments2.add(new Thorax.Model({comment: 'comment five'}));
       equal(view.$('p')[4].innerHTML, 'comment five', msg + ' : added comment content');
-  
+
       blogModel.attributes.posts.add(new Thorax.Model({
         title: 'title three'
       }));

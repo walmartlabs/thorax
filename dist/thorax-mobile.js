@@ -260,7 +260,7 @@ Thorax.View = Backbone.View.extend({
     if (typeof this.template === 'string') {
       this.template = Handlebars.compile(this.template);
     } else if (this.name && !this.template) {
-      //fetch the template 
+      //fetch the template
       this.template = Thorax.Util.getTemplate(this.name, true);
     }
     
@@ -373,16 +373,17 @@ Thorax.View = Backbone.View.extend({
       return template(data);
     }
   },
-  
+
   ensureRendered: function() {
     !this._renderCount && this.render();
   },
-  
+
   html: function(html) {
     if (typeof html === 'undefined') {
       return this.el.innerHTML;
     } else {
-      var element = this.$el.html(html);
+      this.el.innerHTML = "";
+      var element = this.$el.append(html);
       
         this._appendViews();
       
@@ -497,10 +498,16 @@ function addViewToContext(source) {
 //override handlebars "each" helper to provide "_view"
 Handlebars.registerHelper('each', function(context, options) {
   var fn = options.fn, inverse = options.inverse;
-  var ret = "";
+  var ret = "", data;
+
+  if (options.data) {
+    data = Handlebars.createFrame(options.data);
+  }
+
   if (context && context.length > 0) {
     for (var i = 0, j = context.length; i < j; i++) {
-      ret = ret + fn(addViewToContext.call(this, context[i]));
+      if (data) { data.index = i; }
+      ret = ret + fn(addViewToContext.call(this, context[i]), { data: data });
     }
   } else {
     ret = inverse(this);
@@ -938,7 +945,7 @@ _.extend(Thorax.View.prototype, {
         errors: true
             
         // Begin injected code from "src/form.js"
-        , populate: true 
+        , populate: true
         // End injected code
         // Begin injected code from "src/loading.js"
         , ignoreErrors: this.ignoreFetchError
@@ -1518,7 +1525,7 @@ _.extend(Thorax.View.prototype, {
     }, options || {});
 
     var attributes = options.attributes || {};
-    
+
     //callback has context of element
     var view = this;
     var errors = [];
@@ -1556,7 +1563,7 @@ _.extend(Thorax.View.prototype, {
         return false;
       };
     }
-    
+
     callback && callback.call(this, attributes, _.bind(resetSubmitState, this));
     return attributes;
   },
@@ -1629,9 +1636,9 @@ _.extend(Thorax.View.prototype, {
 });
 
 Thorax.View.on({
-  error: function() {  
+  error: function() {
     resetSubmitState.call(this);
-  
+
     // If we errored with a model we want to reset the content but leave the UI
     // intact. If the user updates the data and serializes any overwritten data
     // will be restored.
@@ -2357,7 +2364,7 @@ Handlebars.registerViewHelper('empty', function(collection, view) {
     view.on(collection, 'add', collectionAddCallback);
     view.on(collection, 'reset', collectionResetCallback);
   }
-  
+
   view.render();
 });
 
@@ -2391,7 +2398,7 @@ Handlebars.registerHelper('super', function() {
   var parent = this._view.constructor && this._view.constructor.__super__;
   if (parent) {
     var template = parent.template;
-    if (!template) { 
+    if (!template) {
       if (!parent.name) {
         throw new Error('Cannot use super helper when parent has no name or template.');
       }
@@ -2479,13 +2486,6 @@ Thorax.View.prototype._appendViews = function(scope, callback) {
         view.ensureRendered();
       }
       $(el).replaceWith(view.el);
-      //TODO: jQuery has trouble with delegateEvents() when
-      //the child dom node is detached then re-attached
-      if (typeof jQuery !== 'undefined' && $ === jQuery) {
-        if (this._renderCount > 1) {
-          view.delegateEvents();
-        }
-      }
       callback && callback(view.el);
     }
   }, this);
@@ -2513,7 +2513,7 @@ Thorax.Util.scrollTo = function(x, y) {
   }
   return [x, y];
 };
-  
+
 Thorax.Util.scrollToTop = function() {
   // android will use height of 1 because of minimumScrollYOffset in scrollTo()
   return this.scrollTo(0, 0);
@@ -2538,13 +2538,13 @@ Thorax.configureFastClick = function(useFastClick) {
     body.addEventListener('touchstart', onTouchStart, true);
     body.addEventListener('touchmove', onTouchMove, true);
     body.addEventListener('touchend', onTouchEnd, true);
-    body.addEventListener('click', clickKiller, true);  
+    body.addEventListener('click', clickKiller, true);
   } else {
     Thorax._fastClickEventName = 'click';
     body.removeEventListener('touchstart', onTouchStart, true);
     body.removeEventListener('touchmove', onTouchMove, true);
     body.removeEventListener('touchend', onTouchEnd, true);
-    body.removeEventListener('click', clickKiller, true);  
+    body.removeEventListener('click', clickKiller, true);
   }
   
     registerClickHandler && registerClickHandler();
@@ -2554,7 +2554,7 @@ Thorax.configureFastClick = function(useFastClick) {
 if (isMobile) {
   var start,
       clickRedRum;
-  
+
   function onTouchStart(event) {
     try {
       if (event.touches.length === 1) {
@@ -2568,17 +2568,17 @@ if (isMobile) {
       Thorax.onException('fast-click start', e);
     }
   }
-  
+
   function onTouchMove() {
     if (!event.touches || event.touches.length > 1) {
       start = false;
     }
   }
-  
+
   function defaultPrevented(event) {
     return event.isDefaultPrevented ? event.isDefaultPrevented() : event.defaultPrevented;
   }
-  
+
   function onTouchEnd(event) {
     try {
       var touch = event.changedTouches[0];
@@ -2586,7 +2586,7 @@ if (isMobile) {
           && Math.abs(touch.clientX-start.x) <= TAP_RANGE
           && Math.abs(touch.clientY-start.y) <= TAP_RANGE) {
         var target = touch.target;
-      
+
         // see if target element or ancestor is disabled as click would not be triggered in this case
         var disabled = !!($(target).closest('[disabled]').length);
         if (!disabled) {
@@ -2604,14 +2604,14 @@ if (isMobile) {
             clickRedRum = true;
             event.original.preventDefault();
             event.defaultPrevented = true;
-          } 
+          }
         }
       }
     } catch(e) {
       Thorax.onException('fast-click end', e);
     }
   }
-  
+
   function clickKiller(event) {
     if (clickRedRum) {
       event.preventDefault();
@@ -2619,7 +2619,7 @@ if (isMobile) {
       clickRedRum = false;
     }
   }
-  
+
   // Use this instead of $(function() {}) so that jQuery
   // does not register a timeout
   $(document).ready(function() {
@@ -2656,7 +2656,7 @@ $.fn.tapHoldAndEnd = function(selector, callbackStart, callbackEnd) {
 
       function clearTapTimer(event) {
         clearTimeout(timer);
-             
+
         if (tapHoldStart) {
           var retval = false;
           if (event) {
@@ -2667,7 +2667,7 @@ $.fn.tapHoldAndEnd = function(selector, callbackStart, callbackEnd) {
           if (retval === false) {
             _.each(timers, clearTimeout);
             timers = [];
-          } 
+          }
         }
       }
 
@@ -2687,7 +2687,7 @@ $.fn.tapHoldAndEnd = function(selector, callbackStart, callbackEnd) {
         if (retval === false) {
           _.each(timers, clearTimeout);
           timers = [];
-        } 
+        }
       }, 150);
       timers.push(timer);
     });
@@ -2732,13 +2732,13 @@ _.extend(Thorax.View.prototype, {
   _tapHighlightStart: function(event) {
     var target = event.currentTarget,
         tagName = target && target.tagName.toLowerCase();
-  
+
     // User input controls may be visually part of a larger group. For these cases
     // we want to give priority to any parent that may provide a focus operation.
     if (tagName === 'input' || tagName === 'select' || tagName === 'textarea') {
       target = $(target).closest('[data-tappable=true]')[0] || target;
     }
-  
+
     if (target) {
       $(target).addClass(this._tapHighlightClassName);
       return false;

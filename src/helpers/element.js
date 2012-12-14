@@ -1,10 +1,12 @@
+var elementPlaceholderAttributeName = 'data-element-tmp';
+
 Handlebars.registerHelper('element', function(element, options) {
   var cid = _.uniqueId('element'),
       htmlAttributes = Thorax.Util.htmlAttributesFromOptions(options.hash);
   htmlAttributes[elementPlaceholderAttributeName] = cid;
   this._view._elementsByCid || (this._view._elementsByCid = {});
   this._view._elementsByCid[cid] = element;
-  return new Handlebars.SafeString(Thorax.Util.tag.call(this, htmlAttributes));
+  return new Handlebars.SafeString(Thorax.Util.tag(htmlAttributes));
 });
 
 Thorax.View.prototype._appendElements = function(scope, callback) {
