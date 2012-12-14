@@ -476,6 +476,15 @@ $(function() {
     equal(renderCount, 1);
   });
 
+  test("collection-element helper", function() {
+    var view = new Thorax.View({
+      collection: letterCollection,
+      template: '<div class="test">{{collection-element tag="ul"}}</div>',
+      itemTemplate: 'letter-item'
+    });
+    equal(view.$('li').length, letterCollection.length);
+  });
+
   test("graceful failure of empty collection with no empty template", function() {
     var view = new Thorax.View({
       template: '{{collection item-template="letter-item"}}',
