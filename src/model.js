@@ -29,7 +29,7 @@ inheritVars.model = {
   array: '_models',
   hash: '_modelOptionsByCid',
 
-  'constructor': function() {
+  ctor: function() {
     if (this.model) {
       //need to null this.model so setModel will not treat
       //it as the old model and immediately return
