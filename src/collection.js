@@ -39,7 +39,6 @@ dataObject('collection', {
   name: '_collectionEvents',
   array: '_collections',
   hash: '_collectionOptionsByCid',
-
   set: 'setCollection',
   bind: 'bindCollection',
   unbind: 'unbindCollection',
