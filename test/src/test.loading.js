@@ -416,7 +416,21 @@ $(function(){
     this.requests[0].respond(0, {}, '');
 
     Backbone.history.trigger('route');
+    equal(success.callCount, 0);
+    equal(failback.callCount, 1);
+    ok(failback.alwaysCalledWith(true));
+    equal(this.startSpy.callCount, 1);
+    equal(this.endSpy.callCount, 1);
+  });
+  test('data load on route change sends load events', function() {
+    var success = this.spy(),
+        failback = this.spy();
 
+    var fragment = 'data-bar';
+    this.model.load(success, failback);
+
+    fragment = 'data-foo';
+    Backbone.history.trigger('route');
     equal(this.endSpy.callCount, 1);
 
     this.requests[0].respond(200, {}, '{}');
