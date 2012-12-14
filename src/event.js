@@ -1,20 +1,18 @@
 // Save a copy of the _on method to call as a $super method
 var _on = Thorax.View.prototype.on;
 
-{{#inject "configure"}}
-  //_events not present on HelperView
-  this.constructor._events && _.each(this.constructor._events, function(event) {
-    this.on.apply(this, event);
-  }, this);
-  if (this.events) {
+inheritVars.event = {
+  name: '_events',
+
+  configure: function(handle, eventName) {
+    _.each(this.constructor._events, function(event) {
+      this.on.apply(this, event);
+    }, this);
     _.each(getValue(this, 'events'), function(handler, eventName) {
       this.on(eventName, handler, this);
     }, this);
   }
-{{/inject}}
-
-inheritVars.event = { name: '_events' };
-
+};
 
 _.extend(Thorax.View.prototype, {
   freeze: function(options) {

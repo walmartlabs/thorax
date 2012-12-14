@@ -1,3 +1,4 @@
+/*global createRegistryWrapper, extendViewMember, inheritVars */
 var modelCidAttributeName = 'data-model-cid',
     modelNameAttributeName = 'data-model-name';
 
@@ -23,22 +24,21 @@ Thorax.Model = Backbone.Model.extend({
 Thorax.Models = {};
 createRegistryWrapper(Thorax.Model, Thorax.Models);
 
-{{#inject "constructor"}}
-  if (this.model) {
-    //need to null this.model so setModel will not treat
-    //it as the old model and immediately return
-    var model = this.model;
-    this.model = null;
-    this.setModel(model);
-  }
-{{/inject}}
-
 inheritVars.model = {
   event: true,
   name: '_modelEvents',
   array: '_models',
   hash: '_modelOptionsByCid',
 
+  'constructor': function() {
+    if (this.model) {
+      //need to null this.model so setModel will not treat
+      //it as the old model and immediately return
+      var model = this.model;
+      this.model = null;
+      this.setModel(model);
+    }
+  },
   unbind: 'unbindModel'
 };
 

@@ -34,7 +34,11 @@ var Thorax = this.Thorax = {
 Thorax.View = Backbone.View.extend({
   constructor: function() {
     var response = Backbone.View.apply(this, arguments);
-    {{{override "constructor" indent=4}}}
+    _.each(inheritVars, function(obj) {
+      if (obj.constructor) {
+        obj.constructor.call(this, response);
+      }
+    }, this);
     return response;
   },
   _configure: function(options) {
@@ -62,7 +66,12 @@ Thorax.View = Backbone.View.extend({
       //fetch the template
       this.template = Thorax.Util.getTemplate(this.name, true);
     }
-    {{{override "configure" indent=4}}}
+
+    _.each(inheritVars, function(obj) {
+      if (obj.configure) {
+        obj.configure.call(this);
+      }
+    }, this);
   },
 
   setElement : function() {

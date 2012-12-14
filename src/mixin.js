@@ -1,13 +1,13 @@
+/*global createInheritVars, inheritVars */
 Thorax.Mixins = {};
 
-{{#inject "configure"}}
-  //HelperView will not have mixins so need to check
-  this.constructor.mixins && _.each(this.constructor.mixins, this.mixin, this);
-  this.mixins && _.each(this.mixins, this.mixin, this);
-{{/inject}}
-
-
-inheritVars.mixins = { name: 'mixins' };
+inheritVars.mixins = {
+  name: 'mixins',
+  configure: function(mixin) {
+    _.each(this.constructor.mixins, this.mixin, this);
+    _.each(this.mixins, this.mixin, this);
+  }
+};
 
 _.extend(Thorax.View, {
   mixin: function(mixin) {
