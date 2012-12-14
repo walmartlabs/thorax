@@ -2043,9 +2043,31 @@ function loadData(callback, failback, options) {
     failback = false;
   }
 
+  var self = this,
+      routeChanged = false;
+
+  function routeHandler() {
+    routeChanged = true;
+    Backbone.history.off('route', routeHandler);
+    if (self._request) {
+      self._aborted = true;
+      self._request.abort();
+    }
+    failback.call(self, false);
+  }
+
+  Backbone.history.on('route', routeHandler);
+
   this.fetch(_.defaults({
-    success: bindToRoute(callback, failback && _.bind(failback, this, false)),
-    error: failback && bindToRoute(_.bind(failback, this, true))
+    success: function() {
+      !routeChanged && callback.apply(self, arguments);
+    },
+    error: failback && function() {
+      !routeChanged && failback.apply(self, [true].concat(_.toArray(arguments)));
+    },
+    complete: function() {
+      Backbone.history.off('route', routeHandler);
+    }
   }, options));
 }
 

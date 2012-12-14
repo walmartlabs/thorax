@@ -432,13 +432,14 @@ $(function(){
 
     fragment = 'data-foo';
     Backbone.history.trigger('route');
+    equal(this.endSpy.callCount, 1);
+
     this.requests[0].respond(200, {}, '{}');
 
     equal(success.callCount, 0);
     equal(failback.callCount, 1);
     ok(failback.alwaysCalledWith(false));
     equal(this.startSpy.callCount, 1);
-    equal(this.endSpy.callCount, 1);
   });
   test('data load sent for background and foreground requests', function() {
     var success = this.spy(),
