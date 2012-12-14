@@ -249,8 +249,7 @@ _.extend(Thorax.View.prototype, {
       }
       return view;
     } else {
-      var emptyTemplate = this.emptyTemplate || (this.name && Thorax.Util.getTemplate(this.name + '-empty', true));
-      return emptyTemplate && this.renderTemplate(emptyTemplate, context);
+      return this.emptyTemplate && this.renderTemplate(this.emptyTemplate, context);
     }
   },
   renderItem: function(model, i) {
@@ -263,11 +262,10 @@ _.extend(Thorax.View.prototype, {
       view.ensureRendered();
       return view;
     } else {
-      var itemTemplate = this.itemTemplate || (this.name && Thorax.Util.getTemplate(this.name + '-item', true));
-      if (!itemTemplate) {
+      if (!this.itemTemplate) {
         throw new Error('collection in View: ' + (this.name || this.cid) + ' requires an item template.');
       }
-      return this.renderTemplate(itemTemplate, this.itemContext ? this.itemContext(model, i) : model.attributes);
+      return this.renderTemplate(this.itemTemplate, this.itemContext ? this.itemContext(model, i) : model.attributes);
     }
   },
   appendEmpty: function() {
@@ -354,12 +352,34 @@ Thorax.CollectionHelperView = Thorax.View.extend({
       options.inverse = Handlebars.VM.noop;
     }
     !options.template && (options.template = Handlebars.VM.noop);
-    return Thorax.CollectionHelperView.__super__.constructor.call(this, options);
+    var response = Thorax.CollectionHelperView.__super__.constructor.call(this, options);
+    if (this.parent.name) {
+      !this.emptyTemplate && (this.emptyTemplate = Thorax.Util.getTemplate(this.parent.name + '-empty', true));
+      !this.itemTemplate && (this.itemTemplate = Thorax.Util.getTemplate(this.parent.name + '-item', true));
+    }
+    return response;
+  },
+  setAsPrimaryCollectionHelper: function(collection) {
+    this.$el.attr(primaryCollectionAttributeName, collection.cid);
+    forwardMissingProperty.call(this, 'itemContext');
+    forwardMissingProperty.call(this, 'itemFilter');
+    forwardMissingProperty.call(this, 'itemTemplate');
+    forwardMissingProperty.call(this, 'itemView');
+    forwardMissingProperty.call(this, 'emptyContext', true);
+    forwardMissingProperty.call(this, 'emptyTemplate');
+    forwardMissingProperty.call(this, 'emptyView');
   },
   emptyContext: function() {
-    return Thorax.Util.getValue(this.parent, 'context');
+    return getValue(this.parent, 'context');
   }
 });
+
+function forwardMissingProperty(methodName, force) {
+  if (!this[methodName] || force) {
+    var method = getParent(this)[methodName];
+    method && (this[methodName] = method);
+  }
+}
 
 var collectionHelperOptionNames = {
   'item-template': 'itemTemplate',

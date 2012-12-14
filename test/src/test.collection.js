@@ -93,6 +93,7 @@ $(function() {
 
       //freeze
       view.freeze();
+      view.collection.off();
       clonedLetterCollection.remove(clonedLetterCollection.models);
       equal(renderedEmptyCount, 1, msg + 'rendered:empty event count');
       equal(view.$('li')[0 * indexMultiplier].innerHTML, 'a', msg + 'transition from empty to one item');
@@ -155,24 +156,6 @@ $(function() {
       template: '{{collection tag="ul" empty-template="letter-empty" empty-view="letter-empty" item-template="letter-item"}}'
     });
     runCollectionTests(viewWithCollectionHelperWithEmptyViewAndBlock, 1, 'block helper with empty view and block');
-  });
-
-  test("programmatic access to CollectionView", function() {
-    /*
-    var parent = new Thorax.View({
-      template: '{{view child}}'
-    });
-    parent.child = new Thorax.CollectionView({
-      tagName: 'ul',
-      parent: parent,
-      'item-template': 'letter-item'
-    });
-    parent.child.setCollection(letterCollection);
-    parent.render();
-    equal(parent.$('ul').length, 1);
-    equal(parent.child.parent, parent);
-    equal(parent.$('li').length, letterCollection.length);
-    */
   });
 
   test("multiple collections", function() {
@@ -288,9 +271,9 @@ $(function() {
     }
 
     var view = new Thorax.View({
-      template: '{{#collection filter="filterCollection" tag="ul"}}<li>{{key}}</li>{{/collection}}',
+      template: '{{#collection tag="ul"}}<li>{{key}}</li>{{/collection}}',
       collection: new Thorax.Collection(),
-      filterCollection: function(model) {
+      itemFilter: function(model) {
         return model.attributes.key === 'a' || model.attributes.key === 'b';
       }
     });
@@ -307,6 +290,7 @@ $(function() {
     equal(filterVisible(view.$('li'))[1].innerHTML, 'b');
     var c = new Thorax.Model({key: 'c'});
     view.collection.add(c);
+    console.log(view.html(),filterVisible(view.$('li')));
     equal(filterVisible(view.$('li')).length, 2, 'add item that should not be included');
     equal(filterVisible(view.$('li'))[1].innerHTML, 'b', 'add item that should not be included');
     c.set({key: 'b'});

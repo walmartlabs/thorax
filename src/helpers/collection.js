@@ -8,7 +8,7 @@ Handlebars.registerViewHelper('collection', Thorax.CollectionHelperView, functio
   // #collection this.collection
   if (collection === this._view.collection) {
     ensureCollectionCid(collection);
-    view.$el.attr(primaryCollectionAttributeName, collection.cid);
+    view.setAsPrimaryCollectionHelper(collection);
   }
   collection && view.setCollection(collection);
 });
