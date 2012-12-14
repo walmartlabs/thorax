@@ -225,11 +225,6 @@ var collectionOptionNames = [
   'empty-context',
   'empty-class',
   'filter'
-  {{#has-plugin "loading"}}
-  , 'loading-template'
-  , 'loading-view'
-  , 'loading-placement'
-  {{/has-plugin}}
 ];
 
 function applyVisibilityFilter() {
