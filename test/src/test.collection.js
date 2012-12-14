@@ -93,6 +93,7 @@ $(function() {
 
       //freeze
       view.freeze();
+      // TODO: remove this once events / bindModel / bindCollection are ported to Backbone listenTo
       view.collection.off();
       clonedLetterCollection.remove(clonedLetterCollection.models);
       equal(renderedEmptyCount, 1, msg + 'rendered:empty event count');
