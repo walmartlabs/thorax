@@ -1,3 +1,4 @@
+/*global collectionOptionNames, extendOptions, inheritVars */
 var loadStart = 'load:start',
     loadEnd = 'load:end',
     rootObject;
@@ -353,6 +354,46 @@ function loadingDataOptions() {
 }
 extendOptions('_setModelOptions', loadingDataOptions);
 extendOptions('_setCollectionOptions', loadingDataOptions);
+
+inheritVars.collection.loading = function() {
+  var loadingView = this.options['loading-view'],
+      loadingTemplate = this.options['loading-template'],
+      loadingPlacement = this.options['loading-placement'];
+  //add "loading-view" and "loading-template" options to collection helper
+  if (loadingView || loadingTemplate) {
+    var callback = Thorax.loadHandler(_.bind(function() {
+      var item;
+      if (this.collection.length === 0) {
+        this.$el.empty();
+      }
+      if (loadingView) {
+        var instance = Thorax.Util.getViewInstance(loadingView, {
+          collection: this.collection
+        });
+        this._addChild(instance);
+        if (loadingTemplate) {
+          instance.render(loadingTemplate);
+        } else {
+          instance.render();
+        }
+        item = instance;
+      } else {
+        item = this.renderTemplate(loadingTemplate, {
+          collection: this.collection
+        });
+      }
+      var index = loadingPlacement
+        ? loadingPlacement.call(this.parent, this)
+        : this.collection.length
+      ;
+      this.appendItem(item, index);
+      this.$el.children().eq(index).attr('data-loading-element', this.collection.cid);
+    }, this), _.bind(function() {
+      this.$el.find('[data-loading-element="' + this.collection.cid + '"]').remove();
+    }, this));
+    this.on(this.collection, 'load:start', callback);
+  }
+};
 
 Thorax.View.on({
   'load:start': Thorax.loadHandler(
