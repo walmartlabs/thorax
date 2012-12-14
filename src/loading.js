@@ -356,9 +356,9 @@ extendOptions('_setModelOptions', loadingDataOptions);
 extendOptions('_setCollectionOptions', loadingDataOptions);
 
 inheritVars.collection.loading = function() {
-  var loadingView = this.options['loading-view'],
-      loadingTemplate = this.options['loading-template'],
-      loadingPlacement = this.options['loading-placement'];
+  var loadingView = this.loadingView,
+      loadingTemplate = this.loadingTemplate,
+      loadingPlacement = this.loadingPlacement;
   //add "loading-view" and "loading-template" options to collection helper
   if (loadingView || loadingTemplate) {
     var callback = Thorax.loadHandler(_.bind(function() {
@@ -383,7 +383,7 @@ inheritVars.collection.loading = function() {
         });
       }
       var index = loadingPlacement
-        ? loadingPlacement.call(this.parent, this)
+        ? loadingPlacement.call(this)
         : this.collection.length
       ;
       this.appendItem(item, index);

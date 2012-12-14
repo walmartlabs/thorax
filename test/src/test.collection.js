@@ -290,7 +290,6 @@ $(function() {
     equal(filterVisible(view.$('li'))[1].innerHTML, 'b');
     var c = new Thorax.Model({key: 'c'});
     view.collection.add(c);
-    console.log(view.html(),filterVisible(view.$('li')));
     equal(filterVisible(view.$('li')).length, 2, 'add item that should not be included');
     equal(filterVisible(view.$('li'))[1].innerHTML, 'b', 'add item that should not be included');
     c.set({key: 'b'});
@@ -546,7 +545,6 @@ $(function() {
       }
     });
     view.render();
-    console.log(view.html());
     equal(view.$('span').length, letterCollection.length);
     equal(view.$('span')[0].innerHTML, 'testing');
 

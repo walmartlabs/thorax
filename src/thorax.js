@@ -177,7 +177,7 @@ Thorax.View = Backbone.View.extend({
       this.el.innerHTML = '';
       {{#has-plugin "collection"}}
         var element;
-        if (this.collection && this.getCollectionOptions(this.collection) && this._renderCount) {
+        if (this.collection && this._collectionOptionsByCid[this.collection.cid] && this._renderCount) {
           // preserveCollectionElement calls the callback after it has a reference
           // to the collection element, calls the callback, then re-appends the element
           preserveCollectionElement.call(this, function() {

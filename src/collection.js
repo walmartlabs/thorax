@@ -45,10 +45,11 @@ dataObject('collection', {
   setCallback: afterSetCollection,
   bind: 'bindCollection',
   unbind: 'unbindCollection',
+  options: '_setCollectionOptions',
   change: '_onCollectionReset',
-  $el: 'getCollectionElement'
+  $el: 'getCollectionElement',
   cidAttrName: collectionCidAttributeName
-};
+});
 
 _.extend(Thorax.View.prototype, {
   _collectionSelector: '[' + collectionElementAttributeName + ']',
@@ -309,14 +310,10 @@ function forwardMissingProperty(methodName, force) {
 }
 
 function afterSetCollection(collection) {
-  if (collection) {
-    if (!collectionHelperPresentForPrimaryCollection.call(this)) {
-      bindEvents.call(this, collection, this._collectionRenderingEvents);
-    }
-  } else {
-    if (!collectionHelperPresentForPrimaryCollection.call(this)) {
-      unbindEvents.call(this, this.collection, this._collectionRenderingEvents);
-    }
+  if (collection && !collectionHelperPresentForPrimaryCollection.call(this)) {
+    bindEvents.call(this, collection, this._collectionRenderingEvents);
+  } else if (!collectionHelperPresentForPrimaryCollection.call(this)) {
+    unbindEvents.call(this, this.collection, this._collectionRenderingEvents);
   }
 }
 

@@ -13,28 +13,6 @@ function dataObject(type, spec) {
     }
   };
 
-  function getEventCallback(callback, context) {
-    if (typeof callback === 'function') {
-      return callback;
-    } else {
-      return context[callback];
-    }
-  }
-
-  function bindEvents(target, events) {
-    _.each(events, function(event) {
-      // getEventCallback will resolve if it is a string or a method
-      // and return a method
-      target.on(event[0], getEventCallback(event[1], this), event[2] || this);
-    }, this);
-  }
-
-  function unbindEvents(target, events) {
-    _.each(events, function(event) {
-      target.off(event[0], getEventCallback(event[1], this), event[2] || this);
-    }, this);
-  }
-
   function loadObject(dataObject, options) {
     if (dataObject.load) {
       dataObject.load(function() {
@@ -50,7 +28,7 @@ function dataObject(type, spec) {
       return false;
     }
     // Collections do not have a cid attribute by default
-    dataObject.cid = dataObject.cid || _.uniqueId(type);
+    ensureDataObjectCid(type, dataObject);
     this[spec.array].push(dataObject);
 
     var options = this[spec.options](dataObject, options);
@@ -131,6 +109,32 @@ function dataObject(type, spec) {
   extend[spec.options] = objectOptions;
 
   _.extend(Thorax.View.prototype, extend);
+}
+
+function getEventCallback(callback, context) {
+  if (typeof callback === 'function') {
+    return callback;
+  } else {
+    return context[callback];
+  }
+}
+
+function bindEvents(target, events) {
+  _.each(events, function(event) {
+    // getEventCallback will resolve if it is a string or a method
+    // and return a method
+    target.on(event[0], getEventCallback(event[1], this), event[2] || this);
+  }, this);
+}
+
+function unbindEvents(target, events) {
+  _.each(events, function(event) {
+    target.off(event[0], getEventCallback(event[1], this), event[2] || this);
+  }, this);
+}
+
+function ensureDataObjectCid(type, obj) {
+  obj.cid = obj.cid || _.uniqueId(type);
 }
 
 Thorax.Util.shouldFetch = function(modelOrCollection, options) {

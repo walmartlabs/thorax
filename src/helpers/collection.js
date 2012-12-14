@@ -6,8 +6,8 @@ Handlebars.registerViewHelper('collection', Thorax.CollectionHelperView, functio
   // Need additional check here to see if it is the
   // primary collection as templates can do:
   // #collection this.collection
-  if (collection === this._view.collection) {
-    ensureCollectionCid(collection);
+  if (collection && collection === this._view.collection) {
+    ensureDataObjectCid('collection', collection);
     view.setAsPrimaryCollectionHelper(collection);
   }
   collection && view.setCollection(collection);
