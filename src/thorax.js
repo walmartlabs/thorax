@@ -199,37 +199,6 @@ Thorax.View = Backbone.View.extend({
   }
 });
 
-{{#has-plugin "event"}}
-  _.extend(Thorax.View, {
-    on: function(eventName, callback) {
-      createInheritVars(this);
-
-      if (objectEvents(this, eventName, callback)) {
-        return this;
-      }
-
-      //accept on({"rendered": handler})
-      if (typeof eventName === 'object') {
-        _.each(eventName, function(value, key) {
-          this.on(key, value);
-        }, this);
-      } else {
-        //accept on({"rendered": [handler, handler]})
-        if (_.isArray(callback)) {
-          _.each(callback, function(cb) {
-            this._events.push([eventName, cb]);
-          }, this);
-        //accept on("rendered", handler)
-        } else {
-          this._events.push([eventName, callback]);
-        }
-      }
-      return this;
-    }
-  });
-{{/has-plugin}}
-
-
 Thorax.View.extend = function() {
   createInheritVars(this);
 

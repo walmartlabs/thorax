@@ -15,6 +15,34 @@ inheritVars.event = {
   }
 };
 
+_.extend(Thorax.View, {
+  on: function(eventName, callback) {
+    createInheritVars(this);
+
+    if (objectEvents(this, eventName, callback)) {
+      return this;
+    }
+
+    //accept on({"rendered": handler})
+    if (typeof eventName === 'object') {
+      _.each(eventName, function(value, key) {
+        this.on(key, value);
+      }, this);
+    } else {
+      //accept on({"rendered": [handler, handler]})
+      if (_.isArray(callback)) {
+        _.each(callback, function(cb) {
+          this._events.push([eventName, cb]);
+        }, this);
+      //accept on("rendered", handler)
+      } else {
+        this._events.push([eventName, callback]);
+      }
+    }
+    return this;
+  }
+});
+
 _.extend(Thorax.View.prototype, {
   freeze: function(options) {
     _.each(inheritVars, function(obj) {
