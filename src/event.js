@@ -1,10 +1,11 @@
+/*global createInheritVars, getValue, inheritVars, objectEvents */
 // Save a copy of the _on method to call as a $super method
 var _on = Thorax.View.prototype.on;
 
 inheritVars.event = {
   name: '_events',
 
-  configure: function(handle, eventName) {
+  configure: function() {
     _.each(this.constructor._events, function(event) {
       this.on.apply(this, event);
     }, this);
@@ -36,7 +37,7 @@ _.extend(Thorax.View.prototype, {
     }
     this.trigger('freeze');
     if (options.children) {
-      _.each(this.children, function(child, id) {
+      _.each(this.children, function(child) {
         child.freeze(options);
       }, this);
     }
@@ -119,27 +120,25 @@ _.extend(Thorax.View.prototype, {
 
 var eventSplitter = /^(nested\s+)?(\S+)(?:\s+(.+))?/;
 
-var domEvents = [
+var domEvents = [],
+    domEventRegexp;
+function pushDomEvents(events) {
+  domEvents.push.apply(domEvents, events);
+  domEventRegexp = new RegExp('^(' + domEvents.join('|') + ')');
+}
+pushDomEvents([
   'mousedown', 'mouseup', 'mousemove', 'mouseover', 'mouseout',
   'touchstart', 'touchend', 'touchmove',
   'click', 'dblclick',
   'keyup', 'keydown', 'keypress',
   'submit', 'change',
   'focus', 'blur'
-  {{#has-plugin "mobile"}}
-    ,
-    'singleTap', 'doubleTap', 'longTap',
-    'swipe',
-    'swipeUp', 'swipeDown',
-    'swipeLeft', 'swipeRight'
-  {{/has-plugin}}
-];
-var domEventRegexp = new RegExp('^(' + domEvents.join('|') + ')');
+]);
 
 function containHandlerToCurentView(handler, cid) {
   return function(event) {
     var view = $(event.target).view({helper: false});
-    if (view && view.cid == cid) {
+    if (view && view.cid === cid) {
       event.originalContext = this;
       handler(event);
     }
