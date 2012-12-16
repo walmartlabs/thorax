@@ -58,6 +58,33 @@ function cloneInheritVars(source, target) {
     });
   });
 }
+function walkInheritTree(source, fieldName, isStatic, callback) {
+  var tree = [];
+  if (_.has(source, fieldName)) {
+    tree.push(source);
+  }
+  if (isStatic) {
+    while (source = source.__parent__) {
+      if (_.has(source, fieldName)) {
+        tree.push(source);
+      }
+    }
+  } else {
+    source = source.constructor;
+    while (source) {
+      if (source.prototype && _.has(source.prototype, fieldName)) {
+        tree.push(source.prototype);
+      }
+      source = source.__super__ && source.__super__.constructor;
+    }
+  }
+
+  var i = tree.length;
+  while (i--) {
+    _.each(getValue(tree[i], fieldName, source), callback);
+  }
+}
+
 function objectEvents(target, eventName, callback) {
   if (_.isObject(callback)) {
     var spec = inheritVars[eventName];
