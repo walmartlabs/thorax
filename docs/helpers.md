@@ -37,9 +37,9 @@ Multiple arguments can be passed and will be joined with a "/":
 
 ### link *{{#link url [htmlAttributes]}}*
 
-Creates an `a` tag that will call `Backbone.history.navigate()` with the given url when clicked. Passes the `url` parameter to the `url` helper with the current context. Do not use this method for creating external links.
+Creates an `a` tag that will call `Backbone.history.navigate()` with the given url when clicked. Passes the `url` parameter to the `url` helper with the current context. Do not use this method for creating external links. Like the `url` helper, multiple arguments may be passed as well as an `expand-tokens` option.
 
-    {{#link "articles/:id" class="article-link"}}Link Text{{/link}}
+    {{#link "articles/{{id}}" expand-tokens=true class="article-link"}}Link Text{{/link}}
 
 To call a method from an `a` tag use the `button` helper:
 
@@ -47,8 +47,8 @@ To call a method from an `a` tag use the `button` helper:
 
 Like the `button` helper, a `trigger` attribute may be specified that will trigger an event on the delcaring view in addition to navigating to the specified url:
 
-    {{#link "articles/:id" trigger="customEvent"}}Link Text{{/link}}
+    {{#link "articles" id trigger="customEvent"}}Link Text{{/link}}
 
 The href attribute is required but may also be specified as an attribute:
 
-    {{#link href="articles/:id"}}Link Test{{/link}}
+    {{#link href="articles/{{id}}" expand-tokens=true}}Link Test{{/link}}

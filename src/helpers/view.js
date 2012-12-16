@@ -9,7 +9,9 @@ Handlebars.registerHelper('view', function(view, options) {
   if (!instance) {
     return '';
   }
-  var placeholder_id = instance.cid + '-' + _.uniqueId('placeholder');
+  var placeholder_id = instance.cid + '-' + _.uniqueId('placeholder'),
+      expandTokens = options.hash['expand-tokens'];
+  delete options.hash['expand-tokens'];
   this._view._addChild(instance);
   this._view.trigger('child', instance);
   if (options.fn) {
@@ -17,7 +19,7 @@ Handlebars.registerHelper('view', function(view, options) {
   }
   var htmlAttributes = Thorax.Util.htmlAttributesFromOptions(options.hash);
   htmlAttributes[viewPlaceholderAttributeName] = placeholder_id;
-  return new Handlebars.SafeString(Thorax.Util.tag.call(this, htmlAttributes));
+  return new Handlebars.SafeString(Thorax.Util.tag(htmlAttributes, undefined, expandTokens ? this : null));
 });
 
 Thorax.View.on('append', function(scope, callback) {
