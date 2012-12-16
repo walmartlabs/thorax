@@ -27,12 +27,12 @@ function registryGet(object, type, name, ignoreErrors) {
   }
 }
 
-function getValue(object, prop) {
+function getValue(object, prop, scope) {
   if (!(object && object[prop])) {
     return null;
   }
   return _.isFunction(object[prop])
-    ? object[prop].apply(object, Array.prototype.slice.call(arguments, 2))
+    ? object[prop].apply(scope || object, Array.prototype.slice.call(arguments, 2))
     : object[prop];
 }
 
