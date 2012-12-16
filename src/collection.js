@@ -260,7 +260,7 @@ function handleChangeFromNotEmptyToEmpty() {
   this.appendEmpty();
 }
 
-var sharedCollectionEvents = {
+Thorax.View.on({
   collection: {
     reset: function(collection) {
       var options = this._collectionOptionsByCid[collection.cid];
@@ -271,14 +271,7 @@ var sharedCollectionEvents = {
       options.errors && this.trigger('error', message);
     }
   }
-};
-
-// Sub-classes have already been declared, so need
-// to call `on` on all classes that should get the
-// events
-Thorax.View.on(sharedCollectionEvents);
-Thorax.HelperView.on(sharedCollectionEvents);
-Thorax.CollectionView.on(sharedCollectionEvents);
+});
 
 Thorax.CollectionView.on({
   collection: {

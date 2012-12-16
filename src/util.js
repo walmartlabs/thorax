@@ -45,23 +45,10 @@ function createInheritVars(self) {
     }
   });
 }
-function cloneInheritVars(source, target) {
+function resetInheritVars(self) {
+  // Ensure that we have our static event objects
   _.each(inheritVars, function(obj) {
-    var key = obj.name;
-    if (key === '_events') {
-      // Special case for the time being while data objects are ported over to chained
-      // inheritance
-      target[key] = [];
-      return;
-    }
-    source[key] = _.clone(target[key]);
-
-    //need to deep clone events array
-    _.each(source[key], function(value, _key) {
-      if (_.isArray(value)) {
-        target[key][_key] = _.clone(value);
-      }
-    });
+    self[obj.name] = [];
   });
 }
 function walkInheritTree(source, fieldName, isStatic, callback) {
