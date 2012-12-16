@@ -69,19 +69,20 @@ function walkInheritTree(source, fieldName, isStatic, callback) {
   if (_.has(source, fieldName)) {
     tree.push(source);
   }
+  var iterate = source;
   if (isStatic) {
-    while (source = source.__parent__) {
-      if (_.has(source, fieldName)) {
-        tree.push(source);
+    while (iterate = iterate.__parent__) {
+      if (_.has(iterate, fieldName)) {
+        tree.push(iterate);
       }
     }
   } else {
-    source = source.constructor;
-    while (source) {
-      if (source.prototype && _.has(source.prototype, fieldName)) {
-        tree.push(source.prototype);
+    iterate = iterate.constructor;
+    while (iterate) {
+      if (iterate.prototype && _.has(iterate.prototype, fieldName)) {
+        tree.push(iterate.prototype);
       }
-      source = source.__super__ && source.__super__.constructor;
+      iterate = iterate.__super__ && iterate.__super__.constructor;
     }
   }
 
