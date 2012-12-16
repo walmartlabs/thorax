@@ -48,6 +48,12 @@ function createInheritVars(self) {
 function cloneInheritVars(source, target) {
   _.each(inheritVars, function(obj) {
     var key = obj.name;
+    if (key === '_events') {
+      // Special case for the time being while data objects are ported over to chained
+      // inheritance
+      target[key] = [];
+      return;
+    }
     source[key] = _.clone(target[key]);
 
     //need to deep clone events array
