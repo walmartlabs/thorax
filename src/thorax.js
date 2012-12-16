@@ -203,6 +203,7 @@ Thorax.View.extend = function() {
   createInheritVars(this);
 
   var child = Backbone.View.extend.apply(this, arguments);
+  child.__parent__ = this;
 
   cloneInheritVars(this, child);
 
