@@ -85,7 +85,7 @@ Thorax.CollectionView = Thorax.HelperView.extend({
       //if the renderer's output wasn't contained in a tag, wrap it in a div
       //plain text, or a mixture of top level text nodes and element nodes
       //will get wrapped
-      if (typeof itemView === 'string' && !itemView.match(/^\s*\</m)) {
+      if (typeof itemView === 'string' && !itemView.match(/^\s*</m)) {
         itemView = '<div>' + itemView + '</div>';
       }
       var itemElement = itemView.el ? [itemView.el] : _.filter($(itemView), function(node) {
@@ -101,16 +101,11 @@ Thorax.CollectionView = Thorax.HelperView.extend({
         var last = this.$el.find('[' + modelCidAttributeName + '="' + previousModel.cid + '"]').last();
         last.after(itemElement);
       }
-      {{#has-plugin "helpers/view"}}
-        this._appendViews(null, function(el) {
-          el.setAttribute(modelCidAttributeName, model.cid);
-        });
-      {{/has-plugin}}
-      {{#has-plugin "helpers/element"}}
-        this._appendElements(null, function(el) {
-          el.setAttribute(modelCidAttributeName, model.cid);
-        });
-      {{/has-plugin}}
+
+      this.trigger('append', null, function(el) {
+        el.setAttribute(modelCidAttributeName, model.cid);
+      });
+
       !options.silent && this.parent.trigger('rendered:item', this, this.collection, model, itemElement, index);
       applyItemVisiblityFilter.call(this, model);
     }

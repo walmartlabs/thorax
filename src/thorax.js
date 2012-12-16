@@ -1,3 +1,5 @@
+/*global cloneInheritVars, createInheritVars, createRegistryWrapper, getValue, inheritVars */
+
 //support zepto.forEach on jQuery
 if (!$.fn.forEach) {
   $.fn.forEach = function(iterator, context) {
@@ -175,12 +177,7 @@ Thorax.View = Backbone.View.extend({
     } else {
       this.el.innerHTML = "";
       var element = this.$el.append(html);
-      {{#has-plugin "helpers/view"}}
-        this._appendViews();
-      {{/has-plugin}}
-      {{#has-plugin "helpers/element"}}
-        this._appendElements();
-      {{/has-plugin}}
+      this.trigger('append');
       return element;
     }
   },

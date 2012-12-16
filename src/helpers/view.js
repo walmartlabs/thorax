@@ -20,7 +20,7 @@ Handlebars.registerHelper('view', function(view, options) {
   return new Handlebars.SafeString(Thorax.Util.tag.call(this, htmlAttributes));
 });
 
-Thorax.View.prototype._appendViews = function(scope, callback) {
+Thorax.View.on('append', function(scope, callback) {
   (scope || this.$el).find('[' + viewPlaceholderAttributeName + ']').forEach(function(el) {
     var placeholder_id = el.getAttribute(viewPlaceholderAttributeName),
         cid = placeholder_id.replace(/\-placeholder\d+$/, ''),
@@ -41,4 +41,4 @@ Thorax.View.prototype._appendViews = function(scope, callback) {
       callback && callback(view.el);
     }
   }, this);
-};
+});
