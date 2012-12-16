@@ -1,4 +1,4 @@
-/*global createInheritVars, getValue, inheritVars, objectEvents */
+/*global createInheritVars, inheritVars, objectEvents, walkInheritTree */
 // Save a copy of the _on method to call as a $super method
 var _on = Thorax.View.prototype.on;
 
@@ -6,12 +6,13 @@ inheritVars.event = {
   name: '_events',
 
   configure: function() {
-    _.each(this.constructor._events, function(event) {
-      this.on.apply(this, event);
-    }, this);
-    _.each(getValue(this, 'events'), function(handler, eventName) {
-      this.on(eventName, handler, this);
-    }, this);
+    var self = this;
+    walkInheritTree(this.constructor, '_events', true, function(event) {
+      self.on.apply(self, event);
+    });
+    walkInheritTree(this, 'events', false, function(handler, eventName) {
+      self.on(eventName, handler, self);
+    });
   }
 };
 
