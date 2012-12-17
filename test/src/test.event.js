@@ -74,10 +74,66 @@ $(function() {
     });
 
     var ChildTwo = Parent.extend({});
-    equal(Child._events[originalLength - 0][1], 1, 'ensure events are not shared between children');
-    equal(Child._events.length - originalLength, 2, 'ensure events are not shared between children');
-    equal(ChildTwo._events[originalLength - 0][1], 1, 'ensure events are not shared between children');
-    equal(ChildTwo._events.length - originalLength, 1, 'ensure events are not shared between children');
+    equal(Parent._events[0][1], 1, 'ensure events are not shared between children');
+    equal(Parent._events.length, 1, 'ensure events are not shared between children');
+    equal(Child._events[0][1], 2, 'ensure events are not shared between children');
+    equal(Child._events.length, 1, 'ensure events are not shared between children');
+    equal(ChildTwo._events.length, 0, 'ensure events are not shared between children');
+  });
+
+  test("inherit prototype event hash", function() {
+    expect(16);
+    var View = Thorax.View.extend({
+      key: 'value',
+      events: {
+        test1: 'test1',
+        test2: function() {
+          equal(this.key, 'value');
+          ok(true);
+        }
+      },
+      test1: function() {
+        equal(this.key, 'value');
+        ok(true);
+      }
+    });
+
+    var view = new View();
+    view.trigger('test1');
+    view.trigger('test2');
+
+    view = new View({
+      events: function() {
+        return {
+          test3: 'test3'
+        };
+      },
+      key: 'value',
+      test3: function() {
+        equal(this.key, 'value');
+        ok(true);
+      }
+    });
+    view.trigger('test1');
+    view.trigger('test2');
+    view.trigger('test3');
+
+    View = View.extend({
+      events: function() {
+        return {
+          test3: 'test3'
+        };
+      },
+      key: 'value',
+      test3: function() {
+        equal(this.key, 'value');
+        ok(true);
+      }
+    });
+    view = new View();
+    view.trigger('test1');
+    view.trigger('test2');
+    view.trigger('test3');
   });
 
   test("multiple event registration", function() {

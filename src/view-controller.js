@@ -1,4 +1,4 @@
-/*global createRegistryWrapper, registryGet */
+/*global createRegistryWrapper */
 //Router
 function initializeRouter() {
   Backbone.history || (Backbone.history = new Backbone.History());
@@ -85,9 +85,6 @@ Thorax.LayoutView = Thorax.View.extend({
     this._view = view;
     oldView && (delete this.children[oldView.cid]);
     oldView && oldView._shouldDestroyOnNextSetView && oldView.destroy();
-    {{#has-plugin "mobile"}}
-      options.scroll && Thorax.Util.scrollTo(0, 0);
-    {{/has-plugin}}
     this._view && this._view.trigger('ready', options);
     this.trigger('change:view:end', view, oldView, options);
     return view;

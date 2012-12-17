@@ -9,7 +9,7 @@ Handlebars.registerHelper('element', function(element, options) {
   return new Handlebars.SafeString(Thorax.Util.tag(htmlAttributes));
 });
 
-Thorax.View.prototype._appendElements = function(scope, callback) {
+Thorax.View.on('append', function(scope, callback) {
   (scope || this.$el).find('[' + elementPlaceholderAttributeName + ']').forEach(function(el) {
     var cid = el.getAttribute(elementPlaceholderAttributeName),
         element = this._elementsByCid[cid];
@@ -19,4 +19,4 @@ Thorax.View.prototype._appendElements = function(scope, callback) {
     $(el).replaceWith(element);
     callback && callback(element);
   }, this);
-};
+});
