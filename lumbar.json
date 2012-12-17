@@ -29,11 +29,8 @@
         {"src": "src/collection.js"},
         {"src": "src/form.js"},
         {"src": "src/view-controller.js"},
-        {"src": "src/loading.js"},
         {"src": "src/helpers/collection.js"},
         {"src": "src/helpers/empty.js"},
-        {"src": "src/helpers/loading.js"},
-        {"src": "src/helpers/super.js"},
         {"src": "src/helpers/template.js"},
         {"src": "src/helpers/url.js"},
         {"src": "src/helpers/view.js"},
@@ -44,6 +41,14 @@
       "scripts": [
         {"src": "src/helpers/button-link.js"},
         {"src": "src/helpers/element.js"},
+        {"src": "src/helpers/super.js"},
+      ]
+    },
+
+    "thorax-loading": {
+      "scripts": [
+        {"src": "src/loading.js"},
+        {"src": "src/helpers/loading.js"}
       ]
     },
 
