@@ -27,12 +27,12 @@ function registryGet(object, type, name, ignoreErrors) {
   }
 }
 
-function getValue(object, prop) {
+function getValue(object, prop, scope) {
   if (!(object && object[prop])) {
     return null;
   }
   return _.isFunction(object[prop])
-    ? object[prop].apply(object, Array.prototype.slice.call(arguments, 2))
+    ? object[prop].apply(scope || object, Array.prototype.slice.call(arguments, 2))
     : object[prop];
 }
 
@@ -45,19 +45,40 @@ function createInheritVars(self) {
     }
   });
 }
-function cloneInheritVars(source, target) {
+function resetInheritVars(self) {
+  // Ensure that we have our static event objects
   _.each(inheritVars, function(obj) {
-    var key = obj.name;
-    source[key] = _.clone(target[key]);
-
-    //need to deep clone events array
-    _.each(source[key], function(value, _key) {
-      if (_.isArray(value)) {
-        target[key][_key] = _.clone(value);
-      }
-    });
+    self[obj.name] = [];
   });
 }
+function walkInheritTree(source, fieldName, isStatic, callback) {
+  var tree = [];
+  if (_.has(source, fieldName)) {
+    tree.push(source);
+  }
+  var iterate = source;
+  if (isStatic) {
+    while (iterate = iterate.__parent__) {
+      if (_.has(iterate, fieldName)) {
+        tree.push(iterate);
+      }
+    }
+  } else {
+    iterate = iterate.constructor;
+    while (iterate) {
+      if (iterate.prototype && _.has(iterate.prototype, fieldName)) {
+        tree.push(iterate.prototype);
+      }
+      iterate = iterate.__super__ && iterate.__super__.constructor;
+    }
+  }
+
+  var i = tree.length;
+  while (i--) {
+    _.each(getValue(tree[i], fieldName, source), callback);
+  }
+}
+
 function objectEvents(target, eventName, callback) {
   if (_.isObject(callback)) {
     var spec = inheritVars[eventName];
@@ -139,8 +160,7 @@ Thorax.Util = {
     return typeof obj === 'object' && ('length' in obj);
   },
   expandToken: function(input, scope) {
-    // concatenate handlebars tokens as this file itself is a handlebars template
-    if (input && input.indexOf && input.indexOf('{' + '{') >= 0) {
+    if (input && input.indexOf && input.indexOf('{{') >= 0) {
       var re = /(?:\{?[^{]+)|(?:\{\{([^}]+)\}\})/g,
           match,
           ret = [];
