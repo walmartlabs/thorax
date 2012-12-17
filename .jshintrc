@@ -1,0 +1,46 @@
+{
+  "predef": [
+    "_", "Backbone", "Handlebars", "Thorax",
+
+    "describe", "it", "before", "after", "beforeEach", "afterEach", "expect", "sinon"
+  ],
+
+  "maxerr": 10000,
+
+  "node": true,
+  "es5": true,
+  "browser": true,
+  "jquery": true,
+
+  "bitwise": true,
+  "curly": true,
+  "eqeqeq": true,
+  "evil": false,
+  "expr": true,
+  "forin": true,
+  "immed": false,
+  "latedef": false,
+  "laxbreak": true,
+  "newcap": true,
+  "noarg": true,
+  "noempty": false,
+  "nonew": true,
+  "plusplus": false,
+  "undef": true,
+  "strict": false,
+  "shadow": true,
+  "trailing": false,
+  "globalstrict": true,
+  "nonstandard": true,
+  "white": false,
+  "indent": 2,
+
+  "onevar": false
+}
+
+/*
+    "boss" : false,
+    "debug": false,
+    "devel": false,
+    "regexp": false
+*/
