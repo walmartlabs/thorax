@@ -1,27 +1,26 @@
-  QUnit.module('Thorax Model');
-
-  test("shouldFetch", function() {
+describe('model', function() {
+  it("shouldFetch", function() {
     [Thorax, Backbone].forEach(function(type) {
       var options = {fetch: true};
-      var a = new (type.Model.extend());
-      ok(!Thorax.Util.shouldFetch(a, options));
+      var a = new (type.Model.extend())();
+      expect(Thorax.Util.shouldFetch(a, options)).to.not.be.ok;
 
-      var b = new (type.Model.extend({urlRoot: '/'}));
-      ok(!!Thorax.Util.shouldFetch(b, options));
+      var b = new (type.Model.extend({urlRoot: '/'}))();
+      expect(Thorax.Util.shouldFetch(b, options)).to.be.true;
 
-      var c = new (type.Model.extend({urlRoot: '/'}));
+      var c = new (type.Model.extend({urlRoot: '/'}))();
       c.set({key: 'value'});
-      ok(!Thorax.Util.shouldFetch(c, options));
+      expect(Thorax.Util.shouldFetch(c, options)).to.not.be.ok;
 
-      var d = new (type.Collection.extend());
-      ok(!Thorax.Util.shouldFetch(d, options));
+      var d = new (type.Collection.extend())();
+      expect(Thorax.Util.shouldFetch(d, options)).to.not.be.ok;
 
-      var e = new (type.Collection.extend({url: '/'}));
-      ok(!!Thorax.Util.shouldFetch(e, options));
+      var e = new (type.Collection.extend({url: '/'}))();
+      expect(Thorax.Util.shouldFetch(e, options)).to.be.true;
     });
   });
 
-  test("model view binding", function() {
+  it("model view binding", function() {
     var modelA = new Thorax.Model({letter: 'a'});
     var modelB = new Thorax.Model({letter: 'b'});
     var modelC = new Thorax.Model({letter: 'c'});
@@ -30,16 +29,16 @@
       template: '<li>{{letter}}</li>',
       model: modelA
     });
-    equal(a.el.firstChild.innerHTML, 'a', 'set via constructor');
+    expect(a.el.firstChild.innerHTML).to.equal('a', 'set via constructor');
 
     var b = new Thorax.View({
       template: '<li>{{letter}}</li>'
     });
     b.setModel(modelB);
-    equal(b.el.firstChild.innerHTML, 'b', 'set via setModel');
+    expect(b.el.firstChild.innerHTML).to.equal('b', 'set via setModel');
 
     modelB.set({letter: 'B'});
-    equal(b.el.firstChild.innerHTML, 'B', 'update attribute triggers render');
+    expect(b.el.firstChild.innerHTML).to.equal('B', 'update attribute triggers render');
     modelB.set({letter: 'b'});
 
     var c = new Thorax.View({
@@ -48,17 +47,17 @@
     c.setModel(modelC, {
       render: false
     });
-    ok(!c.el.firstChild, 'did not render');
+    expect(c.el.firstChild).to.not.exist;
     c.render();
-    equal(c.el.firstChild.innerHTML, 'c', 'manual render');
+    expect(c.el.firstChild.innerHTML).to.equal('c', 'manual render');
   });
 
-  test("isPopulated", function() {
-    ok(!(new Thorax.Model()).isPopulated());
-    ok((new Thorax.Model({key: 'value'})).isPopulated());
+  it("isPopulated", function() {
+    expect((new Thorax.Model()).isPopulated()).to.be.false;
+    expect((new Thorax.Model({key: 'value'})).isPopulated()).to.be.true;
   });
 
-  test("$.fn.model", function() {
+  it("$.fn.model", function() {
     var model = new Thorax.Model({
       key: 'value'
     });
@@ -67,11 +66,11 @@
       template: '{{key}}'
     });
     view.render();
-    equal(view.html(), 'value');
-    equal(view.$el.model(), model);
+    expect(view.html()).to.equal('value');
+    expect(view.$el.model()).to.equal(model);
   });
 
-  test("model events", function() {
+  it("model events", function() {
     var callCounter = {
       all: 0,
       test1: 0,
@@ -99,7 +98,8 @@
     var oldAllCount = Number(callCounter.all);
     model.trigger('test1');
     model.trigger('test2');
-    equal(callCounter.all - oldAllCount, 2);
-    equal(callCounter.test1, 1);
-    equal(callCounter.test2, 1);
+    expect(callCounter.all - oldAllCount).to.equal(2);
+    expect(callCounter.test1).to.equal(1);
+    expect(callCounter.test2).to.equal(1);
   });
+});

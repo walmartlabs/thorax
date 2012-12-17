@@ -82,7 +82,7 @@ Thorax.LayoutView = Thorax.View.extend({
     view && this._addChild(view);
     view && view.ensureRendered();
     view && getLayoutViewsTargetElement.call(this).appendChild(view.el);
-    this._view = view;
+    this._view = view || undefined;
     oldView && (delete this.children[oldView.cid]);
     oldView && oldView._shouldDestroyOnNextSetView && oldView.destroy();
     this._view && this._view.trigger('ready', options);

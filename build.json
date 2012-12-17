@@ -45,7 +45,6 @@
         {"src": "test/lib/sinon.js", "global": true},
         {"src": "test/lib/sinon-backbone.js", "global": true},
         "test/lib/runner.js",
-        "test/lib/qunit-shim.js",
 
         "test/src/"
       ],
