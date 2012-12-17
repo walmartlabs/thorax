@@ -28,8 +28,9 @@
   "plugins": {
     "mixin": [],
     "event": [],
-    "model": ["event"],
-    "collection": ["event", "model"],
+    "data-object": [],
+    "model": ["event", "data-object"],
+    "collection": ["event", "data-object", "model"],
     "form": ["model"],
     "view-controller": [],
     "loading": ["event", "model", "collection"],
