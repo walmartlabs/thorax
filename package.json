@@ -24,6 +24,8 @@
     "mocha-phantomjs": "~1.1"
   },
   "scripts": {
+    "watch": "./node_modules/.bin/lumbar watch ./build.json ./build",
+
     "start": "node bin/test-server.js . 8083",
 
     "pretest": "./node_modules/.bin/lumbar build ./build.json ./build",
