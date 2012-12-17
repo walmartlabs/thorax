@@ -1,5 +1,3 @@
-$(function() {
-
   QUnit.module('Thorax Collection Helper');
 
   Thorax.templates['letter'] = '{{collection tag="ul"}}';
@@ -709,5 +707,3 @@ $(function() {
     layout.setView(view);
     equal(layout.$('li').html(), 'value');
   });
-
-});

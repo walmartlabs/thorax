@@ -1,4 +1,3 @@
-$(function() {
   QUnit.module('Thorax Form');
 
   test("serialize() / populate()", function() {
@@ -116,5 +115,3 @@ $(function() {
 
 
   });
-
-});

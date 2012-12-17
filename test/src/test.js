@@ -1,4 +1,3 @@
-$(function() {
   QUnit.module('Thorax Core');
 
   Backbone.history = new Backbone.History();
@@ -452,4 +451,3 @@ $(function() {
     Thorax.onException = oldOnException;
     view.$el.remove();
   });
-});

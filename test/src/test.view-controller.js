@@ -1,4 +1,3 @@
-$(function() {
   QUnit.module("Thorax ViewController");
 
   test("LayoutView", function() {
@@ -193,5 +192,3 @@ $(function() {
     equal(c.$('.one').length, 0);
     equal(c.$('.two').length, 1);
   });
-
-});

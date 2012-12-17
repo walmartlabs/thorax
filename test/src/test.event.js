@@ -1,5 +1,3 @@
-$(function() {
-
   QUnit.module('Thorax Event');
 
   test("don't break existing event hash", function() {
@@ -226,4 +224,3 @@ $(function() {
       parent.$el.remove();
     });
   }
-});

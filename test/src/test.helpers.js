@@ -1,5 +1,3 @@
-$(function() {
-
   QUnit.module('Thorax Helpers');
 
   test("url helper", function() {
@@ -77,5 +75,3 @@ $(function() {
     equal(view.$('a').html(),'content');
     equal(view.$('a').attr('href'),'#href');
   });
-
-});

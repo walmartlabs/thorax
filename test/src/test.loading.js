@@ -1,4 +1,4 @@
-$(function(){
+(function(){
 
   var loadStart = 'load:start',
       loadEnd = 'load:end',
@@ -648,4 +648,4 @@ $(function(){
     equal(collectionLoadingTemplateView.$('li.empty-item').length, 0);
     equal(collectionLoadingTemplateView.$('li.loading-item').length, 0);
   });
-});
+})();

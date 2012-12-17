@@ -1,5 +1,3 @@
-$(function() {
-
   QUnit.module('Thorax Model');
 
   test("shouldFetch", function() {
@@ -105,4 +103,3 @@ $(function() {
     equal(callCounter.test1, 1);
     equal(callCounter.test2, 1);
   });
-});
