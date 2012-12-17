@@ -64,6 +64,8 @@ function unregisterClickHandler() {
   lastClickHandlerEventName && $(document).off(lastClickHandlerEventName, clickSelector, handleClick);
 }
 
-{{^has-plugin "mobile"}}
-  $(registerClickHandler);
-{{/has-plugin}}
+$(document).ready(function() {
+  if (!Thorax._fastClickEventName) {
+    registerClickHandler();
+  }
+});

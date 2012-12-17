@@ -1,4 +1,4 @@
-/*global inheritVars */
+/*global getValue, inheritVars, walkInheritTree */
 function dataObject(type, spec) {
   spec = inheritVars[type] = _.defaults({event: true}, spec);
 
@@ -9,18 +9,20 @@ function dataObject(type, spec) {
       return context[callback];
     }
   }
-  function bindEvents(target, events) {
-    _.each(events, function(event) {
+  function bindEvents(target, source) {
+    var context = this;
+    walkInheritTree(source, spec.name, true, function(event) {
       // getEventCallback will resolve if it is a string or a method
       // and return a method
-      target.on(event[0], getEventCallback(event[1], this), event[2] || this);
-    }, this);
+      target.on(event[0], getEventCallback(event[1], context), event[2] || context);
+    });
   }
 
-  function unbindEvents(target, events) {
-    _.each(events, function(event) {
-      target.off(event[0], getEventCallback(event[1], this), event[2] || this);
-    }, this);
+  function unbindEvents(target, source) {
+    var context = this;
+    walkInheritTree(source, spec.name, true, function(event) {
+      target.off(event[0], getEventCallback(event[1], context), event[2] || context);
+    });
   }
 
   function loadObject(dataObject, options) {
@@ -40,8 +42,8 @@ function dataObject(type, spec) {
 
     var options = this[spec.options](dataObject, options);
 
-    bindEvents.call(this, dataObject, this.constructor[spec.name]);
-    bindEvents.call(this, dataObject, this[spec.name]);
+    bindEvents.call(this, dataObject, this.constructor);
+    bindEvents.call(this, dataObject, this);
 
     if (Thorax.Util.shouldFetch(dataObject, options)) {
       loadObject(dataObject, options);
@@ -53,8 +55,8 @@ function dataObject(type, spec) {
   function unbindObject(dataObject) {
     this[spec.array] = _.without(this[spec.array], dataObject);
     dataObject.trigger('freeze');
-    unbindEvents.call(this, dataObject, this.constructor[spec.name]);
-    unbindEvents.call(this, dataObject, this[spec.name]);
+    unbindEvents.call(this, dataObject, this.constructor);
+    unbindEvents.call(this, dataObject, this);
     delete this[spec.hash][dataObject.cid];
   }
 

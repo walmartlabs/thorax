@@ -1,18 +1,48 @@
+/*global createInheritVars, inheritVars, objectEvents, walkInheritTree */
 // Save a copy of the _on method to call as a $super method
 var _on = Thorax.View.prototype.on;
 
 inheritVars.event = {
   name: '_events',
 
-  configure: function(handle, eventName) {
-    _.each(this.constructor._events, function(event) {
-      this.on.apply(this, event);
-    }, this);
-    _.each(getValue(this, 'events'), function(handler, eventName) {
-      this.on(eventName, handler, this);
-    }, this);
+  configure: function() {
+    var self = this;
+    walkInheritTree(this.constructor, '_events', true, function(event) {
+      self.on.apply(self, event);
+    });
+    walkInheritTree(this, 'events', false, function(handler, eventName) {
+      self.on(eventName, handler, self);
+    });
   }
 };
+
+_.extend(Thorax.View, {
+  on: function(eventName, callback) {
+    createInheritVars(this);
+
+    if (objectEvents(this, eventName, callback)) {
+      return this;
+    }
+
+    //accept on({"rendered": handler})
+    if (typeof eventName === 'object') {
+      _.each(eventName, function(value, key) {
+        this.on(key, value);
+      }, this);
+    } else {
+      //accept on({"rendered": [handler, handler]})
+      if (_.isArray(callback)) {
+        _.each(callback, function(cb) {
+          this._events.push([eventName, cb]);
+        }, this);
+      //accept on("rendered", handler)
+      } else {
+        this._events.push([eventName, callback]);
+      }
+    }
+    return this;
+  }
+});
 
 _.extend(Thorax.View.prototype, {
   freeze: function(options) {
@@ -36,7 +66,7 @@ _.extend(Thorax.View.prototype, {
     }
     this.trigger('freeze');
     if (options.children) {
-      _.each(this.children, function(child, id) {
+      _.each(this.children, function(child) {
         child.freeze(options);
       }, this);
     }
@@ -119,27 +149,25 @@ _.extend(Thorax.View.prototype, {
 
 var eventSplitter = /^(nested\s+)?(\S+)(?:\s+(.+))?/;
 
-var domEvents = [
+var domEvents = [],
+    domEventRegexp;
+function pushDomEvents(events) {
+  domEvents.push.apply(domEvents, events);
+  domEventRegexp = new RegExp('^(' + domEvents.join('|') + ')');
+}
+pushDomEvents([
   'mousedown', 'mouseup', 'mousemove', 'mouseover', 'mouseout',
   'touchstart', 'touchend', 'touchmove',
   'click', 'dblclick',
   'keyup', 'keydown', 'keypress',
   'submit', 'change',
   'focus', 'blur'
-  {{#has-plugin "mobile"}}
-    ,
-    'singleTap', 'doubleTap', 'longTap',
-    'swipe',
-    'swipeUp', 'swipeDown',
-    'swipeLeft', 'swipeRight'
-  {{/has-plugin}}
-];
-var domEventRegexp = new RegExp('^(' + domEvents.join('|') + ')');
+]);
 
 function containHandlerToCurentView(handler, cid) {
   return function(event) {
     var view = $(event.target).view({helper: false});
-    if (view && view.cid == cid) {
+    if (view && view.cid === cid) {
       event.originalContext = this;
       handler(event);
     }

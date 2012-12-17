@@ -28,9 +28,10 @@
   "plugins": {
     "mixin": [],
     "event": [],
+    "helper-view": ["event"],
     "data-object": [],
     "model": ["event", "data-object"],
-    "collection": ["event", "data-object", "model"],
+    "collection": ["event", "data-object", "model", "helper-view"],
     "form": ["model"],
     "view-controller": [],
     "loading": ["event", "model", "collection"],
@@ -42,7 +43,7 @@
     "helpers/super": [],
     "helpers/template": [],
     "helpers/url": [],
-    "helpers/view": [],
+    "helpers/view": ["helper-view"],
     "mobile": ["event"]
   },
   "bin": {
