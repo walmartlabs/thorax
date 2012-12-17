@@ -1,22 +1,57 @@
 {
   "mixins": {
-    "thorax": {
+    "thorax-dep-jquery": {
       "scripts": [
         {"src": "lib/jquery.js", "global": true},
         {"src": "lib/underscore.js", "global": true},
         {"src": "lib/backbone.js", "global": true},
         {"src": "lib/handlebars.js", "global": true},
-        {"src": "dist/thorax.js", "global": true}
       ]
     },
-
-    "thorax-mobile": {
+    "thorax-dep-zepto": {
       "scripts": [
         {"src": "lib/zepto.js", "global": true},
         {"src": "lib/underscore.js", "global": true},
         {"src": "lib/backbone.js", "global": true},
         {"src": "lib/handlebars.runtime.js", "global": true},
-        {"src": "dist/thorax-mobile.js", "global": true}
+      ]
+    },
+
+    "thorax": {
+      "scripts": [
+        {"src": "src/thorax.js"},
+        {"src": "src/util.js"},
+        {"src": "src/mixin.js"},
+        {"src": "src/event.js"},
+        {"src": "src/helper-view.js"},
+        {"src": "src/data-object.js"},
+        {"src": "src/model.js"},
+        {"src": "src/collection.js"},
+        {"src": "src/form.js"},
+        {"src": "src/view-controller.js"},
+        {"src": "src/loading.js"},
+        {"src": "src/helpers/collection.js"},
+        {"src": "src/helpers/empty.js"},
+        {"src": "src/helpers/loading.js"},
+        {"src": "src/helpers/super.js"},
+        {"src": "src/helpers/template.js"},
+        {"src": "src/helpers/url.js"},
+        {"src": "src/helpers/view.js"},
+      ]
+    },
+
+    "thorax-helper-tags": {
+      "scripts": [
+        {"src": "src/helpers/button-link.js"},
+        {"src": "src/helpers/element.js"},
+      ]
+    },
+
+    "thorax-mobile": {
+      "scripts": [
+        {"src": "src/mobile.js"},
+        {"src": "src/mobile/fast-click.js"},
+        {"src": "src/mobile/tap-highlight.js"}
       ]
     }
   },
