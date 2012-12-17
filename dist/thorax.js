@@ -2054,16 +2054,20 @@ function loadData(callback, failback, options) {
   }
 
   var self = this,
-      routeChanged = false;
+      routeChanged = false,
+      fragment = Backbone.history.getFragment();
 
   function routeHandler() {
+    if (fragment === Backbone.history.getFragment()) {
+      return;
+    }
     routeChanged = true;
     Backbone.history.off('route', routeHandler);
     if (self._request) {
       self._aborted = true;
       self._request.abort();
     }
-    failback.call(self, false);
+    failback && failback.call(self, false);
   }
 
   Backbone.history.on('route', routeHandler);
