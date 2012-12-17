@@ -424,9 +424,14 @@ $(function(){
   });
   test('data load on route change sends load events', function() {
     var success = this.spy(),
-        failback = this.spy();
+        failback = this.spy(),
+        _getFragment = Backbone.history.getFragment;
 
     var fragment = 'data-bar';
+    Backbone.history.getFragment = function() {
+      return fragment;
+    };
+
     this.model.load(success, failback);
 
     fragment = 'data-foo';
@@ -439,6 +444,8 @@ $(function(){
     equal(failback.callCount, 1);
     ok(failback.alwaysCalledWith(false));
     equal(this.startSpy.callCount, 1);
+
+    Backbone.history.getFragment = _getFragment;
   });
   test('data load sent for background and foreground requests', function() {
     var success = this.spy(),
