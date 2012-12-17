@@ -162,19 +162,8 @@ Thorax.mixinLoadableEvents = function(target, useParent) {
   });
 };
 
-var klasses = [
-  Thorax.View,
-  Thorax.HelperView,
-  Thorax.LayoutView,
-  {{#has-plugin "collection"}}
-    , Thorax.CollectionHelperView
-  {{/has-plugin}}
-];
-
-_.each(klasses, function(klass) {
-  Thorax.mixinLoadable(klass.prototype);
-  Thorax.mixinLoadableEvents(klass.prototype);
-});
+Thorax.mixinLoadable(Thorax.View.prototype);
+Thorax.mixinLoadableEvents(Thorax.View.prototype);
 
 Thorax.sync = function(method, dataObj, options) {
   var self = this,
@@ -394,6 +383,12 @@ inheritVars.collection.loading = function() {
     this.on(this.collection, 'load:start', callback);
   }
 };
+
+if (typeof collectionOptionNames !== 'undefined') {
+  collectionOptionNames['loading-template'] = 'loadingTemplate';
+  collectionOptionNames['loading-view'] = 'loadingView';
+  collectionOptionNames['loading-placement'] = 'loadingPlacement';
+}
 
 Thorax.View.on({
   'load:start': Thorax.loadHandler(

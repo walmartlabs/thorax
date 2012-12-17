@@ -1,3 +1,5 @@
+/*global isMobile, registerClickHandler */
+
 //removal of click delay on mobile webkit
 var TAP_RANGE = 5;    // +-5px is still considered a tap
 
@@ -17,9 +19,9 @@ Thorax.configureFastClick = function(useFastClick) {
     body.removeEventListener('touchend', onTouchEnd, true);
     body.removeEventListener('click', clickKiller, true);
   }
-  {{#has-plugin "helpers/button-link"}}
+  if (typeof registerClickHandler !== 'undefined') {
     registerClickHandler && registerClickHandler();
-  {{/has-plugin}}
+  }
 };
 
 if (isMobile) {
@@ -35,7 +37,7 @@ if (isMobile) {
         start = false;
       }
       clickRedRum = false;
-    } catch(e) {
+    } catch (e) {
       Thorax.onException('fast-click start', e);
     }
   }
@@ -54,8 +56,8 @@ if (isMobile) {
     try {
       var touch = event.changedTouches[0];
       if (start
-          && Math.abs(touch.clientX-start.x) <= TAP_RANGE
-          && Math.abs(touch.clientY-start.y) <= TAP_RANGE) {
+          && Math.abs(touch.clientX - start.x) <= TAP_RANGE
+          && Math.abs(touch.clientY - start.y) <= TAP_RANGE) {
         var target = touch.target;
 
         // see if target element or ancestor is disabled as click would not be triggered in this case
@@ -78,7 +80,7 @@ if (isMobile) {
           }
         }
       }
-    } catch(e) {
+    } catch (e) {
       Thorax.onException('fast-click end', e);
     }
   }
@@ -97,7 +99,7 @@ if (isMobile) {
     Thorax.configureFastClick(isMobile);
   });
 } else {
-  {{#has-plugin "helpers/button-link"}}
+  if (typeof registerClickHandler !== 'undefined') {
     registerClickHandler && registerClickHandler();
-  {{/has-plugin}}
+  }
 }

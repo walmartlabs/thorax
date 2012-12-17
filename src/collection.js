@@ -79,7 +79,7 @@ _.extend(Thorax.View.prototype, {
       //if the renderer's output wasn't contained in a tag, wrap it in a div
       //plain text, or a mixture of top level text nodes and element nodes
       //will get wrapped
-      if (typeof itemView === 'string' && !itemView.match(/^\s*\</m)) {
+      if (typeof itemView === 'string' && !itemView.match(/^\s*</m)) {
         itemView = '<div>' + itemView + '</div>';
       }
       var itemElement = itemView.el ? [itemView.el] : _.filter($(itemView), function(node) {
@@ -95,16 +95,11 @@ _.extend(Thorax.View.prototype, {
         var last = $el.find('[' + modelCidAttributeName + '="' + previousModel.cid + '"]').last();
         last.after(itemElement);
       }
-      {{#has-plugin "helpers/view"}}
-        this._appendViews(null, function(el) {
-          el.setAttribute(modelCidAttributeName, model.cid);
-        });
-      {{/has-plugin}}
-      {{#has-plugin "helpers/element"}}
-        this._appendElements(null, function(el) {
-          el.setAttribute(modelCidAttributeName, model.cid);
-        });
-      {{/has-plugin}}
+
+      this.trigger('append', null, function(el) {
+        el.setAttribute(modelCidAttributeName, model.cid);
+      });
+
       !options.silent && this.trigger('rendered:item', this, this.collection, model, itemElement, index);
       applyItemVisiblityFilter.call(this, model);
     }
@@ -248,7 +243,7 @@ Thorax.CollectionHelperView = Thorax.View.extend({
     'rendered:empty': forwardRenderEvent('rendered:empty')
   },
   constructor: function(options) {
-    _.each(collectionHelperOptionNames, function(viewAttributeName, helperOptionName) {
+    _.each(collectionOptionNames, function(viewAttributeName, helperOptionName) {
       options.options[helperOptionName] && (options[viewAttributeName] = options.options[helperOptionName]);
     });
     if (!options.itemTemplate && options.template && options.template !== Handlebars.VM.noop) {
@@ -282,18 +277,6 @@ Thorax.CollectionHelperView = Thorax.View.extend({
   }
 });
 
-var collectionHelperOptionNames = {
-  'item-template': 'itemTemplate',
-  'empty-template': 'emptyTemplate',
-  'item-view': 'itemView',
-  'empty-view': 'emptyView',
-  'empty-class': 'emptyClass'
-  {{#has-plugin "loading"}}
-  , 'loading-template': 'loadingTemplate'
-  , 'loading-view': 'loadingView'
-  {{/has-plugin}}
-};
-
 function forwardRenderEvent(eventName) {
   return function() {
     var args = _.toArray(arguments);
@@ -309,11 +292,19 @@ function forwardMissingProperty(methodName, force) {
   }
 }
 
+// TODO: replace with listenTo
+
 function afterSetCollection(collection) {
   if (collection && !collectionHelperPresentForPrimaryCollection.call(this)) {
-    bindEvents.call(this, collection, this._collectionRenderingEvents);
+    _.each(this._collectionRenderingEvents, function(event) {
+      // getEventCallback will resolve if it is a string or a method
+      // and return a method
+      collection.on(event[0], getEventCallback(event[1], this), event[2] || this);
+    }, this);
   } else if (!collectionHelperPresentForPrimaryCollection.call(this)) {
-    unbindEvents.call(this, this.collection, this._collectionRenderingEvents);
+    _.each(this._collectionRenderingEvents, function(event) {
+      this.collection.off(event[0], getEventCallback(event[1], this), event[2] || this);
+    }, this);
   }
 }
 
@@ -326,6 +317,14 @@ function preserveCollectionElement(callback) {
   callback.call(this);
   this.getCollectionElement().replaceWith(oldCollectionElement);
 }
+
+var collectionOptionNames = {
+  'item-template': 'itemTemplate',
+  'empty-template': 'emptyTemplate',
+  'item-view': 'itemView',
+  'empty-view': 'emptyView',
+  'empty-class': 'emptyClass'
+};
 
 function applyVisibilityFilter() {
   if (this.itemFilter) {

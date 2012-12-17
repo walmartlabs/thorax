@@ -1,4 +1,4 @@
-/*global createRegistryWrapper, dataObject, getValue */
+/*global createRegistryWrapper, dataObject */
 var modelCidAttributeName = 'data-model-cid';
 
 Thorax.Model = Backbone.Model.extend({

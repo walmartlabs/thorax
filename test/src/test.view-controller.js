@@ -1,7 +1,5 @@
-$(function() {
-  QUnit.module("Thorax ViewController");
-
-  test("LayoutView", function() {
+describe('view-controller', function() {
+  it("LayoutView", function() {
     var a = new Thorax.View({
       render: function() {
         Thorax.View.prototype.render.call(this, 'a');
@@ -24,41 +22,41 @@ $(function() {
       ++bEventCounter[eventName];
     });
 
-    var layout = new Thorax.LayoutView;
+    var layout = new Thorax.LayoutView();
 
-    ok(!layout.getView(), 'layout does not start with a view');
+    expect(layout.getView()).to.not.exist;
 
     layout.setView(a, {destroy: true});
-    equal(layout.getView(), a, 'layout sets view');
-    ok(layout.$('[data-view-cid]').length, 'layout updates HTML')
+    expect(layout.getView()).to.equal(a, 'layout sets view');
+    expect(layout.$('[data-view-cid]').length).to.be.above(0, 'layout updates HTML');
 
     b.render();
     layout.setView(b, {destroy: true});
-    equal(layout.getView(), b, 'layout sets view');
+    expect(layout.getView()).to.equal(b, 'layout sets view');
 
     //lifecycle checks
-    equal(aEventCounter.rendered, 1, 'lifecycle event: rendered');
-    equal(aEventCounter.activated, 1, 'lifecycle event: activated');
-    equal(aEventCounter.ready, 1, 'lifecycle event: ready');
-    equal(aEventCounter.deactivated, 1, 'lifecycle event: deactivated');
-    equal(aEventCounter.destroyed, 1, 'lifecycle event: destroyed');
+    expect(aEventCounter.rendered).to.equal(1, 'lifecycle event: rendered');
+    expect(aEventCounter.activated).to.equal(1, 'lifecycle event: activated');
+    expect(aEventCounter.ready).to.equal(1, 'lifecycle event: ready');
+    expect(aEventCounter.deactivated).to.equal(1, 'lifecycle event: deactivated');
+    expect(aEventCounter.destroyed).to.equal(1, 'lifecycle event: destroyed');
 
-    equal(bEventCounter.rendered, 1, 'lifecycle event: rendered');
-    equal(bEventCounter.activated, 1, 'lifecycle event: activated');
-    equal(bEventCounter.ready, 1, 'lifecycle event: ready');
-    ok(!bEventCounter.deactivated, 'lifecycle event: deactivated');
-    ok(!bEventCounter.destroyed, 'lifecycle event: destroyed');
+    expect(bEventCounter.rendered).to.equal(1, 'lifecycle event: rendered');
+    expect(bEventCounter.activated).to.equal(1, 'lifecycle event: activated');
+    expect(bEventCounter.ready).to.equal(1, 'lifecycle event: ready');
+    expect(bEventCounter.deactivated).to.not.be.ok;
+    expect(bEventCounter.destroyed).to.not.be.ok;
 
     layout.setView(false);
-    ok(!layout.getView(), 'layout can set to empty view');
-    equal(bEventCounter.rendered, 1, 'lifecycle event: rendered');
-    equal(bEventCounter.activated, 1, 'lifecycle event: activated');
-    equal(bEventCounter.ready, 1, 'lifecycle event: ready');
-    equal(bEventCounter.deactivated, 1, 'lifecycle event: deactivated');
-    equal(bEventCounter.destroyed, 1, 'lifecycle event: destroyed');
+    expect(layout.getView()).to.not.exist;
+    expect(bEventCounter.rendered).to.equal(1, 'lifecycle event: rendered');
+    expect(bEventCounter.activated).to.equal(1, 'lifecycle event: activated');
+    expect(bEventCounter.ready).to.equal(1, 'lifecycle event: ready');
+    expect(bEventCounter.deactivated).to.equal(1, 'lifecycle event: deactivated');
+    expect(bEventCounter.destroyed).to.equal(1, 'lifecycle event: destroyed');
   });
 
-  test("LayoutView destroy will destroy child view", function() {
+  it("LayoutView destroy will destroy child view", function() {
     var callCounts = {
       parent: 0,
       layout: 0,
@@ -77,7 +75,7 @@ $(function() {
             ++callCounts.layout;
           }
         }
-      }),
+      })
     });
     parent.render();
     parent.layout.setView(new Thorax.View({
@@ -89,43 +87,43 @@ $(function() {
       }
     }));
     parent.destroy();
-    equal(callCounts.parent, 1);
-    equal(callCounts.layout, 1);
-    equal(callCounts.child, 1);
+    expect(callCounts.parent).to.equal(1);
+    expect(callCounts.layout).to.equal(1);
+    expect(callCounts.child).to.equal(1);
   });
 
-  test("Layout can set view el", function() {
+  it("Layout can set view el", function() {
     $('body').append('<div id="test-target-container"><div id="test-target"></div></div>');
     var view = new Thorax.LayoutView({
       el: $('#test-target')[0]
     });
     view.render();
-    equal(view.el.parentNode, $('#test-target-container')[0]);
+    expect(view.el.parentNode).to.equal($('#test-target-container')[0]);
     $('#test-target-container').remove();
   });
 
-  test('layouts with templates and {{layout}}', function() {
+  it('layouts with templates and {{layout}}', function() {
     var layoutWithTemplate = new Thorax.LayoutView({
       template: '<div class="outer">{{layout}}</div>'
     });
     layoutWithTemplate.setView(new Thorax.View({
       template: '<div class="inner"></div>'
     }));
-    ok(!$(layoutWithTemplate.el).attr('data-layout-cid'));
-    equal(layoutWithTemplate.$('[data-layout-cid]').length, 1);
-    equal(layoutWithTemplate.$('.outer').length, 1);
-    equal(layoutWithTemplate.$('.inner').length, 1);
+    expect($(layoutWithTemplate.el).attr('data-layout-cid')).to.not.exist;
+    expect(layoutWithTemplate.$('[data-layout-cid]').length).to.equal(1);
+    expect(layoutWithTemplate.$('.outer').length).to.equal(1);
+    expect(layoutWithTemplate.$('.inner').length).to.equal(1);
     var layoutWithTemplateWithoutLayoutTag = new Thorax.LayoutView({
       template: '<div class="outer"></div>'
     });
-    raises(function() {
+    expect(function() {
       layoutWithTemplateWithoutLayoutTag.setView(new Thorax.View({
         template: '<div class="inner"></div>'
       }));
-    });
+    }).to.throw();
   });
 
-  test('ViewController', function() {
+  it('ViewController', function() {
     var viewControllerA = new Thorax.ViewController({
       className: 'view-controller-a'
     });
@@ -133,10 +131,10 @@ $(function() {
       template: '',
       events: {
         ready: function() {
-          ok(this.$el.parents('.view-controller-a').length, 'ViewController sets itself as the view on the parent before the route is called');
+          expect(this.$el.parents('.view-controller-a').length).to.be.above(0, 'ViewController sets itself as the view on the parent before the route is called');
         }
       }
-    })
+    });
     var viewControllerB = new Thorax.ViewController({
       parent: viewControllerA,
       routes: {
@@ -149,10 +147,10 @@ $(function() {
     var callCount = 0;
     viewControllerB.on('route', function(name) {
       ++callCount;
-      equal(name, 'test');
+      expect(name).to.equal('test');
     });
     viewControllerB.navigate('test', {trigger: true});
-    equal(callCount, 1, 'route event triggered on ViewController');
+    expect(callCount).to.equal(1, 'route event triggered on ViewController');
 
     var test2CallCount = 0,
         test2RouteCallCount = 0;
@@ -163,13 +161,13 @@ $(function() {
       test2: function() {
         ++test2CallCount;
       }
-    }));
+    }))();
     router.on('route', function() {
       ++test2RouteCallCount;
     });
     router.navigate('test2', {trigger: true});
-    equal(test2CallCount, 1, 'route called on Router');
-    equal(test2RouteCallCount, 1, 'route event triggered on Router');
+    expect(test2CallCount).to.equal(1, 'route called on Router');
+    expect(test2RouteCallCount).to.equal(1, 'route event triggered on Router');
 
     var c = new Thorax.ViewController({
       routes: {
@@ -177,21 +175,20 @@ $(function() {
         'two': 'two'
       },
       one: function() {
-        this.setView(new Thorax.View({template:'<div class="one">one</div>'}))
+        this.setView(new Thorax.View({template: '<div class="one">one</div>'}));
       },
       two: function() {
-        this.setView(new Thorax.View({template:'<div class="two">two</div>'}))
+        this.setView(new Thorax.View({template: '<div class="two">two</div>'}));
       },
       template: '<div class="outer">{{layout}}</div>'
     });
     c.render();
     Backbone.history.navigate('one', {trigger: true});
-    equal(c.$('.outer').length, 1);
-    equal(c.$('.one').length, 1);
-    equal(c.$('.two').length, 0);
+    expect(c.$('.outer').length).to.equal(1);
+    expect(c.$('.one').length).to.equal(1);
+    expect(c.$('.two').length).to.equal(0);
     Backbone.history.navigate('two', {trigger: true});
-    equal(c.$('.one').length, 0);
-    equal(c.$('.two').length, 1);
+    expect(c.$('.one').length).to.equal(0);
+    expect(c.$('.two').length).to.equal(1);
   });
-
 });

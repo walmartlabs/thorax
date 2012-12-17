@@ -1,3 +1,5 @@
+/*global cloneInheritVars, createInheritVars, createRegistryWrapper, getValue, inheritVars */
+
 //support zepto.forEach on jQuery
 if (!$.fn.forEach) {
   $.fn.forEach = function(iterator, context) {
@@ -9,7 +11,6 @@ if (!$.fn.forEach) {
 
 var viewNameAttributeName = 'data-view-name',
     viewCidAttributeName = 'data-view-cid',
-    viewPlaceholderAttributeName = 'data-view-tmp',
     viewHelperAttributeName = 'data-view-helper';
 
 //view instances
@@ -174,27 +175,18 @@ Thorax.View = Backbone.View.extend({
     if (typeof html === 'undefined') {
       return this.el.innerHTML;
     } else {
-      this.el.innerHTML = '';
-      {{#has-plugin "collection"}}
-        var element;
-        if (this.collection && this._collectionOptionsByCid[this.collection.cid] && this._renderCount) {
-          // preserveCollectionElement calls the callback after it has a reference
-          // to the collection element, calls the callback, then re-appends the element
-          preserveCollectionElement.call(this, function() {
-            element = this.$el.append(html);
-          });
-        } else {
+      this.el.innerHTML = "";
+      var element;
+      if (this.collection && this._collectionOptionsByCid[this.collection.cid] && this._renderCount) {
+        // preserveCollectionElement calls the callback after it has a reference
+        // to the collection element, calls the callback, then re-appends the element
+        preserveCollectionElement.call(this, function() {
           element = this.$el.append(html);
-        }
-      {{else}}
-        var element = this.$el.append(html);
-      {{/has-plugin}}
-      {{#has-plugin "helpers/view"}}
-        this._appendViews();
-      {{/has-plugin}}
-      {{#has-plugin "helpers/element"}}
-        this._appendElements();
-      {{/has-plugin}}
+        });
+      } else {
+        element = this.$el.append(html);
+      }
+      this.trigger('append');
       return element;
     }
   },
@@ -213,43 +205,13 @@ Thorax.View = Backbone.View.extend({
   }
 });
 
-{{#has-plugin "event"}}
-  _.extend(Thorax.View, {
-    on: function(eventName, callback) {
-      createInheritVars(this);
-
-      if (objectEvents(this, eventName, callback)) {
-        return this;
-      }
-
-      //accept on({"rendered": handler})
-      if (typeof eventName === 'object') {
-        _.each(eventName, function(value, key) {
-          this.on(key, value);
-        }, this);
-      } else {
-        //accept on({"rendered": [handler, handler]})
-        if (_.isArray(callback)) {
-          _.each(callback, function(cb) {
-            this._events.push([eventName, cb]);
-          }, this);
-        //accept on("rendered", handler)
-        } else {
-          this._events.push([eventName, callback]);
-        }
-      }
-      return this;
-    }
-  });
-{{/has-plugin}}
-
-
 Thorax.View.extend = function() {
   createInheritVars(this);
 
   var child = Backbone.View.extend.apply(this, arguments);
+  child.__parent__ = this;
 
-  cloneInheritVars(this, child);
+  resetInheritVars(child);
 
   return child;
 };
@@ -290,59 +252,6 @@ Handlebars.registerHelper('each', function(context, options) {
 Handlebars.registerHelper('with', function(context, options) {
   return options.fn(addViewToContext.call(this, context));
 });
-
-Thorax.HelperView = Thorax.View.extend({
-  _ensureElement: function() {
-    Thorax.View.prototype._ensureElement.apply(this, arguments);
-    this.$el.attr(viewHelperAttributeName, this._helperName);
-  },
-  context: function() {
-    return this.parent.context.apply(this.parent, arguments);
-  }
-});
-
-//ensure nested inline helpers will always have this.parent
-//set to the view containing the template
-function getParent(parent) {
-  while (parent._helperName) {
-    parent = parent.parent;
-  }
-  return parent;
-}
-
-Handlebars.registerViewHelper = function(name, viewClass, callback) {
-  if (arguments.length === 2) {
-    callback = arguments[1];
-    viewClass = Thorax.HelperView;
-  }
-  Handlebars.registerHelper(name, function() {
-    var args = _.toArray(arguments),
-        options = args.pop(),
-        viewOptions = {
-          template: options.fn,
-          inverse: options.inverse,
-          options: options.hash,
-          parent: getParent(this._view),
-          _helperName: name
-        };
-    options.hash.id && (viewOptions.id = options.hash.id);
-    options.hash['class'] && (viewOptions.className = options.hash['class']);
-    options.hash.className && (viewOptions.className = options.hash.className);
-    options.hash.tag && (viewOptions.tagName = options.hash.tag);
-    options.hash.tagName && (viewOptions.tagName = options.hash.tagName);
-    var instance = new viewClass(viewOptions);
-    args.push(instance);
-    this._view.children[instance.cid] = instance;
-    this._view.trigger.apply(this._view, ['helper', name].concat(args));
-    this._view.trigger.apply(this._view, ['helper:' + name].concat(args));
-    var htmlAttributes = Thorax.Util.htmlAttributesFromOptions(options.hash);
-    htmlAttributes[viewPlaceholderAttributeName] = instance.cid;
-    callback.apply(this, args);
-    return new Handlebars.SafeString(Thorax.Util.tag(htmlAttributes, ''));
-  });
-  var helper = Handlebars.helpers[name];
-  return helper;
-};
 
 //$(selector).view() helper
 $.fn.view = function(options) {
