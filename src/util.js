@@ -160,8 +160,7 @@ Thorax.Util = {
     return typeof obj === 'object' && ('length' in obj);
   },
   expandToken: function(input, scope) {
-    // concatenate handlebars tokens as this file itself is a handlebars template
-    if (input && input.indexOf && input.indexOf('{' + '{') >= 0) {
+    if (input && input.indexOf && input.indexOf('{{') >= 0) {
       var re = /(?:\{?[^{]+)|(?:\{\{([^}]+)\}\})/g,
           match,
           ret = [];

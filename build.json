@@ -1,0 +1,72 @@
+{
+  "modules": {
+    "jquery": {
+      "mixins": [
+        "thorax-dep-jquery"
+      ],
+      "scripts": [
+        "lib/handlebars.js"
+      ]
+    },
+    "zepto": {
+      "mixins": [
+        "thorax-dep-zepto"
+      ],
+      "scripts": [
+        "lib/handlebars.js"
+      ]
+    },
+
+    "thorax": {
+      "scripts": [
+        {"src": "LICENSE", "global": true}
+      ],
+      "mixins": [
+        "thorax",
+        "thorax-helper-tags",
+        "thorax-loading"
+      ]
+    },
+    "thorax-mobile": {
+      "scripts": [
+        {"src": "LICENSE", "global": true}
+      ],
+      "mixins": [
+        "thorax",
+        "thorax-helper-tags",
+        "thorax-loading",
+        "thorax-mobile"
+      ]
+    },
+
+    "test": {
+      "scripts": [
+        {"src": "test/lib/mocha.js", "global": true},
+        {"src": "test/lib/chai.js", "global": true},
+        {"src": "test/lib/sinon-chai.js", "global": true},
+        {"src": "test/lib/sinon.js", "global": true},
+        {"src": "test/lib/sinon-backbone.js", "global": true},
+        "test/lib/runner.js",
+
+        "test/src/"
+      ],
+      "styles": [
+        "test/lib/mocha.css"
+      ],
+      "static": [
+        {"src": "test/jquery.html", "dest": "jquery.html"},
+        {"src": "test/zepto.html", "dest": "zepto.html"}
+      ]
+    }
+  },
+  "mixins": [
+    "."
+  ],
+  "scope": {
+    "template": "src/fragments/scope.handlebars"
+  },
+
+  "test": {
+    "auto-include": "test/src/test."
+  }
+}
