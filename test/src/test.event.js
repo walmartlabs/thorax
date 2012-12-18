@@ -1,22 +1,14 @@
-$(function() {
+describe('event', function() {
+  it("don't break existing event hash", function() {
+    var spy = this.spy();
 
-  QUnit.module('Thorax Event');
-
-  test("don't break existing event hash", function() {
-    expect(6);
     var view = new Thorax.View({
       key: 'value',
       events: {
         test1: 'test1',
-        test2: function() {
-          equal(this.key, 'value');
-          ok(true);
-        }
+        test2: spy
       },
-      test1: function() {
-        equal(this.key, 'value');
-        ok(true);
-      }
+      test1: spy
     });
     view.trigger('test1');
     view.trigger('test2');
@@ -28,17 +20,14 @@ $(function() {
         };
       },
       key: 'value',
-      test3: function() {
-        equal(this.key, 'value');
-        ok(true);
-      }
+      test3: spy
     });
     view.trigger('test3');
+    expect(spy.callCount).to.equal(3);
   });
 
   //ensure view.on('viewEventOne viewEventTwo') still works
-  test("Inheritable events", function() {
-    var originalLength = Thorax.View._events.length;
+  it("Inheritable events", function() {
     var Parent = Thorax.View.extend({}),
         aCount = 0,
         bCount = 0;
@@ -59,28 +48,74 @@ $(function() {
     parent.trigger('b');
     child.trigger('a');
     child.trigger('b');
-    equal(aCount, 2);
-    equal(bCount, 1);
-  
+    expect(aCount).to.equal(2);
+    expect(bCount).to.equal(1);
+
     //ensure events are properly cloned
     Parent = Thorax.View.extend();
     Parent.on({
       a: 1
     });
-  
+
     Child = Parent.extend({});
     Child.on({
       a: 2
     });
-    
+
     var ChildTwo = Parent.extend({});
-    equal(Child._events[originalLength - 0][1], 1, 'ensure events are not shared between children');
-    equal(Child._events.length - originalLength, 2, 'ensure events are not shared between children');
-    equal(ChildTwo._events[originalLength - 0][1], 1, 'ensure events are not shared between children');
-    equal(ChildTwo._events.length - originalLength, 1, 'ensure events are not shared between children');
+    expect(Parent._events[0][1]).to.equal(1, 'ensure events are not shared between children');
+    expect(Parent._events.length).to.equal(1, 'ensure events are not shared between children');
+    expect(Child._events[0][1]).to.equal(2, 'ensure events are not shared between children');
+    expect(Child._events.length).to.equal(1, 'ensure events are not shared between children');
+    expect(ChildTwo._events.length).to.equal(0, 'ensure events are not shared between children');
   });
 
-  test("multiple event registration", function() {
+  it("inherit prototype event hash", function() {
+    var spy = this.spy();
+
+    var View = Thorax.View.extend({
+      key: 'value',
+      events: {
+        test1: 'test1',
+        test2: spy
+      },
+      test1: spy
+    });
+
+    var view = new View();
+    view.trigger('test1');
+    view.trigger('test2');
+
+    view = new View({
+      events: function() {
+        return {
+          test3: 'test3'
+        };
+      },
+      key: 'value',
+      test3: spy
+    });
+    view.trigger('test1');
+    view.trigger('test2');
+    view.trigger('test3');
+
+    View = View.extend({
+      events: function() {
+        return {
+          test3: 'test3'
+        };
+      },
+      key: 'value',
+      test3: spy
+    });
+    view = new View();
+    view.trigger('test1');
+    view.trigger('test2');
+    view.trigger('test3');
+    expect(spy.callCount).to.equal(8);
+  });
+
+  it("multiple event registration", function() {
     var view = new Thorax.View(), a = 0, b = 0, c = 0, d = 0, e = 0;
     view.on({
       'a b': function() {
@@ -107,14 +142,14 @@ $(function() {
     view.trigger('a');
     view.trigger('b c');
     view.trigger('d e');
-    equal(a, 2);
-    equal(b, 2);
-    equal(c, 2);
-    equal(d, 2);
-    equal(e, 2);
+    expect(a).to.equal(2);
+    expect(b).to.equal(2);
+    expect(c).to.equal(2);
+    expect(d).to.equal(2);
+    expect(e).to.equal(2);
   });
 
-  test("auto dispose events", function() {
+  it("auto dispose events", function() {
     var view = new Thorax.View({});
     var model = new Thorax.Model();
     var callCount = 0;
@@ -122,30 +157,30 @@ $(function() {
       ++callCount;
     });
     model.trigger('test');
-    equal(callCount, 1);
+    expect(callCount).to.equal(1);
     view.freeze();
     model.trigger('test');
-    equal(callCount, 1);
+    expect(callCount).to.equal(1);
   });
 
   // TODO: simluated DOM events fail under Phantom + Zepto, but work in all
   // other scenarios, figure out why this test won't run
   if (!window.callPhantom || (window.callPhantom && typeof jQuery !== 'undefined')) {
-    test("bindToView", function() {
+    it("bindToView", function() {
       var childClickedCount = 0,
           parentClickedCount = 0;
-      
+
       var Child = Thorax.View.extend({
-        template: Thorax.templates['child'],
+        template: Thorax.templates.child,
         events: {
           'click div': function() {
             ++childClickedCount;
           }
         }
       });
-      
+
       var Parent = Thorax.View.extend({
-        template: Thorax.templates['parent'],
+        template: Thorax.templates.parent,
         events: {
           'click div': function() {
             ++parentClickedCount;
@@ -157,16 +192,16 @@ $(function() {
           });
         }
       });
-      
+
       var parent = new Parent();
       $('body').append(parent.el);
       parent.render();
       $(parent.$('div')[0]).trigger('click');
-      equal(parentClickedCount, 1);
-      equal(childClickedCount, 0);
+      expect(parentClickedCount).to.equal(1);
+      expect(childClickedCount).to.equal(0);
       parent.child.$('div').trigger('click');
-      equal(parentClickedCount, 1);
-      equal(childClickedCount, 1);
+      expect(parentClickedCount).to.equal(1);
+      expect(childClickedCount).to.equal(1);
       parent.$el.remove();
     });
   }

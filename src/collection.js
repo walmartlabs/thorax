@@ -1,7 +1,7 @@
+/*global createRegistryWrapper, dataObject, getValue, modelCidAttributeName, viewCidAttributeName */
 var _fetch = Backbone.Collection.prototype.fetch,
     _reset = Backbone.Collection.prototype.reset,
     collectionCidAttributeName = 'data-collection-cid',
-    collectionNameAttributeName = 'data-collection-name',
     collectionEmptyAttributeName = 'data-collection-empty',
     ELEMENT_NODE_TYPE = 1;
 
@@ -15,7 +15,7 @@ Thorax.Collection = Backbone.Collection.extend({
     }
   },
   isPopulated: function() {
-    return this._fetched || this.length > 0 || (!this.length && !Thorax.Util.getValue(this, 'url'));
+    return this._fetched || this.length > 0 || (!this.length && !getValue(this, 'url'));
   },
   fetch: function(options) {
     options = options || {};
@@ -33,77 +33,16 @@ Thorax.Collection = Backbone.Collection.extend({
 });
 
 Thorax.Collections = {};
-Thorax.Util.createRegistryWrapper(Thorax.Collection, Thorax.Collections);
+createRegistryWrapper(Thorax.Collection, Thorax.Collections);
 
-{{#inject "extend"}}
-  Thorax.Util._cloneEvents(this, child, '_collectionEvents');
-{{/inject}}
-
-{{#inject "static-view-properties"}}
-  Thorax.View._collectionEvents = [];
-{{/inject}}
-
-{{#inject "beforeConfigure"}}
-  this._collectionEvents = [];
-  this._collectionOptionsByCid = {};
-  this._collections = [];
-{{/inject}}
-
-{{#inject "freeze"}}
-  _.each(this._collections, this.unbindCollection, this);
-{{/inject}}
-
-{{#inject "on"}}
-  if (eventName === 'collection' && typeof callback === 'object') {
-    return addEvents(this._collectionEvents, callback);
-  }
-{{/inject}}
-
-_.extend(Thorax.View.prototype, {
-  bindCollection: function(collection, options) {
-    // Collections do not have a cid attribute by default
-    collection.cid = collection.cid || _.uniqueId('collection');
-    this._collections.push(collection);
-    var collectionOptions = this._setCollectionOptions(collection, options);
-    bindEvents.call(this, collection, this.constructor._collectionEvents);
-    bindEvents.call(this, collection, this._collectionEvents);
-    if (Thorax.Util.shouldFetch(collection, collectionOptions)) {
-      this._loadCollection(collection);
-    } else if (collectionOptions.render) {
-      //want to trigger built in event handler (render())
-      //without triggering event on collection
-      this.render();
-    }
-  },
-  unbindCollection: function(collection) {
-    this._collections = _.without(this._collections, collection);
-    collection.trigger('freeze');
-    unbindEvents.call(this, collection, this.constructor._collectionEvents);
-    unbindEvents.call(this, collection, this._collectionEvents);
-    delete this._collectionOptionsByCid[collection.cid];
-  },
-  _setCollectionOptions: function(collection, options) {
-    return this._collectionOptionsByCid[collection.cid] = _.extend({
-      render: null, // CollectionView will override and set to true
-      fetch: true,
-      success: false,
-      errors: true
-      {{{override "collection-options" indent=6}}}
-    }, options || {});
-  },
-  _loadCollection: function(collection) {
-    {{#has-plugin "loading"}}
-      if (collection.load) {
-        collection.load(function(){
-          options && options.success && options.success(collection);
-        }, options);
-      } else {
-        collection.fetch(options);
-      }
-    {{else}}
-      collection.fetch(this.options);
-    {{/has-plugin}}
-  }
+dataObject('collection', {
+  name: '_collectionEvents',
+  array: '_collections',
+  hash: '_collectionOptionsByCid',
+  set: 'setCollection',
+  bind: 'bindCollection',
+  unbind: 'unbindCollection',
+  cidAttrName: collectionCidAttributeName
 });
 
 Thorax.CollectionView = Thorax.HelperView.extend({
@@ -119,29 +58,6 @@ Thorax.CollectionView = Thorax.HelperView.extend({
     }, this);
     configureCollectionViewOptions(this);
     this.collection && this.setCollection(this.collection);
-  },
-  setCollection: function(collection, options) {
-    if (collection) {
-      this.collection = collection;
-      {{#has-plugin "loading"}}
-        addLoadingBehaviors.call(this);
-      {{/has-plugin}}
-      this.bindCollection(collection, _.extend({}, this.options, options));
-      this.$el.attr(collectionCidAttributeName, collection.cid);
-      collection.name && this.$el.attr(collectionNameAttributeName, collection.name);
-      collection.trigger('set', collection);
-    } else {
-      this.collection && this.unbindCollection(this.collection);
-      this.collection = false;
-      this.$el.removeAttr(collectionCidAttributeName);
-      this.$el.removeAttr(collectionNameAttributeName);
-    }
-    return this;
-  },
-  _setCollectionOptions: function() {
-    var options = Thorax.View.prototype._setCollectionOptions.apply(this, arguments);
-    options.render === null && (options.render = true);
-    return options;
   },
   //appendItem(model [,index])
   //appendItem(html_string, index)
@@ -168,8 +84,8 @@ Thorax.CollectionView = Thorax.HelperView.extend({
       //if the renderer's output wasn't contained in a tag, wrap it in a div
       //plain text, or a mixture of top level text nodes and element nodes
       //will get wrapped
-      if (typeof itemView === 'string' && !itemView.match(/^\s*\</m)) {
-        itemView = '<div>' + itemView + '</div>'
+      if (typeof itemView === 'string' && !itemView.match(/^\s*</m)) {
+        itemView = '<div>' + itemView + '</div>';
       }
       var itemElement = itemView.el ? [itemView.el] : _.filter($(itemView), function(node) {
         //filter out top level whitespace nodes
@@ -184,16 +100,11 @@ Thorax.CollectionView = Thorax.HelperView.extend({
         var last = this.$el.find('[' + modelCidAttributeName + '="' + previousModel.cid + '"]').last();
         last.after(itemElement);
       }
-      {{#has-plugin "helpers/view"}}
-        this._appendViews(null, function(el) {
-          el.setAttribute(modelCidAttributeName, model.cid);
-        });
-      {{/has-plugin}}
-      {{#has-plugin "helpers/element"}}
-        this._appendElements(null, function(el) {
-          el.setAttribute(modelCidAttributeName, model.cid);
-        });
-      {{/has-plugin}}
+
+      this.trigger('append', null, function(el) {
+        el.setAttribute(modelCidAttributeName, model.cid);
+      });
+
       !options.silent && this.parent.trigger('rendered:item', this, this.collection, model, itemElement, index);
       applyItemVisiblityFilter.call(this, model);
     }
@@ -308,11 +219,6 @@ var collectionOptionNames = [
   'empty-context',
   'empty-class',
   'filter'
-  {{#has-plugin "loading"}}
-  , 'loading-template'
-  , 'loading-view'
-  , 'loading-placement'
-  {{/has-plugin}}
 ];
 
 function applyVisibilityFilter() {
@@ -329,7 +235,7 @@ function applyItemVisiblityFilter(model) {
   }
 }
 
-function itemShouldBeVisible(model, i) {
+function itemShouldBeVisible(model) {
   return (typeof this.options.filter === 'string'
     ? this.parent[this.options.filter]
     : this.options.filter).call(this.parent, model, this.collection.indexOf(model))
@@ -348,7 +254,7 @@ function handleChangeFromNotEmptyToEmpty() {
   this.appendEmpty();
 }
 
-var sharedCollectionEvents = {
+Thorax.View.on({
   collection: {
     reset: function(collection) {
       var options = this._collectionOptionsByCid[collection.cid];
@@ -359,14 +265,7 @@ var sharedCollectionEvents = {
       options.errors && this.trigger('error', message);
     }
   }
-};
-
-// Sub-classes have already been declared, so need
-// to call `on` on all classes that should get the
-// events
-Thorax.View.on(sharedCollectionEvents);
-Thorax.HelperView.on(sharedCollectionEvents);
-Thorax.CollectionView.on(sharedCollectionEvents);
+});
 
 Thorax.CollectionView.on({
   collection: {
@@ -389,7 +288,7 @@ Thorax.CollectionView.on({
         this.appendItem(model, index);
       }
     },
-    remove: function(model, collection) {
+    remove: function(model /*, collection */) {
       this.$el.find('[' + modelCidAttributeName + '="' + model.cid + '"]').remove();
       for (var cid in this.children) {
         if (this.children[cid].model && this.children[cid].model.cid === model.cid) {
@@ -412,48 +311,6 @@ function configureCollectionViewOptions(view) {
     'empty-class': ('empty-class' in view.options) ? view.options['empty-class'] : 'empty'
   });
 }
-
-{{#has-plugin "loading"}}
-  function addLoadingBehaviors() {
-    var loadingView = this.options['loading-view'],
-        loadingTemplate = this.options['loading-template'],
-        loadingPlacement = this.options['loading-placement'];
-    //add "loading-view" and "loading-template" options to collection helper
-    if (loadingView || loadingTemplate) {
-      var callback = Thorax.loadHandler(_.bind(function() {
-        var item;
-        if (this.collection.length === 0) {
-          this.$el.empty();
-        }
-        if (loadingView) {
-          var instance = Thorax.Util.getViewInstance(loadingView, {
-            collection: this.collection
-          });
-          this._addChild(instance);
-          if (loadingTemplate) {
-            instance.render(loadingTemplate);
-          } else {
-            instance.render();
-          }
-          item = instance;
-        } else {
-          item = this.renderTemplate(loadingTemplate, {
-            collection: this.collection
-          });
-        }
-        var index = loadingPlacement
-          ? loadingPlacement.call(this.parent, this)
-          : this.collection.length
-        ;
-        this.appendItem(item, index);
-        this.$el.children().eq(index).attr('data-loading-element', this.collection.cid);
-      }, this), _.bind(function() {
-        this.$el.find('[data-loading-element="' + this.collection.cid + '"]').remove();
-      }, this));
-      this.on(this.collection, 'load:start', callback);
-    }
-  }
-{{/has-plugin}}
 
 //$(selector).collection() helper
 $.fn.collection = function(view) {

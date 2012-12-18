@@ -1,3 +1,7 @@
 .DS_STORE
 .project
 node_modules
+build
+dist
+*.sublime-project
+*.sublime-workspace

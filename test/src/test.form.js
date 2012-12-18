@@ -1,12 +1,10 @@
-$(function() {
-  QUnit.module('Thorax Form');
-
-  test("serialize() / populate()", function() {
+describe('form', function() {
+  it("serialize() / populate()", function() {
     var FormView = Thorax.View.extend({
       name: 'form',
       template: Handlebars.compile('<form><input name="one"/><select name="two"><option value="a">a</option><option value="b">b</option></select><input name="three[four]"/><input name="five" value="A" type="checkbox" /><input name="five" value="B" type="checkbox" checked /><input name="five" value="C" type="checkbox" checked /><input name="six" value="LOL" type="checkbox" checked /></form>', {data: true})
     });
-  
+
     var model = new Thorax.Model({
       one: 'a',
       two: 'b',
@@ -14,20 +12,20 @@ $(function() {
         four: 'c'
       }
     });
-  
+
     var view = new FormView();
     view.render();
     var attributes = view.serialize();
-    equal(attributes.one, "", 'serialize empty attributes');
-    deepEqual(attributes.five, ['B', 'C'], 'serialize empty attributes');
-    equal(attributes.six, 'LOL', 'serialize empty attributes');
+    expect(attributes.one).to.equal('', 'serialize empty attributes');
+    expect(attributes.five).to.eql(['B', 'C'], 'serialize empty attributes');
+    expect(attributes.six).to.equal('LOL', 'serialize empty attributes');
     view.setModel(model);
     attributes = view.serialize();
 
-    equal(attributes.one, 'a', 'serialize attributes from model');
-    equal(attributes.two, 'b', 'serialize attributes from model');
-    equal(attributes.three.four, 'c', 'serialize attributes from model');
-  
+    expect(attributes.one).to.equal('a', 'serialize attributes from model');
+    expect(attributes.two).to.equal('b', 'serialize attributes from model');
+    expect(attributes.three.four).to.equal('c', 'serialize attributes from model');
+
     view.populate({
       one: 'aa',
       two: 'b',
@@ -37,10 +35,10 @@ $(function() {
     });
 
     attributes = view.serialize();
-    equal(attributes.one, 'aa', 'serialize attributes from populate()');
-    equal(attributes.two, 'b', 'serialize attributes from populate()');
-    equal(attributes.three.four, 'cc', 'serialize attributes from populate()');
-  
+    expect(attributes.one).to.equal('aa', 'serialize attributes from populate()');
+    expect(attributes.two).to.equal('b', 'serialize attributes from populate()');
+    expect(attributes.three.four).to.equal('cc', 'serialize attributes from populate()');
+
     view.validateInput = function() {
       return ['error'];
     };
@@ -48,11 +46,11 @@ $(function() {
     view.on('error', function() {
       ++errorCallbackCallCount;
     });
-    ok(!view.serialize());
-    equal(errorCallbackCallCount, 1, "error event triggered when validateInput returned errors");
+    expect(view.serialize()).to.be.undefined;
+    expect(errorCallbackCallCount).to.equal(1, "error event triggered when validateInput returned errors");
   });
 
-  test("nested serialize / populate", function() {
+  it("nested serialize / populate", function() {
     //the test has a child view and a mock helper view fragment
     //the child view should act as a child view, the view fragment
     //should act as a part of the parent view
@@ -69,15 +67,15 @@ $(function() {
       childKey: 'childValue'
     });
     view.setModel(model);
-    equal(view.$('input[name="parentKey"]').val(), 'parentValue');
-    equal(view.$('input[name="childKey"]').val(), 'childValue');
+    expect(view.$('input[name="parentKey"]').val()).to.equal('parentValue');
+    expect(view.$('input[name="childKey"]').val()).to.equal('childValue');
 
     view.populate({
       parentKey: '',
       childKey: ''
     });
-    equal(view.$('input[name="parentKey"]').val(), '');
-    equal(view.$('input[name="childKey"]').val(), '');
+    expect(view.$('input[name="parentKey"]').val()).to.equal('');
+    expect(view.$('input[name="childKey"]').val()).to.equal('');
 
     view.setModel(false);
     view.setModel(model, {
@@ -85,9 +83,9 @@ $(function() {
         children: false
       }
     });
-    equal(view.$('input[name="parentKey"]')[0].value, 'parentValue');
-    equal(view.$('input[name="childKey"]')[1].value, 'childValue');
-    equal(view.$('input[name="childKey"]')[0].value, '');
+    expect(view.$('input[name="parentKey"]')[0].value).to.equal('parentValue');
+    expect(view.$('input[name="childKey"]')[1].value).to.equal('childValue');
+    expect(view.$('input[name="childKey"]')[0].value).to.equal('');
 
     view.populate({
       parentKey: '',
@@ -96,25 +94,22 @@ $(function() {
     view.populate(model.attributes, {
       children: false
     });
-    equal(view.$('input[name="parentKey"]')[0].value, 'parentValue');
-    equal(view.$('input[name="childKey"]')[1].value, 'childValue');
-    equal(view.$('input[name="childKey"]')[0].value, '');
+    expect(view.$('input[name="parentKey"]')[0].value).to.equal('parentValue');
+    expect(view.$('input[name="childKey"]')[1].value).to.equal('childValue');
+    expect(view.$('input[name="childKey"]')[0].value).to.equal('');
 
     view.$('input[name="childKey"]')[0].value = 'childValue';
 
     //multuple childKey inputs should be serialized so there should be an array
-    equal(view.serialize({
+    expect(view.serialize({
       children: true
-    }).childKey[0], 'childValue');
+    }).childKey[0]).to.equal('childValue');
 
     view.$('input[name="childKey"]')[0].value = '';
 
     //no children so only one childKey
-    equal(view.serialize({
+    expect(view.serialize({
       children: false
-    }).childKey, 'childValue');
-
-
+    }).childKey).to.equal('childValue');
   });
-
 });

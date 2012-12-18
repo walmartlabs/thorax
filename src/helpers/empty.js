@@ -43,6 +43,6 @@ Handlebars.registerViewHelper('empty', function(collection, view) {
     view.on(collection, 'add', collectionAddCallback);
     view.on(collection, 'reset', collectionResetCallback);
   }
-  
+
   view.render();
 });

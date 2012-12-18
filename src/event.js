@@ -1,29 +1,57 @@
-var _on = Thorax.View.prototype.on,
-    _delegateEvents = Thorax.View.prototype.delegateEvents;
+/*global createInheritVars, inheritVars, objectEvents, walkInheritTree */
+// Save a copy of the _on method to call as a $super method
+var _on = Thorax.View.prototype.on;
 
-{{#inject "configure"}}
-  //_events not present on HelperView
-  this.constructor._events && _.each(this.constructor._events, function(event) {
-    this.on.apply(this, event);
-  }, this);
-  if (this.events) {
-    _.each(Thorax.Util.getValue(this, 'events'), function(handler, eventName) {
-      this.on(eventName, handler, this);
-    }, this);
+inheritVars.event = {
+  name: '_events',
+
+  configure: function() {
+    var self = this;
+    walkInheritTree(this.constructor, '_events', true, function(event) {
+      self.on.apply(self, event);
+    });
+    walkInheritTree(this, 'events', false, function(handler, eventName) {
+      self.on(eventName, handler, self);
+    });
   }
-{{/inject}}
+};
 
-{{#inject "extend"}}
-  Thorax.Util._cloneEvents(this, child, '_events');
-{{/inject}}
+_.extend(Thorax.View, {
+  on: function(eventName, callback) {
+    createInheritVars(this);
 
-{{#inject "destroy"}}
-  this.freeze();
-{{/inject}}
+    if (objectEvents(this, eventName, callback)) {
+      return this;
+    }
+
+    //accept on({"rendered": handler})
+    if (typeof eventName === 'object') {
+      _.each(eventName, function(value, key) {
+        this.on(key, value);
+      }, this);
+    } else {
+      //accept on({"rendered": [handler, handler]})
+      if (_.isArray(callback)) {
+        _.each(callback, function(cb) {
+          this._events.push([eventName, cb]);
+        }, this);
+      //accept on("rendered", handler)
+      } else {
+        this._events.push([eventName, callback]);
+      }
+    }
+    return this;
+  }
+});
 
 _.extend(Thorax.View.prototype, {
   freeze: function(options) {
-    {{{override "freeze" indent=4}}}
+    _.each(inheritVars, function(obj) {
+      if (obj.unbind) {
+        _.each(this[obj.array], this[obj.unbind], this);
+      }
+    }, this);
+
     options = _.defaults(options || {}, {
       dom: true,
       children: true
@@ -38,13 +66,16 @@ _.extend(Thorax.View.prototype, {
     }
     this.trigger('freeze');
     if (options.children) {
-      _.each(this.children, function(child, id) {
+      _.each(this.children, function(child) {
         child.freeze(options);
       }, this);
     }
   },
   on: function(eventName, callback, context) {
-    {{{override "on" indent=4}}}
+    if (objectEvents(this, eventName, callback)) {
+      return this;
+    }
+
     if (typeof eventName === 'object') {
       //accept on({"rendered": callback})
       if (arguments.length === 1) {
@@ -118,31 +149,29 @@ _.extend(Thorax.View.prototype, {
 
 var eventSplitter = /^(nested\s+)?(\S+)(?:\s+(.+))?/;
 
-var domEvents = [
+var domEvents = [],
+    domEventRegexp;
+function pushDomEvents(events) {
+  domEvents.push.apply(domEvents, events);
+  domEventRegexp = new RegExp('^(' + domEvents.join('|') + ')');
+}
+pushDomEvents([
   'mousedown', 'mouseup', 'mousemove', 'mouseover', 'mouseout',
   'touchstart', 'touchend', 'touchmove',
   'click', 'dblclick',
   'keyup', 'keydown', 'keypress',
   'submit', 'change',
   'focus', 'blur'
-  {{#has-plugin "mobile"}}
-    ,
-    'singleTap', 'doubleTap', 'longTap',
-    'swipe',
-    'swipeUp', 'swipeDown',
-    'swipeLeft', 'swipeRight'
-  {{/has-plugin}}
-];
-var domEventRegexp = new RegExp('^(' + domEvents.join('|') + ')');
+]);
 
 function containHandlerToCurentView(handler, cid) {
   return function(event) {
     var view = $(event.target).view({helper: false});
-    if (view && view.cid == cid) {
+    if (view && view.cid === cid) {
       event.originalContext = this;
       handler(event);
     }
-  }
+  };
 }
 
 function bindEventHandler(eventName, callback) {

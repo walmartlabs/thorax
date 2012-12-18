@@ -1,3 +1,5 @@
+/*global isMobile, registerClickHandler */
+
 //removal of click delay on mobile webkit
 var TAP_RANGE = 5;    // +-5px is still considered a tap
 
@@ -9,23 +11,23 @@ Thorax.configureFastClick = function(useFastClick) {
     body.addEventListener('touchstart', onTouchStart, true);
     body.addEventListener('touchmove', onTouchMove, true);
     body.addEventListener('touchend', onTouchEnd, true);
-    body.addEventListener('click', clickKiller, true);  
+    body.addEventListener('click', clickKiller, true);
   } else {
     Thorax._fastClickEventName = 'click';
     body.removeEventListener('touchstart', onTouchStart, true);
     body.removeEventListener('touchmove', onTouchMove, true);
     body.removeEventListener('touchend', onTouchEnd, true);
-    body.removeEventListener('click', clickKiller, true);  
+    body.removeEventListener('click', clickKiller, true);
   }
-  {{#has-plugin "helpers/button-link"}}
+  if (typeof registerClickHandler !== 'undefined') {
     registerClickHandler && registerClickHandler();
-  {{/has-plugin}}
+  }
 };
 
 if (isMobile) {
   var start,
       clickRedRum;
-  
+
   function onTouchStart(event) {
     try {
       if (event.touches.length === 1) {
@@ -35,29 +37,29 @@ if (isMobile) {
         start = false;
       }
       clickRedRum = false;
-    } catch(e) {
+    } catch (e) {
       Thorax.onException('fast-click start', e);
     }
   }
-  
+
   function onTouchMove() {
     if (!event.touches || event.touches.length > 1) {
       start = false;
     }
   }
-  
+
   function defaultPrevented(event) {
     return event.isDefaultPrevented ? event.isDefaultPrevented() : event.defaultPrevented;
   }
-  
+
   function onTouchEnd(event) {
     try {
       var touch = event.changedTouches[0];
       if (start
-          && Math.abs(touch.clientX-start.x) <= TAP_RANGE
-          && Math.abs(touch.clientY-start.y) <= TAP_RANGE) {
+          && Math.abs(touch.clientX - start.x) <= TAP_RANGE
+          && Math.abs(touch.clientY - start.y) <= TAP_RANGE) {
         var target = touch.target;
-      
+
         // see if target element or ancestor is disabled as click would not be triggered in this case
         var disabled = !!($(target).closest('[disabled]').length);
         if (!disabled) {
@@ -75,14 +77,14 @@ if (isMobile) {
             clickRedRum = true;
             event.original.preventDefault();
             event.defaultPrevented = true;
-          } 
+          }
         }
       }
-    } catch(e) {
+    } catch (e) {
       Thorax.onException('fast-click end', e);
     }
   }
-  
+
   function clickKiller(event) {
     if (clickRedRum) {
       event.preventDefault();
@@ -90,14 +92,14 @@ if (isMobile) {
       clickRedRum = false;
     }
   }
-  
+
   // Use this instead of $(function() {}) so that jQuery
   // does not register a timeout
   $(document).ready(function() {
     Thorax.configureFastClick(isMobile);
   });
 } else {
-  {{#has-plugin "helpers/button-link"}}
+  if (typeof registerClickHandler !== 'undefined') {
     registerClickHandler && registerClickHandler();
-  {{/has-plugin}}
+  }
 }
