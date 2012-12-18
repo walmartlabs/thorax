@@ -28,7 +28,7 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
   Handlebars.registerHelper(name, function() {
     var args = _.toArray(arguments),
         options = args.pop(),
-        declaringView = options.data.view;
+        declaringView = ensureOptionsData(options).data.view;
 
     var viewOptions = {
       template: options.fn,

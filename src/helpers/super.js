@@ -1,5 +1,5 @@
 Handlebars.registerHelper('super', function(options) {
-  var declaringView = options.data.view,
+  var declaringView = ensureOptionsData(options).data.view,
       parent = declaringView.constructor && declaringView.constructor.__super__;
   if (parent) {
     var template = parent.template;

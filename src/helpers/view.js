@@ -1,7 +1,7 @@
 /*global viewPlaceholderAttributeName */
 var viewTemplateOverrides = {};
 Handlebars.registerHelper('view', function(view, options) {
-  var declaringView = options.data.view;
+  var declaringView = ensureOptionsData(options).data.view;
   if (arguments.length === 1) {
     options = view;
     view = Thorax.View;
@@ -32,9 +32,7 @@ Thorax.View.on('append', function(scope, callback) {
       //if not, ensure the view has been rendered at least once
       if (viewTemplateOverrides[placeholderId]) {
         view.render(viewTemplateOverrides[placeholderId](view._getContext(), {
-          data: {
-            view: view
-          }
+          data: view._getData()
         }));
       } else {
         view.ensureRendered();

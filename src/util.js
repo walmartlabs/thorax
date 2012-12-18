@@ -115,6 +115,13 @@ function extendOptions(name, callback) {
   };
 }
 
+function ensureOptionsData(options) {
+  if (!options || !options.data) {
+    throw new Error('Handlebars template compiled without data, use: Handlebars.compile(template, {data: true})');
+  }
+  return options;
+}
+
 Thorax.Util = {
   getViewInstance: function(name, attributes) {
     attributes['class'] && (attributes.className = attributes['class']);

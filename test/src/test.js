@@ -133,6 +133,16 @@ describe('core', function() {
     expect(parent.$('div').get(1).innerHTML).to.equal('b');
   });
 
+  it("throws an error when template compiled without data", function() {
+    var view = new Thorax.View({
+      child: new Thorax.View({template: ''}),
+      template: Handlebars.compile('{{view child}}', {data: false})
+    });
+    expect(function() {
+      view.render();
+    }).to['throw']();
+  });
+
   it("fail silently when no view initialized", function() {
     var parent = new Thorax.View({
       template: "{{view child}}"
