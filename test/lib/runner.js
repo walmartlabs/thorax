@@ -6,6 +6,8 @@ mocha.setup({
 
 window.expect = chai.expect;
 
+chai.Assertion.includeStack = true;
+
 sinon.config = {
   injectIntoThis: true,
   injectInto: null,
