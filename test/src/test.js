@@ -186,8 +186,8 @@ describe('core', function() {
 
   it("template function can be specified", function() {
     var childReturningString = new Thorax.View({
-      template: function(data) {
-        expect(data.cid && data.cid.match(/^t/)).to.exist;
+      template: function(data, options) {
+        expect(options.data.cid && options.data.cid.match(/^t/)).to.exist;
         return 'template';
       }
     });
