@@ -177,8 +177,6 @@ Thorax.sync = function(method, dataObj, options) {
   };
   this._request = Backbone.sync.apply(this, arguments);
 
-  // TODO : Reevaluate this event... Seems too indepth to expose as an API
-  this.trigger('request', this._request);
   return this._request;
 };
 
