@@ -115,6 +115,14 @@ describe('event', function() {
     expect(spy.callCount).to.equal(8);
   });
 
+  it("event map", function() {
+    var spy = this.spy(),
+        view = new Thorax.View();
+    view.on({test: spy});
+    view.trigger('test');
+    expect(spy.callCount).to.equal(1);
+  });
+
   it("multiple event registration", function() {
     var view = new Thorax.View(), a = 0, b = 0, c = 0, d = 0, e = 0;
     view.on({
