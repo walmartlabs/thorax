@@ -205,4 +205,74 @@ describe('event', function() {
       parent.$el.remove();
     });
   }
+
+  it("should call ensureRendered when ready event is triggered", function() {
+    var spy = this.spy(),
+        view = new Thorax.View({
+          events: {
+            rendered: spy
+          },
+          template: 'test'
+        });
+    expect(spy.callCount).to.equal(0);
+    view.trigger('ready');
+    expect(spy.callCount).to.equal(1);
+    view.trigger('ready');
+    expect(spy.callCount).to.equal(1);
+    expect(view.html()).to.equal('test');
+
+    // ensure ready event does not trigger re-render if already rendered
+    spy = this.spy(),
+    view = new Thorax.View({
+      events: {
+        rendered: spy
+      },
+      template: 'test'
+    });
+    expect(spy.callCount).to.equal(0);
+    view.render();
+    expect(spy.callCount).to.equal(1);
+    view.trigger('ready');
+    expect(spy.callCount).to.equal(1);
+  });
+
+  it("should trigger ready event immediately if view is ready", function() {
+    var spy = this.spy(),
+        view = new Thorax.View();
+    view.trigger('ready');
+    expect(spy.callCount).to.equal(0);
+    view.on('ready', spy);
+    expect(spy.callCount).to.equal(1);
+  });
+
+  it("should trigger ready event on children", function() {
+    var spy = this.spy(),
+        layoutView = new Thorax.LayoutView(),
+        view = new Thorax.View({
+          child: new Thorax.View({
+            template: '',
+            events: {
+              ready: spy
+            }
+          }),
+          template: '{{view child}}'
+        });
+    expect(spy.callCount).to.equal(0);
+    layoutView.setView(view);
+    expect(spy.callCount).to.equal(1);
+
+    // adding a child to a view that is ready should
+    // immediately trigger
+    var secondChildSpy = this.spy(),
+        secondChild = new Thorax.View({
+          events: {
+            ready: secondChildSpy
+          },
+          template: 'test'
+        });
+    expect(secondChildSpy.callCount).to.equal(0);
+    view._addChild(secondChild);
+    expect(secondChildSpy.callCount).to.equal(1);
+    expect(secondChild.html()).to.equal('test');
+  });
 });
