@@ -27,13 +27,15 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
   }
   Handlebars.registerHelper(name, function() {
     var args = _.toArray(arguments),
-        options = args.pop();
+        options = args.pop(),
+        declaringView = getOptionsData(options).view;
 
     var viewOptions = {
       template: options.fn,
       inverse: options.inverse,
       options: options.hash,
-      parent: getParent(this._view),
+      declaringView: declaringView,
+      parent: getParent(declaringView),
       _helperName: name
     };
 
@@ -44,9 +46,9 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
     options.hash.tagName && (viewOptions.tagName = options.hash.tagName);
     var instance = new ViewClass(viewOptions);
     args.push(instance);
-    this._view.children[instance.cid] = instance;
-    this._view.trigger.apply(this._view, ['helper', name].concat(args));
-    this._view.trigger.apply(this._view, ['helper:' + name].concat(args));
+    declaringView.children[instance.cid] = instance;
+    declaringView.trigger.apply(declaringView, ['helper', name].concat(args));
+    declaringView.trigger.apply(declaringView, ['helper:' + name].concat(args));
     var htmlAttributes = Thorax.Util.htmlAttributesFromOptions(options.hash);
     htmlAttributes[viewPlaceholderAttributeName] = instance.cid;
     callback.apply(this, args);

@@ -62,7 +62,7 @@ Thorax.View = Backbone.View.extend({
 
     //compile a string if it is set as this.template
     if (typeof this.template === 'string') {
-      this.template = Handlebars.compile(this.template);
+      this.template = Handlebars.compile(this.template, {data: true});
     } else if (this.name && !this.template) {
       //fetch the template
       this.template = Thorax.Util.getTemplate(this.name, true);
@@ -138,14 +138,19 @@ Thorax.View = Backbone.View.extend({
   },
 
   _getContext: function(attributes) {
-    var data = _.extend({}, getValue(this, 'context'), attributes || {}, {
+    return _.extend({}, getValue(this, 'context'), attributes || {});
+  },
+
+  // Private variables in handlebars / options.data in template helpers
+  _getData: function(data) {
+    return {
+      view: this,
       cid: _.uniqueId('t'),
       yield: function() {
+        // fn is seeded by template helper passing context to data
         return data.fn && data.fn(data);
-      },
-      _view: this
-    });
-    return data;
+      }
+    };
   },
 
   renderTemplate: function(file, data, ignoreErrors) {
@@ -163,7 +168,7 @@ Thorax.View = Backbone.View.extend({
         throw new Error('Unable to find template ' + file);
       }
     } else {
-      return template(data);
+      return template(data, {data: this._getData(data)});
     }
   },
 
@@ -208,41 +213,6 @@ Thorax.View.extend = function() {
 };
 
 createRegistryWrapper(Thorax.View, Thorax.Views);
-
-function addViewToContext(source) {
-  if (this._view) {
-    var context = _.clone(source);
-    context._view = this._view;
-    return context;
-  } else {
-    return source;
-  }
-}
-
-//override handlebars "each" helper to provide "_view"
-Handlebars.registerHelper('each', function(context, options) {
-  var fn = options.fn, inverse = options.inverse;
-  var ret = "", data;
-
-  if (options.data) {
-    data = Handlebars.createFrame(options.data);
-  }
-
-  if (context && context.length > 0) {
-    for (var i = 0, j = context.length; i < j; i++) {
-      if (data) { data.index = i; }
-      ret = ret + fn(addViewToContext.call(this, context[i]), { data: data });
-    }
-  } else {
-    ret = inverse(this);
-  }
-  return ret;
-});
-
-//override handlebars "with" helper to provide "_view"
-Handlebars.registerHelper('with', function(context, options) {
-  return options.fn(addViewToContext.call(this, context));
-});
 
 //$(selector).view() helper
 $.fn.view = function(options) {

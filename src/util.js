@@ -115,6 +115,13 @@ function extendOptions(name, callback) {
   };
 }
 
+function getOptionsData(options) {
+  if (!options || !options.data) {
+    throw new Error('Handlebars template compiled without data, use: Handlebars.compile(template, {data: true})');
+  }
+  return options.data;
+}
+
 Thorax.Util = {
   getViewInstance: function(name, attributes) {
     attributes['class'] && (attributes.className = attributes['class']);
@@ -147,7 +154,7 @@ Thorax.Util = {
     }
 
     if (template && typeof template === 'string') {
-      template = Thorax.templates[file] = Handlebars.compile(template);
+      template = Thorax.templates[file] = Handlebars.compile(template, {data: true});
     } else if (!template && !ignoreErrors) {
       throw new Error('templates: ' + file + ' does not exist.');
     }
