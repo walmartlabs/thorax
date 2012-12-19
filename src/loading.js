@@ -378,7 +378,9 @@ inheritVars.collection.loading = function() {
     }, this), _.bind(function() {
       this.$el.find('[data-loading-element="' + this.collection.cid + '"]').remove();
     }, this));
-    this.on(this.collection, 'load:start', callback);
+    this.collection.on('load:start', callback);
+    //TODO: figure out why listenTo will not work
+    //this.listenTo(this.collection, 'load:start', callback);
   }
 };
 

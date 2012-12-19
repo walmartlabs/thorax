@@ -18,14 +18,14 @@ function dataObject(type, spec) {
     walkInheritTree(source, spec.name, true, function(event) {
       // getEventCallback will resolve if it is a string or a method
       // and return a method
-      target.on(event[0], getEventCallback(event[1], context), event[2] || context);
+      context.listenTo(target, event[0], getEventCallback(event[1], context));
     });
   }
 
   function unbindEvents(target, source) {
     var context = this;
     walkInheritTree(source, spec.name, true, function(event) {
-      target.off(event[0], getEventCallback(event[1], context), event[2] || context);
+      context.stopListening(target);
     });
   }
 

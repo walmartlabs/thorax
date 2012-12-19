@@ -292,18 +292,12 @@ function forwardMissingProperty(methodName, force) {
   }
 }
 
-// TODO: replace with listenTo
-
 function afterSetCollection(collection) {
   if (collection && !collectionHelperPresentForPrimaryCollection.call(this)) {
     _.each(this._collectionRenderingEvents, function(event) {
       // getEventCallback will resolve if it is a string or a method
       // and return a method
-      collection.on(event[0], getEventCallback(event[1], this), event[2] || this);
-    }, this);
-  } else if (!collectionHelperPresentForPrimaryCollection.call(this)) {
-    _.each(this._collectionRenderingEvents, function(event) {
-      this.collection.off(event[0], getEventCallback(event[1], this), event[2] || this);
+      this.listenTo(collection, event[0], getEventCallback(event[1], this));
     }, this);
   }
 }
