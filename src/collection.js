@@ -232,7 +232,9 @@ _.extend(Thorax.View.prototype, {
 Thorax.View.on({
   collection: {
     error: function(collection, message) {
-      this._collectionOptionsByCid[collection.cid].errors && this.trigger('error', message);
+      if (this._collectionOptionsByCid[collection.cid].errors) {
+        this.trigger('error', message);
+      }
     }
   }
 });
