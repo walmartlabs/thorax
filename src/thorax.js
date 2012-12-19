@@ -87,6 +87,7 @@ Thorax.View = Backbone.View.extend({
     if (!view.parent) {
       view.parent = this;
     }
+    this.trigger('child', view);
     return view;
   },
 
