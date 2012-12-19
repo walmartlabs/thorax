@@ -141,12 +141,13 @@ Thorax.View = Backbone.View.extend({
     return _.extend({}, getValue(this, 'context'), attributes || {});
   },
 
-  // private variables in handlebars / options.data in template helpers
+  // Private variables in handlebars / options.data in template helpers
   _getData: function(data) {
     return {
       view: this,
       cid: _.uniqueId('t'),
       yield: function() {
+        // fn is seeded by template helper passing context to data
         return data.fn && data.fn(data);
       }
     };
