@@ -1,7 +1,7 @@
 Handlebars.registerViewHelper('collection', Thorax.CollectionHelperView, function(collection, view) {
   if (arguments.length === 1) {
     view = collection;
-    collection = this._view.collection;
+    collection = view.declaringView.collection;
   }
   // Need additional check here to see if it is the
   // primary collection as templates can do:
