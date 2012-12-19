@@ -1,7 +1,7 @@
 /*global viewPlaceholderAttributeName */
 var viewTemplateOverrides = {};
 Handlebars.registerHelper('view', function(view, options) {
-  var declaringView = ensureOptionsData(options).data.view;
+  var declaringView = getOptionsData(options).view;
   if (arguments.length === 1) {
     options = view;
     view = Thorax.View;

@@ -115,11 +115,11 @@ function extendOptions(name, callback) {
   };
 }
 
-function ensureOptionsData(options) {
+function getOptionsData(options) {
   if (!options || !options.data) {
     throw new Error('Handlebars template compiled without data, use: Handlebars.compile(template, {data: true})');
   }
-  return options;
+  return options.data;
 }
 
 Thorax.Util = {

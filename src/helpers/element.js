@@ -2,7 +2,7 @@ var elementPlaceholderAttributeName = 'data-element-tmp';
 
 Handlebars.registerHelper('element', function(element, options) {
   var cid = _.uniqueId('element'),
-      declaringView = ensureOptionsData(options).data.view,
+      declaringView = getOptionsData(options).view,
       htmlAttributes = Thorax.Util.htmlAttributesFromOptions(options.hash);
   htmlAttributes[elementPlaceholderAttributeName] = cid;
   declaringView._elementsByCid || (declaringView._elementsByCid = {});
