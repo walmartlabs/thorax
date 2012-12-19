@@ -181,7 +181,16 @@ Thorax.View = Backbone.View.extend({
       return this.el.innerHTML;
     } else {
       this.el.innerHTML = "";
-      var element = this.$el.append(html);
+      var element;
+      if (this.collection && this._collectionOptionsByCid[this.collection.cid] && this._renderCount) {
+        // preserveCollectionElement calls the callback after it has a reference
+        // to the collection element, calls the callback, then re-appends the element
+        preserveCollectionElement.call(this, function() {
+          element = this.$el.append(html);
+        });
+      } else {
+        element = this.$el.append(html);
+      }
       this.trigger('append');
       return element;
     }
