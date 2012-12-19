@@ -1,7 +1,7 @@
 Handlebars.registerViewHelper('collection', Thorax.CollectionView, function(collection, view) {
   if (arguments.length === 1) {
     view = collection;
-    collection = this._view.collection;
+    collection = view.declaringView.collection;
   }
   if (collection) {
     //item-view and empty-view may also be passed, but have no defaults
