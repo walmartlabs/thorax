@@ -261,8 +261,8 @@ Thorax.CollectionHelperView = Thorax.View.extend({
     !options.template && (options.template = Handlebars.VM.noop);
     var response = Thorax.CollectionHelperView.__super__.constructor.call(this, options);
     if (this.parent.name) {
-      !this.emptyTemplate && (this.emptyTemplate = Thorax.Util.getTemplate(this.parent.name + '-empty', true));
-      !this.itemTemplate && (this.itemTemplate = Thorax.Util.getTemplate(this.parent.name + '-item', true));
+      this.emptyTemplate = this.emptyTemplate || Thorax.Util.getTemplate(this.parent.name + '-empty', true);
+      this.itemTemplate = this.itemTemplate || Thorax.Util.getTemplate(this.parent.name + '-item', true);
     }
     return response;
   },
