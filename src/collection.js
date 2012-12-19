@@ -242,16 +242,18 @@ Thorax.View.on({
 // TODO: replace with listenTo
 
 function afterSetCollection(collection) {
-  if (collection && !collectionHelperPresentForPrimaryCollection.call(this)) {
-    _.each(this._collectionRenderingEvents, function(callback, eventName) {
-      // getEventCallback will resolve if it is a string or a method
-      // and return a method
-      collection.on(eventName, getEventCallback(callback, this), this);
-    }, this);
-  } else if (!collectionHelperPresentForPrimaryCollection.call(this)) {
-    _.each(this._collectionRenderingEvents, function(callback, eventName) {
-      this.collection.off(eventName, getEventCallback(callback, this), this);
-    }, this);
+  if (!collectionHelperPresentForPrimaryCollection.call(this)) {
+    if (collection) {
+      _.each(this._collectionRenderingEvents, function(callback, eventName) {
+        // getEventCallback will resolve if it is a string or a method
+        // and return a method
+        collection.on(eventName, getEventCallback(callback, this), this);
+      }, this);
+    } else {
+      _.each(this._collectionRenderingEvents, function(callback, eventName) {
+        this.collection.off(eventName, getEventCallback(callback, this), this);
+      }, this);
+    }
   }
 }
 
