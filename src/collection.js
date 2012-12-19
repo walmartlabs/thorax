@@ -1,4 +1,4 @@
-/*global createRegistryWrapper, dataObject, getValue, modelCidAttributeName, viewCidAttributeName */
+/*global createRegistryWrapper, dataObject, getEventCallback, getValue, modelCidAttributeName, viewCidAttributeName */
 var _fetch = Backbone.Collection.prototype.fetch,
     _reset = Backbone.Collection.prototype.reset,
     collectionCidAttributeName = 'data-collection-cid',
@@ -189,7 +189,7 @@ _.extend(Thorax.View.prototype, {
     return element.length === 0 ? this.$el : element;
   },
   _onCollectionReset: function(collection) {
-    if(collection === this.collection && this._collectionOptionsByCid[this.collection.cid].render) {
+    if (collection === this.collection && this._collectionOptionsByCid[this.collection.cid].render) {
       this.renderCollection();
     }
   },
@@ -266,14 +266,6 @@ function preserveCollectionElement(callback) {
   callback.call(this);
   this.getCollectionElement().replaceWith(oldCollectionElement);
 }
-
-var collectionOptionNames = {
-  'item-template': 'itemTemplate',
-  'empty-template': 'emptyTemplate',
-  'item-view': 'itemView',
-  'empty-view': 'emptyView',
-  'empty-class': 'emptyClass'
-};
 
 function applyVisibilityFilter() {
   if (this.itemFilter) {
