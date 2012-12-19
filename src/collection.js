@@ -268,13 +268,11 @@ Thorax.CollectionHelperView = Thorax.View.extend({
   },
   setAsPrimaryCollectionHelper: function(collection) {
     this.$el.attr(primaryCollectionAttributeName, collection.cid);
-    forwardMissingProperty.call(this, 'itemContext');
-    forwardMissingProperty.call(this, 'itemFilter');
-    forwardMissingProperty.call(this, 'itemTemplate');
-    forwardMissingProperty.call(this, 'itemView');
+    _.each(forwardableProperties, function(propertyName) {
+      forwardMissingProperty.call(this, propertyName);
+    }, this);
+    // emptyContext needs to be forced because it has a default
     forwardMissingProperty.call(this, 'emptyContext', true);
-    forwardMissingProperty.call(this, 'emptyTemplate');
-    forwardMissingProperty.call(this, 'emptyView');
   },
   emptyContext: function() {
     return getValue(this.parent, 'context');
@@ -288,6 +286,15 @@ function forwardRenderEvent(eventName) {
     this.parent.trigger.apply(this.parent, args);
   }
 }
+
+var forwardableProperties = [
+  'itemContext',
+  'itemFilter',
+  'itemTemplate',
+  'itemView',
+  'emptyTemplate',
+  'emptyView'
+];
 
 function forwardMissingProperty(methodName, force) {
   if (!this[methodName] || force) {
