@@ -114,13 +114,6 @@ describe('core', function() {
     parent.model.set({value: 'c'});
     expect(parentRenderedCount).to.equal(4);
     expect(childRenderedCount).to.equal(3);
-
-    //anonymous child views
-    parent = new Thorax.View({
-      template: '{{#view tag="span" key="value"}}{{key}}{{/view}}'
-    });
-    parent.render();
-    expect(parent.$('span')[0].innerHTML).to.equal('value', 'anonymous child views');
   });
 
   it("child views within #each", function() {
@@ -138,6 +131,16 @@ describe('core', function() {
     parent.render();
     expect(parent.$('div').get(0).innerHTML).to.equal('a');
     expect(parent.$('div').get(1).innerHTML).to.equal('b');
+  });
+
+  it("throws an error when template compiled without data", function() {
+    var view = new Thorax.View({
+      child: new Thorax.View({template: ''}),
+      template: Handlebars.compile('{{view child}}', {data: false})
+    });
+    expect(function() {
+      view.render();
+    }).to['throw']();
   });
 
   it("fail silently when no view initialized", function() {
@@ -193,8 +196,8 @@ describe('core', function() {
 
   it("template function can be specified", function() {
     var childReturningString = new Thorax.View({
-      template: function(data) {
-        expect(data.cid && data.cid.match(/^t/)).to.exist;
+      template: function(data, options) {
+        expect(options.data.cid).to.match(/^t/);
         return 'template';
       }
     });
