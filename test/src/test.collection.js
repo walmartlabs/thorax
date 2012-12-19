@@ -90,8 +90,7 @@ describe('collection', function() {
 
       //freeze
       view.freeze();
-      // TODO: remove this once events / bindModel / bindCollection are ported to Backbone listenTo
-      view.collection.off();
+      
       clonedLetterCollection.remove(clonedLetterCollection.models);
       expect(renderedEmptyCount).to.equal(1, msg + 'rendered:empty event count');
       expect(view.$('li')[0 * indexMultiplier].innerHTML).to.equal('a', msg + 'transition from empty to one item');
