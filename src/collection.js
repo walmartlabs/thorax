@@ -4,7 +4,7 @@ var _fetch = Backbone.Collection.prototype.fetch,
     collectionCidAttributeName = 'data-collection-cid',
     collectionEmptyAttributeName = 'data-collection-empty',
     collectionElementAttributeName = 'data-collection-element',
-    primaryCollectionAttributeName = 'data-collection-primary';
+    primaryCollectionAttributeName = 'data-collection-primary',
     ELEMENT_NODE_TYPE = 1;
 
 Thorax.Collection = Backbone.Collection.extend({
