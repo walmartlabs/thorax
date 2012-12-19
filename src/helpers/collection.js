@@ -9,6 +9,9 @@ Thorax.CollectionHelperView = Thorax.View.extend({
     _.each(collectionOptionNames, function(viewAttributeName, helperOptionName) {
       options.options[helperOptionName] && (options[viewAttributeName] = options.options[helperOptionName]);
     });
+    // Handlebars.VM.noop is passed in the handlebars options object as
+    // a default for fn and inverse, if a block was present. Need to
+    // check to ensure we don't pick the empty / null block up.
     if (!options.itemTemplate && options.template && options.template !== Handlebars.VM.noop) {
       options.itemTemplate = options.template;
       options.template = Handlebars.VM.noop;
