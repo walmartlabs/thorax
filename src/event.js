@@ -51,15 +51,10 @@ _.extend(Thorax.View.prototype, {
         _.each(this[obj.array], this[obj.unbind], this);
       }
     }, this);
-
     options = _.defaults(options || {}, {
       dom: true,
       children: true
     });
-    this._eventArgumentsToUnbind && _.each(this._eventArgumentsToUnbind, function(args) {
-      args[0].off(args[1], args[2], args[3]);
-    });
-    this._eventArgumentsToUnbind = [];
     this.off();
     if (options.dom) {
       this.undelegateEvents();
@@ -76,22 +71,11 @@ _.extend(Thorax.View.prototype, {
       return this;
     }
 
-    if (typeof eventName === 'object') {
+    if (typeof eventName === 'object' && arguments.length === 1) {
       //accept on({"rendered": callback})
-      if (arguments.length === 1) {
-        _.each(eventName, function(value, key) {
-          this.on(key, value, this);
-        }, this);
-      //events on other objects to auto dispose of when view frozen
-      //on(targetObj, 'eventName', callback, context)
-      } else if (arguments.length > 1) {
-        if (!this._eventArgumentsToUnbind) {
-          this._eventArgumentsToUnbind = [];
-        }
-        var args = Array.prototype.slice.call(arguments);
-        this._eventArgumentsToUnbind.push(args);
-        args[0].on.apply(args[0], args.slice(1));
-      }
+      _.each(eventName, function(value, key) {
+        this.on(key, value, this);
+      }, this);
     } else {
       //accept on("rendered", callback, context)
       //accept on("click a", callback, context)
