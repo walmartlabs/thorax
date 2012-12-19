@@ -233,7 +233,7 @@ Thorax.View.on({
   collection: {
     error: function(collection, message) {
       if (this._collectionOptionsByCid[collection.cid].errors) {
-        this.trigger('error', message);
+        this.trigger('error', message, collection);
       }
     }
   }
