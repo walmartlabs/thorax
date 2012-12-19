@@ -157,20 +157,6 @@ describe('event', function() {
     expect(e).to.equal(2);
   });
 
-  it("auto dispose events", function() {
-    var view = new Thorax.View({});
-    var model = new Thorax.Model();
-    var callCount = 0;
-    view.on(model, 'test', function() {
-      ++callCount;
-    });
-    model.trigger('test');
-    expect(callCount).to.equal(1);
-    view.freeze();
-    model.trigger('test');
-    expect(callCount).to.equal(1);
-  });
-
   // TODO: simluated DOM events fail under Phantom + Zepto, but work in all
   // other scenarios, figure out why this test won't run
   if (!window.callPhantom || (window.callPhantom && typeof jQuery !== 'undefined')) {
