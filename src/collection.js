@@ -292,7 +292,9 @@ function forwardRenderEvent(eventName) {
 function forwardMissingProperty(methodName, force) {
   if (!this[methodName] || force) {
     var method = getParent(this)[methodName];
-    method && (this[methodName] = method);
+    if (method){
+      this[methodName] = method;
+    }
   }
 }
 
