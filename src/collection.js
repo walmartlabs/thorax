@@ -194,6 +194,7 @@ _.extend(Thorax.View.prototype, {
   // Events that will only be bound to "this.collection"
   _collectionRenderingEvents: [
     ['reset', '_onCollectionReset'],
+    ['sort', '_onCollectionReset'],
     ['filter', function() {
       applyVisibilityFilter.call(this);
     }],
