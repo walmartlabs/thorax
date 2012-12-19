@@ -225,9 +225,7 @@ A `HelperView` instance differs from a regular view instance in that it has a `p
 A helper that re-rendered a `HelperView` every time an event was triggered on the declaring view could be implemented as:
 
     Handlebars.registerViewHelper('on', function(eventName, helperView) {
-      //register a handler on the parent view, which will be automatically
-      //unregistered when helperView is destroyed
-      helperView.on(helperView.parent, eventName, function() {
+      helperView.listenTo(helperView.parent, eventName, function() {
         helperView.render();
       });
     });
