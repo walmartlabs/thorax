@@ -22,13 +22,6 @@ function dataObject(type, spec) {
     });
   }
 
-  function unbindEvents(target, source) {
-    var context = this;
-    walkInheritTree(source, spec.name, true, function(event) {
-      context.stopListening(target);
-    });
-  }
-
   function loadObject(dataObject, options) {
     if (dataObject.load) {
       dataObject.load(function() {
@@ -67,8 +60,7 @@ function dataObject(type, spec) {
     }
     this[spec.array] = _.without(this[spec.array], dataObject);
     dataObject.trigger('freeze');
-    unbindEvents.call(this, dataObject, this.constructor);
-    unbindEvents.call(this, dataObject, this);
+    this.stopListening(dataObject);
     delete this[spec.hash][dataObject.cid];
     return true;
   }

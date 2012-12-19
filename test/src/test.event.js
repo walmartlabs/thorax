@@ -157,6 +157,25 @@ describe('event', function() {
     expect(e).to.equal(2);
   });
 
+  it("unbindModel / unbindCollection stops events from being triggered", function() {
+    var spy = this.spy();
+    var view = new Thorax.View({
+      events: {
+        model: {
+          test: spy
+        }
+      }
+    });
+    view.myModel = new Thorax.Model({key: 'value'});
+    view.bindModel(view.myModel, {render: false});
+    expect(spy.callCount).to.equal(0);
+    view.myModel.trigger('test');
+    expect(spy.callCount).to.equal(1);
+    view.unbindModel(view.myModel);
+    view.myModel.trigger('test');
+    expect(spy.callCount).to.equal(1);
+  });
+
   // TODO: simluated DOM events fail under Phantom + Zepto, but work in all
   // other scenarios, figure out why this test won't run
   if (!window.callPhantom || (window.callPhantom && typeof jQuery !== 'undefined')) {
