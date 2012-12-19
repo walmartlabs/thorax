@@ -189,31 +189,33 @@ _.extend(Thorax.View.prototype, {
     return element.length === 0 ? this.$el : element;
   },
   _onCollectionReset: function(collection) {
-    collection === this.collection && this._collectionOptionsByCid[this.collection.cid].render && this.renderCollection();
+    if(collection === this.collection && this._collectionOptionsByCid[this.collection.cid].render) {
+      this.renderCollection();
+    }
   },
   // Events that will only be bound to "this.collection"
-  _collectionRenderingEvents: [
-    ['reset', '_onCollectionReset'],
-    ['sort', '_onCollectionReset'],
-    ['filter', function() {
+  _collectionRenderingEvents: {
+    reset: '_onCollectionReset',
+    sort: '_onCollectionReset',
+    filter: function() {
       applyVisibilityFilter.call(this);
-    }],
-    ['change', function(model) {
+    },
+    change: function(model) {
       // If we rendered with item views, model changes will be observed
       // by the generated item view but if we rendered with templates
       // then model changes need to be bound as nothing is watching
       !this.itemView && this.updateItem(model);
       applyItemVisiblityFilter.call(this, model);
-    }],
-    ['add', function(model) {
+    },
+    add: function(model) {
       var $el = this.getCollectionElement();
       this.collection.length === 1 && $el.length && handleChangeFromEmptyToNotEmpty.call(this);
       if ($el.length) {
         var index = this.collection.indexOf(model);
         this.appendItem(model, index);
       }
-    }],
-    ['remove', function(model) {
+    },
+    remove: function(model) {
       var $el = this.getCollectionElement();
       $el.find('[' + modelCidAttributeName + '="' + model.cid + '"]').remove();
       for (var cid in this.children) {
@@ -224,81 +226,26 @@ _.extend(Thorax.View.prototype, {
         }
       }
       this.collection.length === 0 && $el.length && handleChangeFromNotEmptyToEmpty.call(this);
-    }]
-  ]
+    }
+  }
 });
 
 Thorax.View.on({
   collection: {
     error: function(collection, message) {
-      this._collectionOptionsByCid[collection.cid].errors && this.trigger('error', message);
+      if (this._collectionOptionsByCid[collection.cid].errors) {
+        this.trigger('error', message);
+      }
     }
   }
 });
-
-Thorax.CollectionHelperView = Thorax.View.extend({
-  // Forward render events to the parent
-  events: {
-    'rendered:item': forwardRenderEvent('rendered:item'),
-    'rendered:collection': forwardRenderEvent('rendered:collection'),
-    'rendered:empty': forwardRenderEvent('rendered:empty')
-  },
-  constructor: function(options) {
-    _.each(collectionOptionNames, function(viewAttributeName, helperOptionName) {
-      options.options[helperOptionName] && (options[viewAttributeName] = options.options[helperOptionName]);
-    });
-    if (!options.itemTemplate && options.template && options.template !== Handlebars.VM.noop) {
-      options.itemTemplate = options.template;
-      options.template = Handlebars.VM.noop;
-    }
-    if (!options.emptyTemplate && options.inverse && options.inverse !== Handlebars.VM.noop) {
-      options.emptyTemplate = options.inverse;
-      options.inverse = Handlebars.VM.noop;
-    }
-    !options.template && (options.template = Handlebars.VM.noop);
-    var response = Thorax.CollectionHelperView.__super__.constructor.call(this, options);
-    if (this.parent.name) {
-      !this.emptyTemplate && (this.emptyTemplate = Thorax.Util.getTemplate(this.parent.name + '-empty', true));
-      !this.itemTemplate && (this.itemTemplate = Thorax.Util.getTemplate(this.parent.name + '-item', true));
-    }
-    return response;
-  },
-  setAsPrimaryCollectionHelper: function(collection) {
-    this.$el.attr(primaryCollectionAttributeName, collection.cid);
-    forwardMissingProperty.call(this, 'itemContext');
-    forwardMissingProperty.call(this, 'itemFilter');
-    forwardMissingProperty.call(this, 'itemTemplate');
-    forwardMissingProperty.call(this, 'itemView');
-    forwardMissingProperty.call(this, 'emptyContext', true);
-    forwardMissingProperty.call(this, 'emptyTemplate');
-    forwardMissingProperty.call(this, 'emptyView');
-  },
-  emptyContext: function() {
-    return getValue(this.parent, 'context');
-  }
-});
-
-function forwardRenderEvent(eventName) {
-  return function() {
-    var args = _.toArray(arguments);
-    args.unshift(eventName);
-    this.parent.trigger.apply(this.parent, args);
-  }
-}
-
-function forwardMissingProperty(methodName, force) {
-  if (!this[methodName] || force) {
-    var method = getParent(this)[methodName];
-    method && (this[methodName] = method);
-  }
-}
 
 function afterSetCollection(collection) {
-  if (collection && !collectionHelperPresentForPrimaryCollection.call(this)) {
-    _.each(this._collectionRenderingEvents, function(event) {
+  if (!collectionHelperPresentForPrimaryCollection.call(this) && collection) {
+    _.each(this._collectionRenderingEvents, function(callback, eventName) {
       // getEventCallback will resolve if it is a string or a method
       // and return a method
-      this.listenTo(collection, event[0], getEventCallback(event[1], this));
+      this.listenTo(collection, eventName, getEventCallback(callback, this));
     }, this);
   }
 }
