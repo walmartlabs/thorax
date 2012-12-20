@@ -176,6 +176,12 @@ Thorax.View = Backbone.View.extend({
     !this._renderCount && this.render();
   },
 
+  appendTo: function(el, options) {
+    this.ensureRendered();
+    $(el).append(this.el);
+    this.trigger('ready', options || {});
+  },
+
   html: function(html) {
     if (typeof html === 'undefined') {
       return this.el.innerHTML;
