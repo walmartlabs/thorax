@@ -80,12 +80,12 @@ Thorax.LayoutView = Thorax.View.extend({
     }
     //make sure the view has been rendered at least once
     view && this._addChild(view);
-    view && view.ensureRendered();
-    view && getLayoutViewsTargetElement.call(this).appendChild(view.el);
     this._view = view || undefined;
     oldView && (delete this.children[oldView.cid]);
     oldView && oldView._shouldDestroyOnNextSetView && oldView.destroy();
-    this._view && this._view.trigger('ready', options);
+    if (this._view) {
+      this._view.appendTo(getLayoutViewsTargetElement.call(this));
+    }
     this.trigger('change:view:end', view, oldView, options);
     return view;
   },
