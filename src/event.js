@@ -7,7 +7,6 @@ inheritVars.event = {
 
   configure: function() {
     this._isReady = false;
-    this._readyCallbacks = [];
 
     var self = this;
     walkInheritTree(this.constructor, '_events', true, function(event) {
@@ -80,7 +79,11 @@ _.extend(Thorax.View.prototype, {
         event;
     while (event = events.shift()) {
       if (event === 'ready') {
-        onReady.apply(this, rest);
+        if (!this._isReady) {
+          onBeforeReady.apply(this, rest);
+          Backbone.View.prototype.trigger.apply(this, [event].concat(rest));
+          onAfterReady.apply(this, rest);
+        }
       } else {
         Backbone.View.prototype.trigger.apply(this, [event].concat(rest));
       }
@@ -148,12 +151,8 @@ _.extend(Thorax.View.prototype, {
     if (params.type === 'view') {
       boundHandler = bindEventHandler.call(this, 'view-event:' + params.originalName, params.handler);
       _.each(params.name.split(/\s+/), function(name) {
-        if (name === 'ready') {
-          if (this._isReady) {
-            boundHandler.call(params.context || this);
-          } else {
-            this._readyCallbacks.push([boundHandler, params.context || this]);
-          }
+        if (name === 'ready' && this._isReady) {
+          boundHandler.call(params.context || this);
         } else {
           _on.call(this, name, boundHandler, params.context || this);
         }
@@ -172,21 +171,6 @@ _.extend(Thorax.View.prototype, {
     }
   }
 });
-
-function onReady() {
-  var args = arguments;
-  this.ensureRendered();
-  this._isReady = true;
-  _.each(this._readyCallbacks, function(callback) {
-    callback[0].apply(callback[1], args);
-  }, this);
-  this._readyCallbacks = [];
-  _.each(this.children, function(child, cid) {
-    if (!child._isReady) {
-      child.trigger('ready');
-    }
-  });
-}
 
 var eventSplitter = /^(nested\s+)?(\S+)(?:\s+(.+))?/;
 
@@ -263,3 +247,16 @@ Thorax.View.on({
     }
   }
 })
+
+function onBeforeReady() {
+  this.ensureRendered();
+  this._isReady = true;
+}
+
+function onAfterReady() {
+  _.each(this.children, function(child, cid) {
+    if (!child._isReady) {
+      child.trigger('ready');
+    }
+  });
+}

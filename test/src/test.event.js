@@ -236,6 +236,21 @@ describe('event', function() {
     expect(spy.callCount).to.equal(1);
   });
 
+  it("should ignore duplicate ready events", function() {
+    var spy = this.spy(),
+        view = new Thorax.View({
+          template: '',
+          events: {
+            ready: spy
+          }
+        });
+    expect(spy.callCount).to.equal(0);
+    view.trigger('ready');
+    expect(spy.callCount).to.equal(1);
+    view.trigger('ready');
+    expect(spy.callCount).to.equal(1);
+  });
+
   it("should trigger ready event immediately if view is ready", function() {
     var spy = this.spy(),
         view = new Thorax.View({
