@@ -40,7 +40,7 @@
     "model": ["event", "data-object"],
     "collection": ["event", "data-object", "model", "helper-view"],
     "form": ["model"],
-    "view-controller": [],
+    "layout": [],
     "loading": ["event", "model", "collection"],
     "helpers/button-link": [],
     "helpers/collection": ["event", "model", "collection"],

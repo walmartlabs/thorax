@@ -354,7 +354,7 @@ Build a custom version of Thorax using a list of any of the given plugins:
 - collection
 - helpers
 - form
-- view-controller
+- layout
 - loading
 - mobile
 
