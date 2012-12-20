@@ -114,7 +114,7 @@ _.extend(Thorax.View.prototype, {
     options = _.extend({
       children: true
     }, options || {});
-    var value, attributes = attributes || this._getContext(this.model);
+    var value, attributes = attributes || this._getContext();
     //callback has context of element
     eachNamedInput.call(this, options, function() {
       objectAndKeyFromAttributesAndName.call(this, attributes, this.name, {mode: 'populate'}, function(object, key) {

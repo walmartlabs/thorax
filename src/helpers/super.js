@@ -12,7 +12,7 @@ Handlebars.registerHelper('super', function(options) {
     if (typeof template === 'string') {
       template = Handlebars.compile(template, {data: true});
     }
-    return new Handlebars.SafeString(template(this));
+    return new Handlebars.SafeString(template(this, options));
   } else {
     return '';
   }

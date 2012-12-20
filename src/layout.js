@@ -83,12 +83,12 @@ Thorax.LayoutView = Thorax.View.extend({
     }
     //make sure the view has been rendered at least once
     view && this._addChild(view);
-    view && view.ensureRendered();
-    view && getLayoutViewsTargetElement.call(this).appendChild(view.el);
     this._view = view || undefined;
     oldView && (delete this.children[oldView.cid]);
     oldView && oldView._shouldDestroyOnNextSetView && oldView.destroy();
-    this._view && this._view.trigger('ready', options);
+    if (this._view) {
+      this._view.appendTo(getLayoutViewsTargetElement.call(this), options);
+    }
     this.trigger('change:view:end', view, oldView, options);
     return view;
   },
@@ -118,25 +118,3 @@ function ensureLayoutViewsTargetElement() {
 function getLayoutViewsTargetElement() {
   return this.$('[' + layoutCidAttributeName + '="' + this.cid + '"]')[0] || this.el[0] || this.el;
 }
-
-//ViewController
-Thorax.ViewController = Thorax.LayoutView.extend({
-  constructor: function() {
-    var response = Thorax.ViewController.__super__.constructor.apply(this, arguments);
-    this._bindRoutes();
-    initializeRouter.call(this);
-    //set the ViewController as the view on the parent
-    //if a parent was specified
-    this.on('route:before', function(/* route, name */) {
-      if (this.parent && this.parent.getView) {
-        if (this.parent.getView() !== this) {
-          this.parent.setView(this, {
-            destroy: false
-          });
-        }
-      }
-    }, this);
-    return response;
-  }
-});
-_.extend(Thorax.ViewController.prototype, Thorax.Router.prototype);

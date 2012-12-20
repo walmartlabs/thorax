@@ -41,6 +41,14 @@ Thorax.CollectionHelperView = Thorax.View.extend({
   }
 });
 
+var collectionOptionNames = {
+  'item-template': 'itemTemplate',
+  'empty-template': 'emptyTemplate',
+  'item-view': 'itemView',
+  'empty-view': 'emptyView',
+  'empty-class': 'emptyClass'
+};
+
 function forwardRenderEvent(eventName) {
   return function() {
     var args = _.toArray(arguments);
