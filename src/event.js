@@ -147,6 +147,16 @@ _.extend(Thorax.View.prototype, {
   }
 });
 
+// propagate ready event to children
+function triggerReady(view) {
+  view.trigger('ready');
+}
+
+Thorax.View.on('ready', function() {
+  _.each(this.children, triggerReady);
+  this.on('child', triggerReady);
+});
+
 var eventSplitter = /^(nested\s+)?(\S+)(?:\s+(.+))?/;
 
 var domEvents = [],
