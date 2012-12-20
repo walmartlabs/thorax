@@ -6,6 +6,9 @@ inheritVars.event = {
   name: '_events',
 
   configure: function() {
+    this._isReady = false;
+    this._readyCallbacks = [];
+
     var self = this;
     walkInheritTree(this.constructor, '_events', true, function(event) {
       self.on.apply(self, event);
@@ -71,6 +74,19 @@ _.extend(Thorax.View.prototype, {
       }, this);
     }
   },
+  trigger: function(events) {
+    var events = events.split(/\s+/),
+        rest = Array.prototype.slice.call(arguments, 1),
+        event;
+    while (event = events.shift()) {
+      if (event === 'ready') {
+        onReady.apply(this, rest);
+      } else {
+        Backbone.View.prototype.trigger.apply(this, [event].concat(rest));
+      }
+    }
+    return this;
+  },
   on: function(eventName, callback, context) {
     if (objectEvents(this, eventName, callback)) {
       return this;
@@ -128,12 +144,22 @@ _.extend(Thorax.View.prototype, {
   //- type "view" || "DOM"
   //- handler
   _addEvent: function(params) {
+    var boundHandler;
     if (params.type === 'view') {
+      boundHandler = bindEventHandler.call(this, 'view-event:' + params.originalName, params.handler);
       _.each(params.name.split(/\s+/), function(name) {
-        _on.call(this, name, bindEventHandler.call(this, 'view-event:' + params.originalName, params.handler), params.context || this);
+        if (name === 'ready') {
+          if (this._isReady) {
+            boundHandler.call(params.context || this);
+          } else {
+            this._readyCallbacks.push([boundHandler, params.context || this]);
+          }
+        } else {
+          _on.call(this, name, boundHandler, params.context || this);
+        }
       }, this);
     } else {
-      var boundHandler = bindEventHandler.call(this, 'dom-event:' + params.originalName, params.handler);
+      boundHandler = bindEventHandler.call(this, 'dom-event:' + params.originalName, params.handler);
       if (!params.nested) {
         boundHandler = containHandlerToCurentView(boundHandler, this.cid);
       }
@@ -146,6 +172,21 @@ _.extend(Thorax.View.prototype, {
     }
   }
 });
+
+function onReady() {
+  var args = arguments;
+  this.ensureRendered();
+  this._isReady = true;
+  _.each(this._readyCallbacks, function(callback) {
+    callback[0].apply(callback[1], args);
+  }, this);
+  this._readyCallbacks = [];
+  _.each(this.children, function(child, cid) {
+    if (!child._isReady) {
+      child.trigger('ready');
+    }
+  });
+}
 
 var eventSplitter = /^(nested\s+)?(\S+)(?:\s+(.+))?/;
 
@@ -206,3 +247,19 @@ function eventParamsFromEventItem(name, handler, context) {
   params.context = context;
   return params;
 }
+
+Thorax.View.on({
+  child: function(instance) {
+    if (this._isReady) {
+      instance.trigger('ready');
+    } else {
+      // TODO: once backbone-0.9.9 is merged
+      // use 'once'
+      var callback = function() {
+        instance.trigger('ready');
+        this.off('ready', callback, this);
+      };
+      this.on('ready', callback, this);
+    }
+  }
+})
