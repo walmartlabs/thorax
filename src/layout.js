@@ -84,7 +84,7 @@ Thorax.LayoutView = Thorax.View.extend({
     oldView && (delete this.children[oldView.cid]);
     oldView && oldView._shouldDestroyOnNextSetView && oldView.destroy();
     if (this._view) {
-      this._view.appendTo(getLayoutViewsTargetElement.call(this), options);
+      this._view.appendTo(getLayoutViewsTargetElement.call(this));
     }
     this.trigger('change:view:end', view, oldView, options);
     return view;
