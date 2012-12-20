@@ -13,7 +13,6 @@ Handlebars.registerHelper('view', function(view, options) {
   var placeholderId = instance.cid,
       expandTokens = options.hash['expand-tokens'];
   declaringView._addChild(instance);
-  declaringView.trigger('child', instance);
   delete options.hash['expand-tokens'];
   if (options.fn) {
     viewTemplateOverrides[placeholderId] = options.fn;
