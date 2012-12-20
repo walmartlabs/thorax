@@ -1,7 +1,7 @@
 Thorax Collection Plugin
 ========================
 
-Adds view helpers and classes to support collection bindings in. See the [Todos example](http://jsfiddle.net/vzf5L/) to see the collection plugin in action.
+Adds view helpers and classes to support collection bindings in. See the [Todos example](http://jsfiddle.net/QDMyk/) to see the collection plugin in action.
 
 ## View Helpers
 
