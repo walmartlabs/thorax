@@ -74,4 +74,9 @@ describe('helpers', function() {
     expect(view.$('a').html()).to.equal('content');
     expect(view.$('a').attr('href')).to.equal('#href');
   });
+
+  it('should have access to handlebars noop', function() {
+    // Explicit verification that Handlebars is exposing this field.
+    expect(Handlebars.VM.noop).to.exist;
+  });
 });
