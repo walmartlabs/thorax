@@ -19,7 +19,11 @@ Thorax.Util.scrollTo = function(x, y) {
 };
 
 Thorax.View.on('ready', function(options) {
-  options.scroll && Thorax.Util.scrollTo(0, 0);
+  // Options will only be present on views
+  // that were passed directly to LayoutView.setView
+  if (options && options.scroll) {
+    Thorax.Util.scrollTo(0, 0);
+  }
 });
 
 Thorax.Util.scrollToTop = function() {
