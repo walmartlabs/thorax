@@ -119,9 +119,11 @@ _.extend(Thorax.View.prototype, {
     }
     var viewCid = viewEl.attr(viewCidAttributeName);
     if (this.children[viewCid]) {
-      delete this.children[viewCid];
+      this.children[viewCid].destroy();
+      this._removeChild(this.children[viewCid]);
+    } else {
+      viewEl.remove();
     }
-    viewEl.remove();
     return true;
   },
   renderCollection: function() {
@@ -217,14 +219,7 @@ _.extend(Thorax.View.prototype, {
     },
     remove: function(model) {
       var $el = this.getCollectionElement();
-      $el.find('[' + modelCidAttributeName + '="' + model.cid + '"]').remove();
-      for (var cid in this.children) {
-        if (this.children[cid].model && this.children[cid].model.cid === model.cid) {
-          this.children[cid].destroy();
-          delete this.children[cid];
-          break;
-        }
-      }
+      this.removeItem(model);
       this.collection.length === 0 && $el.length && handleChangeFromNotEmptyToEmpty.call(this);
     }
   }
