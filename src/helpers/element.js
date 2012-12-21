@@ -13,9 +13,11 @@ Handlebars.registerHelper('element', function(element, options) {
 // IE will lose a reference to the elements if view.el.innerHTML = '';
 // If they are removed one by one the references are not lost
 Thorax.View.on('before:append', function() {
-  _.each(this._elementsByCid, function(element, cid) {
-    $(element).remove();
-  });
+  if (this._renderCount > 0) {
+    _.each(this._elementsByCid, function(element, cid) {
+      $(element).remove();
+    });
+  }
 });
 
 Thorax.View.on('append', function(scope, callback) {
