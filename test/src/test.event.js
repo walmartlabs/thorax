@@ -115,6 +115,14 @@ describe('event', function() {
     expect(spy.callCount).to.equal(8);
   });
 
+  it("event map", function() {
+    var spy = this.spy(),
+        view = new Thorax.View();
+    view.on({test: spy});
+    view.trigger('test');
+    expect(spy.callCount).to.equal(1);
+  });
+
   it("multiple event registration", function() {
     var view = new Thorax.View(), a = 0, b = 0, c = 0, d = 0, e = 0;
     view.on({
@@ -149,18 +157,23 @@ describe('event', function() {
     expect(e).to.equal(2);
   });
 
-  it("auto dispose events", function() {
-    var view = new Thorax.View({});
-    var model = new Thorax.Model();
-    var callCount = 0;
-    view.on(model, 'test', function() {
-      ++callCount;
+  it("unbindModel / unbindCollection stops events from being triggered", function() {
+    var spy = this.spy();
+    var view = new Thorax.View({
+      events: {
+        model: {
+          test: spy
+        }
+      }
     });
-    model.trigger('test');
-    expect(callCount).to.equal(1);
-    view.freeze();
-    model.trigger('test');
-    expect(callCount).to.equal(1);
+    view.myModel = new Thorax.Model({key: 'value'});
+    view.bindModel(view.myModel, {render: false});
+    expect(spy.callCount).to.equal(0);
+    view.myModel.trigger('test');
+    expect(spy.callCount).to.equal(1);
+    view.unbindModel(view.myModel);
+    view.myModel.trigger('test');
+    expect(spy.callCount).to.equal(1);
   });
 
   // TODO: simluated DOM events fail under Phantom + Zepto, but work in all
