@@ -87,6 +87,7 @@ Thorax.View = Backbone.View.extend({
     if (!view.parent) {
       view.parent = this;
     }
+    this.trigger('child', view);
     return view;
   },
 
@@ -176,10 +177,10 @@ Thorax.View = Backbone.View.extend({
     !this._renderCount && this.render();
   },
 
-  appendTo: function(el, options) {
+  appendTo: function(el) {
     this.ensureRendered();
     $(el).append(this.el);
-    this.trigger('ready', options || {});
+    this.trigger('ready');
   },
 
   html: function(html) {
