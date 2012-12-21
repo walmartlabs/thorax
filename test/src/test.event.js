@@ -176,6 +176,16 @@ describe('event', function() {
     expect(spy.callCount).to.equal(1);
   });
 
+  // Regression: events starting with another event name would not trigger
+  //  due to permissive regex
+  it('should tigger change:view:end', function() {
+    var view = new Thorax.View(),
+        spy = this.spy();
+    view.on('change:view:end', spy);
+    view.trigger('change:view:end');
+    expect(spy).to.have.been.calledOnce;
+  });
+
   // TODO: simluated DOM events fail under Phantom + Zepto, but work in all
   // other scenarios, figure out why this test won't run
   if (!window.callPhantom || (window.callPhantom && typeof jQuery !== 'undefined')) {
