@@ -16,7 +16,7 @@ Thorax.Model = Backbone.Model.extend({
       delete attributes[default_key];
     }
     var keys = _.keys(attributes);
-    return keys.length > 1 || (keys.length === 1 && keys[0] !== 'id');
+    return keys.length > 1 || (keys.length === 1 && keys[0] !== this.idAttribute);
   }
 });
 

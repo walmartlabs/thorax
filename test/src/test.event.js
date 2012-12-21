@@ -115,6 +115,14 @@ describe('event', function() {
     expect(spy.callCount).to.equal(8);
   });
 
+  it("event map", function() {
+    var spy = this.spy(),
+        view = new Thorax.View();
+    view.on({test: spy});
+    view.trigger('test');
+    expect(spy.callCount).to.equal(1);
+  });
+
   it("multiple event registration", function() {
     var view = new Thorax.View(), a = 0, b = 0, c = 0, d = 0, e = 0;
     view.on({
@@ -149,18 +157,33 @@ describe('event', function() {
     expect(e).to.equal(2);
   });
 
-  it("auto dispose events", function() {
-    var view = new Thorax.View({});
-    var model = new Thorax.Model();
-    var callCount = 0;
-    view.on(model, 'test', function() {
-      ++callCount;
+  it("unbindModel / unbindCollection stops events from being triggered", function() {
+    var spy = this.spy();
+    var view = new Thorax.View({
+      events: {
+        model: {
+          test: spy
+        }
+      }
     });
-    model.trigger('test');
-    expect(callCount).to.equal(1);
-    view.freeze();
-    model.trigger('test');
-    expect(callCount).to.equal(1);
+    view.myModel = new Thorax.Model({key: 'value'});
+    view.bindModel(view.myModel, {render: false});
+    expect(spy.callCount).to.equal(0);
+    view.myModel.trigger('test');
+    expect(spy.callCount).to.equal(1);
+    view.unbindModel(view.myModel);
+    view.myModel.trigger('test');
+    expect(spy.callCount).to.equal(1);
+  });
+
+  // Regression: events starting with another event name would not trigger
+  //  due to permissive regex
+  it('should tigger change:view:end', function() {
+    var view = new Thorax.View(),
+        spy = this.spy();
+    view.on('change:view:end', spy);
+    view.trigger('change:view:end');
+    expect(spy).to.have.been.calledOnce;
   });
 
   // TODO: simluated DOM events fail under Phantom + Zepto, but work in all
@@ -258,5 +281,86 @@ describe('event', function() {
     expect(collectionView.$('li').length).to.equal(4, 'ready event triggered via collection:add');
     expect(collectionView.$('li').eq(3).html()).to.equal('four', 'ready event triggered via collection:add');
     expect(itemViewSpy.callCount).to.equal(4, 'ready event triggered via collection:add');
+
+  });
+
+  describe('context', function() {
+    var view, spy,
+        context = {};
+    beforeEach(function() {
+      view = new Thorax.View();
+      spy = this.spy();
+    });
+
+    describe('view events', function() {
+      it('should use view', function() {
+        view.on('foo', spy);
+        view.trigger('foo');
+        expect(spy).to.have.been.calledOnce
+            .to.be.always.calledOn(view);
+      });
+      it('should pass context', function() {
+        view.on('foo', spy, context);
+        view.trigger('foo');
+        expect(spy).to.have.been.calledOnce
+            .to.be.always.calledOn(context);
+      });
+    });
+
+    describe('object view events', function() {
+      it('should use view', function() {
+        view.on({foo: spy});
+        view.trigger('foo');
+        expect(spy).to.have.been.calledOnce
+            .to.be.always.calledOn(view);
+      });
+      it('should pass context', function() {
+        view.on({foo: spy}, context);
+        view.trigger('foo');
+        expect(spy).to.have.been.calledOnce
+            .to.be.always.calledOn(context);
+      });
+    });
+    describe('data object events', function() {
+      it('should use view', function() {
+        var model = new Thorax.Model();
+        view.on({model: {foo: spy}});
+        view.setModel(model, {render: false, fetch: false});
+        model.trigger('foo');
+        expect(spy).to.have.been.calledOnce
+            .to.be.always.calledOn(view);
+      });
+      it('should pass context', function() {
+        var model = new Thorax.Model();
+        view.on({model: {foo: spy}}, context);
+        view.setModel(model, {render: false, fetch: false});
+        model.trigger('foo');
+        expect(spy).to.have.been.calledOnce
+            .to.be.always.calledOn(context);
+      });
+    });
+    describe('dom events', function() {
+      beforeEach(function() {
+        this.stub(view.$el, 'on', function(event, selector, callback) {
+          if (selector === 'foo') {
+            callback($.Event());
+          }
+        });
+        this.stub($.fn, 'view', function() { return view; });
+      });
+
+      it('should use view', function() {
+        view.on('click foo', spy);
+        view.delegateEvents();
+        expect(spy).to.have.been.calledOnce
+            .to.be.always.calledOn(view);
+      });
+      it('should pass context', function() {
+        view.on('click foo', spy, context);
+        view.delegateEvents();
+        expect(spy).to.have.been.calledOnce
+            .to.be.always.calledOn(context);
+      });
+    });
   });
 });

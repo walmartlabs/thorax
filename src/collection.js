@@ -196,6 +196,7 @@ _.extend(Thorax.View.prototype, {
   // Events that will only be bound to "this.collection"
   _collectionRenderingEvents: {
     reset: '_onCollectionReset',
+    sort: '_onCollectionReset',
     filter: function() {
       applyVisibilityFilter.call(this);
     },
@@ -239,21 +240,13 @@ Thorax.View.on({
   }
 });
 
-// TODO: replace with listenTo
-
 function afterSetCollection(collection) {
-  if (!collectionHelperPresentForPrimaryCollection.call(this)) {
-    if (collection) {
-      _.each(this._collectionRenderingEvents, function(callback, eventName) {
-        // getEventCallback will resolve if it is a string or a method
-        // and return a method
-        collection.on(eventName, getEventCallback(callback, this), this);
-      }, this);
-    } else {
-      _.each(this._collectionRenderingEvents, function(callback, eventName) {
-        this.collection.off(eventName, getEventCallback(callback, this), this);
-      }, this);
-    }
+  if (!collectionHelperPresentForPrimaryCollection.call(this) && collection) {
+    _.each(this._collectionRenderingEvents, function(callback, eventName) {
+      // getEventCallback will resolve if it is a string or a method
+      // and return a method
+      this.listenTo(collection, eventName, getEventCallback(callback, this));
+    }, this);
   }
 }
 

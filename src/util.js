@@ -79,23 +79,23 @@ function walkInheritTree(source, fieldName, isStatic, callback) {
   }
 }
 
-function objectEvents(target, eventName, callback) {
+function objectEvents(target, eventName, callback, context) {
   if (_.isObject(callback)) {
     var spec = inheritVars[eventName];
     if (spec && spec.event) {
-      addEvents(target[spec.name], callback);
+      addEvents(target[spec.name], callback, context);
       return true;
     }
   }
 }
-function addEvents(target, source) {
+function addEvents(target, source, context) {
   _.each(source, function(callback, eventName) {
     if (_.isArray(callback)) {
       _.each(callback, function(cb) {
-        target.push([eventName, cb]);
+        target.push([eventName, cb, context]);
       });
     } else {
-      target.push([eventName, callback]);
+      target.push([eventName, callback, context]);
     }
   });
 }
