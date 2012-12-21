@@ -84,27 +84,35 @@ Thorax.View = Backbone.View.extend({
 
   _addChild: function(view) {
     this.children[view.cid] = view;
-    if (!view.parent) {
-      view.parent = this;
-    }
+    view.parent = this;
+    return view;
+  },
+
+  _removeChild: function(view) {
+    delete this.children[view.cid];
+    view.parent = null;
     return view;
   },
 
   destroy: function(options) {
+    this.remove();
+    this.trigger('destroyed');
+    this.off();
     options = _.defaults(options || {}, {
       children: true
     });
-    this.trigger('destroyed');
     delete viewsIndexedByCid[this.cid];
     if (options.children) {
       _.each(this.children, function(child) {
-        child.parent = null;
+        this._removeChild(child);
         child.destroy();
-      });
-      this.children = {};
+      }, this);
     }
-
-    this.freeze && this.freeze();
+    _.each(inheritVars, function(obj) {
+      if (obj.unbind) {
+        _.each(this[obj.array], this[obj.unbind], this);
+      }
+    }, this);
   },
 
   render: function(output) {

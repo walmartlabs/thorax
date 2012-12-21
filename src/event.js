@@ -45,27 +45,29 @@ _.extend(Thorax.View, {
 });
 
 _.extend(Thorax.View.prototype, {
-  freeze: function(options) {
-    _.each(inheritVars, function(obj) {
-      if (obj.unbind) {
-        _.each(this[obj.array], this[obj.unbind], this);
-      }
-    }, this);
-    options = _.defaults(options || {}, {
-      dom: true,
-      children: true
-    });
-    this.off();
-    if (options.dom) {
-      this.undelegateEvents();
-    }
-    this.trigger('freeze');
-    if (options.children) {
-      _.each(this.children, function(child) {
-        child.freeze(options);
-      }, this);
-    }
+  remove: function() {
+    this.deactivate();
+    this.$el.remove();
   },
+  
+  activate: function() {
+    this.trigger('activated');
+    _.each(this.children, function(child, cid) {
+      child.activate();
+    });
+    //TODO: need to put view back in state prior to deactivate()
+    //being called, and also account for if deactivate() was never
+    //called (new view, initial activation)
+  },
+
+  deactivate: function() {
+    this.trigger('deactivated');
+    _.each(this.children, function(child, cid) {
+      child.deactivate();
+    });
+    this.stopListening();
+  },
+
   on: function(eventName, callback, context) {
     if (objectEvents(this, eventName, callback, context)) {
       return this;

@@ -76,19 +76,20 @@ Thorax.LayoutView = Thorax.View.extend({
       view._shouldDestroyOnNextSetView = true;
     }
     this.trigger('change:view:start', view, oldView, options);
-    oldView && oldView.trigger('deactivated', options);
-    view && view.trigger('activated', options);
-    if (oldView && oldView.el && oldView.el.parentNode) {
-      oldView.$el.remove();
+    if (oldView) {
+      this._removeChild(oldView);
+      if (oldView._shouldDestroyOnNextSetView) {
+        oldView.destroy();
+      } else {
+        oldView.remove(); // will call deactivate
+      }
     }
-    //make sure the view has been rendered at least once
-    view && this._addChild(view);
+    if (view) {
+      view.activate();
+      this._addChild(view);
+      view.appendTo(getLayoutViewsTargetElement.call(this), options);
+    }
     this._view = view || undefined;
-    oldView && (delete this.children[oldView.cid]);
-    oldView && oldView._shouldDestroyOnNextSetView && oldView.destroy();
-    if (this._view) {
-      this._view.appendTo(getLayoutViewsTargetElement.call(this), options);
-    }
     this.trigger('change:view:end', view, oldView, options);
     return view;
   },

@@ -10,7 +10,7 @@ Handlebars.registerViewHelper('loading', function(view) {
   var callback = _.bind(view.render, view);
   view.parent._loadingCallbacks = view.parent._loadingCallbacks || [];
   view.parent._loadingCallbacks.push(callback);
-  view.on('freeze', function() {
+  view.on('deactivated', function() {
     view.parent._loadingCallbacks = _.without(view.parent._loadingCallbacks, callback);
   });
   view.render();
