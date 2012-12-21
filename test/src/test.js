@@ -311,7 +311,7 @@ describe('core', function() {
     var view = new Thorax.View();
     expect(function() {
       view.render();
-    }).to.throw();
+    }).to['throw']();
   });
 
   it("render() subclassing", function() {

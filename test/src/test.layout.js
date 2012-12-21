@@ -120,7 +120,7 @@ describe('layout', function() {
       layoutWithTemplateWithoutLayoutTag.setView(new Thorax.View({
         template: '<div class="inner"></div>'
       }));
-    }).to.throw();
+    }).to['throw']();
   });
 
 });
