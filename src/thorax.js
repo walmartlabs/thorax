@@ -186,6 +186,8 @@ Thorax.View = Backbone.View.extend({
     if (typeof html === 'undefined') {
       return this.el.innerHTML;
     } else {
+      // Event for IE element fixes
+      this.trigger('before:append');
       this.el.innerHTML = "";
       var element;
       if (this.collection && this._collectionOptionsByCid[this.collection.cid] && this._renderCount) {
