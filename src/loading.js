@@ -7,9 +7,9 @@ Thorax.setRootObject = function(obj) {
   rootObject = obj;
 };
 
-Thorax.loadHandler = function(start, end) {
+Thorax.loadHandler = function(start, end, context) {
   return function(message, background, object) {
-    var self = this;
+    var self = context || this;
 
     function startLoadTimeout() {
       clearTimeout(self._loadStart.timeout);
