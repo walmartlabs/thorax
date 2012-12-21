@@ -39,9 +39,9 @@ Handlebars.registerViewHelper('empty', function(collection, view) {
       view.render();
     }
 
-    view.on(collection, 'remove', collectionRemoveCallback);
-    view.on(collection, 'add', collectionAddCallback);
-    view.on(collection, 'reset', collectionResetCallback);
+    view.listenTo(collection, 'remove', collectionRemoveCallback);
+    view.listenTo(collection, 'add', collectionAddCallback);
+    view.listenTo(collection, 'reset', collectionResetCallback);
   }
 
   view.render();

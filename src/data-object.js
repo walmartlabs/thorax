@@ -18,14 +18,7 @@ function dataObject(type, spec) {
     walkInheritTree(source, spec.name, true, function(event) {
       // getEventCallback will resolve if it is a string or a method
       // and return a method
-      target.on(event[0], getEventCallback(event[1], context), event[2] || context);
-    });
-  }
-
-  function unbindEvents(target, source) {
-    var context = this;
-    walkInheritTree(source, spec.name, true, function(event) {
-      target.off(event[0], getEventCallback(event[1], context), event[2] || context);
+      context.listenTo(target, event[0], getEventCallback(event[1], context));
     });
   }
 
@@ -67,8 +60,7 @@ function dataObject(type, spec) {
     }
     this[spec.array] = _.without(this[spec.array], dataObject);
     dataObject.trigger('freeze');
-    unbindEvents.call(this, dataObject, this.constructor);
-    unbindEvents.call(this, dataObject, this);
+    this.stopListening(dataObject);
     delete this[spec.hash][dataObject.cid];
     return true;
   }

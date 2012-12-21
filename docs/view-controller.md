@@ -60,7 +60,7 @@ By default `Thorax.LayoutView`, `Thorax.ViewController` and `Thorax.Application`
 
 `Backbone.history` triggers a `route` event when any route is matched, where as this event is triggered on the object which matched the route.
 
-### route:before *route:before(methodName [,args...])*
+### route:before *route:before(route, methodName [,args...])*
 
 Triggered on the object which matched the route immediately before the matched `methodName` is called.
 

@@ -17,9 +17,12 @@ Thorax.Router = Backbone.Router.extend({
     return response;
   },
   route: function(route, name, callback) {
+    if (!callback) {
+      callback = this[name];
+    }
     //add a route:before event that is fired before the callback is called
     return Backbone.Router.prototype.route.call(this, route, name, function() {
-      this.trigger.apply(this, ['route:before', name].concat(Array.prototype.slice.call(arguments)));
+      this.trigger.apply(this, ['route:before', route, name].concat(Array.prototype.slice.call(arguments)));
       return callback.apply(this, arguments);
     });
   }

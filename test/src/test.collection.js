@@ -90,8 +90,7 @@ describe('collection', function() {
 
       //freeze
       view.freeze();
-      // TODO: remove this once events / bindModel / bindCollection are ported to Backbone listenTo
-      view.collection.off();
+      
       clonedLetterCollection.remove(clonedLetterCollection.models);
       expect(renderedEmptyCount).to.equal(1, msg + 'rendered:empty event count');
       expect(view.$('li')[0 * indexMultiplier].innerHTML).to.equal('a', msg + 'transition from empty to one item');
@@ -236,6 +235,25 @@ describe('collection', function() {
     b.letters.reset(letterCollection.models);
     expect(b.$('.empty').length).to.equal(0);
     expect(b.$('[data-collection-cid] div')[0].innerHTML).to.equal('a');
+  });
+
+  it("should re-render when sort is triggered", function() {
+    var collection = new Thorax.Collection(letterCollection.models);
+    var view = new Thorax.View({
+      collection: collection,
+      template: '{{#collection tag="ul"}}<li>{{letter}}</li>{{/collection}}'
+    });
+    view.render();
+    expect(view.$('li').length).to.equal(collection.length);
+    expect(view.$('li').eq(0).html()).to.equal('a');
+    // reverse alphabetical sort
+    collection.comparator = function(letter) {
+      return _.map(letter.get('letter').toLowerCase().split(''), function(l) { 
+        return String.fromCharCode(-(l.charCodeAt(0)));
+      });
+    };
+    collection.sort();
+    expect(view.$('li').eq(0).html()).to.equal('d');
   });
 
   it("_bindCollection or model.set can be called in context()", function() {

@@ -7,9 +7,9 @@ Thorax.setRootObject = function(obj) {
   rootObject = obj;
 };
 
-Thorax.loadHandler = function(start, end) {
+Thorax.loadHandler = function(start, end, context) {
   return function(message, background, object) {
-    var self = this;
+    var self = context || this;
 
     function startLoadTimeout() {
       clearTimeout(self._loadStart.timeout);
@@ -177,8 +177,6 @@ Thorax.sync = function(method, dataObj, options) {
   };
   this._request = Backbone.sync.apply(this, arguments);
 
-  // TODO : Reevaluate this event... Seems too indepth to expose as an API
-  this.trigger('request', this._request);
   return this._request;
 };
 
@@ -379,8 +377,10 @@ inheritVars.collection.loading = function() {
       this.$el.children().eq(index).attr('data-loading-element', this.collection.cid);
     }, this), _.bind(function() {
       this.$el.find('[data-loading-element="' + this.collection.cid + '"]').remove();
-    }, this));
-    this.on(this.collection, 'load:start', callback);
+    }, this),
+    this.collection);
+
+    this.listenTo(this.collection, 'load:start', callback);
   }
 };
 

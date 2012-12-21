@@ -52,17 +52,6 @@ The `Backbone events` object now accepts view events in addition to DOM events. 
       }
     })
 
-### Auto Unbind *view.on(targetObj, eventName, callback [,context])*
-
-Listen for an event on the `targetObj` until `freeze` or `destroy` are called on the view, at which point the listener will be auto unbound (auto `off`ed if you will). Most model and collection behaviors in Thorax are implemented in this manner.
-
-    var view = new Thorax.View();
-    var otherView = new Thorax.View();
-    view.on(otherView, 'rendered', function(){});
-    view.destroy();
-    //the observer registered above will not be triggered
-    otherView.render();
-
 ### DOM Events *view.on(eventNameAndSelector, callback [,context])*
 
 The `on` method will now accept event strings in the same format as the events hash, for instance `click a`. Events separated by a space will still be treated as registering multiple events so long as the event name does not start with a DOM event name (`click`, `change`, `mousedown` etc).
