@@ -67,14 +67,14 @@ _.extend(Thorax.View.prototype, {
     }
   },
   on: function(eventName, callback, context) {
-    if (objectEvents(this, eventName, callback)) {
+    if (objectEvents(this, eventName, callback, context)) {
       return this;
     }
 
-    if (typeof eventName === 'object' && arguments.length === 1) {
+    if (typeof eventName === 'object' && arguments.length < 3) {
       //accept on({"rendered": callback})
       _.each(eventName, function(value, key) {
-        this.on(key, value, this);
+        this.on(key, value, callback || this);    // callback is context in this form of the call
       }, this);
     } else {
       //accept on("rendered", callback, context)
@@ -114,10 +114,10 @@ _.extend(Thorax.View.prototype, {
   _addEvent: function(params) {
     if (params.type === 'view') {
       _.each(params.name.split(/\s+/), function(name) {
-        _on.call(this, name, bindEventHandler.call(this, 'view-event:' + params.originalName, params.handler), params.context || this);
+        _on.call(this, name, bindEventHandler.call(this, 'view-event:', params));
       }, this);
     } else {
-      var boundHandler = bindEventHandler.call(this, 'dom-event:' + params.originalName, params.handler);
+      var boundHandler = bindEventHandler.call(this, 'dom-event:', params);
       if (!params.nested) {
         boundHandler = containHandlerToCurentView(boundHandler, this.cid);
       }
@@ -158,8 +158,11 @@ function containHandlerToCurentView(handler, cid) {
   };
 }
 
-function bindEventHandler(eventName, callback) {
-  var method = typeof callback === 'function' ? callback : this[callback];
+function bindEventHandler(eventName, params) {
+  eventName += params.originalName;
+
+  var callback = params.handler,
+      method = typeof callback === 'function' ? callback : this[callback];
   if (!method) {
     throw new Error('Event "' + callback + '" does not exist ' + (this.name || this.cid) + ':' + eventName);
   }
@@ -169,7 +172,7 @@ function bindEventHandler(eventName, callback) {
     } catch (e) {
       Thorax.onException('thorax-exception: ' + (this.name || this.cid) + ':' + eventName, e);
     }
-  }, this);
+  }, params.context || this);
 }
 
 function eventParamsFromEventItem(name, handler, context) {

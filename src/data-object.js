@@ -18,7 +18,7 @@ function dataObject(type, spec) {
     walkInheritTree(source, spec.name, true, function(event) {
       // getEventCallback will resolve if it is a string or a method
       // and return a method
-      context.listenTo(target, event[0], getEventCallback(event[1], context));
+      context.listenTo(target, event[0], _.bind(getEventCallback(event[1], context), event[2] || context));
     });
   }
 

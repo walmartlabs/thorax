@@ -228,4 +228,84 @@ describe('event', function() {
       parent.$el.remove();
     });
   }
+
+  describe('context', function() {
+    var view, spy,
+        context = {};
+    beforeEach(function() {
+      view = new Thorax.View();
+      spy = this.spy();
+    });
+
+    describe('view events', function() {
+      it('should use view', function() {
+        view.on('foo', spy);
+        view.trigger('foo');
+        expect(spy).to.have.been.calledOnce
+            .to.be.always.calledOn(view);
+      });
+      it('should pass context', function() {
+        view.on('foo', spy, context);
+        view.trigger('foo');
+        expect(spy).to.have.been.calledOnce
+            .to.be.always.calledOn(context);
+      });
+    });
+
+    describe('object view events', function() {
+      it('should use view', function() {
+        view.on({foo: spy});
+        view.trigger('foo');
+        expect(spy).to.have.been.calledOnce
+            .to.be.always.calledOn(view);
+      });
+      it('should pass context', function() {
+        view.on({foo: spy}, context);
+        view.trigger('foo');
+        expect(spy).to.have.been.calledOnce
+            .to.be.always.calledOn(context);
+      });
+    });
+    describe('data object events', function() {
+      it('should use view', function() {
+        var model = new Thorax.Model();
+        view.on({model: {foo: spy}});
+        view.setModel(model, {render: false, fetch: false});
+        model.trigger('foo');
+        expect(spy).to.have.been.calledOnce
+            .to.be.always.calledOn(view);
+      });
+      it('should pass context', function() {
+        var model = new Thorax.Model();
+        view.on({model: {foo: spy}}, context);
+        view.setModel(model, {render: false, fetch: false});
+        model.trigger('foo');
+        expect(spy).to.have.been.calledOnce
+            .to.be.always.calledOn(context);
+      });
+    });
+    describe('dom events', function() {
+      beforeEach(function() {
+        this.stub(view.$el, 'on', function(event, selector, callback) {
+          if (selector === 'foo') {
+            callback($.Event());
+          }
+        });
+        this.stub($.fn, 'view', function() { return view; });
+      });
+
+      it('should use view', function() {
+        view.on('click foo', spy);
+        view.delegateEvents();
+        expect(spy).to.have.been.calledOnce
+            .to.be.always.calledOn(view);
+      });
+      it('should pass context', function() {
+        view.on('click foo', spy, context);
+        view.delegateEvents();
+        expect(spy).to.have.been.calledOnce
+            .to.be.always.calledOn(context);
+      });
+    });
+  });
 });
