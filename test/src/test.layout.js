@@ -87,9 +87,9 @@ describe('layout', function() {
       }
     }));
     parent.destroy();
-    expect(callCounts.parent).to.equal(1);
-    expect(callCounts.layout).to.equal(1);
-    expect(callCounts.child).to.equal(1);
+    expect(callCounts.parent).to.equal(1, 'call count on parent');
+    expect(callCounts.layout).to.equal(1, 'call count on layout');
+    expect(callCounts.child).to.equal(1, 'call count on child');
   });
 
   it("Layout can set view el", function() {
