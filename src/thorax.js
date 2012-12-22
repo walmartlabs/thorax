@@ -60,6 +60,9 @@ Thorax.View = Backbone.View.extend({
     //properties directly with the view and template context
     _.extend(this, options || {});
 
+    // Setup helpers
+    bindHelpers.call(this);
+
     //compile a string if it is set as this.template
     if (typeof this.template === 'string') {
       this.template = Handlebars.compile(this.template, {data: true});
@@ -154,6 +157,15 @@ Thorax.View = Backbone.View.extend({
     };
   },
 
+  _getHelpers: function() {
+    if (this.helpers) {
+      return _.extend({}, Handlebars.helpers, this.helpers);
+    } else {
+      return Handlebars.helpers;
+    }
+    
+  },
+
   renderTemplate: function(file, data, ignoreErrors) {
     var template;
     data = this._getContext(data);
@@ -169,7 +181,10 @@ Thorax.View = Backbone.View.extend({
         throw new Error('Unable to find template ' + file);
       }
     } else {
-      return template(data, {data: this._getData(data)});
+      return template(data, {
+        helpers: this._getHelpers(),
+        data: this._getData(data)
+      });
     }
   },
 
@@ -229,6 +244,20 @@ Thorax.View.extend = function() {
 };
 
 createRegistryWrapper(Thorax.View, Thorax.Views);
+
+function bindHelpers() {
+  if (this.helpers) {
+    _.each(this.helpers, function(helper, name) {
+      var view = this;
+      this.helpers[name] = function() {
+        var args = _.toArray(arguments),
+            options = _.last(args);
+        options.context = this;
+        return helper.apply(view, args);
+      };
+    }, this);
+  }
+}
 
 //$(selector).view() helper
 $.fn.view = function(options) {

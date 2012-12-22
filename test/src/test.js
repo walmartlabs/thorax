@@ -296,15 +296,41 @@ describe('core', function() {
     expect(view.$('li')[4].innerHTML).to.equal('five');
   });
 
-  it("local view functions are called in template scope", function() {
-    var child = new Thorax.View({
-      template: '{{key}}',
-      key: function() {
-        return 'value';
+  it("should allow local helpers to be declared", function() {
+    // register a global helper to ensure that it isn't overwritten
+    Handlebars.registerHelper('globalHelper', function() {
+      return '-';
+    });
+
+    var view = new Thorax.View({
+      helpers: {
+        test: function() {
+          return this.key;
+        },
+        testWithArg: function(arg) {
+          return this.key + arg;
+        },
+        testWithBlock: function(options) {
+          return options.fn(options.context);
+        }
+      },
+      key: 'value',
+      template: '{{globalHelper}} {{test}} {{testWithArg "!"}} {{#testWithBlock}}{{key}}{{/testWithBlock}}'
+    });
+    view.render();
+    expect(view.html()).to.equal('- value value! value');
+
+    view = new Thorax.View({
+      collection: new Thorax.Collection([{letter: 'a'}]),
+      template: '{{#collection tag="ul"}}<li>{{globalHelper}} {{test letter}}</li>{{/collection}}',
+      helpers: {
+        test: function(letter) {
+          return letter + "!";
+        }
       }
     });
-    child.render();
-    expect(child.html()).to.equal('value');
+    view.render();
+    expect(view.$('li').html()).to.equal('- a!');
   });
 
   it("template not found handling", function() {
