@@ -245,7 +245,7 @@ describe('loading', function() {
     it('pair with timeout registers', function() {
       this.object.loadStart('foo', false);
       this.clock.tick(1000);
-      var loaderWrapper = this.object._loadStart;
+      var loaderWrapper = this.object._loadInfo[this.object._loadInfo.length - 1];
 
       this.object.loadEnd();
       this.clock.tick(1000);
@@ -257,7 +257,7 @@ describe('loading', function() {
     it('consequtive pairs emit one event', function() {
       this.object.loadStart('foo', false);
       this.clock.tick(1000);
-      var loaderWrapper = this.object._loadStart;
+      var loaderWrapper = this.object._loadInfo[this.object._loadInfo.length - 1];
 
       this.object.loadEnd();
       this.clock.tick(10);
@@ -277,7 +277,7 @@ describe('loading', function() {
     it('consequtive pairs emit two events after timeout', function() {
       this.object.loadStart('foo', false);
       this.clock.tick(1000);
-      var loaderWrapper = this.object._loadStart;
+      var loaderWrapper = this.object._loadInfo[this.object._loadInfo.length - 1];
 
       this.object.loadEnd();
       this.clock.tick(1000);
@@ -287,7 +287,7 @@ describe('loading', function() {
 
       this.object.loadStart('bar', true);
       this.clock.tick(1000);
-      var loaderWrapper2 = this.object._loadStart;
+      var loaderWrapper2 = this.object._loadInfo[this.object._loadInfo.length - 1];
 
       this.object.loadEnd();
       this.clock.tick(1000);
@@ -299,7 +299,7 @@ describe('loading', function() {
     it('overlapping pairs emit one event', function() {
       this.object.loadStart('foo', false);
       this.clock.tick(1000);
-      var loaderWrapper = this.object._loadStart;
+      var loaderWrapper = this.object._loadInfo[this.object._loadInfo.length - 1];
 
       this.object.loadStart('bar', true);
       this.clock.tick(1000);

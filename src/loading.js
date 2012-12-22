@@ -7,10 +7,14 @@ Thorax.setRootObject = function(obj) {
   rootObject = obj;
 };
 
+var _loadCounter = 0;
+
 Thorax.loadHandler = function(start, end, context) {
-  var loadInfo;
+  var loadCounter = _loadCounter++;
   return function(message, background, object) {
     var self = context || this;
+    self._loadInfo = self._loadInfo || [];
+    var loadInfo = self._loadInfo[loadCounter];
 
     function startLoadTimeout() {
       clearTimeout(loadInfo.timeout);
@@ -26,13 +30,10 @@ Thorax.loadHandler = function(start, end, context) {
     }
 
     if (!loadInfo) {
-      var loadingTimeout = self._loadingTimeoutDuration;
-      if (loadingTimeout === void 0) {
-        // If we are running on a non-view object pull the default timeout
-        loadingTimeout = Thorax.View.prototype._loadingTimeoutDuration;
-      }
+      var loadingTimeout = self._loadingTimeoutDuration !== undefined ?
+        self._loadingTimeoutDuration : Thorax.View.prototype._loadingTimeoutDuration;
 
-      loadInfo = _.extend({
+      loadInfo = self._loadInfo[loadCounter] = _.extend({
         events: [],
         timeout: 0,
         message: message,
@@ -78,7 +79,7 @@ Thorax.loadHandler = function(start, end, context) {
 
               // If stopping make sure we don't run a start
               clearTimeout(loadInfo.timeout);
-              loadInfo = undefined;
+              loadInfo = self._loadInfo[loadCounter] =undefined;
             }
           } catch (e) {
             Thorax.onException('loadEnd', e);
