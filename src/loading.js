@@ -8,15 +8,16 @@ Thorax.setRootObject = function(obj) {
 };
 
 Thorax.loadHandler = function(start, end, context) {
+  var loadInfo;
   return function(message, background, object) {
     var self = context || this;
 
     function startLoadTimeout() {
-      clearTimeout(self._loadStart.timeout);
-      self._loadStart.timeout = setTimeout(function() {
+      clearTimeout(loadInfo.timeout);
+      loadInfo.timeout = setTimeout(function() {
           try {
-            self._loadStart.run = true;
-            start.call(self, self._loadStart.message, self._loadStart.background, self._loadStart);
+            loadInfo.run = true;
+            start.call(self, loadInfo.message, loadInfo.background, loadInfo);
           } catch (e) {
             Thorax.onException('loadStart', e);
           }
@@ -24,14 +25,14 @@ Thorax.loadHandler = function(start, end, context) {
         loadingTimeout * 1000);
     }
 
-    if (!self._loadStart) {
+    if (!loadInfo) {
       var loadingTimeout = self._loadingTimeoutDuration;
       if (loadingTimeout === void 0) {
         // If we are running on a non-view object pull the default timeout
         loadingTimeout = Thorax.View.prototype._loadingTimeoutDuration;
       }
 
-      self._loadStart = _.extend({
+      loadInfo = _.extend({
         events: [],
         timeout: 0,
         message: message,
@@ -39,16 +40,16 @@ Thorax.loadHandler = function(start, end, context) {
       }, Backbone.Events);
       startLoadTimeout();
     } else {
-      clearTimeout(self._loadStart.endTimeout);
+      clearTimeout(loadInfo.endTimeout);
 
-      self._loadStart.message = message;
-      if (!background && self._loadStart.background) {
-        self._loadStart.background = false;
+      loadInfo.message = message;
+      if (!background && loadInfo.background) {
+        loadInfo.background = false;
         startLoadTimeout();
       }
     }
 
-    self._loadStart.events.push(object);
+    loadInfo.events.push(object);
     object.on(loadEnd, function endCallback() {
       object.off(loadEnd, endCallback);
 
@@ -58,26 +59,26 @@ Thorax.loadHandler = function(start, end, context) {
         loadingEndTimeout = Thorax.View.prototype._loadingTimeoutEndDuration;
       }
 
-      var events = self._loadStart.events,
+      var events = loadInfo.events,
           index = events.indexOf(object);
       if (index >= 0) {
         events.splice(index, 1);
       }
       if (!events.length) {
-        self._loadStart.endTimeout = setTimeout(function() {
+        loadInfo.endTimeout = setTimeout(function() {
           try {
             if (!events.length) {
-              var run = self._loadStart.run;
+              var run = loadInfo.run;
 
               if (run) {
                 // Emit the end behavior, but only if there is a paired start
-                end.call(self, self._loadStart.background, self._loadStart);
-                self._loadStart.trigger(loadEnd, self._loadStart);
+                end.call(self, loadInfo.background, loadInfo);
+                loadInfo.trigger(loadEnd, loadInfo);
               }
 
               // If stopping make sure we don't run a start
-              clearTimeout(self._loadStart.timeout);
-              self._loadStart = undefined;
+              clearTimeout(loadInfo.timeout);
+              loadInfo = undefined;
             }
           } catch (e) {
             Thorax.onException('loadEnd', e);
@@ -125,7 +126,7 @@ Thorax.mixinLoadable = function(target, useParent) {
     // Propagates loading view parameters to the AJAX layer
     onLoadStart: function(message, background, object) {
       var that = useParent ? this.parent : this;
-      if (!that.nonBlockingLoad && !background && rootObject) {
+      if (!that.nonBlockingLoad && !background && rootObject && rootObject !== this) {
         rootObject.trigger(loadStart, message, background, object);
       }
       $(that.el).addClass(that._loadingClassName);
