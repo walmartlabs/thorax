@@ -20,10 +20,10 @@ An opinionated, battle tested [Backbone](http://backbonejs.org/) + [Handlebars](
     </td>
   </tr>
   <tr>
-    <td width="25%"><a href="https://github.com/downloads/walmartlabs/thorax/thorax-html.zip" class="btn">Download 2.0.0b5</a></td>
-    <td width="25%"><a href="https://github.com/downloads/walmartlabs/thorax/thorax-lumbar.zip" class="btn btn-primary">Download 2.0.0b5</a></td>
-    <td width="25%"><a href="https://github.com/downloads/walmartlabs/thorax/thorax-mobile.zip" class="btn">Download 2.0.0b5</a></td>
-    <td width="25%"><a href="https://github.com/downloads/walmartlabs/thorax/thorax-rails.zip" class="btn">Download 2.0.0b5</a></td>
+    <td width="25%"><a href="https://github.com/walmartlabs/thorax-boilerplate/raw/master/thorax-html.zip" class="btn">Download 2.0.0b5</a></td>
+    <td width="25%"><a href="https://github.com/walmartlabs/thorax-boilerplate/raw/master/thorax-lumbar.zip" class="btn btn-primary">Download 2.0.0b5</a></td>
+    <td width="25%"><a href="https://github.com/walmartlabs/thorax-boilerplate/raw/master/thorax-mobile.zip" class="btn">Download 2.0.0b5</a></td>
+    <td width="25%"><a href="https://github.com/walmartlabs/thorax-boilerplate/raw/master/thorax-rails.zip" class="btn">Download 2.0.0b5</a></td>
   </tr>
 </table>
 
