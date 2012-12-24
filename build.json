@@ -40,26 +40,21 @@
     },
 
     "test": {
+      "mixins": [
+        "test",
+        "loaded-test-runner"
+      ],
       "scripts": [
-        {"src": "test/lib/mocha.js", "global": true},
-        {"src": "test/lib/chai.js", "global": true},
-        {"src": "test/lib/sinon-chai.js", "global": true},
-        {"src": "test/lib/sinon.js", "global": true},
-        {"src": "test/lib/sinon-backbone.js", "global": true},
-        "test/lib/runner.js",
-
         "test/src/"
       ],
-      "styles": [
-        "test/lib/mocha.css"
-      ],
       "static": [
-        {"src": "test/jquery.html", "dest": "jquery.html"},
-        {"src": "test/zepto.html", "dest": "zepto.html"}
+        {"src": "test/jquery.html", "dest": "jquery/test.html"},
+        {"src": "test/zepto.html", "dest": "zepto/test.html"}
       ]
     }
   },
   "mixins": [
+    "node_modules/phoenix-build/mixin",
     "."
   ],
   "scope": {

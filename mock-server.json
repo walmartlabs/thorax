@@ -1,0 +1,5 @@
+{
+  "build-targets": [
+    {"name": "Test", "path": "build/dev"}
+  ]
+}
