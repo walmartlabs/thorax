@@ -2,7 +2,9 @@ describe('form', function() {
   it("serialize() / populate()", function() {
     var FormView = Thorax.View.extend({
       name: 'form',
-      template: Handlebars.compile('<form><input name="one"/><select name="two"><option value="a">a</option><option value="b">b</option></select><input name="three[four]"/><input name="five" value="A" type="checkbox" /><input name="five" value="B" type="checkbox" checked /><input name="five" value="C" type="checkbox" checked /><input name="six" value="LOL" type="checkbox" checked /></form>', {data: true})
+      template: function() {
+        return '<form><input name="one"/><select name="two"><option value="a">a</option><option value="b">b</option></select><input name="three[four]"/><input name="five" value="A" type="checkbox" /><input name="five" value="B" type="checkbox" checked /><input name="five" value="C" type="checkbox" checked /><input name="six" value="LOL" type="checkbox" checked /></form>';
+      }
     });
 
     var model = new Thorax.Model({
