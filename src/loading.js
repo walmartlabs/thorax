@@ -182,28 +182,35 @@ Thorax.sync = function(method, dataObj, options) {
   return this._request;
 };
 
-var globalRouteCount = (function() {
-  var routeCount = 0;
-  Backbone.history || (Backbone.history = new Backbone.History());
-  Backbone.history.on('route', function() {
-    routeCount++;
-  });
-  return function() { return routeCount; };
-})();
-
 function bindToRoute(callback, failback) {
-  var routeCount = globalRouteCount();
+  var fragment = Backbone.history.getFragment(),
+      routeChanged = false;
+
+  function routeHandler() {
+    if (fragment === Backbone.history.getFragment()) {
+      return;
+    }
+    routeChanged = true;
+    Backbone.history.off('route', routeHandler);
+    failback && failback();
+  }
+
+  Backbone.history.on('route', routeHandler);
 
   function finalizer() {
+    Backbone.history.off('route', routeHandler);
     var args = Array.prototype.slice.call(arguments, 1);
-    if (routeCount === globalRouteCount()) {
+    if (!routeChanged) {
       callback.apply(this, args);
-    } else {
-      failback && failback.apply(this, args);
     }
   }
 
-  return _.bind(finalizer, this);
+  var res = _.bind(finalizer, this);
+  res.cancel = function() {
+    Backbone.history.off('route', routeHandler);
+  };
+
+  return res;
 }
 
 function loadData(callback, failback, options) {
@@ -218,32 +225,24 @@ function loadData(callback, failback, options) {
 
   var self = this,
       routeChanged = false,
-      fragment = Backbone.history.getFragment();
-
-  function routeHandler() {
-    if (fragment === Backbone.history.getFragment()) {
-      return;
-    }
-    routeChanged = true;
-    Backbone.history.off('route', routeHandler);
-    if (self._request) {
-      self._aborted = true;
-      self._request.abort();
-    }
-    failback && failback.call(self, false);
-  }
-
-  Backbone.history.on('route', routeHandler);
+      successCallback = bindToRoute(_.bind(callback, self), function() {
+        routeChanged = true;
+        if (self._request) {
+          self._aborted = true;
+          self._request.abort();
+        }
+        failback && failback.call(self, false);
+      });
 
   this.fetch(_.defaults({
-    success: function() {
-      !routeChanged && callback.apply(self, arguments);
-    },
+    success: successCallback,
     error: failback && function() {
-      !routeChanged && failback.apply(self, [true].concat(_.toArray(arguments)));
+      if (!routeChanged) {
+        failback.apply(self, [true].concat(_.toArray(arguments)));
+      }
     },
     complete: function() {
-      Backbone.history.off('route', routeHandler);
+      successCallback.cancel();
     }
   }, options));
 }

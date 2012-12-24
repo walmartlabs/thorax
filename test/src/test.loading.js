@@ -550,7 +550,7 @@ describe('loading', function() {
       fragment = "bar";
       Backbone.history.trigger('route');
       expect(callback).to.not.have.been.called;
-      expect(failback).to.not.have.been.called;
+      expect(failback).to.have.been.calledOnce;
 
       // make sure callback doesn't work after route has changed
       func();
@@ -563,18 +563,18 @@ describe('loading', function() {
       expect(callback).to.have.been.calledOnce;
       expect(failback).to.not.have.been.called;
 
-      // make sure failback works with initial route trigger
+      // make sure callback works with initial route trigger
       func = reset();
       Backbone.history.trigger('route');
       func();
-      expect(callback).to.not.have.been.called;
-      expect(failback).to.have.been.calledOnce;
+      expect(callback).to.have.been.calledOnce;
+      expect(failback).to.not.have.been.called;
 
       // now make sure no execution happens after route change
       fragment = "bar";
       Backbone.history.trigger('route');
-      expect(callback).to.not.have.been.called;
-      expect(failback).to.have.been.calledOnce;
+      expect(callback).to.have.been.calledOnce;
+      expect(failback).to.not.have.been.called;
 
       Backbone.history.getFragment = _getFragment;
     });
