@@ -64,9 +64,5 @@
   ],
   "scope": {
     "template": "src/fragments/scope.handlebars"
-  },
-
-  "test": {
-    "auto-include": "test/src/test."
   }
 }
