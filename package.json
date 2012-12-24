@@ -22,8 +22,6 @@
     "phoenix-build": "~1"
   },
   "scripts": {
-    "watch": "./node_modules/.bin/lumbar watch ./build.json ./build",
-
     "test": "./node_modules/.bin/jake test"
   },
   "bin": {
