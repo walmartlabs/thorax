@@ -8,7 +8,7 @@ extendOptions('_setModelOptions', function() {
 
 extendViewMember('_onModelChange', function(model) {
   // TODO : What can we do to remove this duplication?
-  var modelOptions = model && this._modelOptionsByCid[model.cid];
+  var modelOptions = model && this._objectOptionsByCid[model.cid];
   if (modelOptions && modelOptions.populate) {
     this.populate(model.attributes, modelOptions.populate === true ? {} : modelOptions.populate);
   }

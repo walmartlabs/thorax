@@ -40,7 +40,6 @@ createRegistryWrapper(Thorax.Collection, Thorax.Collections);
 dataObject('collection', {
   name: '_collectionEvents',
   array: '_collections',
-  hash: '_collectionOptionsByCid',
   set: 'setCollection',
   setCallback: afterSetCollection,
   bind: 'bindCollection',
@@ -189,7 +188,7 @@ _.extend(Thorax.View.prototype, {
     return element.length === 0 ? this.$el : element;
   },
   _onCollectionReset: function(collection) {
-    if (collection === this.collection && this._collectionOptionsByCid[this.collection.cid].render) {
+    if (collection === this.collection && this._objectOptionsByCid[this.collection.cid].render) {
       this.renderCollection();
     }
   },
@@ -233,7 +232,7 @@ _.extend(Thorax.View.prototype, {
 Thorax.View.on({
   collection: {
     error: function(collection, message) {
-      if (this._collectionOptionsByCid[collection.cid].errors) {
+      if (this._objectOptionsByCid[collection.cid].errors) {
         this.trigger('error', message, collection);
       }
     }

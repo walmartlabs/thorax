@@ -61,21 +61,21 @@ function dataObject(type, spec) {
     this[spec.array] = _.without(this[spec.array], dataObject);
     dataObject.trigger('freeze');
     this.stopListening(dataObject);
-    delete this[spec.hash][dataObject.cid];
+    delete this._objectOptionsByCid[dataObject.cid];
     return true;
   }
 
   function objectOptions(dataObject, options) {
-    if (!this[spec.hash][dataObject.cid]) {
-      this[spec.hash][dataObject.cid] = {
+    if (!this._objectOptionsByCid[dataObject.cid]) {
+      this._objectOptionsByCid[dataObject.cid] = {
         render: true,
         fetch: true,
         success: false,
         errors: true
       };
     }
-    _.extend(this[spec.hash][dataObject.cid], options || {});
-    return this[spec.hash][dataObject.cid];
+    _.extend(this._objectOptionsByCid[dataObject.cid], options || {});
+    return this._objectOptionsByCid[dataObject.cid];
   }
 
   function setObject(dataObject, options) {
