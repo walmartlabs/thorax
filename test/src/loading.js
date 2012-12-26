@@ -29,7 +29,7 @@ describe('loading', function() {
       var view = new Thorax.View({
         name: 'food',
         myCollection: collection,
-        template: ''
+        template: function() {}
       });
       view.bindCollection(view.myCollection);
       view.on('load:start', spy);
@@ -77,8 +77,8 @@ describe('loading', function() {
       var view = new Thorax.View({
         name: 'food',
         collection: collection,
-        template: '',
-        itemTemplate: function() {return '';}
+        template: function() {},
+        itemTemplate: function() {return ''; }
       });
       var spy = this.spy(view, 'onLoadEnd');
       view.bindCollection(view.collection);
@@ -94,7 +94,7 @@ describe('loading', function() {
     it('views should see load end after destroy', function() {
       var spy = this.spy(),
           model = new Thorax.Model({url: 'foo'}),
-          view = new Thorax.View({name: 'food', template: '', model: model}),
+          view = new Thorax.View({name: 'food', template: function() {}, model: model}),
           endSpy = this.spy(view, 'onLoadEnd');
       view.on('load:start', spy);
 
@@ -123,7 +123,7 @@ describe('loading', function() {
       exports.on('load:start', Thorax.loadHandler(this.startSpy, this.endSpy));
 
       this.model = new Thorax.Model({url: 'foo'});
-      this.view = new Thorax.View({name: 'food', model: this.model, template: ''});
+      this.view = new Thorax.View({name: 'food', model: this.model, template: function() {}});
     });
     afterEach(function() {
       exports._loadStart = undefined;
