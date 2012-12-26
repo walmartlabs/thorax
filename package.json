@@ -15,43 +15,14 @@
     "node": ">=0.4.7"
   },
   "dependencies": {
-    "fs-watch-tree": "0.2.0",
-    "handlebars": "1.0.x"
+    "fs-watch-tree": "0.2.0"
   },
   "devDependencies": {
-    "express": "2.5.11",
-    "lumbar": "~2",
-    "mocha-phantomjs": "~1.1"
+    "jake": "~0.5",
+    "phoenix-build": "~1"
   },
   "scripts": {
-    "watch": "./node_modules/.bin/lumbar watch ./build.json ./build",
-
-    "start": "node bin/test-server.js . 8083",
-
-    "pretest": "./node_modules/.bin/lumbar build ./build.json ./build",
-    "test": "./node_modules/.bin/mocha-phantomjs 'http://localhost:8083/zepto.html' && ./node_modules/.bin/mocha-phantomjs 'http://localhost:8083/jquery.html'",
-    "posttest": "mkdir dist; cp ./build/thorax*.js dist/"
-  },
-  "plugins": {
-    "mixin": [],
-    "event": [],
-    "helper-view": ["event"],
-    "data-object": [],
-    "model": ["event", "data-object"],
-    "collection": ["event", "data-object", "model", "helper-view"],
-    "form": ["model"],
-    "view-controller": [],
-    "loading": ["event", "model", "collection"],
-    "helpers/button-link": [],
-    "helpers/collection": ["event", "model", "collection"],
-    "helpers/element": [],
-    "helpers/empty": ["event", "model", "collection"],
-    "helpers/loading": ["event", "model", "collection"],
-    "helpers/super": [],
-    "helpers/template": [],
-    "helpers/url": [],
-    "helpers/view": ["helper-view"],
-    "mobile": ["event"]
+    "test": "./node_modules/.bin/jake test"
   },
   "bin": {
     "thorax": "bin/thorax"

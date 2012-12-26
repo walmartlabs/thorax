@@ -79,23 +79,23 @@ function walkInheritTree(source, fieldName, isStatic, callback) {
   }
 }
 
-function objectEvents(target, eventName, callback) {
+function objectEvents(target, eventName, callback, context) {
   if (_.isObject(callback)) {
     var spec = inheritVars[eventName];
     if (spec && spec.event) {
-      addEvents(target[spec.name], callback);
+      addEvents(target[spec.name], callback, context);
       return true;
     }
   }
 }
-function addEvents(target, source) {
+function addEvents(target, source, context) {
   _.each(source, function(callback, eventName) {
     if (_.isArray(callback)) {
       _.each(callback, function(cb) {
-        target.push([eventName, cb]);
+        target.push([eventName, cb, context]);
       });
     } else {
-      target.push([eventName, callback]);
+      target.push([eventName, callback, context]);
     }
   });
 }
@@ -113,6 +113,13 @@ function extendOptions(name, callback) {
   Thorax.View.prototype[name] = function(dataObject, options) {
     return $super.call(this, dataObject, _.extend(callback.call(this, dataObject, options), options));
   };
+}
+
+function getOptionsData(options) {
+  if (!options || !options.data) {
+    throw new Error('Handlebars template compiled without data, use: Handlebars.compile(template, {data: true})');
+  }
+  return options.data;
 }
 
 Thorax.Util = {
@@ -147,7 +154,7 @@ Thorax.Util = {
     }
 
     if (template && typeof template === 'string') {
-      template = Thorax.templates[file] = Handlebars.compile(template);
+      template = Thorax.templates[file] = Handlebars.compile(template, {data: true});
     } else if (!template && !ignoreErrors) {
       throw new Error('templates: ' + file + ' does not exist.');
     }

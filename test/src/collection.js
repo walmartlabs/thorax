@@ -90,6 +90,7 @@ describe('collection', function() {
 
       //freeze
       view.freeze();
+      
       clonedLetterCollection.remove(clonedLetterCollection.models);
       expect(renderedEmptyCount).to.equal(1, msg + 'rendered:empty event count');
       expect(view.$('li')[0 * indexMultiplier].innerHTML).to.equal('a', msg + 'transition from empty to one item');
@@ -152,22 +153,6 @@ describe('collection', function() {
       template: '{{collection tag="ul" empty-template="letter-empty" empty-view="letter-empty" item-template="letter-item"}}'
     });
     runCollectionTests(viewWithCollectionHelperWithEmptyViewAndBlock, 1, 'block helper with empty view and block');
-  });
-
-  it("programmatic access to CollectionView", function() {
-    var parent = new Thorax.View({
-      template: '{{view child}}'
-    });
-    parent.child = new Thorax.CollectionView({
-      tagName: 'ul',
-      parent: parent,
-      'item-template': 'letter-item'
-    });
-    parent.child.setCollection(letterCollection);
-    parent.render();
-    expect(parent.$('ul').length).to.equal(1);
-    expect(parent.child.parent).to.equal(parent);
-    expect(parent.$('li').length).to.equal(letterCollection.length);
   });
 
   it("multiple collections", function() {
@@ -252,6 +237,25 @@ describe('collection', function() {
     expect(b.$('[data-collection-cid] div')[0].innerHTML).to.equal('a');
   });
 
+  it("should re-render when sort is triggered", function() {
+    var collection = new Thorax.Collection(letterCollection.models);
+    var view = new Thorax.View({
+      collection: collection,
+      template: '{{#collection tag="ul"}}<li>{{letter}}</li>{{/collection}}'
+    });
+    view.render();
+    expect(view.$('li').length).to.equal(collection.length);
+    expect(view.$('li').eq(0).html()).to.equal('a');
+    // reverse alphabetical sort
+    collection.comparator = function(letter) {
+      return _.map(letter.get('letter').toLowerCase().split(''), function(l) { 
+        return String.fromCharCode(-(l.charCodeAt(0)));
+      });
+    };
+    collection.sort();
+    expect(view.$('li').eq(0).html()).to.equal('d');
+  });
+
   it("_bindCollection or model.set can be called in context()", function() {
     //this causes recursion
     var view = new Thorax.View({
@@ -283,9 +287,9 @@ describe('collection', function() {
     }
 
     var view = new Thorax.View({
-      template: '{{#collection filter="filterCollection" tag="ul"}}<li>{{key}}</li>{{/collection}}',
+      template: '{{#collection tag="ul"}}<li>{{key}}</li>{{/collection}}',
       collection: new Thorax.Collection(),
-      filterCollection: function(model) {
+      itemFilter: function(model) {
         return model.attributes.key === 'a' || model.attributes.key === 'b';
       }
     });
@@ -419,8 +423,8 @@ describe('collection', function() {
           ++renderCount;
         });
       },
-      collection: collection,
-      template: '{{#collection tag="ul"}}<li>{{name}}</li>{{/collection}}'
+      myCollection: collection,
+      template: '{{#collection myCollection tag="ul"}}<li>{{name}}</li>{{/collection}}'
     });
     view.render();
     expect(renderCount).to.equal(1);
@@ -450,12 +454,14 @@ describe('collection', function() {
     renderCount = 0;
     var itemRenderCount = 0;
     view = new Thorax.View({
+      name: 'outer-view',
       initialize: function() {
         this.on('rendered', function() {
           ++renderCount;
         });
       },
       itemView: Thorax.View.extend({
+        name: 'inner-view',
         initialize: function() {
           this.on('rendered', function() {
             ++itemRenderCount;
@@ -464,8 +470,8 @@ describe('collection', function() {
         tagName: 'li',
         template: '{{name}}'
       }),
-      collection: collection,
-      template: '{{collection tag="ul" item-view=itemView}}'
+      myCollection: collection,
+      template: '{{collection myCollection tag="ul" item-view=itemView}}'
     });
     view.render();
     expect(itemRenderCount).to.equal(1);
@@ -484,6 +490,15 @@ describe('collection', function() {
     expect(itemRenderCount).to.equal(4);
     expect(view.$('li:last-child').html()).to.equal('four');
     expect(renderCount).to.equal(1);
+  });
+
+  it("collection-element helper", function() {
+    var view = new Thorax.View({
+      collection: letterCollection,
+      template: '<div class="test">{{collection-element tag="ul"}}</div>',
+      itemTemplate: 'letter-item'
+    });
+    expect(view.$('li').length).to.equal(letterCollection.length);
   });
 
   it("graceful failure of empty collection with no empty template", function() {
@@ -546,20 +561,6 @@ describe('collection', function() {
   it("item-context & empty-context", function() {
     var view = new Thorax.View({
       collection: letterCollection,
-      template: "{{#collection this.collection item-context=myItemContext}}<span>{{test}}</span>{{/collection}}",
-      myItemContext: function() {
-        return {
-          test: 'testing'
-        };
-      }
-    });
-    view.render();
-    expect(view.$('span').length).to.equal(letterCollection.length);
-    expect(view.$('span')[0].innerHTML).to.equal('testing');
-
-    //will use default
-    view = new Thorax.View({
-      collection: letterCollection,
       template: "{{#collection this.collection}}<span>{{test}}</span>{{/collection}}",
       itemContext: function() {
         return {
@@ -571,24 +572,7 @@ describe('collection', function() {
     expect(view.$('span').length).to.equal(letterCollection.length);
     expect(view.$('span')[0].innerHTML).to.equal('testing');
 
-    view = new Thorax.View({
-      collection: new (Thorax.Collection.extend({
-        url: false,
-        isEmpty: function() {
-          return true;
-        }
-      }))(),
-      template: "{{#collection this.collection empty-context=\"myEmptyContext\"}}{{test}}{{else}}<b>{{test}}</b>{{/collection}}",
-      myEmptyContext: function() {
-        return {
-          test: 'testing'
-        };
-      }
-    });
-    view.render();
-    expect(view.$('b')[0].innerHTML).to.equal('testing');
-
-    //uses default
+    //will use default
     view = new Thorax.View({
       collection: new (Thorax.Collection.extend({
         url: false,
@@ -682,27 +666,11 @@ describe('collection', function() {
         ++callCounter.test1;
       }
     });
-    view.bindCollection(view.collection);
     var oldAllCount = callCounter.all;
     collection.trigger('test1');
     collection.trigger('test2');
     expect(callCounter.all - oldAllCount).to.equal(2);
     expect(callCounter.test1).to.equal(1);
     expect(callCounter.test2).to.equal(1);
-  });
-
-  it("pass CollectionView to Layout", function() {
-    var layout = new Thorax.LayoutView();
-    var collection = new Thorax.Collection([new Thorax.Model({
-      key: 'value'
-    })]);
-    var view = new Thorax.CollectionView({
-      tagName: 'ul',
-      parent: layout,
-      'item-template': Handlebars.compile('<li>{{key}}</li>')
-    });
-    view.setCollection(collection);
-    layout.setView(view);
-    expect(layout.$('li').html()).to.equal('value');
   });
 });

@@ -51,15 +51,10 @@ _.extend(Thorax.View.prototype, {
         _.each(this[obj.array], this[obj.unbind], this);
       }
     }, this);
-
     options = _.defaults(options || {}, {
       dom: true,
       children: true
     });
-    this._eventArgumentsToUnbind && _.each(this._eventArgumentsToUnbind, function(args) {
-      args[0].off(args[1], args[2], args[3]);
-    });
-    this._eventArgumentsToUnbind = [];
     this.off();
     if (options.dom) {
       this.undelegateEvents();
@@ -72,26 +67,15 @@ _.extend(Thorax.View.prototype, {
     }
   },
   on: function(eventName, callback, context) {
-    if (objectEvents(this, eventName, callback)) {
+    if (objectEvents(this, eventName, callback, context)) {
       return this;
     }
 
-    if (typeof eventName === 'object') {
+    if (typeof eventName === 'object' && arguments.length < 3) {
       //accept on({"rendered": callback})
-      if (arguments.length === 1) {
-        _.each(eventName, function(value, key) {
-          this.on(key, value, this);
-        }, this);
-      //events on other objects to auto dispose of when view frozen
-      //on(targetObj, 'eventName', callback, context)
-      } else if (arguments.length > 1) {
-        if (!this._eventArgumentsToUnbind) {
-          this._eventArgumentsToUnbind = [];
-        }
-        var args = Array.prototype.slice.call(arguments);
-        this._eventArgumentsToUnbind.push(args);
-        args[0].on.apply(args[0], args.slice(1));
-      }
+      _.each(eventName, function(value, key) {
+        this.on(key, value, callback || this);    // callback is context in this form of the call
+      }, this);
     } else {
       //accept on("rendered", callback, context)
       //accept on("click a", callback, context)
@@ -130,10 +114,10 @@ _.extend(Thorax.View.prototype, {
   _addEvent: function(params) {
     if (params.type === 'view') {
       _.each(params.name.split(/\s+/), function(name) {
-        _on.call(this, name, bindEventHandler.call(this, 'view-event:' + params.originalName, params.handler), params.context || this);
+        _on.call(this, name, bindEventHandler.call(this, 'view-event:', params));
       }, this);
     } else {
-      var boundHandler = bindEventHandler.call(this, 'dom-event:' + params.originalName, params.handler);
+      var boundHandler = bindEventHandler.call(this, 'dom-event:', params);
       if (!params.nested) {
         boundHandler = containHandlerToCurentView(boundHandler, this.cid);
       }
@@ -147,13 +131,30 @@ _.extend(Thorax.View.prototype, {
   }
 });
 
+// propagate ready event to children
+function triggerReady(view) {
+  view.trigger('ready');
+}
+
+// When view is ready trigger ready event on all
+// children that are present, then register an
+// event that will trigger ready on new children
+// when they are added
+Thorax.View.on('ready', function() {
+  if (!this._isReady) {
+    this._isReady = true;
+    _.each(this.children, triggerReady);
+    this.on('child', triggerReady);
+  }
+});
+
 var eventSplitter = /^(nested\s+)?(\S+)(?:\s+(.+))?/;
 
 var domEvents = [],
     domEventRegexp;
 function pushDomEvents(events) {
   domEvents.push.apply(domEvents, events);
-  domEventRegexp = new RegExp('^(' + domEvents.join('|') + ')');
+  domEventRegexp = new RegExp('^(' + domEvents.join('|') + ')(?:\\s|$)');
 }
 pushDomEvents([
   'mousedown', 'mouseup', 'mousemove', 'mouseover', 'mouseout',
@@ -174,8 +175,11 @@ function containHandlerToCurentView(handler, cid) {
   };
 }
 
-function bindEventHandler(eventName, callback) {
-  var method = typeof callback === 'function' ? callback : this[callback];
+function bindEventHandler(eventName, params) {
+  eventName += params.originalName;
+
+  var callback = params.handler,
+      method = typeof callback === 'function' ? callback : this[callback];
   if (!method) {
     throw new Error('Event "' + callback + '" does not exist ' + (this.name || this.cid) + ':' + eventName);
   }
@@ -185,7 +189,7 @@ function bindEventHandler(eventName, callback) {
     } catch (e) {
       Thorax.onException('thorax-exception: ' + (this.name || this.cid) + ':' + eventName, e);
     }
-  }, this);
+  }, params.context || this);
 }
 
 function eventParamsFromEventItem(name, handler, context) {

@@ -1,34 +1,9 @@
-describe('helpers', function() {
-  it("url helper", function() {
-    var view = new Thorax.View({
-      template: '<a href="{{url "/a/{{b}}" expand-tokens=true}}"></a>'
-    });
-    view.render();
-    expect(view.$('a').attr('href')).to.equal('#/a/');
-    view.b = 'b';
-    view.render();
-    expect(view.$('a').attr('href')).to.equal('#/a/b');
-    view.b = false;
-    view.setModel(new Backbone.Model({
-      b: 'c'
-    }));
-    expect(view.$('a').attr('href')).to.equal('#/a/c');
-
-    var view = new Thorax.View({
-      template: '<a href="{{url "a" b}}"></a>',
-      b: 'c'
-    });
-    view.render();
-    expect(view.$('a').attr('href')).to.equal('#a/c');
-  });
-
+describe('button-link helpers', function() {
   it("option hash required arguments for button and link", function() {
-    var view = new Thorax.View({
-      template: '{{#link href="a"}}{{/link}}{{#button method="b"}}{{/button}}'
-    });
-    view.render();
-    expect(view.$('a').attr('href')).to.equal('#a');
-    expect(view.$('button').attr('data-call-method')).to.equal('b');
+    var link = $(Handlebars.helpers.link({hash: {href: 'a'}}).toString()),
+        button = $(Handlebars.helpers.button({hash: {method: 'b'}}).toString());
+    expect(link.attr('href')).to.equal('#a');
+    expect(button.attr('data-call-method')).to.equal('b');
   });
 
   it("multiple arguments to link", function() {

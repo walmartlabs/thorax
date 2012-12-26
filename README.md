@@ -20,10 +20,10 @@ An opinionated, battle tested [Backbone](http://backbonejs.org/) + [Handlebars](
     </td>
   </tr>
   <tr>
-    <td width="25%"><a href="https://github.com/downloads/walmartlabs/thorax/thorax-html.zip" class="btn">Download 2.0.0b5</a></td>
-    <td width="25%"><a href="https://github.com/downloads/walmartlabs/thorax/thorax-lumbar.zip" class="btn btn-primary">Download 2.0.0b5</a></td>
-    <td width="25%"><a href="https://github.com/downloads/walmartlabs/thorax/thorax-mobile.zip" class="btn">Download 2.0.0b5</a></td>
-    <td width="25%"><a href="https://github.com/downloads/walmartlabs/thorax/thorax-rails.zip" class="btn">Download 2.0.0b5</a></td>
+    <td width="25%"><a href="https://github.com/walmartlabs/thorax-boilerplate/raw/master/thorax-html.zip" class="btn">Download 2.0.0b5</a></td>
+    <td width="25%"><a href="https://github.com/walmartlabs/thorax-boilerplate/raw/master/thorax-lumbar.zip" class="btn btn-primary">Download 2.0.0b5</a></td>
+    <td width="25%"><a href="https://github.com/walmartlabs/thorax-boilerplate/raw/master/thorax-mobile.zip" class="btn">Download 2.0.0b5</a></td>
+    <td width="25%"><a href="https://github.com/walmartlabs/thorax-boilerplate/raw/master/thorax-rails.zip" class="btn">Download 2.0.0b5</a></td>
   </tr>
 </table>
 
@@ -50,14 +50,14 @@ Thorax can be used standalone in any JavaScript environment in addition the [boi
       <td width="50%">
         <p>All of the examples use the <a href="https://raw.github.com/gist/3504663/d1e6321e9fdb69ff47d636eab5df5e52acb64ae0/gistfile1.txt">same sample data</a>.</p>
         <ul>
-          <li><a href="http://jsfiddle.net/vzf5L/">Simple Todos</a></li>
-          <li><a href="http://jsfiddle.net/qwyvx/">$.model</a></li>
-          <li><a href="http://jsfiddle.net/5sWA8/">Context</a></li>
-          <li><a href="http://jsfiddle.net/x3qMU/">view &amp; template helpers</a></li>
-          <li><a href="http://jsfiddle.net/wCbHk/">empty helper</a></li>
-          <li><a href="http://jsfiddle.net/Kaths/">freeze</a></li>
-          <li><a href="http://jsfiddle.net/KX5bC/">LayoutView</a></li>
-          <li><a href="http://jsfiddle.net/AMBgp/">registerViewHelper</a></li>
+          <li><a href="http://jsfiddle.net/QDMyk/">Simple Todos</a></li>
+          <li><a href="http://jsfiddle.net/jLVqN/">$.model</a></li>
+          <li><a href="http://jsfiddle.net/BN2v3/">Context</a></li>
+          <li><a href="http://jsfiddle.net/EcvvM/">view &amp; template helpers</a></li>
+          <li><a href="http://jsfiddle.net/ttZxv/">empty helper</a></li>
+          <li><a href="http://jsfiddle.net/s7YbW/">freeze</a></li>
+          <li><a href="http://jsfiddle.net/tVFfj/">LayoutView</a></li>
+          <li><a href="http://jsfiddle.net/XXUVu/">registerViewHelper</a></li>
         </ul>
       </td>
       <td style="vertical-align:top;" width="50%">
@@ -225,9 +225,7 @@ A `HelperView` instance differs from a regular view instance in that it has a `p
 A helper that re-rendered a `HelperView` every time an event was triggered on the declaring view could be implemented as:
 
     Handlebars.registerViewHelper('on', function(eventName, helperView) {
-      //register a handler on the parent view, which will be automatically
-      //unregistered when helperView is destroyed
-      helperView.on(helperView.parent, eventName, function() {
+      helperView.listenTo(helperView.parent, eventName, function() {
         helperView.render();
       });
     });
@@ -354,7 +352,7 @@ Build a custom version of Thorax using a list of any of the given plugins:
 - collection
 - helpers
 - form
-- view-controller
+- layout
 - loading
 - mobile
 

@@ -28,10 +28,10 @@ describe('loading', function() {
           collection = new Thorax.Collection({url: 'foo'});
       var view = new Thorax.View({
         name: 'food',
-        collection: collection,
-        template: ''
+        myCollection: collection,
+        template: function() {}
       });
-      view.bindCollection(view.collection);
+      view.bindCollection(view.myCollection);
       view.on('load:start', spy);
       view.render();
       expect($(view.el).hasClass('loading')).to.be.false;
@@ -77,7 +77,8 @@ describe('loading', function() {
       var view = new Thorax.View({
         name: 'food',
         collection: collection,
-        template: ''
+        template: function() {},
+        itemTemplate: function() {return ''; }
       });
       var spy = this.spy(view, 'onLoadEnd');
       view.bindCollection(view.collection);
@@ -93,7 +94,7 @@ describe('loading', function() {
     it('views should see load end after destroy', function() {
       var spy = this.spy(),
           model = new Thorax.Model({url: 'foo'}),
-          view = new Thorax.View({name: 'food', render: function() {}, model: model}),
+          view = new Thorax.View({name: 'food', template: function() {}, model: model}),
           endSpy = this.spy(view, 'onLoadEnd');
       view.on('load:start', spy);
 
@@ -122,7 +123,7 @@ describe('loading', function() {
       exports.on('load:start', Thorax.loadHandler(this.startSpy, this.endSpy));
 
       this.model = new Thorax.Model({url: 'foo'});
-      this.view = new Thorax.View({name: 'food', model: this.model, render: function() {}});
+      this.view = new Thorax.View({name: 'food', model: this.model, template: function() {}});
     });
     afterEach(function() {
       exports._loadStart = undefined;
@@ -629,8 +630,8 @@ describe('loading', function() {
         tagName: 'li'
       });
       var collectionLoadingTemplateView = new Thorax.View({
-        template: '{{#collection loading-template="collection-loading" tag="ul"}}<li class="item">{{number}}</li>{{else}}<li class="empty-item">empty</li>{{/collection}}',
-        collection: new (Thorax.Collection.extend({
+        template: '{{#collection myCollection loading-template="collection-loading" tag="ul"}}<li class="item">{{number}}</li>{{else}}<li class="empty-item">empty</li>{{/collection}}',
+        myCollection: new (Thorax.Collection.extend({
           url: false
         }))()
       });
@@ -638,26 +639,26 @@ describe('loading', function() {
       expect(collectionLoadingTemplateView.$('li').length).to.equal(1);
       expect(collectionLoadingTemplateView.$('li.empty-item').length).to.equal(1);
 
-      collectionLoadingTemplateView.collection.loadStart();
+      collectionLoadingTemplateView.myCollection.loadStart();
       this.clock.tick(loadStartTimeout);
       expect(collectionLoadingTemplateView.$('li').length).to.equal(1);
       expect(collectionLoadingTemplateView.$('li.empty-item').length).to.equal(0);
       expect(collectionLoadingTemplateView.$('li.loading-item').length).to.equal(1);
-      collectionLoadingTemplateView.collection.add([{"number": "one"}, {"number": "two"}]);
-      collectionLoadingTemplateView.collection.loadEnd();
+      collectionLoadingTemplateView.myCollection.add([{"number": "one"}, {"number": "two"}]);
+      collectionLoadingTemplateView.myCollection.loadEnd();
       this.clock.tick(loadEndTimeout);
       expect(collectionLoadingTemplateView.$('li').length).to.equal(2);
       expect(collectionLoadingTemplateView.$('li.empty-item').length).to.equal(0);
       expect(collectionLoadingTemplateView.$('li.loading-item').length).to.equal(0);
 
-      collectionLoadingTemplateView.collection.loadStart();
+      collectionLoadingTemplateView.myCollection.loadStart();
       this.clock.tick(loadStartTimeout);
       expect(collectionLoadingTemplateView.$('li').length).to.equal(3);
       expect(collectionLoadingTemplateView.$('li.empty-item').length).to.equal(0);
       expect(collectionLoadingTemplateView.$('li.loading-item').length).to.equal(1);
       expect($(collectionLoadingTemplateView.$('li')[2]).hasClass('loading-item')).to.be.true;
-      collectionLoadingTemplateView.collection.add([{"number": "three"}, {"number": "four"}]);
-      collectionLoadingTemplateView.collection.loadEnd();
+      collectionLoadingTemplateView.myCollection.add([{"number": "three"}, {"number": "four"}]);
+      collectionLoadingTemplateView.myCollection.loadEnd();
       this.clock.tick(loadEndTimeout);
       expect(collectionLoadingTemplateView.$('li').length).to.equal(4);
       expect(collectionLoadingTemplateView.$('li.empty-item').length).to.equal(0);

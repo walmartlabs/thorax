@@ -1,4 +1,4 @@
-describe('view-controller', function() {
+describe('layout', function() {
   it("LayoutView", function() {
     var a = new Thorax.View({
       render: function() {
@@ -123,72 +123,4 @@ describe('view-controller', function() {
     }).to.throw();
   });
 
-  it('ViewController', function() {
-    var viewControllerA = new Thorax.ViewController({
-      className: 'view-controller-a'
-    });
-    var testView = new Thorax.View({
-      template: '',
-      events: {
-        ready: function() {
-          expect(this.$el.parents('.view-controller-a').length).to.be.above(0, 'ViewController sets itself as the view on the parent before the route is called');
-        }
-      }
-    });
-    var viewControllerB = new Thorax.ViewController({
-      parent: viewControllerA,
-      routes: {
-        "test": "test"
-      },
-      test: function() {
-        this.setView(testView);
-      }
-    });
-    var callCount = 0;
-    viewControllerB.on('route', function(name) {
-      ++callCount;
-      expect(name).to.equal('test');
-    });
-    viewControllerB.navigate('test', {trigger: true});
-    expect(callCount).to.equal(1, 'route event triggered on ViewController');
-
-    var test2CallCount = 0,
-        test2RouteCallCount = 0;
-    var router = new (Thorax.Router.extend({
-      routes: {
-        "test2": "test2"
-      },
-      test2: function() {
-        ++test2CallCount;
-      }
-    }))();
-    router.on('route', function() {
-      ++test2RouteCallCount;
-    });
-    router.navigate('test2', {trigger: true});
-    expect(test2CallCount).to.equal(1, 'route called on Router');
-    expect(test2RouteCallCount).to.equal(1, 'route event triggered on Router');
-
-    var c = new Thorax.ViewController({
-      routes: {
-        'one': 'one',
-        'two': 'two'
-      },
-      one: function() {
-        this.setView(new Thorax.View({template: '<div class="one">one</div>'}));
-      },
-      two: function() {
-        this.setView(new Thorax.View({template: '<div class="two">two</div>'}));
-      },
-      template: '<div class="outer">{{layout}}</div>'
-    });
-    c.render();
-    Backbone.history.navigate('one', {trigger: true});
-    expect(c.$('.outer').length).to.equal(1);
-    expect(c.$('.one').length).to.equal(1);
-    expect(c.$('.two').length).to.equal(0);
-    Backbone.history.navigate('two', {trigger: true});
-    expect(c.$('.one').length).to.equal(0);
-    expect(c.$('.two').length).to.equal(1);
-  });
 });

@@ -16,7 +16,7 @@ Thorax.Model = Backbone.Model.extend({
       delete attributes[default_key];
     }
     var keys = _.keys(attributes);
-    return keys.length > 1 || (keys.length === 1 && keys[0] !== 'id');
+    return keys.length > 1 || (keys.length === 1 && keys[0] !== this.idAttribute);
   }
 });
 
@@ -27,22 +27,12 @@ dataObject('model', {
   name: '_modelEvents',
   array: '_models',
   hash: '_modelOptionsByCid',
-
-  ctor: function() {
-    if (this.model) {
-      //need to null this.model so setModel will not treat
-      //it as the old model and immediately return
-      var model = this.model;
-      this.model = null;
-      this.setModel(model);
-    }
-  },
-
   set: 'setModel',
   bind: 'bindModel',
   unbind: 'unbindModel',
   options: '_setModelOptions',
   change: '_onModelChange',
+  $el: '$el',
   cidAttrName: modelCidAttributeName
 });
 
