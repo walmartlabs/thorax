@@ -45,11 +45,12 @@ Thorax.View = Backbone.View.extend({
   _configure: function(options) {
     var self = this;
 
+    this._objectOptionsByCid = {};
+    this._boundDataObjects = [];
+
     // Setup object event tracking
     _.each(inheritVars, function(obj) {
       self[obj.name] = [];
-      if (obj.array) { self[obj.array] = []; }
-      if (obj.hash) { self[obj.hash] = {}; }
     });
 
     viewsIndexedByCid[this.cid] = this;
@@ -204,7 +205,7 @@ Thorax.View = Backbone.View.extend({
     } else {
       this.el.innerHTML = "";
       var element;
-      if (this.collection && this._collectionOptionsByCid[this.collection.cid] && this._renderCount) {
+      if (this.collection && this._objectOptionsByCid[this.collection.cid] && this._renderCount) {
         // preserveCollectionElement calls the callback after it has a reference
         // to the collection element, calls the callback, then re-appends the element
         preserveCollectionElement.call(this, function() {

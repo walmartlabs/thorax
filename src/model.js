@@ -24,37 +24,35 @@ Thorax.Models = {};
 createRegistryWrapper(Thorax.Model, Thorax.Models);
 
 dataObject('model', {
-  name: '_modelEvents',
-  array: '_models',
-  hash: '_modelOptionsByCid',
   set: 'setModel',
-  bind: 'bindModel',
-  unbind: 'unbindModel',
-  options: '_setModelOptions',
-  change: '_onModelChange',
+  defaultOptions: {
+    render: true,
+    fetch: true,
+    success: false,
+    errors: true
+  },
+  change: onModelChange,
   $el: '$el',
   cidAttrName: modelCidAttributeName
 });
 
-_.extend(Thorax.View.prototype, {
-  _onModelChange: function(model) {
-    var modelOptions = model && this._modelOptionsByCid[model.cid];
-    // !modelOptions will be true when setModel(false) is called
-    if (!modelOptions || (modelOptions && modelOptions.render)) {
-      this.render();
-    }
+function onModelChange(model) {
+  var modelOptions = model && this._objectOptionsByCid[model.cid];
+  // !modelOptions will be true when setModel(false) is called
+  if (!modelOptions || (modelOptions && modelOptions.render)) {
+    this.render();
   }
-});
+}
 
 Thorax.View.on({
   model: {
     error: function(model, errors) {
-      if (this._modelOptionsByCid[model.cid].errors) {
+      if (this._objectOptionsByCid[model.cid].errors) {
         this.trigger('error', errors, model);
       }
     },
     change: function(model) {
-      this._onModelChange(model);
+      onModelChange.call(this, model);
     }
   }
 });
