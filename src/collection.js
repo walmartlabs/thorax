@@ -45,6 +45,12 @@ dataObject('collection', {
   bind: 'bindCollection',
   unbind: 'unbindCollection',
   options: '_setCollectionOptions',
+  defaultOptions: {
+    render: true,
+    fetch: true,
+    success: false,
+    errors: true
+  },
   change: '_onCollectionReset',
   $el: 'getCollectionElement',
   cidAttrName: collectionCidAttributeName

@@ -30,6 +30,12 @@ dataObject('model', {
   bind: 'bindModel',
   unbind: 'unbindModel',
   options: '_setModelOptions',
+  defaultOptions: {
+    render: true,
+    fetch: true,
+    success: false,
+    errors: true
+  },
   change: '_onModelChange',
   $el: '$el',
   cidAttrName: modelCidAttributeName

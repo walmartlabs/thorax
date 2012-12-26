@@ -67,14 +67,9 @@ function dataObject(type, spec) {
 
   function objectOptions(dataObject, options) {
     if (!this._objectOptionsByCid[dataObject.cid]) {
-      this._objectOptionsByCid[dataObject.cid] = {
-        render: true,
-        fetch: true,
-        success: false,
-        errors: true
-      };
+      this._objectOptionsByCid[dataObject.cid] = {};
     }
-    _.extend(this._objectOptionsByCid[dataObject.cid], options || {});
+    _.extend(this._objectOptionsByCid[dataObject.cid], spec.defaultOptions, options);
     return this._objectOptionsByCid[dataObject.cid];
   }
 
