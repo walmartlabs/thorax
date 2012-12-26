@@ -31,7 +31,7 @@ describe('loading', function() {
         myCollection: collection,
         template: function() {}
       });
-      view.bindCollection(view.myCollection);
+      view.bindDataObject(view.myCollection);
       view.on('load:start', spy);
       view.render();
       expect($(view.el).hasClass('loading')).to.be.false;
@@ -81,7 +81,7 @@ describe('loading', function() {
         itemTemplate: function() {return ''; }
       });
       var spy = this.spy(view, 'onLoadEnd');
-      view.bindCollection(view.collection);
+      view.bindDataObject(view.collection);
       collection.loadStart();
       this.clock.tick(1000);
 

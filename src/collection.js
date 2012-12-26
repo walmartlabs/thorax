@@ -38,20 +38,15 @@ Thorax.Collections = {};
 createRegistryWrapper(Thorax.Collection, Thorax.Collections);
 
 dataObject('collection', {
-  name: '_collectionEvents',
-  array: '_collections',
   set: 'setCollection',
   setCallback: afterSetCollection,
-  bind: 'bindCollection',
-  unbind: 'unbindCollection',
-  options: '_setCollectionOptions',
   defaultOptions: {
     render: true,
     fetch: true,
     success: false,
     errors: true
   },
-  change: '_onCollectionReset',
+  change: onCollectionReset,
   $el: 'getCollectionElement',
   cidAttrName: collectionCidAttributeName
 });
@@ -193,15 +188,10 @@ _.extend(Thorax.View.prototype, {
     var element = this.$(this._collectionSelector);
     return element.length === 0 ? this.$el : element;
   },
-  _onCollectionReset: function(collection) {
-    if (collection === this.collection && this._objectOptionsByCid[this.collection.cid].render) {
-      this.renderCollection();
-    }
-  },
   // Events that will only be bound to "this.collection"
   _collectionRenderingEvents: {
-    reset: '_onCollectionReset',
-    sort: '_onCollectionReset',
+    reset: onCollectionReset,
+    sort: onCollectionReset,
     filter: function() {
       applyVisibilityFilter.call(this);
     },
@@ -244,6 +234,12 @@ Thorax.View.on({
     }
   }
 });
+
+function onCollectionReset(collection) {
+  if (collection === this.collection && this._objectOptionsByCid[this.collection.cid].render) {
+    this.renderCollection();
+  }
+}
 
 function afterSetCollection(collection) {
   if (!collectionHelperPresentForPrimaryCollection.call(this) && collection) {

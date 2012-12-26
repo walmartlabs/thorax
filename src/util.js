@@ -83,7 +83,7 @@ function objectEvents(target, eventName, callback, context) {
   if (_.isObject(callback)) {
     var spec = inheritVars[eventName];
     if (spec && spec.event) {
-      addEvents(target[spec.name], callback, context);
+      addEvents(target['_' + eventName + 'Events'], callback, context);
       return true;
     }
   }
@@ -98,21 +98,6 @@ function addEvents(target, source, context) {
       target.push([eventName, callback, context]);
     }
   });
-}
-
-function extendViewMember(name, callback) {
-  var $super = Thorax.View.prototype[name];
-  Thorax.View.prototype[name] = function() {
-    var ret = $super.apply(this, arguments);
-    callback.apply(this, arguments);
-    return ret;
-  };
-}
-function extendOptions(name, callback) {
-  var $super = Thorax.View.prototype[name];
-  Thorax.View.prototype[name] = function(dataObject, options) {
-    return $super.call(this, dataObject, _.extend(callback.call(this, dataObject, options), options));
-  };
 }
 
 function getOptionsData(options) {

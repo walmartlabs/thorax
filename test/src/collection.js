@@ -76,6 +76,7 @@ describe('collection', function() {
       clonedLetterCollection.remove(clonedLetterCollection.models);
       expect(view.$('li')[0].innerHTML).to.equal('empty', msg + 'empty collection renders empty');
       clonedLetterCollection.add(new LetterModel({letter: 'a'}));
+      
       expect(view.$('li').length).to.equal(1 * indexMultiplier, msg + 'transition from empty to one item');
       expect(view.$('li')[0 * indexMultiplier].innerHTML).to.equal('a', msg + 'transition from empty to one item');
       expect(renderedCount).to.equal(1, msg + 'rendered event count');
@@ -93,7 +94,7 @@ describe('collection', function() {
       
       clonedLetterCollection.remove(clonedLetterCollection.models);
       expect(renderedEmptyCount).to.equal(1, msg + 'rendered:empty event count');
-      expect(view.$('li')[0 * indexMultiplier].innerHTML).to.equal('a', msg + 'transition from empty to one item');
+      expect(view.$('li')[0 * indexMultiplier].innerHTML).to.equal('a', msg + 'transition from empty to one item after freeze');
     }
 
     runCollectionTests(new LetterCollectionView(), 1, 'base');
@@ -256,7 +257,7 @@ describe('collection', function() {
     expect(view.$('li').eq(0).html()).to.equal('d');
   });
 
-  it("_bindCollection or model.set can be called in context()", function() {
+  it("bindDataObject or model.set can be called in context()", function() {
     //this causes recursion
     var view = new Thorax.View({
       model: new Thorax.Model(),

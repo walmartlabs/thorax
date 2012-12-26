@@ -1,6 +1,10 @@
 /*global getValue, inheritVars, walkInheritTree */
+
 function dataObject(type, spec) {
-  spec = inheritVars[type] = _.defaults({event: true}, spec);
+  spec = inheritVars[type] = _.defaults({
+    name: '_' + type + 'Events',
+    event: true
+  }, spec);
 
   // Add a callback in the view constructor
   spec.ctor = function() {
@@ -13,66 +17,6 @@ function dataObject(type, spec) {
     }
   };
 
-  function bindEvents(target, source) {
-    var context = this;
-    walkInheritTree(source, spec.name, true, function(event) {
-      // getEventCallback will resolve if it is a string or a method
-      // and return a method
-      context.listenTo(target, event[0], _.bind(getEventCallback(event[1], context), event[2] || context));
-    });
-  }
-
-  function loadObject(dataObject, options) {
-    if (dataObject.load) {
-      dataObject.load(function() {
-        options && options.success && options.success(dataObject);
-      }, options);
-    } else {
-      dataObject.fetch(options);
-    }
-  }
-
-  function bindObject(dataObject, options) {
-    if (this[spec.array].indexOf(dataObject) !== -1) {
-      return false;
-    }
-    // Collections do not have a cid attribute by default
-    ensureDataObjectCid(type, dataObject);
-    this[spec.array].push(dataObject);
-
-    var options = this[spec.options](dataObject, options);
-
-    bindEvents.call(this, dataObject, this.constructor);
-    bindEvents.call(this, dataObject, this);
-
-    if (Thorax.Util.shouldFetch(dataObject, options)) {
-      loadObject(dataObject, options);
-    } else {
-      // want to trigger built in rendering without triggering event on model
-      this[spec.change](dataObject, options);
-    }
-    return true;
-  }
-
-  function unbindObject(dataObject) {
-    if (this[spec.array].indexOf(dataObject) === -1) {
-      return false;
-    }
-    this[spec.array] = _.without(this[spec.array], dataObject);
-    dataObject.trigger('freeze');
-    this.stopListening(dataObject);
-    delete this._objectOptionsByCid[dataObject.cid];
-    return true;
-  }
-
-  function objectOptions(dataObject, options) {
-    if (!this._objectOptionsByCid[dataObject.cid]) {
-      this._objectOptionsByCid[dataObject.cid] = {};
-    }
-    _.extend(this._objectOptionsByCid[dataObject.cid], spec.defaultOptions, options);
-    return this._objectOptionsByCid[dataObject.cid];
-  }
-
   function setObject(dataObject, options) {
     var old = this[type],
         $el = getValue(this, spec.$el);
@@ -81,7 +25,7 @@ function dataObject(type, spec) {
       return this;
     }
     if (old) {
-      this[spec.unbind](old);
+      this.unbindDataObject(old);
     }
 
     if (dataObject) {
@@ -91,13 +35,13 @@ function dataObject(type, spec) {
         spec.loading.call(this);
       }
 
-      this[spec.bind](dataObject, _.extend({}, this.options, options));
+      this.bindDataObject(dataObject, _.extend({}, this.options, options));
       $el.attr(spec.cidAttrName, dataObject.cid);
       dataObject.trigger('set', dataObject, old);
     } else {
       this[type] = false;
       if (spec.change) {
-        this[spec.change](false);
+        spec.change.call(this, false);
       }
       $el.removeAttr(spec.cidAttrName);
     }
@@ -105,13 +49,85 @@ function dataObject(type, spec) {
     return this;
   }
 
-  var extend = {};
-  extend[spec.bind] = bindObject;
-  extend[spec.unbind] = unbindObject;
-  extend[spec.set] = setObject;
-  extend[spec.options] = objectOptions;
+  Thorax.View.prototype[spec.set] = setObject;
+}
 
-  _.extend(Thorax.View.prototype, extend);
+_.extend(Thorax.View.prototype, {
+  bindDataObject: function(dataObject, options) {
+    var type = getDataObjectType(dataObject);
+    if (this._boundDataObjects.indexOf(dataObject) !== -1) {
+      return false;
+    }
+    // Collections do not have a cid attribute by default
+    ensureDataObjectCid(type, dataObject);
+    this._boundDataObjects.push(dataObject);
+
+    var options = this._modifyDataObjectOptions(dataObject, _.extend({}, inheritVars[type].defaultOptions, options));
+    this._objectOptionsByCid[dataObject.cid] = options;
+
+    bindEvents.call(this, type, dataObject, this.constructor);
+    bindEvents.call(this, type, dataObject, this);
+
+    if (Thorax.Util.shouldFetch(dataObject, options)) {
+      loadObject(dataObject, options);
+    } else if (inheritVars[type].change) {
+      // want to trigger built in rendering without triggering event on model
+      inheritVars[type].change.call(this, dataObject, options);
+    }
+    return true;
+  },
+
+  unbindDataObject: function (dataObject) {
+    if (this._boundDataObjects.indexOf(dataObject) === -1) {
+      return false;
+    }
+    this._boundDataObjects = _.without(this._boundDataObjects, dataObject);
+    dataObject.trigger('freeze');
+    this.stopListening(dataObject);
+    delete this._objectOptionsByCid[dataObject.cid];
+    return true;
+  },
+
+  _modifyDataObjectOptions: function(dataObject, options) {
+    return options;
+  }
+});
+
+function getDataObjectType(dataObject) {
+  if (isModel(dataObject)) {
+    return 'model';
+  } else if (isCollection(dataObject)) {
+    return 'collection';
+  } else {
+    throw new Error('Unknown data object bound: ' + (typeof dataObject));
+  }
+}
+
+function isModel(model) {
+  return model && model.attributes && model.set;
+}
+
+function isCollection(collection) {
+  return collection && collection.indexOf && collection.models;
+}
+
+function bindEvents(type, target, source) {
+  var context = this;
+  walkInheritTree(source, '_' + type + 'Events', true, function(event) {
+    // getEventCallback will resolve if it is a string or a method
+    // and return a method
+    context.listenTo(target, event[0], _.bind(getEventCallback(event[1], context), event[2] || context));
+  });
+}
+
+function loadObject(dataObject, options) {
+  if (dataObject.load) {
+    dataObject.load(function() {
+      options && options.success && options.success(dataObject);
+    }, options);
+  } else {
+    dataObject.fetch(options);
+  }
 }
 
 function getEventCallback(callback, context) {

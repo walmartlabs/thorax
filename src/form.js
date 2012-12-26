@@ -1,18 +1,17 @@
-/*global extendOptions, extendViewMember */
+/*global inheritVars */
 
-extendOptions('_setModelOptions', function() {
-  return {
-    populate: true
-  };
-});
+inheritVars.model.defaultOptions.populate = true;
 
-extendViewMember('_onModelChange', function(model) {
+var oldModelChange = inheritVars.model.change;
+inheritVars.model.change = function() {
+  oldModelChange.apply(this, arguments);
   // TODO : What can we do to remove this duplication?
-  var modelOptions = model && this._objectOptionsByCid[model.cid];
+  var modelOptions = this.model && this._objectOptionsByCid[this.model.cid];
   if (modelOptions && modelOptions.populate) {
-    this.populate(model.attributes, modelOptions.populate === true ? {} : modelOptions.populate);
+    this.populate(this.model.attributes, modelOptions.populate === true ? {} : modelOptions.populate);
   }
-});
+};
+inheritVars.model.defaultOptions.populate = true;
 
 _.extend(Thorax.View.prototype, {
   //serializes a form present in the view, returning the serialized data
