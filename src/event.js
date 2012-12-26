@@ -46,11 +46,7 @@ _.extend(Thorax.View, {
 
 _.extend(Thorax.View.prototype, {
   freeze: function(options) {
-    _.each(inheritVars, function(obj) {
-      if (obj.unbind) {
-        _.each(this[obj.array], this[obj.unbind], this);
-      }
-    }, this);
+    _.each(this._boundDataObjects, this.unbindDataObject, this);
     options = _.defaults(options || {}, {
       dom: true,
       children: true
@@ -128,6 +124,23 @@ _.extend(Thorax.View.prototype, {
         this.$el.on(params.name, boundHandler);
       }
     }
+  }
+});
+
+// propagate ready event to children
+function triggerReady(view) {
+  view.trigger('ready');
+}
+
+// When view is ready trigger ready event on all
+// children that are present, then register an
+// event that will trigger ready on new children
+// when they are added
+Thorax.View.on('ready', function() {
+  if (!this._isReady) {
+    this._isReady = true;
+    _.each(this.children, triggerReady);
+    this.on('child', triggerReady);
   }
 });
 

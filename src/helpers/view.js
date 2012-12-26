@@ -13,7 +13,6 @@ Handlebars.registerHelper('view', function(view, options) {
   var placeholderId = instance.cid,
       expandTokens = options.hash['expand-tokens'];
   declaringView._addChild(instance);
-  declaringView.trigger('child', instance);
   delete options.hash['expand-tokens'];
   if (options.fn) {
     viewTemplateOverrides[placeholderId] = options.fn;
@@ -41,9 +40,7 @@ Thorax.View.on('append', function(scope, callback) {
       //see if the view helper declared an override for the view
       //if not, ensure the view has been rendered at least once
       if (viewTemplateOverrides[placeholderId]) {
-        view.render(viewTemplateOverrides[placeholderId](view._getContext(), {
-          data: view._getData()
-        }));
+        view.render(viewTemplateOverrides[placeholderId]);
       } else {
         view.ensureRendered();
       }

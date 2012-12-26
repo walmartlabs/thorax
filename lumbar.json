@@ -1,4 +1,6 @@
 {
+  "name": "thorax",
+
   "mixins": {
     "thorax-dep-jquery": {
       "scripts": [

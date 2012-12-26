@@ -45,11 +45,12 @@ Thorax.View = Backbone.View.extend({
   _configure: function(options) {
     var self = this;
 
+    this._objectOptionsByCid = {};
+    this._boundDataObjects = [];
+
     // Setup object event tracking
     _.each(inheritVars, function(obj) {
       self[obj.name] = [];
-      if (obj.array) { self[obj.array] = []; }
-      if (obj.hash) { self[obj.hash] = {}; }
     });
 
     viewsIndexedByCid[this.cid] = this;
@@ -59,6 +60,9 @@ Thorax.View = Backbone.View.extend({
     //this.options is removed in Thorax.View, we merge passed
     //properties directly with the view and template context
     _.extend(this, options || {});
+
+    // Setup helpers
+    bindHelpers.call(this);
 
     //compile a string if it is set as this.template
     if (typeof this.template === 'string') {
@@ -87,6 +91,7 @@ Thorax.View = Backbone.View.extend({
     if (!view.parent) {
       view.parent = this;
     }
+    this.trigger('child', view);
     return view;
   },
 
@@ -153,6 +158,15 @@ Thorax.View = Backbone.View.extend({
     };
   },
 
+  _getHelpers: function() {
+    if (this.helpers) {
+      return _.extend({}, Handlebars.helpers, this.helpers);
+    } else {
+      return Handlebars.helpers;
+    }
+    
+  },
+
   renderTemplate: function(file, data, ignoreErrors) {
     var template;
     data = this._getContext(data);
@@ -168,7 +182,10 @@ Thorax.View = Backbone.View.extend({
         throw new Error('Unable to find template ' + file);
       }
     } else {
-      return template(data, {data: this._getData(data)});
+      return template(data, {
+        helpers: this._getHelpers(),
+        data: this._getData(data)
+      });
     }
   },
 
@@ -176,10 +193,10 @@ Thorax.View = Backbone.View.extend({
     !this._renderCount && this.render();
   },
 
-  appendTo: function(el, options) {
+  appendTo: function(el) {
     this.ensureRendered();
     $(el).append(this.el);
-    this.trigger('ready', options || {});
+    this.trigger('ready');
   },
 
   html: function(html) {
@@ -190,7 +207,7 @@ Thorax.View = Backbone.View.extend({
       this.trigger('before:append');
       this.el.innerHTML = "";
       var element;
-      if (this.collection && this._collectionOptionsByCid[this.collection.cid] && this._renderCount) {
+      if (this.collection && this._objectOptionsByCid[this.collection.cid] && this._renderCount) {
         // preserveCollectionElement calls the callback after it has a reference
         // to the collection element, calls the callback, then re-appends the element
         preserveCollectionElement.call(this, function() {
@@ -230,6 +247,20 @@ Thorax.View.extend = function() {
 };
 
 createRegistryWrapper(Thorax.View, Thorax.Views);
+
+function bindHelpers() {
+  if (this.helpers) {
+    _.each(this.helpers, function(helper, name) {
+      var view = this;
+      this.helpers[name] = function() {
+        var args = _.toArray(arguments),
+            options = _.last(args);
+        options.context = this;
+        return helper.apply(view, args);
+      };
+    }, this);
+  }
+}
 
 //$(selector).view() helper
 $.fn.view = function(options) {
