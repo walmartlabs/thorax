@@ -7,10 +7,8 @@ Thorax.setRootObject = function(obj) {
   rootObject = obj;
 };
 
-var _loadCounter = 0;
-
 Thorax.loadHandler = function(start, end, context) {
-  var loadCounter = _loadCounter++;
+  var loadCounter = _.uniqueId();
   return function(message, background, object) {
     var self = context || this;
     self._loadInfo = self._loadInfo || [];
@@ -79,7 +77,7 @@ Thorax.loadHandler = function(start, end, context) {
 
               // If stopping make sure we don't run a start
               clearTimeout(loadInfo.timeout);
-              loadInfo = self._loadInfo[loadCounter] =undefined;
+              loadInfo = self._loadInfo[loadCounter] = undefined;
             }
           } catch (e) {
             Thorax.onException('loadEnd', e);
