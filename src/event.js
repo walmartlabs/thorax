@@ -46,11 +46,7 @@ _.extend(Thorax.View, {
 
 _.extend(Thorax.View.prototype, {
   freeze: function(options) {
-    _.each(inheritVars, function(obj) {
-      if (obj.unbind) {
-        _.each(this[obj.array], this[obj.unbind], this);
-      }
-    }, this);
+    _.each(this._boundDataObjects, this.unbindDataObject, this);
     options = _.defaults(options || {}, {
       dom: true,
       children: true
