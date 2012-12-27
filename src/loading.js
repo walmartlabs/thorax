@@ -1,4 +1,4 @@
-/*global collectionOptionNames, extendOptions, inheritVars */
+/*global collectionOptionNames, inheritVars */
 var loadStart = 'load:start',
     loadEnd = 'load:end',
     rootObject;
@@ -335,14 +335,11 @@ if (Thorax.Router) {
 }
 
 // Propagates loading view parameters to the AJAX layer
-function loadingDataOptions() {
-  return {
-    ignoreErrors: this.ignoreFetchError,
-    background: this.nonBlockingLoad
-  };
-}
-extendOptions('_setModelOptions', loadingDataOptions);
-extendOptions('_setCollectionOptions', loadingDataOptions);
+Thorax.View.prototype._modifyDataObjectOptions = function(dataObject, options) {
+  options.ignoreErrors = this.ignoreFetchError;
+  options.background = this.nonBlockingLoad;
+  return options;
+};
 
 inheritVars.collection.loading = function() {
   var loadingView = this.loadingView,
