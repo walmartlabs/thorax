@@ -22,16 +22,6 @@ Handlebars.registerHelper('view', function(view, options) {
   return new Handlebars.SafeString(Thorax.Util.tag(htmlAttributes, undefined, expandTokens ? this : null));
 });
 
-// IE will lose a reference to the elements if view.el.innerHTML = '';
-// If they are removed one by one the references are not lost
-Thorax.View.on('before:append', function() {
-  if (this._renderCount > 0) {
-    _.each(this.children, function(child, cid) {
-      child.$el.remove();
-    });
-  }
-});
-
 Thorax.View.on('append', function(scope, callback) {
   (scope || this.$el).find('[' + viewPlaceholderAttributeName + ']').forEach(function(el) {
     var placeholderId = el.getAttribute(viewPlaceholderAttributeName),

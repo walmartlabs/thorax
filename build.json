@@ -24,7 +24,8 @@
       "mixins": [
         "thorax",
         "thorax-helper-tags",
-        "thorax-loading"
+        "thorax-loading",
+        "thorax-ie"
       ]
     },
     "thorax-mobile": {
