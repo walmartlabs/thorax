@@ -365,9 +365,7 @@ inheritVars.collection.loading = function() {
         }
         item = instance;
       } else {
-        item = this.renderTemplate(loadingTemplate, {
-          collection: this.collection
-        });
+        item = this.renderTemplate(loadingTemplate);
       }
       var index = loadingPlacement
         ? loadingPlacement.call(this)
