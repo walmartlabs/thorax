@@ -46,7 +46,7 @@ Thorax.View = Backbone.View.extend({
     var self = this;
 
     this._objectOptionsByCid = {};
-    this._boundDataObjects = [];
+    this._boundDataObjectsByCid = {};
 
     // Setup object event tracking
     _.each(inheritVars, function(obj) {
