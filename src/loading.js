@@ -17,6 +17,12 @@ Thorax.loadHandler = function(start, end, context) {
 
     function startLoadTimeout() {
       clearTimeout(loadInfo.timeout);
+
+      loadInfo.loadingTimeout = loadInfo.loadingTimeout ?
+        Math.max(loadInfo.loadingTimeout - (Date.now() - loadInfo.startTime), 0) :
+        loadingTimeout * 1000;
+
+      loadInfo.startTime = Date.now();
       loadInfo.timeout = setTimeout(function() {
           try {
             loadInfo.run = true;
@@ -25,12 +31,12 @@ Thorax.loadHandler = function(start, end, context) {
             Thorax.onException('loadStart', e);
           }
         },
-        loadingTimeout * 1000);
+        loadInfo.loadingTimeout);
     }
 
+    var loadingTimeout = self._loadingTimeoutDuration !== undefined ?
+      self._loadingTimeoutDuration : Thorax.View.prototype._loadingTimeoutDuration;
     if (!loadInfo) {
-      var loadingTimeout = self._loadingTimeoutDuration !== undefined ?
-        self._loadingTimeoutDuration : Thorax.View.prototype._loadingTimeoutDuration;
 
       loadInfo = self._loadInfo[loadCounter] = _.extend({
         events: [],

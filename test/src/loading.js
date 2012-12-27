@@ -245,16 +245,16 @@ describe('loading', function() {
 
     it('triggers start only after timeout', function() {
       this.object.loadStart(undefined, true);
-      this.clock.tick(10);
+      this.clock.tick(150);
 
       expect(this.loads.length).to.equal(0);
 
       this.object.loadStart();
-      this.clock.tick(10);
+      this.clock.tick(150);
 
       expect(this.loads.length).to.equal(0);
 
-      this.clock.tick(1000);
+      this.clock.tick(50);
 
       expect(this.loads.length).to.equal(1);
     });
