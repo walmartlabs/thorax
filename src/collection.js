@@ -38,15 +38,15 @@ Thorax.Collections = {};
 createRegistryWrapper(Thorax.Collection, Thorax.Collections);
 
 dataObject('collection', {
-  name: '_collectionEvents',
-  array: '_collections',
-  hash: '_collectionOptionsByCid',
   set: 'setCollection',
   setCallback: afterSetCollection,
-  bind: 'bindCollection',
-  unbind: 'unbindCollection',
-  options: '_setCollectionOptions',
-  change: '_onCollectionReset',
+  defaultOptions: {
+    render: true,
+    fetch: true,
+    success: false,
+    errors: true
+  },
+  change: onCollectionReset,
   $el: 'getCollectionElement',
   cidAttrName: collectionCidAttributeName
 });
@@ -190,15 +190,10 @@ _.extend(Thorax.View.prototype, {
     var element = this.$(this._collectionSelector);
     return element.length === 0 ? this.$el : element;
   },
-  _onCollectionReset: function(collection) {
-    if (collection === this.collection && this._collectionOptionsByCid[this.collection.cid].render) {
-      this.renderCollection();
-    }
-  },
   // Events that will only be bound to "this.collection"
   _collectionRenderingEvents: {
-    reset: '_onCollectionReset',
-    sort: '_onCollectionReset',
+    reset: onCollectionReset,
+    sort: onCollectionReset,
     filter: function() {
       applyVisibilityFilter.call(this);
     },
@@ -228,12 +223,18 @@ _.extend(Thorax.View.prototype, {
 Thorax.View.on({
   collection: {
     error: function(collection, message) {
-      if (this._collectionOptionsByCid[collection.cid].errors) {
+      if (this._objectOptionsByCid[collection.cid].errors) {
         this.trigger('error', message, collection);
       }
     }
   }
 });
+
+function onCollectionReset(collection) {
+  if (collection === this.collection && this._objectOptionsByCid[this.collection.cid].render) {
+    this.renderCollection();
+  }
+}
 
 function afterSetCollection(collection) {
   if (!collectionHelperPresentForPrimaryCollection.call(this) && collection) {

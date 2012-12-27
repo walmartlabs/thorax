@@ -157,7 +157,7 @@ describe('event', function() {
     expect(e).to.equal(2);
   });
 
-  it("unbindModel / unbindCollection stops events from being triggered", function() {
+  it("unbindDataObject stops events from being triggered", function() {
     var spy = this.spy();
     var view = new Thorax.View({
       events: {
@@ -167,11 +167,11 @@ describe('event', function() {
       }
     });
     view.myModel = new Thorax.Model({key: 'value'});
-    view.bindModel(view.myModel, {render: false});
+    view.bindDataObject(view.myModel, {render: false});
     expect(spy.callCount).to.equal(0);
     view.myModel.trigger('test');
     expect(spy.callCount).to.equal(1);
-    view.unbindModel(view.myModel);
+    view.unbindDataObject(view.myModel);
     view.myModel.trigger('test');
     expect(spy.callCount).to.equal(1);
   });
@@ -228,6 +228,61 @@ describe('event', function() {
       parent.$el.remove();
     });
   }
+
+  it("should trigger ready event on children", function() {
+    var spy = this.spy(),
+        layoutView = new Thorax.LayoutView(),
+        view = new Thorax.View({
+          child: new Thorax.View({
+            template: '',
+            events: {
+              ready: spy
+            }
+          }),
+          template: '{{view child}}'
+        });
+    expect(spy.callCount).to.equal(0, 'ready event will trigger via LayoutView');
+    layoutView.setView(view);
+    expect(spy.callCount).to.equal(1, 'ready event will trigger via LayoutView');
+
+    var secondChildSpy = this.spy(),
+        secondChild = new Thorax.View({
+          events: {
+            ready: secondChildSpy
+          },
+          template: 'test'
+        });
+    expect(secondChildSpy.callCount).to.equal(0, 'adding a child to a view that is ready should immediately trigger');
+    view._addChild(secondChild);
+    expect(secondChildSpy.callCount).to.equal(1, 'adding a child to a view that is ready should immediately trigger');
+
+    var itemViewSpy = this.spy();    
+    var collectionView = new Thorax.View({
+      itemView: Thorax.View.extend({
+        events: {
+          ready: itemViewSpy
+        },
+        tagName: 'li',
+        template: '{{key}}'
+      }),
+      collection: new Thorax.Collection([
+        {key: 'one'},
+        {key: 'two'},
+        {key: 'three'}
+      ]),
+      template: '{{collection tag="ul"}}'
+    });
+    expect(itemViewSpy.callCount).to.equal(0, 'ready event triggered via collection');
+    collectionView.trigger('ready');
+    expect(collectionView.$('li').length).to.equal(3, 'ready event triggered via collection');
+    expect(collectionView.$('li').eq(0).html()).to.equal('one', 'ready event triggered via collection');
+    expect(itemViewSpy.callCount).to.equal(3, 'ready event triggered via collection');
+    collectionView.collection.add(new Thorax.Model({key: 'four'}));
+    expect(collectionView.$('li').length).to.equal(4, 'ready event triggered via collection:add');
+    expect(collectionView.$('li').eq(3).html()).to.equal('four', 'ready event triggered via collection:add');
+    expect(itemViewSpy.callCount).to.equal(4, 'ready event triggered via collection:add');
+
+  });
 
   describe('context', function() {
     var view, spy,

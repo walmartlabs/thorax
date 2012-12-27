@@ -133,6 +133,23 @@ _.extend(Thorax.View.prototype, {
   }
 });
 
+// propagate ready event to children
+function triggerReady(view) {
+  view.trigger('ready');
+}
+
+// When view is ready trigger ready event on all
+// children that are present, then register an
+// event that will trigger ready on new children
+// when they are added
+Thorax.View.on('ready', function() {
+  if (!this._isReady) {
+    this._isReady = true;
+    _.each(this.children, triggerReady);
+    this.on('child', triggerReady);
+  }
+});
+
 var eventSplitter = /^(nested\s+)?(\S+)(?:\s+(.+))?/;
 
 var domEvents = [],
