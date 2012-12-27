@@ -12,13 +12,14 @@ Handlebars.registerHelper('element', function(element, options) {
 
 Thorax.View.on('append', function(scope, callback) {
   (scope || this.$el).find('[' + elementPlaceholderAttributeName + ']').forEach(function(el) {
-    var cid = el.getAttribute(elementPlaceholderAttributeName),
+    var $el = $(el),
+        cid = $el.attr(elementPlaceholderAttributeName),
         element = this._elementsByCid[cid];
-    // A callback function may be specified as the vaue
+    // A callback function may be specified as the value
     if (_.isFunction(element)) {
       element = element.call(this);
     }
-    $(el).replaceWith(element);
+    $el.replaceWith(element);
     callback && callback(element);
   }, this);
 });

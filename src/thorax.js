@@ -46,7 +46,7 @@ Thorax.View = Backbone.View.extend({
     var self = this;
 
     this._objectOptionsByCid = {};
-    this._boundDataObjects = [];
+    this._boundDataObjectsByCid = {};
 
     // Setup object event tracking
     _.each(inheritVars, function(obj) {
@@ -203,6 +203,8 @@ Thorax.View = Backbone.View.extend({
     if (typeof html === 'undefined') {
       return this.el.innerHTML;
     } else {
+      // Event for IE element fixes
+      this.trigger('before:append');
       this.el.innerHTML = "";
       var element;
       if (this.collection && this._objectOptionsByCid[this.collection.cid] && this._renderCount) {

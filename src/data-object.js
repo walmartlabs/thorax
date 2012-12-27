@@ -55,12 +55,12 @@ function dataObject(type, spec) {
 _.extend(Thorax.View.prototype, {
   bindDataObject: function(dataObject, options) {
     var type = getDataObjectType(dataObject);
-    if (this._boundDataObjects.indexOf(dataObject) !== -1) {
+    if (this._boundDataObjectsByCid[dataObject.cid]) {
       return false;
     }
     // Collections do not have a cid attribute by default
     ensureDataObjectCid(type, dataObject);
-    this._boundDataObjects.push(dataObject);
+    this._boundDataObjectsByCid[dataObject.cid] = dataObject;
 
     var options = this._modifyDataObjectOptions(dataObject, _.extend({}, inheritVars[type].defaultOptions, options));
     this._objectOptionsByCid[dataObject.cid] = options;
@@ -78,10 +78,10 @@ _.extend(Thorax.View.prototype, {
   },
 
   unbindDataObject: function (dataObject) {
-    if (this._boundDataObjects.indexOf(dataObject) === -1) {
+    if (!this._boundDataObjectsByCid[dataObject.cid]) {
       return false;
     }
-    this._boundDataObjects = _.without(this._boundDataObjects, dataObject);
+    delete this._boundDataObjectsByCid[dataObject.cid];
     dataObject.trigger('freeze');
     this.stopListening(dataObject);
     delete this._objectOptionsByCid[dataObject.cid];

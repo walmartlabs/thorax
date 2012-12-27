@@ -6,7 +6,7 @@ describe('model', function() {
       expect(Thorax.Util.shouldFetch(a, options)).to.not.be.ok;
 
       var b = new (type.Model.extend({urlRoot: '/'}))();
-      expect(Thorax.Util.shouldFetch(b, options)).to.be.true;
+      expect(Thorax.Util.shouldFetch(b, options)).to.be['true'];
 
       var c = new (type.Model.extend({urlRoot: '/'}))();
       c.set({key: 'value'});
@@ -16,7 +16,7 @@ describe('model', function() {
       expect(Thorax.Util.shouldFetch(d, options)).to.not.be.ok;
 
       var e = new (type.Collection.extend({url: '/'}))();
-      expect(Thorax.Util.shouldFetch(e, options)).to.be.true;
+      expect(Thorax.Util.shouldFetch(e, options)).to.be['true'];
     });
   });
 
@@ -53,8 +53,8 @@ describe('model', function() {
   });
 
   it("isPopulated", function() {
-    expect((new Thorax.Model()).isPopulated()).to.be.false;
-    expect((new Thorax.Model({key: 'value'})).isPopulated()).to.be.true;
+    expect((new Thorax.Model()).isPopulated()).to.be['false'];
+    expect((new Thorax.Model({key: 'value'})).isPopulated()).to.be['true'];
   });
 
   it("$.fn.model", function() {
