@@ -245,7 +245,7 @@ describe('loading', function() {
     it('pair with timeout registers', function() {
       this.object.loadStart('foo', false);
       this.clock.tick(1000);
-      var loaderWrapper = this.object._loadStart;
+      var loaderWrapper = this.object._loadInfo[this.object._loadInfo.length - 1];
 
       this.object.loadEnd();
       this.clock.tick(1000);
@@ -257,7 +257,7 @@ describe('loading', function() {
     it('consequtive pairs emit one event', function() {
       this.object.loadStart('foo', false);
       this.clock.tick(1000);
-      var loaderWrapper = this.object._loadStart;
+      var loaderWrapper = this.object._loadInfo[this.object._loadInfo.length - 1];
 
       this.object.loadEnd();
       this.clock.tick(10);
@@ -277,7 +277,7 @@ describe('loading', function() {
     it('consequtive pairs emit two events after timeout', function() {
       this.object.loadStart('foo', false);
       this.clock.tick(1000);
-      var loaderWrapper = this.object._loadStart;
+      var loaderWrapper = this.object._loadInfo[this.object._loadInfo.length - 1];
 
       this.object.loadEnd();
       this.clock.tick(1000);
@@ -287,7 +287,7 @@ describe('loading', function() {
 
       this.object.loadStart('bar', true);
       this.clock.tick(1000);
-      var loaderWrapper2 = this.object._loadStart;
+      var loaderWrapper2 = this.object._loadInfo[this.object._loadInfo.length - 1];
 
       this.object.loadEnd();
       this.clock.tick(1000);
@@ -299,7 +299,7 @@ describe('loading', function() {
     it('overlapping pairs emit one event', function() {
       this.object.loadStart('foo', false);
       this.clock.tick(1000);
-      var loaderWrapper = this.object._loadStart;
+      var loaderWrapper = this.object._loadInfo[this.object._loadInfo.length - 1];
 
       this.object.loadStart('bar', true);
       this.clock.tick(1000);
@@ -314,6 +314,47 @@ describe('loading', function() {
 
       expect(this.loads).to.eql([{msg: 'foo', background: false, model: loaderWrapper}]);
       expect(this.ends).to.eql([{background: false, model: loaderWrapper}]);
+    });
+
+    it('loadHandlers are isolated', function() {
+      var startSpy = this.spy(),
+          endSpy = this.spy();
+      this.object.on('load:start', Thorax.loadHandler(startSpy, endSpy));
+      this.object.loadStart('foo', false);
+
+      expect(this.loads.length).to.equal(0);
+      expect(this.ends.length).to.equal(0);
+      expect(startSpy).to.not.have.been.called;
+      expect(endSpy).to.not.have.been.called;
+
+      this.clock.tick(200);
+
+      expect(this.loads.length).to.equal(0);
+      expect(this.ends.length).to.equal(0);
+      expect(startSpy).to.not.have.been.called;
+      expect(endSpy).to.not.have.been.called;
+
+      this.clock.tick(1000);
+
+      expect(this.loads.length).to.equal(1);
+      expect(this.ends.length).to.equal(0);
+      expect(startSpy).to.have.been.calledOnce;
+      expect(endSpy).to.not.have.been.called;
+
+      this.object.loadEnd();
+
+      expect(this.loads.length).to.equal(1);
+      expect(this.ends.length).to.equal(0);
+      expect(startSpy).to.have.been.calledOnce;
+      expect(endSpy).to.not.have.been.called;
+
+      this.clock.tick(1000);
+
+      expect(this.loads.length).to.equal(1);
+      expect(this.ends.length).to.equal(1);
+      expect(startSpy).to.have.been.calledOnce;
+      expect(endSpy).to.have.been.calledOnce;
+
     });
   });
 
