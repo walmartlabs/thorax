@@ -109,6 +109,7 @@ function getOptionsData(options) {
 
 Thorax.Util = {
   getViewInstance: function(name, attributes) {
+    attributes = attributes || {};
     attributes['class'] && (attributes.className = attributes['class']);
     attributes.tag && (attributes.tagName = attributes.tag);
     if (typeof name === 'string') {

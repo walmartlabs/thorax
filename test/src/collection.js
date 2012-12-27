@@ -150,6 +150,11 @@ describe('collection', function() {
     });
     runCollectionTests(viewWithCollectionHelperWithEmptyView, 1, 'block helper with item-template');
 
+    var viewWithCollectionHelperWithItemViewAndItemTemplate = new Thorax.View({
+      template: '{{collection tag="ul" empty-view="letter-empty" item-view="letter-item" item-template="letter-item"}}'
+    });
+    runCollectionTests(viewWithCollectionHelperWithItemViewAndItemTemplate, 1, 'block helper with item-template');
+
     var viewWithCollectionHelperWithEmptyViewAndBlock = new Thorax.View({
       template: '{{collection tag="ul" empty-template="letter-empty" empty-view="letter-empty" item-template="letter-item"}}'
     });
@@ -582,11 +587,7 @@ describe('collection', function() {
         }
       }))(),
       template: "{{#collection this.collection}}{{test}}{{else}}<b>{{test}}</b>{{/collection}}",
-      emptyContext: function() {
-        return {
-          test: 'testing'
-        };
-      }
+      test: 'testing'
     });
     view.render();
     expect(view.$('b')[0].innerHTML).to.equal('testing');

@@ -7,7 +7,13 @@ Thorax.CollectionHelperView = Thorax.View.extend({
   },
   constructor: function(options) {
     _.each(collectionOptionNames, function(viewAttributeName, helperOptionName) {
-      options.options[helperOptionName] && (options[viewAttributeName] = options.options[helperOptionName]);
+      if (options.options[helperOptionName]) {
+        var value = options.options[helperOptionName];
+        if (viewAttributeName === 'itemTemplate' || viewAttributeName === 'emptyTemplate') {
+          value = Thorax.Util.getTemplate(value);
+        }
+        options[viewAttributeName] = value;
+      }
     });
     // Handlebars.VM.noop is passed in the handlebars options object as
     // a default for fn and inverse, if a block was present. Need to
@@ -23,21 +29,24 @@ Thorax.CollectionHelperView = Thorax.View.extend({
     !options.template && (options.template = Handlebars.VM.noop);
     var response = Thorax.CollectionHelperView.__super__.constructor.call(this, options);
     if (this.parent.name) {
-      this.emptyTemplate = this.emptyTemplate || Thorax.Util.getTemplate(this.parent.name + '-empty', true);
-      this.itemTemplate = this.itemTemplate || Thorax.Util.getTemplate(this.parent.name + '-item', true);
+      if (!this.emptyTemplate) {
+        this.emptyTemplate = Thorax.Util.getTemplate(this.parent.name + '-empty', true);
+      }
+      if (!this.itemTemplate) {
+        this.itemTemplate = Thorax.Util.getTemplate(this.parent.name + '-item', true);
+      }
     }
     return response;
+  },
+  // will be used by emptyView and emptyTemplate
+  _getContext: function(attributes) {
+    return _.extend({}, getValue(this.parent, 'context'), attributes || {});
   },
   setAsPrimaryCollectionHelper: function(collection) {
     this.$el.attr(primaryCollectionAttributeName, collection.cid);
     _.each(forwardableProperties, function(propertyName) {
       forwardMissingProperty.call(this, propertyName);
     }, this);
-    // emptyContext needs to be forced because it has a default
-    forwardMissingProperty.call(this, 'emptyContext', true);
-  },
-  emptyContext: function() {
-    return getValue(this.parent, 'context');
   }
 });
 
