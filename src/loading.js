@@ -189,7 +189,7 @@ function bindToRoute(callback, failback) {
       return;
     }
     routeChanged = true;
-    Backbone.history.off('route', routeHandler);
+    res.cancel();
     failback && failback();
   }
 
