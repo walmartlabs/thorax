@@ -1,5 +1,5 @@
 describe('core', function() {
-  Backbone.history = new Backbone.History();
+  Backbone.history || (Backbone.history = new Backbone.History());
   Backbone.history.start();
 
   Thorax.templates.parent = '<div>{{view child}}</div>';
