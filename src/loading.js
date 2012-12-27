@@ -1,4 +1,5 @@
-/*global collectionOptionNames, extendOptions, inheritVars */
+/*global collectionOptionNames, inheritVars */
+
 var loadStart = 'load:start',
     loadEnd = 'load:end',
     rootObject;
@@ -7,10 +8,8 @@ Thorax.setRootObject = function(obj) {
   rootObject = obj;
 };
 
-var _loadCounter = 0;
-
 Thorax.loadHandler = function(start, end, context) {
-  var loadCounter = _loadCounter++;
+  var loadCounter = _.uniqueId();
   return function(message, background, object) {
     var self = context || this;
     self._loadInfo = self._loadInfo || [];
@@ -79,7 +78,7 @@ Thorax.loadHandler = function(start, end, context) {
 
               // If stopping make sure we don't run a start
               clearTimeout(loadInfo.timeout);
-              loadInfo = self._loadInfo[loadCounter] =undefined;
+              loadInfo = self._loadInfo[loadCounter] = undefined;
             }
           } catch (e) {
             Thorax.onException('loadEnd', e);
@@ -184,37 +183,33 @@ Thorax.sync = function(method, dataObj, options) {
 
 function bindToRoute(callback, failback) {
   var fragment = Backbone.history.getFragment(),
-      completed;
+      routeChanged = false;
 
-  function finalizer(isCanceled) {
-    var same = fragment === Backbone.history.getFragment();
-
-    if (completed) {
-      // Prevent multiple execution, i.e. we were canceled but the success callback still runs
+  function routeHandler() {
+    if (fragment === Backbone.history.getFragment()) {
       return;
     }
+    routeChanged = true;
+    res.cancel();
+    failback && failback();
+  }
 
-    if (isCanceled && same) {
-      // Ignore the first route event if we are running in newer versions of backbone
-      // where the route operation is a postfix operation.
-      return;
-    }
+  Backbone.history.on('route', routeHandler);
 
-    completed = true;
-    Backbone.history.off('route', resetLoader);
-
+  function finalizer() {
+    Backbone.history.off('route', routeHandler);
     var args = Array.prototype.slice.call(arguments, 1);
-    if (!isCanceled && same) {
+    if (!routeChanged) {
       callback.apply(this, args);
-    } else {
-      failback && failback.apply(this, args);
     }
   }
 
-  var resetLoader = _.bind(finalizer, this, true);
-  Backbone.history.on('route', resetLoader);
+  var res = _.bind(finalizer, this);
+  res.cancel = function() {
+    Backbone.history.off('route', routeHandler);
+  };
 
-  return _.bind(finalizer, this, false);
+  return res;
 }
 
 function loadData(callback, failback, options) {
@@ -227,9 +222,27 @@ function loadData(callback, failback, options) {
     failback = false;
   }
 
+  var self = this,
+      routeChanged = false,
+      successCallback = bindToRoute(_.bind(callback, self), function() {
+        routeChanged = true;
+        if (self._request) {
+          self._aborted = true;
+          self._request.abort();
+        }
+        failback && failback.call(self, false);
+      });
+
   this.fetch(_.defaults({
-    success: bindToRoute(callback, failback && _.bind(failback, this, false)),
-    error: failback && _.bind(failback, this, true)
+    success: successCallback,
+    error: failback && function() {
+      if (!routeChanged) {
+        failback.apply(self, [true].concat(_.toArray(arguments)));
+      }
+    },
+    complete: function() {
+      successCallback.cancel();
+    }
   }, options));
 }
 
@@ -303,6 +316,7 @@ _.each(klasses, function(DataClass) {
         options = failback;
         failback = false;
       }
+
       options = options || {};
       if (!options.background && !this.isPopulated() && rootObject) {
         // Make sure that the global scope sees the proper load events here
@@ -310,20 +324,7 @@ _.each(klasses, function(DataClass) {
         Thorax.forwardLoadEvents(this, rootObject, true);
       }
 
-      var self = this;
-      loadData.call(this, callback,
-        function(isError) {
-          // Route changed, kill it
-          if (!isError) {
-            if (self._request) {
-              self._aborted = true;
-              self._request.abort();
-            }
-          }
-
-          failback && failback.apply && failback.apply(this, arguments);
-        },
-        options);
+      loadData.call(this, callback, failback, options);
     }
   });
 });
@@ -335,14 +336,11 @@ if (Thorax.Router) {
 }
 
 // Propagates loading view parameters to the AJAX layer
-function loadingDataOptions() {
-  return {
-    ignoreErrors: this.ignoreFetchError,
-    background: this.nonBlockingLoad
-  };
-}
-extendOptions('_setModelOptions', loadingDataOptions);
-extendOptions('_setCollectionOptions', loadingDataOptions);
+Thorax.View.prototype._modifyDataObjectOptions = function(dataObject, options) {
+  options.ignoreErrors = this.ignoreFetchError;
+  options.background = this.nonBlockingLoad;
+  return options;
+};
 
 inheritVars.collection.loading = function() {
   var loadingView = this.loadingView,
