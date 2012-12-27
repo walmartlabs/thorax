@@ -95,20 +95,24 @@ Thorax.View = Backbone.View.extend({
     return view;
   },
 
+  _removeChild: function(view) {
+    delete this.children[view.cid];
+    view.parent = null;
+    return view;
+  },
+
   destroy: function(options) {
     options = _.defaults(options || {}, {
       children: true
     });
     this.trigger('destroyed');
     delete viewsIndexedByCid[this.cid];
-    if (options.children) {
-      _.each(this.children, function(child) {
-        child.parent = null;
+    _.each(this.children, function(child) {
+      this._removeChild(child);
+      if (options.children) {
         child.destroy();
-      });
-      this.children = {};
-    }
-
+      }
+    }, this);
     this.freeze && this.freeze();
   },
 
