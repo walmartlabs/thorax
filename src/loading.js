@@ -1,4 +1,5 @@
 /*global collectionOptionNames, inheritVars */
+
 var loadStart = 'load:start',
     loadEnd = 'load:end',
     rootObject;
