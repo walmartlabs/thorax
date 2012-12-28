@@ -49,6 +49,8 @@ Thorax.View = Backbone.View.extend({
   _configure: function(options) {
     var self = this;
 
+    this.context = generateContextModel.call(this);
+
     this._objectOptionsByCid = {};
     this._boundDataObjectsByCid = {};
 
@@ -142,16 +144,8 @@ Thorax.View = Backbone.View.extend({
     return output;
   },
 
-  context: function() {
-    if (this.model && this.model.attributes) {
-      return _.extend({}, this, (this.model && this.model.attributes) || {});
-    } else {
-      return this;
-    }
-  },
-
-  _getContext: function(attributes) {
-    return _.extend({}, getValue(this, 'context'), attributes || {});
+  _getContext: function() {
+    return this.context.attributes;
   },
 
   // Private variables in handlebars / options.data in template helpers
