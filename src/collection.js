@@ -40,11 +40,13 @@ createRegistryWrapper(Thorax.Collection, Thorax.Collections);
 dataObject('collection', {
   set: 'setCollection',
   setCallback: afterSetCollection,
-  defaultOptions: {
-    render: true,
-    fetch: true,
-    success: false,
-    errors: true
+  defaultOptions: function(key, collection) {
+    return {
+      render: true,
+      fetch: true,
+      success: false,
+      errors: true
+    };
   },
   change: onCollectionReset,
   $el: 'getCollectionElement',

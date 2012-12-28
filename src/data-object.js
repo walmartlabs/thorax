@@ -61,7 +61,7 @@ function bindDataObject(key, dataObject, options) {
   ensureDataObjectCid(type, dataObject);
   this._boundDataObjectsByCid[dataObject.cid] = dataObject;
 
-  var options = this._modifyDataObjectOptions(dataObject, _.extend({}, inheritVars[type].defaultOptions, options));
+  var options = _.extend({}, inheritVars[type].defaultOptions.call(this, key, dataObject), options));
   this._boundDataObjectOptionsByCid[dataObject.cid] = options;
 
   bindEvents.call(this, type, dataObject, this.constructor);
@@ -86,13 +86,6 @@ function unbindDataObject(key, dataObject) {
   delete this._boundDataObjectOptionsByCid[dataObject.cid];
   return true;
 }
-
-_.extend(Thorax.View.prototype, {
-
-  _modifyDataObjectOptions: function(dataObject, options) {
-    return options;
-  }
-});
 
 function getDataObjectType(dataObject) {
   if (isModel(dataObject)) {

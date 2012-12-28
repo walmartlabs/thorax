@@ -25,11 +25,17 @@ createRegistryWrapper(Thorax.Model, Thorax.Models);
 
 dataObject('model', {
   set: 'setModel',
-  defaultOptions: {
-    //render option will default to true
-    fetch: true,
-    success: false,
-    errors: true
+  defaultOptions: function(key, model) {
+    var options = {
+      fetch: true,
+      success: false,
+      errors: true
+    };
+    if (key === 'model') {
+      options.merge = true;
+      options.render = true;
+    }
+    return options;
   },
   $el: '$el',
   cidAttrName: modelCidAttributeName

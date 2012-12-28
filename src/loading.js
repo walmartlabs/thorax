@@ -336,11 +336,17 @@ if (Thorax.Router) {
 }
 
 // Propagates loading view parameters to the AJAX layer
-Thorax.View.prototype._modifyDataObjectOptions = function(dataObject, options) {
-  options.ignoreErrors = this.ignoreFetchError;
-  options.background = this.nonBlockingLoad;
-  return options;
-};
+_.each([inheritVars.model, inheritVars.collection], function(spec) {
+  if (spec) {
+    var defaultOptions = spec.defaultOptions;
+    spec.defaultOptions = function(key, model) {
+      var options = defaultOptions.apply(this, arguments);
+      options.ignoreErrors = this.ignoreFetchError;
+      options.background = this.nonBlockingLoad;
+      return options;
+    };
+  }
+});
 
 inheritVars.collection.loading = function() {
   var loadingView = this.loadingView,
