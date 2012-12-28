@@ -7,7 +7,13 @@ Thorax.ContextModel = Backbone.Model.extend({
 
 function generateContextModel() {
   var context = new Thorax.ContextModel();
+  // Forward change and change:* events to view
+  this.listenTo(context, 'all', function() {
+    this.trigger.apply(this, arguments);
+  });
+
   this.listenTo(context, 'change', function(model, options) {
+    options = options || {};
     onContextChange.call(this, model, options);
     if (options.render) {
       this.render();
