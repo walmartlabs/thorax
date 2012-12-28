@@ -51,6 +51,7 @@ Thorax.View = Backbone.View.extend({
 
     this.context = generateContextModel.call(this);
 
+    this._boundDataObjectKeysByCid = {};
     this._boundDataObjectOptionsByCid = {};
     this._boundDataObjectsByCid = {};
 

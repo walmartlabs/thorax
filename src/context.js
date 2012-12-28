@@ -17,10 +17,6 @@ function generateContextModel() {
 }
 
 function onContextChange(context, options) {
-  if (!this._boundObjectKeysByCid) {
-    this._boundObjectKeysByCid = {};
-  }
-
   var detectedCids = [],
       detectedDataObjectsByCid = {},
       detectedDataObjectsKeysByCid = {};
@@ -52,7 +48,7 @@ function onContextChange(context, options) {
     } else if (isCollection(obj)) {
       onRemoveCollection.call(this, key, obj, objOptions);
     }
-    delete this._boundObjectKeysByCid[obj.cid];
+    delete this._boundDataObjectKeysByCid[obj.cid];
   }, this);
 
   // Detect data objects that have been set
@@ -67,7 +63,7 @@ function onContextChange(context, options) {
     } else if (isCollection(obj)) {
       onAddCollection.call(this, key, obj, options);
     }
-    this._boundObjectKeysByCid[obj.cid] = key;
+    this._boundDataObjectKeysByCid[obj.cid] = key;
   }, this);
 }
 
@@ -141,7 +137,7 @@ function onRemoveModel(key, model, options) {
 }
 
 function setAttributesOnContextOnModelChange(model) {
-  var key = this._boundObjectKeysByCid[model.cid],
+  var key = this._boundDataObjectKeysByCid[model.cid],
       options = this._boundDataObjectOptionsByCid[model.cid];
   if (options.merge) {
     this.context.set(model.attributes, options);
