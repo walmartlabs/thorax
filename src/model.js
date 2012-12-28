@@ -38,7 +38,7 @@ dataObject('model', {
 Thorax.View.on({
   model: {
     error: function(model, errors) {
-      if (this._objectOptionsByCid[model.cid].errors) {
+      if (this._boundDataObjectOptionsByCid[model.cid].errors) {
         this.trigger('error', errors, model);
       }
     }

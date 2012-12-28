@@ -44,7 +44,7 @@ function onContextChange(context, options) {
   _.each(unsetCids, function(cid) {
     var obj = detectedDataObjectsByCid[cid],
         key = detectedDataObjectsKeysByCid[cid],
-        objOptions = this._objectOptionsByCid[cid];
+        objOptions = this._boundDataObjectOptionsByCid[cid];
     if (isView(obj)) {
       onRemoveView.call(this, key, obj);
     } else if (isModel(obj)) {
@@ -142,7 +142,7 @@ function onRemoveModel(key, model, options) {
 
 function setAttributesOnContextOnModelChange(model) {
   var key = this._boundObjectKeysByCid[model.cid],
-      options = this._objectOptionsByCid[model.cid];
+      options = this._boundDataObjectOptionsByCid[model.cid];
   if (options.merge) {
     this.context.set(model.attributes, options);
   } else {

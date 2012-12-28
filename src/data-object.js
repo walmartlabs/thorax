@@ -63,7 +63,7 @@ _.extend(Thorax.View.prototype, {
     this._boundDataObjectsByCid[dataObject.cid] = dataObject;
 
     var options = this._modifyDataObjectOptions(dataObject, _.extend({}, inheritVars[type].defaultOptions, options));
-    this._objectOptionsByCid[dataObject.cid] = options;
+    this._boundDataObjectOptionsByCid[dataObject.cid] = options;
 
     bindEvents.call(this, type, dataObject, this.constructor);
     bindEvents.call(this, type, dataObject, this);
@@ -84,7 +84,7 @@ _.extend(Thorax.View.prototype, {
     delete this._boundDataObjectsByCid[dataObject.cid];
     dataObject.trigger('freeze');
     this.stopListening(dataObject);
-    delete this._objectOptionsByCid[dataObject.cid];
+    delete this._boundDataObjectOptionsByCid[dataObject.cid];
     return true;
   },
 

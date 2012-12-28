@@ -51,7 +51,7 @@ Thorax.View = Backbone.View.extend({
 
     this.context = generateContextModel.call(this);
 
-    this._objectOptionsByCid = {};
+    this._boundDataObjectOptionsByCid = {};
     this._boundDataObjectsByCid = {};
 
     // Setup object event tracking
@@ -209,7 +209,7 @@ Thorax.View = Backbone.View.extend({
       this.trigger('before:append');
       this.el.innerHTML = "";
       var element;
-      if (this.collection && this._objectOptionsByCid[this.collection.cid] && this._renderCount) {
+      if (this.collection && this._boundDataObjectOptionsByCid[this.collection.cid] && this._renderCount) {
         // preserveCollectionElement calls the callback after it has a reference
         // to the collection element, calls the callback, then re-appends the element
         preserveCollectionElement.call(this, function() {
