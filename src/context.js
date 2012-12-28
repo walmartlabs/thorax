@@ -17,6 +17,10 @@ function generateContextModel() {
 }
 
 function onContextChange(context, options) {
+  if (!this._boundObjectKeysByCid) {
+    this._boundObjectKeysByCid = {};
+  }
+
   var detectedCids = [],
       detectedDataObjectsByCid = {},
       detectedDataObjectsKeysByCid = {};
@@ -48,6 +52,7 @@ function onContextChange(context, options) {
     } else if (isCollection(obj)) {
       onRemoveCollection.call(this, key, obj, objOptions);
     }
+    delete this._boundObjectKeysByCid[obj.cid];
   }, this);
 
   // Detect data objects that have been set
@@ -62,6 +67,7 @@ function onContextChange(context, options) {
     } else if (isCollection(obj)) {
       onAddCollection.call(this, key, obj, options);
     }
+    this._boundObjectKeysByCid[obj.cid] = key;
   }, this);
 }
 
@@ -118,11 +124,7 @@ function onAddModel(key, model, options) {
   } else {
     this.bindDataObject(model, options);
   }
-  if (options.merge) {
-    this.context.set(model.attributes);
-  } else {
-    this.context.set(key, model.attributes);
-  }
+  setAttributesOnContextOnModelChange.call(this, model);
 }
 
 function onRemoveModel(key, model, options) {
@@ -138,6 +140,16 @@ function onRemoveModel(key, model, options) {
   }
 }
 
+function setAttributesOnContextOnModelChange(model) {
+  var key = this._boundObjectKeysByCid[model.cid],
+      options = this._objectOptionsByCid[model.cid];
+  if (options.merge) {
+    this.context.set(model.attributes, options);
+  } else {
+    this.context.set(key, model.attributes, options);
+  }
+}
+
 // Duck duck duck duck...
 function isView(view) {
   return view && view.$el && view.render;
@@ -149,3 +161,11 @@ _.each(['get', 'set', 'has', 'unset', 'clear'], function(methodName) {
     return this.context[methodName].apply(this.context, arguments);
   };
 });
+
+Thorax.View.on({
+  model: {
+    change: function(model) {
+      setAttributesOnContextOnModelChange.call(this, model);
+    }
+  }
+})

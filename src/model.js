@@ -26,23 +26,14 @@ createRegistryWrapper(Thorax.Model, Thorax.Models);
 dataObject('model', {
   set: 'setModel',
   defaultOptions: {
-    render: true,
+    //render option will default to true
     fetch: true,
     success: false,
     errors: true
   },
-  change: onModelChange,
   $el: '$el',
   cidAttrName: modelCidAttributeName
 });
-
-function onModelChange(model) {
-  var modelOptions = model && this._objectOptionsByCid[model.cid];
-  // !modelOptions will be true when setModel(false) is called
-  if (!modelOptions || (modelOptions && modelOptions.render)) {
-    this.render();
-  }
-}
 
 Thorax.View.on({
   model: {
@@ -50,9 +41,6 @@ Thorax.View.on({
       if (this._objectOptionsByCid[model.cid].errors) {
         this.trigger('error', errors, model);
       }
-    },
-    change: function(model) {
-      onModelChange.call(this, model);
     }
   }
 });
