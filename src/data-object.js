@@ -25,7 +25,7 @@ function dataObject(type, spec) {
       return this;
     }
     if (old) {
-      this.unbindDataObject(old);
+      unbindDataObject.call(type, old);
     }
 
     if (dataObject) {
@@ -35,7 +35,7 @@ function dataObject(type, spec) {
         spec.loading.call(this);
       }
 
-      this.bindDataObject(dataObject, _.extend({}, this.options, options));
+      bindDataObject.call(this, type, dataObject, _.extend({}, this.options, options));
       $el.attr(spec.cidAttrName, dataObject.cid);
       dataObject.trigger('set', dataObject, old);
     } else {
@@ -52,41 +52,42 @@ function dataObject(type, spec) {
   Thorax.View.prototype[spec.set] = setObject;
 }
 
+function bindDataObject(key, dataObject, options) {
+  var type = getDataObjectType(dataObject);
+  if (this._boundDataObjectsByCid[dataObject.cid]) {
+    return false;
+  }
+  // Collections do not have a cid attribute by default
+  ensureDataObjectCid(type, dataObject);
+  this._boundDataObjectsByCid[dataObject.cid] = dataObject;
+
+  var options = this._modifyDataObjectOptions(dataObject, _.extend({}, inheritVars[type].defaultOptions, options));
+  this._boundDataObjectOptionsByCid[dataObject.cid] = options;
+
+  bindEvents.call(this, type, dataObject, this.constructor);
+  bindEvents.call(this, type, dataObject, this);
+
+  if (Thorax.Util.shouldFetch(dataObject, options)) {
+    loadObject(dataObject, options);
+  } else if (inheritVars[type].change) {
+    // want to trigger built in rendering without triggering event on model
+    inheritVars[type].change.call(this, dataObject, options);
+  }
+  return true;
+}
+
+function unbindDataObject(key, dataObject) {
+  if (!this._boundDataObjectsByCid[dataObject.cid]) {
+    return false;
+  }
+  delete this._boundDataObjectsByCid[dataObject.cid];
+  dataObject.trigger('freeze');
+  this.stopListening(dataObject);
+  delete this._boundDataObjectOptionsByCid[dataObject.cid];
+  return true;
+}
+
 _.extend(Thorax.View.prototype, {
-  bindDataObject: function(dataObject, options) {
-    var type = getDataObjectType(dataObject);
-    if (this._boundDataObjectsByCid[dataObject.cid]) {
-      return false;
-    }
-    // Collections do not have a cid attribute by default
-    ensureDataObjectCid(type, dataObject);
-    this._boundDataObjectsByCid[dataObject.cid] = dataObject;
-
-    var options = this._modifyDataObjectOptions(dataObject, _.extend({}, inheritVars[type].defaultOptions, options));
-    this._boundDataObjectOptionsByCid[dataObject.cid] = options;
-
-    bindEvents.call(this, type, dataObject, this.constructor);
-    bindEvents.call(this, type, dataObject, this);
-
-    if (Thorax.Util.shouldFetch(dataObject, options)) {
-      loadObject(dataObject, options);
-    } else if (inheritVars[type].change) {
-      // want to trigger built in rendering without triggering event on model
-      inheritVars[type].change.call(this, dataObject, options);
-    }
-    return true;
-  },
-
-  unbindDataObject: function (dataObject) {
-    if (!this._boundDataObjectsByCid[dataObject.cid]) {
-      return false;
-    }
-    delete this._boundDataObjectsByCid[dataObject.cid];
-    dataObject.trigger('freeze');
-    this.stopListening(dataObject);
-    delete this._boundDataObjectOptionsByCid[dataObject.cid];
-    return true;
-  },
 
   _modifyDataObjectOptions: function(dataObject, options) {
     return options;

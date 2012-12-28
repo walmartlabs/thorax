@@ -46,7 +46,9 @@ _.extend(Thorax.View, {
 
 _.extend(Thorax.View.prototype, {
   freeze: function(options) {
-    _.each(this._boundDataObjectsByCid, this.unbindDataObject, this);
+    _.each(this._boundDataObjectsByCid, function(obj) {
+      unbindDataObject.call(this, this._boundDataObjectKeysByCid[obj.cid], obj);
+    }, this);
     options = _.defaults(options || {}, {
       dom: true,
       children: true

@@ -89,7 +89,7 @@ function onAddCollection(key, collection, options) {
   if (key === 'collection') {
     this.setCollection(collection, options);
   } else {
-    this.bindDataObject(collection, options);
+    bindDataObject.call(this, key, collection, options);
   }
   if (Handlebars.helpers.collection) {
     this.helpers[key] = function() {
@@ -104,7 +104,7 @@ function onRemoveCollection(key, collection, options) {
   if (key === 'collection') {
     this.setCollection(false);
   } else {
-    this.unbindDataObject(collection);
+    unbindDataObject.call(this, key, collection);
   }
   if (Handlebars.helpers.collection) {
     delete this.helpers[key];
@@ -118,7 +118,7 @@ function onAddModel(key, model, options) {
   if (key === 'model') {
     this.setModel(model, options);
   } else {
-    this.bindDataObject(model, options);
+    bindDataObject.call(this, key, model, options);
   }
   setAttributesOnContextOnModelChange.call(this, model);
 }
@@ -127,7 +127,7 @@ function onRemoveModel(key, model, options) {
   if (key === 'model') {
     this.setModel(false);
   } else {
-    this.unbindDataObject(model, options);
+    unbindDataObject.call(this, model, options);
   }
   if (options.merge) {
     _.each(model.attributes, function(value, key) {
