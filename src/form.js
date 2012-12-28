@@ -1,9 +1,10 @@
 /*global inheritVars */
 
 (function() {
+  console.log(inheritVars.model);
   var defaultOptions = inheritVars.model.defaultOptions;
   inheritVars.model.defaultOptions = function(key, model) {
-    var options = defualtOptions.apply(this, arguments);
+    var options = defaultOptions.apply(this, arguments);
     if (key === 'model') {
       options.populate = true;
     }

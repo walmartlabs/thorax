@@ -25,6 +25,7 @@ createRegistryWrapper(Thorax.Model, Thorax.Models);
 
 dataObject('model', {
   set: 'setModel',
+  change: setAttributesOnContextOnModelChange,
   defaultOptions: function(key, model) {
     var options = {
       fetch: true,

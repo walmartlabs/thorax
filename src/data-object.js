@@ -61,7 +61,7 @@ function bindDataObject(key, dataObject, options) {
   ensureDataObjectCid(type, dataObject);
   this._boundDataObjectsByCid[dataObject.cid] = dataObject;
 
-  var options = _.extend({}, inheritVars[type].defaultOptions.call(this, key, dataObject), options));
+  var options = _.extend({}, inheritVars[type].defaultOptions.call(this, key, dataObject), options);
   this._boundDataObjectOptionsByCid[dataObject.cid] = options;
 
   bindEvents.call(this, type, dataObject, this.constructor);
