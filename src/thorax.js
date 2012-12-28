@@ -33,13 +33,17 @@ var Thorax = this.Thorax = {
 };
 
 Thorax.View = Backbone.View.extend({
-  constructor: function() {
-    var response = Backbone.View.apply(this, arguments);
+  constructor: function(context, options) {
+    var response = Backbone.View.call(this, options);
     _.each(inheritVars, function(obj) {
       if (obj.ctor) {
         obj.ctor.call(this, response);
       }
     }, this);
+    if (context) {
+      this.context.set(context, {render: false});
+      onContextChange.call(this, this.context, {});
+    }
     return response;
   },
   _configure: function(options) {
@@ -253,17 +257,16 @@ Thorax.View.extend = function() {
 createRegistryWrapper(Thorax.View, Thorax.Views);
 
 function bindHelpers() {
-  if (this.helpers) {
-    _.each(this.helpers, function(helper, name) {
-      var view = this;
-      this.helpers[name] = function() {
-        var args = _.toArray(arguments),
-            options = _.last(args);
-        options.context = this;
-        return helper.apply(view, args);
-      };
-    }, this);
-  }
+  this.helpers = this.helpers || {};
+  _.each(this.helpers, function(helper, name) {
+    var view = this;
+    this.helpers[name] = function() {
+      var args = _.toArray(arguments),
+          options = _.last(args);
+      options.context = this;
+      return helper.apply(view, args);
+    };
+  }, this);
 }
 
 //$(selector).view() helper
