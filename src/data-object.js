@@ -5,60 +5,30 @@ function dataObject(type, spec) {
     name: '_' + type + 'Events',
     event: true
   }, spec);
-
-  // Add a callback in the view constructor
-  spec.ctor = function() {
-    if (this[type]) {
-      // Need to null this.model/collection so setModel/Collection will
-      // not treat it as the old model/collection and immediately return
-      var object = this[type];
-      this[type] = null;
-      this[spec.set](object);
-    }
-  };
-
-  function setObject(dataObject, options) {
-    var old = this[type],
-        $el = getValue(this, spec.$el);
-
-    if (dataObject === old) {
-      return this;
-    }
-    if (old) {
-      unbindDataObject.call(type, old);
-    }
-
-    if (dataObject) {
-      this[type] = dataObject;
-
-      if (spec.loading) {
-        spec.loading.call(this);
-      }
-
-      bindDataObject.call(this, type, dataObject, _.extend({}, this.options, options));
-      $el.attr(spec.cidAttrName, dataObject.cid);
-      dataObject.trigger('set', dataObject, old);
-    } else {
-      this[type] = false;
-      if (spec.change) {
-        spec.change.call(this, false);
-      }
-      $el.removeAttr(spec.cidAttrName);
-    }
-    spec.setCallback && spec.setCallback.call(this, dataObject, options);
-    return this;
-  }
-
-  Thorax.View.prototype[spec.set] = setObject;
 }
 
 function bindDataObject(key, dataObject, options) {
-  var type = getDataObjectType(dataObject);
+  // Collections do not have a cid attribute by default
+  ensureDataObjectCid(type, dataObject);
+
+  // noop if the object is already bound
+  // TODO: handle changing object from one key to another
   if (this._boundDataObjectsByCid[dataObject.cid]) {
     return false;
   }
-  // Collections do not have a cid attribute by default
-  ensureDataObjectCid(type, dataObject);
+
+  var type = getDataObjectType(dataObject),
+      spec = inheritVars[type],
+      isPrimary = type === key, // calling set('model', model) or set('collection', collection)
+      $el = getValue(this, spec.$el);
+
+  // Copy model / collection to this.model / this.collection
+  if (isPrimary) {
+    this[type] = dataObject;
+    spec.loading && spec.loading.call(this);
+    $el.attr(spec.cidAttrName, dataObject.cid);
+  }
+
   this._boundDataObjectsByCid[dataObject.cid] = dataObject;
 
   var options = _.extend({}, inheritVars[type].defaultOptions.call(this, key, dataObject), options);
@@ -67,23 +37,38 @@ function bindDataObject(key, dataObject, options) {
   bindEvents.call(this, type, dataObject, this.constructor);
   bindEvents.call(this, type, dataObject, this);
 
+  spec.bindCallback && spec.bindCallback.call(this, dataObject, options);
+
   if (Thorax.Util.shouldFetch(dataObject, options)) {
     loadObject(dataObject, options);
   } else if (inheritVars[type].change) {
-    // want to trigger built in rendering without triggering event on model
-    inheritVars[type].change.call(this, dataObject, options);
+    // Want to trigger built in rendering without triggering event on model / collection
+    spec.change.call(this, dataObject, options);
   }
   return true;
 }
 
 function unbindDataObject(key, dataObject) {
+  // noop if object is not bound
   if (!this._boundDataObjectsByCid[dataObject.cid]) {
     return false;
   }
+
+  var type = getDataObjectType(dataObject),
+      spec = inheritVars[type],
+      isPrimary = type === key,
+      $el = getValue(this, spec.$el);
+
   delete this._boundDataObjectsByCid[dataObject.cid];
-  dataObject.trigger('freeze');
   this.stopListening(dataObject);
   delete this._boundDataObjectOptionsByCid[dataObject.cid];
+
+  if (isPrimary) {
+    this[type] = false;
+    spec.change && spec.change.call(this, false);
+    $el.removeAttr(spec.cidAttrName);
+  }
+
   return true;
 }
 

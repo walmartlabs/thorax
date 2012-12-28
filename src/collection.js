@@ -38,8 +38,7 @@ Thorax.Collections = {};
 createRegistryWrapper(Thorax.Collection, Thorax.Collections);
 
 dataObject('collection', {
-  set: 'setCollection',
-  setCallback: afterSetCollection,
+  bindCallback: onBindCollection, 
   defaultOptions: function(key, collection) {
     return {
       render: true,
@@ -233,19 +232,21 @@ Thorax.View.on({
   }
 });
 
-function onCollectionReset(collection) {
-  if (collection === this.collection && this._boundDataObjectOptionsByCid[this.collection.cid].render) {
-    this.renderCollection();
+function onBindCollection(collection) {
+  if (collection && collection === this.collection) {
+    if (!collectionHelperPresentForPrimaryCollection.call(this) && collection) {
+      _.each(this._collectionRenderingEvents, function(callback, eventName) {
+        // getEventCallback will resolve if it is a string or a method
+        // and return a method
+        this.listenTo(collection, eventName, getEventCallback(callback, this));
+      }, this);
+    }
   }
 }
 
-function afterSetCollection(collection) {
-  if (!collectionHelperPresentForPrimaryCollection.call(this) && collection) {
-    _.each(this._collectionRenderingEvents, function(callback, eventName) {
-      // getEventCallback will resolve if it is a string or a method
-      // and return a method
-      this.listenTo(collection, eventName, getEventCallback(callback, this));
-    }, this);
+function onCollectionReset() {
+  if (this._boundDataObjectOptionsByCid[this.collection.cid].render) {
+    this.renderCollection();
   }
 }
 

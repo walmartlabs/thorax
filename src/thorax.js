@@ -35,11 +35,6 @@ var Thorax = this.Thorax = {
 Thorax.View = Backbone.View.extend({
   constructor: function(context, options) {
     var response = Backbone.View.call(this, options);
-    _.each(inheritVars, function(obj) {
-      if (obj.ctor) {
-        obj.ctor.call(this, response);
-      }
-    }, this);
     if (context) {
       this.context.set(context, {render: false});
       onContextChange.call(this, this.context, {});

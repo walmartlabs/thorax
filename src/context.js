@@ -86,11 +86,7 @@ function onRemoveView(key, view) {
 }
 
 function onAddCollection(key, collection, options) {
-  if (key === 'collection') {
-    this.setCollection(collection, options);
-  } else {
-    bindDataObject.call(this, key, collection, options);
-  }
+  bindDataObject.call(this, key, collection, options);
   if (Handlebars.helpers.collection) {
     this.helpers[key] = function() {
       var args = _.toArray(arguments);
@@ -101,34 +97,18 @@ function onAddCollection(key, collection, options) {
 }
 
 function onRemoveCollection(key, collection, options) {
-  if (key === 'collection') {
-    this.setCollection(false);
-  } else {
-    unbindDataObject.call(this, key, collection);
-  }
+  unbindDataObject.call(this, key, collection, options);
   if (Handlebars.helpers.collection) {
     delete this.helpers[key];
   }
 }
 
 function onAddModel(key, model, options) {
-  if (!('merge' in options) && key === 'model') {
-    options.merge = true;
-  }
-  if (key === 'model') {
-    this.setModel(model, options);
-  } else {
-    bindDataObject.call(this, key, model, options);
-  }
-  setAttributesOnContextOnModelChange.call(this, model);
+  bindDataObject.call(this, key, model, options);
 }
 
 function onRemoveModel(key, model, options) {
-  if (key === 'model') {
-    this.setModel(false);
-  } else {
-    unbindDataObject.call(this, model, options);
-  }
+  unbindDataObject.call(this, key, model, options);
   if (options.merge) {
     _.each(model.attributes, function(value, key) {
       this.context.unset(key);
@@ -136,7 +116,7 @@ function onRemoveModel(key, model, options) {
   }
 }
 
-function setAttributesOnContextOnModelChange(model) {
+function onModelChange(model) {
   var key = this._boundDataObjectKeysByCid[model.cid],
       options = this._boundDataObjectOptionsByCid[model.cid];
   if (options.merge) {
@@ -161,7 +141,7 @@ _.each(['get', 'set', 'has', 'unset', 'clear'], function(methodName) {
 Thorax.View.on({
   model: {
     change: function(model) {
-      setAttributesOnContextOnModelChange.call(this, model);
+      onModelChange.call(this, model);
     }
   }
 })
