@@ -150,7 +150,7 @@ var domEvents = [],
     domEventRegexp;
 function pushDomEvents(events) {
   domEvents.push.apply(domEvents, events);
-  domEventRegexp = new RegExp('^(' + domEvents.join('|') + ')(?:\\s|$)');
+  domEventRegexp = new RegExp('^(nested\\s+)?(' + domEvents.join('|') + ')(?:\\s|$)');
 }
 pushDomEvents([
   'mousedown', 'mouseup', 'mousemove', 'mouseover', 'mouseout',
