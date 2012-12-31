@@ -17,6 +17,17 @@ Thorax.Model = Backbone.Model.extend({
     }
     var keys = _.keys(attributes);
     return keys.length > 1 || (keys.length === 1 && keys[0] !== this.idAttribute);
+  },
+  shouldFetch: function(options) {
+    // TODO: if https://github.com/documentcloud/backbone/pull/2057 is merged
+    // then add {silent: true} to url call
+    var url;
+    try {
+      url = this.url();
+    } catch(e) {
+      url = false;
+    }
+    return options.fetch && !!url && !this.isPopulated();
   }
 });
 

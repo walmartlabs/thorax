@@ -1,23 +1,24 @@
 describe('model', function() {
   it("shouldFetch", function() {
-    [Thorax, Backbone].forEach(function(type) {
-      var options = {fetch: true};
-      var a = new (type.Model.extend())();
-      expect(Thorax.Util.shouldFetch(a, options)).to.not.be.ok;
+    var options = {fetch: true};
+    var a = new (Thorax.Model.extend())();
+    expect(a.shouldFetch(options)).to.not.be.ok;
 
-      var b = new (type.Model.extend({urlRoot: '/'}))();
-      expect(Thorax.Util.shouldFetch(b, options)).to.be['true'];
+    var b = new (Thorax.Model.extend({urlRoot: '/'}))();
+    expect(b.shouldFetch(options)).to.be['true'];
 
-      var c = new (type.Model.extend({urlRoot: '/'}))();
-      c.set({key: 'value'});
-      expect(Thorax.Util.shouldFetch(c, options)).to.not.be.ok;
+    var c = new (Thorax.Model.extend({urlRoot: '/'}))();
+    c.set({key: 'value'});
+    expect(c.shouldFetch(options)).to.not.be.ok;
 
-      var d = new (type.Collection.extend())();
-      expect(Thorax.Util.shouldFetch(d, options)).to.not.be.ok;
+    var d = new (Thorax.Collection.extend())();
+    expect(d.shouldFetch(options)).to.not.be.ok;
 
-      var e = new (type.Collection.extend({url: '/'}))();
-      expect(Thorax.Util.shouldFetch(e, options)).to.be['true'];
-    });
+    var e = new (Thorax.Collection.extend({url: '/'}))();
+    expect(e.shouldFetch(options)).to.be['true'];
+
+    var f = new (Thorax.Collection.extend({url: '/'}))();
+    expect(e.shouldFetch({fetch: false})).to.be['false'];
   });
 
   it("model view binding", function() {
