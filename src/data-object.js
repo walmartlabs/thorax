@@ -1,4 +1,4 @@
-/*global getValue, inheritVars, walkInheritTree */
+/*global inheritVars, walkInheritTree */
 
 function dataObject(type, spec) {
   spec = inheritVars[type] = _.defaults({
@@ -19,7 +19,7 @@ function dataObject(type, spec) {
 
   function setObject(dataObject, options) {
     var old = this[type],
-        $el = getValue(this, spec.$el);
+        $el = _.result(this, spec.$el);
 
     if (dataObject === old) {
       return this;
@@ -149,9 +149,9 @@ Thorax.Util.shouldFetch = function(modelOrCollection, options) {
 
   var isCollection = !modelOrCollection.collection && modelOrCollection._byCid && modelOrCollection._byId,
       url = (
-        (!modelOrCollection.collection && getValue(modelOrCollection, 'urlRoot')) ||
-        (modelOrCollection.collection && getValue(modelOrCollection.collection, 'url')) ||
-        (isCollection && getValue(modelOrCollection, 'url'))
+        (!modelOrCollection.collection && _.result(modelOrCollection, 'urlRoot')) ||
+        (modelOrCollection.collection && _.result(modelOrCollection.collection, 'url')) ||
+        (isCollection && _.result(modelOrCollection, 'url'))
       );
 
   return url && !(

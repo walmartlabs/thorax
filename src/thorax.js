@@ -1,4 +1,4 @@
-/*global cloneInheritVars, createInheritVars, createRegistryWrapper, getValue, inheritVars */
+/*global cloneInheritVars, createInheritVars, createRegistryWrapper, inheritVars */
 
 //support zepto.forEach on jQuery
 if (!$.fn.forEach) {
@@ -147,7 +147,7 @@ Thorax.View = Backbone.View.extend({
   },
 
   _getContext: function(attributes) {
-    return _.extend({}, getValue(this, 'context'), attributes || {});
+    return _.extend({}, _.result(this, 'context'), attributes || {});
   },
 
   // Private variables in handlebars / options.data in template helpers
