@@ -117,8 +117,10 @@ function onRemoveModel(key, model, options) {
   unbindDataObject.call(this, key, model, options);
   if (options.merge) {
     _.each(model.attributes, function(value, key) {
-      this.context.unset(key);
+      delete this.context.attributes[key];
     }, this);
+  } else {
+    delete this.context.attributes[key];
   }
 }
 
@@ -126,9 +128,9 @@ function onModelChange(model) {
   var key = this._boundDataObjectKeysByCid[model.cid],
       options = this._boundDataObjectOptionsByCid[model.cid];
   if (options.merge) {
-    this.context.set(model.attributes, options);
+    _.extend(this.context.attributes, model.attributes);
   } else {
-    this.context.set(key, model.attributes, options);
+    this.context.attributes[key] = model.attributes;
   }
 }
 
