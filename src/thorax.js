@@ -157,12 +157,7 @@ Thorax.View = Backbone.View.extend({
   },
 
   _getHelpers: function() {
-    if (this.helpers) {
-      return _.extend({}, Handlebars.helpers, this.helpers);
-    } else {
-      return Handlebars.helpers;
-    }
-    
+    return _.extend({}, Handlebars.helpers, this.helpers);
   },
 
   renderTemplate: function(file, data, ignoreErrors) {
