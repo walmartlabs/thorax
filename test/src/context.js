@@ -38,4 +38,85 @@ describe("context", function() {
     view.set({key: 'VALUE'}, {render: true});
     expect(view.html()).to.equal('value');
   });
+
+  it("should set model attributes on context", function() {
+    var spy = this.spy(),
+        model = new Thorax.Model({key: 'value'});
+    var view = new (Thorax.View.extend({
+      template: '{{key}}',
+      events: {
+        rendered: spy
+      }
+    }));
+    view.set('model', model, {render: false});
+    expect(spy.callCount).to.equal(0, 'render option set to false');
+    expect(view.html()).to.equal('', 'render option set to false');
+    view.render();
+    expect(spy.callCount).to.equal(1, 'after manual render when render option is false');
+    expect(view.html()).to.equal('value', 'after manual render when render option is false');
+
+    // update key should not re-render
+    model.set({key: 'value2'});
+    expect(spy.callCount).to.equal(1, 'after set when render option is false');
+    expect(view.html()).to.equal('value', 'after set when render option is false');
+
+    // render option should default to true
+    model.set({key: 'value'});
+    spy = this.spy();
+    view = new (Thorax.View.extend({
+      template: '{{key}}',
+      events: {
+        rendered: spy
+      }
+    }));
+    view.set('model', model);
+    expect(spy.callCount).to.equal(1, 'no options passed to set model');
+    expect(view.html()).to.equal('value', 'no options passed to set model');
+  
+    // update key should re-render
+    model.set({key: 'value2'});
+    expect(spy.callCount).to.equal(2, 'after set when render option is true');
+    expect(view.html()).to.equal('value2', 'after set when render option is true');
+  });
+
+  it("should only render once for multiple bound models", function() {
+    var spy = this.spy(),
+        a = new Thorax.Model({key: 'a'}),
+        b = new Thorax.Model({key: 'b'});
+    var view = new (Thorax.View.extend({
+      template: '{{a.key}}{{b.key}}',
+      events: {
+        rendered: spy
+      }
+    }));
+    view.set({a: a, b: b}, {render: true});
+    expect(view.html()).to.equal('ab');
+    expect(spy.callCount).to.equal(1);
+  });
+
+  it("should accept a merge option on a model", function() {
+    var spy = this.spy(),
+        model = new Thorax.Model({key: 'a'}),
+        b = new Thorax.Model({key: 'b'});
+    var view = new (Thorax.View.extend({
+      template: '{{model.key}}{{b.key}}',
+      events: {
+        rendered: spy
+      }
+    }));
+
+    view.set('model', model, {merge: false});
+    expect(spy.callCount).to.equal(1, 'model with merge: false');
+    expect(view.html()).to.equal('a', 'model with merge: false');
+    // merge key on non primary models should default to true
+    view.set('b', b);
+    expect(spy.callCount).to.equal(2, 'non primary model');
+    expect(view.html()).to.equal('ab', 'non primary model');
+  });
+  
+  /*
+  it("deffered load on model will render when loaded", function() {
+  
+  });
+  */
 });

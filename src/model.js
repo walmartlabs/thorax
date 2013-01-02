@@ -24,18 +24,15 @@ Thorax.Models = {};
 createRegistryWrapper(Thorax.Model, Thorax.Models);
 
 dataObject('model', {
-  change: onModelChange, // Defined in src/context
+  change: setModelAttributesOnContext, // Defined in src/context
   defaultOptions: function(key, model) {
-    var options = {
+    return {
       fetch: true,
       success: false,
-      errors: true
+      errors: true,
+      render: true,
+      merge: key === 'model'
     };
-    if (key === 'model') {
-      options.merge = true;
-      options.render = true;
-    }
-    return options;
   },
   $el: '$el',
   cidAttrName: modelCidAttributeName
@@ -44,9 +41,13 @@ dataObject('model', {
 Thorax.View.on({
   model: {
     error: function(model, errors) {
-      if (this._boundDataObjectOptionsByCid[model.cid].errors) {
+      if (getDataObjectOptions.call(this, model).errors) {
         this.trigger('error', errors, model);
       }
+    },
+    change: function(model) {
+      setModelAttributesOnContext.call(this, model);
+      this._context.trigger('change', model, getDataObjectOptions.call(this, model));
     }
   }
 });

@@ -225,7 +225,7 @@ _.extend(Thorax.View.prototype, {
 Thorax.View.on({
   collection: {
     error: function(collection, message) {
-      if (this._boundDataObjectOptionsByCid[collection.cid].errors) {
+      if (getDataObjectOptions.call(this, collection).errors) {
         this.trigger('error', message, collection);
       }
     }
@@ -245,7 +245,7 @@ function onBindCollection(collection) {
 }
 
 function onCollectionReset() {
-  if (this._boundDataObjectOptionsByCid[this.collection.cid].render) {
+  if (getDataObjectOptions.call(this, this.collection).render) {
     this.renderCollection();
   }
 }

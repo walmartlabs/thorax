@@ -14,7 +14,6 @@ function generateContextModel() {
 
   this.listenTo(context, 'change', function(model, options) {
     options = options || {};
-    onContextChange.call(this, model, options);
     if (options.render) {
       this.render();
     }
@@ -22,59 +21,104 @@ function generateContextModel() {
   return context;
 }
 
-function onContextChange(context, options) {
-  var detectedCids = [],
-      detectedDataObjectsByCid = {},
-      detectedDataObjectsKeysByCid = {};
+_.extend(Thorax.View.prototype, {
+  set: function(key, val, options) {
+    var attrs;
+    if (key == null) {
+      return this;
+    }
+    if (_.isObject(key)) {
+      attrs = key;
+      options = val;
+    } else {
+      (attrs = {})[key] = val;
+    }
 
-  _.each(context.attributes, function(value, key) {
-    if (value && value.cid) {
-      detectedCids.push(value.cid);
-      detectedDataObjectsByCid[value.cid] = value;
-      detectedDataObjectsKeysByCid[value.cid] = key;
-    }
-  }, this);
+    var attrsForContext = {},
+        shouldRender = !!options && options.render;
 
-  // Detect data objects that have been unset
-  var unsetCids = [];
-  // Need two loops as this unbindDataObject will mutate this._boundDataObjectsByCid
-  _.each(this._boundDataObjectsByCid, function(object, cid) {
-    if (detectedCids.indexOf(cid) === -1) {
-      unsetCids.push(cid);
-    }
-  });
-  _.each(unsetCids, function(cid) {
-    var obj = detectedDataObjectsByCid[cid],
-        key = detectedDataObjectsKeysByCid[cid],
-        objOptions = this._boundDataObjectOptionsByCid[cid];
-    if (isView(obj)) {
-      onRemoveView.call(this, key, obj);
-    } else if (isModel(obj)) {
-      onRemoveModel.call(this, key, obj, objOptions);
-    } else if (isCollection(obj)) {
-      onRemoveCollection.call(this, key, obj, objOptions);
-    }
-    delete this._boundDataObjectKeysByCid[obj.cid];
-  }, this);
+    // Loop over attrs to unset first so case of
+    // bound data object from one key to another
+    // is properly handled
+    _.each(attrs, function(value, key) {
+      if (!value) {
+        var cid = this._boundObjectCidsByKey[key];
+        if (cid) {
+          unsetDataObject.call(this, key, this._boundObjectsByCid[cid]);
+        } else {
+          attrsForContext[key] = value;
+        }
+      }
+    }, this);
 
-  // Detect data objects that have been set
-  var setCids = unsetCids.length ? _.without.apply(_, _.clone(detectedCids).concat(unsetCids)) : detectedCids;
-  _.each(setCids, function(cid) {
-    var obj = detectedDataObjectsByCid[cid],
-        key = detectedDataObjectsKeysByCid[cid];
-    if (isView(obj)) {
-      onAddView.call(this, key, obj);
-    } else if (isModel(obj)) {
-      onAddModel.call(this, key, obj, options);
-    } else if (isCollection(obj)) {
-      onAddCollection.call(this, key, obj, options);
+    _.each(attrs, function(value, key) {
+      if (value) {
+        if (value.cid) {
+          setDataObject.call(this, key, value, options);
+          if (getDataObjectOptions.call(this, value).render) {
+            shouldRender = true;
+          }
+        } else {
+          attrsForContext[key] = value;
+        }
+      }
+    }, this);
+
+    // loud set, will fire 'change' event
+    this._context.set(attrsForContext, {render: shouldRender});
+
+    return this;
+  },
+  unset: function(key, options) {
+    var cid = this._boundObjectCidsByKey[key];
+    if (cid) {
+      unsetDataObject.call(this, key, this._boundDataObjectsByCid[cid]);
     }
-    this._boundDataObjectKeysByCid[obj.cid] = key;
-  }, this);
+    this._context.unset(key, options);
+    return this;
+  },
+  clear: function(options) {
+    _.each(this._boundDataObjectsByCid, function(obj) {
+      unsetDataObject.call(this, this._boundObjectKeysByCid[obj.cid], obj);
+    }, this);
+    this._context.clear(options);
+  }
+});
+
+// Forward method names
+_.each(['get', 'has'], function(methodName) {
+  Thorax.View.prototype[methodName] = function() {
+    return this._context[methodName].apply(this._context, arguments);
+  };
+});
+
+function setDataObject(key, obj, options) {
+  if (isView(obj)) {
+    onAddView.call(this, key, obj);
+  } else if (isModel(obj)) {
+    onAddModel.call(this, key, obj, options);
+  } else if (isCollection(obj)) {
+    onAddCollection.call(this, key, obj, options);
+  }
+}
+
+function unsetDataObject(key, obj) {
+  var options = getDataObjectOptions.call(this, obj);
+  if (isView(obj)) {
+    onRemoveView.call(this, key, obj);
+  } else if (isModel(obj)) {
+    onRemoveModel.call(this, key, obj, options);
+  } else if (isCollection(obj)) {
+    onRemoveCollection.call(this, key, obj, options);
+  }
 }
 
 function onAddView(key, view) {
+  this._context.set(key, view, {silent: true});
   this._addChild(view);
+  // Models and collections will do this inside of unbindDataObject
+  this._boundDataObjectCidsByKey[key] = view.cid;
+  this._boundDataObjectKeysByCid[view.cid] = key;
   if (Handlebars.helpers.view) {
     this.helpers[key] = function() {
       var args = _.toArray(arguments);
@@ -85,13 +129,18 @@ function onAddView(key, view) {
 }
 
 function onRemoveView(key, view) {
+  this._context.unset(key, {silent: true});
   this._removeChild(view);
+  // Models and collections will do this inside of unbindDataObject
+  delete this._boundDataObjectCidsByKey[key];
+  delete this._boundDataObjectKeysByCid[view.cid];
   if (Handlebars.helpers.view) {
     delete this.helpers[key];
   }
 }
 
 function onAddCollection(key, collection, options) {
+  this._context.set(key, collection, {silent: true});
   bindDataObject.call(this, key, collection, options);
   if (Handlebars.helpers.collection) {
     this.helpers[key] = function() {
@@ -103,34 +152,41 @@ function onAddCollection(key, collection, options) {
 }
 
 function onRemoveCollection(key, collection, options) {
+  this._context.unset(key, {silent: true});
   unbindDataObject.call(this, key, collection, options);
   if (Handlebars.helpers.collection) {
     delete this.helpers[key];
   }
 }
 
+// setting / unsetting of keys on context is handled
+// by setModelAttributesOnContext which is bound
+// as a callback via dataObject() in model.js
 function onAddModel(key, model, options) {
   bindDataObject.call(this, key, model, options);
 }
 
 function onRemoveModel(key, model, options) {
   unbindDataObject.call(this, key, model, options);
-  if (options.merge) {
-    _.each(model.attributes, function(value, key) {
-      delete this.context.attributes[key];
-    }, this);
-  } else {
-    delete this.context.attributes[key];
-  }
 }
 
-function onModelChange(model) {
+function setModelAttributesOnContext(model) {
   var key = this._boundDataObjectKeysByCid[model.cid],
-      options = this._boundDataObjectOptionsByCid[model.cid];
+      options = getDataObjectOptions.call(this, model);
   if (options.merge) {
-    _.extend(this.context.attributes, model.attributes);
+    if (model) {
+      this._context.set(model.attributes, {silent: true});
+    } else {
+      _.each(model.attributes, function(value, key) {
+        this._context.unset(key, {silent: true});
+      }, this);
+    }
   } else {
-    this.context.attributes[key] = model.attributes;
+    if (model) {
+      this._context.set(key, model.attributes, {silent: true});
+    } else {
+      this._context.unset(key, {silent: true});
+    }
   }
 }
 
@@ -138,18 +194,3 @@ function onModelChange(model) {
 function isView(view) {
   return view && view.$el && view.render;
 }
-
-// Forward method names
-_.each(['get', 'set', 'has', 'unset', 'clear'], function(methodName) {
-  Thorax.View.prototype[methodName] = function() {
-    return this.context[methodName].apply(this.context, arguments);
-  };
-});
-
-Thorax.View.on({
-  model: {
-    change: function(model) {
-      onModelChange.call(this, model);
-    }
-  }
-})

@@ -36,17 +36,17 @@ Thorax.View = Backbone.View.extend({
   constructor: function(context, options) {
     var response = Backbone.View.call(this, options);
     if (context) {
-      this.context.set(context, {render: false});
-      onContextChange.call(this, this.context, {});
+      this.set(context, {render: false});
     }
     return response;
   },
   _configure: function(options) {
     var self = this;
 
-    this.context = generateContextModel.call(this);
+    this._context = generateContextModel.call(this);
 
     this._boundDataObjectKeysByCid = {};
+    this._boundDataObjectCidsByKey = {};
     this._boundDataObjectOptionsByCid = {};
     this._boundDataObjectsByCid = {};
 
@@ -141,7 +141,7 @@ Thorax.View = Backbone.View.extend({
   },
 
   _getContext: function() {
-    return this.context.attributes;
+    return this._context.attributes;
   },
 
   // Private variables in handlebars / options.data in template helpers
@@ -205,7 +205,7 @@ Thorax.View = Backbone.View.extend({
       this.trigger('before:append');
       this.el.innerHTML = "";
       var element;
-      if (this.collection && this._boundDataObjectOptionsByCid[this.collection.cid] && this._renderCount) {
+      if (this.collection && getDataObjectOptions.call(this, this.collection) && this._renderCount) {
         // preserveCollectionElement calls the callback after it has a reference
         // to the collection element, calls the callback, then re-appends the element
         preserveCollectionElement.call(this, function() {

@@ -6,8 +6,8 @@ Thorax.HelperView = Thorax.View.extend({
     Thorax.View.prototype._ensureElement.apply(this, arguments);
     this.$el.attr(viewHelperAttributeName, this._helperName);
   },
-  context: function() {
-    return this.parent.context.apply(this.parent, arguments);
+  _getContext: function() {
+    return this.parent._getContext.apply(this.parent, arguments);
   }
 });
 

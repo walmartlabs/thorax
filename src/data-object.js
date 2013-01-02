@@ -22,6 +22,10 @@ function bindDataObject(key, dataObject, options) {
       isPrimary = type === key, // calling set('model', model) or set('collection', collection)
       $el = getValue(this, spec.$el);
 
+  this._boundDataObjectCidsByKey[key] = dataObject.cid;
+  this._boundDataObjectKeysByCid[dataObject.cid] = key;
+  this._boundDataObjectsByCid[dataObject.cid] = dataObject;
+
   // Copy model / collection to this.model / this.collection
   if (isPrimary) {
     this[type] = dataObject;
@@ -29,9 +33,7 @@ function bindDataObject(key, dataObject, options) {
     $el.attr(spec.cidAttrName, dataObject.cid);
   }
 
-  this._boundDataObjectsByCid[dataObject.cid] = dataObject;
-
-  var options = _.extend({}, inheritVars[type].defaultOptions.call(this, key, dataObject), options);
+  options = _.extend({}, inheritVars[type].defaultOptions.call(this, key, dataObject), options);
   this._boundDataObjectOptionsByCid[dataObject.cid] = options;
 
   bindEvents.call(this, type, dataObject, this.constructor);
@@ -59,6 +61,8 @@ function unbindDataObject(key, dataObject) {
       isPrimary = type === key,
       $el = getValue(this, spec.$el);
 
+  delete this._boundDataObjectCidsByKey[key];
+  delete this._boundDataObjectKeysByCid[dataObject.cid];
   delete this._boundDataObjectsByCid[dataObject.cid];
   this.stopListening(dataObject);
   delete this._boundDataObjectOptionsByCid[dataObject.cid];
@@ -70,6 +74,10 @@ function unbindDataObject(key, dataObject) {
   }
 
   return true;
+}
+
+function getDataObjectOptions(dataObject) {
+  return dataObject && this._boundDataObjectOptionsByCid[dataObject.cid];
 }
 
 function getDataObjectType(dataObject) {

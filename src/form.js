@@ -15,7 +15,7 @@ var oldModelChange = inheritVars.model.change;
 inheritVars.model.change = function() {
   oldModelChange.apply(this, arguments);
   // TODO : What can we do to remove this duplication?
-  var modelOptions = this.model && this._boundDataObjectOptionsByCid[this.model.cid];
+  var modelOptions = this.model && getDataObjectOptions.call(this, this.model);
   if (modelOptions && modelOptions.populate) {
     this.populate(this.model.attributes, modelOptions.populate === true ? {} : modelOptions.populate);
   }
