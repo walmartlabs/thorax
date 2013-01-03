@@ -79,7 +79,7 @@ function unbindDataObject(key, dataObject) {
 }
 
 function getDataObjectOptions(dataObject) {
-  return dataObject && this._boundDataObjectOptionsByCid[dataObject.cid];
+  return dataObject && this._boundDataObjectOptionsByCid[dataObject.cid] || {};
 }
 
 function getDataObjectType(dataObject) {
