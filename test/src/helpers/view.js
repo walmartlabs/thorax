@@ -5,6 +5,39 @@ describe('view helper', function() {
     }).to['throw']();
   });
 
+  it("should accept tag tagName class className and id html options", function() {
+    var childOne = Thorax.View.extend({name: 'view-embed-attrs-one'});
+    var childTwo = Thorax.View.extend({name: 'view-embed-attrs-two'});
+    var parent = new (Thorax.View.extend({
+      template: '{{view "view-embed-attrs-one" tag="ul" class="one" id="one"}}{{view "view-embed-attrs-two" tagName="ul" className="two" id="two"}}'
+    }));
+    parent.set('childOne', childOne);
+    parent.set('childTwo', childTwo);
+    parent.render();
+    expect(parent.$('ul').length).to.equal(2);
+    expect(parent.$('#one').length).to.equal(1);
+    expect(parent.$('#two').length).to.equal(1);
+    expect(parent.$('.one').length).to.equal(1);
+    expect(parent.$('.two').length).to.equal(1);
+  });
+
+  it("should pass non HTML attribute options to view instance", function() {
+    Thorax.View.extend({
+      name: 'child-with-instance-attrs',
+      template: '{{key}}'
+    });
+    var parent = new (Thorax.View.extend({
+      template: '{{view "child-with-instance-attrs" key="value"}}{{view child key="value"}}'
+    }));
+    var child = new (Thorax.View.extend({
+      template: '{{key}}'
+    }));
+    parent.set('child', child);
+    parent.render();
+    expect(parent.$('div').eq(0).html()).to.equal('value');
+    expect(parent.$('div').eq(1).html()).to.equal('value');
+  });
+
   it('should use the registry to lookup view clases', function() {
     //test nested
     Thorax.Views.Outer = {
@@ -33,9 +66,9 @@ describe('view helper', function() {
   });
 
   it("fail silently when no view initialized", function() {
-    var parent = new Thorax.View({
+    var parent = new (Thorax.View.extend({
       template: "{{view child}}"
-    });
+    }));
     parent.render();
     expect(parent.$el.html()).to.equal('');
   });
@@ -63,29 +96,29 @@ describe('view helper', function() {
     var childModel = new Thorax.Model({
       value: 'a'
     });
-    parent.set('childModel', childModel);
     parent.set('child', new Thorax.Views.child({
       model: childModel
     }));
+
     parent.render();
     expect(parent.$('[data-view-name="child"] > div').html()).to.equal('a', 'view embedded');
-    expect(parentRenderedCount).to.equal(1);
-    expect(childRenderedCount).to.equal(1);
+    expect(parentRenderedCount).to.equal(1, 'inital parent render count');
+    expect(childRenderedCount).to.equal(1, 'initial child render count');
 
     parent.render();
     expect(parent.$('[data-view-name="child"] > div').html()).to.equal('a', 'view embedded');
     expect(parentRenderedCount).to.equal(2, 're-render of parent does not render child');
     expect(childRenderedCount).to.equal(1, 're-render of parent does not render child');
 
-    parent.childModel.set({value: 'b'});
+    childModel.set({value: 'b'});
     expect(parent.$('[data-view-name="child"] > div').html()).to.equal('b', 'view embedded');
-    expect(parentRenderedCount).to.equal(2, 're-render of child does not parent child');
+    expect(parentRenderedCount).to.equal(2, 're-render of child does not render child');
     expect(childRenderedCount).to.equal(2, 're-render of child does not render parent');
 
     //ensure recursion does not happen when child view has the same model
     //as parent
-    parent.set('model', parent.childModel);
-    parent.get('model').set({value: 'c'});
+    parent.set('model', childModel);
+    childModel.set({value: 'c'});
     expect(parentRenderedCount).to.equal(4);
     expect(childRenderedCount).to.equal(3);
   });
