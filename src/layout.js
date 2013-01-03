@@ -50,7 +50,7 @@ Thorax.LayoutView = Thorax.View.extend({
       layoutTemplate = Thorax.Util.getTemplate(this.name, true);
     }
     //a template is optional in a layout
-    if (output || this.template || layoutTemplate) {
+    if (output || !needsTemplate.call(this) || layoutTemplate) {
       //but if present, it must have embedded an element containing layoutCidAttributeName 
       var response = Thorax.View.prototype.render.call(this, output || this.template || layoutTemplate);
       ensureLayoutViewsTargetElement.call(this);
