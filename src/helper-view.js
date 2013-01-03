@@ -44,7 +44,7 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
     options.hash.className && (viewOptions.className = options.hash.className);
     options.hash.tag && (viewOptions.tagName = options.hash.tag);
     options.hash.tagName && (viewOptions.tagName = options.hash.tagName);
-    var instance = new ViewClass(viewOptions);
+    var instance = new (ViewClass.extend(viewOptions));
     args.push(instance);
     declaringView.children[instance.cid] = instance;
     declaringView.trigger.apply(declaringView, ['helper', name].concat(args));
