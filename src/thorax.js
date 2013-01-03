@@ -36,7 +36,7 @@ Thorax.View = Backbone.View.extend({
   constructor: function(context, options) {
     var response = Backbone.View.call(this, options);
     if (context) {
-      this.set(context, {render: false});
+      this.set(context);
     }
     return response;
   },
