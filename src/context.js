@@ -42,7 +42,7 @@ _.extend(Thorax.View.prototype, {
     // is properly handled
     _.each(attrs, function(value, key) {
       if (!value) {
-        var cid = this._boundObjectCidsByKey[key];
+        var cid = this._boundDataObjectCidsByKey[key];
         if (cid) {
           unsetDataObject.call(this, key, this._boundObjectsByCid[cid]);
         } else {
@@ -70,7 +70,7 @@ _.extend(Thorax.View.prototype, {
     return this;
   },
   unset: function(key, options) {
-    var cid = this._boundObjectCidsByKey[key];
+    var cid = this._boundDataObjectCidsByKey[key];
     if (cid) {
       unsetDataObject.call(this, key, this._boundDataObjectsByCid[cid]);
     }
