@@ -17,6 +17,17 @@ Thorax.Model = Backbone.Model.extend({
     }
     var keys = _.keys(attributes);
     return keys.length > 1 || (keys.length === 1 && keys[0] !== this.idAttribute);
+  },
+  shouldFetch: function(options) {
+    // url() will throw if model has no `urlRoot` and no `collection`
+    // or has `collection` and `collection` has no `url`
+    var url;
+    try {
+      url = this.url();
+    } catch(e) {
+      url = false;
+    }
+    return options.fetch && !!url && !this.isPopulated();
   }
 });
 
