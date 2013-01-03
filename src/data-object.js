@@ -1,4 +1,4 @@
-/*global inheritVars, walkInheritTree */
+/*global getValue, inheritVars, walkInheritTree */
 
 function dataObject(type, spec) {
   spec = inheritVars[type] = _.defaults({
@@ -19,7 +19,7 @@ function dataObject(type, spec) {
 
   function setObject(dataObject, options) {
     var old = this[type],
-        $el = _.result(this, spec.$el);
+        $el = getValue(this, spec.$el);
 
     if (dataObject === old) {
       return this;
