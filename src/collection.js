@@ -20,7 +20,7 @@ Thorax.Collection = Backbone.Collection.extend({
     return this._fetched || this.length > 0 || (!this.length && !getValue(this, 'url'));
   },
   shouldFetch: function(options) {
-    return options.fetch && !!_.result(this, 'url') && !this.isPopulated();
+    return options.fetch && !!getValue(this, 'url') && !this.isPopulated();
   },
   fetch: function(options) {
     options = options || {};
