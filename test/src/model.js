@@ -26,26 +26,25 @@ describe('model', function() {
     var modelB = new Thorax.Model({letter: 'b'});
     var modelC = new Thorax.Model({letter: 'c'});
 
-    var a = new Thorax.View({
+    var a = new (Thorax.View.extend({
       template: '<li>{{letter}}</li>',
-      model: modelA
-    });
+    }))({model: modelA});
     expect(a.el.firstChild.innerHTML).to.equal('a', 'set via constructor');
 
-    var b = new Thorax.View({
+    var b = new (Thorax.View.extend({
       template: '<li>{{letter}}</li>'
-    });
-    b.setModel(modelB);
+    }));
+    b.set('model', modelB);
     expect(b.el.firstChild.innerHTML).to.equal('b', 'set via setModel');
 
     modelB.set({letter: 'B'});
     expect(b.el.firstChild.innerHTML).to.equal('B', 'update attribute triggers render');
     modelB.set({letter: 'b'});
 
-    var c = new Thorax.View({
+    var c = new (Thorax.View.extend({
       template: '<li>{{letter}}</li>'
-    });
-    c.setModel(modelC, {
+    }));
+    c.set('model', modelC, {
       render: false
     });
     expect(c.el.firstChild).to.not.exist;
@@ -62,10 +61,10 @@ describe('model', function() {
     var model = new Thorax.Model({
       key: 'value'
     });
-    var view = new Thorax.View({
-      model: model,
+    var view = new (Thorax.View.extend({
       template: '{{key}}'
-    });
+    }));
+    view.set('model', model);
     view.render();
     expect(view.html()).to.equal('value');
     expect(view.$el.model()).to.equal(model);
@@ -77,7 +76,7 @@ describe('model', function() {
       test1: 0,
       test2: 0
     };
-    var view = new Thorax.View({
+    var view = new (Thorax.View.extend({
       template: '',
       events: {
         model: {
@@ -93,9 +92,9 @@ describe('model', function() {
       test1: function() {
         ++callCounter.test1;
       }
-    });
+    }));
     var model = new Thorax.Model();
-    view.setModel(model, {fetch: false});
+    view.set('model', model, {fetch: false});
     var oldAllCount = Number(callCounter.all);
     model.trigger('test1');
     model.trigger('test2');
