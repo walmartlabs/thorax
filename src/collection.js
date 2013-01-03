@@ -153,9 +153,11 @@ _.extend(Thorax.View.prototype, {
   emptyClass: 'empty',
   renderEmpty: function() {
     if (this.emptyView) {
-      var viewOptions = {};
+      var viewOptions;
       if (this.emptyTemplate) {
-        viewOptions.template = this.emptyTemplate;
+        viewOptions = {
+          template: this.emptyTemplate
+        };
       }
       var view = Thorax.Util.getViewInstance(this.emptyView, viewOptions);
       view.ensureRendered();
@@ -166,13 +168,14 @@ _.extend(Thorax.View.prototype, {
   },
   renderItem: function(model, i) {
     if (this.itemView) {
-      var viewOptions = {
-        model: model
-      };
+      var viewOptions;
       if (this.itemTemplate) {
-        viewOptions.template = this.itemTemplate;
+        viewOptions = {
+          template: this.itemTemplate
+        }
       }
       var view = Thorax.Util.getViewInstance(this.itemView, viewOptions);
+      view.set({model: model});
       view.ensureRendered();
       return view;
     } else {
