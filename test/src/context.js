@@ -114,6 +114,31 @@ describe("context", function() {
     expect(view.html()).to.equal('ab', 'non primary model');
   });
   
+  it("should accept a modifyContext object", function() {
+    var view = new (Thorax.View.extend({
+      template: '{{a}}{{model.b}}',
+      modifyContext: {
+        a: function(value) {
+          return value.toUpperCase();
+        },
+        model: function(model) {
+          return {
+            b: model.attributes.b.toUpperCase()
+          };
+        }
+      }
+    }));
+    view.set({
+      a: 'a',
+      model: new Thorax.Model({
+        b: 'b'
+      })
+    }, {
+      merge: false
+    });
+    expect(view.html()).to.equal('AB');
+  });
+
   /*
   it("deffered load on model will render when loaded", function() {
   

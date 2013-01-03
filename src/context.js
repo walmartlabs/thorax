@@ -46,7 +46,7 @@ _.extend(Thorax.View.prototype, {
         if (cid) {
           unsetDataObject.call(this, key, this._boundObjectsByCid[cid]);
         } else {
-          attrsForContext[key] = value;
+          attrsForContext[key] = getModifiedValue.call(this, key, value);;
         }
       }
     }, this);
@@ -59,7 +59,7 @@ _.extend(Thorax.View.prototype, {
             shouldRender = true;
           }
         } else {
-          attrsForContext[key] = value;
+          attrsForContext[key] = getModifiedValue.call(this, key, value);
         }
       }
     }, this);
@@ -172,21 +172,30 @@ function onRemoveModel(key, model, options) {
 
 function setModelAttributesOnContext(model) {
   var key = this._boundDataObjectKeysByCid[model.cid],
-      options = getDataObjectOptions.call(this, model);
+      options = getDataObjectOptions.call(this, model),
+      attrs = getModifiedValue.call(this, key, model, true);
   if (options.merge) {
     if (model) {
-      this._context.set(model.attributes, {silent: true});
+      this._context.set(attrs, {silent: true});
     } else {
-      _.each(model.attributes, function(value, key) {
+      _.each(attrs, function(value, key) {
         this._context.unset(key, {silent: true});
       }, this);
     }
   } else {
     if (model) {
-      this._context.set(key, model.attributes, {silent: true});
+      this._context.set(key, attrs, {silent: true});
     } else {
       this._context.unset(key, {silent: true});
     }
+  }
+}
+
+function getModifiedValue(key, value, isModel) {
+  if (!this.modifyContext || !this.modifyContext[key]) {
+    return isModel ? value.attributes : value;
+  } else {
+    return this.modifyContext[key].call(this, value);
   }
 }
 
