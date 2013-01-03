@@ -41,11 +41,13 @@ function bindDataObject(key, dataObject, options) {
 
   spec.bindCallback && spec.bindCallback.call(this, dataObject, options);
 
-  if (Thorax.Util.shouldFetch(dataObject, options)) {
-    loadObject(dataObject, options);
-  } else if (inheritVars[type].change) {
-    // Want to trigger built in rendering without triggering event on model / collection
-    spec.change.call(this, dataObject, options);
+  if (dataObject.shouldFetch) {
+    if (dataObject.shouldFetch(options)) {
+      loadObject(dataObject, options);
+    } else if (inheritVars[type].change) {
+      // Want to trigger built in rendering without triggering event on model / collection
+      spec.change.call(this, dataObject, options);
+    }
   }
   return true;
 }
@@ -128,24 +130,3 @@ function getEventCallback(callback, context) {
 function ensureDataObjectCid(type, obj) {
   obj.cid = obj.cid || _.uniqueId(type);
 }
-
-Thorax.Util.shouldFetch = function(modelOrCollection, options) {
-  if (!options.fetch) {
-    return;
-  }
-
-  var isCollection = !modelOrCollection.collection && modelOrCollection._byCid && modelOrCollection._byId,
-      url = (
-        (!modelOrCollection.collection && _.result(modelOrCollection, 'urlRoot')) ||
-        (modelOrCollection.collection && _.result(modelOrCollection.collection, 'url')) ||
-        (isCollection && _.result(modelOrCollection, 'url'))
-      );
-
-  return url && !(
-    (modelOrCollection.isPopulated && modelOrCollection.isPopulated()) ||
-    (isCollection
-      ? Thorax.Collection && Thorax.Collection.prototype.isPopulated.call(modelOrCollection)
-      : Thorax.Model.prototype.isPopulated.call(modelOrCollection)
-    )
-  );
-};

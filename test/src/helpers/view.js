@@ -57,7 +57,7 @@ describe('view helper', function() {
         this.on('rendered', function() {
           ++parentRenderedCount;
         });
-        this.childModel = new Backbone.Model({
+        this.childModel = new Thorax.Model({
           value: 'a'
         });
         this.child = new Thorax.Views.child({
