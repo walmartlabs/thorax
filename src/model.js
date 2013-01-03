@@ -19,8 +19,8 @@ Thorax.Model = Backbone.Model.extend({
     return keys.length > 1 || (keys.length === 1 && keys[0] !== this.idAttribute);
   },
   shouldFetch: function(options) {
-    // TODO: if https://github.com/documentcloud/backbone/pull/2057 is merged
-    // then add {silent: true} to url call
+    // url() will throw if model has no `urlRoot` and no `collection`
+    // or has `collection` and `collection` has no `url`
     var url;
     try {
       url = this.url();
