@@ -156,9 +156,44 @@ describe("context", function() {
   });
   */
 
-  /*
   it("deffered load on model will render when loaded", function() {
-  
+    var server = sinon.fakeServer.create();
+    var spy = this.spy();
+    var View = Thorax.View.extend({
+      events: {
+        rendered: spy
+      },
+      template: '{{model.key}}{{key}}'
+    });
+
+    var view = new View(),
+        model = new (Thorax.Model.extend({
+          urlRoot: '/test'
+        }));
+    view.set({model: model, key: 'value'}, {merge: false});
+    expect(spy.callCount).to.equal(0);
+    server.requests[0].respond(
+      200,
+      { "Content-Type": "application/json" },
+      JSON.stringify({ key: 'value' })
+    );
+    expect(spy.callCount).to.equal(1);
+    expect(view.html()).to.equal('valuevalue');
+
+    spy.callCount = 0;
+    view = new View();
+    model = new (Thorax.Model.extend({
+      urlRoot: '/test'
+    }));
+    view.set({model: model, key: 'value'}, {merge: false, render: true});
+    expect(spy.callCount).to.equal(1);
+    server.requests[1].respond(
+      200,
+      { "Content-Type": "application/json" },
+      JSON.stringify({ key: 'value' })
+    );
+    expect(spy.callCount).to.equal(2);
+    expect(view.html()).to.equal('valuevalue');
+    server.restore();
   });
-  */
 });

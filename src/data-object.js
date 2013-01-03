@@ -43,9 +43,11 @@ function bindDataObject(key, dataObject, options) {
 
   if (dataObject.shouldFetch) {
     if (dataObject.shouldFetch(options)) {
+      dataObject._willLoadOnBind = true;
       loadObject(dataObject, options);
     } else if (inheritVars[type].change) {
       // Want to trigger built in rendering without triggering event on model / collection
+      dataObject._willLoadOnBind = false;
       spec.change.call(this, dataObject, options);
     }
   }

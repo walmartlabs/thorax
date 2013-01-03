@@ -55,7 +55,7 @@ _.extend(Thorax.View.prototype, {
       if (value) {
         if (value.cid) {
           setDataObject.call(this, key, value, options);
-          if (getDataObjectOptions.call(this, value).render) {
+          if (!value._willLoadOnBind && !shouldRender && getDataObjectOptions.call(this, value).render) {
             shouldRender = true;
           }
         } else {
