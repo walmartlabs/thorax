@@ -69,9 +69,9 @@ Thorax.View = Backbone.View.extend({
     //compile a string if it is set as this.template
     if (typeof this.template === 'string') {
       this.template = Handlebars.compile(this.template, {data: true});
-    } else if (this.name && !this.template) {
+    } else if (this.name && needsTemplate.call(this)) {
       //fetch the template
-      this.template = Thorax.Util.getTemplate(this.name, true);
+      this.template = Thorax.Util.getTemplate(this.name, true) || defaultTemplate;
     }
 
     _.each(inheritVars, function(obj) {
@@ -120,15 +120,6 @@ Thorax.View = Backbone.View.extend({
 
   render: function(output) {
     if (typeof output === 'undefined' || (!_.isElement(output) && !Thorax.Util.is$(output) && !(output && output.el) && typeof output !== 'string' && typeof output !== 'function')) {
-      if (!this.template) {
-        //if the name was set after the view was created try one more time to fetch a template
-        if (this.name) {
-          this.template = Thorax.Util.getTemplate(this.name, true);
-        }
-        if (!this.template) {
-          throw new Error('View ' + (this.name || this.cid) + '.render() was called with no content and no template set on the view.');
-        }
-      }
       output = this.renderTemplate(this.template);
     } else if (typeof output === 'function') {
       output = this.renderTemplate(output);
@@ -159,6 +150,8 @@ Thorax.View = Backbone.View.extend({
   _getHelpers: function() {
     return _.extend({}, Handlebars.helpers, this.helpers);
   },
+
+  template: defaultTemplate,
 
   renderTemplate: function(file, data, ignoreErrors) {
     var template;
@@ -240,6 +233,14 @@ Thorax.View.extend = function() {
 };
 
 createRegistryWrapper(Thorax.View, Thorax.Views);
+
+function defaultTemplate() {
+  return '';
+}
+
+function needsTemplate() {
+  return !this.template || (this.template && this.template === defaultTemplate);
+}
 
 function bindHelpers() {
   this.helpers = this.helpers || {};
