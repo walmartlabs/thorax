@@ -27,27 +27,12 @@ describe('core', function() {
     expect(Thorax.Views['a-name'].prototype.key).to.equal('value', 'registry will extend an existing class prototype');
   });
 
-  it("context may be an object", function() {
-    var view = new (Thorax.View.extend({
-      context: {
-        a: 'a',
-        b: 'b',
-        c: function() {
-          return 'c';
-        }
-      },
-      template: '{{a}}{{b}}{{c}}'
-    }))();
-    view.render();
-    expect(view.html()).to.equal('abc');
-  });
-
   it("can set view el", function() {
     $('body').append('<div id="test-target-container"><div id="test-target"></div></div>');
-    var view = new Thorax.View({
+    var view = new (Thorax.View.extend({
       template: function() { return 'testing123'; },
       el: $('#test-target')[0]
-    });
+    }));
     view.render();
     expect($('#test-target-container > #test-target')[0].innerHTML).to.equal('testing123');
     expect(view.el.parentNode).to.equal($('#test-target-container')[0]);
@@ -55,26 +40,26 @@ describe('core', function() {
   });
 
   it("template function can be specified", function() {
-    var childReturningString = new Thorax.View({
+    var childReturningString = new (Thorax.View.extend({
       template: function(data, options) {
         expect(options.data.cid).to.match(/^t/);
         return 'template';
       }
-    });
+    }));
     childReturningString.render();
     expect(childReturningString.html()).to.equal('template');
-    var childReturningElement = new Thorax.View({
+    var childReturningElement = new (Thorax.View.extend({
       template: function() {
         return $('<p>template</p>')[0];
       }
-    });
+    }));
     childReturningElement.render();
     expect(childReturningElement.$('p').html()).to.equal('template');
-    var childReturning$ = new Thorax.View({
+    var childReturning$ = new (Thorax.View.extend({
       template: function() {
         return $('<p>template</p>');
       }
-    });
+    }));
     childReturning$.render();
     expect(childReturning$.$('p').html()).to.equal('template');
   });
@@ -82,9 +67,9 @@ describe('core', function() {
   it("template yield", function() {
     Thorax.templates['yield-child'] = '<span>{{yield}}</span>';
     Thorax.templates['yield-parent'] = '<p>{{#template "yield-child"}}content{{/template}}</p>';
-    var view = new Thorax.View({
+    var view = new (Thorax.View.extend({
       name: 'yield-parent'
-    });
+    }));
     view.render();
     expect(view.$('p > span').html()).to.equal('content');
   });
@@ -92,8 +77,10 @@ describe('core', function() {
   it("element helper", function() {
     var a = document.createElement('li');
     a.innerHTML = 'one';
-    var view = new Thorax.View({
+    var view = new (Thorax.View.extend({
       template: '<ul>{{element a tag="li"}}{{element b tag="li"}}{{element c}}{{element d}}</ul>',
+    }));
+    view.set({
       a: a,
       b: function() {
         var li = document.createElement('li');
@@ -127,33 +114,33 @@ describe('core', function() {
       return '-';
     });
 
-    var view = new Thorax.View({
+    var view = new (Thorax.View.extend({
       helpers: {
         test: function() {
-          return this.key;
+          return this.get('key');
         },
         testWithArg: function(arg) {
-          return this.key + arg;
+          return this.get('key') + arg;
         },
         testWithBlock: function(options) {
           return options.fn(options.context);
         }
       },
-      key: 'value',
       template: '{{globalHelper}} {{test}} {{testWithArg "!"}} {{#testWithBlock}}{{key}}{{/testWithBlock}}'
-    });
+    }));
+    view.set('key', 'value');
     view.render();
     expect(view.html()).to.equal('- value value! value');
 
-    view = new Thorax.View({
-      collection: new Thorax.Collection([{letter: 'a'}]),
+    view = new (Thorax.View.extend({
       template: '{{#collection tag="ul"}}<li>{{globalHelper}} {{test letter}}</li>{{/collection}}',
       helpers: {
         test: function(letter) {
           return letter + "!";
         }
       }
-    });
+    }));
+    view.set('collection', new Thorax.Collection([{letter: 'a'}]));
     view.render();
     expect(view.$('li').html()).to.equal('- a!');
   });
@@ -166,40 +153,40 @@ describe('core', function() {
   });
 
   it("render() subclassing", function() {
-    var a = new Thorax.View({
+    var a = new (Thorax.View.extend({
       render: function() {
         Thorax.View.prototype.render.call(this, '<p>a</p>');
       }
-    });
+    }));
     a.render();
 
-    var b = new Thorax.View({
+    var b = new (Thorax.View.extend({
       render: function() {
         Thorax.View.prototype.render.call(this, $('<p>b</p>'));
       }
-    });
+    }));
     b.render();
 
-    var c = new Thorax.View({
+    var c = new (Thorax.View.extend({
       render: function() {
         var el = document.createElement('p');
         el.innerHTML = 'c';
         Thorax.View.prototype.render.call(this, el);
       }
-    });
+    }));
     c.render();
 
-    var d = new Thorax.View({
+    var d = new (Thorax.View.extend({
       render: function() {
-        var view = new Thorax.View({
+        var view = new (Thorax.View.extend({
           render: function() {
             Thorax.View.prototype.render.call(this, '<p>d</p>');
           }
-        });
+        }));
         view.render();
         Thorax.View.prototype.render.call(this, view);
       }
-    });
+    }));
     d.render();
 
     expect(a._renderCount).to.equal(1, '_renderCount incrimented');
@@ -212,70 +199,9 @@ describe('core', function() {
     expect(d.$('p').html()).to.equal('d', 'parent render accepts view');
   });
 
-  it("template passed to constructor and view block", function() {
-    var view = new Thorax.View({
-      template: '<p>{{key}}</p>',
-      key: 'value'
-    });
-    view.render();
-    expect(view.$('p').html()).to.equal('value');
-
-    var view = new (Thorax.View.extend({
-      template: '<p>{{key}}</p>',
-      key: 'value'
-    }))();
-    view.render();
-    expect(view.$('p').html()).to.equal('value');
-
-    var Child = Thorax.View.extend({
-      template: '<div class="child-a">{{key}}</div>',
-      key: 'value'
-    });
-
-    var a = new Child();
-    var b = new Child();
-
-    var parent = new Thorax.View({
-      template: '<div class="parent">{{#view b}}<div class="child-b">{{key}}</div>{{/view}}{{view a}}</div>',
-      a: a,
-      b: b
-    });
-    parent.render();
-    expect(parent.$('.child-a').html()).to.equal('value');
-    expect(parent.$('.child-b').html()).to.equal('value');
-
-    //ensure that override does not persist to view itself
-    b.render();
-    expect(b.$('.child-a').html()).to.equal('value');
-
-    //test nesting
-    var outer = new Thorax.View({
-      template: '<div class="a">{{#view inner}}<div class="b">{{#view child}}<div class="c">value</div>{{/view}}</div>{{/view}}</div>',
-      inner: new Thorax.View({
-        child: new Thorax.View()
-      })
-    });
-    outer.render();
-    expect(outer.$('.c').html()).to.equal('value');
-  });
-
-  it("nestable scope of view helper", function() {
-    Handlebars.registerViewHelper('test', function(viewHelper) {
-      expect(view.cid).to.equal(viewHelper.parent.cid);
-    });
-    var view = new Thorax.View({
-      name: 'outer',
-      template: '{{#test}}{{#test}}{{#test}}{{key}}{{/test}}{{/test}}{{/test}}',
-      key: 'value'
-    });
-    view.render();
-    expect(view.$('[data-view-helper]')[2].innerHTML).to.equal('value');
-    delete Handlebars.helpers.test;
-  });
-
   it("onException", function() {
     var oldOnException = Thorax.onException;
-    var view = new Thorax.View({
+    var view = new (Thorax.View.extend({
       events: {
         test: function () {
           throw new Error('view error');
@@ -285,7 +211,7 @@ describe('core', function() {
         }
       },
       template: '<div></div>'
-    });
+    }));
     view.render();
     document.body.appendChild(view.el);
     Thorax.onException = function(errorName) {

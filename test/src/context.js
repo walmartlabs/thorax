@@ -140,6 +140,23 @@ describe("context", function() {
   });
 
   /*
+    it("context may be an object", function() {
+    var view = new (Thorax.View.extend({
+      context: {
+        a: 'a',
+        b: 'b',
+        c: function() {
+          return 'c';
+        }
+      },
+      template: '{{a}}{{b}}{{c}}'
+    }))();
+    view.render();
+    expect(view.html()).to.equal('abc');
+  });
+  */
+
+  /*
   it("deffered load on model will render when loaded", function() {
   
   });
