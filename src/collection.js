@@ -1,4 +1,4 @@
-/*global createRegistryWrapper, dataObject, getEventCallback, modelCidAttributeName, viewCidAttributeName */
+/*global createRegistryWrapper, dataObject, getEventCallback, getValue, modelCidAttributeName, viewCidAttributeName */
 var _fetch = Backbone.Collection.prototype.fetch,
     _reset = Backbone.Collection.prototype.reset,
     collectionCidAttributeName = 'data-collection-cid',
@@ -17,10 +17,10 @@ Thorax.Collection = Backbone.Collection.extend({
     }
   },
   isPopulated: function() {
-    return this._fetched || this.length > 0 || (!this.length && !_.result(this, 'url'));
+    return this._fetched || this.length > 0 || (!this.length && !getValue(this, 'url'));
   },
   shouldFetch: function(options) {
-    return options.fetch && !!_.result(this, 'url') && !this.isPopulated();
+    return options.fetch && !!getValue(this, 'url') && !this.isPopulated();
   },
   fetch: function(options) {
     options = options || {};

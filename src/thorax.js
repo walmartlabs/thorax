@@ -1,4 +1,4 @@
-/*global cloneInheritVars, createInheritVars, createRegistryWrapper, inheritVars */
+/*global cloneInheritVars, createInheritVars, createRegistryWrapper, getValue, inheritVars */
 
 //support zepto.forEach on jQuery
 if (!$.fn.forEach) {

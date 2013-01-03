@@ -40,7 +40,7 @@ Thorax.CollectionHelperView = Thorax.View.extend({
   },
   // will be used by emptyView and emptyTemplate
   _getContext: function() {
-    return getValue(this.parent, 'context');
+    return this.parent._getContext();
   },
   setAsPrimaryCollectionHelper: function(collection) {
     this.$el.attr(primaryCollectionAttributeName, collection.cid);
