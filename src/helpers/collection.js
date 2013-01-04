@@ -96,7 +96,7 @@ Handlebars.registerViewHelper('collection', Thorax.CollectionHelperView, functio
     ensureDataObjectCid('collection', collection);
     view.setAsPrimaryCollectionHelper(collection);
   }
-  collection && view.setCollection(collection);
+  collection && view.set('collection', collection);
 });
 
 Handlebars.registerHelper('collection-element', function(options) {
