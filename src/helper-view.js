@@ -30,7 +30,7 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
         options = args.pop(),
         declaringView = getOptionsData(options).view;
 
-    var viewOptions = {
+    var classAttrs = {
       template: options.fn,
       inverse: options.inverse,
       options: options.hash,
@@ -39,12 +39,15 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
       _helperName: name
     };
 
-    options.hash.id && (viewOptions.id = options.hash.id);
-    options.hash['class'] && (viewOptions.className = options.hash['class']);
-    options.hash.className && (viewOptions.className = options.hash.className);
-    options.hash.tag && (viewOptions.tagName = options.hash.tag);
-    options.hash.tagName && (viewOptions.tagName = options.hash.tagName);
-    var instance = new (ViewClass.extend(viewOptions));
+    options.hash.id && (classAttrs.id = options.hash.id);
+    options.hash['class'] && (classAttrs.className = options.hash['class']);
+    options.hash.className && (classAttrs.className = options.hash.className);
+    options.hash.tag && (classAttrs.tagName = options.hash.tag);
+    options.hash.tagName && (classAttrs.tagName = options.hash.tagName);
+    if (ViewClass.modifyClassAttributes) {
+      classAttrs = ViewClass.modifyClassAttributes(classAttrs);
+    }
+    var instance = new (ViewClass.extend(classAttrs));
     args.push(instance);
     declaringView.children[instance.cid] = instance;
     declaringView.trigger.apply(declaringView, ['helper', name].concat(args));

@@ -1,4 +1,4 @@
-Thorax.CollectionHelperView = Thorax.View.extend({
+Thorax.CollectionHelperView = Thorax.HelperView.extend({
   // Forward render events to the parent
   events: {
     'rendered:item': forwardRenderEvent('rendered:item'),
@@ -6,27 +6,6 @@ Thorax.CollectionHelperView = Thorax.View.extend({
     'rendered:empty': forwardRenderEvent('rendered:empty')
   },
   constructor: function(options) {
-    _.each(collectionOptionNames, function(viewAttributeName, helperOptionName) {
-      if (options.options[helperOptionName]) {
-        var value = options.options[helperOptionName];
-        if (viewAttributeName === 'itemTemplate' || viewAttributeName === 'emptyTemplate') {
-          value = Thorax.Util.getTemplate(value);
-        }
-        options[viewAttributeName] = value;
-      }
-    });
-    // Handlebars.VM.noop is passed in the handlebars options object as
-    // a default for fn and inverse, if a block was present. Need to
-    // check to ensure we don't pick the empty / null block up.
-    if (!options.itemTemplate && options.template && options.template !== Handlebars.VM.noop) {
-      options.itemTemplate = options.template;
-      options.template = Handlebars.VM.noop;
-    }
-    if (!options.emptyTemplate && options.inverse && options.inverse !== Handlebars.VM.noop) {
-      options.emptyTemplate = options.inverse;
-      options.inverse = Handlebars.VM.noop;
-    }
-    !options.template && (options.template = Handlebars.VM.noop);
     var response = Thorax.CollectionHelperView.__super__.constructor.call(this, options);
     if (this.parent.name) {
       if (!this.emptyTemplate) {
@@ -38,10 +17,6 @@ Thorax.CollectionHelperView = Thorax.View.extend({
     }
     return response;
   },
-  // will be used by emptyView and emptyTemplate
-  _getContext: function() {
-    return this.parent._getContext();
-  },
   setAsPrimaryCollectionHelper: function(collection) {
     this.$el.attr(primaryCollectionAttributeName, collection.cid);
     _.each(forwardableProperties, function(propertyName) {
@@ -49,6 +24,31 @@ Thorax.CollectionHelperView = Thorax.View.extend({
     }, this);
   }
 });
+
+Thorax.CollectionHelperView.modifyClassAttributes = function(classAttrs) {
+  _.each(collectionOptionNames, function(viewAttributeName, helperOptionName) {
+    if (classAttrs.options[helperOptionName]) {
+      var value = classAttrs.options[helperOptionName];
+      if (viewAttributeName === 'itemTemplate' || viewAttributeName === 'emptyTemplate') {
+        value = Thorax.Util.getTemplate(value);
+      }
+      classAttrs[viewAttributeName] = value;
+    }
+  });
+  // Handlebars.VM.noop is passed in the handlebars options object as
+  // a default for fn and inverse, if a block was present. Need to
+  // check to ensure we don't pick the empty / null block up.
+  if (!classAttrs.itemTemplate && classAttrs.template && classAttrs.template !== Handlebars.VM.noop) {
+    classAttrs.itemTemplate = classAttrs.template;
+    classAttrs.template = Handlebars.VM.noop;
+  }
+  if (!classAttrs.emptyTemplate && classAttrs.inverse && classAttrs.inverse !== Handlebars.VM.noop) {
+    classAttrs.emptyTemplate = classAttrs.inverse;
+    classAttrs.inverse = Handlebars.VM.noop;
+  }
+  !classAttrs.template && (classAttrs.template = Handlebars.VM.noop);
+  return classAttrs;
+};
 
 var collectionOptionNames = {
   'item-template': 'itemTemplate',
