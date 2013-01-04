@@ -7,8 +7,9 @@ describe('button-link helpers', function() {
   });
 
   it("multiple arguments to link", function() {
-    var view = new Thorax.View({
+    var view = new (Thorax.View.extend({
       template: '{{#link a b c class="test"}}link{{/link}}',
+    }))({
       a: 'a',
       b: 'b',
       c: 'c'
@@ -18,15 +19,17 @@ describe('button-link helpers', function() {
   });
 
   it("expand-tokens in link", function() {
-    var view = new Thorax.View({
+    var view = new (Thorax.View.extend({
       template: '{{#link "a/{{key}}"}}link{{/link}}',
+    }))({
       key: 'b'
     });
     view.render();
     expect(view.$('a').attr('href')).to.equal('#a/{{key}}');
 
-    view = new Thorax.View({
+    view = new (Thorax.View.extend({
       template: '{{#link "a/{{key}}" expand-tokens=true}}link{{/link}}',
+    }))({
       key: 'b'
     });
     view.render();
@@ -35,13 +38,13 @@ describe('button-link helpers', function() {
   });
 
   it("button and link helpers", function() {
-    var view = new Thorax.View({
+    var view = new (Thorax.View.extend({
       events: {
         testEvent: function() {}
       },
       someMethod: function() {},
       template: '{{#button "someMethod"}}Button{{/button}}{{#button trigger="testEvent"}}Button 2{{/button}}{{#link "href"}}content{{/link}}'
-    });
+    }));
     view.render();
     expect($(view.$('button')[0]).html()).to.equal('Button');
     expect($(view.$('button')[0]).attr('data-call-method')).to.equal('someMethod');
