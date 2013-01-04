@@ -13,7 +13,9 @@ describe('loading', function() {
     it('views should see load start from model', function() {
       var spy = this.spy(),
           model = new Thorax.Model({url: 'foo'}),
-          view = new Thorax.View({name: 'food', render: function() {}, model: model});
+          view = new (Thorax.View.extend({
+            name: 'food', render: function(){}
+          }))({model: model});
       view.on('load:start', spy);
 
       expect($(view.el).hasClass('loading')).to.be['false'];
@@ -26,13 +28,12 @@ describe('loading', function() {
     it('views should see load start from collection', function() {
       var spy = this.spy(),
           collection = new Thorax.Collection({url: 'foo'});
-      var view = new Thorax.View({
+      var view = new (Thorax.View.extend({
         name: 'food',
-        myCollection: collection,
         template: function() {}
-      });
-      view.bindDataObject(view.myCollection);
+      }));
       view.on('load:start', spy);
+      view.set('myCollection', collection);
       view.render();
       expect($(view.el).hasClass('loading')).to.be['false'];
       collection.loadStart();
@@ -45,7 +46,7 @@ describe('loading', function() {
     it('views should not see load start after destroy', function() {
       var spy = this.spy(),
           model = new Thorax.Model({url: 'foo'}),
-          view = new Thorax.View({name: 'food', render: function() {}, model: model});
+          view = new (Thorax.View.extend({name: 'food', render: function() {}}))({model: model});
       view.on('load:start', spy);
 
       expect($(view.el).hasClass('loading')).to.be['false'];
@@ -60,7 +61,7 @@ describe('loading', function() {
 
     it('views should see load end from model', function() {
       var model = new Thorax.Model({url: 'foo'}),
-          view = new Thorax.View({name: 'food', render: function() {}, model: model}),
+          view = new (Thorax.View.extend({name: 'food', render: function() {}}))({model: model}),
           spy = this.spy(view, 'onLoadEnd');
 
       model.loadStart();
@@ -74,14 +75,15 @@ describe('loading', function() {
     });
     it('views should see load end from collection', function() {
       var collection = new Thorax.Collection({url: 'foo'});
-      var view = new Thorax.View({
+      var view = new (Thorax.View.extend({
         name: 'food',
-        collection: collection,
         template: function() {},
         itemTemplate: function() {return ''; }
+      }))({
+        collection: collection
       });
+
       var spy = this.spy(view, 'onLoadEnd');
-      view.bindDataObject(view.collection);
       collection.loadStart();
       this.clock.tick(1000);
 
@@ -94,7 +96,7 @@ describe('loading', function() {
     it('views should see load end after destroy', function() {
       var spy = this.spy(),
           model = new Thorax.Model({url: 'foo'}),
-          view = new Thorax.View({name: 'food', template: function() {}, model: model}),
+          view = new (Thorax.View.extend({name: 'food', template: function() {}}))({model: model}),
           endSpy = this.spy(view, 'onLoadEnd');
       view.on('load:start', spy);
 
@@ -123,7 +125,7 @@ describe('loading', function() {
       exports.on('load:start', Thorax.loadHandler(this.startSpy, this.endSpy));
 
       this.model = new Thorax.Model({url: 'foo'});
-      this.view = new Thorax.View({name: 'food', model: this.model, template: function() {}});
+      this.view = new (Thorax.View.extend({name: 'food', template: function() {}}))({model: this.model});
     });
     afterEach(function() {
       exports._loadStart = undefined;
@@ -622,9 +624,9 @@ describe('loading', function() {
     });
 
     it("loading helper and loading collection options", function() {
-      var loadingView = new Thorax.View({
+      var loadingView = new (Thorax.View.extend({
         template: '{{#loading}}<p>loading</p>{{else}}<p>not loading</p>{{/loading}}'
-      });
+      }));
       loadingView.render();
       expect(loadingView.$('p').html()).to.equal('not loading');
       loadingView.loadStart();
@@ -636,9 +638,9 @@ describe('loading', function() {
       expect(loadingView.$('p').html()).to.equal('not loading');
 
       //trigger loadStart before render
-      loadingView = new Thorax.View({
+      loadingView = new (Thorax.View.extend({
         template: '{{#loading}}<p>loading</p>{{else}}<p>not loading</p>{{/loading}}'
-      });
+      }));
       loadingView.loadStart();
       this.clock.tick(loadStartTimeout);
       loadingView.render();
@@ -647,8 +649,9 @@ describe('loading', function() {
       this.clock.tick(loadEndTimeout);
       expect(loadingView.$('p').html()).to.equal('not loading');
 
-      var loadingViewWithModel = new Thorax.View({
-        template: '{{#loading}}<p>loading</p>{{else}}<p>not loading</p>{{/loading}}',
+      var loadingViewWithModel = new (Thorax.View.extend({
+        template: '{{#loading}}<p>loading</p>{{else}}<p>not loading</p>{{/loading}}'
+      }))({
         model: new Thorax.Model()
       });
       loadingViewWithModel.render();
@@ -670,8 +673,9 @@ describe('loading', function() {
         name: 'collection-loading-view',
         tagName: 'li'
       });
-      var collectionLoadingTemplateView = new Thorax.View({
+      var collectionLoadingTemplateView = new (Thorax.View.extend({
         template: '{{#collection myCollection loading-template="collection-loading" tag="ul"}}<li class="item">{{number}}</li>{{else}}<li class="empty-item">empty</li>{{/collection}}',
+      }))({
         myCollection: new (Thorax.Collection.extend({
           url: false
         }))()
