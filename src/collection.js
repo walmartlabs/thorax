@@ -9,6 +9,10 @@ var _fetch = Backbone.Collection.prototype.fetch,
 
 Thorax.Collection = Backbone.Collection.extend({
   model: Thorax.Model || Backbone.Model,
+  initialize: function() {
+    ensureDataObjectCid('collection', this);
+    return Backbone.Collection.prototype.initialize.apply(this, arguments);
+  },
   isEmpty: function() {
     if (this.length > 0) {
       return false;
