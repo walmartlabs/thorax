@@ -35,7 +35,7 @@ describe('model', function() {
       template: '<li>{{letter}}</li>'
     }));
     b.set('model', modelB);
-    expect(b.el.firstChild.innerHTML).to.equal('b', 'set via setModel');
+    expect(b.el.firstChild.innerHTML).to.equal('b', 'set via set("model", model)');
 
     modelB.set({letter: 'B'});
     expect(b.el.firstChild.innerHTML).to.equal('B', 'update attribute triggers render');
