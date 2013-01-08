@@ -1,46 +1,48 @@
+/*dotfiles browser, thorax, mocha, chai*/
 {
-  "predef": [
-    "_", "Backbone", "Handlebars", "Thorax",
-
-    "describe", "it", "before", "after", "beforeEach", "afterEach", "expect", "sinon"
-  ],
-
-  "maxerr": 10000,
-
-  "node": true,
+  "node": false,
   "es5": true,
+  "esnext": false,
   "browser": true,
-  "jquery": true,
-
   "bitwise": true,
   "curly": true,
   "eqeqeq": true,
-  "evil": false,
-  "expr": true,
   "forin": true,
   "immed": false,
   "latedef": false,
-  "laxbreak": true,
   "newcap": true,
   "noarg": true,
-  "noempty": false,
-  "nonew": true,
+  "noempty": true,
+  "nonew": false,
   "plusplus": false,
+  "regexp": false,
   "undef": true,
+  "unused": false,
   "strict": false,
+  "trailing": true,
+  "maxparams": 4,
+  "asi": false,
+  "boss": false,
+  "expr": true,
+  "laxbreak": true,
+  "loopfunc": true,
   "shadow": true,
-  "trailing": false,
-  "globalstrict": true,
   "nonstandard": true,
-  "white": false,
-  "indent": 2,
-
-  "onevar": false
+  "onevar": false,
+  "predef": [
+    "$",
+    "_",
+    "Backbone",
+    "Handlebars",
+    "Thorax",
+    "describe",
+    "it",
+    "before",
+    "after",
+    "beforeEach",
+    "afterEach",
+    "chai",
+    "expect",
+    "sinon"
+  ]
 }
-
-/*
-    "boss" : false,
-    "debug": false,
-    "devel": false,
-    "regexp": false
-*/
