@@ -45,11 +45,12 @@ Thorax.View = Backbone.View.extend({
   _configure: function(options) {
     var self = this;
 
+    this._objectOptionsByCid = {};
+    this._boundDataObjectsByCid = {};
+
     // Setup object event tracking
     _.each(inheritVars, function(obj) {
       self[obj.name] = [];
-      if (obj.array) { self[obj.array] = []; }
-      if (obj.hash) { self[obj.hash] = {}; }
     });
 
     viewsIndexedByCid[this.cid] = this;
@@ -59,6 +60,9 @@ Thorax.View = Backbone.View.extend({
     //this.options is removed in Thorax.View, we merge passed
     //properties directly with the view and template context
     _.extend(this, options || {});
+
+    // Setup helpers
+    bindHelpers.call(this);
 
     //compile a string if it is set as this.template
     if (typeof this.template === 'string') {
@@ -91,20 +95,24 @@ Thorax.View = Backbone.View.extend({
     return view;
   },
 
+  _removeChild: function(view) {
+    delete this.children[view.cid];
+    view.parent = null;
+    return view;
+  },
+
   destroy: function(options) {
     options = _.defaults(options || {}, {
       children: true
     });
     this.trigger('destroyed');
     delete viewsIndexedByCid[this.cid];
-    if (options.children) {
-      _.each(this.children, function(child) {
-        child.parent = null;
+    _.each(this.children, function(child) {
+      this._removeChild(child);
+      if (options.children) {
         child.destroy();
-      });
-      this.children = {};
-    }
-
+      }
+    }, this);
     this.freeze && this.freeze();
   },
 
@@ -154,6 +162,15 @@ Thorax.View = Backbone.View.extend({
     };
   },
 
+  _getHelpers: function() {
+    if (this.helpers) {
+      return _.extend({}, Handlebars.helpers, this.helpers);
+    } else {
+      return Handlebars.helpers;
+    }
+    
+  },
+
   renderTemplate: function(file, data, ignoreErrors) {
     var template;
     data = this._getContext(data);
@@ -169,7 +186,10 @@ Thorax.View = Backbone.View.extend({
         throw new Error('Unable to find template ' + file);
       }
     } else {
-      return template(data, {data: this._getData(data)});
+      return template(data, {
+        helpers: this._getHelpers(),
+        data: this._getData(data)
+      });
     }
   },
 
@@ -187,9 +207,11 @@ Thorax.View = Backbone.View.extend({
     if (typeof html === 'undefined') {
       return this.el.innerHTML;
     } else {
+      // Event for IE element fixes
+      this.trigger('before:append');
       this.el.innerHTML = "";
       var element;
-      if (this.collection && this._collectionOptionsByCid[this.collection.cid] && this._renderCount) {
+      if (this.collection && this._objectOptionsByCid[this.collection.cid] && this._renderCount) {
         // preserveCollectionElement calls the callback after it has a reference
         // to the collection element, calls the callback, then re-appends the element
         preserveCollectionElement.call(this, function() {
@@ -229,6 +251,20 @@ Thorax.View.extend = function() {
 };
 
 createRegistryWrapper(Thorax.View, Thorax.Views);
+
+function bindHelpers() {
+  if (this.helpers) {
+    _.each(this.helpers, function(helper, name) {
+      var view = this;
+      this.helpers[name] = function() {
+        var args = _.toArray(arguments),
+            options = _.last(args);
+        options.context = this;
+        return helper.apply(view, args);
+      };
+    }, this);
+  }
+}
 
 //$(selector).view() helper
 $.fn.view = function(options) {

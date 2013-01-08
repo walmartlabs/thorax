@@ -64,7 +64,7 @@ describe('form', function() {
       template: '<input name="parentKey">{{view child}}' + mockViewHelperFragment
     });
     view.render();
-    var model = new Backbone.Model({
+    var model = new Thorax.Model({
       parentKey: 'parentValue',
       childKey: 'childValue'
     });

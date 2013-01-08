@@ -157,7 +157,7 @@ describe('event', function() {
     expect(e).to.equal(2);
   });
 
-  it("unbindModel / unbindCollection stops events from being triggered", function() {
+  it("unbindDataObject stops events from being triggered", function() {
     var spy = this.spy();
     var view = new Thorax.View({
       events: {
@@ -167,11 +167,11 @@ describe('event', function() {
       }
     });
     view.myModel = new Thorax.Model({key: 'value'});
-    view.bindModel(view.myModel, {render: false});
+    view.bindDataObject(view.myModel, {render: false});
     expect(spy.callCount).to.equal(0);
     view.myModel.trigger('test');
     expect(spy.callCount).to.equal(1);
-    view.unbindModel(view.myModel);
+    view.unbindDataObject(view.myModel);
     view.myModel.trigger('test');
     expect(spy.callCount).to.equal(1);
   });

@@ -19,6 +19,9 @@ Thorax.Collection = Backbone.Collection.extend({
   isPopulated: function() {
     return this._fetched || this.length > 0 || (!this.length && !getValue(this, 'url'));
   },
+  shouldFetch: function(options) {
+    return options.fetch && !!getValue(this, 'url') && !this.isPopulated();
+  },
   fetch: function(options) {
     options = options || {};
     var success = options.success;
@@ -38,15 +41,15 @@ Thorax.Collections = {};
 createRegistryWrapper(Thorax.Collection, Thorax.Collections);
 
 dataObject('collection', {
-  name: '_collectionEvents',
-  array: '_collections',
-  hash: '_collectionOptionsByCid',
   set: 'setCollection',
   setCallback: afterSetCollection,
-  bind: 'bindCollection',
-  unbind: 'unbindCollection',
-  options: '_setCollectionOptions',
-  change: '_onCollectionReset',
+  defaultOptions: {
+    render: true,
+    fetch: true,
+    success: false,
+    errors: true
+  },
+  change: onCollectionReset,
   $el: 'getCollectionElement',
   cidAttrName: collectionCidAttributeName
 });
@@ -117,11 +120,13 @@ _.extend(Thorax.View.prototype, {
     if (!viewEl.length) {
       return false;
     }
-    var viewCid = viewEl.attr(viewCidAttributeName);
-    if (this.children[viewCid]) {
-      delete this.children[viewCid];
-    }
     viewEl.remove();
+    var viewCid = viewEl.attr(viewCidAttributeName),
+        child = this.children[viewCid];
+    if (child) {
+      this._removeChild(child);
+      child.destroy();
+    }
     return true;
   },
   renderCollection: function() {
@@ -146,17 +151,16 @@ _.extend(Thorax.View.prototype, {
   },
   emptyClass: 'empty',
   renderEmpty: function() {
-    var context = this.emptyContext ? this.emptyContext.call(this) : this.context();
     if (this.emptyView) {
-      var view = Thorax.Util.getViewInstance(this.emptyView, {});
+      var viewOptions = {};
       if (this.emptyTemplate) {
-        view.render(this.renderTemplate(this.emptyTemplate, context));
-      } else {
-        view.render();
+        viewOptions.template = this.emptyTemplate;
       }
+      var view = Thorax.Util.getViewInstance(this.emptyView, viewOptions);
+      view.ensureRendered();
       return view;
     } else {
-      return this.emptyTemplate && this.renderTemplate(this.emptyTemplate, context);
+      return this.emptyTemplate && this.renderTemplate(this.emptyTemplate);
     }
   },
   renderItem: function(model, i) {
@@ -164,7 +168,9 @@ _.extend(Thorax.View.prototype, {
       var viewOptions = {
         model: model
       };
-      this.itemTemplate && (viewOptions.template = this.itemTemplate);
+      if (this.itemTemplate) {
+        viewOptions.template = this.itemTemplate;
+      }
       var view = Thorax.Util.getViewInstance(this.itemView, viewOptions);
       view.ensureRendered();
       return view;
@@ -188,15 +194,10 @@ _.extend(Thorax.View.prototype, {
     var element = this.$(this._collectionSelector);
     return element.length === 0 ? this.$el : element;
   },
-  _onCollectionReset: function(collection) {
-    if (collection === this.collection && this._collectionOptionsByCid[this.collection.cid].render) {
-      this.renderCollection();
-    }
-  },
   // Events that will only be bound to "this.collection"
   _collectionRenderingEvents: {
-    reset: '_onCollectionReset',
-    sort: '_onCollectionReset',
+    reset: onCollectionReset,
+    sort: onCollectionReset,
     filter: function() {
       applyVisibilityFilter.call(this);
     },
@@ -217,14 +218,7 @@ _.extend(Thorax.View.prototype, {
     },
     remove: function(model) {
       var $el = this.getCollectionElement();
-      $el.find('[' + modelCidAttributeName + '="' + model.cid + '"]').remove();
-      for (var cid in this.children) {
-        if (this.children[cid].model && this.children[cid].model.cid === model.cid) {
-          this.children[cid].destroy();
-          delete this.children[cid];
-          break;
-        }
-      }
+      this.removeItem(model);
       this.collection.length === 0 && $el.length && handleChangeFromNotEmptyToEmpty.call(this);
     }
   }
@@ -233,12 +227,18 @@ _.extend(Thorax.View.prototype, {
 Thorax.View.on({
   collection: {
     error: function(collection, message) {
-      if (this._collectionOptionsByCid[collection.cid].errors) {
+      if (this._objectOptionsByCid[collection.cid].errors) {
         this.trigger('error', message, collection);
       }
     }
   }
 });
+
+function onCollectionReset(collection) {
+  if (collection === this.collection && this._objectOptionsByCid[this.collection.cid].render) {
+    this.renderCollection();
+  }
+}
 
 function afterSetCollection(collection) {
   if (!collectionHelperPresentForPrimaryCollection.call(this) && collection) {

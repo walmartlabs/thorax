@@ -16,12 +16,12 @@ describe('loading', function() {
           view = new Thorax.View({name: 'food', render: function() {}, model: model});
       view.on('load:start', spy);
 
-      expect($(view.el).hasClass('loading')).to.be.false;
+      expect($(view.el).hasClass('loading')).to.be['false'];
       model.loadStart();
 
       this.clock.tick(1000);
       expect(spy).to.have.been.calledOnce;
-      expect($(view.el).hasClass('loading')).to.be.true;
+      expect($(view.el).hasClass('loading')).to.be['true'];
     });
     it('views should see load start from collection', function() {
       var spy = this.spy(),
@@ -31,16 +31,16 @@ describe('loading', function() {
         myCollection: collection,
         template: function() {}
       });
-      view.bindCollection(view.myCollection);
+      view.bindDataObject(view.myCollection);
       view.on('load:start', spy);
       view.render();
-      expect($(view.el).hasClass('loading')).to.be.false;
+      expect($(view.el).hasClass('loading')).to.be['false'];
       collection.loadStart();
 
       this.clock.tick(1000);
       expect(spy).to.have.been.calledOnce;
 
-      expect($(view.el).hasClass('loading')).to.be.true;
+      expect($(view.el).hasClass('loading')).to.be['true'];
     });
     it('views should not see load start after destroy', function() {
       var spy = this.spy(),
@@ -48,14 +48,14 @@ describe('loading', function() {
           view = new Thorax.View({name: 'food', render: function() {}, model: model});
       view.on('load:start', spy);
 
-      expect($(view.el).hasClass('loading')).to.be.false;
+      expect($(view.el).hasClass('loading')).to.be['false'];
       view.destroy();
 
       model.loadStart();
 
       this.clock.tick(1000);
       expect(spy).to.not.have.been.called;
-      expect($(view.el).hasClass('loading')).to.be.false;
+      expect($(view.el).hasClass('loading')).to.be['false'];
     });
 
     it('views should see load end from model', function() {
@@ -70,7 +70,7 @@ describe('loading', function() {
       this.clock.tick(1000);
 
       expect(spy).to.have.been.calledOnce;
-      expect($(view.el).hasClass('loading')).to.be.false;
+      expect($(view.el).hasClass('loading')).to.be['false'];
     });
     it('views should see load end from collection', function() {
       var collection = new Thorax.Collection({url: 'foo'});
@@ -81,7 +81,7 @@ describe('loading', function() {
         itemTemplate: function() {return ''; }
       });
       var spy = this.spy(view, 'onLoadEnd');
-      view.bindCollection(view.collection);
+      view.bindDataObject(view.collection);
       collection.loadStart();
       this.clock.tick(1000);
 
@@ -89,7 +89,7 @@ describe('loading', function() {
       this.clock.tick(1000);
 
       expect(spy).to.have.been.calledOnce;
-      expect($(view.el).hasClass('loading')).to.be.false;
+      expect($(view.el).hasClass('loading')).to.be['false'];
     });
     it('views should see load end after destroy', function() {
       var spy = this.spy(),
@@ -98,11 +98,11 @@ describe('loading', function() {
           endSpy = this.spy(view, 'onLoadEnd');
       view.on('load:start', spy);
 
-      expect($(view.el).hasClass('loading')).to.be.false;
+      expect($(view.el).hasClass('loading')).to.be['false'];
       model.loadStart();
       this.clock.tick(1000);
 
-      expect($(view.el).hasClass('loading')).to.be.true;
+      expect($(view.el).hasClass('loading')).to.be['true'];
       view.destroy();
 
       model.loadEnd();
@@ -111,7 +111,7 @@ describe('loading', function() {
       this.clock.tick(1000);
       expect(spy).to.have.been.calledOnce;
       expect(endSpy).to.have.been.calledOnce;
-      expect($(view.el).hasClass('loading')).to.be.false;
+      expect($(view.el).hasClass('loading')).to.be['false'];
     });
   });
 
@@ -245,7 +245,7 @@ describe('loading', function() {
     it('pair with timeout registers', function() {
       this.object.loadStart('foo', false);
       this.clock.tick(1000);
-      var loaderWrapper = this.object._loadStart;
+      var loaderWrapper = this.object._loadInfo[this.object._loadInfo.length - 1];
 
       this.object.loadEnd();
       this.clock.tick(1000);
@@ -257,7 +257,7 @@ describe('loading', function() {
     it('consequtive pairs emit one event', function() {
       this.object.loadStart('foo', false);
       this.clock.tick(1000);
-      var loaderWrapper = this.object._loadStart;
+      var loaderWrapper = this.object._loadInfo[this.object._loadInfo.length - 1];
 
       this.object.loadEnd();
       this.clock.tick(10);
@@ -277,7 +277,7 @@ describe('loading', function() {
     it('consequtive pairs emit two events after timeout', function() {
       this.object.loadStart('foo', false);
       this.clock.tick(1000);
-      var loaderWrapper = this.object._loadStart;
+      var loaderWrapper = this.object._loadInfo[this.object._loadInfo.length - 1];
 
       this.object.loadEnd();
       this.clock.tick(1000);
@@ -287,7 +287,7 @@ describe('loading', function() {
 
       this.object.loadStart('bar', true);
       this.clock.tick(1000);
-      var loaderWrapper2 = this.object._loadStart;
+      var loaderWrapper2 = this.object._loadInfo[this.object._loadInfo.length - 1];
 
       this.object.loadEnd();
       this.clock.tick(1000);
@@ -299,7 +299,7 @@ describe('loading', function() {
     it('overlapping pairs emit one event', function() {
       this.object.loadStart('foo', false);
       this.clock.tick(1000);
-      var loaderWrapper = this.object._loadStart;
+      var loaderWrapper = this.object._loadInfo[this.object._loadInfo.length - 1];
 
       this.object.loadStart('bar', true);
       this.clock.tick(1000);
@@ -314,6 +314,47 @@ describe('loading', function() {
 
       expect(this.loads).to.eql([{msg: 'foo', background: false, model: loaderWrapper}]);
       expect(this.ends).to.eql([{background: false, model: loaderWrapper}]);
+    });
+
+    it('loadHandlers are isolated', function() {
+      var startSpy = this.spy(),
+          endSpy = this.spy();
+      this.object.on('load:start', Thorax.loadHandler(startSpy, endSpy));
+      this.object.loadStart('foo', false);
+
+      expect(this.loads.length).to.equal(0);
+      expect(this.ends.length).to.equal(0);
+      expect(startSpy).to.not.have.been.called;
+      expect(endSpy).to.not.have.been.called;
+
+      this.clock.tick(200);
+
+      expect(this.loads.length).to.equal(0);
+      expect(this.ends.length).to.equal(0);
+      expect(startSpy).to.not.have.been.called;
+      expect(endSpy).to.not.have.been.called;
+
+      this.clock.tick(1000);
+
+      expect(this.loads.length).to.equal(1);
+      expect(this.ends.length).to.equal(0);
+      expect(startSpy).to.have.been.calledOnce;
+      expect(endSpy).to.not.have.been.called;
+
+      this.object.loadEnd();
+
+      expect(this.loads.length).to.equal(1);
+      expect(this.ends.length).to.equal(0);
+      expect(startSpy).to.have.been.calledOnce;
+      expect(endSpy).to.not.have.been.called;
+
+      this.clock.tick(1000);
+
+      expect(this.loads.length).to.equal(1);
+      expect(this.ends.length).to.equal(1);
+      expect(startSpy).to.have.been.calledOnce;
+      expect(endSpy).to.have.been.calledOnce;
+
     });
   });
 
@@ -405,6 +446,20 @@ describe('loading', function() {
       expect(this.startSpy).to.have.been.calledOnce;
       expect(this.endSpy).to.have.been.calledOnce;
     });
+    it('data load on error calls failback once', function() {
+      var success = this.spy(),
+          failback = this.spy();
+
+      this.model.load(success, failback);
+      this.requests[0].respond(0, {}, '');
+
+      Backbone.history.trigger('route');
+      expect(success).to.not.have.been.called;
+      expect(failback).to.have.been.calledOnce;
+      expect(failback).to.have.been.calledWith(true);
+      expect(this.startSpy).to.have.been.calledOnce;
+      expect(this.endSpy).to.have.been.calledOnce;
+    });
     it('data load on route change sends load events', function() {
       var success = this.spy(),
           failback = this.spy();
@@ -415,11 +470,14 @@ describe('loading', function() {
 
       fragment = 'data-foo';
       Backbone.history.trigger('route');
+      expect(this.endSpy).to.have.been.calledOnce;
+
+      this.requests[0].respond(200, {}, '{}');
 
       expect(success).to.not.have.been.called;
-      expect(failback).to.have.been.calledTwice;
+      expect(failback).to.have.been.calledOnce;
+      expect(failback).to.have.been.calledWith(false);
       expect(this.startSpy).to.have.been.calledOnce;
-      expect(this.endSpy).to.have.been.calledOnce;
     });
     it('data load sent for background and foreground requests', function() {
       var success = this.spy(),
@@ -639,7 +697,7 @@ describe('loading', function() {
       expect(collectionLoadingTemplateView.$('li').length).to.equal(3);
       expect(collectionLoadingTemplateView.$('li.empty-item').length).to.equal(0);
       expect(collectionLoadingTemplateView.$('li.loading-item').length).to.equal(1);
-      expect($(collectionLoadingTemplateView.$('li')[2]).hasClass('loading-item')).to.be.true;
+      expect($(collectionLoadingTemplateView.$('li')[2]).hasClass('loading-item')).to.be['true'];
       collectionLoadingTemplateView.myCollection.add([{"number": "three"}, {"number": "four"}]);
       collectionLoadingTemplateView.myCollection.loadEnd();
       this.clock.tick(loadEndTimeout);

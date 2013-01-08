@@ -27,12 +27,15 @@ function registryGet(object, type, name, ignoreErrors) {
   }
 }
 
+// getValue is used instead of _.result because we
+// need an extra scope parameter, and will minify
+// better than _.result
 function getValue(object, prop, scope) {
   if (!(object && object[prop])) {
     return null;
   }
   return _.isFunction(object[prop])
-    ? object[prop].apply(scope || object, Array.prototype.slice.call(arguments, 2))
+    ? object[prop].call(scope || object)
     : object[prop];
 }
 
@@ -83,7 +86,7 @@ function objectEvents(target, eventName, callback, context) {
   if (_.isObject(callback)) {
     var spec = inheritVars[eventName];
     if (spec && spec.event) {
-      addEvents(target[spec.name], callback, context);
+      addEvents(target['_' + eventName + 'Events'], callback, context);
       return true;
     }
   }
@@ -100,21 +103,6 @@ function addEvents(target, source, context) {
   });
 }
 
-function extendViewMember(name, callback) {
-  var $super = Thorax.View.prototype[name];
-  Thorax.View.prototype[name] = function() {
-    var ret = $super.apply(this, arguments);
-    callback.apply(this, arguments);
-    return ret;
-  };
-}
-function extendOptions(name, callback) {
-  var $super = Thorax.View.prototype[name];
-  Thorax.View.prototype[name] = function(dataObject, options) {
-    return $super.call(this, dataObject, _.extend(callback.call(this, dataObject, options), options));
-  };
-}
-
 function getOptionsData(options) {
   if (!options || !options.data) {
     throw new Error('Handlebars template compiled without data, use: Handlebars.compile(template, {data: true})');
@@ -124,6 +112,7 @@ function getOptionsData(options) {
 
 Thorax.Util = {
   getViewInstance: function(name, attributes) {
+    attributes = attributes || {};
     attributes['class'] && (attributes.className = attributes['class']);
     attributes.tag && (attributes.tagName = attributes.tag);
     if (typeof name === 'string') {

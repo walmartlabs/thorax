@@ -1,5 +1,5 @@
 describe('core', function() {
-  Backbone.history = new Backbone.History();
+  Backbone.history || (Backbone.history = new Backbone.History());
   Backbone.history.start();
 
   Thorax.templates.parent = '<div>{{view child}}</div>';
@@ -89,22 +89,80 @@ describe('core', function() {
     expect(view.$('p > span').html()).to.equal('content');
   });
 
-  it("local view functions are called in template scope", function() {
-    var child = new Thorax.View({
-      template: '{{key}}',
-      key: function() {
-        return 'value';
+  it("element helper", function() {
+    var a = document.createElement('li');
+    a.innerHTML = 'one';
+    var view = new Thorax.View({
+      template: '<ul>{{element a tag="li"}}{{element b tag="li"}}{{element c}}{{element d}}</ul>',
+      a: a,
+      b: function() {
+        var li = document.createElement('li');
+        li.innerHTML = 'two';
+        return li;
+      },
+      c: function() {
+        return $('<li>three</li><li>four</li>');
+      },
+      d: $('<li>five</li>')
+    });
+    view.render();
+    expect(view.$('li')[0].innerHTML).to.equal('one');
+    expect(view.$('li')[1].innerHTML).to.equal('two');
+    expect(view.$('li')[2].innerHTML).to.equal('three');
+    expect(view.$('li')[3].innerHTML).to.equal('four');
+    expect(view.$('li')[4].innerHTML).to.equal('five');
+    view.html('');
+    expect(view.$('li').length).to.equal(0);
+    view.render();
+    expect(view.$('li')[0].innerHTML).to.equal('one');
+    expect(view.$('li')[1].innerHTML).to.equal('two');
+    expect(view.$('li')[2].innerHTML).to.equal('three');
+    expect(view.$('li')[3].innerHTML).to.equal('four');
+    expect(view.$('li')[4].innerHTML).to.equal('five');
+  });
+
+  it("should allow local helpers to be declared", function() {
+    // register a global helper to ensure that it isn't overwritten
+    Handlebars.registerHelper('globalHelper', function() {
+      return '-';
+    });
+
+    var view = new Thorax.View({
+      helpers: {
+        test: function() {
+          return this.key;
+        },
+        testWithArg: function(arg) {
+          return this.key + arg;
+        },
+        testWithBlock: function(options) {
+          return options.fn(options.context);
+        }
+      },
+      key: 'value',
+      template: '{{globalHelper}} {{test}} {{testWithArg "!"}} {{#testWithBlock}}{{key}}{{/testWithBlock}}'
+    });
+    view.render();
+    expect(view.html()).to.equal('- value value! value');
+
+    view = new Thorax.View({
+      collection: new Thorax.Collection([{letter: 'a'}]),
+      template: '{{#collection tag="ul"}}<li>{{globalHelper}} {{test letter}}</li>{{/collection}}',
+      helpers: {
+        test: function(letter) {
+          return letter + "!";
+        }
       }
     });
-    child.render();
-    expect(child.html()).to.equal('value');
+    view.render();
+    expect(view.$('li').html()).to.equal('- a!');
   });
 
   it("template not found handling", function() {
     var view = new Thorax.View();
     expect(function() {
       view.render();
-    }).to.throw();
+    }).to['throw']();
   });
 
   it("render() subclassing", function() {

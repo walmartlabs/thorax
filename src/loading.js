@@ -1,4 +1,5 @@
-/*global collectionOptionNames, extendOptions, inheritVars */
+/*global collectionOptionNames, inheritVars */
+
 var loadStart = 'load:start',
     loadEnd = 'load:end',
     rootObject;
@@ -8,15 +9,18 @@ Thorax.setRootObject = function(obj) {
 };
 
 Thorax.loadHandler = function(start, end, context) {
+  var loadCounter = _.uniqueId();
   return function(message, background, object) {
     var self = context || this;
+    self._loadInfo = self._loadInfo || [];
+    var loadInfo = self._loadInfo[loadCounter];
 
     function startLoadTimeout() {
-      clearTimeout(self._loadStart.timeout);
-      self._loadStart.timeout = setTimeout(function() {
+      clearTimeout(loadInfo.timeout);
+      loadInfo.timeout = setTimeout(function() {
           try {
-            self._loadStart.run = true;
-            start.call(self, self._loadStart.message, self._loadStart.background, self._loadStart);
+            loadInfo.run = true;
+            start.call(self, loadInfo.message, loadInfo.background, loadInfo);
           } catch (e) {
             Thorax.onException('loadStart', e);
           }
@@ -24,14 +28,11 @@ Thorax.loadHandler = function(start, end, context) {
         loadingTimeout * 1000);
     }
 
-    if (!self._loadStart) {
-      var loadingTimeout = self._loadingTimeoutDuration;
-      if (loadingTimeout === void 0) {
-        // If we are running on a non-view object pull the default timeout
-        loadingTimeout = Thorax.View.prototype._loadingTimeoutDuration;
-      }
+    if (!loadInfo) {
+      var loadingTimeout = self._loadingTimeoutDuration !== undefined ?
+        self._loadingTimeoutDuration : Thorax.View.prototype._loadingTimeoutDuration;
 
-      self._loadStart = _.extend({
+      loadInfo = self._loadInfo[loadCounter] = _.extend({
         events: [],
         timeout: 0,
         message: message,
@@ -39,16 +40,16 @@ Thorax.loadHandler = function(start, end, context) {
       }, Backbone.Events);
       startLoadTimeout();
     } else {
-      clearTimeout(self._loadStart.endTimeout);
+      clearTimeout(loadInfo.endTimeout);
 
-      self._loadStart.message = message;
-      if (!background && self._loadStart.background) {
-        self._loadStart.background = false;
+      loadInfo.message = message;
+      if (!background && loadInfo.background) {
+        loadInfo.background = false;
         startLoadTimeout();
       }
     }
 
-    self._loadStart.events.push(object);
+    loadInfo.events.push(object);
     object.on(loadEnd, function endCallback() {
       object.off(loadEnd, endCallback);
 
@@ -58,26 +59,26 @@ Thorax.loadHandler = function(start, end, context) {
         loadingEndTimeout = Thorax.View.prototype._loadingTimeoutEndDuration;
       }
 
-      var events = self._loadStart.events,
+      var events = loadInfo.events,
           index = events.indexOf(object);
       if (index >= 0) {
         events.splice(index, 1);
       }
       if (!events.length) {
-        self._loadStart.endTimeout = setTimeout(function() {
+        loadInfo.endTimeout = setTimeout(function() {
           try {
             if (!events.length) {
-              var run = self._loadStart.run;
+              var run = loadInfo.run;
 
               if (run) {
                 // Emit the end behavior, but only if there is a paired start
-                end.call(self, self._loadStart.background, self._loadStart);
-                self._loadStart.trigger(loadEnd, self._loadStart);
+                end.call(self, loadInfo.background, loadInfo);
+                loadInfo.trigger(loadEnd, loadInfo);
               }
 
               // If stopping make sure we don't run a start
-              clearTimeout(self._loadStart.timeout);
-              self._loadStart = undefined;
+              clearTimeout(loadInfo.timeout);
+              loadInfo = self._loadInfo[loadCounter] = undefined;
             }
           } catch (e) {
             Thorax.onException('loadEnd', e);
@@ -125,7 +126,7 @@ Thorax.mixinLoadable = function(target, useParent) {
     // Propagates loading view parameters to the AJAX layer
     onLoadStart: function(message, background, object) {
       var that = useParent ? this.parent : this;
-      if (!that.nonBlockingLoad && !background && rootObject) {
+      if (!that.nonBlockingLoad && !background && rootObject && rootObject !== this) {
         rootObject.trigger(loadStart, message, background, object);
       }
       $(that.el).addClass(that._loadingClassName);
@@ -182,37 +183,33 @@ Thorax.sync = function(method, dataObj, options) {
 
 function bindToRoute(callback, failback) {
   var fragment = Backbone.history.getFragment(),
-      completed;
+      routeChanged = false;
 
-  function finalizer(isCanceled) {
-    var same = fragment === Backbone.history.getFragment();
-
-    if (completed) {
-      // Prevent multiple execution, i.e. we were canceled but the success callback still runs
+  function routeHandler() {
+    if (fragment === Backbone.history.getFragment()) {
       return;
     }
+    routeChanged = true;
+    res.cancel();
+    failback && failback();
+  }
 
-    if (isCanceled && same) {
-      // Ignore the first route event if we are running in newer versions of backbone
-      // where the route operation is a postfix operation.
-      return;
-    }
+  Backbone.history.on('route', routeHandler);
 
-    completed = true;
-    Backbone.history.off('route', resetLoader);
-
+  function finalizer() {
+    Backbone.history.off('route', routeHandler);
     var args = Array.prototype.slice.call(arguments, 1);
-    if (!isCanceled && same) {
+    if (!routeChanged) {
       callback.apply(this, args);
-    } else {
-      failback && failback.apply(this, args);
     }
   }
 
-  var resetLoader = _.bind(finalizer, this, true);
-  Backbone.history.on('route', resetLoader);
+  var res = _.bind(finalizer, this);
+  res.cancel = function() {
+    Backbone.history.off('route', routeHandler);
+  };
 
-  return _.bind(finalizer, this, false);
+  return res;
 }
 
 function loadData(callback, failback, options) {
@@ -225,9 +222,27 @@ function loadData(callback, failback, options) {
     failback = false;
   }
 
+  var self = this,
+      routeChanged = false,
+      successCallback = bindToRoute(_.bind(callback, self), function() {
+        routeChanged = true;
+        if (self._request) {
+          self._aborted = true;
+          self._request.abort();
+        }
+        failback && failback.call(self, false);
+      });
+
   this.fetch(_.defaults({
-    success: bindToRoute(callback, failback && _.bind(failback, this, false)),
-    error: failback && _.bind(failback, this, true)
+    success: successCallback,
+    error: failback && function() {
+      if (!routeChanged) {
+        failback.apply(self, [true].concat(_.toArray(arguments)));
+      }
+    },
+    complete: function() {
+      successCallback.cancel();
+    }
   }, options));
 }
 
@@ -301,6 +316,7 @@ _.each(klasses, function(DataClass) {
         options = failback;
         failback = false;
       }
+
       options = options || {};
       if (!options.background && !this.isPopulated() && rootObject) {
         // Make sure that the global scope sees the proper load events here
@@ -308,20 +324,7 @@ _.each(klasses, function(DataClass) {
         Thorax.forwardLoadEvents(this, rootObject, true);
       }
 
-      var self = this;
-      loadData.call(this, callback,
-        function(isError) {
-          // Route changed, kill it
-          if (!isError) {
-            if (self._request) {
-              self._aborted = true;
-              self._request.abort();
-            }
-          }
-
-          failback && failback.apply && failback.apply(this, arguments);
-        },
-        options);
+      loadData.call(this, callback, failback, options);
     }
   });
 });
@@ -333,14 +336,11 @@ if (Thorax.Router) {
 }
 
 // Propagates loading view parameters to the AJAX layer
-function loadingDataOptions() {
-  return {
-    ignoreErrors: this.ignoreFetchError,
-    background: this.nonBlockingLoad
-  };
-}
-extendOptions('_setModelOptions', loadingDataOptions);
-extendOptions('_setCollectionOptions', loadingDataOptions);
+Thorax.View.prototype._modifyDataObjectOptions = function(dataObject, options) {
+  options.ignoreErrors = this.ignoreFetchError;
+  options.background = this.nonBlockingLoad;
+  return options;
+};
 
 inheritVars.collection.loading = function() {
   var loadingView = this.loadingView,
@@ -365,9 +365,7 @@ inheritVars.collection.loading = function() {
         }
         item = instance;
       } else {
-        item = this.renderTemplate(loadingTemplate, {
-          collection: this.collection
-        });
+        item = this.renderTemplate(loadingTemplate);
       }
       var index = loadingPlacement
         ? loadingPlacement.call(this)

@@ -15,8 +15,8 @@ describe('collection', function() {
   Thorax.View.extend({name: 'letter-empty'});
 
   it("should implement isPopulated", function() {
-    expect(letterCollection.isPopulated()).to.be.true;
-    expect(letterCollection.at(0).isPopulated()).to.be.true;
+    expect(letterCollection.isPopulated()).to.be['true'];
+    expect(letterCollection.at(0).isPopulated()).to.be['true'];
   });
 
   it("collection view binding", function() {
@@ -76,6 +76,7 @@ describe('collection', function() {
       clonedLetterCollection.remove(clonedLetterCollection.models);
       expect(view.$('li')[0].innerHTML).to.equal('empty', msg + 'empty collection renders empty');
       clonedLetterCollection.add(new LetterModel({letter: 'a'}));
+      
       expect(view.$('li').length).to.equal(1 * indexMultiplier, msg + 'transition from empty to one item');
       expect(view.$('li')[0 * indexMultiplier].innerHTML).to.equal('a', msg + 'transition from empty to one item');
       expect(renderedCount).to.equal(1, msg + 'rendered event count');
@@ -93,7 +94,7 @@ describe('collection', function() {
       
       clonedLetterCollection.remove(clonedLetterCollection.models);
       expect(renderedEmptyCount).to.equal(1, msg + 'rendered:empty event count');
-      expect(view.$('li')[0 * indexMultiplier].innerHTML).to.equal('a', msg + 'transition from empty to one item');
+      expect(view.$('li')[0 * indexMultiplier].innerHTML).to.equal('a', msg + 'transition from empty to one item after freeze');
     }
 
     runCollectionTests(new LetterCollectionView(), 1, 'base');
@@ -148,6 +149,11 @@ describe('collection', function() {
       template: '{{collection tag="ul" empty-view="letter-empty" item-template="letter-item"}}'
     });
     runCollectionTests(viewWithCollectionHelperWithEmptyView, 1, 'block helper with item-template');
+
+    var viewWithCollectionHelperWithItemViewAndItemTemplate = new Thorax.View({
+      template: '{{collection tag="ul" empty-view="letter-empty" item-view="letter-item" item-template="letter-item"}}'
+    });
+    runCollectionTests(viewWithCollectionHelperWithItemViewAndItemTemplate, 1, 'block helper with item-template');
 
     var viewWithCollectionHelperWithEmptyViewAndBlock = new Thorax.View({
       template: '{{collection tag="ul" empty-template="letter-empty" empty-view="letter-empty" item-template="letter-item"}}'
@@ -256,7 +262,7 @@ describe('collection', function() {
     expect(view.$('li').eq(0).html()).to.equal('d');
   });
 
-  it("_bindCollection or model.set can be called in context()", function() {
+  it("bindDataObject or model.set can be called in context()", function() {
     //this causes recursion
     var view = new Thorax.View({
       model: new Thorax.Model(),
@@ -581,11 +587,7 @@ describe('collection', function() {
         }
       }))(),
       template: "{{#collection this.collection}}{{test}}{{else}}<b>{{test}}</b>{{/collection}}",
-      emptyContext: function() {
-        return {
-          test: 'testing'
-        };
-      }
+      test: 'testing'
     });
     view.render();
     expect(view.$('b')[0].innerHTML).to.equal('testing');
@@ -597,12 +599,12 @@ describe('collection', function() {
       collection: new (Thorax.Collection.extend({url: false}))()
     });
     view.render();
-    expect(view.$('ul').hasClass('a')).to.be.true;
+    expect(view.$('ul').hasClass('a')).to.be['true'];
     var model = new Thorax.Model({key: 'value'});
     view.collection.add(model);
-    expect(view.$('ul').hasClass('a')).to.be.false;
+    expect(view.$('ul').hasClass('a')).to.be['false'];
     view.collection.remove(model);
-    expect(view.$('ul').hasClass('a')).to.be.true;
+    expect(view.$('ul').hasClass('a')).to.be['true'];
 
     //with default arg
     view = new Thorax.View({
@@ -610,12 +612,12 @@ describe('collection', function() {
       collection: new (Thorax.Collection.extend({url: false}))()
     });
     view.render();
-    expect(view.$('ul').hasClass('empty')).to.be.true;
+    expect(view.$('ul').hasClass('empty')).to.be['true'];
     var model = new Thorax.Model({key: 'value'});
     view.collection.add(model);
-    expect(view.$('ul').hasClass('empty')).to.be.false;
+    expect(view.$('ul').hasClass('empty')).to.be['false'];
     view.collection.remove(model);
-    expect(view.$('ul').hasClass('empty')).to.be.true;
+    expect(view.$('ul').hasClass('empty')).to.be['true'];
   });
 
   it("helper and local scope collision", function() {
