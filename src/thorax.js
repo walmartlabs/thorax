@@ -146,8 +146,8 @@ Thorax.View = Backbone.View.extend({
     }
   },
 
-  _getContext: function(attributes) {
-    return _.extend({}, getValue(this, 'context'), attributes || {});
+  _getContext: function() {
+    return getValue(this, 'context');
   },
 
   // Private variables in handlebars / options.data in template helpers
@@ -173,7 +173,7 @@ Thorax.View = Backbone.View.extend({
 
   renderTemplate: function(file, data, ignoreErrors) {
     var template;
-    data = this._getContext(data);
+    data = data || this._getContext();
     if (typeof file === 'function') {
       template = file;
     } else {
