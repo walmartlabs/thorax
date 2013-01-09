@@ -1,17 +1,25 @@
 /*global inheritVars */
 
-inheritVars.model.defaultOptions.populate = true;
+(function() {
+  var defaultOptions = inheritVars.model.defaultOptions;
+  inheritVars.model.defaultOptions = function(key, model) {
+    var options = defaultOptions.apply(this, arguments);
+    if (key === 'model') {
+      options.populate = true;
+    }
+    return options;
+  };
+})();
 
 var oldModelChange = inheritVars.model.change;
 inheritVars.model.change = function() {
   oldModelChange.apply(this, arguments);
   // TODO : What can we do to remove this duplication?
-  var modelOptions = this.model && this._objectOptionsByCid[this.model.cid];
+  var modelOptions = this.model && getDataObjectOptions.call(this, this.model);
   if (modelOptions && modelOptions.populate) {
     this.populate(this.model.attributes, modelOptions.populate === true ? {} : modelOptions.populate);
   }
 };
-inheritVars.model.defaultOptions.populate = true;
 
 _.extend(Thorax.View.prototype, {
   //serializes a form present in the view, returning the serialized data

@@ -9,6 +9,10 @@ var _fetch = Backbone.Collection.prototype.fetch,
 
 Thorax.Collection = Backbone.Collection.extend({
   model: Thorax.Model || Backbone.Model,
+  initialize: function() {
+    ensureDataObjectCid('collection', this);
+    return Backbone.Collection.prototype.initialize.apply(this, arguments);
+  },
   isEmpty: function() {
     if (this.length > 0) {
       return false;
@@ -41,13 +45,14 @@ Thorax.Collections = {};
 createRegistryWrapper(Thorax.Collection, Thorax.Collections);
 
 dataObject('collection', {
-  set: 'setCollection',
-  setCallback: afterSetCollection,
-  defaultOptions: {
-    render: true,
-    fetch: true,
-    success: false,
-    errors: true
+  bindCallback: onBindCollection, 
+  defaultOptions: function(key, collection) {
+    return {
+      render: true,
+      fetch: true,
+      success: false,
+      errors: true
+    };
   },
   change: onCollectionReset,
   $el: 'getCollectionElement',
@@ -152,9 +157,11 @@ _.extend(Thorax.View.prototype, {
   emptyClass: 'empty',
   renderEmpty: function() {
     if (this.emptyView) {
-      var viewOptions = {};
+      var viewOptions;
       if (this.emptyTemplate) {
-        viewOptions.template = this.emptyTemplate;
+        viewOptions = {
+          template: this.emptyTemplate
+        };
       }
       var view = Thorax.Util.getViewInstance(this.emptyView, viewOptions);
       view.ensureRendered();
@@ -165,13 +172,14 @@ _.extend(Thorax.View.prototype, {
   },
   renderItem: function(model, i) {
     if (this.itemView) {
-      var viewOptions = {
-        model: model
-      };
+      var viewOptions;
       if (this.itemTemplate) {
-        viewOptions.template = this.itemTemplate;
+        viewOptions = {
+          template: this.itemTemplate
+        }
       }
       var view = Thorax.Util.getViewInstance(this.itemView, viewOptions);
+      view.set({model: model});
       view.ensureRendered();
       return view;
     } else {
@@ -227,26 +235,28 @@ _.extend(Thorax.View.prototype, {
 Thorax.View.on({
   collection: {
     error: function(collection, message) {
-      if (this._objectOptionsByCid[collection.cid].errors) {
+      if (getDataObjectOptions.call(this, collection).errors) {
         this.trigger('error', message, collection);
       }
     }
   }
 });
 
-function onCollectionReset(collection) {
-  if (collection === this.collection && this._objectOptionsByCid[this.collection.cid].render) {
-    this.renderCollection();
+function onBindCollection(collection) {
+  if (collection && collection === this.collection) {
+    if (!collectionHelperPresentForPrimaryCollection.call(this) && collection) {
+      _.each(this._collectionRenderingEvents, function(callback, eventName) {
+        // getEventCallback will resolve if it is a string or a method
+        // and return a method
+        this.listenTo(collection, eventName, getEventCallback(callback, this));
+      }, this);
+    }
   }
 }
 
-function afterSetCollection(collection) {
-  if (!collectionHelperPresentForPrimaryCollection.call(this) && collection) {
-    _.each(this._collectionRenderingEvents, function(callback, eventName) {
-      // getEventCallback will resolve if it is a string or a method
-      // and return a method
-      this.listenTo(collection, eventName, getEventCallback(callback, this));
-    }, this);
+function onCollectionReset() {
+  if (getDataObjectOptions.call(this, this.collection).render) {
+    this.renderCollection();
   }
 }
 

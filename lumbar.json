@@ -29,6 +29,7 @@
         {"src": "src/data-object.js"},
         {"src": "src/model.js"},
         {"src": "src/collection.js"},
+        {"src": "src/context.js"},
         {"src": "src/form.js"},
         {"src": "src/layout.js"},
         {"src": "src/helpers/collection.js"},

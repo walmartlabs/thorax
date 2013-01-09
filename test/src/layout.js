@@ -1,21 +1,21 @@
 describe('layout', function() {
   it("LayoutView", function() {
-    var a = new Thorax.View({
+    var a = new (Thorax.View.extend({
       render: function() {
         Thorax.View.prototype.render.call(this, 'a');
       }
-    });
+    }));
     var aEventCounter = {};
     a.bind('all', function(eventName) {
       aEventCounter[eventName] || (aEventCounter[eventName] = 0);
       ++aEventCounter[eventName];
     });
 
-    var b = new Thorax.View({
+    var b = new (Thorax.View.extend({
       render: function() {
         Thorax.View.prototype.render.call(this, 'b');
       }
-    });
+    }));
     var bEventCounter = {};
     b.bind('all', function(eventName) {
       bEventCounter[eventName] || (bEventCounter[eventName] = 0);
@@ -62,30 +62,33 @@ describe('layout', function() {
       layout: 0,
       child: 0
     };
-    var parent = new Thorax.View({
+    var parent = new (Thorax.View.extend({
       events: {
         destroyed: function() {
           ++callCounts.parent;
         }
       },
       template: "{{view this.layout}}",
-      layout: new Thorax.LayoutView({
-        events: {
-          destroyed: function() {
-            ++callCounts.layout;
-          }
+    }));
+    var layout = new (Thorax.LayoutView.extend({
+      events: {
+        destroyed: function() {
+          ++callCounts.layout;
         }
-      })
+      }
+    }));
+    parent.set({
+      layout: layout
     });
     parent.render();
-    parent.layout.setView(new Thorax.View({
+    layout.setView(new (Thorax.View.extend({
       template: "",
       events: {
         destroyed: function() {
           ++callCounts.child;
         }
       }
-    }));
+    })));
     parent.destroy();
     expect(callCounts.parent).to.equal(1);
     expect(callCounts.layout).to.equal(1);
@@ -94,32 +97,32 @@ describe('layout', function() {
 
   it("Layout can set view el", function() {
     $('body').append('<div id="test-target-container"><div id="test-target"></div></div>');
-    var view = new Thorax.LayoutView({
+    var view = new (Thorax.LayoutView.extend({
       el: $('#test-target')[0]
-    });
+    }));
     view.render();
     expect(view.el.parentNode).to.equal($('#test-target-container')[0]);
     $('#test-target-container').remove();
   });
 
   it('layouts with templates and {{layout}}', function() {
-    var layoutWithTemplate = new Thorax.LayoutView({
+    var layoutWithTemplate = new (Thorax.LayoutView.extend({
       template: '<div class="outer">{{layout}}</div>'
-    });
-    layoutWithTemplate.setView(new Thorax.View({
-      template: '<div class="inner"></div>'
     }));
+    layoutWithTemplate.setView(new (Thorax.View.extend({
+      template: '<div class="inner"></div>'
+    })));
     expect($(layoutWithTemplate.el).attr('data-layout-cid')).to.not.exist;
     expect(layoutWithTemplate.$('[data-layout-cid]').length).to.equal(1);
     expect(layoutWithTemplate.$('.outer').length).to.equal(1);
     expect(layoutWithTemplate.$('.inner').length).to.equal(1);
-    var layoutWithTemplateWithoutLayoutTag = new Thorax.LayoutView({
+    var layoutWithTemplateWithoutLayoutTag = new (Thorax.LayoutView.extend({
       template: '<div class="outer"></div>'
-    });
+    }));
     expect(function() {
-      layoutWithTemplateWithoutLayoutTag.setView(new Thorax.View({
+      layoutWithTemplateWithoutLayoutTag.setView(new (Thorax.View.extend({
         template: '<div class="inner"></div>'
-      }));
+      })));
     }).to['throw']();
   });
 

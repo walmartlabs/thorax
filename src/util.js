@@ -111,18 +111,25 @@ function getOptionsData(options) {
 }
 
 Thorax.Util = {
-  getViewInstance: function(name, attributes) {
-    attributes = attributes || {};
-    attributes['class'] && (attributes.className = attributes['class']);
-    attributes.tag && (attributes.tagName = attributes.tag);
+  getViewInstance: function(name, classAttrs) {
+    if (classAttrs) {
+      if (classAttrs['class']) {
+        classAttrs.className = classAttrs['class'];
+      }
+      if (classAttrs.tag) {
+        classAttrs.tagName = classAttrs.tag;
+      }
+    }
+    var klass;
     if (typeof name === 'string') {
-      var Klass = registryGet(Thorax, 'Views', name, false);
-      return Klass.cid ? _.extend(Klass, attributes || {}) : new Klass(attributes);
+      klass = registryGet(Thorax, 'Views', name, false);
     } else if (typeof name === 'function') {
-      return new name(attributes);
+      klass = name;
     } else {
+      // already initialized view
       return name;
     }
+    return new (classAttrs ? klass.extend(classAttrs) : klass);
   },
 
   getTemplate: function(file, ignoreErrors) {

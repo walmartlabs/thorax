@@ -33,19 +33,21 @@ var Thorax = this.Thorax = {
 };
 
 Thorax.View = Backbone.View.extend({
-  constructor: function() {
-    var response = Backbone.View.apply(this, arguments);
-    _.each(inheritVars, function(obj) {
-      if (obj.ctor) {
-        obj.ctor.call(this, response);
-      }
-    }, this);
+  constructor: function(context, options) {
+    var response = Backbone.View.call(this, options);
+    if (context) {
+      this.set(context);
+    }
     return response;
   },
   _configure: function(options) {
     var self = this;
 
-    this._objectOptionsByCid = {};
+    this._context = generateContextModel.call(this);
+
+    this._boundDataObjectKeysByCid = {};
+    this._boundDataObjectCidsByKey = {};
+    this._boundDataObjectOptionsByCid = {};
     this._boundDataObjectsByCid = {};
 
     // Setup object event tracking
@@ -67,9 +69,9 @@ Thorax.View = Backbone.View.extend({
     //compile a string if it is set as this.template
     if (typeof this.template === 'string') {
       this.template = Handlebars.compile(this.template, {data: true});
-    } else if (this.name && !this.template) {
+    } else if (this.name && needsTemplate.call(this)) {
       //fetch the template
-      this.template = Thorax.Util.getTemplate(this.name, true);
+      this.template = Thorax.Util.getTemplate(this.name, true) || defaultTemplate;
     }
 
     _.each(inheritVars, function(obj) {
@@ -118,15 +120,6 @@ Thorax.View = Backbone.View.extend({
 
   render: function(output) {
     if (typeof output === 'undefined' || (!_.isElement(output) && !Thorax.Util.is$(output) && !(output && output.el) && typeof output !== 'string' && typeof output !== 'function')) {
-      if (!this.template) {
-        //if the name was set after the view was created try one more time to fetch a template
-        if (this.name) {
-          this.template = Thorax.Util.getTemplate(this.name, true);
-        }
-        if (!this.template) {
-          throw new Error('View ' + (this.name || this.cid) + '.render() was called with no content and no template set on the view.');
-        }
-      }
       output = this.renderTemplate(this.template);
     } else if (typeof output === 'function') {
       output = this.renderTemplate(output);
@@ -138,16 +131,8 @@ Thorax.View = Backbone.View.extend({
     return output;
   },
 
-  context: function() {
-    if (this.model && this.model.attributes) {
-      return _.extend({}, this, (this.model && this.model.attributes) || {});
-    } else {
-      return this;
-    }
-  },
-
-  _getContext: function(attributes) {
-    return _.extend({}, getValue(this, 'context'), attributes || {});
+  _getContext: function() {
+    return this._context.attributes;
   },
 
   // Private variables in handlebars / options.data in template helpers
@@ -163,17 +148,14 @@ Thorax.View = Backbone.View.extend({
   },
 
   _getHelpers: function() {
-    if (this.helpers) {
-      return _.extend({}, Handlebars.helpers, this.helpers);
-    } else {
-      return Handlebars.helpers;
-    }
-    
+    return _.extend({}, Handlebars.helpers, this.helpers);
   },
 
-  renderTemplate: function(file, data, ignoreErrors) {
+  template: defaultTemplate,
+
+  renderTemplate: function(file, context, ignoreErrors) {
     var template;
-    data = this._getContext(data);
+    context = context || this._getContext();
     if (typeof file === 'function') {
       template = file;
     } else {
@@ -186,9 +168,9 @@ Thorax.View = Backbone.View.extend({
         throw new Error('Unable to find template ' + file);
       }
     } else {
-      return template(data, {
+      return template(context, {
         helpers: this._getHelpers(),
-        data: this._getData(data)
+        data: this._getData(context)
       });
     }
   },
@@ -211,7 +193,7 @@ Thorax.View = Backbone.View.extend({
       this.trigger('before:append');
       this.el.innerHTML = "";
       var element;
-      if (this.collection && this._objectOptionsByCid[this.collection.cid] && this._renderCount) {
+      if (this.collection && getDataObjectOptions.call(this, this.collection) && this._renderCount) {
         // preserveCollectionElement calls the callback after it has a reference
         // to the collection element, calls the callback, then re-appends the element
         preserveCollectionElement.call(this, function() {
@@ -252,18 +234,25 @@ Thorax.View.extend = function() {
 
 createRegistryWrapper(Thorax.View, Thorax.Views);
 
+function defaultTemplate() {
+  return '';
+}
+
+function needsTemplate() {
+  return !this.template || (this.template && this.template === defaultTemplate);
+}
+
 function bindHelpers() {
-  if (this.helpers) {
-    _.each(this.helpers, function(helper, name) {
-      var view = this;
-      this.helpers[name] = function() {
-        var args = _.toArray(arguments),
-            options = _.last(args);
-        options.context = this;
-        return helper.apply(view, args);
-      };
-    }, this);
-  }
+  this.helpers = this.helpers || {};
+  _.each(this.helpers, function(helper, name) {
+    var view = this;
+    this.helpers[name] = function() {
+      var args = _.toArray(arguments),
+          options = _.last(args);
+      options.context = this;
+      return helper.apply(view, args);
+    };
+  }, this);
 }
 
 //$(selector).view() helper

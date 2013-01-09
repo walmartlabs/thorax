@@ -1,23 +1,43 @@
 /*global viewPlaceholderAttributeName */
-var viewTemplateOverrides = {};
+var viewTemplateOverrides = {},
+    allowedHTMLAttributes = ['tag', 'class', 'id', 'className', 'tagName'];
+
 Handlebars.registerHelper('view', function(view, options) {
-  var declaringView = getOptionsData(options).view;
   if (arguments.length === 1) {
     options = view;
     view = Thorax.View;
   }
-  var instance = Thorax.Util.getViewInstance(view, options ? options.hash : {});
+  var declaringView = getOptionsData(options).view,
+      expandTokens = options.hash['expand-tokens'],
+      instanceOptions,
+      htmlAttributes;
+  delete options.hash['expand-tokens'];
+  _.each(options.hash, function(value, key) {
+    if (allowedHTMLAttributes.indexOf(key) === -1) {
+      if (!instanceOptions) {
+        instanceOptions = {};
+      }
+      instanceOptions[key] = value;
+    } else {
+      if (!htmlAttributes) {
+        htmlAttributes = {};
+      }
+      htmlAttributes[key] = value;
+    }
+  });
+  var instance = Thorax.Util.getViewInstance(view, htmlAttributes);
   if (!instance) {
     return '';
   }
-  var placeholderId = instance.cid,
-      expandTokens = options.hash['expand-tokens'];
+  var placeholderId = instance.cid;
   declaringView._addChild(instance);
-  delete options.hash['expand-tokens'];
   if (options.fn) {
     viewTemplateOverrides[placeholderId] = options.fn;
   }
-  var htmlAttributes = Thorax.Util.htmlAttributesFromOptions(options.hash);
+  if (instanceOptions) {
+    instance.set(instanceOptions);
+  }
+  htmlAttributes = htmlAttributes ? Thorax.Util.htmlAttributesFromOptions(htmlAttributes) : {};
   htmlAttributes[viewPlaceholderAttributeName] = placeholderId;
   return new Handlebars.SafeString(Thorax.Util.tag(htmlAttributes, undefined, expandTokens ? this : null));
 });
