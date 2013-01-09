@@ -96,6 +96,7 @@ Handlebars.registerViewHelper('collection', Thorax.CollectionHelperView, functio
     ensureDataObjectCid('collection', collection);
     view.setAsPrimaryCollectionHelper(collection);
   }
+  view.nonBlockingLoad = view.declaringView.nonBlockingLoad;
   collection && view.setCollection(collection);
 });
 
