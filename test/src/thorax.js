@@ -80,7 +80,7 @@ describe('core', function() {
   });
 
   it("template yield", function() {
-    Thorax.templates['yield-child'] = '<span>{{yield}}</span>';
+    Thorax.templates['yield-child'] = '<span>{{@yield}}</span>';
     Thorax.templates['yield-parent'] = '<p>{{#template "yield-child"}}content{{/template}}</p>';
     var view = new Thorax.View({
       name: 'yield-parent'
