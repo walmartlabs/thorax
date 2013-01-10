@@ -198,9 +198,8 @@ function bindToRoute(callback, failback) {
 
   function finalizer() {
     Backbone.history.off('route', routeHandler);
-    var args = Array.prototype.slice.call(arguments, 1);
     if (!routeChanged) {
-      callback.apply(this, args);
+      callback.apply(this, arguments);
     }
   }
 
