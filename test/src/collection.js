@@ -566,9 +566,13 @@ describe('collection', function() {
 
   it("item-context & empty-context", function() {
     var view = new Thorax.View({
+      key: 'value',
       collection: letterCollection,
       template: "{{#collection this.collection}}<span>{{test}}</span>{{/collection}}",
       itemContext: function() {
+        // not checking for `view` or cid as itemContext will be called immediately
+        // before `view` var is assigned 
+        expect(this.key).to.equal('value', 'itemContext called with correct context');
         return {
           test: 'testing'
         };

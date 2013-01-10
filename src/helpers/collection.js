@@ -47,6 +47,9 @@ Thorax.CollectionHelperView = Thorax.HelperView.extend({
     _.each(forwardableProperties, function(propertyName) {
       forwardMissingProperty.call(this, propertyName);
     }, this);
+    _.each(forwardableMethods, function(methodName) {
+      forwardMissingMethod.call(this, methodName);
+    }, this);
   }
 });
 
@@ -66,20 +69,33 @@ function forwardRenderEvent(eventName) {
   }
 }
 
-var forwardableProperties = [
+var forwardableMethods = [
   'itemContext',
-  'itemFilter',
+  'itemFilter'
+];
+
+function forwardMissingMethod(methodName) {
+  var parent = getParent(this);
+  if (parent[methodName]) {
+    this[methodName] = function() {
+      return this.parent[methodName].apply(this.parent, arguments);
+    };
+  }
+}
+
+var forwardableProperties = [
   'itemTemplate',
   'itemView',
   'emptyTemplate',
   'emptyView'
 ];
 
-function forwardMissingProperty(methodName, force) {
-  if (!this[methodName] || force) {
-    var method = getParent(this)[methodName];
-    if (method){
-      this[methodName] = method;
+function forwardMissingProperty(propertyName) {
+  var parent = getParent(this);
+  if (!this[propertyName]) {
+    var prop = parent[propertyName];
+    if (prop){
+      this[propertyName] = prop;
     }
   }
 }
