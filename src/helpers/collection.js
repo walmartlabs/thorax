@@ -1,4 +1,4 @@
-Thorax.CollectionHelperView = Thorax.View.extend({
+Thorax.CollectionHelperView = Thorax.HelperView.extend({
   // Forward render events to the parent
   events: {
     'rendered:item': forwardRenderEvent('rendered:item'),

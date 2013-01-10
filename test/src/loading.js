@@ -705,5 +705,21 @@ describe('loading', function() {
       expect(collectionLoadingTemplateView.$('li.empty-item').length).to.equal(0);
       expect(collectionLoadingTemplateView.$('li.loading-item').length).to.equal(0);
     });
+
+    it("nonBlockingLoad and ignoreErrors propagate to collection helper view", function() {
+      var view = new Thorax.View({
+        ignoreFetchError: false,
+        nonBlockingLoad: false,
+        myCollection: new Thorax.Collection([{key: 'value'}]),
+        template: '{{#collection myCollection}}{{/collection}}'
+      });
+      view.render();
+      var firstChildCid = _.keys(view.children)[0];
+      var collectionView = view.children[firstChildCid];
+      var collectionCid = collectionView.collection.cid;
+      var options = collectionView._objectOptionsByCid[collectionCid];
+      expect(options.ignoreErrors).to.equal(true);
+      expect(options.background).to.equal(true);
+    });
   });
 });
