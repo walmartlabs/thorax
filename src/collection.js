@@ -160,6 +160,9 @@ _.extend(Thorax.View.prototype, {
       view.ensureRendered();
       return view;
     } else {
+      if (!this.emptyTemplate) {
+        this.emptyTemplate = Thorax.Util.getTemplate(this.name + '-empty', true);
+      }
       return this.emptyTemplate && this.renderTemplate(this.emptyTemplate);
     }
   },
@@ -176,7 +179,7 @@ _.extend(Thorax.View.prototype, {
       return view;
     } else {
       if (!this.itemTemplate) {
-        throw new Error('collection in View: ' + (this.name || this.cid) + ' requires an item template.');
+        this.itemTemplate = Thorax.Util.getTemplate(this.name + '-item');
       }
       return this.renderTemplate(this.itemTemplate, this.itemContext ? this.itemContext(model, i) : model.attributes);
     }
