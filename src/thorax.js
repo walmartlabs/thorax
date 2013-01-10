@@ -209,16 +209,17 @@ Thorax.View = Backbone.View.extend({
     } else {
       // Event for IE element fixes
       this.trigger('before:append');
-      this.el.innerHTML = "";
       var element;
+      function replaceHTML() {
+        this.el.innerHTML = "";
+        element = this.$el.append(html);
+      }
       if (this.collection && this._objectOptionsByCid[this.collection.cid] && this._renderCount) {
         // preserveCollectionElement calls the callback after it has a reference
         // to the collection element, calls the callback, then re-appends the element
-        preserveCollectionElement.call(this, function() {
-          element = this.$el.append(html);
-        });
+        preserveCollectionElement.call(this, replaceHTML);
       } else {
-        element = this.$el.append(html);
+        replaceHTML.call(this);
       }
       this.trigger('append');
       return element;
