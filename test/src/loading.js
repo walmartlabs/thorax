@@ -708,8 +708,8 @@ describe('loading', function() {
 
     it("nonBlockingLoad and ignoreErrors propagate to collection helper view", function() {
       var view = new Thorax.View({
-        ignoreFetchError: false,
-        nonBlockingLoad: false,
+        ignoreFetchError: true,
+        nonBlockingLoad: true,
         myCollection: new Thorax.Collection([{key: 'value'}]),
         template: '{{#collection myCollection}}{{/collection}}'
       });
