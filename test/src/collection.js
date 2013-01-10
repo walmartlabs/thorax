@@ -76,7 +76,7 @@ describe('collection', function() {
       clonedLetterCollection.remove(clonedLetterCollection.models);
       expect(view.$('li')[0].innerHTML).to.equal('empty', msg + 'empty collection renders empty');
       clonedLetterCollection.add(new LetterModel({letter: 'a'}));
-      
+
       expect(view.$('li').length).to.equal(1 * indexMultiplier, msg + 'transition from empty to one item');
       expect(view.$('li')[0 * indexMultiplier].innerHTML).to.equal('a', msg + 'transition from empty to one item');
       expect(renderedCount).to.equal(1, msg + 'rendered event count');
@@ -91,7 +91,7 @@ describe('collection', function() {
 
       //freeze
       view.freeze();
-      
+
       clonedLetterCollection.remove(clonedLetterCollection.models);
       expect(renderedEmptyCount).to.equal(1, msg + 'rendered:empty event count');
       expect(view.$('li')[0 * indexMultiplier].innerHTML).to.equal('a', msg + 'transition from empty to one item after freeze');
@@ -254,7 +254,7 @@ describe('collection', function() {
     expect(view.$('li').eq(0).html()).to.equal('a');
     // reverse alphabetical sort
     collection.comparator = function(letter) {
-      return _.map(letter.get('letter').toLowerCase().split(''), function(l) { 
+      return _.map(letter.get('letter').toLowerCase().split(''), function(l) {
         return String.fromCharCode(-(l.charCodeAt(0)));
       });
     };
@@ -618,6 +618,16 @@ describe('collection', function() {
     expect(view.$('ul').hasClass('empty')).to.be['false'];
     view.collection.remove(model);
     expect(view.$('ul').hasClass('empty')).to.be['true'];
+  });
+
+  it('should render collection after setCollection is called', function() {
+    var view = new Thorax.View({
+      template: "{{collection}}"
+    });
+    view.render();
+    expect(view.$('div').length).to.equal(1);
+    view.setCollection(new Thorax.Collection());
+    expect(view.$('div').length).to.equal(1);
   });
 
   it("helper and local scope collision", function() {
