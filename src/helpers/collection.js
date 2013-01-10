@@ -36,6 +36,7 @@ Thorax.CollectionHelperView = Thorax.View.extend({
         this.itemTemplate = Thorax.Util.getTemplate(this.parent.name + '-item', true);
       }
     }
+    this.$el.attr(collectionElementAttributeName, 'true');
     return response;
   },
   // will be used by emptyView and emptyTemplate
