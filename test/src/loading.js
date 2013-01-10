@@ -721,5 +721,23 @@ describe('loading', function() {
       expect(options.ignoreErrors).to.equal(true);
       expect(options.background).to.equal(true);
     });
+
+    it("load callback should be called with collection and not array", function() {
+      var server = sinon.fakeServer.create();
+      var collection = new (Thorax.Collection.extend({
+        url: '/test'
+      }));
+      var spy = this.spy(function() {
+        expect(arguments[0]).to.equal(collection);
+      });
+      collection.load(spy);
+      server.requests[0].respond(
+        200,
+        { "Content-Type": "application/json" },
+        JSON.stringify([{ id: 1, text: "test"}])
+      );
+      expect(spy.callCount).to.equal(1);
+      server.restore();
+    });
   });
 });
