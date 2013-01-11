@@ -103,6 +103,14 @@ Handlebars.registerViewHelper('collection', Thorax.CollectionHelperView, functio
     ensureDataObjectCid('collection', collection);
     view.setAsPrimaryCollectionHelper(collection);
   }
+  // Mark primary collection element with collection element attribute so that
+  // it can be found by getCollectionElement method
+  // This will execute if both collection and the delcaring view's collection
+  // are null in cases where {{collection}} was declared in a view and
+  // setCollection has not yet been called
+  if (collection === view.declaringView.collection) {
+    view.$el.attr(collectionElementAttributeName, 'true');
+  }
   collection && view.setCollection(collection);
 });
 
