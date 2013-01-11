@@ -140,7 +140,7 @@ Thorax.View = Backbone.View.extend({
 
   context: function() {
     if (this.model && this.model.attributes) {
-      return _.clone(this.model.attributes);
+      return this.model.attributes;
     } else {
       return {};
     }
