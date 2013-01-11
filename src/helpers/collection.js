@@ -38,6 +38,9 @@ Thorax.CollectionHelperView = Thorax.HelperView.extend({
     }
     return response;
   },
+  itemContext: function() {
+    return this.parent.itemContext.apply(this.parent, arguments);
+  },
   // will be used by emptyView and emptyTemplate
   _getContext: function() {
     return getValue(this.parent, 'context');
@@ -47,9 +50,11 @@ Thorax.CollectionHelperView = Thorax.HelperView.extend({
     _.each(forwardableProperties, function(propertyName) {
       forwardMissingProperty.call(this, propertyName);
     }, this);
-    _.each(forwardableMethods, function(methodName) {
-      forwardMissingMethod.call(this, methodName);
-    }, this);
+    if (this.parent.itemFilter) {
+      this.itemFilter = function() {
+        return this.parent.itemFilter.apply(this.parent, arguments);
+      };
+    }
   }
 });
 
@@ -66,20 +71,6 @@ function forwardRenderEvent(eventName) {
     var args = _.toArray(arguments);
     args.unshift(eventName);
     this.parent.trigger.apply(this.parent, args);
-  }
-}
-
-var forwardableMethods = [
-  'itemContext',
-  'itemFilter'
-];
-
-function forwardMissingMethod(methodName) {
-  var parent = getParent(this);
-  if (parent[methodName]) {
-    this[methodName] = function() {
-      return this.parent[methodName].apply(this.parent, arguments);
-    };
   }
 }
 

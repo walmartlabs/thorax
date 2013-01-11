@@ -181,8 +181,11 @@ _.extend(Thorax.View.prototype, {
       if (!this.itemTemplate) {
         this.itemTemplate = Thorax.Util.getTemplate(this.name + '-item');
       }
-      return this.renderTemplate(this.itemTemplate, this.itemContext ? this.itemContext(model, i) : model.attributes);
+      return this.renderTemplate(this.itemTemplate, this.itemContext(model, i));
     }
+  },
+  itemContext: function(model, i) {
+    return model.attributes;
   },
   appendEmpty: function() {
     var $el = this.getCollectionElement();
