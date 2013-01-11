@@ -693,26 +693,26 @@ describe('collection', function() {
   });
 
   it('should preserve itself in the DOM after re-rendering collection', function() {
+    var spy = this.spy();
     var collection = new Thorax.Collection([{key: 'one'}, {key: 'two'}]);
     var view = new Thorax.View({
-      template: "{{#collection tag=\"ul\"}}<li>{{key}}</li>{{/collection}}"
-    });
-    view.setCollection(collection);
-    expect(view.$('ul').length).to.equal(1, 'with collection helper before render');
-    expect(view.$('li').length).to.equal(2, 'with collection helper before render');
-    view.render();
-    expect(view.$('ul').length).to.equal(1, 'with collection helper after render');
-    expect(view.$('li').length).to.equal(2, 'with collection helper after render');
-
-    view = new Thorax.View({
       template: "{{collection-element tag=\"ul\"}}",
-      itemTemplate: Handlebars.compile('<li>{{key}}</li>')
+      itemTemplate: Handlebars.compile('<li>{{key}}</li>'),
+      events: {
+        'rendered:item': spy
+      }
     });
     view.setCollection(collection);
-    expect(view.$('ul').length).to.equal(1, 'without collection helper before render');
-    expect(view.$('li').length).to.equal(2, 'without collection helper before render');
+    var oldUl = view.$('ul')[0];
+    expect(spy.callCount).to.equal(2, 'without colletion helper before render');
+    expect(view.$('ul').length).to.equal(1, 'without colletion helper before render');
+    expect(view.$('li').length).to.equal(2, 'without colletion helper before render');
+  
     view.render();
-    expect(view.$('ul').length).to.equal(1, 'without collection helper after render');
-    expect(view.$('li').length).to.equal(2, 'without collection helper after render');
+    expect(spy.callCount).to.equal(2, 'without colletion helper after render');
+    expect(oldUl).to.equal(view.$('ul')[0], 'without colletion helper after render');
+    expect(view.$('ul').length).to.equal(1, 'without colletion helper after render');
+    expect(view.$('li').length).to.equal(2, 'without colletion helper after render');
+    spy.callCount = 0;
   });
 });
