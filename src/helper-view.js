@@ -39,6 +39,10 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
       _helperName: name
     };
 
+    if (!viewOptions.template) {
+      viewOptions.template = Handlebars.VM.noop;
+    }
+
     options.hash.id && (viewOptions.id = options.hash.id);
     options.hash['class'] && (viewOptions.className = options.hash['class']);
     options.hash.className && (viewOptions.className = options.hash.className);
