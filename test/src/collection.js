@@ -628,6 +628,8 @@ describe('collection', function() {
     expect(view.$('div').length).to.equal(1);
     view.setCollection(new Thorax.Collection());
     expect(view.$('div').length).to.equal(1);
+    view.setCollection(new Thorax.Collection());
+    expect(view.$('div').length).to.equal(1);
   });
 
   it("helper and local scope collision", function() {

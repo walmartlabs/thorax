@@ -36,7 +36,6 @@ Thorax.CollectionHelperView = Thorax.View.extend({
         this.itemTemplate = Thorax.Util.getTemplate(this.parent.name + '-item', true);
       }
     }
-    this.$el.attr(collectionElementAttributeName, 'true');
     return response;
   },
   // will be used by emptyView and emptyTemplate
@@ -96,6 +95,12 @@ Handlebars.registerViewHelper('collection', Thorax.CollectionHelperView, functio
   if (collection && collection === view.declaringView.collection) {
     ensureDataObjectCid('collection', collection);
     view.setAsPrimaryCollectionHelper(collection);
+  }
+
+  // Mark primary collection element with collection element attribute so that
+  // it can be found by getCollectionElement method
+  if (collection === view.declaringView.collection) {
+    view.$el.attr(collectionElementAttributeName, 'true');
   }
   collection && view.setCollection(collection);
 });
