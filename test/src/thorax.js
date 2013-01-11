@@ -42,6 +42,32 @@ describe('core', function() {
     expect(view.html()).to.equal('abc');
   });
 
+  it("context can return undefined", function() {
+    var view = new Thorax.View({
+      key: 'value',
+      context: function() {
+        return;
+      },
+      template: '{{key}}'
+    });
+    view.render();
+    expect(view.html()).to.equal('value');
+  });
+
+  it("context function is additive", function() {
+    var view = new Thorax.View({
+      a: 'a',
+      context: function() {
+        return {
+          b: 'b'
+        };
+      },
+      template: '{{a}}{{b}}'
+    });
+    view.render();
+    expect(view.html()).to.equal('ab');
+  });
+
   it("can set view el", function() {
     $('body').append('<div id="test-target-container"><div id="test-target"></div></div>');
     var view = new Thorax.View({
