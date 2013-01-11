@@ -341,15 +341,11 @@ Thorax.View.prototype._modifyDataObjectOptions = function(dataObject, options) {
   return options;
 };
 
-_.each([Thorax.HelperView, Thorax.CollectionHelperView], function(klass) {
-  if (klass) {
-    klass.prototype._modifyDataObjectOptions = function(dataObject, options) {
-      options.ignoreErrors = this.parent.ignoreFetchError;
-      options.background = this.parent.nonBlockingLoad;
-      return options;
-    };
-  }
-});
+Thorax.HelperView.prototype._modifyDataObjectOptions = function(dataObject, options) {
+  options.ignoreErrors = this.parent.ignoreFetchError;
+  options.background = this.parent.nonBlockingLoad;
+  return options;
+};
 
 inheritVars.collection.loading = function() {
   var loadingView = this.loadingView,
