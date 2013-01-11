@@ -117,6 +117,13 @@ Thorax.View = Backbone.View.extend({
   },
 
   render: function(output) {
+    // Destroy old HelperViews
+    _.each(this.children, function(child, cid) {
+      if (child._helperName) {
+        child.destroy();
+        this._removeChild(child);
+      }
+    }, this);
     if (typeof output === 'undefined' || (!_.isElement(output) && !Thorax.Util.is$(output) && !(output && output.el) && typeof output !== 'string' && typeof output !== 'function')) {
       if (!this.template) {
         //if the name was set after the view was created try one more time to fetch a template
