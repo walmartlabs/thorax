@@ -80,8 +80,9 @@ describe('core', function() {
       }),
       template: '{{modifyObject a}}{{modifyObject b}}'
     });
-    expect(view.a.mutated).to.be.undefined;
-    expect(view.model.attributes.b.mutated).to.be.undefined;
+    expect(view.a.mutated).to.be['undefined'];
+    expect(view.model.attributes.b.mutated).to.be['undefined'];
+    expect(view.html()).to.equal('ab');
   });
 
   it("can set view el", function() {
