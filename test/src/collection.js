@@ -632,6 +632,18 @@ describe('collection', function() {
     expect(view.$('div').length).to.equal(1);
   });
 
+  it('should preserve itself in the DOM after re-rendering collection', function() {
+    var parent = $('<div></div>');
+    var view = new Thorax.View({
+      template: "{{collection}}"
+    });
+    view.setCollection(new Thorax.Collection());
+    parent.append(view.$el);
+    expect(parent.children('div').length).to.equal(1);
+    view.render();
+    expect(parent.children('div').length).to.equal(1);
+  });
+
   it("helper and local scope collision", function() {
     var child = new Thorax.View({
       collection: letterCollection,
