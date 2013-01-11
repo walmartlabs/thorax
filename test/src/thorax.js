@@ -68,6 +68,22 @@ describe('core', function() {
     expect(view.html()).to.equal('ab');
   });
 
+  it("template helpers will not mutate view or model attributes", function() {
+    Handlebars.registerHelper('modifyObject', function(obj) {
+      obj.mutated = true;
+      return obj;
+    });
+    var view = new Thorax.View({
+      a: 'a',
+      model: new Thorax.Model({
+        b: 'b'
+      }),
+      template: '{{modifyObject a}}{{modifyObject b}}'
+    });
+    expect(view.a.mutated).to.be.undefined;
+    expect(view.model.attributes.b.mutated).to.be.undefined;
+  });
+
   it("can set view el", function() {
     $('body').append('<div id="test-target-container"><div id="test-target"></div></div>');
     var view = new Thorax.View({
