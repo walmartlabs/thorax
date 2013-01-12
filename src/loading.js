@@ -19,10 +19,10 @@ Thorax.loadHandler = function(start, end, context) {
       clearTimeout(loadInfo.timeout);
 
       loadInfo.loadingTimeout = loadInfo.loadingTimeout ?
-        Math.max(loadInfo.loadingTimeout - (Date.now() - loadInfo.startTime), 0) :
+        Math.max(loadInfo.loadingTimeout - (new Date().getTime() - loadInfo.startTime), 0) :
         loadingTimeout * 1000;
 
-      loadInfo.startTime = Date.now();
+      loadInfo.startTime = new Date().getTime();
       loadInfo.timeout = setTimeout(function() {
           try {
             loadInfo.run = true;
