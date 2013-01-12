@@ -715,4 +715,28 @@ describe('collection', function() {
     expect(view.$('li').length).to.equal(2, 'without colletion helper after render');
     spy.callCount = 0;
   });
+
+  it('collection loaded via load() will be rendered', function() {
+    var spy = this.spy();
+    var server = sinon.fakeServer.create();
+    var collection = new (Thorax.Collection.extend({
+      url: '/test'
+    }));
+    var view = new Thorax.View({
+      collection: collection,
+      events: {
+        'rendered:collection': spy
+      },
+      template: '{{collection-element}}',
+      itemTemplate: Handlebars.compile('<span>{{text}}</span>')
+    });
+    server.requests[0].respond(
+      200,
+      { "Content-Type": "application/json" },
+      JSON.stringify([{id: 1, text: "test"}])
+    );
+    expect(spy.callCount).to.equal(1);
+    expect(view.$('span').html()).to.equal('test');
+    server.restore();
+  });
 });
