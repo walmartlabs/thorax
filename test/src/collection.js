@@ -720,15 +720,12 @@ describe('collection', function() {
     var parent = $('<div></div>');
     var view = new Thorax.View({
       template: '{{collection}}',
-      className: 'test'
     });
     view.setCollection(new Thorax.Collection());
     parent.append(view.$el);
-    expect(parent.children('div').length).to.equal(1);
-    expect(parent.children('div').hasClass('test')).to.be.true;
+    var oldEl = parent.children('div')[0];
     view.render();
-    expect(parent.children('div').length).to.equal(1);
-    expect(parent.children('div').hasClass('test')).to.be.true;
+    expect(parent.children('div')[0]).to.equal(oldEl);
   });
 
 });
