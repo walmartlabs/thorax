@@ -164,7 +164,7 @@ Thorax.View = Backbone.View.extend({
     } else {
       return Handlebars.helpers;
     }
-    
+
   },
 
   renderTemplate: function(file, context, ignoreErrors) {
@@ -200,22 +200,27 @@ Thorax.View = Backbone.View.extend({
   },
 
   html: function(html) {
+
+    function replaceHTML(view) {
+      view.el.innerHTML = "";
+      return view.$el.append(html);
+    }
+
     if (typeof html === 'undefined') {
       return this.el.innerHTML;
     } else {
       // Event for IE element fixes
       this.trigger('before:append');
       var element;
-      function replaceHTML() {
-        this.el.innerHTML = "";
-        element = this.$el.append(html);
-      }
       if (this.collection && this._objectOptionsByCid[this.collection.cid] && this._renderCount) {
-        // preserveCollectionElement calls the callback after it has a reference
-        // to the collection element, calls the callback, then re-appends the element
-        preserveCollectionElement.call(this, replaceHTML);
+        // preserve collection element if it was not created with {{collection}} helper
+        var oldCollectionElement = this.getCollectionElement();
+        element = replaceHTML(this);
+        if (!oldCollectionElement.attr('data-view-cid')) {
+          this.getCollectionElement().replaceWith(oldCollectionElement);
+        }
       } else {
-        replaceHTML.call(this);
+        element = replaceHTML(this);
       }
       this.trigger('append');
       return element;
