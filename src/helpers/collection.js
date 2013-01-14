@@ -41,10 +41,6 @@ Thorax.CollectionHelperView = Thorax.HelperView.extend({
   itemContext: function() {
     return this.parent.itemContext.apply(this.parent, arguments);
   },
-  // will be used by emptyView and emptyTemplate
-  _getContext: function() {
-    return getValue(this.parent, 'context');
-  },
   setAsPrimaryCollectionHelper: function(collection) {
     this.$el.attr(primaryCollectionAttributeName, collection.cid);
     _.each(forwardableProperties, function(propertyName) {
