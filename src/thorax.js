@@ -139,15 +139,11 @@ Thorax.View = Backbone.View.extend({
   },
 
   context: function() {
-    if (this.model && this.model.attributes) {
-      return _.extend({}, this, (this.model && this.model.attributes) || {});
-    } else {
-      return this;
-    }
+    return (this.model && this.model.attributes) || {};
   },
 
   _getContext: function() {
-    return getValue(this, 'context');
+    return _.extend({}, this, getValue(this, 'context') || {});
   },
 
   // Private variables in handlebars / options.data in template helpers
@@ -171,9 +167,9 @@ Thorax.View = Backbone.View.extend({
     
   },
 
-  renderTemplate: function(file, data, ignoreErrors) {
+  renderTemplate: function(file, context, ignoreErrors) {
     var template;
-    data = data || this._getContext();
+    context = context || this._getContext();
     if (typeof file === 'function') {
       template = file;
     } else {
@@ -186,9 +182,9 @@ Thorax.View = Backbone.View.extend({
         throw new Error('Unable to find template ' + file);
       }
     } else {
-      return template(data, {
+      return template(context, {
         helpers: this._getHelpers(),
-        data: this._getData(data)
+        data: this._getData(context)
       });
     }
   },
