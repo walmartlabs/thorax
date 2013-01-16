@@ -151,4 +151,33 @@ describe('view helper', function() {
     expect(parent.$('div.parent').view()).to.equal(parent);
     expect(parent.$('div.child').view()).to.equal(child);
   });
+
+  it("multiple views initialized by name will not be re-rendered", function() {
+    var spy = this.spy(function() {
+      return Thorax.View.prototype.initialize.apply(this, arguments);
+    });
+    Thorax.View.extend({
+      name: 'named-view',
+      template: 'inner',
+      initialize: spy
+    });
+    var view = new Thorax.View({
+      template: '{{view "named-view"}}{{view "named-view"}}'
+    });
+    view.render();
+    var firstCids = _.keys(view.children);
+    expect(spy.callCount).to.equal(2);
+    expect(view.$('div').eq(0).html()).to.equal('inner');
+    expect(view.$('div').eq(1).html()).to.equal('inner');
+
+    view.render();
+    expect(spy.callCount).to.equal(2);
+    expect(view.$('div').eq(0).html()).to.equal('inner');
+    expect(view.$('div').eq(1).html()).to.equal('inner');
+    
+    var secondCids = _.keys(view.children);
+    expect(firstCids.length).to.equal(secondCids.length);
+    expect(firstCids[0]).to.equal(secondCids[0]);
+    expect(firstCids[1]).to.equal(secondCids[1]);
+  });
 });
