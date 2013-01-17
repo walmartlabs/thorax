@@ -42,7 +42,8 @@ createRegistryWrapper(Thorax.Collection, Thorax.Collections);
 
 dataObject('collection', {
   set: 'setCollection',
-  setCallback: afterSetCollection,
+  beforeBind: beforeSetCollection,
+  afterBind: afterSetCollection,
   defaultOptions: {
     render: true,
     fetch: true,
@@ -246,8 +247,36 @@ function onCollectionReset(collection) {
   }
 }
 
+function addCollectedEvent() {
+  this._collectedEvents.push(_.toArray(arguments));
+}
+
+function beforeSetCollection(collection) {
+  // if the collection has events triggered on it that 
+  // this._collectionRenderingEvents should respond to
+  // capture the events then trigger them after the
+  // collection has bound.
+  if (!collectionHelperPresentForPrimaryCollection.call(this) && collection) {
+    collection._collectedEvents = [];
+    collection.on('all', addCollectedEvent);
+  }
+}
+
 function afterSetCollection(collection) {
   if (!collectionHelperPresentForPrimaryCollection.call(this) && collection) {
+    if (collection._collectedEvents) {
+      _.each(collection._collectedEvents, function(event) {
+        var collectedEventName = event[0],
+            args = event.slice(1);
+        _.each(this._collectionRenderingEvents, function(callback, eventName) {
+          if (eventName === collectedEventName) {
+            getEventCallback(callback, this).apply(this, args);
+          }
+        }, this);
+      }, this);
+      delete collection._collectedEvents;
+      collection.off('all', addCollectedEvent);
+    }
     _.each(this._collectionRenderingEvents, function(callback, eventName) {
       // getEventCallback will resolve if it is a string or a method
       // and return a method

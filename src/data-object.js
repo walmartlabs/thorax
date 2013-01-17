@@ -27,7 +27,7 @@ function dataObject(type, spec) {
     if (old) {
       this.unbindDataObject(old);
     }
-
+    spec.beforeBind && spec.beforeBind.call(this, dataObject, options);
     if (dataObject) {
       this[type] = dataObject;
 
@@ -45,7 +45,7 @@ function dataObject(type, spec) {
       }
       $el.removeAttr(spec.cidAttrName);
     }
-    spec.setCallback && spec.setCallback.call(this, dataObject, options);
+    spec.afterBind && spec.afterBind.call(this, dataObject, options);
     return this;
   }
 
