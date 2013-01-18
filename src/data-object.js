@@ -97,12 +97,13 @@ _.extend(Thorax.View.prototype, {
 });
 
 function getDataObjectType(dataObject) {
-  if (isModel(dataObject)) {
-    return 'model';
-  } else if (isCollection(dataObject)) {
+  if (isCollection(dataObject)) {
     return 'collection';
   } else {
-    throw new Error('Unknown data object bound: ' + (typeof dataObject));
+    // no check here so that model-like objects
+    // may be treated as models if they implement
+    // the needed APIs 
+    return 'model';
   }
 }
 
