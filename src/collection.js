@@ -299,11 +299,14 @@ function handleChangeFromNotEmptyToEmpty() {
 
 //$(selector).collection() helper
 $.fn.collection = function(view) {
+  if (view && view.collection) {
+    return view.collection;
+  }
   var $this = $(this),
       collectionElement = $this.closest('[' + collectionCidAttributeName + ']'),
       collectionCid = collectionElement && collectionElement.attr(collectionCidAttributeName);
   if (collectionCid) {
-    view = view || $this.view();
+    view = $this.view();
     if (view) {
       return view.collection;
     }
