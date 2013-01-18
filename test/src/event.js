@@ -167,7 +167,7 @@ describe('event', function() {
       }
     });
     view.myModel = new Thorax.Model({key: 'value'});
-    view.bindDataObject(view.myModel, {render: false});
+    view.bindDataObject('model', view.myModel, {render: false});
     expect(spy.callCount).to.equal(0);
     view.myModel.trigger('test');
     expect(spy.callCount).to.equal(1);
