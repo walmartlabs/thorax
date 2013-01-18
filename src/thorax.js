@@ -139,15 +139,11 @@ Thorax.View = Backbone.View.extend({
   },
 
   context: function() {
-    if (this.model && this.model.attributes) {
-      return _.extend({}, this, (this.model && this.model.attributes) || {});
-    } else {
-      return this;
-    }
+    return (this.model && this.model.attributes) || {};
   },
 
   _getContext: function() {
-    return getValue(this, 'context');
+    return _.extend({}, this, getValue(this, 'context') || {});
   },
 
   // Private variables in handlebars / options.data in template helpers
@@ -168,12 +164,12 @@ Thorax.View = Backbone.View.extend({
     } else {
       return Handlebars.helpers;
     }
-    
+
   },
 
-  renderTemplate: function(file, data, ignoreErrors) {
+  renderTemplate: function(file, context, ignoreErrors) {
     var template;
-    data = data || this._getContext();
+    context = context || this._getContext();
     if (typeof file === 'function') {
       template = file;
     } else {
@@ -186,9 +182,9 @@ Thorax.View = Backbone.View.extend({
         throw new Error('Unable to find template ' + file);
       }
     } else {
-      return template(data, {
+      return template(context, {
         helpers: this._getHelpers(),
-        data: this._getData(data)
+        data: this._getData(context)
       });
     }
   },
@@ -204,22 +200,27 @@ Thorax.View = Backbone.View.extend({
   },
 
   html: function(html) {
+
+    function replaceHTML(view) {
+      view.el.innerHTML = "";
+      return view.$el.append(html);
+    }
+
     if (typeof html === 'undefined') {
       return this.el.innerHTML;
     } else {
       // Event for IE element fixes
       this.trigger('before:append');
       var element;
-      function replaceHTML() {
-        this.el.innerHTML = "";
-        element = this.$el.append(html);
-      }
       if (this.collection && this._objectOptionsByCid[this.collection.cid] && this._renderCount) {
-        // preserveCollectionElement calls the callback after it has a reference
-        // to the collection element, calls the callback, then re-appends the element
-        preserveCollectionElement.call(this, replaceHTML);
+        // preserve collection element if it was not created with {{collection}} helper
+        var oldCollectionElement = this.getCollectionElement();
+        element = replaceHTML(this);
+        if (!oldCollectionElement.attr('data-view-cid')) {
+          this.getCollectionElement().replaceWith(oldCollectionElement);
+        }
       } else {
-        replaceHTML.call(this);
+        element = replaceHTML(this);
       }
       this.trigger('append');
       return element;

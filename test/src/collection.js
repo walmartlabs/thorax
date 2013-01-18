@@ -76,7 +76,7 @@ describe('collection', function() {
       clonedLetterCollection.remove(clonedLetterCollection.models);
       expect(view.$('li')[0].innerHTML).to.equal('empty', msg + 'empty collection renders empty');
       clonedLetterCollection.add(new LetterModel({letter: 'a'}));
-      
+
       expect(view.$('li').length).to.equal(1 * indexMultiplier, msg + 'transition from empty to one item');
       expect(view.$('li')[0 * indexMultiplier].innerHTML).to.equal('a', msg + 'transition from empty to one item');
       expect(renderedCount).to.equal(1, msg + 'rendered event count');
@@ -91,7 +91,7 @@ describe('collection', function() {
 
       //freeze
       view.freeze();
-      
+
       clonedLetterCollection.remove(clonedLetterCollection.models);
       expect(renderedEmptyCount).to.equal(1, msg + 'rendered:empty event count');
       expect(view.$('li')[0 * indexMultiplier].innerHTML).to.equal('a', msg + 'transition from empty to one item after freeze');
@@ -254,7 +254,7 @@ describe('collection', function() {
     expect(view.$('li').eq(0).html()).to.equal('a');
     // reverse alphabetical sort
     collection.comparator = function(letter) {
-      return _.map(letter.get('letter').toLowerCase().split(''), function(l) { 
+      return _.map(letter.get('letter').toLowerCase().split(''), function(l) {
         return String.fromCharCode(-(l.charCodeAt(0)));
       });
     };
@@ -571,7 +571,7 @@ describe('collection', function() {
       template: "{{#collection this.collection}}<span>{{test}}</span>{{/collection}}",
       itemContext: function() {
         // not checking for `view` or cid as itemContext will be called immediately
-        // before `view` var is assigned 
+        // before `view` var is assigned
         expect(this.key).to.equal('value', 'itemContext called with correct context');
         return {
           test: 'testing'
@@ -707,13 +707,24 @@ describe('collection', function() {
     expect(spy.callCount).to.equal(2, 'without colletion helper before render');
     expect(view.$('ul').length).to.equal(1, 'without colletion helper before render');
     expect(view.$('li').length).to.equal(2, 'without colletion helper before render');
-  
+
     view.render();
     expect(spy.callCount).to.equal(2, 'without colletion helper after render');
     expect(oldUl).to.equal(view.$('ul')[0], 'without colletion helper after render');
     expect(view.$('ul').length).to.equal(1, 'without colletion helper after render');
     expect(view.$('li').length).to.equal(2, 'without colletion helper after render');
     spy.callCount = 0;
+
+    // Alternate way of testing
+    var parent = $('<div></div>');
+    view = new Thorax.View({
+      template: '{{collection}}',
+    });
+    view.setCollection(new Thorax.Collection());
+    parent.append(view.$el);
+    var oldEl = parent.children('div')[0];
+    view.render();
+    expect(parent.children('div')[0]).to.equal(oldEl);
   });
 
   it('collection loaded via load() will be rendered', function() {
@@ -739,4 +750,5 @@ describe('collection', function() {
     expect(view.$('span').html()).to.equal('test');
     server.restore();
   });
+
 });

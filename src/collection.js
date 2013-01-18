@@ -260,12 +260,6 @@ function collectionHelperPresentForPrimaryCollection() {
   return this.collection && this.$('[' + primaryCollectionAttributeName + '="' + this.collection.cid + '"]').length;
 }
 
-function preserveCollectionElement(callback) {
-  var oldCollectionElement = this.getCollectionElement();
-  callback.call(this);
-  this.getCollectionElement().replaceWith(oldCollectionElement);
-}
-
 function applyVisibilityFilter() {
   if (this.itemFilter) {
     this.collection.forEach(function(model) {
