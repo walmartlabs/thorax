@@ -103,4 +103,55 @@ describe('model', function() {
     expect(callCounter.test1).to.equal(1);
     expect(callCounter.test2).to.equal(1);
   });
+
+  // Not really a great idea, but support allow it to work
+  // with some hacks to render if someone really wants it
+  it("set collection as model", function() {
+    // example that will need to fetch / load
+    var server = sinon.fakeServer.create();
+    var spy = this.spy(function() {
+      this.render();
+    });
+    var collection = new (Thorax.Collection.extend({
+      url: '/test'
+    }));
+    collection.key = 'value';
+    var view = new Thorax.View({
+      events: {
+        model: {
+          reset: spy
+        }
+      },
+      template: '{{key}}',
+      context: function() {
+        return this.model;
+      }
+    });
+    view.setModel(collection);
+    expect(view.html()).to.equal('');
+    expect(spy.callCount).to.equal(0);
+    server.requests[0].respond(
+      200,
+      { "Content-Type": "application/json" },
+      JSON.stringify([{id: 1, text: "test"}])
+    );
+    expect(view.html()).to.equal('value');
+    expect(spy.callCount).to.equal(1);
+    server.restore();
+
+    // local model will not load()
+    spy.callCount = 0;
+    collection = new (Thorax.Collection.extend({
+      url: '/test'
+    }))([{id: 1, text: 'test'}]);
+    collection.key = 'value';
+    view = new Thorax.View({
+      template: '{{key}}',
+      context: function() {
+        return this.model;
+      }
+    });
+    view.setModel(collection);
+    expect(view.html()).to.equal('value');
+  });
 });
