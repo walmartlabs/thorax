@@ -177,20 +177,6 @@ describe('core', function() {
     expect(outer.$('.c').html()).to.equal('value');
   });
 
-  it("nestable scope of view helper", function() {
-    Handlebars.registerViewHelper('test', function(viewHelper) {
-      expect(view.cid).to.equal(viewHelper.parent.cid);
-    });
-    var view = new Thorax.View({
-      name: 'outer',
-      template: '{{#test}}{{#test}}{{#test}}{{key}}{{/test}}{{/test}}{{/test}}',
-      key: 'value'
-    });
-    view.render();
-    expect(view.$('[data-view-helper]')[2].innerHTML).to.equal('value');
-    delete Handlebars.helpers.test;
-  });
-
   it("onException", function() {
     var oldOnException = Thorax.onException;
     var view = new Thorax.View({
