@@ -651,7 +651,6 @@ describe('loading', function() {
         template: '{{#loading}}<p>loading</p>{{else}}<p>not loading</p>{{/loading}}',
         model: new Thorax.Model()
       });
-      loadingViewWithModel.render();
       expect(loadingViewWithModel.$('p').html()).to.equal('not loading');
       loadingViewWithModel.model.loadStart();
       expect(loadingViewWithModel.$('p').html()).to.equal('not loading');
