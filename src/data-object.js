@@ -45,6 +45,7 @@ function dataObject(type, spec) {
       }
       $el.removeAttr(spec.cidAttrName);
     }
+    this.trigger('change:data-object', type, dataObject, old);
     spec.setCallback && spec.setCallback.call(this, dataObject, options);
     return this;
   }
