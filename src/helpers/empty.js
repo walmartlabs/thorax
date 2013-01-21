@@ -24,7 +24,7 @@ Handlebars.registerViewHelper('empty', function(collection, view) {
   var render = _.bind(view.render, view);
 
   if (noArgument) {
-    view.parent.on('change:data-object', function(type, object, old) {
+    view.listenTo(view.parent, 'change:data-object', function(type, object, old) {
       if (type === 'model') {
         if (old) {
           view.stopListening(old);
