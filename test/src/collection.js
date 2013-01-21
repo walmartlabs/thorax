@@ -161,42 +161,50 @@ describe('collection', function() {
     runCollectionTests(viewWithCollectionHelperWithEmptyViewAndBlock, 1, 'block helper with empty view and block');
   });
 
-  it("multiple collections", function() {
-    var view = new Thorax.View({
-      template: '{{collection a tag="ul" item-template="letter-item"}}{{collection b tag="ul" item-template="letter-item"}}',
-      a: new Thorax.Collection(letterCollection.models),
-      b: new Thorax.Collection(letterCollection.models)
+  describe('multiple collections', function() {
+    it('should render separate collections', function() {
+      var view = new Thorax.View({
+        template: '{{collection a tag="ul" item-template="letter-item"}}{{collection b tag="ul" item-template="letter-item"}}',
+        a: new Thorax.Collection(letterCollection.models),
+        b: new Thorax.Collection(letterCollection.models)
+      });
+      view.render();
+      expect(view.$('li').length).to.equal(letterCollection.models.length * 2);
     });
-    view.render();
-    expect(view.$('li').length).to.equal(letterCollection.models.length * 2);
 
-    view = new Thorax.View({
-      template: '{{collection a tag="ul" item-template="letter-item"}}{{collection a tag="ul" item-template="letter-item"}}{{collection b tag="ul" item-template="letter-item"}}{{collection b tag="ul" item-template="letter-item"}}',
-      a: new Thorax.Collection(letterCollection.models),
-      b: new Thorax.Collection(letterCollection.models)
+    it('should render the same collection multiple times', function() {
+      var view = new Thorax.View({
+        template: '{{collection a tag="ul" item-template="letter-item"}}{{collection a tag="ul" item-template="letter-item"}}{{collection b tag="ul" item-template="letter-item"}}{{collection b tag="ul" item-template="letter-item"}}',
+        a: new Thorax.Collection(letterCollection.models),
+        b: new Thorax.Collection(letterCollection.models)
+      });
+      view.render();
+      expect(view.$('li').length).to.equal(letterCollection.models.length * 4);
     });
-    view.render();
-    expect(view.$('li').length).to.equal(letterCollection.models.length * 4);
 
-    Thorax.View.extend({
-      name: 'sub-view-with-same-collection',
-      template: '{{collection a tag="ul" item-template="letter-item"}}'
+    it('should render subview collections', function() {
+      Thorax.View.extend({
+        name: 'sub-view-with-same-collection',
+        template: '{{collection a tag="ul" item-template="letter-item"}}'
+      });
+      var view = new Thorax.View({
+        a: new Thorax.Collection(letterCollection.models),
+        b: new Thorax.Collection(letterCollection.models),
+        template: '{{collection a tag="ul" item-template="letter-item"}}{{view "sub-view-with-same-collection" a=a}}'
+      });
+      view.render();
+      expect(view.$('li').length).to.equal(letterCollection.models.length * 2);
     });
-    var view = new Thorax.View({
-      a: new Thorax.Collection(letterCollection.models),
-      b: new Thorax.Collection(letterCollection.models),
-      template: '{{collection a tag="ul" item-template="letter-item"}}{{view "sub-view-with-same-collection" a=a}}'
-    });
-    view.render();
-    expect(view.$('li').length).to.equal(letterCollection.models.length * 2);
 
-    var view = new Thorax.View({
-      template: '{{#collection a tag="ul"}}<li>{{letter}}</li>{{/collection}}{{#collection a tag="div"}}<span>{{letter}}</span>{{/collection}}',
-      a: new Thorax.Collection(letterCollection.models)
+    it('should render with proper item template', function() {
+      var view = new Thorax.View({
+        template: '{{#collection a tag="ul"}}<li>{{letter}}</li>{{/collection}}{{#collection a tag="div"}}<span>{{letter}}</span>{{/collection}}',
+        a: new Thorax.Collection(letterCollection.models)
+      });
+      view.render();
+      expect(view.$('li').length).to.equal(letterCollection.models.length);
+      expect(view.$('span').length).to.equal(letterCollection.models.length);
     });
-    view.render();
-    expect(view.$('li').length).to.equal(letterCollection.models.length);
-    expect(view.$('span').length).to.equal(letterCollection.models.length);
   });
 
   it("inverse block in collection helper", function() {
