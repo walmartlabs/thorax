@@ -646,4 +646,29 @@ describe('collection', function() {
     server.restore();
   });
 
+  it("multiple collection bindings do not cause multiple loads", function() {
+    var spy = this.spy(function() {
+      return Thorax.Collection.prototype.fetch.apply(this, arguments);
+    });
+    var server = sinon.fakeServer.create();
+    var collection = new (Thorax.Collection.extend({
+      url: '/test'
+    }));
+    collection.fetch = spy;
+    var view = new Thorax.View({
+      template: '{{#collection myCollection}}<span>{{text}}</span>{{/collection}}',
+      myCollection: collection
+    });
+    view.bindDataObject('collection', collection);
+    view.render();
+    server.requests[0].respond(
+      200,
+      { "Content-Type": "application/json" },
+      JSON.stringify([{id: 1, text: "test"}])
+    );
+    expect(view.$('span').html()).to.equal('test');
+    expect(spy.callCount).to.equal(1);
+    server.restore();
+  });
+
 });
