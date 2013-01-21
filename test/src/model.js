@@ -21,6 +21,13 @@ describe('model', function() {
     expect(e.shouldFetch({fetch: false})).to.be['false'];
   });
 
+  it("allow model url to be a string", function() {
+    var model = new (Thorax.Model.extend({
+      url: '/test'
+    }));
+    expect(model.shouldFetch({fetch: true})).to.be['true'];
+  });
+
   it("model view binding", function() {
     var modelA = new Thorax.Model({letter: 'a'});
     var modelB = new Thorax.Model({letter: 'b'});

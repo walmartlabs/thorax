@@ -23,7 +23,7 @@ Thorax.Model = Backbone.Model.extend({
     // or has `collection` and `collection` has no `url`
     var url;
     try {
-      url = this.url();
+      url = getValue(this, 'url');
     } catch(e) {
       url = false;
     }
