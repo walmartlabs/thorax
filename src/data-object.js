@@ -95,14 +95,6 @@ _.extend(Thorax.View.prototype, {
   }
 });
 
-function isModel(model) {
-  return model && model.attributes && model.set;
-}
-
-function isCollection(collection) {
-  return collection && collection.indexOf && collection.models;
-}
-
 function bindEvents(type, target, source) {
   var context = this;
   walkInheritTree(source, '_' + type + 'Events', true, function(event) {
