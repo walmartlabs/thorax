@@ -31,6 +31,7 @@
         {"src": "src/collection.js"},
         {"src": "src/form.js"},
         {"src": "src/layout.js"},
+        {"src": "src/router.js"},
         {"src": "src/helpers/collection.js"},
         {"src": "src/helpers/empty.js"},
         {"src": "src/helpers/template.js"},
