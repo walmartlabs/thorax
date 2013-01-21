@@ -235,11 +235,28 @@ describe('loading', function() {
 
     it('pair in less than timeout does nothing', function() {
       this.object.loadStart();
+      this.clock.tick(10);
       this.object.loadEnd();
       this.clock.tick(1000);
 
       expect(this.loads).to.eql([]);
       expect(this.ends).to.eql([]);
+    });
+
+    it('triggers start only after timeout', function() {
+      this.object.loadStart(undefined, true);
+      this.clock.tick(150);
+
+      expect(this.loads.length).to.equal(0);
+
+      this.object.loadStart();
+      this.clock.tick(150);
+
+      expect(this.loads.length).to.equal(0);
+
+      this.clock.tick(50);
+
+      expect(this.loads.length).to.equal(1);
     });
 
     it('pair with timeout registers', function() {

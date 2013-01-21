@@ -16,7 +16,16 @@ Thorax.loadHandler = function(start, end, context) {
     var loadInfo = self._loadInfo[loadCounter];
 
     function startLoadTimeout() {
-      clearTimeout(loadInfo.timeout);
+
+      // If the timeout has been set already but has not triggered yet do nothing
+      // Otherwise set a new timeout (either initial or for going from background to
+      // non-background loading)
+      if (loadInfo.timeout && !loadInfo.run) {
+        return;
+      }
+
+      var loadingTimeout = self._loadingTimeoutDuration !== undefined ?
+        self._loadingTimeoutDuration : Thorax.View.prototype._loadingTimeoutDuration;
       loadInfo.timeout = setTimeout(function() {
           try {
             loadInfo.run = true;
@@ -24,14 +33,10 @@ Thorax.loadHandler = function(start, end, context) {
           } catch (e) {
             Thorax.onException('loadStart', e);
           }
-        },
-        loadingTimeout * 1000);
+        }, loadingTimeout * 1000);
     }
 
     if (!loadInfo) {
-      var loadingTimeout = self._loadingTimeoutDuration !== undefined ?
-        self._loadingTimeoutDuration : Thorax.View.prototype._loadingTimeoutDuration;
-
       loadInfo = self._loadInfo[loadCounter] = _.extend({
         events: [],
         timeout: 0,
