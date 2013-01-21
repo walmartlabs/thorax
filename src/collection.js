@@ -184,7 +184,7 @@ _.extend(Thorax.View.prototype, {
       return this.renderTemplate(this.itemTemplate, this.itemContext(model, i));
     }
   },
-  itemContext: function(model, i) {
+  itemContext: function(model /*, i */) {
     return model.attributes;
   },
   appendEmpty: function() {
