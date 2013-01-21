@@ -113,7 +113,7 @@ Thorax.View = Backbone.View.extend({
         child.destroy();
       }
     }, this);
-    this.freeze && this.freeze();
+    this.remove(); // Will call stopListening()
   },
 
   render: function(output) {
