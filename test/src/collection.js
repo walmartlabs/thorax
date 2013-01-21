@@ -89,8 +89,7 @@ describe('collection', function() {
       clonedLetterCollection.reset(clonedLetterCollection.models);
       expect(view.$('li').length).to.equal(oldLength, msg + 'Reset does not cause change in number of rendered items');
 
-      //freeze
-      view.freeze();
+      clonedLetterCollection.off();
 
       clonedLetterCollection.remove(clonedLetterCollection.models);
       expect(renderedEmptyCount).to.equal(1, msg + 'rendered:empty event count');
