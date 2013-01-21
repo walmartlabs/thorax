@@ -17,7 +17,7 @@ var viewNameAttributeName = 'data-view-name',
 var viewsIndexedByCid = {};
 
 var Thorax = this.Thorax = {
-  VERSION: '{{version}}',
+  VERSION: '2.0.0b6',
   templatePathPrefix: '',
   templates: {},
   //view classes
