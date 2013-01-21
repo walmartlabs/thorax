@@ -9,11 +9,9 @@ Handlebars.registerViewHelper('empty', function(collection, view) {
   var _render = view.render;
   view.render = function() {
     if (noArgument) {
-      empty = !this.parent.model || (this.parent.model && !this.parent.model.isEmpty());
-    } else if (!collection) {
-      empty = true;
+      empty = !this.parent.model || this.parent.model.isEmpty();
     } else {
-      empty = collection.isEmpty();
+      empty = !collection || collection.isEmpty();
     }
     if (empty) {
       this.parent.trigger('rendered:empty', this, collection);
