@@ -105,6 +105,7 @@ Thorax.View = Backbone.View.extend({
     options = _.defaults(options || {}, {
       children: true
     });
+    _.each(this._boundDataObjectsByCid, this.unbindDataObject, this);
     this.trigger('destroyed');
     delete viewsIndexedByCid[this.cid];
     _.each(this.children, function(child) {

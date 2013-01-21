@@ -45,23 +45,6 @@ _.extend(Thorax.View, {
 });
 
 _.extend(Thorax.View.prototype, {
-  freeze: function(options) {
-    _.each(this._boundDataObjectsByCid, this.unbindDataObject, this);
-    options = _.defaults(options || {}, {
-      dom: true,
-      children: true
-    });
-    this.off();
-    if (options.dom) {
-      this.undelegateEvents();
-    }
-    this.trigger('freeze');
-    if (options.children) {
-      _.each(this.children, function(child) {
-        child.freeze(options);
-      }, this);
-    }
-  },
   on: function(eventName, callback, context) {
     if (objectEvents(this, eventName, callback, context)) {
       return this;
