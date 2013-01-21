@@ -86,7 +86,8 @@ describe('collection', function() {
       matchCids(clonedLetterCollection);
 
       var oldLength = view.$('li').length;
-      clonedLetterCollection.reset(clonedLetterCollection.models);
+      clonedLetterCollection.reset(_.clone(clonedLetterCollection.models));
+      expect(renderedEmptyCount).to.equal(1, msg + 'rendered:empty event count');
       expect(view.$('li').length).to.equal(oldLength, msg + 'Reset does not cause change in number of rendered items');
 
       //freeze
