@@ -84,7 +84,6 @@ _.extend(Thorax.View.prototype, {
       return false;
     }
     delete this._boundDataObjectsByCid[dataObject.cid];
-    dataObject.trigger('freeze');
     this.stopListening(dataObject);
     delete this._objectOptionsByCid[dataObject.cid];
     return true;
