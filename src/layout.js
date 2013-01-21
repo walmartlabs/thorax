@@ -81,13 +81,14 @@ Thorax.LayoutView = Thorax.View.extend({
     if (oldView) {
       this._removeChild(oldView);
       oldView.$el.remove();
-      oldView.trigger('deactivated', options);
+      triggerLifecycleEvent.call(oldView, 'deactivated', options);
       if (oldView._shouldDestroyOnNextSetView) {
         oldView.destroy();
       }
     }
 
     if (view) {
+      triggerLifecycleEvent.call(this, 'activated', options);
       view.trigger('activated', options);
       this._addChild(view);
       this._view = view;
@@ -109,6 +110,15 @@ Handlebars.registerHelper('layout', function(options) {
   options.hash[layoutCidAttributeName] = getOptionsData(options).view.cid;
   return new Handlebars.SafeString(Thorax.Util.tag.call(this, options.hash, '', this));
 });
+
+function triggerLifecycleEvent(eventName, options) {
+  options = options || {};
+  options.target = this;
+  this.trigger(eventName, options);
+  _.each(this.children, function(child) {
+    child.trigger(eventName, options);
+  });
+}
 
 function ensureLayoutCid() {
   ++this._renderCount;
