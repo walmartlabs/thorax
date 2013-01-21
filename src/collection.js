@@ -103,8 +103,10 @@ _.extend(Thorax.View.prototype, {
         el.setAttribute(modelCidAttributeName, model.cid);
       });
 
-      !options.silent && this.trigger('rendered:item', this, this.collection, model, itemElement, index);
-      applyItemVisiblityFilter.call(this, model);
+      if (!options.silent) {
+        this.trigger('rendered:item', this, this.collection, model, itemElement, index);
+        applyItemVisiblityFilter.call(this, model);
+      }
     }
     return itemView;
   },
