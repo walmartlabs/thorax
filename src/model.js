@@ -79,7 +79,9 @@ $.fn.model = function(view) {
     }
     var collection = $this.collection(view);
     if (collection) {
-      return collection._byCid[modelCid] || false;
+      return collection.find(function(model) {
+        return model.cid === modelCid;
+      }) || false;
     }
   }
   return false;
