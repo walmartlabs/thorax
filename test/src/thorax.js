@@ -27,64 +27,6 @@ describe('core', function() {
     expect(Thorax.Views['a-name'].prototype.key).to.equal('value', 'registry will extend an existing class prototype');
   });
 
-  it("context may be an object", function() {
-    var view = new (Thorax.View.extend({
-      context: {
-        a: 'a',
-        b: 'b',
-        c: function() {
-          return 'c';
-        }
-      },
-      template: '{{a}}{{b}}{{c}}'
-    }))();
-    view.render();
-    expect(view.html()).to.equal('abc');
-  });
-
-  it("context can return undefined", function() {
-    var view = new Thorax.View({
-      key: 'value',
-      context: function() {
-        return;
-      },
-      template: '{{key}}'
-    });
-    view.render();
-    expect(view.html()).to.equal('value');
-  });
-
-  it("context function is additive", function() {
-    var view = new Thorax.View({
-      a: 'a',
-      context: function() {
-        return {
-          b: 'b'
-        };
-      },
-      template: '{{a}}{{b}}'
-    });
-    view.render();
-    expect(view.html()).to.equal('ab');
-  });
-
-  it("template helpers will not mutate view or model attributes", function() {
-    Handlebars.registerHelper('modifyObject', function(obj) {
-      obj.mutated = true;
-      return obj;
-    });
-    var view = new Thorax.View({
-      a: 'a',
-      model: new Thorax.Model({
-        b: 'b'
-      }),
-      template: '{{modifyObject a}}{{modifyObject b}}'
-    });
-    expect(view.a.mutated).to.be['undefined'];
-    expect(view.model.attributes.b.mutated).to.be['undefined'];
-    expect(view.html()).to.equal('ab');
-  });
-
   it("can set view el", function() {
     $('body').append('<div id="test-target-container"><div id="test-target"></div></div>');
     var view = new Thorax.View({
@@ -95,73 +37,6 @@ describe('core', function() {
     expect($('#test-target-container > #test-target')[0].innerHTML).to.equal('testing123');
     expect(view.el.parentNode).to.equal($('#test-target-container')[0]);
     $('#test-target-container').remove();
-  });
-
-  it("template function can be specified", function() {
-    var childReturningString = new Thorax.View({
-      template: function(data, options) {
-        expect(options.data.cid).to.match(/^t/);
-        return 'template';
-      }
-    });
-    childReturningString.render();
-    expect(childReturningString.html()).to.equal('template');
-    var childReturningElement = new Thorax.View({
-      template: function() {
-        return $('<p>template</p>')[0];
-      }
-    });
-    childReturningElement.render();
-    expect(childReturningElement.$('p').html()).to.equal('template');
-    var childReturning$ = new Thorax.View({
-      template: function() {
-        return $('<p>template</p>');
-      }
-    });
-    childReturning$.render();
-    expect(childReturning$.$('p').html()).to.equal('template');
-  });
-
-  it("template yield", function() {
-    Thorax.templates['yield-child'] = '<span>{{@yield}}</span>';
-    Thorax.templates['yield-parent'] = '<p>{{#template "yield-child"}}content{{/template}}</p>';
-    var view = new Thorax.View({
-      name: 'yield-parent'
-    });
-    view.render();
-    expect(view.$('p > span').html()).to.equal('content');
-  });
-
-  it("element helper", function() {
-    var a = document.createElement('li');
-    a.innerHTML = 'one';
-    var view = new Thorax.View({
-      template: '<ul>{{element a tag="li"}}{{element b tag="li"}}{{element c}}{{element d}}</ul>',
-      a: a,
-      b: function() {
-        var li = document.createElement('li');
-        li.innerHTML = 'two';
-        return li;
-      },
-      c: function() {
-        return $('<li>three</li><li>four</li>');
-      },
-      d: $('<li>five</li>')
-    });
-    view.render();
-    expect(view.$('li')[0].innerHTML).to.equal('one');
-    expect(view.$('li')[1].innerHTML).to.equal('two');
-    expect(view.$('li')[2].innerHTML).to.equal('three');
-    expect(view.$('li')[3].innerHTML).to.equal('four');
-    expect(view.$('li')[4].innerHTML).to.equal('five');
-    view.html('');
-    expect(view.$('li').length).to.equal(0);
-    view.render();
-    expect(view.$('li')[0].innerHTML).to.equal('one');
-    expect(view.$('li')[1].innerHTML).to.equal('two');
-    expect(view.$('li')[2].innerHTML).to.equal('three');
-    expect(view.$('li')[3].innerHTML).to.equal('four');
-    expect(view.$('li')[4].innerHTML).to.equal('five');
   });
 
   it("should allow local helpers to be declared", function() {
@@ -302,20 +177,6 @@ describe('core', function() {
     expect(outer.$('.c').html()).to.equal('value');
   });
 
-  it("nestable scope of view helper", function() {
-    Handlebars.registerViewHelper('test', function(viewHelper) {
-      expect(view.cid).to.equal(viewHelper.parent.cid);
-    });
-    var view = new Thorax.View({
-      name: 'outer',
-      template: '{{#test}}{{#test}}{{#test}}{{key}}{{/test}}{{/test}}{{/test}}',
-      key: 'value'
-    });
-    view.render();
-    expect(view.$('[data-view-helper]')[2].innerHTML).to.equal('value');
-    delete Handlebars.helpers.test;
-  });
-
   it("onException", function() {
     var oldOnException = Thorax.onException;
     var view = new Thorax.View({
@@ -341,5 +202,65 @@ describe('core', function() {
     view.trigger('test');
     Thorax.onException = oldOnException;
     view.$el.remove();
+  });
+
+  describe('context', function() {
+    it("may be an object", function() {
+      var view = new (Thorax.View.extend({
+        context: {
+          a: 'a',
+          b: 'b',
+          c: function() {
+            return 'c';
+          }
+        },
+        template: '{{a}}{{b}}{{c}}'
+      }))();
+      view.render();
+      expect(view.html()).to.equal('abc');
+    });
+
+    it("can return undefined", function() {
+      var view = new Thorax.View({
+        key: 'value',
+        context: function() {
+          return;
+        },
+        template: '{{key}}'
+      });
+      view.render();
+      expect(view.html()).to.equal('value');
+    });
+
+    it("function is additive", function() {
+      var view = new Thorax.View({
+        a: 'a',
+        context: function() {
+          return {
+            b: 'b'
+          };
+        },
+        template: '{{a}}{{b}}'
+      });
+      view.render();
+      expect(view.html()).to.equal('ab');
+    });
+
+    it("template helpers will not mutate view or model attributes", function() {
+      Handlebars.registerHelper('modifyObject', function(obj) {
+        obj.mutated = true;
+        return obj;
+      });
+      var view = new Thorax.View({
+        a: 'a',
+        model: new Thorax.Model({
+          b: 'b'
+        }),
+        template: '{{modifyObject a}}{{modifyObject b}}'
+      });
+      expect(view.a.mutated).to.be['undefined'];
+      expect(view.model.attributes.b.mutated).to.be['undefined'];
+      expect(view.html()).to.equal('ab');
+    });
   });
 });
