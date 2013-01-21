@@ -26,6 +26,15 @@ describe('empty helper', function() {
     emptyModelView.model.set({foo: 'value'});
     expect(emptyModelView.$('[data-view-helper]').html()).to.equal('not empty');
   });
+  it('should render when model is added', function() {
+    var emptyModelView = new Thorax.View({
+      template: '{{#empty}}empty{{else}}not empty{{/empty}}'
+    });
+    emptyModelView.render();
+    expect(emptyModelView.$('[data-view-helper]').html()).to.equal('empty');
+    emptyModelView.setModel(new Thorax.Model({foo: 'value'}));
+    expect(emptyModelView.$('[data-view-helper]').html()).to.equal('not empty');
+  });
   it('should render empty with collection parameter', function() {
     var emptyCollectionView = new Thorax.View({
       template: '{{#empty myCollection}}empty{{else}}not empty{{/empty}}',

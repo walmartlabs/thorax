@@ -1,4 +1,4 @@
-/*global viewHelperAttributeName */
+/*global getOptionsData, viewHelperAttributeName */
 var viewPlaceholderAttributeName = 'data-view-tmp';
 
 Thorax.HelperView = Thorax.View.extend({
@@ -36,7 +36,11 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
       options: options.hash,
       declaringView: declaringView,
       parent: getParent(declaringView),
-      _helperName: name
+      _helperName: name,
+      _helperOptions: {
+        options: cloneHelperOptions(options),
+        args: _.clone(args)
+      }
     };
 
     options.hash.id && (viewOptions.id = options.hash.id);
@@ -57,3 +61,9 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
   var helper = Handlebars.helpers[name];
   return helper;
 };
+
+function cloneHelperOptions(options) {
+  var ret = _.pick(options, 'fn', 'inverse', 'hash', 'data');
+  ret.data = _.omit(options.data, 'cid', 'view', 'yield');
+  return ret;
+}
