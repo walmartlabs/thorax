@@ -321,6 +321,22 @@ describe('collection', function() {
 
   });
 
+  it("itemFilter should not be passed null items when appending empty", function() {
+    var view = new Thorax.View({
+      template: '{{#collection tag="ul"}}<li>{{key}}</li>{{/collection}}',
+      collection: new Thorax.Collection(),
+      itemFilter: function(model) {
+        return model.attributes.key === 'a' || model.attributes.key === 'b';
+      },
+      emptyTemplate: function(){ return '<li>empty</li>'; }
+    });
+    view.render();
+    expect(view.$('ul li').html()).to.equal('empty');
+    var a = new Thorax.Model({key: 'a'});
+    view.collection.reset([a]);
+    expect(view.$('li').length).to.equal(1);
+  });
+
   it("collection model updates will update item", function() {
     var collection = new Thorax.Collection([{name: 'a'}], {
       comparator: function(obj) {
