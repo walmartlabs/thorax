@@ -117,6 +117,16 @@ Thorax.View = Backbone.View.extend({
   },
 
   render: function(output) {
+    this._previousHelpers = _.filter(this.children, function(child) { return child._helperOptions; });
+
+    var children = {};
+    _.each(this.children, function(child, key) {
+      if (!child._helperOptions) {
+        children[key] = child;
+      }
+    });
+    this.children = children;
+
     if (typeof output === 'undefined' || (!_.isElement(output) && !Thorax.Util.is$(output) && !(output && output.el) && typeof output !== 'string' && typeof output !== 'function')) {
       if (!this.template) {
         //if the name was set after the view was created try one more time to fetch a template
@@ -131,6 +141,14 @@ Thorax.View = Backbone.View.extend({
     } else if (typeof output === 'function') {
       output = this.renderTemplate(output);
     }
+
+    // Destroy any helpers that may be lingering
+    _.each(this._previousHelpers, function(child) {
+      child.destroy();
+      child.parent = undefined;
+    });
+    this._previousHelpers = undefined;
+
     //accept a view, string, Handlebars.SafeString or DOM element
     this.html((output && output.el) || (output && output.string) || output);
     ++this._renderCount;

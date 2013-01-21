@@ -48,14 +48,30 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
     options.hash.className && (viewOptions.className = options.hash.className);
     options.hash.tag && (viewOptions.tagName = options.hash.tag);
     options.hash.tagName && (viewOptions.tagName = options.hash.tagName);
-    var instance = new ViewClass(viewOptions);
-    args.push(instance);
-    declaringView.children[instance.cid] = instance;
-    declaringView.trigger.apply(declaringView, ['helper', name].concat(args));
-    declaringView.trigger.apply(declaringView, ['helper:' + name].concat(args));
+
+    // Check to see if we have an existing instance that we can reuse
+    var instance = _.find(declaringView._previousHelpers, function(child) {
+      return compareHelperOptions(viewOptions, child);
+    });
+
+    // Create the instance if we don't already have one
+    if (!instance) {
+      instance = new ViewClass(viewOptions);
+
+      args.push(instance);
+      declaringView.children[instance.cid] = instance;
+      declaringView.trigger.apply(declaringView, ['helper', name].concat(args));
+      declaringView.trigger.apply(declaringView, ['helper:' + name].concat(args));
+
+      callback.apply(this, args);
+    } else {
+      declaringView._previousHelpers = _.without(declaringView._previousHelpers, instance);
+      declaringView.children[instance.cid] = instance;
+    }
+
     var htmlAttributes = Thorax.Util.htmlAttributesFromOptions(options.hash);
     htmlAttributes[viewPlaceholderAttributeName] = instance.cid;
-    callback.apply(this, args);
+
     return new Handlebars.SafeString(Thorax.Util.tag(htmlAttributes, ''));
   });
   var helper = Handlebars.helpers[name];
@@ -66,4 +82,33 @@ function cloneHelperOptions(options) {
   var ret = _.pick(options, 'fn', 'inverse', 'hash', 'data');
   ret.data = _.omit(options.data, 'cid', 'view', 'yield');
   return ret;
+}
+
+function compareHelperOptions(a, b) {
+  function compareValues(a, b) {
+    return _.every(a, function(value, key) {
+      return b[key] === value;
+    });
+  }
+
+  if (a._helperName !== b._helperName) {
+    return false;
+  }
+
+  a = a._helperOptions;
+  b = b._helperOptions;
+
+  // Implements a first level depth comparison
+  return a.args.length === b.args.length
+      && compareValues(a.args, b.args)
+      && _.isEqual(_.keys(a.options), _.keys(b.options))
+      && _.every(a.options, function(value, key) {
+          if (key === 'data' || key === 'hash') {
+            return compareValues(a.options[key], b.options[key]);
+          } else if (key === 'fn' || key === 'inverse') {
+            return b.options[key] === value
+                || (value && ((b.options[key] || {}).program === value.program));
+          }
+          return b.options[key] === value;
+        });
 }
