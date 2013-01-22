@@ -200,7 +200,7 @@ Thorax.Util = {
     var htmlAttributes = _.omit(attributes, 'tag', 'tagName'),
         tag = attributes.tag || attributes.tagName || 'div';
     return '<' + tag + ' ' + _.map(htmlAttributes, function(value, key) {
-      if (typeof value === 'undefined') {
+      if (typeof value === 'undefined' || key === 'expand-tokens') {
         return '';
       }
       var formattedValue = value;
