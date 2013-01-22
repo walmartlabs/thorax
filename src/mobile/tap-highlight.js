@@ -1,3 +1,5 @@
+/*global isAndroid, isMobile */
+
 $.fn.tapHoldAndEnd = function(selector, callbackStart, callbackEnd) {
   function triggerEvent(obj, eventType, callback, event) {
     var originalType = event.type,
@@ -112,7 +114,7 @@ _.extend(Thorax.View.prototype, {
       return false;
     }
   },
-  _tapHighlightEnd: function(event) {
+  _tapHighlightEnd: function(/* event */) {
     $('.' + this._tapHighlightClassName).removeClass(this._tapHighlightClassName);
   }
 });

@@ -76,7 +76,7 @@ describe('collection', function() {
       clonedLetterCollection.remove(clonedLetterCollection.models);
       expect(view.$('li')[0].innerHTML).to.equal('empty', msg + 'empty collection renders empty');
       clonedLetterCollection.add(new LetterModel({letter: 'a'}));
-      
+
       expect(view.$('li').length).to.equal(1 * indexMultiplier, msg + 'transition from empty to one item');
       expect(view.$('li')[0 * indexMultiplier].innerHTML).to.equal('a', msg + 'transition from empty to one item');
       expect(renderedCount).to.equal(1, msg + 'rendered event count');
@@ -86,12 +86,13 @@ describe('collection', function() {
       matchCids(clonedLetterCollection);
 
       var oldLength = view.$('li').length;
-      clonedLetterCollection.reset(clonedLetterCollection.models);
+      clonedLetterCollection.reset(_.clone(clonedLetterCollection.models));
+      expect(renderedEmptyCount).to.equal(1, msg + 'rendered:empty event count');
       expect(view.$('li').length).to.equal(oldLength, msg + 'Reset does not cause change in number of rendered items');
 
       //freeze
       view.freeze();
-      
+
       clonedLetterCollection.remove(clonedLetterCollection.models);
       expect(renderedEmptyCount).to.equal(1, msg + 'rendered:empty event count');
       expect(view.$('li')[0 * indexMultiplier].innerHTML).to.equal('a', msg + 'transition from empty to one item after freeze');
@@ -150,48 +151,61 @@ describe('collection', function() {
     });
     runCollectionTests(viewWithCollectionHelperWithEmptyView, 1, 'block helper with item-template');
 
+    var viewWithCollectionHelperWithItemViewAndItemTemplate = new Thorax.View({
+      template: '{{collection tag="ul" empty-view="letter-empty" item-view="letter-item" item-template="letter-item"}}'
+    });
+    runCollectionTests(viewWithCollectionHelperWithItemViewAndItemTemplate, 1, 'block helper with item-template');
+
     var viewWithCollectionHelperWithEmptyViewAndBlock = new Thorax.View({
       template: '{{collection tag="ul" empty-template="letter-empty" empty-view="letter-empty" item-template="letter-item"}}'
     });
     runCollectionTests(viewWithCollectionHelperWithEmptyViewAndBlock, 1, 'block helper with empty view and block');
   });
 
-  it("multiple collections", function() {
-    var view = new Thorax.View({
-      template: '{{collection a tag="ul" item-template="letter-item"}}{{collection b tag="ul" item-template="letter-item"}}',
-      a: new Thorax.Collection(letterCollection.models),
-      b: new Thorax.Collection(letterCollection.models)
+  describe('multiple collections', function() {
+    it('should render separate collections', function() {
+      var view = new Thorax.View({
+        template: '{{collection a tag="ul" item-template="letter-item"}}{{collection b tag="ul" item-template="letter-item"}}',
+        a: new Thorax.Collection(letterCollection.models),
+        b: new Thorax.Collection(letterCollection.models)
+      });
+      view.render();
+      expect(view.$('li').length).to.equal(letterCollection.models.length * 2);
     });
-    view.render();
-    expect(view.$('li').length).to.equal(letterCollection.models.length * 2);
 
-    view = new Thorax.View({
-      template: '{{collection a tag="ul" item-template="letter-item"}}{{collection a tag="ul" item-template="letter-item"}}{{collection b tag="ul" item-template="letter-item"}}{{collection b tag="ul" item-template="letter-item"}}',
-      a: new Thorax.Collection(letterCollection.models),
-      b: new Thorax.Collection(letterCollection.models)
+    it('should render the same collection multiple times', function() {
+      var view = new Thorax.View({
+        template: '{{collection a tag="ul" item-template="letter-item"}}{{collection a tag="ul" item-template="letter-item"}}{{collection b tag="ul" item-template="letter-item"}}{{collection b tag="ul" item-template="letter-item"}}',
+        a: new Thorax.Collection(letterCollection.models),
+        b: new Thorax.Collection(letterCollection.models)
+      });
+      view.render();
+      expect(view.$('li').length).to.equal(letterCollection.models.length * 4);
     });
-    view.render();
-    expect(view.$('li').length).to.equal(letterCollection.models.length * 4);
 
-    Thorax.View.extend({
-      name: 'sub-view-with-same-collection',
-      template: '{{collection a tag="ul" item-template="letter-item"}}'
+    it('should render subview collections', function() {
+      Thorax.View.extend({
+        name: 'sub-view-with-same-collection',
+        template: '{{collection a tag="ul" item-template="letter-item"}}'
+      });
+      var view = new Thorax.View({
+        a: new Thorax.Collection(letterCollection.models),
+        b: new Thorax.Collection(letterCollection.models),
+        template: '{{collection a tag="ul" item-template="letter-item"}}{{view "sub-view-with-same-collection" a=a}}'
+      });
+      view.render();
+      expect(view.$('li').length).to.equal(letterCollection.models.length * 2);
     });
-    var view = new Thorax.View({
-      a: new Thorax.Collection(letterCollection.models),
-      b: new Thorax.Collection(letterCollection.models),
-      template: '{{collection a tag="ul" item-template="letter-item"}}{{view "sub-view-with-same-collection" a=a}}'
-    });
-    view.render();
-    expect(view.$('li').length).to.equal(letterCollection.models.length * 2);
 
-    var view = new Thorax.View({
-      template: '{{#collection a tag="ul"}}<li>{{letter}}</li>{{/collection}}{{#collection a tag="div"}}<span>{{letter}}</span>{{/collection}}',
-      a: new Thorax.Collection(letterCollection.models)
+    it('should render with proper item template', function() {
+      var view = new Thorax.View({
+        template: '{{#collection a tag="ul"}}<li>{{letter}}</li>{{/collection}}{{#collection a tag="div"}}<span>{{letter}}</span>{{/collection}}',
+        a: new Thorax.Collection(letterCollection.models)
+      });
+      view.render();
+      expect(view.$('li').length).to.equal(letterCollection.models.length);
+      expect(view.$('span').length).to.equal(letterCollection.models.length);
     });
-    view.render();
-    expect(view.$('li').length).to.equal(letterCollection.models.length);
-    expect(view.$('span').length).to.equal(letterCollection.models.length);
   });
 
   it("inverse block in collection helper", function() {
@@ -213,31 +227,6 @@ describe('collection', function() {
     expect(view.$('[data-collection-empty] div').html()).to.equal('value');
   });
 
-  it("empty and collection helpers in the same template", function() {
-    var a = new Thorax.View({
-      template: '{{#empty letters}}<div class="empty">empty</div>{{/empty}}{{#collection letters}}{{letter}}{{/collection}}',
-      letters: new Thorax.Collection()
-    });
-    var b = new Thorax.View({
-      template: '{{#empty letters}}<div class="empty">empty a</div>{{/empty}}{{#collection letters}}{{letter}}{{else}}empty b{{/collection}}',
-      letters: new Thorax.Collection()
-    });
-    a.render();
-    var oldRenderCount = a._renderCount;
-    expect(a.$('.empty').html()).to.equal('empty');
-    a.letters.reset(letterCollection.models);
-    expect(a.$('.empty').length).to.equal(0);
-    expect(a.$('[data-collection-cid] div')[0].innerHTML).to.equal('a');
-    expect(oldRenderCount).to.equal(a._renderCount, 'render count unchanged on collection reset');
-
-    b.render();
-    expect(b.$('.empty').html()).to.equal('empty a');
-    expect(b.$('[data-collection-cid] div')[0].innerHTML).to.equal('empty b');
-    b.letters.reset(letterCollection.models);
-    expect(b.$('.empty').length).to.equal(0);
-    expect(b.$('[data-collection-cid] div')[0].innerHTML).to.equal('a');
-  });
-
   it("should re-render when sort is triggered", function() {
     var collection = new Thorax.Collection(letterCollection.models);
     var view = new Thorax.View({
@@ -249,7 +238,7 @@ describe('collection', function() {
     expect(view.$('li').eq(0).html()).to.equal('a');
     // reverse alphabetical sort
     collection.comparator = function(letter) {
-      return _.map(letter.get('letter').toLowerCase().split(''), function(l) { 
+      return _.map(letter.get('letter').toLowerCase().split(''), function(l) {
         return String.fromCharCode(-(l.charCodeAt(0)));
       });
     };
@@ -333,82 +322,20 @@ describe('collection', function() {
 
   });
 
-  it("nested collection helper", function() {
-    function testNesting(view, msg) {
-      var blogModel = new Thorax.Model();
-      view.setModel(blogModel);
-      expect(view.$('[data-view-helper]').html()).to.equal('empty', msg + ' : starts empty');
-      var authors = [
-        new Thorax.Model({author: 'author 1'}),
-        new Thorax.Model({author: 'author 2'})
-      ];
-      var comments1 = new Thorax.Collection([
-        new Thorax.Model({
-          comment: 'comment one',
-          authors: new Thorax.Collection(authors)
-        }),
-        new Thorax.Model({
-          comment: 'comment two',
-          authors: new Thorax.Collection(authors)
-        })
-      ]);
-      var comments2 = new Thorax.Collection([
-        new Thorax.Model({
-          comment: 'comment three',
-          authors: new Thorax.Collection(authors)
-        }),
-        new Thorax.Model({
-          comment: 'comment four',
-          authors: new Thorax.Collection(authors)
-        })
-      ]);
-      blogModel.set({
-        posts: new Thorax.Collection([
-          new Thorax.Model({
-            title: 'title one',
-            comments: comments1
-          }),
-          new Thorax.Model({
-            title: 'title two',
-            comments: comments2
-          })
-        ])
-      });
-      expect(view.$('h2').length).to.equal(2, msg + ' : title length');
-      expect(view.$('h2')[0].innerHTML).to.equal('title one', msg + ' : title content');
-      expect(view.$('h2')[1].innerHTML).to.equal('title two', msg + ' : title content');
-      expect(view.$('p').length).to.equal(4, msg + ' : comment length');
-      expect(view.$('p')[0].innerHTML).to.equal('comment one', msg + ' : comment content');
-      expect(view.$('p')[1].innerHTML).to.equal('comment two', msg + ' : comment content');
-      expect(view.$('p')[2].innerHTML).to.equal('comment three', msg + ' : comment content');
-      expect(view.$('p')[3].innerHTML).to.equal('comment four', msg + ' : comment content');
-      expect(view.$('span').length).to.equal(8, msg + ' : author length');
-
-      comments2.add(new Thorax.Model({comment: 'comment five'}));
-      expect(view.$('p')[4].innerHTML).to.equal('comment five', msg + ' : added comment content');
-
-      blogModel.attributes.posts.add(new Thorax.Model({
-        title: 'title three'
-      }));
-      expect(view.$('h2').length).to.equal(3, msg + ' : added title length');
-      expect(view.$('h2')[2].innerHTML).to.equal('title three', msg + ' : added title content');
-    }
-
-    //test with embedded view
-    Thorax.View.extend({
-      name: 'comments',
-      template: '{{#collection comments}}<p>{{comment}}</p>{{#collection authors}}<span>{{author}}</span>{{/collection}}{{/collection}}'
-    });
+  it("itemFilter should not be passed null items when appending empty", function() {
     var view = new Thorax.View({
-      template: '{{#empty posts}}empty{{else}}{{#collection posts name="outer"}}<h2>{{title}}</h2>{{view "comments" comments=comments}}</div>{{/collection}}{{/empty}}'
+      template: '{{#collection tag="ul"}}<li>{{key}}</li>{{/collection}}',
+      collection: new Thorax.Collection(),
+      itemFilter: function(model) {
+        return model.attributes.key === 'a' || model.attributes.key === 'b';
+      },
+      emptyTemplate: function(){ return '<li>empty</li>'; }
     });
-    testNesting(view, 'nested view');
-
-    //test with multiple inline nesting
-    view = new Thorax.View({
-      template: '{{#empty posts}}empty{{else}}{{#collection posts name="outer"}}<h2>{{title}}</h2>{{#collection comments}}<p>{{comment}}</p>{{#collection authors}}<span>{{author}}</span>{{/collection}}{{/collection}}</div>{{/collection}}{{/empty}}'
-    });
-    testNesting(view, 'nested inline');
+    view.render();
+    expect(view.$('ul li').html()).to.equal('empty');
+    var a = new Thorax.Model({key: 'a'});
+    view.collection.reset([a]);
+    expect(view.$('li').length).to.equal(1);
   });
 
   it("collection model updates will update item", function() {
@@ -532,38 +459,15 @@ describe('collection', function() {
     expect(view.$('[data-collection-empty]').length).to.equal(0);
   });
 
-  it("empty helper", function() {
-    var emptyView = new Thorax.View({
-      template: '{{#empty}}empty{{else}}not empty{{/empty}}'
-    });
-    emptyView.render();
-    expect(emptyView.$('[data-view-helper]').html()).to.equal('empty');
-    var emptyModelView = new Thorax.View({
-      template: '{{#empty}}empty{{else}}not empty{{/empty}}',
-      model: new Thorax.Model()
-    });
-    emptyModelView.render();
-    expect(emptyModelView.$('[data-view-helper]').html()).to.equal('empty');
-    emptyModelView.model.set({key: 'value'});
-    expect(emptyModelView.$('[data-view-helper]').html()).to.equal('not empty');
-    var emptyCollectionView = new Thorax.View({
-      template: '{{#empty myCollection}}empty{{else}}not empty{{/empty}}',
-      myCollection: new Thorax.Collection()
-    });
-    emptyCollectionView.render();
-    expect(emptyCollectionView.$('[data-view-helper]').html()).to.equal('empty');
-    var model = new Thorax.Model();
-    emptyCollectionView.myCollection.add(model);
-    expect(emptyCollectionView.$('[data-view-helper]').html()).to.equal('not empty');
-    emptyCollectionView.myCollection.remove(model);
-    expect(emptyCollectionView.$('[data-view-helper]').html()).to.equal('empty');
-  });
-
   it("item-context & empty-context", function() {
     var view = new Thorax.View({
+      key: 'value',
       collection: letterCollection,
       template: "{{#collection this.collection}}<span>{{test}}</span>{{/collection}}",
       itemContext: function() {
+        // not checking for `view` or cid as itemContext will be called immediately
+        // before `view` var is assigned
+        expect(this.key).to.equal('value', 'itemContext called with correct context');
         return {
           test: 'testing'
         };
@@ -582,11 +486,7 @@ describe('collection', function() {
         }
       }))(),
       template: "{{#collection this.collection}}{{test}}{{else}}<b>{{test}}</b>{{/collection}}",
-      emptyContext: function() {
-        return {
-          test: 'testing'
-        };
-      }
+      test: 'testing'
     });
     view.render();
     expect(view.$('b')[0].innerHTML).to.equal('testing');
@@ -674,4 +574,76 @@ describe('collection', function() {
     expect(callCounter.test1).to.equal(1);
     expect(callCounter.test2).to.equal(1);
   });
+
+  it('should render collection after setCollection is called', function() {
+    var view = new Thorax.View({
+      template: "hi{{collection}}"
+    });
+    view.render();
+    expect(view.$('div').length).to.equal(1, 'initial render');
+    view.setCollection(new Thorax.Collection());
+    expect(view.$('div').length).to.equal(1, 'after setCollection (first)');
+    view.setCollection(new Thorax.Collection());
+    expect(view.$('div').length).to.equal(1, 'after setCollection (second)');
+  });
+
+  it('should preserve itself in the DOM after re-rendering collection', function() {
+    var spy = this.spy();
+    var collection = new Thorax.Collection([{key: 'one'}, {key: 'two'}]);
+    var view = new Thorax.View({
+      template: "{{collection-element tag=\"ul\"}}",
+      itemTemplate: Handlebars.compile('<li>{{key}}</li>'),
+      events: {
+        'rendered:item': spy
+      }
+    });
+    view.setCollection(collection);
+    var oldUl = view.$('ul')[0];
+    expect(spy.callCount).to.equal(2, 'without colletion helper before render');
+    expect(view.$('ul').length).to.equal(1, 'without colletion helper before render');
+    expect(view.$('li').length).to.equal(2, 'without colletion helper before render');
+
+    view.render();
+    expect(spy.callCount).to.equal(2, 'without colletion helper after render');
+    expect(oldUl).to.equal(view.$('ul')[0], 'without colletion helper after render');
+    expect(view.$('ul').length).to.equal(1, 'without colletion helper after render');
+    expect(view.$('li').length).to.equal(2, 'without colletion helper after render');
+    spy.callCount = 0;
+
+    // Alternate way of testing
+    var parent = $('<div></div>');
+    view = new Thorax.View({
+      template: '{{collection}}',
+    });
+    view.setCollection(new Thorax.Collection());
+    parent.append(view.$el);
+    var oldEl = parent.children('div')[0];
+    view.render();
+    expect(parent.children('div')[0]).to.equal(oldEl);
+  });
+
+  it('collection loaded via load() will be rendered', function() {
+    var spy = this.spy();
+    var server = sinon.fakeServer.create();
+    var collection = new (Thorax.Collection.extend({
+      url: '/test'
+    }));
+    var view = new Thorax.View({
+      collection: collection,
+      events: {
+        'rendered:collection': spy
+      },
+      template: '{{collection-element}}',
+      itemTemplate: Handlebars.compile('<span>{{text}}</span>')
+    });
+    server.requests[0].respond(
+      200,
+      { "Content-Type": "application/json" },
+      JSON.stringify([{id: 1, text: "test"}])
+    );
+    expect(spy.callCount).to.equal(1);
+    expect(view.$('span').html()).to.equal('test');
+    server.restore();
+  });
+
 });

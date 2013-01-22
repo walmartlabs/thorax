@@ -17,7 +17,7 @@ var viewNameAttributeName = 'data-view-name',
 var viewsIndexedByCid = {};
 
 var Thorax = this.Thorax = {
-  VERSION: '{{version}}',
+  VERSION: '2.0.0b6',
   templatePathPrefix: '',
   templates: {},
   //view classes
@@ -95,24 +95,38 @@ Thorax.View = Backbone.View.extend({
     return view;
   },
 
+  _removeChild: function(view) {
+    delete this.children[view.cid];
+    view.parent = null;
+    return view;
+  },
+
   destroy: function(options) {
     options = _.defaults(options || {}, {
       children: true
     });
     this.trigger('destroyed');
     delete viewsIndexedByCid[this.cid];
-    if (options.children) {
-      _.each(this.children, function(child) {
-        child.parent = null;
+    _.each(this.children, function(child) {
+      this._removeChild(child);
+      if (options.children) {
         child.destroy();
-      });
-      this.children = {};
-    }
-
+      }
+    }, this);
     this.freeze && this.freeze();
   },
 
   render: function(output) {
+    this._previousHelpers = _.filter(this.children, function(child) { return child._helperOptions; });
+
+    var children = {};
+    _.each(this.children, function(child, key) {
+      if (!child._helperOptions) {
+        children[key] = child;
+      }
+    });
+    this.children = children;
+
     if (typeof output === 'undefined' || (!_.isElement(output) && !Thorax.Util.is$(output) && !(output && output.el) && typeof output !== 'string' && typeof output !== 'function')) {
       if (!this.template) {
         //if the name was set after the view was created try one more time to fetch a template
@@ -127,6 +141,14 @@ Thorax.View = Backbone.View.extend({
     } else if (typeof output === 'function') {
       output = this.renderTemplate(output);
     }
+
+    // Destroy any helpers that may be lingering
+    _.each(this._previousHelpers, function(child) {
+      child.destroy();
+      child.parent = undefined;
+    });
+    this._previousHelpers = undefined;
+
     //accept a view, string, Handlebars.SafeString or DOM element
     this.html((output && output.el) || (output && output.string) || output);
     ++this._renderCount;
@@ -135,15 +157,11 @@ Thorax.View = Backbone.View.extend({
   },
 
   context: function() {
-    if (this.model && this.model.attributes) {
-      return _.extend({}, this, (this.model && this.model.attributes) || {});
-    } else {
-      return this;
-    }
+    return (this.model && this.model.attributes) || {};
   },
 
-  _getContext: function(attributes) {
-    return _.extend({}, getValue(this, 'context'), attributes || {});
+  _getContext: function() {
+    return _.extend({}, this, getValue(this, 'context') || {});
   },
 
   // Private variables in handlebars / options.data in template helpers
@@ -164,12 +182,12 @@ Thorax.View = Backbone.View.extend({
     } else {
       return Handlebars.helpers;
     }
-    
+
   },
 
-  renderTemplate: function(file, data, ignoreErrors) {
+  renderTemplate: function(file, context, ignoreErrors) {
     var template;
-    data = this._getContext(data);
+    context = context || this._getContext();
     if (typeof file === 'function') {
       template = file;
     } else {
@@ -182,9 +200,9 @@ Thorax.View = Backbone.View.extend({
         throw new Error('Unable to find template ' + file);
       }
     } else {
-      return template(data, {
+      return template(context, {
         helpers: this._getHelpers(),
-        data: this._getData(data)
+        data: this._getData(context)
       });
     }
   },
@@ -200,21 +218,27 @@ Thorax.View = Backbone.View.extend({
   },
 
   html: function(html) {
+
+    function replaceHTML(view) {
+      view.el.innerHTML = "";
+      return view.$el.append(html);
+    }
+
     if (typeof html === 'undefined') {
       return this.el.innerHTML;
     } else {
       // Event for IE element fixes
       this.trigger('before:append');
-      this.el.innerHTML = "";
       var element;
       if (this.collection && this._objectOptionsByCid[this.collection.cid] && this._renderCount) {
-        // preserveCollectionElement calls the callback after it has a reference
-        // to the collection element, calls the callback, then re-appends the element
-        preserveCollectionElement.call(this, function() {
-          element = this.$el.append(html);
-        });
+        // preserve collection element if it was not created with {{collection}} helper
+        var oldCollectionElement = this.getCollectionElement();
+        element = replaceHTML(this);
+        if (!oldCollectionElement.attr('data-view-cid')) {
+          this.getCollectionElement().replaceWith(oldCollectionElement);
+        }
       } else {
-        element = this.$el.append(html);
+        element = replaceHTML(this);
       }
       this.trigger('append');
       return element;

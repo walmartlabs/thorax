@@ -2,18 +2,15 @@
   "modules": {
     "jquery": {
       "mixins": [
-        "thorax-dep-jquery"
-      ],
-      "scripts": [
-        "lib/handlebars.js"
+        {"name": "thorax-dep-jquery", "ignoreWarnings": true}
       ]
     },
     "zepto": {
       "mixins": [
-        "thorax-dep-zepto"
+        {"name": "thorax-dep-zepto", "ignoreWarnings": true}
       ],
       "scripts": [
-        "lib/handlebars.js"
+        {"src": "lib/handlebars.js", "ignoreWarnings": true}
       ]
     },
 

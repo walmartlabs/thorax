@@ -16,7 +16,16 @@ Thorax.loadHandler = function(start, end, context) {
     var loadInfo = self._loadInfo[loadCounter];
 
     function startLoadTimeout() {
-      clearTimeout(loadInfo.timeout);
+
+      // If the timeout has been set already but has not triggered yet do nothing
+      // Otherwise set a new timeout (either initial or for going from background to
+      // non-background loading)
+      if (loadInfo.timeout && !loadInfo.run) {
+        return;
+      }
+
+      var loadingTimeout = self._loadingTimeoutDuration !== undefined ?
+        self._loadingTimeoutDuration : Thorax.View.prototype._loadingTimeoutDuration;
       loadInfo.timeout = setTimeout(function() {
           try {
             loadInfo.run = true;
@@ -24,14 +33,10 @@ Thorax.loadHandler = function(start, end, context) {
           } catch (e) {
             Thorax.onException('loadStart', e);
           }
-        },
-        loadingTimeout * 1000);
+        }, loadingTimeout * 1000);
     }
 
     if (!loadInfo) {
-      var loadingTimeout = self._loadingTimeoutDuration !== undefined ?
-        self._loadingTimeoutDuration : Thorax.View.prototype._loadingTimeoutDuration;
-
       loadInfo = self._loadInfo[loadCounter] = _.extend({
         events: [],
         timeout: 0,
@@ -198,9 +203,8 @@ function bindToRoute(callback, failback) {
 
   function finalizer() {
     Backbone.history.off('route', routeHandler);
-    var args = Array.prototype.slice.call(arguments, 1);
     if (!routeChanged) {
-      callback.apply(this, args);
+      callback.apply(this, arguments);
     }
   }
 
@@ -342,6 +346,12 @@ Thorax.View.prototype._modifyDataObjectOptions = function(dataObject, options) {
   return options;
 };
 
+Thorax.HelperView.prototype._modifyDataObjectOptions = function(dataObject, options) {
+  options.ignoreErrors = this.parent.ignoreFetchError;
+  options.background = this.parent.nonBlockingLoad;
+  return options;
+};
+
 inheritVars.collection.loading = function() {
   var loadingView = this.loadingView,
       loadingTemplate = this.loadingTemplate,
@@ -365,9 +375,7 @@ inheritVars.collection.loading = function() {
         }
         item = instance;
       } else {
-        item = this.renderTemplate(loadingTemplate, {
-          collection: this.collection
-        });
+        item = this.renderTemplate(loadingTemplate);
       }
       var index = loadingPlacement
         ? loadingPlacement.call(this)

@@ -1,14 +1,14 @@
-/*global createRegistryWrapper, dataObject */
+/*global createRegistryWrapper, dataObject, getValue */
 var modelCidAttributeName = 'data-model-cid';
 
 Thorax.Model = Backbone.Model.extend({
   isEmpty: function() {
-    return this.isPopulated();
+    return !this.isPopulated();
   },
   isPopulated: function() {
     // We are populated if we have attributes set
-    var attributes = _.clone(this.attributes);
-    var defaults = _.isFunction(this.defaults) ? this.defaults() : (this.defaults || {});
+    var attributes = _.clone(this.attributes),
+        defaults = getValue(this, 'defaults') || {};
     for (var default_key in defaults) {
       if (attributes[default_key] != defaults[default_key]) {
         return true;
@@ -17,6 +17,17 @@ Thorax.Model = Backbone.Model.extend({
     }
     var keys = _.keys(attributes);
     return keys.length > 1 || (keys.length === 1 && keys[0] !== this.idAttribute);
+  },
+  shouldFetch: function(options) {
+    // url() will throw if model has no `urlRoot` and no `collection`
+    // or has `collection` and `collection` has no `url`
+    var url;
+    try {
+      url = getValue(this, 'url');
+    } catch(e) {
+      url = false;
+    }
+    return options.fetch && !!url && !this.isPopulated();
   }
 });
 
@@ -68,7 +79,9 @@ $.fn.model = function(view) {
     }
     var collection = $this.collection(view);
     if (collection) {
-      return collection._byCid[modelCid] || false;
+      return collection.find(function(model) {
+        return model.cid === modelCid;
+      }) || false;
     }
   }
   return false;

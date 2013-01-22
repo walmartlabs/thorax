@@ -167,7 +167,7 @@ describe('event', function() {
       }
     });
     view.myModel = new Thorax.Model({key: 'value'});
-    view.bindDataObject(view.myModel, {render: false});
+    view.bindDataObject('model', view.myModel, {render: false});
     expect(spy.callCount).to.equal(0);
     view.myModel.trigger('test');
     expect(spy.callCount).to.equal(1);
@@ -186,48 +186,44 @@ describe('event', function() {
     expect(spy).to.have.been.calledOnce;
   });
 
-  // TODO: simluated DOM events fail under Phantom + Zepto, but work in all
-  // other scenarios, figure out why this test won't run
-  if (!window.callPhantom || (window.callPhantom && typeof jQuery !== 'undefined')) {
-    it("bindToView", function() {
-      var childClickedCount = 0,
-          parentClickedCount = 0;
+  it("bindToView", function() {
+    var childClickedCount = 0,
+        parentClickedCount = 0;
 
-      var Child = Thorax.View.extend({
-        template: Thorax.templates.child,
-        events: {
-          'click div': function() {
-            ++childClickedCount;
-          }
+    var Child = Thorax.View.extend({
+      template: Thorax.templates.child,
+      events: {
+        'click div': function() {
+          ++childClickedCount;
         }
-      });
-
-      var Parent = Thorax.View.extend({
-        template: Thorax.templates.parent,
-        events: {
-          'click div': function() {
-            ++parentClickedCount;
-          }
-        },
-        initialize: function() {
-          this.child = new Child({
-            value: 'a'
-          });
-        }
-      });
-
-      var parent = new Parent();
-      $('body').append(parent.el);
-      parent.render();
-      $(parent.$('div')[0]).trigger('click');
-      expect(parentClickedCount).to.equal(1);
-      expect(childClickedCount).to.equal(0);
-      parent.child.$('div').trigger('click');
-      expect(parentClickedCount).to.equal(1);
-      expect(childClickedCount).to.equal(1);
-      parent.$el.remove();
+      }
     });
-  }
+
+    var Parent = Thorax.View.extend({
+      template: Thorax.templates.parent,
+      events: {
+        'click div': function() {
+          ++parentClickedCount;
+        }
+      },
+      initialize: function() {
+        this.child = new Child({
+          value: 'a'
+        });
+      }
+    });
+
+    var parent = new Parent();
+    $('body').append(parent.el);
+    parent.render();
+    $(parent.$('div')[0]).trigger('click');
+    expect(parentClickedCount).to.equal(1);
+    expect(childClickedCount).to.equal(0);
+    parent.child.$('div').trigger('click');
+    expect(parentClickedCount).to.equal(1);
+    expect(childClickedCount).to.equal(1);
+    parent.$el.remove();
+  });
 
   it("should trigger ready event on children", function() {
     var spy = this.spy(),

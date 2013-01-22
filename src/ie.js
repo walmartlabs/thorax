@@ -7,10 +7,10 @@ var isIE = (/msie [\w.]+/).exec(navigator.userAgent.toLowerCase());
 if (isIE) {
   Thorax.View.on('before:append', function() {
     if (this._renderCount > 0) {
-      _.each(this._elementsByCid, function(element, cid) {
+      _.each(this._elementsByCid, function(element) {
         $(element).remove();
       });
-      _.each(this.children, function(child, cid) {
+      _.each(this.children, function(child) {
         child.$el.remove();
       });
     }

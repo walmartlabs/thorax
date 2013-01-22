@@ -31,7 +31,7 @@ describe('loading', function() {
         myCollection: collection,
         template: function() {}
       });
-      view.bindDataObject(view.myCollection);
+      view.bindDataObject('collection', view.myCollection);
       view.on('load:start', spy);
       view.render();
       expect($(view.el).hasClass('loading')).to.be['false'];
@@ -81,7 +81,7 @@ describe('loading', function() {
         itemTemplate: function() {return ''; }
       });
       var spy = this.spy(view, 'onLoadEnd');
-      view.bindDataObject(view.collection);
+      view.bindDataObject('collection', view.collection);
       collection.loadStart();
       this.clock.tick(1000);
 
@@ -235,11 +235,28 @@ describe('loading', function() {
 
     it('pair in less than timeout does nothing', function() {
       this.object.loadStart();
+      this.clock.tick(10);
       this.object.loadEnd();
       this.clock.tick(1000);
 
       expect(this.loads).to.eql([]);
       expect(this.ends).to.eql([]);
+    });
+
+    it('triggers start only after timeout', function() {
+      this.object.loadStart(undefined, true);
+      this.clock.tick(150);
+
+      expect(this.loads.length).to.equal(0);
+
+      this.object.loadStart();
+      this.clock.tick(150);
+
+      expect(this.loads.length).to.equal(0);
+
+      this.clock.tick(50);
+
+      expect(this.loads.length).to.equal(1);
     });
 
     it('pair with timeout registers', function() {
@@ -704,6 +721,40 @@ describe('loading', function() {
       expect(collectionLoadingTemplateView.$('li').length).to.equal(4);
       expect(collectionLoadingTemplateView.$('li.empty-item').length).to.equal(0);
       expect(collectionLoadingTemplateView.$('li.loading-item').length).to.equal(0);
+    });
+
+    it("nonBlockingLoad and ignoreErrors propagate to collection helper view", function() {
+      var view = new Thorax.View({
+        ignoreFetchError: true,
+        nonBlockingLoad: true,
+        myCollection: new Thorax.Collection([{key: 'value'}]),
+        template: '{{#collection myCollection}}{{/collection}}'
+      });
+      view.render();
+      var firstChildCid = _.keys(view.children)[0];
+      var collectionView = view.children[firstChildCid];
+      var collectionCid = collectionView.collection.cid;
+      var options = collectionView._objectOptionsByCid[collectionCid];
+      expect(options.ignoreErrors).to.equal(true);
+      expect(options.background).to.equal(true);
+    });
+
+    it("load callback should be called with collection and not array", function() {
+      var server = sinon.fakeServer.create();
+      var collection = new (Thorax.Collection.extend({
+        url: '/test'
+      }));
+      var spy = this.spy(function() {
+        expect(arguments[0]).to.equal(collection);
+      });
+      collection.load(spy);
+      server.requests[0].respond(
+        200,
+        { "Content-Type": "application/json" },
+        JSON.stringify([{ id: 1, text: "test"}])
+      );
+      expect(spy.callCount).to.equal(1);
+      server.restore();
     });
   });
 });

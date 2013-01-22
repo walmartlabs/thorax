@@ -1,4 +1,4 @@
-Thorax.CollectionHelperView = Thorax.View.extend({
+Thorax.CollectionHelperView = Thorax.HelperView.extend({
   // Forward render events to the parent
   events: {
     'rendered:item': forwardRenderEvent('rendered:item'),
@@ -7,7 +7,13 @@ Thorax.CollectionHelperView = Thorax.View.extend({
   },
   constructor: function(options) {
     _.each(collectionOptionNames, function(viewAttributeName, helperOptionName) {
-      options.options[helperOptionName] && (options[viewAttributeName] = options.options[helperOptionName]);
+      if (options.options[helperOptionName]) {
+        var value = options.options[helperOptionName];
+        if (viewAttributeName === 'itemTemplate' || viewAttributeName === 'emptyTemplate') {
+          value = Thorax.Util.getTemplate(value);
+        }
+        options[viewAttributeName] = value;
+      }
     });
     // Handlebars.VM.noop is passed in the handlebars options object as
     // a default for fn and inverse, if a block was present. Need to
@@ -21,23 +27,30 @@ Thorax.CollectionHelperView = Thorax.View.extend({
       options.inverse = Handlebars.VM.noop;
     }
     !options.template && (options.template = Handlebars.VM.noop);
-    var response = Thorax.CollectionHelperView.__super__.constructor.call(this, options);
+    var response = Thorax.HelperView.call(this, options);
     if (this.parent.name) {
-      this.emptyTemplate = this.emptyTemplate || Thorax.Util.getTemplate(this.parent.name + '-empty', true);
-      this.itemTemplate = this.itemTemplate || Thorax.Util.getTemplate(this.parent.name + '-item', true);
+      if (!this.emptyTemplate) {
+        this.emptyTemplate = Thorax.Util.getTemplate(this.parent.name + '-empty', true);
+      }
+      if (!this.itemTemplate) {
+        this.itemTemplate = Thorax.Util.getTemplate(this.parent.name + '-item', true);
+      }
     }
     return response;
+  },
+  itemContext: function() {
+    return this.parent.itemContext.apply(this.parent, arguments);
   },
   setAsPrimaryCollectionHelper: function(collection) {
     this.$el.attr(primaryCollectionAttributeName, collection.cid);
     _.each(forwardableProperties, function(propertyName) {
       forwardMissingProperty.call(this, propertyName);
     }, this);
-    // emptyContext needs to be forced because it has a default
-    forwardMissingProperty.call(this, 'emptyContext', true);
-  },
-  emptyContext: function() {
-    return getValue(this.parent, 'context');
+    if (this.parent.itemFilter) {
+      this.itemFilter = function() {
+        return this.parent.itemFilter.apply(this.parent, arguments);
+      };
+    }
   }
 });
 
@@ -58,19 +71,18 @@ function forwardRenderEvent(eventName) {
 }
 
 var forwardableProperties = [
-  'itemContext',
-  'itemFilter',
   'itemTemplate',
   'itemView',
   'emptyTemplate',
   'emptyView'
 ];
 
-function forwardMissingProperty(methodName, force) {
-  if (!this[methodName] || force) {
-    var method = getParent(this)[methodName];
-    if (method){
-      this[methodName] = method;
+function forwardMissingProperty(propertyName) {
+  var parent = getParent(this);
+  if (!this[propertyName]) {
+    var prop = parent[propertyName];
+    if (prop){
+      this[propertyName] = prop;
     }
   }
 }
@@ -86,6 +98,14 @@ Handlebars.registerViewHelper('collection', Thorax.CollectionHelperView, functio
   if (collection && collection === view.declaringView.collection) {
     ensureDataObjectCid('collection', collection);
     view.setAsPrimaryCollectionHelper(collection);
+  }
+  // Mark primary collection element with collection element attribute so that
+  // it can be found by getCollectionElement method
+  // This will execute if both collection and the delcaring view's collection
+  // are null in cases where {{collection}} was declared in a view and
+  // setCollection has not yet been called
+  if (collection === view.declaringView.collection) {
+    view.$el.attr(collectionElementAttributeName, 'true');
   }
   collection && view.setCollection(collection);
 });

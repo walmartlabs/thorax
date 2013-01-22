@@ -19,6 +19,9 @@ Thorax.Collection = Backbone.Collection.extend({
   isPopulated: function() {
     return this._fetched || this.length > 0 || (!this.length && !getValue(this, 'url'));
   },
+  shouldFetch: function(options) {
+    return options.fetch && !!getValue(this, 'url') && !this.isPopulated();
+  },
   fetch: function(options) {
     options = options || {};
     var success = options.success;
@@ -100,8 +103,10 @@ _.extend(Thorax.View.prototype, {
         el.setAttribute(modelCidAttributeName, model.cid);
       });
 
-      !options.silent && this.trigger('rendered:item', this, this.collection, model, itemElement, index);
-      applyItemVisiblityFilter.call(this, model);
+      if (!options.silent) {
+        this.trigger('rendered:item', this, this.collection, model, itemElement, index);
+        applyItemVisiblityFilter.call(this, model);
+      }
     }
     return itemView;
   },
@@ -117,11 +122,13 @@ _.extend(Thorax.View.prototype, {
     if (!viewEl.length) {
       return false;
     }
-    var viewCid = viewEl.attr(viewCidAttributeName);
-    if (this.children[viewCid]) {
-      delete this.children[viewCid];
-    }
     viewEl.remove();
+    var viewCid = viewEl.attr(viewCidAttributeName),
+        child = this.children[viewCid];
+    if (child) {
+      this._removeChild(child);
+      child.destroy();
+    }
     return true;
   },
   renderCollection: function() {
@@ -146,17 +153,19 @@ _.extend(Thorax.View.prototype, {
   },
   emptyClass: 'empty',
   renderEmpty: function() {
-    var context = this.emptyContext ? this.emptyContext.call(this) : this.context();
     if (this.emptyView) {
-      var view = Thorax.Util.getViewInstance(this.emptyView, {});
+      var viewOptions = {};
       if (this.emptyTemplate) {
-        view.render(this.renderTemplate(this.emptyTemplate, context));
-      } else {
-        view.render();
+        viewOptions.template = this.emptyTemplate;
       }
+      var view = Thorax.Util.getViewInstance(this.emptyView, viewOptions);
+      view.ensureRendered();
       return view;
     } else {
-      return this.emptyTemplate && this.renderTemplate(this.emptyTemplate, context);
+      if (!this.emptyTemplate) {
+        this.emptyTemplate = Thorax.Util.getTemplate(this.name + '-empty', true);
+      }
+      return this.emptyTemplate && this.renderTemplate(this.emptyTemplate);
     }
   },
   renderItem: function(model, i) {
@@ -164,16 +173,21 @@ _.extend(Thorax.View.prototype, {
       var viewOptions = {
         model: model
       };
-      this.itemTemplate && (viewOptions.template = this.itemTemplate);
+      if (this.itemTemplate) {
+        viewOptions.template = this.itemTemplate;
+      }
       var view = Thorax.Util.getViewInstance(this.itemView, viewOptions);
       view.ensureRendered();
       return view;
     } else {
       if (!this.itemTemplate) {
-        throw new Error('collection in View: ' + (this.name || this.cid) + ' requires an item template.');
+        this.itemTemplate = Thorax.Util.getTemplate(this.name + '-item');
       }
-      return this.renderTemplate(this.itemTemplate, this.itemContext ? this.itemContext(model, i) : model.attributes);
+      return this.renderTemplate(this.itemTemplate, this.itemContext(model, i));
     }
+  },
+  itemContext: function(model /*, i */) {
+    return model.attributes;
   },
   appendEmpty: function() {
     var $el = this.getCollectionElement();
@@ -212,14 +226,7 @@ _.extend(Thorax.View.prototype, {
     },
     remove: function(model) {
       var $el = this.getCollectionElement();
-      $el.find('[' + modelCidAttributeName + '="' + model.cid + '"]').remove();
-      for (var cid in this.children) {
-        if (this.children[cid].model && this.children[cid].model.cid === model.cid) {
-          this.children[cid].destroy();
-          delete this.children[cid];
-          break;
-        }
-      }
+      this.removeItem(model);
       this.collection.length === 0 && $el.length && handleChangeFromNotEmptyToEmpty.call(this);
     }
   }
@@ -255,12 +262,6 @@ function collectionHelperPresentForPrimaryCollection() {
   return this.collection && this.$('[' + primaryCollectionAttributeName + '="' + this.collection.cid + '"]').length;
 }
 
-function preserveCollectionElement(callback) {
-  var oldCollectionElement = this.getCollectionElement();
-  callback.call(this);
-  this.getCollectionElement().replaceWith(oldCollectionElement);
-}
-
 function applyVisibilityFilter() {
   if (this.itemFilter) {
     this.collection.forEach(function(model) {
@@ -294,11 +295,14 @@ function handleChangeFromNotEmptyToEmpty() {
 
 //$(selector).collection() helper
 $.fn.collection = function(view) {
+  if (view && view.collection) {
+    return view.collection;
+  }
   var $this = $(this),
       collectionElement = $this.closest('[' + collectionCidAttributeName + ']'),
       collectionCid = collectionElement && collectionElement.attr(collectionCidAttributeName);
   if (collectionCid) {
-    view = view || $this.view();
+    view = $this.view();
     if (view) {
       return view.collection;
     }

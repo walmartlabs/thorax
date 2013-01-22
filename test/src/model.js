@@ -1,23 +1,31 @@
 describe('model', function() {
   it("shouldFetch", function() {
-    [Thorax, Backbone].forEach(function(type) {
-      var options = {fetch: true};
-      var a = new (type.Model.extend())();
-      expect(Thorax.Util.shouldFetch(a, options)).to.not.be.ok;
+    var options = {fetch: true};
+    var a = new (Thorax.Model.extend())();
+    expect(a.shouldFetch(options)).to.not.be.ok;
 
-      var b = new (type.Model.extend({urlRoot: '/'}))();
-      expect(Thorax.Util.shouldFetch(b, options)).to.be['true'];
+    var b = new (Thorax.Model.extend({urlRoot: '/'}))();
+    expect(b.shouldFetch(options)).to.be['true'];
 
-      var c = new (type.Model.extend({urlRoot: '/'}))();
-      c.set({key: 'value'});
-      expect(Thorax.Util.shouldFetch(c, options)).to.not.be.ok;
+    var c = new (Thorax.Model.extend({urlRoot: '/'}))();
+    c.set({key: 'value'});
+    expect(c.shouldFetch(options)).to.not.be.ok;
 
-      var d = new (type.Collection.extend())();
-      expect(Thorax.Util.shouldFetch(d, options)).to.not.be.ok;
+    var d = new (Thorax.Collection.extend())();
+    expect(d.shouldFetch(options)).to.not.be.ok;
 
-      var e = new (type.Collection.extend({url: '/'}))();
-      expect(Thorax.Util.shouldFetch(e, options)).to.be['true'];
-    });
+    var e = new (Thorax.Collection.extend({url: '/'}))();
+    expect(e.shouldFetch(options)).to.be['true'];
+
+    var f = new (Thorax.Collection.extend({url: '/'}))();
+    expect(e.shouldFetch({fetch: false})).to.be['false'];
+  });
+
+  it("allow model url to be a string", function() {
+    var model = new (Thorax.Model.extend({
+      url: '/test'
+    }));
+    expect(model.shouldFetch({fetch: true})).to.be['true'];
   });
 
   it("model view binding", function() {
@@ -101,5 +109,56 @@ describe('model', function() {
     expect(callCounter.all - oldAllCount).to.equal(2);
     expect(callCounter.test1).to.equal(1);
     expect(callCounter.test2).to.equal(1);
+  });
+
+  // Not really a great idea, but support allow it to work
+  // with some hacks to render if someone really wants it
+  it("set collection as model", function() {
+    // example that will need to fetch / load
+    var server = sinon.fakeServer.create();
+    var spy = this.spy(function() {
+      this.render();
+    });
+    var collection = new (Thorax.Collection.extend({
+      url: '/test'
+    }));
+    collection.key = 'value';
+    var view = new Thorax.View({
+      events: {
+        model: {
+          reset: spy
+        }
+      },
+      template: '{{key}}',
+      context: function() {
+        return this.model;
+      }
+    });
+    view.setModel(collection);
+    expect(view.html()).to.equal('');
+    expect(spy.callCount).to.equal(0);
+    server.requests[0].respond(
+      200,
+      { "Content-Type": "application/json" },
+      JSON.stringify([{id: 1, text: "test"}])
+    );
+    expect(view.html()).to.equal('value');
+    expect(spy.callCount).to.equal(1);
+    server.restore();
+
+    // local model will not load()
+    spy.callCount = 0;
+    collection = new (Thorax.Collection.extend({
+      url: '/test'
+    }))([{id: 1, text: 'test'}]);
+    collection.key = 'value';
+    view = new Thorax.View({
+      template: '{{key}}',
+      context: function() {
+        return this.model;
+      }
+    });
+    view.setModel(collection);
+    expect(view.html()).to.equal('value');
   });
 });

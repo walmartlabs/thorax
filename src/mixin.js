@@ -3,7 +3,7 @@ Thorax.Mixins = {};
 
 inheritVars.mixins = {
   name: 'mixins',
-  configure: function(mixin) {
+  configure: function() {
     _.each(this.constructor.mixins, this.mixin, this);
     _.each(this.mixins, this.mixin, this);
   }

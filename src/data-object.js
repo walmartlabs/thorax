@@ -35,7 +35,7 @@ function dataObject(type, spec) {
         spec.loading.call(this);
       }
 
-      this.bindDataObject(dataObject, _.extend({}, this.options, options));
+      this.bindDataObject(type, dataObject, _.extend({}, this.options, options));
       $el.attr(spec.cidAttrName, dataObject.cid);
       dataObject.trigger('set', dataObject, old);
     } else {
@@ -45,6 +45,7 @@ function dataObject(type, spec) {
       }
       $el.removeAttr(spec.cidAttrName);
     }
+    this.trigger('change:data-object', type, dataObject, old);
     spec.setCallback && spec.setCallback.call(this, dataObject, options);
     return this;
   }
@@ -53,8 +54,7 @@ function dataObject(type, spec) {
 }
 
 _.extend(Thorax.View.prototype, {
-  bindDataObject: function(dataObject, options) {
-    var type = getDataObjectType(dataObject);
+  bindDataObject: function(type, dataObject, options) {
     if (this._boundDataObjectsByCid[dataObject.cid]) {
       return false;
     }
@@ -68,12 +68,15 @@ _.extend(Thorax.View.prototype, {
     bindEvents.call(this, type, dataObject, this.constructor);
     bindEvents.call(this, type, dataObject, this);
 
-    if (Thorax.Util.shouldFetch(dataObject, options)) {
-      loadObject(dataObject, options);
-    } else if (inheritVars[type].change) {
-      // want to trigger built in rendering without triggering event on model
-      inheritVars[type].change.call(this, dataObject, options);
+    if (dataObject.shouldFetch) {
+      if (dataObject.shouldFetch(options)) {
+        loadObject(dataObject, options);
+      } else if (inheritVars[type].change) {
+        // want to trigger built in rendering without triggering event on model
+        inheritVars[type].change.call(this, dataObject, options);
+      }
     }
+
     return true;
   },
 
@@ -92,24 +95,6 @@ _.extend(Thorax.View.prototype, {
     return options;
   }
 });
-
-function getDataObjectType(dataObject) {
-  if (isModel(dataObject)) {
-    return 'model';
-  } else if (isCollection(dataObject)) {
-    return 'collection';
-  } else {
-    throw new Error('Unknown data object bound: ' + (typeof dataObject));
-  }
-}
-
-function isModel(model) {
-  return model && model.attributes && model.set;
-}
-
-function isCollection(collection) {
-  return collection && collection.indexOf && collection.models;
-}
 
 function bindEvents(type, target, source) {
   var context = this;
@@ -141,24 +126,3 @@ function getEventCallback(callback, context) {
 function ensureDataObjectCid(type, obj) {
   obj.cid = obj.cid || _.uniqueId(type);
 }
-
-Thorax.Util.shouldFetch = function(modelOrCollection, options) {
-  if (!options.fetch) {
-    return;
-  }
-
-  var isCollection = !modelOrCollection.collection && modelOrCollection._byCid && modelOrCollection._byId,
-      url = (
-        (!modelOrCollection.collection && getValue(modelOrCollection, 'urlRoot')) ||
-        (modelOrCollection.collection && getValue(modelOrCollection.collection, 'url')) ||
-        (isCollection && getValue(modelOrCollection, 'url'))
-      );
-
-  return url && !(
-    (modelOrCollection.isPopulated && modelOrCollection.isPopulated()) ||
-    (isCollection
-      ? Thorax.Collection && Thorax.Collection.prototype.isPopulated.call(modelOrCollection)
-      : Thorax.Model.prototype.isPopulated.call(modelOrCollection)
-    )
-  );
-};

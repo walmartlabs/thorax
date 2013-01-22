@@ -27,12 +27,15 @@ function registryGet(object, type, name, ignoreErrors) {
   }
 }
 
+// getValue is used instead of _.result because we
+// need an extra scope parameter, and will minify
+// better than _.result
 function getValue(object, prop, scope) {
   if (!(object && object[prop])) {
     return null;
   }
   return _.isFunction(object[prop])
-    ? object[prop].apply(scope || object, Array.prototype.slice.call(arguments, 2))
+    ? object[prop].call(scope || object)
     : object[prop];
 }
 
@@ -109,6 +112,7 @@ function getOptionsData(options) {
 
 Thorax.Util = {
   getViewInstance: function(name, attributes) {
+    attributes = attributes || {};
     attributes['class'] && (attributes.className = attributes['class']);
     attributes.tag && (attributes.tagName = attributes.tag);
     if (typeof name === 'string') {
@@ -196,7 +200,7 @@ Thorax.Util = {
     var htmlAttributes = _.omit(attributes, 'tag', 'tagName'),
         tag = attributes.tag || attributes.tagName || 'div';
     return '<' + tag + ' ' + _.map(htmlAttributes, function(value, key) {
-      if (typeof value === 'undefined') {
+      if (typeof value === 'undefined' || key === 'expand-tokens') {
         return '';
       }
       var formattedValue = value;
