@@ -78,12 +78,31 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
   return helper;
 };
 
+/**
+ * Clones the helper options, dropping items that are known to change
+ * between rendering cycles as appropriate.
+ */
 function cloneHelperOptions(options) {
   var ret = _.pick(options, 'fn', 'inverse', 'hash', 'data');
   ret.data = _.omit(options.data, 'cid', 'view', 'yield');
   return ret;
 }
 
+/**
+ * Checks for basic equality between two sets of parameters for a helper view.
+ *
+ * Checked fields include:
+ *  - _helperName
+ *  - All args
+ *  - Hash
+ *  - Data
+ *  - Function and Invert (id based if possible)
+ *
+ * This method allows us to determine if the inputs to a given view are the same. If they
+ * are then we make the assumption that the rendering will be the same (or the child view will
+ * otherwise rerendering it by monitoring it's parameters as necessary) and reuse the view on
+ * rerender of the parent view.
+ */
 function compareHelperOptions(a, b) {
   function compareValues(a, b) {
     return _.every(a, function(value, key) {
