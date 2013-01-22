@@ -1,11 +1,26 @@
 # Change Log
 
-## 2.0.0b6
+## 2.0.0rc1
 
-- collection events bound with `on({collection: events})` no longer recieve a `CollectionView` as the first argument as collections may be bound without a `CollectionView`
-- added `bindCollection` and `unbindCollection`
-- `addModel` and `removeModel` renamed to `bindModel` and `unbindModel`
-- `empty-context` in `collection` helper now defaults to `parent.context`
+- Numerous performance and bug fixes
+- Thorax now requires Backbone 0.9.9 or later
+- The "auto unbind" feature of `on(targetObject, eventName)` has been removed, implemented by Backbone as `listenTo`
+- Use of `Thorax.Router` is deprecated and no longer documented
+- Removed `ViewController` class
+- Views can now specify a `helpers` hash to call templates with
+- Removed Thorax.Util.getValue
+- `renderTemplate` second `context` argument now overrides context passed to template instead of adding to it
+- `ready` event now propagates to children
+- Added `view.appendTo` method
+- Added `bindDataObject`, `unbindDataObject` methods
+- New lumbar based build system, `thorax build` command line option has been removed
+- Add `removeItem` `updateItem` methods for views rendering a collection
+- Remove `emptyContext` method and `empty-context` collection helper argument
+- Add {{collection-element}} helper, to specify where in a view a collection should be rendered
+- `CollectionView` has been removed, collection rendering can now be done in any class
+- Added `itemFilter` method
+- Move `{{cid}}`, `{{yield}}` special variables to private variables in handlebars (available with `{{@cid}}` and `{{@yield}}`). `{{_view}}` is now avialable as `{{@view}}` 
+- Collection events bound with `on({collection: events})` no longer recieve a `CollectionView` as the first argument
 - Revert: DOM event handlers now recieve the original context (if the handler had been registered with $.on) as the second argument
 
 ## 2.0.0b5
