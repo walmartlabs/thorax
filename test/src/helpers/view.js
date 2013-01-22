@@ -106,36 +106,30 @@ describe('view helper', function() {
     expect(parent.$('div').get(1).innerHTML).to.equal('b');
   });
 
-  // TODO: The bug and test to ensure it is fixed is limited to jQuery
-  // The test fails on PhantomJS running the zepto tests for unknown
-  // reasons. The test passes on Zepto when run directly in a browser.
-  // It is disabled for now as it does not affect Zepto.
-  if (typeof jQuery !== 'undefined' && $ === jQuery) {
-    it("child view re-render will keep dom events intact", function() {
-      var callCount = 0;
-      var parent = new Thorax.View({
-        name: 'parent-event-dom-test',
-        child: new Thorax.View({
-          name: 'child-event-dom-test',
-          events: {
-            'click .test': function() {
-              ++callCount;
-            }
-          },
-          template: function() { return '<div class="test"></div>'; }
-        }),
-        template: "{{view child}}"
-      });
-      parent.render();
-      document.body.appendChild(parent.el);
-      parent.child.$('.test').trigger('click');
-      expect(callCount).to.equal(1);
-      parent.render();
-      parent.child.$('.test').trigger('click');
-      expect(callCount).to.equal(2);
-      $(parent.el).remove();
+  it("child view re-render will keep dom events intact", function() {
+    var callCount = 0;
+    var parent = new Thorax.View({
+      name: 'parent-event-dom-test',
+      child: new Thorax.View({
+        name: 'child-event-dom-test',
+        events: {
+          'click .test': function() {
+            ++callCount;
+          }
+        },
+        template: function() { return '<div class="test"></div>'; }
+      }),
+      template: "{{view child}}"
     });
-  }
+    parent.render();
+    document.body.appendChild(parent.el);
+    parent.child.$('.test').trigger('click');
+    expect(callCount).to.equal(1);
+    parent.render();
+    parent.child.$('.test').trigger('click');
+    expect(callCount).to.equal(2);
+    $(parent.el).remove();
+  });
 
   it("$.fn.view", function() {
     var child = new Thorax.View({
