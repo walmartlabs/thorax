@@ -13,6 +13,7 @@
 - `ready` event now propagates to children
 - Added `view.appendTo` method
 - Added `bindDataObject`, `unbindDataObject` methods
+- Added `thorax release` command to generate combined & minified files
 - New lumbar based build system, `thorax build` command line option has been removed
 - Add `removeItem` `updateItem` methods for views rendering a collection
 - Remove `emptyContext` method and `empty-context` collection helper argument
