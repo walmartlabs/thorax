@@ -23,8 +23,12 @@ function getParent(parent) {
 
 Handlebars.registerViewHelper = function(name, ViewClass, callback) {
   if (arguments.length === 2) {
-    callback = arguments[1];
-    ViewClass = Thorax.HelperView;
+    if (ViewClass.factory) {
+      callback = ViewClass.callback;
+    } else {
+      callback = ViewClass;
+      ViewClass = Thorax.HelperView;
+    }
   }
   Handlebars.registerHelper(name, function() {
     var args = _.toArray(arguments),
@@ -57,14 +61,24 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
 
     // Create the instance if we don't already have one
     if (!instance) {
-      instance = new ViewClass(viewOptions);
+      if (ViewClass.factory) {
+        instance = ViewClass.factory(args, viewOptions);
+        if (!instance) {
+          return '';
+        }
+
+        instance._helperName = viewOptions._helperName;
+        instance._helperOptions = viewOptions._helperOptions;
+      } else {
+        instance = new ViewClass(viewOptions);
+      }
 
       args.push(instance);
-      declaringView.children[instance.cid] = instance;
+      declaringView._addChild(instance);
       declaringView.trigger.apply(declaringView, ['helper', name].concat(args));
       declaringView.trigger.apply(declaringView, ['helper:' + name].concat(args));
 
-      callback.apply(this, args);
+      callback && callback.apply(this, args);
     } else {
       declaringView._previousHelpers = _.without(declaringView._previousHelpers, instance);
       declaringView.children[instance.cid] = instance;

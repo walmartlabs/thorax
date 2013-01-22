@@ -135,7 +135,9 @@ describe('view helper', function() {
       b: b
     });
     parent.render();
+    expect(parent.$('.child-a').length).to.equal(1);
     expect(parent.$('.child-a').html()).to.equal('value');
+    expect(parent.$('.child-b').length).to.equal(1);
     expect(parent.$('.child-b').html()).to.equal('value');
 
     //ensure that override does not persist to view itself
@@ -221,7 +223,7 @@ describe('view helper', function() {
     expect(spy.callCount).to.equal(2);
     expect(view.$('div').eq(0).html()).to.equal('inner');
     expect(view.$('div').eq(1).html()).to.equal('inner');
-    
+
     var secondCids = _.keys(view.children);
     expect(firstCids.length).to.equal(secondCids.length);
     expect(firstCids[0]).to.equal(secondCids[0]);
