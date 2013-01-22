@@ -73,7 +73,8 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
     var htmlAttributes = Thorax.Util.htmlAttributesFromOptions(options.hash);
     htmlAttributes[viewPlaceholderAttributeName] = instance.cid;
 
-    return new Handlebars.SafeString(Thorax.Util.tag(htmlAttributes, ''));
+    var expandTokens = options.hash['expand-tokens'];
+    return new Handlebars.SafeString(Thorax.Util.tag(htmlAttributes, '', expandTokens ? this : null));
   });
   var helper = Handlebars.helpers[name];
   return helper;
