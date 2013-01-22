@@ -130,53 +130,6 @@ describe('core', function() {
     expect(d.$('p').html()).to.equal('d', 'parent render accepts view');
   });
 
-  it("template passed to constructor and view block", function() {
-    var view = new Thorax.View({
-      template: '<p>{{key}}</p>',
-      key: 'value'
-    });
-    view.render();
-    expect(view.$('p').html()).to.equal('value');
-
-    var view = new (Thorax.View.extend({
-      template: '<p>{{key}}</p>',
-      key: 'value'
-    }))();
-    view.render();
-    expect(view.$('p').html()).to.equal('value');
-
-    var Child = Thorax.View.extend({
-      template: '<div class="child-a">{{key}}</div>',
-      key: 'value'
-    });
-
-    var a = new Child();
-    var b = new Child();
-
-    var parent = new Thorax.View({
-      template: '<div class="parent">{{#view b}}<div class="child-b">{{key}}</div>{{/view}}{{view a}}</div>',
-      a: a,
-      b: b
-    });
-    parent.render();
-    expect(parent.$('.child-a').html()).to.equal('value');
-    expect(parent.$('.child-b').html()).to.equal('value');
-
-    //ensure that override does not persist to view itself
-    b.render();
-    expect(b.$('.child-a').html()).to.equal('value');
-
-    //test nesting
-    var outer = new Thorax.View({
-      template: '<div class="a">{{#view inner}}<div class="b">{{#view child}}<div class="c">value</div>{{/view}}</div>{{/view}}</div>',
-      inner: new Thorax.View({
-        child: new Thorax.View()
-      })
-    });
-    outer.render();
-    expect(outer.$('.c').html()).to.equal('value');
-  });
-
   it("onException", function() {
     var oldOnException = Thorax.onException;
     var view = new Thorax.View({
