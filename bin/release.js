@@ -45,8 +45,10 @@ module.exports = function() {
         output += fs.readFileSync(path.join(__dirname, '..', file)).toString() + "\n";
       });
       var targetFile = path.join(__dirname, targetDir, target);
-      fs.writeFileSync(targetFile, minify(output));
+      fs.writeFileSync(targetFile.replace(/\.js$/, '.min.js'), minify(output));
+      fs.writeFileSync(targetFile, output);
       console.log("Wrote: " + targetFile);
+      console.log("Wrote: " + targetFile.replace(/\.js$/, '.min.js'));
     }
   });
 };

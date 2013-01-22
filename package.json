@@ -3,6 +3,7 @@
   "version": "2.0.0b6",
   "description": "Handlebars + Backbone",
   "keywords": ["backbone", "handlebars"],
+  "homepage": "http://thoraxjs.org",
   "authors": [
     "Ryan Eastridge <ryan@eastridge.xxx> (http://eastridge.xxx)",
     "Kevin Decker <kpdecker@gmail.com> (http://incaseofstairs.com)"
