@@ -1,5 +1,6 @@
 /*global getOptionsData, viewHelperAttributeName */
 var viewPlaceholderAttributeName = 'data-view-tmp';
+var viewTemplateOverrides = {};
 
 Thorax.HelperView = Thorax.View.extend({
   _ensureElement: function() {
@@ -77,6 +78,26 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
   var helper = Handlebars.helpers[name];
   return helper;
 };
+
+Thorax.View.on('append', function(scope, callback) {
+  (scope || this.$el).find('[' + viewPlaceholderAttributeName + ']').forEach(function(el) {
+    var placeholderId = el.getAttribute(viewPlaceholderAttributeName),
+        view = this.children[placeholderId];
+    if (view) {
+      //see if the view helper declared an override for the view
+      //if not, ensure the view has been rendered at least once
+      if (viewTemplateOverrides[placeholderId]) {
+        view.render(viewTemplateOverrides[placeholderId]);
+        delete viewTemplateOverrides[placeholderId];
+      } else {
+        view.ensureRendered();
+      }
+      $(el).replaceWith(view.el);
+      callback && callback(view.el);
+    }
+  }, this);
+});
+
 
 /**
  * Clones the helper options, dropping items that are known to change

@@ -1,5 +1,4 @@
 /*global viewPlaceholderAttributeName */
-var viewTemplateOverrides = {};
 Handlebars.registerHelper('view', function(view, options) {
   var declaringView = getOptionsData(options).view;
   if (arguments.length === 1) {
@@ -20,22 +19,5 @@ Handlebars.registerHelper('view', function(view, options) {
   var htmlAttributes = Thorax.Util.htmlAttributesFromOptions(options.hash);
   htmlAttributes[viewPlaceholderAttributeName] = placeholderId;
   return new Handlebars.SafeString(Thorax.Util.tag(htmlAttributes, undefined, expandTokens ? this : null));
-});
 
-Thorax.View.on('append', function(scope, callback) {
-  (scope || this.$el).find('[' + viewPlaceholderAttributeName + ']').forEach(function(el) {
-    var placeholderId = el.getAttribute(viewPlaceholderAttributeName),
-        view = this.children[placeholderId];
-    if (view) {
-      //see if the view helper declared an override for the view
-      //if not, ensure the view has been rendered at least once
-      if (viewTemplateOverrides[placeholderId]) {
-        view.render(viewTemplateOverrides[placeholderId]);
-      } else {
-        view.ensureRendered();
-      }
-      $(el).replaceWith(view.el);
-      callback && callback(view.el);
-    }
-  }, this);
 });
