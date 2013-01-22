@@ -4,7 +4,11 @@ var fs = require('fs'),
     uglify = require('uglify-js'),
     targetDir = '../build/release';
 
-fs.mkdirSync(path.join(__dirname, targetDir));
+try {
+  fs.mkdirSync(path.join(__dirname, targetDir));
+} catch(e) {
+  
+}
 
 var config = {
   "thorax.js": [
