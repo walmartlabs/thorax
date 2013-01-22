@@ -162,7 +162,7 @@ function compareHelperOptions(a, b) {
             return compareValues(a.options[key], b.options[key]);
           } else if (key === 'fn' || key === 'inverse') {
             return b.options[key] === value
-                || (value && ((b.options[key] || {}).program === value.program));
+                || (value && _.has(value, 'program') && ((b.options[key] || {}).program === value.program));
           }
           return b.options[key] === value;
         });

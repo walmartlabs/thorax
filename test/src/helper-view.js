@@ -69,6 +69,21 @@ describe('helper-view', function() {
       var newFirstKey = _.keys(view.children)[0];
       expect(firstKey).to.not.equal(newFirstKey);
     });
+    it('should rerender a helper has depth', function() {
+      view = new Thorax.View({
+        template: '{{#test}}{{../foo}}{{/test}}'
+      });
+      view.render();
+      expect(spy.callCount).to.equal(1);
+      expect(_.keys(view.children).length).to.equal(1);
+      var firstKey = _.keys(view.children)[0];
+
+      view.render();
+      expect(spy.callCount).to.equal(2);
+      expect(_.keys(view.children).length).to.equal(1);
+      var newFirstKey = _.keys(view.children)[0];
+      expect(firstKey).to.not.equal(newFirstKey);
+    });
     it('should cooperate with each loops', function() {
       view = new Thorax.View({
         template: '{{#each keys}}{{#test}}@index{{/test}}{{/each}}',
