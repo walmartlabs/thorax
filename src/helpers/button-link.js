@@ -27,7 +27,7 @@ Handlebars.registerHelper('link', function() {
       url = args.length === 0 ? [hash.href] : args,
       expandTokens = hash['expand-tokens'];
   delete hash['expand-tokens'];
-  if (!url[0]) {
+  if (!url[0] && url[0] !== '') {
     throw new Error("link helper requires an href as the first argument or an 'href' attribute");
   }
   url.push(options);

@@ -34,6 +34,14 @@ describe('button-link helpers', function() {
     expect(view.$('a[expand-tokens]').length).to.equal(0);
   });
 
+  it("allow empty string as link", function() {
+    var view = new Thorax.View({
+      template: '{{#link ""}}text{{/link}}'
+    });
+    view.render();
+    expect(view.$('a').html()).to.equal('text');
+  });
+
   it("button and link helpers", function() {
     var view = new Thorax.View({
       events: {
