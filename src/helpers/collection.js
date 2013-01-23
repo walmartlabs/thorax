@@ -90,20 +90,8 @@ function forwardMissingProperty(propertyName) {
 Handlebars.registerViewHelper('collection', Thorax.CollectionHelperView, function(collection, view) {
   if (arguments.length === 1) {
     view = collection;
-    collection = view.declaringView.collection;
-  }
-  // Need additional check here to see if it is the
-  // primary collection as templates can do:
-  // #collection this.collection
-  if (collection && collection === view.declaringView.collection) {
-    view.setAsPrimaryCollectionHelper(collection);
-  }
-  // Mark primary collection element with collection element attribute so that
-  // it can be found by getCollectionElement method
-  // This will execute if both collection and the delcaring view's collection
-  // are null in cases where {{collection}} was declared in a view and
-  // setCollection has not yet been called
-  if (collection === view.declaringView.collection) {
+    collection = view.parent.collection;
+    collection && view.setAsPrimaryCollectionHelper(collection);
     view.$el.attr(collectionElementAttributeName, 'true');
   }
   collection && view.setCollection(collection);

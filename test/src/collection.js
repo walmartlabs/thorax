@@ -338,6 +338,23 @@ describe('collection', function() {
     expect(view.$('li').length).to.equal(1);
   });
 
+  it("itemFilter will work in nested view helpers", function() {
+    var view = new Thorax.View({
+      collection: new Thorax.Collection([
+        {letter: 'a'},
+        {letter: 'b'}
+      ]),
+      template: '{{^empty collection}}{{#collection tag="ul"}}<li>{{letter}}</li>{{/collection}}{{/empty}}',
+      itemFilter: function(model) {
+        return model.get('letter') != 'a';
+      }
+    });
+    view.render();
+
+    expect(view.$('li').eq(0).css('display')).to.equal('none');
+    expect(view.$('li').eq(1).css('display')).to.not.equal('none');
+  });
+
   it("collection model updates will update item", function() {
     var collection = new Thorax.Collection([{name: 'a'}], {
       comparator: function(obj) {
@@ -463,7 +480,7 @@ describe('collection', function() {
     var view = new Thorax.View({
       key: 'value',
       collection: letterCollection,
-      template: "{{#collection this.collection}}<span>{{test}}</span>{{/collection}}",
+      template: "{{#collection}}<span>{{test}}</span>{{/collection}}",
       itemContext: function() {
         // not checking for `view` or cid as itemContext will be called immediately
         // before `view` var is assigned
@@ -485,7 +502,7 @@ describe('collection', function() {
           return true;
         }
       }))(),
-      template: "{{#collection this.collection}}{{test}}{{else}}<b>{{test}}</b>{{/collection}}",
+      template: "{{#collection}}{{test}}{{else}}<b>{{test}}</b>{{/collection}}",
       test: 'testing'
     });
     view.render();
@@ -517,15 +534,6 @@ describe('collection', function() {
     expect(view.$('ul').hasClass('empty')).to.be['false'];
     view.collection.remove(model);
     expect(view.$('ul').hasClass('empty')).to.be['true'];
-  });
-
-  it("helper and local scope collision", function() {
-    var child = new Thorax.View({
-      collection: letterCollection,
-      template: '{{#collection this.collection tag="ul"}}<li>{{letter}}</li>{{/collection}}'
-    });
-    child.render();
-    expect(child.$('li').html()).to.equal('a');
   });
 
   it("$.fn.collection", function() {
