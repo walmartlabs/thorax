@@ -58,8 +58,6 @@ _.extend(Thorax.View.prototype, {
     if (this._boundDataObjectsByCid[dataObject.cid]) {
       return false;
     }
-    // Collections do not have a cid attribute by default
-    ensureDataObjectCid(type, dataObject);
     this._boundDataObjectsByCid[dataObject.cid] = dataObject;
 
     var options = this._modifyDataObjectOptions(dataObject, _.extend({}, inheritVars[type].defaultOptions, options));
@@ -121,8 +119,4 @@ function getEventCallback(callback, context) {
   } else {
     return context[callback];
   }
-}
-
-function ensureDataObjectCid(type, obj) {
-  obj.cid = obj.cid || _.uniqueId(type);
 }
