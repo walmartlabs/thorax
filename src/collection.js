@@ -66,7 +66,9 @@ _.extend(Thorax.View.prototype, {
     }
     var itemView,
         $el = this.getCollectionElement();
-    options = options || {};
+    options = _.defaults(options || {}, {
+      filter: true
+    });
     //if index argument is a view
     index && index.el && (index = $el.children().indexOf(index.el) + 1);
     //if argument is a view, or html string
@@ -103,10 +105,8 @@ _.extend(Thorax.View.prototype, {
         el.setAttribute(modelCidAttributeName, model.cid);
       });
 
-      if (!options.silent) {
-        this.trigger('rendered:item', this, this.collection, model, itemElement, index);
-        applyItemVisiblityFilter.call(this, model);
-      }
+      !options.silent && this.trigger('rendered:item', this, this.collection, model, itemElement, index);
+      options.filter && applyItemVisiblityFilter.call(this, model);
     }
     return itemView;
   },
@@ -194,7 +194,8 @@ _.extend(Thorax.View.prototype, {
     $el.empty();
     var emptyContent = this.renderEmpty();
     emptyContent && this.appendItem(emptyContent, 0, {
-      silent: true
+      silent: true,
+      filter: false
     });
     this.trigger('rendered:empty', this, this.collection);
   },
