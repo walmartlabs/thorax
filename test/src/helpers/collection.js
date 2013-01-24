@@ -17,6 +17,25 @@ describe('collection helper', function() {
     expect(view.$('li').length).to.equal(0);
   });
 
+  it("collection helper won't re-render parent on add", function() {
+    var spy = this.spy();
+    var collection = new Thorax.Collection([{letter: 'a'}]);
+    var view = new Thorax.View({
+      events: {
+        rendered: spy
+      },
+      template: '{{#collection tag="ul"}}<li>{{letter}}</li>{{/collection}}'
+    });
+    view.render();
+    expect(spy.callCount).to.equal(1);
+    view.setCollection(collection);
+    expect(spy.callCount).to.equal(1);
+    expect(view.$('li').length).to.equal(1);
+    collection.add({letter: 'b'});
+    expect(spy.callCount).to.equal(1);
+    expect(view.$('li').length).to.equal(2);
+  });
+
   it("nested collection helper", function() {
     function testNesting(view, msg) {
       var blogModel = new Thorax.Model();
