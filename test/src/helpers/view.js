@@ -223,4 +223,31 @@ describe('view helper', function() {
     expect(firstCids[0]).to.equal(secondCids[0]);
     expect(firstCids[1]).to.equal(secondCids[1]);
   });
+
+  it("views embedded with view helper do not incorrectly set parent", function() {
+    var view = new Thorax.View({
+      child: new Thorax.View({
+        template: '{{#empty}}so empty{{/empty}}'
+      }),
+      template: '{{view child}}'
+    });
+    view.render();
+    var emptyView = _.find(view.child.children, function(child) {
+      return child._helperName === 'empty';
+    });
+    expect(emptyView.parent).to.equal(view.child);
+
+    // ensure overrides do not modify either
+    view = new Thorax.View({
+      child: new Thorax.View({
+        template: ''
+      }),
+      template: '{{#view child}}{{#empty}}so empty{{/empty}}{{/view}}'
+    });
+    view.render();
+    emptyView = _.find(view.child.children, function(child) {
+      return child._helperName === 'empty';
+    });
+    expect(emptyView.parent).to.equal(view.child);
+  });
 });
