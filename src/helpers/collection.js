@@ -42,7 +42,6 @@ Thorax.CollectionHelperView = Thorax.HelperView.extend({
     return this.parent.itemContext.apply(this.parent, arguments);
   },
   setAsPrimaryCollectionHelper: function(collection) {
-    this.$el.attr(primaryCollectionAttributeName, collection.cid);
     _.each(forwardableProperties, function(propertyName) {
       forwardMissingProperty.call(this, propertyName);
     }, this);
@@ -91,7 +90,19 @@ Handlebars.registerViewHelper('collection', Thorax.CollectionHelperView, functio
   if (arguments.length === 1) {
     view = collection;
     collection = view.parent.collection;
-    collection && view.setAsPrimaryCollectionHelper(collection);
+    view.parent._childWillRenderCollection = true;
+    if (collection) {
+      view.setAsPrimaryCollectionHelper(collection);
+    } else {
+      var handler = function(type, dataObject) {
+        if (type === 'collection') {
+          view.setAsPrimaryCollectionHelper(dataObject);
+          view.setCollection(dataObject);
+          view.stopListening(view.parent, 'change:data-object', handler);
+        }
+      };
+      view.listenTo(view.parent, 'change:data-object', handler);
+    }
     view.$el.attr(collectionElementAttributeName, 'true');
   }
   collection && view.setCollection(collection);

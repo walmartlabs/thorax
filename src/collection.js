@@ -4,7 +4,6 @@ var _fetch = Backbone.Collection.prototype.fetch,
     collectionCidAttributeName = 'data-collection-cid',
     collectionEmptyAttributeName = 'data-collection-empty',
     collectionElementAttributeName = 'data-collection-element',
-    primaryCollectionAttributeName = 'data-collection-primary',
     ELEMENT_NODE_TYPE = 1;
 
 Thorax.Collection = Backbone.Collection.extend({
@@ -137,7 +136,7 @@ _.extend(Thorax.View.prototype, {
   },
   renderCollection: function() {
     this.ensureRendered();
-    if (collectionHelperPresentForPrimaryCollection.call(this)) {
+    if (this._childWillRenderCollection) {
       return;
     }
     if (this.collection) {
@@ -248,23 +247,19 @@ Thorax.View.on({
 });
 
 function onCollectionReset(collection) {
-  if (collection === this.collection && this._objectOptionsByCid[this.collection.cid].render) {
+  if (!collection || (collection === this.collection && this._objectOptionsByCid[this.collection.cid].render)) {
     this.renderCollection();
   }
 }
 
 function afterSetCollection(collection) {
-  if (!collectionHelperPresentForPrimaryCollection.call(this) && collection) {
+  if (!this._childWillRenderCollection && collection) {
     _.each(this._collectionRenderingEvents, function(callback, eventName) {
       // getEventCallback will resolve if it is a string or a method
       // and return a method
       this.listenTo(collection, eventName, getEventCallback(callback, this));
     }, this);
   }
-}
-
-function collectionHelperPresentForPrimaryCollection() {
-  return this.collection && this.$('[' + primaryCollectionAttributeName + '="' + this.collection.cid + '"]').length;
 }
 
 function applyVisibilityFilter() {
