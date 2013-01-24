@@ -41,7 +41,7 @@ Thorax.CollectionHelperView = Thorax.HelperView.extend({
   itemContext: function() {
     return this.parent.itemContext.apply(this.parent, arguments);
   },
-  setAsPrimaryCollectionHelper: function(collection) {
+  setAsPrimaryCollectionHelper: function() {
     _.each(forwardableProperties, function(propertyName) {
       forwardMissingProperty.call(this, propertyName);
     }, this);
@@ -91,12 +91,10 @@ Handlebars.registerViewHelper('collection', Thorax.CollectionHelperView, functio
     view = collection;
     collection = view.parent.collection;
     view.parent._childWillRenderCollection = true;
-    if (collection) {
-      view.setAsPrimaryCollectionHelper(collection);
-    } else {
+    view.setAsPrimaryCollectionHelper();
+    if (!collection) {
       var handler = function(type, dataObject) {
         if (type === 'collection') {
-          view.setAsPrimaryCollectionHelper(dataObject);
           view.setCollection(dataObject);
           view.stopListening(view.parent, 'change:data-object', handler);
         }
