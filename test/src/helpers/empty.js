@@ -74,6 +74,19 @@ describe('empty helper', function() {
     expect(b.$('[data-collection-cid] div')[0].innerHTML).to.equal('a');
   });
 
+  it("transition from no collection to collection", function() {
+    var view = new Thorax.View({
+      template: '{{#collection tag="ul"}}<li>{{letter}}</li>{{/collection}}'
+    });
+    view.render();
+    expect(view.$('li').length).to.equal(0);
+    var collection = new Thorax.Collection([{letter: 'a'}]);
+    view.setCollection(collection);
+    expect(view.$('li').length).to.equal(1);
+    view.setCollection(false);
+    expect(view.$('li').length).to.equal(0);
+  });
+
   it("nested collection helper", function() {
     function testNesting(view, msg) {
       var blogModel = new Thorax.Model();
