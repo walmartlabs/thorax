@@ -66,13 +66,11 @@ _.extend(Thorax.View.prototype, {
     bindEvents.call(this, type, dataObject, this.constructor);
     bindEvents.call(this, type, dataObject, this);
 
-    if (dataObject.shouldFetch) {
-      if (dataObject.shouldFetch(options)) {
-        loadObject(dataObject, options);
-      } else if (inheritVars[type].change) {
-        // want to trigger built in rendering without triggering event on model
-        inheritVars[type].change.call(this, dataObject, options);
-      }
+    if (dataObject.shouldFetch && dataObject.shouldFetch(options)) {
+      loadObject(dataObject, options);
+    } else if (inheritVars[type].change) {
+      // want to trigger built in rendering without triggering event on model
+      inheritVars[type].change.call(this, dataObject, options);
     }
 
     return true;
