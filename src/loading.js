@@ -370,9 +370,7 @@ inheritVars.collection.loading = function() {
         this.$el.empty();
       }
       if (loadingView) {
-        var instance = Thorax.Util.getViewInstance(loadingView, {
-          collection: this.collection
-        });
+        var instance = Thorax.Util.getViewInstance(loadingView);
         this._addChild(instance);
         if (loadingTemplate) {
           instance.render(loadingTemplate);
