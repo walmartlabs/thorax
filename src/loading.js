@@ -171,6 +171,12 @@ Thorax.mixinLoadableEvents = function(target, useParent) {
 Thorax.mixinLoadable(Thorax.View.prototype);
 Thorax.mixinLoadableEvents(Thorax.View.prototype);
 
+
+if (Thorax.HelperView) {
+  Thorax.mixinLoadable(Thorax.HelperView.prototype, true);
+  Thorax.mixinLoadableEvents(Thorax.HelperView.prototype, true);
+}
+
 Thorax.sync = function(method, dataObj, options) {
   var self = this,
       complete = options.complete;

@@ -731,12 +731,16 @@ describe('loading', function() {
         template: '{{#collection myCollection}}{{/collection}}'
       });
       view.render();
-      var firstChildCid = _.keys(view.children)[0];
-      var collectionView = view.children[firstChildCid];
-      var collectionCid = collectionView.collection.cid;
-      var options = collectionView._objectOptionsByCid[collectionCid];
+      view.myCollection.url = function() { return 'foo'; };
+      view.myCollection.fetch();
+      this.clock.tick(1000);
+
+      var collectionView = _.values(view.children)[0],
+          collectionCid = collectionView.collection.cid,
+          options = collectionView._objectOptionsByCid[collectionCid];
       expect(options.ignoreErrors).to.equal(true);
       expect(options.background).to.equal(true);
+      expect(view.$el.hasClass('loading')).to.be.true;
     });
 
     it("load callback should be called with collection and not array", function() {
