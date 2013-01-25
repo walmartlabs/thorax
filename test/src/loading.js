@@ -211,6 +211,11 @@ describe('loading', function() {
 
       this.model.loadEnd();
       this.model.loadEnd();
+      this.model.loadEnd();
+      this.clock.tick(1000);
+      expect(this.endSpy).to.not.have.been.called;
+
+      this.model.loadEnd();
       this.clock.tick(1000);
 
       expect(this.endSpy).to.have.been.calledOnce;
