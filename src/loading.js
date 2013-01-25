@@ -54,10 +54,16 @@ Thorax.loadHandler = function(start, end, context) {
       }
     }
 
-    loadInfo.events.push(object);
-    object.on(loadEnd, function endCallback() {
-      object.off(loadEnd, endCallback);
+    // Prevent binds to the same object multiple times as this can cause very bad things
+    // to happen for the load;load;end;end execution flow.
+    if (loadInfo.events.indexOf(object) >= 0) {
+      loadInfo.events.push(object);
+      return;
+    }
 
+    loadInfo.events.push(object);
+
+    object.on(loadEnd, function endCallback() {
       var loadingEndTimeout = self._loadingTimeoutEndDuration;
       if (loadingEndTimeout === void 0) {
         // If we are running on a non-view object pull the default timeout
@@ -68,8 +74,15 @@ Thorax.loadHandler = function(start, end, context) {
           index = events.indexOf(object);
       if (index >= 0) {
         events.splice(index, 1);
+
+        if (events.indexOf(object) < 0) {
+          // Last callback for this particlar object, remove the bind
+          object.off(loadEnd, endCallback);
+        }
       }
+
       if (!events.length) {
+        clearTimeout(loadInfo.endTimeout);
         loadInfo.endTimeout = setTimeout(function() {
           try {
             if (!events.length) {
