@@ -101,12 +101,14 @@ function bindEvents(type, target, source) {
 }
 
 function loadObject(dataObject, options) {
-  if (dataObject.load) {
+  if (!dataObject._isLoading) {
+    dataObject._isLoading = true;
     dataObject.load(function() {
+      delete dataObject._isLoading;
       options && options.success && options.success(dataObject);
+    }, function() {
+      delete dataObject._isLoading;
     }, options);
-  } else {
-    dataObject.fetch(options);
   }
 }
 
