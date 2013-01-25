@@ -45,7 +45,7 @@ Thorax.CollectionHelperView = Thorax.HelperView.extend({
     _.each(forwardableProperties, function(propertyName) {
       forwardMissingProperty.call(this, propertyName);
     }, this);
-    if (this.parent.itemFilter) {
+    if (this.parent.itemFilter && !this.itemFilter) {
       this.itemFilter = function() {
         return this.parent.itemFilter.apply(this.parent, arguments);
       };
@@ -91,7 +91,7 @@ Handlebars.registerViewHelper('collection', Thorax.CollectionHelperView, functio
     view = collection;
     collection = view.parent.collection;
     view.parent._childWillRenderCollection = true;
-    view.setAsPrimaryCollectionHelper();
+    collection && view.setAsPrimaryCollectionHelper();
     view.$el.attr(collectionElementAttributeName, 'true');
     // propagate future changes to the parent's collection object
     // to the helper view
