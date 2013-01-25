@@ -114,6 +114,9 @@ Thorax.View = Backbone.View.extend({
         child.destroy();
       }
     }, this);
+    if (this.parent) {
+      this.parent._removeChild(this);
+    }
     this.remove(); // Will call stopListening()
   },
 
