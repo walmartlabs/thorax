@@ -15,6 +15,11 @@ describe('collection helper', function() {
     expect(view.$('li').length).to.equal(1);
     view.setCollection(false);
     expect(view.$('li').length).to.equal(0);
+    // keep swapping back and forth
+    view.setCollection(collection);
+    expect(view.$('li').length).to.equal(1);
+    view.setCollection(false);
+    expect(view.$('li').length).to.equal(0);
   });
 
   it("collection helper won't re-render parent on add", function() {

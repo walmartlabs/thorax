@@ -92,18 +92,16 @@ Handlebars.registerViewHelper('collection', Thorax.CollectionHelperView, functio
     collection = view.parent.collection;
     view.parent._childWillRenderCollection = true;
     view.setAsPrimaryCollectionHelper();
-    if (!collection) {
-      var handler = function(type, dataObject) {
-        if (type === 'collection') {
-          view.setCollection(dataObject);
-          view.stopListening(view.parent, 'change:data-object', handler);
-        }
-      };
-      view.listenTo(view.parent, 'change:data-object', handler);
-    }
     view.$el.attr(collectionElementAttributeName, 'true');
   }
   collection && view.setCollection(collection);
+  // propagate future changes to the parent's collection object
+  // to the helper view
+  view.listenTo(view.parent, 'change:data-object', function(type, dataObject) {
+    if (type === 'collection') {
+      view.setCollection(dataObject);
+    }
+  });
 });
 
 Handlebars.registerHelper('collection-element', function(options) {
