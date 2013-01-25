@@ -97,6 +97,7 @@ Handlebars.registerViewHelper('collection', Thorax.CollectionHelperView, functio
     // to the helper view
     view.listenTo(view.parent, 'change:data-object', function(type, dataObject) {
       if (type === 'collection') {
+        view.setAsPrimaryCollectionHelper();
         view.setCollection(dataObject);
       }
     });
