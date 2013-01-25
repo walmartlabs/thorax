@@ -418,9 +418,19 @@ if (typeof collectionOptionNames !== 'undefined') {
 Thorax.View.on({
   'load:start': Thorax.loadHandler(
       function(message, background, object) {
+        // If we have been destroyed then NOP as this is not formally
+        // part of the view's event binds.
+        if (!this.parent) {
+          return;
+        }
+
         this.onLoadStart(message, background, object);
       },
       function(background, object) {
+        if (!this.parent) {
+          return;
+        }
+
         this.onLoadEnd(object);
       }),
 
