@@ -144,6 +144,12 @@ Thorax.mixinLoadable = function(target, useParent) {
     // Propagates loading view parameters to the AJAX layer
     onLoadStart: function(message, background, object) {
       var that = useParent ? this.parent : this;
+
+      // Protect against race conditions
+      if (!that || !that.el) {
+        return;
+      }
+
       if (!that.nonBlockingLoad && !background && rootObject && rootObject !== this) {
         rootObject.trigger(loadStart, message, background, object);
       }
@@ -157,6 +163,12 @@ Thorax.mixinLoadable = function(target, useParent) {
     },
     onLoadEnd: function(/* background, object */) {
       var that = useParent ? this.parent : this;
+
+      // Protect against race conditions
+      if (!that || !that.el) {
+        return;
+      }
+
       $(that.el).removeClass(that._loadingClassName);
       //used by loading helpers
       if (that._loadingCallbacks) {
