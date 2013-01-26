@@ -5,6 +5,8 @@ Thorax.CollectionHelperView = Thorax.HelperView.extend({
     'rendered:collection': forwardRenderEvent('rendered:collection'),
     'rendered:empty': forwardRenderEvent('rendered:empty')
   },
+  collectionRenderer: true,
+
   constructor: function(options) {
     _.each(collectionOptionNames, function(viewAttributeName, helperOptionName) {
       if (options.options[helperOptionName]) {
@@ -90,7 +92,6 @@ Handlebars.registerViewHelper('collection', Thorax.CollectionHelperView, functio
   if (arguments.length === 1) {
     view = collection;
     collection = view.parent.collection;
-    view.parent._childWillRenderCollection = true;
     collection && view.setAsPrimaryCollectionHelper();
     view.$el.attr(collectionElementAttributeName, 'true');
     // propagate future changes to the parent's collection object

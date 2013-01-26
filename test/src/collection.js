@@ -438,6 +438,7 @@ describe('collection', function() {
 
   it("collection-element helper", function() {
     var view = new Thorax.View({
+      collectionRenderer: true,
       collection: letterCollection,
       template: '<div class="test">{{collection-element tag="ul"}}</div>',
       itemTemplate: 'letter-item'
@@ -598,6 +599,7 @@ describe('collection', function() {
     var spy = this.spy();
     var collection = new Thorax.Collection([{key: 'one'}, {key: 'two'}]);
     var view = new Thorax.View({
+      collectionRenderer: true,
       template: "{{collection-element tag=\"ul\"}}",
       itemTemplate: Handlebars.compile('<li>{{key}}</li>'),
       events: {
@@ -636,6 +638,7 @@ describe('collection', function() {
       url: '/test'
     }));
     var view = new Thorax.View({
+      collectionRenderer: true,
       collection: collection,
       events: {
         'rendered:collection': spy

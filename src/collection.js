@@ -136,7 +136,7 @@ _.extend(Thorax.View.prototype, {
   },
   renderCollection: function() {
     this.ensureRendered();
-    if (this._childWillRenderCollection) {
+    if (!this.collectionRenderer) {
       return;
     }
     if (this.collection) {
@@ -253,7 +253,7 @@ function onCollectionReset(collection) {
 }
 
 function afterSetCollection(collection) {
-  if (!this._childWillRenderCollection && collection) {
+  if (this.collectionRenderer && collection) {
     _.each(this._collectionRenderingEvents, function(callback, eventName) {
       // getEventCallback will resolve if it is a string or a method
       // and return a method
