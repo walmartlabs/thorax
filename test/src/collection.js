@@ -161,6 +161,21 @@ describe('collection', function() {
     runCollectionTests(viewWithCollectionHelperWithEmptyViewAndBlock, 1, 'block helper with empty view and block');
   });
 
+  it('should render sync fetch', function() {
+    var collection = new Thorax.Collection();
+    collection.url = true;
+    collection.fetch = function() {
+      collection.reset([{id: 1}, {id: 2}, {id: 3}]);
+    };
+
+    var view = new Thorax.View({
+      template: '{{#collection}}<li>foo</li>{{/collection}}',
+      collection: collection
+    });
+    view.render();
+    expect(view.$('li').length).to.equal(3);
+  });
+
   describe('multiple collections', function() {
     it('should render separate collections', function() {
       var view = new Thorax.View({

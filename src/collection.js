@@ -45,7 +45,7 @@ createRegistryWrapper(Thorax.Collection, Thorax.Collections);
 
 dataObject('collection', {
   set: 'setCollection',
-  setCallback: afterSetCollection,
+  bindCallback: onSetCollection,
   defaultOptions: {
     render: true,
     fetch: true,
@@ -252,7 +252,7 @@ function onCollectionReset(collection) {
   }
 }
 
-function afterSetCollection(collection) {
+function onSetCollection(collection) {
   if (this.collectionRenderer && collection) {
     _.each(this._collectionRenderingEvents, function(callback, eventName) {
       // getEventCallback will resolve if it is a string or a method

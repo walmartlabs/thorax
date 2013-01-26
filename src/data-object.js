@@ -46,7 +46,6 @@ function dataObject(type, spec) {
       $el.removeAttr(spec.cidAttrName);
     }
     this.trigger('change:data-object', type, dataObject, old);
-    spec.setCallback && spec.setCallback.call(this, dataObject, options);
     return this;
   }
 
@@ -65,6 +64,9 @@ _.extend(Thorax.View.prototype, {
 
     bindEvents.call(this, type, dataObject, this.constructor);
     bindEvents.call(this, type, dataObject, this);
+
+    var spec = inheritVars[type];
+    spec.bindCallback && spec.bindCallback.call(this, dataObject, options);
 
     if (dataObject.shouldFetch && dataObject.shouldFetch(options)) {
       loadObject(dataObject, options);
