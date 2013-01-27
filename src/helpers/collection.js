@@ -5,7 +5,6 @@ Thorax.CollectionHelperView = Thorax.CollectionView.extend({
     'rendered:collection': forwardRenderEvent('rendered:collection'),
     'rendered:empty': forwardRenderEvent('rendered:empty')
   },
-  collectionRenderer: true,
 
   constructor: function(options) {
     _.each(collectionOptionNames, function(viewAttributeName, helperOptionName) {
