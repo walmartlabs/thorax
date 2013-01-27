@@ -57,7 +57,8 @@ dataObject('collection', {
   cidAttrName: collectionCidAttributeName
 });
 
-_.extend(Thorax.View.prototype, {
+Thorax.CollectionView = Thorax.View.extend({
+  collectionRenderer: true,
   _collectionSelector: '[' + collectionElementAttributeName + ']',
   //appendItem(model [,index])
   //appendItem(html_string, index)
@@ -135,7 +136,6 @@ _.extend(Thorax.View.prototype, {
     return true;
   },
   renderCollection: function() {
-    this.ensureRendered();
     if (!this.collectionRenderer) {
       return;
     }
@@ -205,9 +205,11 @@ _.extend(Thorax.View.prototype, {
   getCollectionElement: function() {
     var element = this.$(this._collectionSelector);
     return element.length === 0 ? this.$el : element;
-  },
-  // Events that will only be bound to "this.collection"
-  _collectionRenderingEvents: {
+  }
+});
+
+Thorax.CollectionView.on({
+  collection: {
     reset: onCollectionReset,
     sort: onCollectionReset,
     filter: function() {
@@ -247,12 +249,14 @@ Thorax.View.on({
 });
 
 function onCollectionReset(collection) {
-  if (!collection || (collection === this.collection && this._objectOptionsByCid[this.collection.cid].render)) {
+  // noop if not a CollectionView
+  if (this.renderCollection && (!collection || (collection === this.collection && this._objectOptionsByCid[this.collection.cid].render))) {
     this.renderCollection();
   }
 }
 
 function onSetCollection(collection) {
+  this.ensureRendered();
   if (this.collectionRenderer && collection) {
     _.each(this._collectionRenderingEvents, function(callback, eventName) {
       // getEventCallback will resolve if it is a string or a method

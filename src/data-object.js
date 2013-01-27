@@ -36,14 +36,14 @@ function dataObject(type, spec) {
       }
 
       this.bindDataObject(type, dataObject, _.extend({}, this.options, options));
-      $el.attr(spec.cidAttrName, dataObject.cid);
+      $el && $el.attr(spec.cidAttrName, dataObject.cid);
       dataObject.trigger('set', dataObject, old);
     } else {
       this[type] = false;
       if (spec.change) {
         spec.change.call(this, false);
       }
-      $el.removeAttr(spec.cidAttrName);
+      $el && $el.removeAttr(spec.cidAttrName);
     }
     this.trigger('change:data-object', type, dataObject, old);
     return this;
