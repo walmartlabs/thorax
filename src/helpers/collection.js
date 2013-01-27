@@ -106,7 +106,9 @@ Handlebars.registerViewHelper('collection', Thorax.CollectionHelperView, functio
 });
 
 Handlebars.registerHelper('collection-element', function(options) {
-  options.hash.tag = options.hash.tag || options.hash.tagName || 'div';
-  options.hash[collectionElementAttributeName] = true;
-  return new Handlebars.SafeString(Thorax.Util.tag.call(this, options.hash, '', this));
+  var hash = options.hash;
+  normalizeHTMLAttributeOptions(hash);
+  hash.tagName = hash.tagName || 'div';
+  hash[collectionElementAttributeName] = true;
+  return new Handlebars.SafeString(Thorax.Util.tag.call(this, hash, '', this));
 });

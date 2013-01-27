@@ -110,11 +110,30 @@ function getOptionsData(options) {
   return options.data;
 }
 
+// These whitelisted attributes will be the only ones passed
+// from the options hash to Thorax.Util.tag
+var htmlAttributesToCopy = ['id', 'className', 'tagName'];
+
+// In helpers "tagName" or "tag" may be specified, as well
+// as "class" or "className". Normalize to "tagName" and
+// "className" to match the property names used by Backbone
+// jQuery, etc. Special case for "className" in
+// Thorax.Util.tag: will be rewritten as "class" in
+// generated HTML.
+function normalizeHTMLAttributeOptions(options) {
+  if (options.tag) {
+    options.tagName = options.tag;
+    delete options.tag;
+  }
+  if (options['class']) {
+    options.className = options['class'];
+    delete options['class'];
+  }
+}
+
 Thorax.Util = {
   getViewInstance: function(name, attributes) {
     attributes = attributes || {};
-    attributes['class'] && (attributes.className = attributes['class']);
-    attributes.tag && (attributes.tagName = attributes.tag);
     if (typeof name === 'string') {
       var Klass = registryGet(Thorax, 'Views', name, false);
       return Klass.cid ? _.extend(Klass, attributes || {}) : new Klass(attributes);
@@ -197,8 +216,8 @@ Thorax.Util = {
     return input;
   },
   tag: function(attributes, content, scope) {
-    var htmlAttributes = _.omit(attributes, 'tag', 'tagName'),
-        tag = attributes.tag || attributes.tagName || 'div';
+    var htmlAttributes = _.omit(attributes, 'tagName'),
+        tag = attributes.tagName || 'div';
     return '<' + tag + ' ' + _.map(htmlAttributes, function(value, key) {
       if (typeof value === 'undefined' || key === 'expand-tokens') {
         return '';
@@ -207,7 +226,7 @@ Thorax.Util = {
       if (scope) {
         formattedValue = Thorax.Util.expandToken(value, scope);
       }
-      return key + '="' + Handlebars.Utils.escapeExpression(formattedValue) + '"';
+      return (key === 'className' ? 'class' : key) + '="' + Handlebars.Utils.escapeExpression(formattedValue) + '"';
     }).join(' ') + '>' + (typeof content === 'undefined' ? '' : content) + '</' + tag + '>';
   }
 };

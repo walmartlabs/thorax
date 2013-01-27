@@ -12,7 +12,8 @@ Handlebars.registerHelper('button', function(method, options) {
   if (!method && !options.hash.trigger) {
     throw new Error("button helper must have a method name as the first argument or a 'trigger', or a 'method' attribute specified.");
   }
-  hash.tag = hash.tag || hash.tagName || 'button';
+  normalizeHTMLAttributeOptions(hash);
+  hash.tagName = hash.tagName || 'button';
   hash.trigger && (hash[triggerEventAttributeName] = hash.trigger);
   delete hash.trigger;
   method && (hash[callMethodAttributeName] = method);
@@ -30,9 +31,10 @@ Handlebars.registerHelper('link', function() {
   if (!url[0] && url[0] !== '') {
     throw new Error("link helper requires an href as the first argument or an 'href' attribute");
   }
+  normalizeHTMLAttributeOptions(hash);
   url.push(options);
   hash.href = Handlebars.helpers.url.apply(this, url);
-  hash.tag = hash.tag || hash.tagName || 'a';
+  hash.tagName = hash.tagName || 'a';
   hash.trigger && (hash[triggerEventAttributeName] = options.hash.trigger);
   delete hash.trigger;
   hash[callMethodAttributeName] = '_anchorClick';
