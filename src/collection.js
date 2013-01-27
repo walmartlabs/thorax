@@ -1,6 +1,7 @@
 /*global createRegistryWrapper, dataObject, getEventCallback, getValue, modelCidAttributeName, viewCidAttributeName */
 var _fetch = Backbone.Collection.prototype.fetch,
     _reset = Backbone.Collection.prototype.reset,
+    _replaceHTML = Thorax.View.prototype._replaceHTML,
     collectionCidAttributeName = 'data-collection-cid',
     collectionEmptyAttributeName = 'data-collection-empty',
     collectionElementAttributeName = 'data-collection-element',
@@ -59,6 +60,21 @@ dataObject('collection', {
 
 Thorax.CollectionView = Thorax.View.extend({
   _collectionSelector: '[' + collectionElementAttributeName + ']',
+  
+  // preserve collection element if it was not created with {{collection}} helper
+  _replaceHTML: function(html) {
+    if (this.collection && this._objectOptionsByCid[this.collection.cid] && this._renderCount) {
+      var element;
+      var oldCollectionElement = this.getCollectionElement();
+      element = _replaceHTML.call(this, html);
+      if (!oldCollectionElement.attr('data-view-cid')) {
+        this.getCollectionElement().replaceWith(oldCollectionElement);
+      }
+    } else {
+      return _replaceHTML.call(this, html);
+    }
+  },
+
   //appendItem(model [,index])
   //appendItem(html_string, index)
   //appendItem(view, index)
