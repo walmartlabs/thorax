@@ -115,6 +115,9 @@ Handlebars.registerViewHelper('collection', Thorax.CollectionHelperView, functio
 });
 
 Handlebars.registerHelper('collection-element', function(options) {
+  if (!getOptionsData(options).view.renderCollection) {
+    throw new Error("collection-element helper must be declared inside of a CollectionView");
+  }
   var hash = options.hash;
   normalizeHTMLAttributeOptions(hash);
   hash.tagName = hash.tagName || 'div';

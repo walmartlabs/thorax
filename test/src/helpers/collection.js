@@ -22,6 +22,13 @@ describe('collection helper', function() {
     expect(view.$('li').length).to.equal(0);
   });
 
+  it("collection-element declared outside of CollectionView will raise", function() {
+    var view = new Thorax.View({
+      template: '{{collection-element}}'
+    });
+    expect(view.render).to['throw'];
+  });
+
   it("collection helper won't re-render parent on add", function() {
     var spy = this.spy();
     var collection = new Thorax.Collection([{letter: 'a'}]);
@@ -49,7 +56,7 @@ describe('collection helper', function() {
           test: spy
         }
       },
-      template: '{{#collection}}{{/collection}}'
+      template: '{{#collection}}{{/collection}}',
       collection: new Thorax.Collection()
     });
     view.collection.trigger('test');
