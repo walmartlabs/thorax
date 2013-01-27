@@ -257,13 +257,6 @@ function onCollectionReset(collection) {
 
 function onSetCollection(collection) {
   this.ensureRendered();
-  if (this.collectionRenderer && collection) {
-    _.each(this._collectionRenderingEvents, function(callback, eventName) {
-      // getEventCallback will resolve if it is a string or a method
-      // and return a method
-      this.listenTo(collection, eventName, getEventCallback(callback, this));
-    }, this);
-  }
 }
 
 function applyVisibilityFilter() {
