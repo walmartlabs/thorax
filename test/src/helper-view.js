@@ -114,5 +114,24 @@ describe('helper-view', function() {
       expect(spy.callCount).to.equal(2);
       expect(child.destroy.callCount).to.equal(1);
     });
+
+    it('id, class and tag passed to helper view', function() {
+      view = new Thorax.View({
+        template: '{{#test tagName="a" className="b" id="c"}}{{/test}}'
+      });
+      view.render();
+      expect(view.$('a').length).to.equal(1);
+      expect(view.$('.b').length).to.equal(1);
+      expect(view.$('#c').length).to.equal(1);
+    });
+
+    it('className and tagName re-written in helper view', function() {
+      view = new Thorax.View({
+        template: '{{#test tagName="a" className="b"}}{{/test}}'
+      });
+      view.render();
+      expect(view.$('a').length).to.equal(1);
+      expect(view.$('.b').length).to.equal(1);
+    });
   });
 });

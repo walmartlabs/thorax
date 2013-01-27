@@ -48,11 +48,8 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
       }
     };
 
-    options.hash.id && (viewOptions.id = options.hash.id);
-    options.hash['class'] && (viewOptions.className = options.hash['class']);
-    options.hash.className && (viewOptions.className = options.hash.className);
-    options.hash.tag && (viewOptions.tagName = options.hash.tag);
-    options.hash.tagName && (viewOptions.tagName = options.hash.tagName);
+    normalizeHTMLAttributeOptions(options.hash);
+    _.extend(viewOptions, _.pick(options.hash, htmlAttributesToCopy));
 
     // Check to see if we have an existing instance that we can reuse
     var instance = _.find(declaringView._previousHelpers, function(child) {
@@ -84,7 +81,7 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
       declaringView.children[instance.cid] = instance;
     }
 
-    var htmlAttributes = Thorax.Util.htmlAttributesFromOptions(options.hash);
+    var htmlAttributes = _.pick(options.hash, htmlAttributesToCopy);
     htmlAttributes[viewPlaceholderAttributeName] = instance.cid;
 
     var expandTokens = options.hash['expand-tokens'];
