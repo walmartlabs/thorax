@@ -58,7 +58,6 @@ dataObject('collection', {
 });
 
 Thorax.CollectionView = Thorax.View.extend({
-  collectionRenderer: true,
   _collectionSelector: '[' + collectionElementAttributeName + ']',
   //appendItem(model [,index])
   //appendItem(html_string, index)
@@ -136,9 +135,6 @@ Thorax.CollectionView = Thorax.View.extend({
     return true;
   },
   renderCollection: function() {
-    if (!this.collectionRenderer) {
-      return;
-    }
     if (this.collection) {
       if (this.collection.isEmpty()) {
         handleChangeFromNotEmptyToEmpty.call(this);
