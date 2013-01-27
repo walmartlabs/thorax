@@ -234,7 +234,8 @@ Thorax.View = Backbone.View.extend({
       // Event for IE element fixes
       this.trigger('before:append');
       var element;
-      if (this.collection && this._objectOptionsByCid[this.collection.cid] && this._renderCount) {
+      // TODO: move to CollectionView
+      if (this.collection && this.renderCollection && this._objectOptionsByCid[this.collection.cid] && this._renderCount) {
         // preserve collection element if it was not created with {{collection}} helper
         var oldCollectionElement = this.getCollectionElement();
         element = replaceHTML(this);

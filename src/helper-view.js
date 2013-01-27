@@ -9,7 +9,7 @@ Thorax.HelperView = Thorax.View.extend({
   },
   _getContext: function() {
     return this.parent._getContext.apply(this.parent, arguments);
-  },
+  }
 });
 
 // Ensure nested inline helpers will always have this.parent

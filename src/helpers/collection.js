@@ -1,4 +1,4 @@
-Thorax.CollectionHelperView = Thorax.HelperView.extend({
+Thorax.CollectionHelperView = Thorax.CollectionView.extend({
   // Forward render events to the parent
   events: {
     'rendered:item': forwardRenderEvent('rendered:item'),
@@ -38,10 +38,8 @@ Thorax.CollectionHelperView = Thorax.HelperView.extend({
         this.itemTemplate = Thorax.Util.getTemplate(this.parent.name + '-item', true);
       }
     }
+
     return response;
-  },
-  itemContext: function() {
-    return this.parent.itemContext.apply(this.parent, arguments);
   },
   setAsPrimaryCollectionHelper: function() {
     _.each(forwardableProperties, function(propertyName) {
@@ -52,7 +50,18 @@ Thorax.CollectionHelperView = Thorax.HelperView.extend({
         return this.parent.itemFilter.apply(this.parent, arguments);
       };
     }
+    if (this.parent.itemContext) {
+      this.itemContext = function() {
+        return this.parent.itemContext.apply(this.parent, arguments);
+      };
+    }
   }
+});
+
+_.extend(Thorax.CollectionHelperView.prototype, {
+  _ensureElement: Thorax.HelperView.prototype._ensureElement,
+  _getContext: Thorax.HelperView.prototype._getContext,
+  _modifyDataObjectOptions: Thorax.HelperView.prototype._modifyDataObjectOptions
 });
 
 var collectionOptionNames = {
