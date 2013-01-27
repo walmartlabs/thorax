@@ -257,6 +257,9 @@ function onCollectionReset(collection) {
   }
 }
 
+// Even if the view is not a CollectionView
+// ensureRendered() to provide similar behavior
+// to a model
 function onSetCollection(collection) {
   this.ensureRendered();
 }
