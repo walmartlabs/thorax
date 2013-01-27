@@ -1,32 +1,5 @@
 An opinionated, battle tested [Backbone](http://backbonejs.org/) + [Handlebars](http://handlebarsjs.com/) framework to build large scale web applications. 
 
-<table cellpadding="0" cellspacing="0" border="0" width="100%" id="downloads">
-  <tr>
-    <td width="25%">
-      <h3>Standalone</h3>
-      <p>Open the <code>index.html</code> file from the downloaded project in your browser.</p>
-    </td>
-    <td width="25%">
-      <h3>Node + <a href="http://walmartlabs.github.com/lumbar">Lumbar</a></h3>
-      <p>Run <code>npm start</code> from the downloaded project.</p>
-    </td>
-    <td width="25%">
-      <h3>Mobile</a></h3>
-      <p>Run <code>npm start</code> from the downloaded project.</p>
-    </td>
-    <td width="25%">
-      <h3>Rails</h3>
-      <p>Run <code>rails server</code> from the downloaded project.</p>
-    </td>
-  </tr>
-  <tr>
-    <td width="25%"><a href="https://github.com/walmartlabs/thorax-boilerplate/raw/master/thorax-html.zip" class="btn">Download 2.0.0b5</a></td>
-    <td width="25%"><a href="https://github.com/walmartlabs/thorax-boilerplate/raw/master/thorax-lumbar.zip" class="btn btn-primary">Download 2.0.0b5</a></td>
-    <td width="25%"><a href="https://github.com/walmartlabs/thorax-boilerplate/raw/master/thorax-mobile.zip" class="btn">Download 2.0.0b5</a></td>
-    <td width="25%"><a href="https://github.com/walmartlabs/thorax-boilerplate/raw/master/thorax-rails.zip" class="btn">Download 2.0.0b5</a></td>
-  </tr>
-</table>
-
 **Thorax 2 is presently in beta, the [stable source](https://github.com/walmartlabs/thorax/tree/1.2) and [documentation](http://walmartlabs.github.com/thorax/stable) are still available.**
 
 Thorax can be used standalone in any JavaScript environment in addition the [boilerplate projects](https://github.com/walmartlabs/thorax-boilerplate) provided above.
@@ -35,47 +8,7 @@ Thorax can be used standalone in any JavaScript environment in addition the [boi
       greeting: "Hello",
       template: "{{greeting}} world!"
     });
-    view.render();
-    $("body").append(view.el);
-
-<table cellpadding="0" cellspacing="0" border="0" width="100%">
-  <thead>
-    <tr>
-      <th>Editable Examples</th>
-      <th>Resources</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td width="50%">
-        <p>All of the examples use the <a href="https://raw.github.com/gist/3504663/d1e6321e9fdb69ff47d636eab5df5e52acb64ae0/gistfile1.txt">same sample data</a>.</p>
-        <ul>
-          <li><a href="http://jsfiddle.net/QDMyk/">Simple Todos</a></li>
-          <li><a href="http://jsfiddle.net/jLVqN/">$.model</a></li>
-          <li><a href="http://jsfiddle.net/BN2v3/">Context</a></li>
-          <li><a href="http://jsfiddle.net/EcvvM/">view &amp; template helpers</a></li>
-          <li><a href="http://jsfiddle.net/ttZxv/">empty helper</a></li>
-          <li><a href="http://jsfiddle.net/s7YbW/">freeze</a></li>
-          <li><a href="http://jsfiddle.net/tVFfj/">LayoutView</a></li>
-          <li><a href="http://jsfiddle.net/XXUVu/">registerViewHelper</a></li>
-        </ul>
-      </td>
-      <td style="vertical-align:top;" width="50%">
-        <ul>
-          <li>
-            <a href="http://todomvc.com/labs/architecture-examples/thorax/">Thorax TodoMVC</a>
-            <ul>
-              <li><a href="https://github.com/addyosmani/todomvc/tree/gh-pages/labs/architecture-examples/thorax">Standalone Source</a></li>
-              <li><a href="https://github.com/addyosmani/todomvc/tree/gh-pages/labs/dependency-examples/thorax_lumbar">Thorax + Lumbar Source</a></li>
-              <li><a href="https://github.com/addyosmani/todomvc/tree/gh-pages/labs/dependency-examples/thorax_require">Thorax + Require.js Source</a>
-            </ul>
-          </li>
-        </ul>
-      </td>
-    </tr>
-  </tbody>
-</table>
-
+    view.appendTo('body');
 
 ## Registry
 
@@ -92,7 +25,6 @@ Thorax creates a special hash for each type of class to store all subclasses in 
     <tr><td>Thorax.View</td><td>Thorax.Views</td></tr>
     <tr><td>Thorax.Model</td><td>Thorax.Models</td></tr>
     <tr><td>Thorax.Collection</td><td>Thorax.Collections</td></tr>
-    <tr><td>Thorax.Router</td><td>Thorax.Routers</td></tr>
     <tr><td>templates</td><td>Thorax.templates</td></tr>
   </tbody>
 </table>
