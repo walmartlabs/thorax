@@ -17,18 +17,6 @@ Used by the `empty` helper. In a collection the implementations of `isEmpty` and
 
 Used by `setModel` to determine wether or not to fetch the model. The default implementation checks to see if any keys that are not `id` and are not default values have been set.
 
-## View Events
-
-The model plugin extends the events plugin by allowing a `model` hash of events to be specified in the View `events` object or to a view's `on` method. When a model is bound to a view with `setModel` any events on the model can be observed by the view in this way. For instance to observe any model `change` event when it is bound to any view:
-
-    Thorax.View.on({
-      model: {
-        change: function() {
-          //"this" will refer to the view
-        }
-      }
-    });
-
 ## Thorax.View
 
 ### context *view.context()*

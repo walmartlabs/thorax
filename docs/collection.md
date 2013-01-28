@@ -55,18 +55,6 @@ To embed a row within a `collection` helper if it the collection is empty the `e
       No cats!
     {{/collection}}
 
-## View Events
-
-The collection plugin extends the events plugin by allowing a `collection` hash of events to be specified in the View `events` object or to a view's `on` method. When a collection is bound to a view with the collection helper any events on the collection can be observed by the view in this way. For instance to observe any collection `reset` event when it is bound to any view:
-
-    Thorax.View.on({
-      collection: {
-        reset: function() {
-
-        }
-      }
-    });
-
 ## Thorax.View
 
 ### bindCollection *view.bindCollection(collection [, options])*

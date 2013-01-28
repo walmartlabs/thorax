@@ -212,7 +212,90 @@ In addition, if a view class is specified as the second argument to `registerVie
 
 <a href="http://thoraxjs.org/tutorials/helper-view" class="tutorial">HelperView</a>
 
-## Events
+## Event Enhancements
+
+Thorax adds inheritable class events for all Thorax classes and significant enhancements to the Thorax.View event handling.
+
+### Inheritable Events *ViewClass.on(eventName, callback)*
+
+All Thorax classes have an `on` method to observe events on all instances of the class. Subclasses inherit their parents' event handlers. Accepts any arguments that can be passed to `viewInstance.on` or declared in the `events` hash.
+
+    Thorax.View.on({
+      'click a': function(event) {
+
+      }
+    });
+
+### Model Events
+
+When a model is bound to a view with `setModel` (automatically called by passing a `model` option in the constructor) any events on the model can be observed by the view in this way. For instance to observe any model `change` event when it is bound to any view:
+
+    Thorax.View.on({
+      model: {
+        change: function() {
+          // "this" will refer to the view
+        }
+      }
+    });
+
+### Collection Events
+
+When a collection is bound to a view with `setCollection` (automatically called by passing a `collection` option in the constructor) any events on the collection can be observed by the view in this way. For instance to observe any collection `reset` event when it is bound to any view:
+
+    Thorax.View.on({
+      collection: {
+        reset: function() {
+          // "this" will refer to the view
+        }
+      }
+    });
+
+### View Events *view.events.viewEventName*
+
+The `events` hash has been enhanced to allow view events to be registered along side DOM events:
+
+    Thorax.View.extend({
+      events: {
+        'click a': function(event) {},
+        rendered: function() {}
+      }
+    });
+
+### DOM Events *view.on(eventNameAndSelector, callback [,context])*
+
+The `on` method will now accept event strings in the same format as the events hash, for instance `click a`. Events separated by a space will still be treated as registering multiple events so long as the event name does not start with a DOM event name (`click`, `change`, `mousedown` etc).
+
+DOM events observed in this way will only operate on the view itself. If the view embeds other views with the `view` helper that would match the event name and selector, they will be ignored. For instance declaring:
+
+    view.on('click a', function(event) {})
+
+Will only listen for clicks on `a` elements within the view. If the view has children that has `a` elements, this handler will not observe clicks on them.
+
+DOM events may be prefixed with the special keyword `nested` which will apply the event to all elements in child views:
+
+    view.on('nested click a', function() {})
+
+Thorax will add an attribute to the event named `originalContext` that will be the `Element` object that would have been set as `this` had the handler been registered with jQuery / Zepto:
+
+    $('a').on('click', function() {});
+    view.on('click a', function(event) {
+      // event.originalContext === what "this" would be in the
+      // first handler
+    });
+
+### _addEvent *view._addEvent(eventParams)*
+
+This method is never called directly, but can be specified to override the behavior of the `events` hash or any event arguments passed to `on`. For each event declared in either manner `_addEvent` will be called with a hash containing:
+
+- type "view" || "DOM"
+- name (DOM events will begin with ".delegateEvents")
+- originalName
+- selector (DOM events only)
+- handler
+
+All of the behavior described in this section is implemented via this method, so if overriding make sure to call `Thorax.View.prototype._addEvent` in your child view.
+
+## Catalog of Built-in Events
 
 ### destroyed *destroyed ()*
 
