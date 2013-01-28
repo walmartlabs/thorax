@@ -240,6 +240,16 @@ The href attribute is required but may also be specified as an attribute:
 
     {{#link href="articles/{{id}}" expand-tokens=true}}Link Test{{/link}}
 
+### loading *{{#loading}}*
+
+A block helper to use when the view is loading. For collection specific loading the a `CollectionView` accepts `loadingView` and `loadingTemplate` options to append an item in a collection when it is loading.
+
+    {{#loading}}
+      View is loading a model or collection.
+    {{else}}
+      View is not loading a model or collection.
+    {{/loading}}
+
 ## HelperView
 
 ### registerViewHelper *Handlebars.registerViewHelper(name [,viewClass] ,callback)*
@@ -445,6 +455,18 @@ Triggered on a view when `serialize` is called, if validateInput returned an arr
 
 Triggered on a view when `populate` is called. Passed a hash containing the attributes that the view will be populated with.
 
+### load:start *load:start (message, background, target)*
+
+Triggered on a model or collection by `fetch` or `load` and on a view if it has bound the model or collection with `setModel` or `setCollection`. Always generate a handler for a `load:start` event with `Thorax.loadHandler`.
+ 
+<a href="http://thoraxjs.org/tutorials/data-loading" class="tutorial">Data Loading</a>
+
+### load:end *load:end (target)*
+
+Triggered on a model or collection by `fetch` or `load` and on a view if it has bound the model or collection with `setModel` or `setCollection`. Never observe this directly, always use `Thorax.loadHandler` on `load:start`.
+
+<a href="http://thoraxjs.org/tutorials/data-loading" class="tutorial">Data Loading</a>
+
 ## Form Handling
 
 Thorax provides helpers to assist with form handling, but makes no user interface decisions for you. Use the `validate` and `error` events to implement error messages in your application.
@@ -542,18 +564,6 @@ Validate the attributes created by `serialize`, must return an array or nothing 
 
 <a href="http://thoraxjs.org/tutorials/data-validation" class="tutorial">Data Validation</a>
 
-## Util
-
-### tag *Thorax.Util.tag(name, htmlAttributes [,content] [,expand-tokens])*
-
-Generate an HTML string. All built in HTML generation uses this method. If `context` is passed any Handlebars references inside of the htmlAttributes values will rendered with the context.
-
-    Thorax.Util.tag("div", {
-      id: "div-{{number}}"
-    }, "content of the div", {
-      number: 3
-    });
-
 ## $
 
 ### $.view *$(event.target).view([options])*
@@ -577,6 +587,92 @@ Get a reference to the nearest bound collection. Can be used with any `$` object
     $(event.target).collection();
 
 A `view` may be optionally passed to limit the lookup to a specific view.
+
+## Data Loading
+
+### Queuing
+
+Thorax wraps `fetch` (and therefore `load`) on models and collections with a queuing mechansim to ensure that multiple `sync` calls for the same url will not trigger multiple HTTP requests. To force a `fetch` or `load` call to create a new HTTP request regardless of wether an identical request is in the queue use the `resetQueue` option:
+
+    model.fetch({
+      resetQueue: true
+      success: function() {}
+    });
+
+### bindToRoute *Thorax.Util.bindToRoute(callback [,failback])*
+
+Used by `model.load` and `collection.load`. Binds the callback to the current route. If the browser navigtates to another route in the time between when the callback is bound and when it is executed, callback will not be called. Else failback will be called if present.
+
+    routerMethod: function() {
+      var callback = Thorax.Util.bindToRoute(function() {
+        //callback called if browser is still on route
+      });
+      setTimeout(callback, 5000);
+    }
+
+<a href="http://thoraxjs.org/tutorials/data-loading" class="tutorial">Data Loading</a>
+
+### load *modelOrCollection.load(callback [,failback] [,options])*
+
+Calls `fetch` on the model or collection ensuring the callbacks will only be called if the route does not change. `callback` and `failback` will be used as arguments to `bindToRoute`. `options` will be passed to the `fetch` call on the model or collection if present.
+
+    routerMethod: function(id) {
+      var view = new Thorax.View();
+      var model = new Application.Model({id: id});
+      model.load(function() {
+        //callback only called if browser still on this route
+        view.setModel(model);
+        myLayoutView.setView(view);
+      }, function() {
+        //failback only called if browser has left this route
+      });
+    }
+
+Triggers `load:start` and `load:end` events on the model or collection, and additionally on a view if it has bound the object via `setModel` or `setCollection`.
+
+By default the events will propagate to a root object set with `setRootObject`. Pass `background: true` as an option to prevent the event from being triggered on the rootObject.
+
+<a href="http://thoraxjs.org/tutorials/data-loading" class="tutorial">Data Loading</a>
+
+### setRootObject *Thorax.setRootObject(obj)*
+
+Set the root object that will recieve `load:start` and `load:end` events if the `load:start` was not a `background` event. This is useful to implement a global loading indicator.
+
+### loadHandler *Thorax.loadHandler(startCallback, endCallback)*
+
+Generates an `load:start` event handler that when triggered will then monitor the associated object for a `load:end` event. If the duration between the start and and the end events exceed `_loadingTimeoutDuration` then the `start` and `end` callbacks will be triggered at the appropriate times to allow the display of a loading UI.
+
+    view.on("load:start", Thorax.loadHandler(
+      function(message, background, object) {
+        view.$el.addClass("loading");
+      },
+      function(background, object) {
+        view.$el.removeClass("loading");
+      }));
+
+### _loadingClassName *view._loadingClassName*
+
+Class name to add and remove from a view's `el` when it is loading. Defaults to `loading`.
+
+### _loadingTimeoutDuration *view._loadingTimeoutDuration*
+
+Timeout duration in seconds before a `load:start` callback will be triggered. Defaults to 0.33 seconds. If for instance the `load:end` event was triggered 0.32 seconds after the `load:start` event the `load:start` callback would not be called.
+
+### _loadingTimeoutEndDuration *view._loadingTimeoutEndDuration*
+
+Just like `_loadingTimeoutDuration` but applies to `load:end`. Defaults to 0.10 seconds.
+
+## Util
+
+### tag *Thorax.Util.tag(name, htmlAttributes [,content] [,expand-tokens])*
+
+Generate an HTML string. All built in HTML generation uses this method. If `context` is passed any Handlebars references inside of the htmlAttributes values will rendered with the context.
+
+    Thorax.Util.tag("div", {
+      id: "div-{{number}}"
+    }, "content of the div", {
+      number: 3
+    });
 
 ## HTML Attributes
 
