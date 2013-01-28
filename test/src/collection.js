@@ -161,6 +161,21 @@ describe('collection', function() {
     runCollectionTests(viewWithCollectionHelperWithEmptyViewAndBlock, 1, 'block helper with empty view and block');
   });
 
+  it('should render sync fetch', function() {
+    var collection = new Thorax.Collection();
+    collection.url = true;
+    collection.fetch = function() {
+      collection.reset([{id: 1}, {id: 2}, {id: 3}]);
+    };
+
+    var view = new Thorax.View({
+      template: '{{#collection}}<li>foo</li>{{/collection}}',
+      collection: collection
+    });
+    view.render();
+    expect(view.$('li').length).to.equal(3);
+  });
+
   describe('multiple collections', function() {
     it('should render separate collections', function() {
       var view = new Thorax.View({
@@ -438,6 +453,7 @@ describe('collection', function() {
 
   it("collection-element helper", function() {
     var view = new Thorax.View({
+      collectionRenderer: true,
       collection: letterCollection,
       template: '<div class="test">{{collection-element tag="ul"}}</div>',
       itemTemplate: 'letter-item'
@@ -598,6 +614,7 @@ describe('collection', function() {
     var spy = this.spy();
     var collection = new Thorax.Collection([{key: 'one'}, {key: 'two'}]);
     var view = new Thorax.View({
+      collectionRenderer: true,
       template: "{{collection-element tag=\"ul\"}}",
       itemTemplate: Handlebars.compile('<li>{{key}}</li>'),
       events: {
@@ -636,6 +653,7 @@ describe('collection', function() {
       url: '/test'
     }));
     var view = new Thorax.View({
+      collectionRenderer: true,
       collection: collection,
       events: {
         'rendered:collection': spy
