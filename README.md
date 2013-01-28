@@ -53,7 +53,7 @@ If a `View` has the same `name` as a template in the `templates` hash, it's `tem
 
 ## Thorax.View
 
-`Thorax.View` provides mostly additive functionality over `Backbone.View` but breaks compatibility in one imporant way in that it does not use an `options` object. All properties passed to the constructor become available on the instance:
+`Thorax.View` provides additive functionality over `Backbone.View` but breaks compatibility in one imporant way in that it does not use an `options` object. All properties passed to the constructor become available on the instance:
 
     var view = new Thorax.View({
       key: "value"
@@ -123,7 +123,27 @@ If a view was embedded inside another with the `view` helper, or a generated `He
 
 Calls `remove` (and therefore `$el.remove` and `stopListening`) on your view, unbinds any model or collection bound with `setCollection` or `setModel`, calls `destroy` on all children, then triggers a `destroyed` event which can be used to implement specific cleanup behaviors in your views. Pass `children: false` to this method to prevent the view's children from being destroyed.
 
+`destroy` will also be called on a view if it was previously passed to the `setView` method on a `LayoutView`, and then another view is passed to `setView`.
+
 <a class="tutorial" href="http://thoraxjs.org/tutorials/view-lifecycle">View Lifecycle</a>
+
+## Thorax.LayoutView
+
+A view to contain a single other view which will change over time, (multi-pane single page applications for instance), triggering a series of events . By default this class has no template. If one is specified use the `layout` helper to determine where `setView` will place a view. A `Thorax.LayoutView` is a subclass of `Thorax.View` and may be treated as a view in every regard (i.e. embed multiple `LayoutView` instances in a parent view with the `view` helper).
+
+### setView *view.setView(view [,options])*
+
+Set the current view on the `LayoutView`, triggering `activated`, `ready` and `deactivated` events on the current and previous view during the lifecycle. `ensureRendered` is called on views passed to `setView`. By default `destroy` is called on the previous view when the new view is set. Pass `destroy: false` when setting a view to prevent it from being destroyed at a later time.
+
+<a href="http://thoraxjs.org/tutorials/view-lifecycle" class="tutorial">View Lifecycle</a>
+
+### getView *view.getView()*
+
+Get the current view that was previously set with `setView`.
+
+### layout *{{layout [htmlAttributes]}}*
+
+By default `Thorax.LayoutView` classes have no template, just a placeholder to insert a view via `setView`. If a template to any of those classes is specified it must contain the a call to the layout helper where views will be placed. A custom `tag` or any HTML attributes may be specified.
 
 ## View Helpers
 
@@ -297,37 +317,65 @@ All of the behavior described in this section is implemented via this method, so
 
 ## Catalog of Built-in Events
 
-### destroyed *destroyed ()*
-
-Triggered when the `destroy` method is called. Useful for implementing custom view cleanup behaviors.
-
 ### rendered *rendered ()*
 
-Triggered when the `rendered` method is called.
+Triggered on a view when the `rendered` method is called.
 
 ### child *child (instance)*
 
-Triggered every time a child view is inserted into the view with the `view` helper. Will not be triggered from view instances created by helper view helpers.
+Triggered on a view every time a child view is appened into the view with the `view` helper.
+
+### ready *ready (options)*
+
+Triggered when a view is append to the DOM with `appendTo` or when a view is appeneded to a `LayoutView` via `setView`. Setting focus and other behaviors that depend on the view being present in the DOM should be handled in this event.
+
+This event propagates to all children, including children that will be bound after the view is created. `options` will contain a `target` view, which is the view that triggered the event.
+
+<a href="http://thoraxjs.org/tutorials/view-lifecycle" class="tutorial">View Lifecycle</a>
+
+### activated *activated (options)*
+
+Triggered on a view immediately after it was passed to a `LayoutView`'s `setView` method. Like `ready` this event propagates to children and the `options` hash will contain a `target` view.
+
+<a href="http://thoraxjs.org/tutorials/view-lifecycle" class="tutorial">View Lifecycle</a>
+
+### deactivated *deactivated (options)*
+
+Triggered on a view when it was previously passed to the `setView` method on a `LayoutView`, and then another view is passed to `setView`. Triggered when the current view's `el` is still attached to the parent. Like `ready` this event propagates to children and the `options` hash will contain a `target` view.
+
+<a href="http://thoraxjs.org/tutorials/view-lifecycle" class="tutorial">View Lifecycle</a>
+
+### destroyed *destroyed ()*
+
+Triggered on a view when the `destroy` method is called. Useful for implementing custom view cleanup behaviors. `destroy` will be also be called if it was previously passed to the `setView` method on a `LayoutView`, and then another view is passed to `setView`.
+
+<a href="http://thoraxjs.org/tutorials/view-lifecycle" class="tutorial">View Lifecycle</a>
+
+### change:view:start *change:view:start (newView [,oldView] ,options)*
+
+Trigged on a `Thorax.LayoutView` immediately after `setView` is called.
+
+<a href="http://thoraxjs.org/tutorials/view-lifecycle" class="tutorial">View Lifecycle</a>
+
+### change:view:end *change:view:end (newView [,oldView] ,options)*
+
+Trigged on a `Thorax.LayoutView` after `setView` is called, the old view has been destroyed (if present) and the new view has been attached to the DOM and had it's `ready` event triggered.
+
+<a href="http://thoraxjs.org/tutorials/view-lifecycle" class="tutorial">View Lifecycle</a>
 
 ### helper *helper (name [,args...] ,helperView)*
 
-Triggered when a view helper (such as `collection`, `empty`, etc) create a new `HelperView` instance.
+Triggered on a view when a view helper (such as `collection`, `empty`, etc) create a new `HelperView` instance.
 
 ### helper:name *helper:name ([,args...] ,helperView)*
 
-Triggered when a given view helper creates a new `HelperView` instance.
+Triggered on a view when a given view helper creates a new `HelperView` instance.
 
     {{#collection cats}}{{/collection}}
 
     view.on('helper:collection', function(collection, collectionView) {
 
     });
-
-### ready *ready (options)*
-
-Triggered when a view is append to the DOM with `appendTo` or when a view is appeneded to a `LayoutView` with `setView`. Setting `focus` and other behaviors that depend on the view being present in the DOM should be handled in this event.
-
-This event propagates to all children, including children that will be bound after the view is created. `options` will contain a `target` view, which is the view that triggered the event.
 
 ## Util
 
