@@ -57,13 +57,3 @@ Set the `model` attribute of a view, then bind it via `bindModel` with the passe
       model: myModel
     });
     view.setModel(myModel);
-
-## $
-
-### $.model *$(event.target).model([view])*
-
-Get a reference to the nearest bound model.
-
-    $(event.target).model()
-
-Passing a view instance will limit the lookup to just that view.

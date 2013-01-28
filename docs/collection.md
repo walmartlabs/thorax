@@ -124,14 +124,6 @@ Used by the `empty` helper and the `empty-template` and `empty-item` options of 
 Used by the `collection` helper to determine wether or not to fetch the collection.
 
 
-## Extras
-
-### $.collection *$(event.target).collection()*
-
-Get a reference to the nearest bound collection. Can be used with any `$` object but most useful when dealing with event handlers.
-
-    $(event.target).collection();
-
 ## Events
 
 ### rendered:collection *rendred:collection(collectionView, collection)*

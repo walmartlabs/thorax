@@ -264,7 +264,23 @@ Generate an HTML string. All built in HTML generation uses this method. If `cont
 
 Get a reference to the nearest parent view. Pass `helper: false` to options to exclude `HelperView`s from the lookup. Useful when registering DOM event handlers:
 
-    $(event.target).view()
+    $(event.target).view();
+
+### $.model *$(event.target).model([view])*
+
+Get a reference to the nearest bound model. Can be used with any `$` object but most useful in event handlers.
+
+    $(event.target).model();
+
+A `view` may be optionally passed to limit the lookup to a specific view.
+
+### $.collection *$(event.target).collection([view])*
+
+Get a reference to the nearest bound collection. Can be used with any `$` object but most useful in event handlers.
+
+    $(event.target).collection();
+
+A `view` may be optionally passed to limit the lookup to a specific view.
 
 ## HTML Attributes
 
