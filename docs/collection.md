@@ -5,7 +5,7 @@ Adds view helpers and classes to support collection bindings in. See the [Todos 
 
 ## View Helpers
 
-### collection *{{collection [collectionObj] [options]}}*
+### collection helper *{{collection [collectionObj] [options]}}*
 
 Creates and embeds a `CollectionView` instance, updating when items are added, removed or changed in the collection. If a block is passed it will be used as the `item-template`, which will be called with a context of the `model.attributes` for each model in the collection.
 
@@ -37,7 +37,7 @@ If you need a reference to a specific CollectionView you can create it directly 
 
     });
 
-### empty *{{#empty [collection]}}*
+### empty helper *{{#empty [collection]}}*
 
 Creates and embeds a `HelperView` that will be updated dependening on wether the collection is empty or not. If no collection is specified it will default to the view's model if present.
 
@@ -57,19 +57,6 @@ To embed a row within a `collection` helper if it the collection is empty the `e
 
 ## Thorax.View
 
-### bindCollection *view.bindCollection(collection [, options])*
-
-Binds any events declared via `view.on({collection: events})` including the built in `reset` and `error`, then attempts to fetch the collection if it has a URL and is not yet loaded. Accepts any of the following options:
-
-- **render** - Wether to render the collection if it is populated, or render it after it has been loaded
-- **fetch** - Wether or not to try to call `fetch` on the collection if `shouldFetch` returns true
-- **success** - Callback on fetch success, defaults to noop
-- **errors** - Wether or not to trigger an `error` event on the view when an `error` event is triggered on the collection
-
-### unbindCollection *view.unbindCollection(collection [, options])*
-
-Remove the event handlers bound by `bindCollection`
-
 ## Thorax.CollectionView
 
 A `CollectionView` class is automatically generated each time a `collection` helper is used. A CollectionView may also be created in JavaScript and appended as a child view with the `view` helper. The constructor will accept any options that the `collection` helper accepts, though any template or view names must be the actual names and not inline templates. The `parent` attribute of the `CollectionView` is required in the constructor and is not automatically set for you as it would be when using the `collection` helper.
@@ -85,9 +72,6 @@ A `CollectionView` class is automatically generated each time a `collection` hel
       template: "{{view myCollectionView}}"
     });
 
-### setCollection *view.setCollection(collection, options)*
-
-If directly creating a CollectionView instance, the collection property may be set by passing `collection` to the constructor, or by calling this method. Accepts any options that the `bindCollection` method does.
 
 ### appendItem *view.appendItem(modelOrView [,index])*
 
@@ -97,31 +81,4 @@ Append a model (which will used to generate a new `item-view`) or a view at a gi
 
 ### updateItem *view.updateItem(model)*
 
-## Thorax.Collection
-
-### collection *Thorax.collection(name [,protoProps])*
-
-Get or set a collection class.
-
-### isEmpty *collection.isEmpty()*
-
-Used by the `empty` helper and the `empty-template` and `empty-item` options of the `collection` helper to check wether a collection is empty. A collection is only treated as empty if it `isPopulated` and zero length.
-
-### isPopulated *collection.isPopulated()*
-
-Used by the `collection` helper to determine wether or not to fetch the collection.
-
-
-## Events
-
-### rendered:collection *rendred:collection(collectionView, collection)*
-
-Triggered on the view calling the `collection` helper every time `render` is called on the `CollectionView`.
-
-### rendered:item *rendered:item(collectionView, collection, model, itemElement, index)*
-
-Triggered on the view calling the `collection` helper every time an item is rendered in the `CollectionView`.
-
-### rendered:empty *rendered:empty(collectionView, collection)*
-
-Triggered on the view calling the `collection` helper every time the `empty-view` or `empty-template` is rendered in the `CollectionView`.
+### collection-element helper *{{collection-element [*htmlAttributes]}}

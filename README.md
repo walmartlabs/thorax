@@ -49,7 +49,7 @@ A hash of templates, used by various Thorax helpers. If using the Lumbar or Rail
 
 If a `View` has the same `name` as a template in the `templates` hash, it's `template' property will be automatically assigned.
 
-<a class="tutorial" href="http://thoraxjs.org/tutorials/project-configuration">Project Configuration</a>
+<a href="http://thoraxjs.org/tutorials/project-configuration" class="tutorial" title="Project Configuration">Tutorial</a>
 
 ## Thorax.View
 
@@ -125,7 +125,7 @@ Calls `remove` (and therefore `$el.remove` and `stopListening`) on your view, un
 
 `destroy` will also be called on a view if it was previously passed to the `setView` method on a `LayoutView`, and then another view is passed to `setView`.
 
-<a class="tutorial" href="http://thoraxjs.org/tutorials/view-lifecycle">View Lifecycle</a>
+<a href="http://thoraxjs.org/tutorials/view-lifecycle" class="tutorial" title="View Lifecycle">Tutorial</a>
 
 ## View Helpers
 
@@ -144,7 +144,7 @@ If a block is used, the template will have a variable named `@yield` available t
 
 This is useful when a child template will be called from multiple different parents.
 
-<a class="tutorial" href="http://thoraxjs.org/tutorials/template-yield">Template Yield</a>
+<a href="http://thoraxjs.org/tutorials/template-yield" class="tutorial" title="Template Yield">Tutorial</a>
 
 ### super *{{super}}*
 
@@ -264,7 +264,7 @@ In addition, if a view class is specified as the second argument to `registerVie
 
     });
 
-<a href="http://thoraxjs.org/tutorials/helper-view" class="tutorial">HelperView</a>
+<a href="http://thoraxjs.org/tutorials/helper-view" class="tutorial" title="HelperView">Tutorial</a>
 
 ## Thorax.LayoutView
 
@@ -274,7 +274,7 @@ A view to contain a single other view which will change over time, (multi-pane s
 
 Set the current view on the `LayoutView`, triggering `activated`, `ready` and `deactivated` events on the current and previous view during the lifecycle. `ensureRendered` is called on views passed to `setView`. By default `destroy` is called on the previous view when the new view is set. Pass `destroy: false` when setting a view to prevent it from being destroyed at a later time.
 
-<a href="http://thoraxjs.org/tutorials/view-lifecycle" class="tutorial">View Lifecycle</a>
+<a href="http://thoraxjs.org/tutorials/view-lifecycle" class="tutorial" title="View Lifecycle">Tutorial</a>
 
 ### getView *view.getView()*
 
@@ -284,21 +284,11 @@ Get the current view that was previously set with `setView`.
 
 By default `Thorax.LayoutView` classes have no template, just a placeholder to insert a view via `setView`. If a template to any of those classes is specified it must contain the a call to the layout helper where views will be placed. A custom `tag` or any HTML attributes may be specified.
 
-## Thorax.Model
-
-Enhances `Backbone.Model` with the concept of wether or not the model is populated and wether or not it should be automatically fetched. Note that when passing a model to `view.setModel` it must be an instance of `Thorax.Model` and not `Backbone.Model`.
-
-### isEmpty *model.isEmpty()*
-
-Used by the `empty` helper. In a collection the implementations of `isEmpty` and `isPopulated` differ, but in a model `isEmpty` is an alias for `!isPopulated`.
-
-### isPopulated *model.isPopulated()*
-
-Used by `setModel` to determine wether or not to fetch the model. The default implementation checks to see if any keys that are not `id` and are not default values have been set.
+## Data Binding
 
 ### setModel *view.setModel(model [,options])*
 
-Set the `model` attribute of a view then attempts to fetch the model if it has not yet been populated. Once set the default `context` implementation will merge the model's `attributes` into the context, so any model attributes will automatically become available in a template. In addition any events declared via `view.on({model: events})` will be bound to the model with `listenTo`.
+Sets the `model` attribute of a view then attempts to fetch the model if it has not yet been populated. Once set the default `context` implementation will merge the model's `attributes` into the context, so any model attributes will automatically become available in a template. In addition any events declared via `view.on({model: events})` will be bound to the model with `listenTo`.
 
 Accepts any of the following options:
 
@@ -314,6 +304,51 @@ Setting `model` in the construtor will automatically call `setModel`, so the fol
       model: myModel
     });
     view.setModel(myModel);
+
+<a href="http://thoraxjs.org/tutorials/controlling-context" class="tutorial" title="Controlling Context">Tutorial</a>
+
+### setCollection *view.setCollection(collection [,options])*
+
+Sets the `collection` attribute of a view then attempts to fetch the collection if it has not yet been populated. In addition any events declared via `view.on({collection: events})` will be bound to the collection with `listenTo`.
+
+Accepts any of the following options:
+
+- **render** - Wether to render the collection if it is populated, or render it after it has been loaded
+- **fetch** - Wether or not to try to call `fetch` on the collection if `shouldFetch` returns true
+- **success** - Callback on fetch success, defaults to noop
+- **errors** - Wether or not to trigger an `error` event on the view when an `error` event is triggered on the collection
+
+Note that while any view may bind a collection only a `CollectionView` will actually render a collection. A regular `Thorax.View` may declare a `collection` helper which in turn will generate and embed a `CollectionView`.
+
+<a href="http://thoraxjs.org/tutorials/collection-rendering" class="tutorial" title="Collection Rendering">Tutorial</a>
+
+## Thorax.Model
+
+Enhances `Backbone.Model` with the concept of wether or not the model is populated and wether or not it should be automatically fetched. Note that when passing a model to `view.setModel` it must be an instance of `Thorax.Model` and not `Backbone.Model`.
+
+### isEmpty *model.isEmpty()*
+
+Used by the `empty` helper. In a collection the implementations of `isEmpty` and `isPopulated` differ, but in a model `isEmpty` is an alias for `!isPopulated`.
+
+### isPopulated *model.isPopulated()*
+
+Used by `setModel` to determine wether or not to fetch the model. The default implementation checks to see if any keys that are not `id` and are not default values have been set.
+
+## Thorax.Collection
+
+Enhances `Backbone.Collection` with the concept of wether or not the collection is populated and wether or not it should be automatically fetched. Note that when passing a collection to `view.setCollection` it must be an instance of `Thorax.Collection` and not `Backbone.Collection`.
+
+### isEmpty *collection.isEmpty()*
+
+Used by the `empty` helper and the `emptyTemplate` and `emptyItem` options of a `CollectionView` to check wether a collection is empty. A collection is only treated as empty if it `isPopulated` and zero length.
+
+### isPopulated *collection.isPopulated()*
+
+Used by `setCollection` to determine wether or not to fetch the collection.
+
+## Thorax.CollectionView
+
+
 
 ## Event Enhancements
 
@@ -414,37 +449,37 @@ Triggered when a view is append to the DOM with `appendTo` or when a view is app
 
 This event propagates to all children, including children that will be bound after the view is created. `options` will contain a `target` view, which is the view that triggered the event.
 
-<a href="http://thoraxjs.org/tutorials/view-lifecycle" class="tutorial">View Lifecycle</a>
+<a href="http://thoraxjs.org/tutorials/view-lifecycle" class="tutorial" title="View Lifecycle">Tutorial</a>
 
 ### activated *activated (options)*
 
 Triggered on a view immediately after it was passed to a `LayoutView`'s `setView` method. Like `ready` this event propagates to children and the `options` hash will contain a `target` view.
 
-<a href="http://thoraxjs.org/tutorials/view-lifecycle" class="tutorial">View Lifecycle</a>
+<a href="http://thoraxjs.org/tutorials/view-lifecycle" class="tutorial" title="View Lifecycle">Tutorial</a>
 
 ### deactivated *deactivated (options)*
 
 Triggered on a view when it was previously passed to the `setView` method on a `LayoutView`, and then another view is passed to `setView`. Triggered when the current view's `el` is still attached to the parent. Like `ready` this event propagates to children and the `options` hash will contain a `target` view.
 
-<a href="http://thoraxjs.org/tutorials/view-lifecycle" class="tutorial">View Lifecycle</a>
+<a href="http://thoraxjs.org/tutorials/view-lifecycle" class="tutorial" title="View Lifecycle">Tutorial</a>
 
 ### destroyed *destroyed ()*
 
 Triggered on a view when the `destroy` method is called. Useful for implementing custom view cleanup behaviors. `destroy` will be also be called if it was previously passed to the `setView` method on a `LayoutView`, and then another view is passed to `setView`.
 
-<a href="http://thoraxjs.org/tutorials/view-lifecycle" class="tutorial">View Lifecycle</a>
+<a href="http://thoraxjs.org/tutorials/view-lifecycle" class="tutorial" title="View Lifecycle">Tutorial</a>
 
 ### change:view:start *change:view:start (newView [,oldView] ,options)*
 
 Trigged on a `Thorax.LayoutView` immediately after `setView` is called.
 
-<a href="http://thoraxjs.org/tutorials/view-lifecycle" class="tutorial">View Lifecycle</a>
+<a href="http://thoraxjs.org/tutorials/view-lifecycle" class="tutorial" title="View Lifecycle">Tutorial</a>
 
 ### change:view:end *change:view:end (newView [,oldView] ,options)*
 
 Trigged on a `Thorax.LayoutView` after `setView` is called, the old view has been destroyed (if present) and the new view has been attached to the DOM and had it's `ready` event triggered.
 
-<a href="http://thoraxjs.org/tutorials/view-lifecycle" class="tutorial">View Lifecycle</a>
+<a href="http://thoraxjs.org/tutorials/view-lifecycle" class="tutorial" title="View Lifecycle">Tutorial</a>
 
 ### helper *helper (name [,args...] ,helperView)*
 
@@ -480,13 +515,25 @@ Triggered on a view when `populate` is called. Passed a hash containing the attr
 
 Triggered on a model or collection by `fetch` or `load` and on a view if it has bound the model or collection with `setModel` or `setCollection`. Always generate a handler for a `load:start` event with `Thorax.loadHandler`.
  
-<a href="http://thoraxjs.org/tutorials/data-loading" class="tutorial">Data Loading</a>
+<a href="http://thoraxjs.org/tutorials/data-loading" class="tutorial" title="Data Loading">Tutorial</a>
 
 ### load:end *load:end (target)*
 
 Triggered on a model or collection by `fetch` or `load` and on a view if it has bound the model or collection with `setModel` or `setCollection`. Never observe this directly, always use `Thorax.loadHandler` on `load:start`.
 
-<a href="http://thoraxjs.org/tutorials/data-loading" class="tutorial">Data Loading</a>
+<a href="http://thoraxjs.org/tutorials/data-loading" class="tutorial" title="Data Loading">Tutorial</a>
+
+### rendered:collection *rendred:collection (collectionView, collection)*
+
+Triggered on a `CollectionView` or a the view calling the `collection` helper every time `render` is called on the `CollectionView`.
+
+### rendered:item *rendered:item (collectionView, collection, model, itemElement, index)*
+
+Triggered on a `CollectionView` or a the view calling the `collection` helper every time an item is rendered in the `CollectionView`.
+
+### rendered:empty *rendered:empty (collectionView, collection)*
+
+Triggered on a `CollectionView` or a the view calling the `collection` helper every time the `emptyView` or `emptyTemplate` is rendered in the `CollectionView`.
 
 ## Form Handling
 
@@ -504,7 +551,7 @@ Thorax provides helpers to assist with form handling, but makes no user interfac
       }
     });
 
-<a href="http://thoraxjs.org/tutorials/form-handling" class="tutorial">Form Handling</a>
+<a href="http://thoraxjs.org/tutorials/form-handling" class="tutorial" title="Form Handling">Tutorial</a>
 
 ### serialize *view.serialize([event], callback [,options])*
 
@@ -583,7 +630,7 @@ Validate the attributes created by `serialize`, must return an array or nothing 
       return errors;
     }
 
-<a href="http://thoraxjs.org/tutorials/data-validation" class="tutorial">Data Validation</a>
+<a href="http://thoraxjs.org/tutorials/data-validation" class="tutorial" title="Data Validation">Tutorial</a>
 
 ## $
 
@@ -631,7 +678,7 @@ Used by `model.load` and `collection.load`. Binds the callback to the current ro
       setTimeout(callback, 5000);
     }
 
-<a href="http://thoraxjs.org/tutorials/data-loading" class="tutorial">Data Loading</a>
+<a href="http://thoraxjs.org/tutorials/data-loading" class="tutorial" title="Data Loading">Tutorial</a>
 
 ### load *modelOrCollection.load(callback [,failback] [,options])*
 
@@ -653,7 +700,7 @@ Triggers `load:start` and `load:end` events on the model or collection, and addi
 
 By default the events will propagate to a root object set with `setRootObject`. Pass `background: true` as an option to prevent the event from being triggered on the rootObject.
 
-<a href="http://thoraxjs.org/tutorials/data-loading" class="tutorial">Data Loading</a>
+<a href="http://thoraxjs.org/tutorials/data-loading" class="tutorial" title="Data Loading">Tutorial</a>
 
 ### setRootObject *Thorax.setRootObject(obj)*
 
@@ -765,4 +812,4 @@ If using Thorax outside of the provided node or Rails downloads you can inline a
     npm install -g thorax
     thorax templates ./templates-dir ./templates.js
 
-<a href="http://thoraxjs.org/tutorials/project-configuration" class="tutorial">Project Configuration</a>
+<a href="http://thoraxjs.org/tutorials/project-configuration" class="tutorial" title="Project Configuration">Tutorial</a>
