@@ -12,7 +12,7 @@ Thorax can be used standalone in any JavaScript environment in addition the [boi
 
 ## Registry
 
-Thorax creates a special hash for each type of class to store all subclasses in your application. The use of `Thorax.Views` and `Thorax.templates` is required to allow the `view`, `template` and other helper methods to operate, but the use of the others are optional and provided for consitency.
+Thorax creates a special hash for each type of class to store all subclasses in your application. The use of `Thorax.Views` and `Thorax.templates` is required to allow the `view`, `template` and other helper methods to operate, but the use of `Thorax.Models` and `Thorax.Collections` are optional and provided for consitency.
 
 <table cellpadding="0" cellspacing="0" border="0" width="100%">
   <thead>
@@ -43,15 +43,15 @@ If a `name` property is passed to any Thorax classes' `extend` method the result
 
 ### templates *Thorax.templates*
 
-A hash of templates, used by various Thorax helpers. If using the node or Rails boilerplate projects this hash will be automatically generated from the files in your `templates` directories. To manually add a template to the hash:
+A hash of templates, used by various Thorax helpers. If using the Lumbar or Rails boilerplate projects this hash will be automatically generated from the files in your `templates` directories. To manually add a template to the hash:
 
     Thorax.templates['my-template-name'] = Handlebars.compile('template string');
 
 If a `View` has the same `name` as a template in the `templates` hash, it's `template' property will be automatically assigned.
 
-## Thorax.View
+<a class="tutorial" href="http://thoraxjs.org/tutorials/project-configuration">Project Configuration</a>
 
-The base `Thorax.View` implementation is concerned only with Handlebars + Backbone integration. A variety of additional functionality is provided by the various included plugins. The boilerplate projects have a build of Thorax with all plugins included.
+## Thorax.View
 
 `Thorax.View` provides mostly additive functionality over `Backbone.View` but breaks compatibility in one imporant way in that it does not use an `options` object. All properties passed to the constructor become available on the instance:
 
@@ -60,13 +60,7 @@ The base `Thorax.View` implementation is concerned only with Handlebars + Backbo
     });
     view.key === "value"
 
-### children *view.children*
-
-A hash of child view's indexed by `cid`. Child views may become attached to the parent with the `view` helper or may be automatically attached `HelperView` instanced created by helpers created with `regsterViewHelper`.
-
-### parent *view.parent*
-
-If a view was embedded inside another with the `view` helper, or is a `HelperView` created by a helper creted with `registerViewHelper` the view will have a `parent` attribute.
+By default all instance properties are available in the template context. So when setting a key on the view it will by default be available in the template.
 
 ### template *view.template*
 
@@ -76,26 +70,38 @@ Assign a template to a view. This may be a string or a function which recieves a
       template: "{{key}}"
     });
 
-### destroy *view.destroy([options])*
-
-By default this will only call `destroy` on all child views. Other plugins override this method to implement custom cleanup behaviors. Your own behaviors can be added with the `destroyed` event. Pass `children: false` to this method to prevent the view's children from being destroyed.
-
 ### render *view.render([content])*
 
-Renders the view's `template` updating the view's `el` with the result, triggering the `rendered` event. `content` may be empty (render the `template`) or a function that will be called with the response from `context` or a string.
+Renders the view's `template` updating the view's `el` with the result, triggering the `rendered` event.
 
-    //will render template
-    view.render()
-    //will insert custom content
-    view.render('custom html')
+    view.render();
+
+`render` can also accept a content argument that may be an element, string or a template function:
+
+    view.render('custom html');
 
 ### context *view.context()*
 
-Used by `render` to determine what attributes are available in the view's `template`. The default context function returns `this`. If the model plugin is used, `this` + `model.attributes` will be the context.
+Used by `render` to determine what attributes are available in the view's `template`. The default context function returns `this` + `this.model.attributes` if a `model` is present on the view. The `context` method may be overriden to provide a custom context:
 
-### renderTemplate *view.renderTemplate(name, [,extraContext] [,ignoreErrors])*
+  new Thorax.View({
+    template: '{{key}}',
+    context: function() {
+      return _.defaults(this.model.attributes, {
+        key: 'value'
+      });
+    }
+  });
 
-Render a template with the view's `context` plus any optional `extraContext` parameters passed in.
+<a href="http://thoraxjs.org/tutorials/controlling-context">Controlling Context</a>
+
+### appendTo *view.appendTo(element)*
+
+Appends the view to a given `element` which may be a CSS selector or DOM element. `ensureRendered` will be called and a `ready` event will be triggered. This is the preferred way to append your outer most view onto a page.
+
+### renderTemplate *view.renderTemplate(name [,context])*
+
+Renders a given template with the view's `context` or the given context argument.
 
 ### ensureRendered *view.ensureRendered()*
 
@@ -105,28 +111,44 @@ Ensure that the view has been rendered at least once.
 
 Get or set the `innerHTML` of the view, without triggering the `rendered` event.
 
+### children *view.children*
+
+A hash of child view's indexed by `cid`. Child views may become attached to the parent with the `view` helper or may be automatically attached `HelperView` instances created by helpers created with `regsterViewHelper` (such as the `collection` and `empty` helpers).
+
+### parent *view.parent*
+
+If a view was embedded inside another with the `view` helper, or a generated `HelperView` (for instance the `collection` or `empty` helpers) it will have a `parent` view attribute. In the case of `HelperView`s, the `parent` will be the view that declared the helper in it's template.
+
+### destroy *view.destroy([options])*
+
+Calls `remove` (and therefore `$el.remove` and `stopListening`) on your view, unbinds any model or collection bound with `setCollection` or `setModel`, calls `destroy` on all children, then triggers a `destroyed` event which can be used to implement specific cleanup behaviors in your views. Pass `children: false` to this method to prevent the view's children from being destroyed.
+
+<a class="tutorial" href="http://thoraxjs.org/tutorials/view-lifecycle">View Lifecycle</a>
+
 ## View Helpers
+
+### template *{{template name [options]}}*
+
+Embed a template inside of another, as a string. An associated view (if any) will not be initialized. By default the template will be called with the current context but extra options may be passed which will be added to the context.
+
+    {{template "path/to/template" key="value"}}
+
+If a block is used, the template will have a variable named `@yield` available that will contain the contents of the block.
+
+    {{#template "child"}}
+      content in the block will be available in a variable 
+      named "@yield" inside the template "child"
+    {{/template}}
+
+This is useful when a child template will be called from multiple different parents.
+
+<a class="tutorial" href="http://thoraxjs.org/tutorials/template-yield">Template Yield</a>
 
 ### super *{{super}}*
 
 Embed the `template` from the parent view within the child template.
 
     {{super}}
-
-### template *{{template name [options]}}*
-
-Embed a template inside of another, as a string. An associated view (if any) will not be initialized. By default the template will be called with the current scope but extra options may be passed which will be added to the context.
-
-    {{template "path/to/template" key="value"}}
-
-If a block is used, the template will have a variable named `yield` available that will contain the contents of the block.
-
-    {{#template "child"}}
-      content in the block will be available in a variable 
-      named "yield" inside the template "child"
-    {{/template}}
-
-This is useful when a child template will be called from multiple different parents.
 
 ### view *{{view name [options]}}*
 
@@ -144,7 +166,7 @@ If a block is specified it will be assigned as the `template` to the view instan
 
 ### element *{{element name [options]}}*
 
-Embed a DOM element in the view. This uses a placeholder technique to work, if the placeholder must be of a certain type in order to work (for instance a `tbody` inside of a `table`) specify a `tag` option.
+Embed a DOM element in the view. This uses a placeholder technique to work, if the placeholder must be of a certain type in order to be valid (for instance a `tbody` inside of a `table`) specify a `tag` option.
 
     {{element domElement tag="tbody"}}
 
@@ -184,13 +206,15 @@ And the corresponding view class:
 In addition, if a view class is specified as the second argument to `registerViewHelper`, the helper will always initialize a view of that class instead of a `HelperView`:
 
     Handlebars.registerViewHelper('collection',
-      Thorax.CollectionView, function(collection, view) {
+      Thorax.CollectionHelperView, function(collection, view) {
 
     });
 
+<a href="http://thoraxjs.org/tutorials/helper-view" class="tutorial">HelperView</a>
+
 ## Util
 
-### tag *Thorax.Util.tag(name, htmlAttributes [,content] [,context])*
+### tag *Thorax.Util.tag(name, htmlAttributes [,content] [,expand-tokens])*
 
 Generate an HTML string. All built in HTML generation uses this method. If `context` is passed any Handlebars references inside of the htmlAttributes values will rendered with the context.
 
@@ -204,7 +228,7 @@ Generate an HTML string. All built in HTML generation uses this method. If `cont
 
 ### $.view *$(event.target).view([options])*
 
-Get a reference to the nearest parent view. Pass `helper: false` to options to exclude `HelperView`s from the lookup. `$.model` and `$.collection` will also be available if you include the model and collection plugins.
+Get a reference to the nearest parent view. Pass `helper: false` to options to exclude `HelperView`s from the lookup. Useful when registering DOM event handlers:
 
     $(event.target).view()
 
@@ -212,7 +236,7 @@ Get a reference to the nearest parent view. Pass `helper: false` to options to e
 
 ### destroyed *destroyed ()*
 
-Triggered when the `destroy` method is called.
+Triggered when the `destroy` method is called. Useful for implementing custom view cleanup behaviors.
 
 ### rendered *rendered ()*
 
@@ -226,7 +250,7 @@ Triggered every time a child view is inserted into the view with the `view` help
 
 Triggered when a view helper (such as `collection`, `empty`, etc) create a new `HelperView` instance.
 
-### helper:name *helper:name [,args...] ,helperView)*
+### helper:name *helper:name ([,args...] ,helperView)*
 
 Triggered when a given view helper creates a new `HelperView` instance.
 
@@ -235,6 +259,12 @@ Triggered when a given view helper creates a new `HelperView` instance.
     view.on('helper:collection', function(collection, collectionView) {
 
     });
+
+### ready *ready (options)*
+
+Triggered when a view is append to the DOM with `appendTo` or when a view is appeneded to a `LayoutView` with `setView`. Setting `focus` and other behaviors that depend on the view being present in the DOM should be handled in this event.
+
+This event propagates to all children, including children that will be bound after the view is created. `options` will contain a `target` view, which is the view that triggered the event.
 
 ## HTML Attributes
 
@@ -253,6 +283,7 @@ Thorax and it's view helpers generate a number of custom HTML attributes that ma
     <tr><td><code>data-collection-cid</code></td><td>Element generated by the `collection helper`</td></tr>
     <tr><td><code>data-collection-name</code></td><td>Same as above, only present when the bound collection is named</td></tr>
     <tr><td><code>data-collection-empty</code></td><td>Set to "true" or "false" depending on wether the bound collection <code>isEmpty</code></td></tr>
+    <tr><td><code>data-collection-element</code></td><td>Set by the <code>collection-element</code>, determines where a collection in a <code>CollectionView</code> will be rendered.</td></tr>
     <tr><td><code>data-model-cid</code></td><td>A view's <code>el</code> if a model was bound to the view or each item element inside of elements generated by the collection helper</td></tr>
     <tr><td><code>data-model-name</code></td><td>Same as above, only present if the model is named</td></tr>
     <tr><td><code>data-layout-cid</code></td><td>The element generated by the <code>layout</code> helper or <code>el</code> inside of a <code>LayoutView</code> or <code>ViewController</code> instance</td></tr>
@@ -268,33 +299,23 @@ When creating CSS selectors it's recommended to use the generated attributes (es
       border: 1px solid #ccc;
     }
 
+## Error Handling
+
+### onException *Thorax.onException(name, error)*
+
+Bound DOM event handlers in Thorax are wrapped with a try / catch block, calling this function if an error is caught. This hook is provided primarily to allow for easier debugging in Android environments where it is difficult to determine the source of the error. The default error handler is simply:
+  
+    Thorax.onException = function(name, error) {
+      throw error;
+    };
+
+Override this function with your own logging / debugging handler. `name` will be the event name where the error was thrown.
+
 ## Command Line
 
 To use the command line utilities:
 
     npm install -g thorax
-
-### build *thorax build target [plugin] [plugin...]*
-
-Build a custom version of Thorax using a list of any of the given plugins:
-
-- mixin
-- event
-- model
-- collection
-- helpers
-- form
-- layout
-- loading
-- mobile
-
-Not specifying any plugins will build a version with all plugins except mobile. To build a version of Thorax with all plugins including the mobile plugin run:
-
-    thorax build ./thorax-mobile.js --mobile
-
-Not specifying any arguments will build both the mobile and regular versions of Thorax in the `dist` directory of the npm package:
-
-    thorax build
 
 ### templates *thorax templates ./templates ./templates.js*
 
@@ -303,14 +324,4 @@ If using Thorax outside of the provided node or Rails downloads you can inline a
     npm install -g thorax
     thorax templates ./templates-dir ./templates.js
 
-## Error Handling
-
-### onException *Thorax.onException(name, error)*
-
-Bound DOM event handlers in Thorax are wrapped with a try / catch block, calling this function if an error is caught. This hook is provided primarily to allow for easier debugging in Android environments where it is difficult to determine the source of the error. The default error handler is simply:
-  
-    function(name, error) {
-      throw error;
-    }
-
-Override this function with your own logging / debugging handler. `name` will be the event name where the error was thrown.
+<a href="http://thoraxjs.org/tutorials/project-configuration" class="tutorial">Project Configuration</a>
