@@ -73,12 +73,18 @@ A `CollectionView` class is automatically generated each time a `collection` hel
     });
 
 
-### appendItem *view.appendItem(modelOrView [,index])*
+### appendItem *view.appendItem(modelOrView [,index] [,options])*
 
-Append a model (which will used to generate a new `item-view`) or a view at a given index in the `CollectionView`. If passing a view as the first argument `index` may be a model which will be used to look up the index.
+Append a model (which will used to generate a new `itemView` or render an `itemTemplate`) or a view at a given index in the `CollectionView`. If passing a view as the first argument `index` may be a model which will be used to look up the index.
+
+By default this will trigger a `rendered:item` event, `silent: true` may be passed in the options hash to prevent this. To also prevent the appeneded item from being filtered if an `itemFilter` is present pass `filter: false` in the options hash.
 
 ### removeItem *view.removeItem(model)*
 
+Remove an item from the view.
+
 ### updateItem *view.updateItem(model)*
+
+Equivelent to calling `removeItem` then `appendItem`. Note that this is mainly meant to cover edge cases, by default changing a model will update the needed item (wether using `itemTemplate` or `itemView`).
 
 ### collection-element helper *{{collection-element [*htmlAttributes]}}
