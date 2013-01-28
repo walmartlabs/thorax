@@ -127,24 +127,6 @@ Calls `remove` (and therefore `$el.remove` and `stopListening`) on your view, un
 
 <a class="tutorial" href="http://thoraxjs.org/tutorials/view-lifecycle">View Lifecycle</a>
 
-## Thorax.LayoutView
-
-A view to contain a single other view which will change over time, (multi-pane single page applications for instance), triggering a series of events . By default this class has no template. If one is specified use the `layout` helper to determine where `setView` will place a view. A `Thorax.LayoutView` is a subclass of `Thorax.View` and may be treated as a view in every regard (i.e. embed multiple `LayoutView` instances in a parent view with the `view` helper).
-
-### setView *view.setView(view [,options])*
-
-Set the current view on the `LayoutView`, triggering `activated`, `ready` and `deactivated` events on the current and previous view during the lifecycle. `ensureRendered` is called on views passed to `setView`. By default `destroy` is called on the previous view when the new view is set. Pass `destroy: false` when setting a view to prevent it from being destroyed at a later time.
-
-<a href="http://thoraxjs.org/tutorials/view-lifecycle" class="tutorial">View Lifecycle</a>
-
-### getView *view.getView()*
-
-Get the current view that was previously set with `setView`.
-
-### layout *{{layout [htmlAttributes]}}*
-
-By default `Thorax.LayoutView` classes have no template, just a placeholder to insert a view via `setView`. If a template to any of those classes is specified it must contain the a call to the layout helper where views will be placed. A custom `tag` or any HTML attributes may be specified.
-
 ## View Helpers
 
 ### template *{{template name [options]}}*
@@ -240,16 +222,6 @@ The href attribute is required but may also be specified as an attribute:
 
     {{#link href="articles/{{id}}" expand-tokens=true}}Link Test{{/link}}
 
-### loading *{{#loading}}*
-
-A block helper to use when the view is loading. For collection specific loading the a `CollectionView` accepts `loadingView` and `loadingTemplate` options to append an item in a collection when it is loading.
-
-    {{#loading}}
-      View is loading a model or collection.
-    {{else}}
-      View is not loading a model or collection.
-    {{/loading}}
-
 ## HelperView
 
 ### registerViewHelper *Handlebars.registerViewHelper(name [,viewClass] ,callback)*
@@ -293,6 +265,55 @@ In addition, if a view class is specified as the second argument to `registerVie
     });
 
 <a href="http://thoraxjs.org/tutorials/helper-view" class="tutorial">HelperView</a>
+
+## Thorax.LayoutView
+
+A view to contain a single other view which will change over time, (multi-pane single page applications for instance), triggering a series of events . By default this class has no template. If one is specified use the `layout` helper to determine where `setView` will place a view. A `Thorax.LayoutView` is a subclass of `Thorax.View` and may be treated as a view in every regard (i.e. embed multiple `LayoutView` instances in a parent view with the `view` helper).
+
+### setView *view.setView(view [,options])*
+
+Set the current view on the `LayoutView`, triggering `activated`, `ready` and `deactivated` events on the current and previous view during the lifecycle. `ensureRendered` is called on views passed to `setView`. By default `destroy` is called on the previous view when the new view is set. Pass `destroy: false` when setting a view to prevent it from being destroyed at a later time.
+
+<a href="http://thoraxjs.org/tutorials/view-lifecycle" class="tutorial">View Lifecycle</a>
+
+### getView *view.getView()*
+
+Get the current view that was previously set with `setView`.
+
+### layout helper *{{layout [htmlAttributes]}}*
+
+By default `Thorax.LayoutView` classes have no template, just a placeholder to insert a view via `setView`. If a template to any of those classes is specified it must contain the a call to the layout helper where views will be placed. A custom `tag` or any HTML attributes may be specified.
+
+## Thorax.Model
+
+Enhances `Backbone.Model` with the concept of wether or not the model is populated and wether or not it should be automatically fetched. Note that when passing a model to `view.setModel` it must be an instance of `Thorax.Model` and not `Backbone.Model`.
+
+### isEmpty *model.isEmpty()*
+
+Used by the `empty` helper. In a collection the implementations of `isEmpty` and `isPopulated` differ, but in a model `isEmpty` is an alias for `!isPopulated`.
+
+### isPopulated *model.isPopulated()*
+
+Used by `setModel` to determine wether or not to fetch the model. The default implementation checks to see if any keys that are not `id` and are not default values have been set.
+
+### setModel *view.setModel(model [,options])*
+
+Set the `model` attribute of a view then attempts to fetch the model if it has not yet been populated. Once set the default `context` implementation will merge the model's `attributes` into the context, so any model attributes will automatically become available in a template. In addition any events declared via `view.on({model: events})` will be bound to the model with `listenTo`.
+
+Accepts any of the following options:
+
+- **fetch** - Boolean, wether to fetch the model when it is set, defaults to true.
+- **success** - Callback on fetch success, defaults to noop
+- **render** - Render on the view on model:change? Defaults to true
+- **populate** - Call `populate` with the model's attributes when it is set? Defaults to true. Pass `populate: {children: false}` to prevent child views from having their inputs populated.
+- **errors** - When the model triggers an `error` event, trigger the event on the view? Defaults to true
+
+Setting `model` in the construtor will automatically call `setModel`, so the following are equivelent:
+
+    var view = new Thorax.View({
+      model: myModel
+    });
+    view.setModel(myModel);
 
 ## Event Enhancements
 
@@ -649,6 +670,18 @@ Generates an `load:start` event handler that when triggered will then monitor th
       function(background, object) {
         view.$el.removeClass("loading");
       }));
+
+### loading helper *{{#loading}}*
+
+A block helper to use when the view is loading. For collection specific loading the a `CollectionView` accepts `loadingView` and `loadingTemplate` options to append an item in a collection when it is loading.
+
+    {{#loading}}
+      View is loading a model or collection.
+    {{else}}
+      View is not loading a model or collection.
+    {{/loading}}
+
+<a href="http://thoraxjs.org/tutorials/data-loading">Data Loading</a>
 
 ### _loadingClassName *view._loadingClassName*
 
