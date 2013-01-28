@@ -212,26 +212,6 @@ In addition, if a view class is specified as the second argument to `registerVie
 
 <a href="http://thoraxjs.org/tutorials/helper-view" class="tutorial">HelperView</a>
 
-## Util
-
-### tag *Thorax.Util.tag(name, htmlAttributes [,content] [,expand-tokens])*
-
-Generate an HTML string. All built in HTML generation uses this method. If `context` is passed any Handlebars references inside of the htmlAttributes values will rendered with the context.
-
-    Thorax.Util.tag("div", {
-      id: "div-{{number}}"
-    }, "content of the div", {
-      number: 3
-    });
-
-## $
-
-### $.view *$(event.target).view([options])*
-
-Get a reference to the nearest parent view. Pass `helper: false` to options to exclude `HelperView`s from the lookup. Useful when registering DOM event handlers:
-
-    $(event.target).view()
-
 ## Events
 
 ### destroyed *destroyed ()*
@@ -265,6 +245,26 @@ Triggered when a given view helper creates a new `HelperView` instance.
 Triggered when a view is append to the DOM with `appendTo` or when a view is appeneded to a `LayoutView` with `setView`. Setting `focus` and other behaviors that depend on the view being present in the DOM should be handled in this event.
 
 This event propagates to all children, including children that will be bound after the view is created. `options` will contain a `target` view, which is the view that triggered the event.
+
+## Util
+
+### tag *Thorax.Util.tag(name, htmlAttributes [,content] [,expand-tokens])*
+
+Generate an HTML string. All built in HTML generation uses this method. If `context` is passed any Handlebars references inside of the htmlAttributes values will rendered with the context.
+
+    Thorax.Util.tag("div", {
+      id: "div-{{number}}"
+    }, "content of the div", {
+      number: 3
+    });
+
+## $
+
+### $.view *$(event.target).view([options])*
+
+Get a reference to the nearest parent view. Pass `helper: false` to options to exclude `HelperView`s from the lookup. Useful when registering DOM event handlers:
+
+    $(event.target).view()
 
 ## HTML Attributes
 
