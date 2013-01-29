@@ -12,9 +12,11 @@ Thorax.HelperView = Thorax.View.extend({
   },
 });
 
-//ensure nested inline helpers will always have this.parent
-//set to the view containing the template
+// Ensure nested inline helpers will always have this.parent
+// set to the view containing the template
 function getParent(parent) {
+  // The `view` helper is a special case as it embeds
+  // a view instead of creating a new one
   while (parent._helperName && parent._helperName !== 'view') {
     parent = parent.parent;
   }
