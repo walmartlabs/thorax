@@ -1,6 +1,7 @@
 /*global createRegistryWrapper, dataObject, getEventCallback, getValue, modelCidAttributeName, viewCidAttributeName */
 var _fetch = Backbone.Collection.prototype.fetch,
     _reset = Backbone.Collection.prototype.reset,
+    _replaceHTML = Thorax.View.prototype._replaceHTML,
     collectionCidAttributeName = 'data-collection-cid',
     collectionEmptyAttributeName = 'data-collection-empty',
     collectionElementAttributeName = 'data-collection-element',
@@ -57,8 +58,23 @@ dataObject('collection', {
   cidAttrName: collectionCidAttributeName
 });
 
-_.extend(Thorax.View.prototype, {
+Thorax.CollectionView = Thorax.View.extend({
   _collectionSelector: '[' + collectionElementAttributeName + ']',
+  
+  // preserve collection element if it was not created with {{collection}} helper
+  _replaceHTML: function(html) {
+    if (this.collection && this._objectOptionsByCid[this.collection.cid] && this._renderCount) {
+      var element;
+      var oldCollectionElement = this.getCollectionElement();
+      element = _replaceHTML.call(this, html);
+      if (!oldCollectionElement.attr('data-view-cid')) {
+        this.getCollectionElement().replaceWith(oldCollectionElement);
+      }
+    } else {
+      return _replaceHTML.call(this, html);
+    }
+  },
+
   //appendItem(model [,index])
   //appendItem(html_string, index)
   //appendItem(view, index)
@@ -135,10 +151,6 @@ _.extend(Thorax.View.prototype, {
     return true;
   },
   renderCollection: function() {
-    this.ensureRendered();
-    if (!this.collectionRenderer) {
-      return;
-    }
     if (this.collection) {
       if (this.collection.isEmpty()) {
         handleChangeFromNotEmptyToEmpty.call(this);
@@ -205,9 +217,11 @@ _.extend(Thorax.View.prototype, {
   getCollectionElement: function() {
     var element = this.$(this._collectionSelector);
     return element.length === 0 ? this.$el : element;
-  },
-  // Events that will only be bound to "this.collection"
-  _collectionRenderingEvents: {
+  }
+});
+
+Thorax.CollectionView.on({
+  collection: {
     reset: onCollectionReset,
     sort: onCollectionReset,
     filter: function() {
@@ -247,19 +261,17 @@ Thorax.View.on({
 });
 
 function onCollectionReset(collection) {
-  if (!collection || (collection === this.collection && this._objectOptionsByCid[this.collection.cid].render)) {
+  // noop if not a CollectionView
+  if (this.renderCollection && (!collection || (collection === this.collection && this._objectOptionsByCid[this.collection.cid].render))) {
     this.renderCollection();
   }
 }
 
+// Even if the view is not a CollectionView
+// ensureRendered() to provide similar behavior
+// to a model
 function onSetCollection(collection) {
-  if (this.collectionRenderer && collection) {
-    _.each(this._collectionRenderingEvents, function(callback, eventName) {
-      // getEventCallback will resolve if it is a string or a method
-      // and return a method
-      this.listenTo(collection, eventName, getEventCallback(callback, this));
-    }, this);
-  }
+  this.ensureRendered();
 }
 
 function applyVisibilityFilter() {

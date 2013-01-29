@@ -452,8 +452,7 @@ describe('collection', function() {
   });
 
   it("collection-element helper", function() {
-    var view = new Thorax.View({
-      collectionRenderer: true,
+    var view = new Thorax.CollectionView({
       collection: letterCollection,
       template: '<div class="test">{{collection-element tag="ul"}}</div>',
       itemTemplate: 'letter-item'
@@ -491,7 +490,7 @@ describe('collection', function() {
     expect(view.$('[data-collection-empty]').length).to.equal(0);
   });
 
-  it("item-context & empty-context", function() {
+  it("itemContext", function() {
     var view = new Thorax.View({
       key: 'value',
       collection: letterCollection,
@@ -613,8 +612,7 @@ describe('collection', function() {
   it('should preserve itself in the DOM after re-rendering collection', function() {
     var spy = this.spy();
     var collection = new Thorax.Collection([{key: 'one'}, {key: 'two'}]);
-    var view = new Thorax.View({
-      collectionRenderer: true,
+    var view = new Thorax.CollectionView({
       template: "{{collection-element tag=\"ul\"}}",
       itemTemplate: Handlebars.compile('<li>{{key}}</li>'),
       events: {
@@ -652,8 +650,7 @@ describe('collection', function() {
     var collection = new (Thorax.Collection.extend({
       url: '/test'
     }));
-    var view = new Thorax.View({
-      collectionRenderer: true,
+    var view = new Thorax.CollectionView({
       collection: collection,
       events: {
         'rendered:collection': spy

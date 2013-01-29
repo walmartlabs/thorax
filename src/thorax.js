@@ -222,31 +222,20 @@ Thorax.View = Backbone.View.extend({
   },
 
   html: function(html) {
-
-    function replaceHTML(view) {
-      view.el.innerHTML = "";
-      return view.$el.append(html);
-    }
-
     if (typeof html === 'undefined') {
       return this.el.innerHTML;
     } else {
       // Event for IE element fixes
       this.trigger('before:append');
-      var element;
-      if (this.collection && this._objectOptionsByCid[this.collection.cid] && this._renderCount) {
-        // preserve collection element if it was not created with {{collection}} helper
-        var oldCollectionElement = this.getCollectionElement();
-        element = replaceHTML(this);
-        if (!oldCollectionElement.attr('data-view-cid')) {
-          this.getCollectionElement().replaceWith(oldCollectionElement);
-        }
-      } else {
-        element = replaceHTML(this);
-      }
+      var element = this._replaceHTML(html);
       this.trigger('append');
       return element;
     }
+  },
+
+  _replaceHTML: function(html) {
+    this.el.innerHTML = "";
+    return this.$el.append(html);
   },
 
   _anchorClick: function(event) {

@@ -202,6 +202,11 @@ if (Thorax.HelperView) {
   Thorax.mixinLoadableEvents(Thorax.HelperView.prototype, true);
 }
 
+if (Thorax.CollectionHelperView) {
+  Thorax.mixinLoadable(Thorax.CollectionHelperView.prototype, true);
+  Thorax.mixinLoadableEvents(Thorax.CollectionHelperView.prototype, true);
+}
+
 Thorax.sync = function(method, dataObj, options) {
   var self = this,
       complete = options.complete;
@@ -382,6 +387,12 @@ Thorax.HelperView.prototype._modifyDataObjectOptions = function(dataObject, opti
   options.background = this.parent.nonBlockingLoad;
   return options;
 };
+
+// Thorax.CollectionHelperView inherits from CollectionView
+// so need to set it manually
+if(Thorax.CollectionHelperView.prototype) {
+  Thorax.CollectionHelperView.prototype._modifyDataObjectOptions = Thorax.HelperView.prototype._modifyDataObjectOptions;
+}
 
 inheritVars.collection.loading = function() {
   var loadingView = this.loadingView,

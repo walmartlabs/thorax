@@ -22,6 +22,13 @@ describe('collection helper', function() {
     expect(view.$('li').length).to.equal(0);
   });
 
+  it("collection-element declared outside of CollectionView will raise", function() {
+    var view = new Thorax.View({
+      template: '{{collection-element}}'
+    });
+    expect(view.render).to['throw'];
+  });
+
   it("collection helper won't re-render parent on add", function() {
     var spy = this.spy();
     var collection = new Thorax.Collection([{letter: 'a'}]);
@@ -39,6 +46,21 @@ describe('collection helper', function() {
     collection.add({letter: 'b'});
     expect(spy.callCount).to.equal(1);
     expect(view.$('li').length).to.equal(2);
+  });
+
+  it("events handled on parent when collection view renders", function() {
+    var spy = this.spy();
+    var view = new Thorax.View({
+      events: {
+        collection: {
+          test: spy
+        }
+      },
+      template: '{{#collection}}{{/collection}}',
+      collection: new Thorax.Collection()
+    });
+    view.collection.trigger('test');
+    expect(spy.callCount).to.equal(1);
   });
 
   it("nested collection helper", function() {
