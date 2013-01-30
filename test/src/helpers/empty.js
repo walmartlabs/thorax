@@ -70,4 +70,19 @@ describe('empty helper', function() {
     expect(b.$('.empty').length).to.equal(0);
     expect(b.$('[data-collection-cid] div')[0].innerHTML).to.equal('a');
   });
+
+  it("multiple empty helpers binding the same object will not cause multiple renders", function() {
+    var spy = this.spy();
+    var view = new Thorax.View({
+      events: {
+        rendered: spy
+      },
+      template: "{{#empty collection}}{{/empty}}{{#empty collection}}{{/empty}}",
+      collection: new Thorax.Collection()
+    });
+    view.ensureRendered();
+    expect(spy.callCount).to.equal(1);
+    view.collection.add({key: 'value'});
+    expect(spy.callCount).to.equal(2);
+  });
 });
