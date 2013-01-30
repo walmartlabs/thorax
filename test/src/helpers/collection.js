@@ -45,7 +45,7 @@ describe('collection helper', function() {
     function testNesting(view, msg) {
       var blogModel = new Thorax.Model();
       view.setModel(blogModel);
-      expect(view.$('[data-view-helper]').html()).to.equal('empty', msg + ' : starts empty');
+      expect(view.html()).to.equal('empty', msg + ' : starts empty');
       var authors = [
         new Thorax.Model({author: 'author 1'}),
         new Thorax.Model({author: 'author 2'})
