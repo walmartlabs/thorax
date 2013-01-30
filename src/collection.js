@@ -247,10 +247,11 @@ Thorax.View.on({
 });
 
 function onCollectionReset(collection) {
-  if (!collection || (this.collection && collection === this.collection)) {
-    if (this._objectOptionsByCid[this.collection.cid].render) {
-      this.renderCollection();
-    }
+  var options = collection && this._objectOptionsByCid[collection.cid];
+  // we would want to still render in the case that the
+  // collection has transitioned to being falsy
+  if (!collection || (options && options.render)) {
+    this.renderCollection();
   }
 }
 
