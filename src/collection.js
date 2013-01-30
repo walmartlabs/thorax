@@ -247,8 +247,10 @@ Thorax.View.on({
 });
 
 function onCollectionReset(collection) {
-  if (!collection || (this.collection && collection === this.collection && this._objectOptionsByCid[this.collection.cid].render)) {
-    this.renderCollection();
+  if (!collection || (this.collection && collection === this.collection)) {
+    if (this._objectOptionsByCid[this.collection.cid].render) {
+      this.renderCollection();
+    }
   }
 }
 
