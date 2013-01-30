@@ -153,13 +153,10 @@ Thorax.mixinLoadable = function(target, useParent) {
       if (!that.nonBlockingLoad && !background && rootObject && rootObject !== this) {
         rootObject.trigger(loadStart, message, background, object);
       }
+      that._isLoading = true;
       $(that.el).addClass(that._loadingClassName);
-      //used by loading helpers
-      if (that._loadingCallbacks) {
-        _.each(that._loadingCallbacks, function(callback) {
-          callback();
-        });
-      }
+      // used by loading helpers
+      that.trigger('change:load-state', 'start');
     },
     onLoadEnd: function(/* background, object */) {
       var that = useParent ? this.parent : this;
@@ -168,14 +165,11 @@ Thorax.mixinLoadable = function(target, useParent) {
       if (!that || !that.el) {
         return;
       }
-
+      
+      that._isLoading = false;
       $(that.el).removeClass(that._loadingClassName);
-      //used by loading helpers
-      if (that._loadingCallbacks) {
-        _.each(that._loadingCallbacks, function(callback) {
-          callback();
-        });
-      }
+      // used by loading helper
+      that.trigger('change:load-state', 'end');
     }
   });
 };

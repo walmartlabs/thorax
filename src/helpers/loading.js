@@ -1,17 +1,10 @@
-Handlebars.registerViewHelper('loading', function(view) {
-  var _render = view.render;
-  view.render = function() {
-    if (view.parent.$el.hasClass(view.parent._loadingClassName)) {
-      return _render.call(this, view.fn);
-    } else {
-      return _render.call(this, view.inverse);
-    }
-  };
-  var callback = _.bind(view.render, view);
-  view.parent._loadingCallbacks = view.parent._loadingCallbacks || [];
-  view.parent._loadingCallbacks.push(callback);
-  view.on('destroyed', function() {
-    view.parent._loadingCallbacks = _.without(view.parent._loadingCallbacks, callback);
-  });
-  view.render();
+Handlebars.registerHelper('loading', function(options) {
+  var view = getOptionsData(options).view;
+  view.off('change:load-state', onLoadStateChange, view);
+  view.on('change:load-state', onLoadStateChange, view);
+  return view._isLoading ? options.fn(this) : options.inverse(this);
 });
+
+function onLoadStateChange() {
+  this.render();
+}
