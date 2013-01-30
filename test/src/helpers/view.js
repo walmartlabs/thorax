@@ -227,13 +227,13 @@ describe('view helper', function() {
   it("views embedded with view helper do not incorrectly set parent", function() {
     var view = new Thorax.View({
       child: new Thorax.View({
-        template: '{{#empty}}so empty{{/empty}}'
+        template: '{{#loading}}loading{{/loading}}'
       }),
       template: '{{view child}}'
     });
     view.render();
     var emptyView = _.find(view.child.children, function(child) {
-      return child._helperName === 'empty';
+      return child._helperName === 'loading';
     });
     expect(emptyView.parent).to.equal(view.child);
 
@@ -242,11 +242,11 @@ describe('view helper', function() {
       child: new Thorax.View({
         template: ''
       }),
-      template: '{{#view child}}{{#empty}}so empty{{/empty}}{{/view}}'
+      template: '{{#view child}}{{#loading}}loading{{/loading}}{{/view}}'
     });
     view.render();
     emptyView = _.find(view.child.children, function(child) {
-      return child._helperName === 'empty';
+      return child._helperName === 'loading';
     });
     expect(emptyView.parent).to.equal(view.child);
   });

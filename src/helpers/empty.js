@@ -1,56 +1,32 @@
-Handlebars.registerViewHelper('empty', function(collection, view) {
-  var empty, noArgument;
+Handlebars.registerHelper('empty', function(dataObject, options) {
   if (arguments.length === 1) {
-    view = collection;
-    collection = false;
-    noArgument = true;
+    options = dataObject;
   }
-
-  var _render = view.render;
-  view.render = function() {
-    if (noArgument) {
-      empty = !this.parent.model || this.parent.model.isEmpty();
-    } else {
-      empty = !collection || collection.isEmpty();
-    }
-    if (empty) {
-      this.parent.trigger('rendered:empty', this, collection);
-      return _render.call(this, this.template);
-    } else {
-      return _render.call(this, this.inverse);
-    }
-  };
-
-  var render = _.bind(view.render, view);
-
-  if (noArgument) {
-    view.listenTo(view.parent, 'change:data-object', function(type, object, old) {
-      if (type === 'model') {
-        if (old) {
-          view.stopListening(old);
-        }
-        if (object) {
-          view.listenTo(object, 'change', render);
-        }
-        render();
-      }
-    });
-    if (view.parent.model) {
-      view.listenTo(view.parent.model, 'change', render);
-    }
-  } else if (collection) {
-    view.listenTo(collection, 'remove', function() {
-      if (collection.length === 0) {
-        render();
-      }
-    });
-    view.listenTo(collection, 'add', function() {
-      if (collection.length === 1) {
-        render();
-      }
-    });
-    view.listenTo(collection, 'reset', render);
+  var view = getOptionsData(options).view;
+  if (arguments.length === 1) {
+    dataObject = view.model;
   }
-
-  render();
+  // listeners for the empty helper rather than listeners
+  // that are themselves empty
+  if (!view._emptyListeners) {
+    view._emptyListeners = {};
+  }
+  // duck type check for collection
+  if (dataObject && !view._emptyListeners[dataObject.cid] && dataObject.models && ('length' in dataObject)) {
+    view._emptyListeners[dataObject.cid] = true;
+    view.listenTo(dataObject, 'remove', function() {
+      if (dataObject.length === 0) {
+        view.render();
+      }
+    });
+    view.listenTo(dataObject, 'add', function() {
+      if (dataObject.length === 1) {
+        view.render();
+      }
+    });
+    view.listenTo(dataObject, 'reset', function() {
+      view.render();
+    });
+  }
+  return !dataObject || dataObject.isEmpty() ? options.fn(this) : options.inverse(this);
 });
