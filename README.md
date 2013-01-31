@@ -352,7 +352,152 @@ Used by `setCollection` to determine wether or not to fetch the collection.
 
 ## Thorax.CollectionView
 
+A class that renders an `itemTemplate` or `itemView` for each item in a `collection` passed to it in it's constructor, or via `setCollection`. The view will automatically update when items are added, removed or changed. 
 
+The `collection` helper will automatically create and embed a `CollectionView` instance for you. If programatic access to the view's methods are needed (for instance calling `appendItem` or specifying an `itemFilter`) it's best to create a `CollectionView` directly and embed it with the `view` helper as you would any other view.
+
+### itemTemplate *view.itemTemplate*
+
+A template name or template function to use when rendering each model. If using the `collection` helper the passed block will become the `itemTemplate`. Defaults to `view.name + '-item'`
+
+### itemView *view.itemView*
+
+A view class to be initialized for each item. Can be used in conjunction with `itemTemplate`.
+
+### itemContext *view.itemContext(model, index)*
+
+A function in the declaring view to specify the context for an `itemTemplate`, recieves model and index as arguments. `itemContext` will not be used if an `itemView` is specified as the `itemView`'s own `context` method will instead be used.
+
+### itemFilter *view.itemFilter(model, index)*
+
+A method, which if present will filter what items are rendered in a collection. Recieves `model` and `index` and must return boolean. The filter will be applied when models' fire a change event, or models are added and removed from the collection. To force a collection to re-filter, trigger a `filter` event on the collection.
+
+Items are hidden and shown with `$.hide` and `$.show` rather than being removed or appended. In performance critical views with large collections consider filtering the collection before it is passed to the view or on the server.
+
+### emptyTemplate *view.emptyTemplate*
+
+A template name or template function to display when the collection is empty. If used in a `collection` helper the inverse block will become the `emptyTemplate`. Defaults to `view.name + '-empty'`
+
+### emptyView *view.emptyView*
+
+A view class to create an instance of when the collection is empty. Can be used in conjunction with `emptyTemplate`.
+
+### loadingTemplate *view.loadingTemplate*
+
+A template name or template function to display when the collection is loading.
+
+### loadingView *view.loadingView*
+
+A view class to create an instance of when the collection is loading.  Can be used in conjunction with `loadingTemplate`.
+
+### loadingPlacement *view.loadingPlacement()*
+
+An index to place the `loadingView` or `loadingTemplate` at. Defaults to `this.collection.length`.
+
+### appendItem *view.appendItem(modelOrView [,index] [,options])*
+
+Append a model (which will used to generate a new `itemView` or render an `itemTemplate`) or a view at a given index in the `CollectionView`. If passing a view as the first argument `index` may be a model which will be used to look up the index.
+
+By default this will trigger a `rendered:item` event, `silent: true` may be passed in the options hash to prevent this. To also prevent the appeneded item from being filtered if an `itemFilter` is present pass `filter: false` in the options hash.
+
+### removeItem *view.removeItem(model)*
+
+Remove an item from the view.
+
+### updateItem *view.updateItem(model)*
+
+Equivelent to calling `removeItem` then `appendItem`. Note that this is mainly meant to cover edge cases, by default changing a model will update the needed item (wether using `itemTemplate` or `itemView`).
+
+## Collection Helpers
+
+### collection helper *{{collection [collection] [*options]}}*
+
+Creates and embeds a `CollectionView` instance, updating when items are added, removed or changed in the collection. If a block is passed it will be used as the `item-template`, which will be called with a context of the `model.attributes` for each model in the collection.
+
+    {{#collection tag="ul"}}
+      <li>{{modelAttr}}</li>
+    {{/collection}}
+
+Options may contain `tag`, `class`, `id` and the following attributes which will map to the generated `CollectionView` instance:
+
+- `item-template` &rarr; `itemTemplate`
+- `item-view` &rarr; `itemView`
+- `empty-template` &rarr; `emptyTemplate`
+- `empty-view` &rarr; `emptyView`
+- `loading-template` &rarr; `loading-template`
+- `loading-view` &rarr; `loadingView`
+
+Any of the options can be specified as variables in addition to strings:
+
+    {{collection item-view=itemViewClass}}
+
+By default the collection helper will look for `this.collection`, but if your view contains multiple collections a collection argument may be passed:
+
+    {{collection myCollection}}
+
+When rendering `this.collection` many properties will be forwarded from the view that is declaring the collection helper to the generated `CollectionView` instance:
+
+- `itemTemplate`
+- `itemView`
+- `itemContext`
+- `itemFilter`
+- `emptyTemplate`
+- `emptyView`
+- `loadingTemplate`
+- `loadingView`
+- `loadingPlacement`
+
+As a result the following two views are equivelenet:
+
+    // render with collection helper, collection
+    // properties are forwarded
+    var view = new Thorax.View({
+      collection: new Thorax.Collection(),
+      itemView: MyItemClass,
+      itemContext: function(model, i) {
+        return model.attributes;
+      },
+      template: '{{collection}}'
+    });
+
+    // directly create collection view, no property
+    // forwarding will occur 
+    var view = new Thorax.View({
+      collectionView: new Thorax.CollectionView({
+        collection: new Thorax.Collection(),
+        itemView: MyItemClass
+        itemContext: function(model, i) {
+          return model.attributes;
+        }
+      }),
+      template: '{{view collectionView}}'
+    });
+
+### empty helper *{{#empty [modelOrCollection]}}*
+
+A conditional helper much like `if` that calls `isEmpty` on the specified object. In addition it will bind events to re-render the view should the object's state change from empty to not empty, or visa versa.
+
+    {{#empty collection}}
+      So empty!
+    {{else}}
+      {{#collection}}{{/collection}}
+    {{/empty}}
+
+To embed a row within a `collection` helper if it the collection is empty, specify an `empty-view` or `empty-template`. Or use the `else` block of the `collection` helper:
+
+    {{#collection tag="ul"}}
+      <li>Some very fine data</li>
+    {{else}}
+      <li>So very empty</li>
+    {{/collection}}
+
+### collection-element helper *{{collection-element [*htmlAttributes]}}
+
+By default `Thorax.CollectionView` instances have no template. Items will be appended to and removed from the view's `el`. Alternatively a template can be specified and `collection-element` used to specify where the individal items in a collection will be rendered.
+
+    <div>
+      {{collection-element tag="ul" class="my-list"}}
+    </div>
 
 ## Event Enhancements
 
