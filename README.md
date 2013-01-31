@@ -280,9 +280,13 @@ Set the current view on the `LayoutView`, triggering `activated`, `ready` and `d
 
 Get the current view that was previously set with `setView`.
 
-### layout helper *{{layout [htmlAttributes]}}*
+### layout-element *{{layout-element [*htmlAttributes]}}*
 
-By default `Thorax.LayoutView` classes have no template, just a placeholder to insert a view via `setView`. If a template to any of those classes is specified it must contain the a call to the layout helper where views will be placed. A custom `tag` or any HTML attributes may be specified.
+By default `Thorax.LayoutView` instances have no template, `setView` will append directly to the view's `el`. Alternatively a template can be specified and a `layout-element` and `setView` will append to that element.
+
+    <ul>
+      {{layout-element tag="li" id="my-layout"}}
+    </ul>
 
 ## Data Binding
 
