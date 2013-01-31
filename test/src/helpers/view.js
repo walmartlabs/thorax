@@ -227,26 +227,28 @@ describe('view helper', function() {
   it("views embedded with view helper do not incorrectly set parent", function() {
     var view = new Thorax.View({
       child: new Thorax.View({
-        template: '{{#loading}}loading{{/loading}}'
+        template: '{{#collection}}{{/collection}}'
       }),
-      template: '{{view child}}'
+      template: '{{view child}}',
+      collection: new Thorax.Collection()
     });
     view.render();
-    var emptyView = _.find(view.child.children, function(child) {
-      return child._helperName === 'loading';
+    var collectionView = _.find(view.child.children, function(child) {
+      return child._helperName === 'collection';
     });
-    expect(emptyView.parent).to.equal(view.child);
+    expect(collectionView.parent).to.equal(view.child);
 
     // ensure overrides do not modify either
     view = new Thorax.View({
       child: new Thorax.View({
         template: ''
       }),
-      template: '{{#view child}}{{#loading}}loading{{/loading}}{{/view}}'
+      template: '{{#view child}}{{#collection}}{{/collection}}{{/view}}',
+      collection: new Thorax.Collection()
     });
     view.render();
     emptyView = _.find(view.child.children, function(child) {
-      return child._helperName === 'loading';
+      return child._helperName === 'collection';
     });
     expect(emptyView.parent).to.equal(view.child);
   });
