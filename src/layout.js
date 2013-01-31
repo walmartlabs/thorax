@@ -66,8 +66,14 @@ Thorax.LayoutView = Thorax.View.extend({
   }
 });
 
-Handlebars.registerHelper('layout', function(options) {
-  options.hash[layoutCidAttributeName] = getOptionsData(options).view.cid;
+Handlebars.registerHelper('layout-element', function(options) {
+  var view = getOptionsData(options).view;
+  // duck type check for LayoutView
+  if (!view.getView) {
+    throw new Error('layout-element must be used within a LayoutView');
+  }
+  options.hash[layoutCidAttributeName] = view.cid;
+  normalizeHTMLAttributeOptions(options.hash);
   return new Handlebars.SafeString(Thorax.Util.tag.call(this, options.hash, '', this));
 });
 

@@ -102,9 +102,9 @@ describe('layout', function() {
     $('#test-target-container').remove();
   });
 
-  it('layouts with templates and {{layout}}', function() {
+  it('layouts with templates and {{layout-element}}', function() {
     var layoutWithTemplate = new Thorax.LayoutView({
-      template: '<div class="outer">{{layout}}</div>'
+      template: '<div class="outer">{{layout-element}}</div>'
     });
     layoutWithTemplate.setView(new Thorax.View({
       template: '<div class="inner"></div>'
@@ -121,6 +121,13 @@ describe('layout', function() {
         template: '<div class="inner"></div>'
       }));
     }).to['throw']();
+  });
+
+  it("layout-element used outside of a LayoutView with throw", function() {
+    var view = new Thorax.View({
+      template: '{{layout-element}}'
+    });
+    expect(view.render).to['throw'];
   });
 
 });
