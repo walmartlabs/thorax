@@ -376,17 +376,13 @@ Thorax.View.prototype._modifyDataObjectOptions = function(dataObject, options) {
   return options;
 };
 
-Thorax.HelperView.prototype._modifyDataObjectOptions = function(dataObject, options) {
+// Thorax.CollectionHelperView inherits from CollectionView
+// not HelperView so need to set it manually
+Thorax.HelperView.prototype._modifyDataObjectOptions = Thorax.CollectionHelperView.prototype._modifyDataObjectOptions = function(dataObject, options) {
   options.ignoreErrors = this.parent.ignoreFetchError;
   options.background = this.parent.nonBlockingLoad;
   return options;
 };
-
-// Thorax.CollectionHelperView inherits from CollectionView
-// so need to set it manually
-if(Thorax.CollectionHelperView.prototype) {
-  Thorax.CollectionHelperView.prototype._modifyDataObjectOptions = Thorax.HelperView.prototype._modifyDataObjectOptions;
-}
 
 inheritVars.collection.loading = function() {
   var loadingView = this.loadingView,

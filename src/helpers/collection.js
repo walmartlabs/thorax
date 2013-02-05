@@ -57,11 +57,7 @@ Thorax.CollectionHelperView = Thorax.CollectionView.extend({
   }
 });
 
-_.extend(Thorax.CollectionHelperView.prototype, {
-  _ensureElement: Thorax.HelperView.prototype._ensureElement,
-  _getContext: Thorax.HelperView.prototype._getContext,
-  _modifyDataObjectOptions: Thorax.HelperView.prototype._modifyDataObjectOptions
-});
+_.extend(Thorax.CollectionHelperView.prototype, helperViewPrototype);
 
 var collectionOptionNames = {
   'item-template': 'itemTemplate',

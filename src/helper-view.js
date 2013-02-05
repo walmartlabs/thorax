@@ -1,8 +1,9 @@
 /*global getOptionsData, viewHelperAttributeName */
-var viewPlaceholderAttributeName = 'data-view-tmp';
-var viewTemplateOverrides = {};
+var viewPlaceholderAttributeName = 'data-view-tmp',
+    viewTemplateOverrides = {};
 
-Thorax.HelperView = Thorax.View.extend({
+// Will be shared by HelperView and CollectionHelperView
+var helperViewPrototype = {
   _ensureElement: function() {
     Thorax.View.prototype._ensureElement.apply(this, arguments);
     this.$el.attr(viewHelperAttributeName, this._helperName);
@@ -10,7 +11,9 @@ Thorax.HelperView = Thorax.View.extend({
   _getContext: function() {
     return this.parent._getContext.apply(this.parent, arguments);
   }
-});
+};
+
+Thorax.HelperView = Thorax.View.extend(helperViewPrototype);
 
 // Ensure nested inline helpers will always have this.parent
 // set to the view containing the template
