@@ -1,4 +1,4 @@
-/*global isAndroid, isMobile */
+/*global isAndroid */
 
 $.fn.tapHoldAndEnd = function(selector, callbackStart, callbackEnd) {
   function triggerEvent(obj, eventType, callback, event) {
@@ -157,7 +157,8 @@ Thorax.View.prototype.setElement = function() {
 var _addEvent = Thorax.View.prototype._addEvent;
 Thorax.View.prototype._addEvent = function(params) {
   this._domEvents = this._domEvents || [];
-  (params.type === "DOM") && this._domEvents.push(params.originalName);
-  isMobile && (params.name = params.name.replace(/^click\b/, Thorax._fastClickEventName));
+  if (params.type === "DOM") {
+    this._domEvents.push(params.originalName);
+  }
   return _addEvent.call(this, params);
 };
