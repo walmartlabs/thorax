@@ -455,7 +455,7 @@ describe('collection', function() {
     var view = new Thorax.CollectionView({
       collection: letterCollection,
       template: '<div class="test">{{collection-element tag="ul"}}</div>',
-      itemTemplate: 'letter-item'
+      itemTemplate: Thorax.templates['letter-item']
     });
     expect(view.$('li').length).to.equal(letterCollection.length);
   });
