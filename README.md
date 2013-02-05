@@ -84,14 +84,14 @@ Renders the view's `template` updating the view's `el` with the result, triggeri
 
 Used by `render` to determine what attributes are available in the view's `template`. The default context function returns `this` + `this.model.attributes` if a `model` is present on the view. The `context` method may be overriden to provide a custom context:
 
-  new Thorax.View({
-    template: '{{key}}',
-    context: function() {
-      return _.defaults(this.model.attributes, {
-        key: 'value'
-      });
-    }
-  });
+    new Thorax.View({
+      template: '{{key}}',
+      context: function() {
+        return _.defaults(this.model.attributes, {
+          key: 'value'
+        });
+      }
+    });
 
 <a href="http://thoraxjs.org/tutorials/controlling-context">Controlling Context</a>
 
