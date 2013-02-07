@@ -4,18 +4,18 @@
   "mixins": {
     "thorax-dep-jquery": {
       "scripts": [
-        {"src": "lib/jquery.js", "global": true},
-        {"src": "lib/underscore.js", "global": true},
-        {"src": "lib/backbone.js", "global": true},
-        {"src": "lib/handlebars.js", "global": true},
+        {"src": "lib/jquery.js", "global": true, "ignoreWarnings": true},
+        {"src": "lib/underscore.js", "global": true, "ignoreWarnings": true},
+        {"src": "lib/backbone.js", "global": true, "ignoreWarnings": true},
+        {"src": "lib/handlebars.js", "global": true, "ignoreWarnings": true},
       ]
     },
     "thorax-dep-zepto": {
       "scripts": [
-        {"src": "lib/zepto.js", "global": true},
-        {"src": "lib/underscore.js", "global": true},
-        {"src": "lib/backbone.js", "global": true},
-        {"src": "lib/handlebars.runtime.js", "global": true},
+        {"src": "lib/zepto.js", "global": true, "ignoreWarnings": true},
+        {"src": "lib/underscore.js", "global": true, "ignoreWarnings": true},
+        {"src": "lib/backbone.js", "global": true, "ignoreWarnings": true},
+        {"src": "lib/handlebars.runtime.js", "global": true, "ignoreWarnings": true},
       ]
     },
 
