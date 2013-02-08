@@ -620,14 +620,18 @@ describe('collection', function() {
       }
     });
     view.setCollection(collection);
-    var oldUl = view.$('ul')[0];
+    // Note that we want to compare HTML instead of the actual node
+    // as in IE only we will clone the node. In other browsers will
+    // use the same node, but don't want to do browser conditional
+    // unit tests
+    var oldUlHTML = view.$('ul')[0].innerHTML;
     expect(spy.callCount).to.equal(2, 'without colletion helper before render');
     expect(view.$('ul').length).to.equal(1, 'without colletion helper before render');
     expect(view.$('li').length).to.equal(2, 'without colletion helper before render');
 
     view.render();
     expect(spy.callCount).to.equal(2, 'without colletion helper after render');
-    expect(oldUl).to.equal(view.$('ul')[0], 'without colletion helper after render');
+    expect(oldUlHTML).to.equal(view.$('ul')[0].innerHTML, 'without colletion helper after render');
     expect(view.$('ul').length).to.equal(1, 'without colletion helper after render');
     expect(view.$('li').length).to.equal(2, 'without colletion helper after render');
     spy.callCount = 0;
