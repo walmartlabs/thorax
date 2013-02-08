@@ -161,9 +161,7 @@ Thorax.Util = {
       template = Thorax.templates[file];
     }
 
-    if (template && typeof template === 'string') {
-      template = Thorax.templates[file] = Handlebars.compile(template, {data: true});
-    } else if (!template && !ignoreErrors) {
+    if (!template && !ignoreErrors) {
       throw new Error('templates: ' + file + ' does not exist.');
     }
     return template;

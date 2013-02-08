@@ -66,7 +66,7 @@ Thorax.View = Backbone.View.extend({
 
     //compile a string if it is set as this.template
     if (typeof this.template === 'string') {
-      this.template = Handlebars.compile(this.template, {data: true});
+      this.template = Thorax.Util.getTemplate(this.template, true);
     } else if (this.name && !this.template) {
       //fetch the template
       this.template = Thorax.Util.getTemplate(this.name, true);
