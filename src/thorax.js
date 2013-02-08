@@ -189,14 +189,10 @@ Thorax.View = Backbone.View.extend({
     if (typeof file === 'function') {
       template = file;
     } else {
-      template = Thorax.Util.getTemplate(file);
+      template = Thorax.Util.getTemplate(file, ignoreErrors);
     }
     if (!template) {
-      if (ignoreErrors) {
-        return '';
-      } else {
-        throw new Error('Unable to find template ' + file);
-      }
+      return '';
     } else {
       return template(context, {
         helpers: this._getHelpers(),
