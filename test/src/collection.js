@@ -599,7 +599,7 @@ describe('collection', function() {
 
   it('should render collection after setCollection is called', function() {
     var view = new Thorax.View({
-      template: Handlebars.compile("hi{{collection}}")
+      template: Handlebars.compile("hi{{#collection}}{{/collection}}")
     });
     view.render();
     expect(view.$('div').length).to.equal(1, 'initial render');
@@ -639,7 +639,7 @@ describe('collection', function() {
     // Alternate way of testing
     var parent = $('<div></div>');
     view = new Thorax.View({
-      template: Handlebars.compile('{{collection}}'),
+      template: Handlebars.compile('{{#collection}}{{/collection}}'),
     });
     view.setCollection(new Thorax.Collection());
     parent.append(view.$el);
@@ -681,5 +681,15 @@ describe('collection', function() {
     expect(view.$('li').length).to.equal(1);
   });
 
+  it("CollectionView with no itemTemplate will throw", function() {
+    var view = new Thorax.View({
+      template: Handlebars.compile('{{collection}}')
+    });
+    var collection = new Thorax.Collection([]);
+    function setCollection() {
+      view.setCollection(collection);
+    }
+    expect(setCollection).to['throw'];
+  });
 
 });
