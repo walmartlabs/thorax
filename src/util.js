@@ -9,6 +9,7 @@ function createRegistryWrapper(klass, hash) {
     return child;
   };
 }
+
 function registryGet(object, type, name, ignoreErrors) {
   var target = object[type],
       value;
@@ -24,6 +25,19 @@ function registryGet(object, type, name, ignoreErrors) {
     throw new Error(type + ': ' + name + ' does not exist.');
   } else {
     return value;
+  }
+}
+
+function assignTemplate(attributeName, options) {
+  // if attribute is the name of template to fetch
+  if (typeof this[attributeName] === 'string') {
+    this[attributeName] = Thorax.Util.getTemplate(this[attributeName], true);
+  // else try and fetch the template based on the name
+  } else if (this.name && typeof this[attributeName] !== 'function') {
+    this[attributeName] = Thorax.Util.getTemplate(this.name + (options.extension || ''), true);
+  }
+  if (options.required && typeof this[attributeName] !== 'function') {
+    throw new Error('View ' + (this.name || this.cid) + ' requires: ' + attributeName);
   }
 }
 

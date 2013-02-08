@@ -2,17 +2,16 @@ var layoutCidAttributeName = 'data-layout-cid';
 
 Thorax.LayoutView = Thorax.View.extend({
   render: function(output) {
-    //TODO: fixme, lumbar inserts templates after JS, most of the time this is fine
-    //but Application will be created in init.js (unlike most views)
-    //so need to put this here so the template will be picked up
-    var layoutTemplate;
-    if (this.name) {
-      layoutTemplate = Thorax.Util.getTemplate(this.name, true);
-    }
-    //a template is optional in a layout
-    if (output || this.template || layoutTemplate) {
-      //but if present, it must have embedded an element containing layoutCidAttributeName 
-      var response = Thorax.View.prototype.render.call(this, output || this.template || layoutTemplate);
+    // TODO: fixme, lumbar inserts templates after JS, most of the time this is fine
+    // but Application will be created in init.js (unlike most views)
+    // so need to put this here so the template will be picked up
+    assignTemplate.call(this, 'template', {
+      required: false
+    });
+    // a template is optional in a layout
+    if (output || this.template) {
+      // but if present, it must have embedded an element containing layoutCidAttributeName 
+      var response = Thorax.View.prototype.render.call(this, output || this.template);
       ensureLayoutViewsTargetElement.call(this);
       return response;
     } else {
