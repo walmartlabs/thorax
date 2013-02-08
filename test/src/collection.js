@@ -1,8 +1,8 @@
 describe('collection', function() {
-  Thorax.templates.letter = '{{collection tag="ul"}}';
-  Thorax.templates['letter-item'] = '<li>{{letter}}</li>';
-  Thorax.templates['letter-empty'] = '<li>empty</li>';
-  Thorax.templates['letter-multiple-item'] = '<li>{{letter}}</li><li>{{letter}}</li>';
+  Thorax.templates.letter = Handlebars.compile('{{collection tag="ul"}}');
+  Thorax.templates['letter-item'] = Handlebars.compile('<li>{{letter}}</li>');
+  Thorax.templates['letter-empty'] = Handlebars.compile('<li>empty</li>');
+  Thorax.templates['letter-multiple-item'] = Handlebars.compile('<li>{{letter}}</li><li>{{letter}}</li>');
 
   var LetterModel = Thorax.Model.extend({});
   var letterCollection = new (Thorax.Collection.extend({
@@ -131,32 +131,32 @@ describe('collection', function() {
     runCollectionTests(viewReturningMultiple, 2, 'renderItem returning multiple');
 
     var viewWithBlockCollectionHelper = new Thorax.View({
-      template: '{{#collection tag="ul" empty-template="letter-empty"}}<li>{{letter}}</li>{{/collection}}'
+      template: Handlebars.compile('{{#collection tag="ul" empty-template="letter-empty"}}<li>{{letter}}</li>{{/collection}}')
     });
     runCollectionTests(viewWithBlockCollectionHelper, 1, 'block helper');
 
     var viewWithBlockCollectionHelperWithViews = new Thorax.View({
-      template: '{{collection tag="ul" empty-template="letter-empty" item-view="letter-item"}}'
+      template: Handlebars.compile('{{collection tag="ul" empty-template="letter-empty" item-view="letter-item"}}')
     });
     runCollectionTests(viewWithBlockCollectionHelperWithViews, 1, 'block helper with item-view');
 
     var viewWithBlockCollectionHelperWithViewsAndBlock = new Thorax.View({
-      template: '{{#collection tag="ul" empty-template="letter-empty" item-view="letter-item"}}<li class="testing">{{letter}}</li>{{/collection}}'
+      template: Handlebars.compile('{{#collection tag="ul" empty-template="letter-empty" item-view="letter-item"}}<li class="testing">{{letter}}</li>{{/collection}}')
     });
     runCollectionTests(viewWithBlockCollectionHelperWithViewsAndBlock, 1, 'block helper with item-view and fn');
 
     var viewWithCollectionHelperWithEmptyView = new Thorax.View({
-      template: '{{collection tag="ul" empty-view="letter-empty" item-template="letter-item"}}'
+      template: Handlebars.compile('{{collection tag="ul" empty-view="letter-empty" item-template="letter-item"}}')
     });
     runCollectionTests(viewWithCollectionHelperWithEmptyView, 1, 'block helper with item-template');
 
     var viewWithCollectionHelperWithItemViewAndItemTemplate = new Thorax.View({
-      template: '{{collection tag="ul" empty-view="letter-empty" item-view="letter-item" item-template="letter-item"}}'
+      template: Handlebars.compile('{{collection tag="ul" empty-view="letter-empty" item-view="letter-item" item-template="letter-item"}}')
     });
     runCollectionTests(viewWithCollectionHelperWithItemViewAndItemTemplate, 1, 'block helper with item-template');
 
     var viewWithCollectionHelperWithEmptyViewAndBlock = new Thorax.View({
-      template: '{{collection tag="ul" empty-template="letter-empty" empty-view="letter-empty" item-template="letter-item"}}'
+      template: Handlebars.compile('{{collection tag="ul" empty-template="letter-empty" empty-view="letter-empty" item-template="letter-item"}}')
     });
     runCollectionTests(viewWithCollectionHelperWithEmptyViewAndBlock, 1, 'block helper with empty view and block');
   });
@@ -169,7 +169,7 @@ describe('collection', function() {
     };
 
     var view = new Thorax.View({
-      template: '{{#collection}}<li>foo</li>{{/collection}}',
+      template: Handlebars.compile('{{#collection}}<li>foo</li>{{/collection}}'),
       collection: collection
     });
     view.render();
@@ -179,7 +179,7 @@ describe('collection', function() {
   describe('multiple collections', function() {
     it('should render separate collections', function() {
       var view = new Thorax.View({
-        template: '{{collection a tag="ul" item-template="letter-item"}}{{collection b tag="ul" item-template="letter-item"}}',
+        template: Handlebars.compile('{{collection a tag="ul" item-template="letter-item"}}{{collection b tag="ul" item-template="letter-item"}}'),
         a: new Thorax.Collection(letterCollection.models),
         b: new Thorax.Collection(letterCollection.models)
       });
@@ -189,7 +189,7 @@ describe('collection', function() {
 
     it('should render the same collection multiple times', function() {
       var view = new Thorax.View({
-        template: '{{collection a tag="ul" item-template="letter-item"}}{{collection a tag="ul" item-template="letter-item"}}{{collection b tag="ul" item-template="letter-item"}}{{collection b tag="ul" item-template="letter-item"}}',
+        template: Handlebars.compile('{{collection a tag="ul" item-template="letter-item"}}{{collection a tag="ul" item-template="letter-item"}}{{collection b tag="ul" item-template="letter-item"}}{{collection b tag="ul" item-template="letter-item"}}'),
         a: new Thorax.Collection(letterCollection.models),
         b: new Thorax.Collection(letterCollection.models)
       });
@@ -200,12 +200,12 @@ describe('collection', function() {
     it('should render subview collections', function() {
       Thorax.View.extend({
         name: 'sub-view-with-same-collection',
-        template: '{{collection a tag="ul" item-template="letter-item"}}'
+        template: Handlebars.compile('{{collection a tag="ul" item-template="letter-item"}}')
       });
       var view = new Thorax.View({
         a: new Thorax.Collection(letterCollection.models),
         b: new Thorax.Collection(letterCollection.models),
-        template: '{{collection a tag="ul" item-template="letter-item"}}{{view "sub-view-with-same-collection" a=a}}'
+        template: Handlebars.compile('{{collection a tag="ul" item-template="letter-item"}}{{view "sub-view-with-same-collection" a=a}}')
       });
       view.render();
       expect(view.$('li').length).to.equal(letterCollection.models.length * 2);
@@ -213,7 +213,7 @@ describe('collection', function() {
 
     it('should render with proper item template', function() {
       var view = new Thorax.View({
-        template: '{{#collection a tag="ul"}}<li>{{letter}}</li>{{/collection}}{{#collection a tag="div"}}<span>{{letter}}</span>{{/collection}}',
+        template: Handlebars.compile('{{#collection a tag="ul"}}<li>{{letter}}</li>{{/collection}}{{#collection a tag="div"}}<span>{{letter}}</span>{{/collection}}'),
         a: new Thorax.Collection(letterCollection.models)
       });
       view.render();
@@ -224,7 +224,7 @@ describe('collection', function() {
 
   it("inverse block in collection helper", function() {
     var emptyCollectionView = new Thorax.View({
-      template: '{{#collection}}<div>{{letter}}</div>{{else}}<div>empty</div>{{/collection}}',
+      template: Handlebars.compile('{{#collection}}<div>{{letter}}</div>{{else}}<div>empty</div>{{/collection}}'),
       collection: new Thorax.Collection()
     });
     emptyCollectionView.render();
@@ -235,7 +235,7 @@ describe('collection', function() {
     var view = new Thorax.View({
       parentKey: 'value',
       collection: new (Thorax.Collection.extend({url: false}))(),
-      template: '{{#collection}}item{{else}}{{parentKey}}{{/collection}}'
+      template: Handlebars.compile('{{#collection}}item{{else}}{{parentKey}}{{/collection}}')
     });
     view.render();
     expect(view.$('[data-collection-empty] div').html()).to.equal('value');
@@ -245,7 +245,7 @@ describe('collection', function() {
     var collection = new Thorax.Collection(letterCollection.models);
     var view = new Thorax.View({
       collection: collection,
-      template: '{{#collection tag="ul"}}<li>{{letter}}</li>{{/collection}}'
+      template: Handlebars.compile('{{#collection tag="ul"}}<li>{{letter}}</li>{{/collection}}')
     });
     view.render();
     expect(view.$('li').length).to.equal(collection.length);
@@ -264,7 +264,7 @@ describe('collection', function() {
     //this causes recursion
     var view = new Thorax.View({
       model: new Thorax.Model(),
-      template: '{{key}}{{#collection col}}{{key}}{{/collection}}',
+      template: Handlebars.compile('{{key}}{{#collection col}}{{key}}{{/collection}}'),
       context: function() {
         this.model.set({key: 'value'});
         return {
@@ -291,7 +291,7 @@ describe('collection', function() {
     }
 
     var view = new Thorax.View({
-      template: '{{#collection tag="ul"}}<li>{{key}}</li>{{/collection}}',
+      template: Handlebars.compile('{{#collection tag="ul"}}<li>{{key}}</li>{{/collection}}'),
       collection: new Thorax.Collection(),
       itemFilter: function(model) {
         return model.attributes.key === 'a' || model.attributes.key === 'b';
@@ -338,7 +338,7 @@ describe('collection', function() {
 
   it("itemFilter should not be passed null items when appending empty", function() {
     var view = new Thorax.View({
-      template: '{{#collection tag="ul"}}<li>{{key}}</li>{{/collection}}',
+      template: Handlebars.compile('{{#collection tag="ul"}}<li>{{key}}</li>{{/collection}}'),
       collection: new Thorax.Collection(),
       itemFilter: function(model) {
         return model.attributes.key === 'a' || model.attributes.key === 'b';
@@ -358,7 +358,7 @@ describe('collection', function() {
         {letter: 'a'},
         {letter: 'b'}
       ]),
-      template: '{{^empty collection}}{{#collection tag="ul"}}<li>{{letter}}</li>{{/collection}}{{/empty}}',
+      template: Handlebars.compile('{{^empty collection}}{{#collection tag="ul"}}<li>{{letter}}</li>{{/collection}}{{/empty}}'),
       itemFilter: function(model) {
         return model.get('letter') != 'a';
       }
@@ -383,7 +383,7 @@ describe('collection', function() {
         });
       },
       myCollection: collection,
-      template: '{{#collection myCollection tag="ul"}}<li>{{name}}</li>{{/collection}}'
+      template: Handlebars.compile('{{#collection myCollection tag="ul"}}<li>{{name}}</li>{{/collection}}')
     });
     view.render();
     expect(renderCount).to.equal(1);
@@ -427,10 +427,10 @@ describe('collection', function() {
           });
         },
         tagName: 'li',
-        template: '{{name}}'
+        template: Handlebars.compile('{{name}}')
       }),
       myCollection: collection,
-      template: '{{collection myCollection tag="ul" item-view=itemView}}'
+      template: Handlebars.compile('{{collection myCollection tag="ul" item-view=itemView}}')
     });
     view.render();
     expect(itemRenderCount).to.equal(1);
@@ -454,7 +454,7 @@ describe('collection', function() {
   it("collection-element helper", function() {
     var view = new Thorax.CollectionView({
       collection: letterCollection,
-      template: '<div class="test">{{collection-element tag="ul"}}</div>',
+      template: Handlebars.compile('<div class="test">{{collection-element tag="ul"}}</div>'),
       itemTemplate: Thorax.templates['letter-item']
     });
     expect(view.$('li').length).to.equal(letterCollection.length);
@@ -462,7 +462,7 @@ describe('collection', function() {
 
   it("graceful failure of empty collection with no empty template", function() {
     var view = new Thorax.View({
-      template: '{{collection item-template="letter-item"}}',
+      template: Handlebars.compile('{{collection item-template="letter-item"}}'),
       collection: new Thorax.Collection({
         isPopulated: function() {
           return true;
@@ -471,7 +471,7 @@ describe('collection', function() {
     });
     view.render();
     view = new Thorax.View({
-      template: '{{collection item-template="letter-item"}}',
+      template: Handlebars.compile('{{collection item-template="letter-item"}}'),
       collection: new Thorax.Collection()
     });
     view.render();
@@ -480,7 +480,7 @@ describe('collection', function() {
   it("item-template and empty-template can return text nodes", function() {
     var view = new Thorax.View({
       letters: new Thorax.Collection(),
-      template: '{{#collection letters}}{{letter}}{{else}}empty{{/collection}}'
+      template: Handlebars.compile('{{#collection letters}}{{letter}}{{else}}empty{{/collection}}')
     });
     view.render();
     expect(view.$('div[data-collection-cid] div').html()).to.equal('empty');
@@ -494,7 +494,7 @@ describe('collection', function() {
     var view = new Thorax.View({
       key: 'value',
       collection: letterCollection,
-      template: "{{#collection}}<span>{{test}}</span>{{/collection}}",
+      template: Handlebars.compile("{{#collection}}<span>{{test}}</span>{{/collection}}"),
       itemContext: function() {
         // not checking for `view` or cid as itemContext will be called immediately
         // before `view` var is assigned
@@ -516,7 +516,7 @@ describe('collection', function() {
           return true;
         }
       }))(),
-      template: "{{#collection}}{{test}}{{else}}<b>{{test}}</b>{{/collection}}",
+      template: Handlebars.compile("{{#collection}}{{test}}{{else}}<b>{{test}}</b>{{/collection}}"),
       test: 'testing'
     });
     view.render();
@@ -525,7 +525,7 @@ describe('collection', function() {
 
   it("empty-class option", function() {
     var view = new Thorax.View({
-      template: "{{#collection empty-class=\"a\" tag=\"ul\"}}{{/collection}}",
+      template: Handlebars.compile("{{#collection empty-class=\"a\" tag=\"ul\"}}{{/collection}}"),
       collection: new (Thorax.Collection.extend({url: false}))()
     });
     view.render();
@@ -538,7 +538,7 @@ describe('collection', function() {
 
     //with default arg
     view = new Thorax.View({
-      template: "{{#collection tag=\"ul\"}}{{/collection}}",
+      template: Handlebars.compile("{{#collection tag=\"ul\"}}{{/collection}}"),
       collection: new (Thorax.Collection.extend({url: false}))()
     });
     view.render();
@@ -552,7 +552,7 @@ describe('collection', function() {
 
   it("$.fn.collection", function() {
     var view = new Thorax.View({
-      template: '{{#collection letters tag="ul"}}<li>{{letter}}</li>{{/collection}}',
+      template: Handlebars.compile('{{#collection letters tag="ul"}}<li>{{letter}}</li>{{/collection}}'),
       letters: letterCollection
     });
     view.render();
@@ -573,7 +573,7 @@ describe('collection', function() {
     var collection = new Thorax.Collection();
     var view = new Thorax.View({
       collection: collection,
-      template: '',
+      template: Handlebars.compile(''),
       events: {
         collection: {
           all: function() {
@@ -599,7 +599,7 @@ describe('collection', function() {
 
   it('should render collection after setCollection is called', function() {
     var view = new Thorax.View({
-      template: "hi{{collection}}"
+      template: Handlebars.compile("hi{{collection}}")
     });
     view.render();
     expect(view.$('div').length).to.equal(1, 'initial render');
@@ -613,7 +613,7 @@ describe('collection', function() {
     var spy = this.spy();
     var collection = new Thorax.Collection([{key: 'one'}, {key: 'two'}]);
     var view = new Thorax.CollectionView({
-      template: "{{collection-element tag=\"ul\"}}",
+      template: Handlebars.compile("{{collection-element tag=\"ul\"}}"),
       itemTemplate: Handlebars.compile('<li>{{key}}</li>'),
       events: {
         'rendered:item': spy
@@ -639,7 +639,7 @@ describe('collection', function() {
     // Alternate way of testing
     var parent = $('<div></div>');
     view = new Thorax.View({
-      template: '{{collection}}',
+      template: Handlebars.compile('{{collection}}'),
     });
     view.setCollection(new Thorax.Collection());
     parent.append(view.$el);
@@ -659,7 +659,7 @@ describe('collection', function() {
       events: {
         'rendered:collection': spy
       },
-      template: '{{collection-element}}',
+      template: Handlebars.compile('{{collection-element}}'),
       itemTemplate: Handlebars.compile('<span>{{text}}</span>')
     });
     server.requests[0].respond(

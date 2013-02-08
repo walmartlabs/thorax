@@ -645,7 +645,7 @@ describe('loading', function() {
 
     it("loading helper and loading collection options", function() {
       var loadingView = new Thorax.View({
-        template: '{{#loading}}<p>loading</p>{{else}}<p>not loading</p>{{/loading}}'
+        template: Handlebars.compile('{{#loading}}<p>loading</p>{{else}}<p>not loading</p>{{/loading}}')
       });
       loadingView.render();
       expect(loadingView.$('p').html()).to.equal('not loading');
@@ -659,7 +659,7 @@ describe('loading', function() {
 
       //trigger loadStart before render
       loadingView = new Thorax.View({
-        template: '{{#loading}}<p>loading</p>{{else}}<p>not loading</p>{{/loading}}'
+        template: Handlebars.compile('{{#loading}}<p>loading</p>{{else}}<p>not loading</p>{{/loading}}')
       });
       loadingView.loadStart();
       this.clock.tick(loadStartTimeout);
@@ -670,7 +670,7 @@ describe('loading', function() {
       expect(loadingView.$('p').html()).to.equal('not loading');
 
       var loadingViewWithModel = new Thorax.View({
-        template: '{{#loading}}<p>loading</p>{{else}}<p>not loading</p>{{/loading}}',
+        template: Handlebars.compile('{{#loading}}<p>loading</p>{{else}}<p>not loading</p>{{/loading}}'),
         model: new Thorax.Model()
       });
       loadingViewWithModel.render();
@@ -686,14 +686,14 @@ describe('loading', function() {
 
     it("loading-template and loading-view collection helper options", function() {
       //use low level events as flusheQueue / fetchQueue interferes
-      Thorax.templates['collection-loading'] = '<li class="loading-item">loading</li>';
-      Thorax.templates['collection-loading-view'] = 'loading';
+      Thorax.templates['collection-loading'] = Handlebars.compile('<li class="loading-item">loading</li>');
+      Thorax.templates['collection-loading-view'] = Handlebars.compile('loading');
       Thorax.View.extend({
         name: 'collection-loading-view',
         tagName: 'li'
       });
       var collectionLoadingTemplateView = new Thorax.View({
-        template: '{{#collection myCollection loading-template="collection-loading" tag="ul"}}<li class="item">{{number}}</li>{{else}}<li class="empty-item">empty</li>{{/collection}}',
+        template: Handlebars.compile('{{#collection myCollection loading-template="collection-loading" tag="ul"}}<li class="item">{{number}}</li>{{else}}<li class="empty-item">empty</li>{{/collection}}'),
         myCollection: new (Thorax.Collection.extend({
           url: false
         }))()
@@ -733,7 +733,7 @@ describe('loading', function() {
         ignoreFetchError: true,
         nonBlockingLoad: true,
         myCollection: new Thorax.Collection([{key: 'value'}]),
-        template: '{{#collection myCollection}}{{/collection}}'
+        template: Handlebars.compile('{{#collection myCollection}}{{/collection}}')
       });
       view.render();
       view.myCollection.url = function() { return 'foo'; };

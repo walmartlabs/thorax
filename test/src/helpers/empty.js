@@ -11,14 +11,14 @@ describe('empty helper', function() {
 
   it('should render empty without any inputs', function() {
     var emptyView = new Thorax.View({
-      template: '{{#empty}}empty{{else}}not empty{{/empty}}'
+      template: Handlebars.compile('{{#empty}}empty{{else}}not empty{{/empty}}')
     });
     emptyView.render();
     expect(emptyView.html()).to.equal('empty');
   });
   it('should render empty with an empty model', function() {
     var emptyModelView = new Thorax.View({
-      template: '{{#empty}}empty{{else}}not empty{{/empty}}',
+      template: Handlebars.compile('{{#empty}}empty{{else}}not empty{{/empty}}'),
       model: new Thorax.Model()
     });
     emptyModelView.render();
@@ -28,7 +28,7 @@ describe('empty helper', function() {
   });
   it('should render when model is added', function() {
     var emptyModelView = new Thorax.View({
-      template: '{{#empty}}empty{{else}}not empty{{/empty}}'
+      template: Handlebars.compile('{{#empty}}empty{{else}}not empty{{/empty}}')
     });
     emptyModelView.render();
     expect(emptyModelView.html()).to.equal('empty');
@@ -37,7 +37,7 @@ describe('empty helper', function() {
   });
   it('should render empty with collection parameter', function() {
     var emptyCollectionView = new Thorax.View({
-      template: '{{#empty myCollection}}empty{{else}}not empty{{/empty}}',
+      template: Handlebars.compile('{{#empty myCollection}}empty{{else}}not empty{{/empty}}'),
       myCollection: new Thorax.Collection()
     });
     emptyCollectionView.render();
@@ -51,7 +51,7 @@ describe('empty helper', function() {
 
   it('empty and collection helpers in the same template', function() {
     var a = new Thorax.View({
-      template: '{{#empty letters}}<div class="empty">empty</div>{{/empty}}{{#collection letters}}{{letter}}{{/collection}}',
+      template: Handlebars.compile('{{#empty letters}}<div class="empty">empty</div>{{/empty}}{{#collection letters}}{{letter}}{{/collection}}'),
       letters: new Thorax.Collection()
     });
     a.render();
@@ -60,7 +60,7 @@ describe('empty helper', function() {
     expect(a.$('.empty').length).to.equal(0);
     expect(a.$('[data-collection-cid] div')[0].innerHTML).to.equal('a');
     var b = new Thorax.View({
-      template: '{{#empty letters}}<div class="empty">empty a</div>{{/empty}}{{#collection letters}}{{letter}}{{else}}empty b{{/collection}}',
+      template: Handlebars.compile('{{#empty letters}}<div class="empty">empty a</div>{{/empty}}{{#collection letters}}{{letter}}{{else}}empty b{{/collection}}'),
       letters: new Thorax.Collection()
     });
     b.render();
@@ -77,7 +77,7 @@ describe('empty helper', function() {
       events: {
         rendered: spy
       },
-      template: "{{#empty collection}}{{/empty}}{{#empty collection}}{{/empty}}",
+      template: Handlebars.compile("{{#empty collection}}{{/empty}}{{#empty collection}}{{/empty}}"),
       collection: new Thorax.Collection()
     });
     view.ensureRendered();
