@@ -90,7 +90,7 @@ function fixupTapHighlight(scope) {
 
         if (useNativeHighlight && !NATIVE_TAPPABLE[el.tagName]) {
           // Add an explicit NOP bind to allow tap-highlight support
-          $el.on('click', false);
+          $el.on('click', function() {});
         }
       });
     }
