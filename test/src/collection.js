@@ -681,6 +681,16 @@ describe('collection', function() {
     expect(view.$('li').length).to.equal(1);
   });
 
+  it("CollectionView will assign template if view only has name", function() {
+    Thorax.templates['collection-view-with-name'] = Handlebars.compile('<div class="named">{{collection-element tag="ul"}}</div>');
+    var view = new Thorax.CollectionView({
+      name: 'collection-view-with-name',
+      itemTemplate: Handlebars.compile('<li>{{key}}</li>'),
+      collection: new Thorax.Collection([{key: 'value'}])
+    });
+    expect(view.$('.named li').length).to.equal(1);
+  });
+
   it("CollectionView with no itemTemplate will throw", function() {
     var view = new Thorax.View({
       template: Handlebars.compile('{{collection}}')

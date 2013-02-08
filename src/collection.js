@@ -59,7 +59,15 @@ dataObject('collection', {
 });
 
 Thorax.CollectionView = Thorax.View.extend({
-  template: Handlebars.VM.noop,
+  // allow template to be a noop, will append items
+  // directly onto this.$el
+  _configure: function() {
+    var response = Thorax.View.prototype._configure.apply(this, arguments);
+    if (!this.template) {
+      this.template = Handlebars.VM.noop;
+    }
+    return response;
+  },
 
   _collectionSelector: '[' + collectionElementAttributeName + ']',
   
