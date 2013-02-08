@@ -27,7 +27,6 @@ Thorax.CollectionHelperView = Thorax.CollectionView.extend({
       options.emptyTemplate = options.inverse;
       options.inverse = Handlebars.VM.noop;
     }
-    !options.template && (options.template = Handlebars.VM.noop);
     var response = Thorax.HelperView.call(this, options);
     if (this.parent.name) {
       if (!this.emptyTemplate) {

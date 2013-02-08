@@ -59,6 +59,8 @@ dataObject('collection', {
 });
 
 Thorax.CollectionView = Thorax.View.extend({
+  template: Handlebars.VM.noop,
+
   _collectionSelector: '[' + collectionElementAttributeName + ']',
   
   // preserve collection element if it was not created with {{collection}} helper

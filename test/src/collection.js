@@ -672,4 +672,14 @@ describe('collection', function() {
     server.restore();
   });
 
+  it("CollectionView may have a blank template", function() {
+    var view = new Thorax.CollectionView({
+      tagName: 'ul',
+      collection: new Thorax.Collection([{key: 'value'}]),
+      itemTemplate: Handlebars.compile('<li>{{key}}</li>')
+    });
+    expect(view.$('li').length).to.equal(1);
+  });
+
+
 });
