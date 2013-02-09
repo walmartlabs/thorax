@@ -22,9 +22,9 @@ _.extend(Thorax.View.prototype, {
     var callback, options, event;
     //ignore undefined arguments in case event was null
     for (var i = 0; i < arguments.length; ++i) {
-      if (typeof arguments[i] === 'function') {
+      if (_.isFunction(arguments[i])) {
         callback = arguments[i];
-      } else if (typeof arguments[i] === 'object') {
+      } else if (_.isObject(arguments[i])) {
         if ('stopPropagation' in arguments[i] && 'preventDefault' in arguments[i]) {
           event = arguments[i];
         } else {
@@ -51,7 +51,7 @@ _.extend(Thorax.View.prototype, {
     var errors = [];
     eachNamedInput.call(this, options, function() {
       var value = view._getInputValue(this, options, errors);
-      if (typeof value !== 'undefined') {
+      if (!_.isUndefined(value)) {
         objectAndKeyFromAttributesAndName.call(this, attributes, this.name, {mode: 'serialize'}, function(object, key) {
           if (!object[key]) {
             object[key] = value;
@@ -117,7 +117,7 @@ _.extend(Thorax.View.prototype, {
     //callback has context of element
     eachNamedInput.call(this, options, function() {
       objectAndKeyFromAttributesAndName.call(this, attributes, this.name, {mode: 'populate'}, function(object, key) {
-        if (object && typeof (value = object[key]) !== 'undefined') {
+        if (object && !_.isUndefined(value = object[key])) {
           //will only execute if we have a name that matches the structure in attributes
           if (this.type === 'checkbox' && _.isBoolean(value)) {
             this.checked = value;

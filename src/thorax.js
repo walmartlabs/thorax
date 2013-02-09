@@ -123,14 +123,14 @@ Thorax.View = Backbone.View.extend({
     });
     this.children = children;
 
-    if (typeof output === 'undefined' || (!_.isElement(output) && !Thorax.Util.is$(output) && !(output && output.el) && typeof output !== 'string' && typeof output !== 'function')) {
+    if (_.isUndefined(output) || (!_.isElement(output) && !Thorax.Util.is$(output) && !(output && output.el) && !_.isString(output) && typeof !_.isFunction(output))) {
       // try one more time to assign the template, if we don't
       // yet have one we must raise
       assignTemplate.call(this, 'template', {
         required: true
       });
       output = this.renderTemplate(this.template);
-    } else if (typeof output === 'function') {
+    } else if (_.isFunction(output)) {
       output = this.renderTemplate(output);
     }
 
@@ -180,7 +180,7 @@ Thorax.View = Backbone.View.extend({
   renderTemplate: function(file, context, ignoreErrors) {
     var template;
     context = context || this._getContext();
-    if (typeof file === 'function') {
+    if (_.isFunction(file)) {
       template = file;
     } else {
       template = Thorax.Util.getTemplate(file, ignoreErrors);
@@ -206,7 +206,7 @@ Thorax.View = Backbone.View.extend({
   },
 
   html: function(html) {
-    if (typeof html === 'undefined') {
+    if (_.isUndefined(html)) {
       return this.el.innerHTML;
     } else {
       // Event for IE element fixes

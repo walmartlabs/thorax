@@ -9,7 +9,7 @@ Handlebars.registerHelper('super', function(options) {
       }
       template = parent.name;
     }
-    if (typeof template === 'string') {
+    if (_.isString(template)) {
       template = Thorax.Util.getTemplate(template, false);
     }
     return new Handlebars.SafeString(template(this, options));

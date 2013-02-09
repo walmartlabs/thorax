@@ -19,7 +19,7 @@ Thorax.configureFastClick = function(useFastClick) {
     body.removeEventListener('touchend', onTouchEnd, true);
     body.removeEventListener('click', clickKiller, true);
   }
-  if (typeof registerClickHandler !== 'undefined') {
+  if (!_.isUndefined(registerClickHandler)) {
     registerClickHandler && registerClickHandler();
   }
 };
@@ -99,7 +99,7 @@ if (isMobile) {
     Thorax.configureFastClick(isMobile);
   });
 } else {
-  if (typeof registerClickHandler !== 'undefined') {
+  if (!_.isUndefined(registerClickHandler)) {
     registerClickHandler && registerClickHandler();
   }
 }

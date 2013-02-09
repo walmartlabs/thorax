@@ -25,7 +25,7 @@ _.extend(Thorax.View, {
     }
 
     //accept on({"rendered": handler})
-    if (typeof eventName === 'object') {
+    if (_.isObject(eventName)) {
       _.each(eventName, function(value, key) {
         this.on(key, value);
       }, this);
@@ -50,7 +50,7 @@ _.extend(Thorax.View.prototype, {
       return this;
     }
 
-    if (typeof eventName === 'object' && arguments.length < 3) {
+    if (_.isObject(eventName) && arguments.length < 3) {
       //accept on({"rendered": callback})
       _.each(eventName, function(value, key) {
         this.on(key, value, callback || this);    // callback is context in this form of the call
@@ -156,7 +156,7 @@ function bindEventHandler(eventName, params) {
   eventName += params.originalName;
 
   var callback = params.handler,
-      method = typeof callback === 'function' ? callback : this[callback];
+      method = _.isFunction(callback) ? callback : this[callback];
   if (!method) {
     throw new Error('Event "' + callback + '" does not exist ' + (this.name || this.cid) + ':' + eventName);
   }
@@ -172,7 +172,7 @@ function bindEventHandler(eventName, params) {
 function eventParamsFromEventItem(name, handler, context) {
   var params = {
     originalName: name,
-    handler: typeof handler === 'string' ? this[handler] : handler
+    handler: _.isString(handler) ? this[handler] : handler
   };
   if (name.match(domEventRegexp)) {
     var match = eventSplitter.exec(name);

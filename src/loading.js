@@ -251,7 +251,7 @@ function loadData(callback, failback, options) {
     return callback(this);
   }
 
-  if (arguments.length === 2 && typeof failback !== 'function' && _.isObject(failback)) {
+  if (arguments.length === 2 && !_.isFunction(failback) && _.isObject(failback)) {
     options = failback;
     failback = false;
   }
@@ -346,7 +346,7 @@ _.each(klasses, function(DataClass) {
     },
 
     load: function(callback, failback, options) {
-      if (arguments.length === 2 && typeof failback !== 'function') {
+      if (arguments.length === 2 && !_.isFunction(failback)) {
         options = failback;
         failback = false;
       }
@@ -422,7 +422,7 @@ inheritVars.collection.loading = function() {
   }
 };
 
-if (typeof collectionOptionNames !== 'undefined') {
+if (!_.isUndefined(collectionOptionNames)) {
   collectionOptionNames['loading-template'] = 'loadingTemplate';
   collectionOptionNames['loading-view'] = 'loadingView';
   collectionOptionNames['loading-placement'] = 'loadingPlacement';
