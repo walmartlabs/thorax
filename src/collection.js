@@ -59,6 +59,7 @@ dataObject('collection', {
 });
 
 Thorax.CollectionView = Thorax.View.extend({
+  _defaultTemplate: Handlebars.VM.noop,
   _collectionSelector: '[' + collectionElementAttributeName + ']',
   
   // preserve collection element if it was not created with {{collection}} helper
@@ -168,6 +169,12 @@ Thorax.CollectionView = Thorax.View.extend({
   },
   emptyClass: 'empty',
   renderEmpty: function() {
+    if (!this.emptyTemplate && !this.emptyView) {
+      assignTemplate.call(this, 'emptyTemplate', {
+        extension: '-empty',
+        required: false
+      });
+    }
     if (this.emptyView) {
       var viewOptions = {};
       if (this.emptyTemplate) {
@@ -177,13 +184,18 @@ Thorax.CollectionView = Thorax.View.extend({
       view.ensureRendered();
       return view;
     } else {
-      if (!this.emptyTemplate) {
-        this.emptyTemplate = Thorax.Util.getTemplate(this.name + '-empty', true);
-      }
       return this.emptyTemplate && this.renderTemplate(this.emptyTemplate);
     }
   },
   renderItem: function(model, i) {
+    if (!this.itemTemplate && !this.itemView) {
+      assignTemplate.call(this, 'itemTemplate', {
+        extension: '-item',
+        // only require an itemTemplate if an itemView
+        // is not present
+        required: !this.itemView
+      });
+    }
     if (this.itemView) {
       var viewOptions = {
         model: model
@@ -195,9 +207,6 @@ Thorax.CollectionView = Thorax.View.extend({
       view.ensureRendered();
       return view;
     } else {
-      if (!this.itemTemplate) {
-        this.itemTemplate = Thorax.Util.getTemplate(this.name + '-item');
-      }
       return this.renderTemplate(this.itemTemplate, this.itemContext(model, i));
     }
   },

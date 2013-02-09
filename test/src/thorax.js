@@ -2,9 +2,9 @@ describe('core', function() {
   Backbone.history || (Backbone.history = new Backbone.History());
   Backbone.history.start();
 
-  Thorax.templates.parent = '<div>{{view child}}</div>';
-  Thorax.templates.child = '<div>{{value}}</div>';
-  Thorax.templates['extension-test.handlebars'] = '123';
+  Thorax.templates.parent = Handlebars.compile('<div>{{view child}}</div>');
+  Thorax.templates.child = Handlebars.compile('<div>{{value}}</div>');
+  Thorax.templates['extension-test.handlebars'] = Handlebars.compile('123');
 
   it("registry", function() {
     var ViewClass = Thorax.View.extend({name: 'a-name'}, {});
@@ -58,14 +58,14 @@ describe('core', function() {
         }
       },
       key: 'value',
-      template: '{{globalHelper}} {{test}} {{testWithArg "!"}} {{#testWithBlock}}{{key}}{{/testWithBlock}}'
+      template: Handlebars.compile('{{globalHelper}} {{test}} {{testWithArg "!"}} {{#testWithBlock}}{{key}}{{/testWithBlock}}')
     });
     view.render();
     expect(view.html()).to.equal('- value value! value');
 
     view = new Thorax.View({
       collection: new Thorax.Collection([{letter: 'a'}]),
-      template: '{{#collection tag="ul"}}<li>{{globalHelper}} {{test letter}}</li>{{/collection}}',
+      template: Handlebars.compile('{{#collection tag="ul"}}<li>{{globalHelper}} {{test letter}}</li>{{/collection}}'),
       helpers: {
         test: function(letter) {
           return letter + "!";
@@ -74,6 +74,16 @@ describe('core', function() {
     });
     view.render();
     expect(view.$('li').html()).to.equal('- a!');
+  });
+
+  it("assign template by name", function() {
+    var view = new Thorax.View({
+      name: 'a',
+      template: 'child',
+      value: 'test'
+    });
+    view.render();
+    expect(view.$('div').html()).to.equal('test');
   });
 
   it("template not found handling", function() {
@@ -141,7 +151,7 @@ describe('core', function() {
           throw new Error('dom error');
         }
       },
-      template: '<div></div>'
+      template: Handlebars.compile('<div></div>')
     });
     view.render();
     document.body.appendChild(view.el);
@@ -167,7 +177,7 @@ describe('core', function() {
             return 'c';
           }
         },
-        template: '{{a}}{{b}}{{c}}'
+        template: Handlebars.compile('{{a}}{{b}}{{c}}')
       }))();
       view.render();
       expect(view.html()).to.equal('abc');
@@ -179,7 +189,7 @@ describe('core', function() {
         context: function() {
           return;
         },
-        template: '{{key}}'
+        template: Handlebars.compile('{{key}}')
       });
       view.render();
       expect(view.html()).to.equal('value');
@@ -193,7 +203,7 @@ describe('core', function() {
             b: 'b'
           };
         },
-        template: '{{a}}{{b}}'
+        template: Handlebars.compile('{{a}}{{b}}')
       });
       view.render();
       expect(view.html()).to.equal('ab');
@@ -209,7 +219,7 @@ describe('core', function() {
         model: new Thorax.Model({
           b: 'b'
         }),
-        template: '{{modifyObject a}}{{modifyObject b}}'
+        template: Handlebars.compile('{{modifyObject a}}{{modifyObject b}}')
       });
       expect(view.a.mutated).to.be['undefined'];
       expect(view.model.attributes.b.mutated).to.be['undefined'];

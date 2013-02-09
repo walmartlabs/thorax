@@ -15,7 +15,7 @@ describe('helper-view', function() {
   it('should nest helper view instances', function() {
     view = new Thorax.View({
       name: 'outer',
-      template: '{{#test}}{{#test}}{{#test}}{{key}}{{/test}}{{/test}}{{/test}}',
+      template: Handlebars.compile('{{#test}}{{#test}}{{#test}}{{key}}{{/test}}{{/test}}{{/test}}'),
       key: 'value'
     });
     view.render();
@@ -23,14 +23,14 @@ describe('helper-view', function() {
   });
   it('should allow an empty template', function() {
     view = new Thorax.View({
-      template: '{{test}}'
+      template: Handlebars.compile('{{test}}')
     });
     view.render();
     expect(spy.callCount).to.equal(1);
   });
   it('should render multiple identical calls', function() {
     view = new Thorax.View({
-      template: '{{test a=1}}{{test a=1}}{{#test a=1}}{{/test}}'
+      template: Handlebars.compile('{{test a=1}}{{test a=1}}{{#test a=1}}{{/test}}')
     });
     view.render();
     expect(spy.callCount).to.equal(3);
@@ -40,7 +40,7 @@ describe('helper-view', function() {
   describe('container render', function() {
     it('should preserve itself in the DOM', function() {
       view = new Thorax.View({
-        template: '{{#test}}{{/test}}'
+        template: Handlebars.compile('{{#test}}{{/test}}')
       });
       view.render();
       expect(spy.callCount).to.equal(1);
@@ -54,7 +54,7 @@ describe('helper-view', function() {
     });
     it('should rerender if an input parameter changes', function() {
       view = new Thorax.View({
-        template: '{{#test key}}{{/test}}',
+        template: Handlebars.compile('{{#test key}}{{/test}}'),
         key: 1
       });
       view.render();
@@ -71,7 +71,7 @@ describe('helper-view', function() {
     });
     it('should rerender a helper has depth', function() {
       view = new Thorax.View({
-        template: '{{#test}}{{../foo}}{{/test}}'
+        template: Handlebars.compile('{{#test}}{{../foo}}{{/test}}')
       });
       view.render();
       expect(spy.callCount).to.equal(1);
@@ -86,7 +86,7 @@ describe('helper-view', function() {
     });
     it('should cooperate with each loops', function() {
       view = new Thorax.View({
-        template: '{{#each keys}}{{#test}}@index{{/test}}{{/each}}',
+        template: Handlebars.compile('{{#each keys}}{{#test}}@index{{/test}}{{/each}}'),
         keys: _.range(5)
       });
       view.render();
@@ -100,7 +100,7 @@ describe('helper-view', function() {
 
     it('should destroy old children on re-render', function() {
       view = new Thorax.View({
-        template: '{{#test key}}{{/test}}',
+        template: Handlebars.compile('{{#test key}}{{/test}}'),
         key: 1
       });
       view.render();
@@ -117,7 +117,7 @@ describe('helper-view', function() {
 
     it('id, class and tag passed to helper view', function() {
       view = new Thorax.View({
-        template: '{{#test tagName="a" className="b" id="c"}}{{/test}}'
+        template: Handlebars.compile('{{#test tagName="a" className="b" id="c"}}{{/test}}')
       });
       view.render();
       expect(view.$('a').length).to.equal(1);
@@ -127,7 +127,7 @@ describe('helper-view', function() {
 
     it('className and tagName re-written in helper view', function() {
       view = new Thorax.View({
-        template: '{{#test tagName="a" className="b"}}{{/test}}'
+        template: Handlebars.compile('{{#test tagName="a" className="b"}}{{/test}}')
       });
       view.render();
       expect(view.$('a').length).to.equal(1);
