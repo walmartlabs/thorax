@@ -29,13 +29,24 @@ function registryGet(object, type, name, ignoreErrors) {
 }
 
 function assignTemplate(attributeName, options) {
+  var template;
   // if attribute is the name of template to fetch
   if (typeof this[attributeName] === 'string') {
-    this[attributeName] = Thorax.Util.getTemplate(this[attributeName], true);
+    template = Thorax.Util.getTemplate(this[attributeName], true);
   // else try and fetch the template based on the name
   } else if (this.name && typeof this[attributeName] !== 'function') {
-    this[attributeName] = Thorax.Util.getTemplate(this.name + (options.extension || ''), true);
+    template = Thorax.Util.getTemplate(this.name + (options.extension || ''), true);
   }
+  // CollectionView and LayoutView have a defaultTemplate that may be used if none
+  // was found, regular views must have a template if render() is called
+  if (!template && attributeName === 'template' && this._defaultTemplate) {
+    template = this._defaultTemplate;
+  }
+  // if we found something, assign it
+  if (template && typeof this[attributeName] !== 'function') {
+    this[attributeName] = template;
+  }
+  // if nothing was found and it's required, throw
   if (options.required && typeof this[attributeName] !== 'function') {
     throw new Error('View ' + (this.name || this.cid) + ' requires: ' + attributeName);
   }

@@ -64,12 +64,6 @@ Thorax.View = Backbone.View.extend({
     // Setup helpers
     bindHelpers.call(this);
 
-    // template isn't required unless render is called
-    // will do a second check there
-    assignTemplate.call(this, 'template', {
-      required: false
-    });
-
     _.each(inheritVars, function(obj) {
       if (obj.configure) {
         obj.configure.call(this);

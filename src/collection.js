@@ -59,20 +59,7 @@ dataObject('collection', {
 });
 
 Thorax.CollectionView = Thorax.View.extend({
-  // allow template to be a noop, will append items directly
-  // onto this.$el. Can't assign on prototype as assignTemplate
-  // will check for the template attribute being a function
-  // then not assign based on name if the CollectionView has a
-  // name attribute
-
-  _configure: function() {
-    var response = Thorax.View.prototype._configure.apply(this, arguments);
-    if (!this.template) {
-      this.template = Handlebars.VM.noop;
-    }
-    return response;
-  },
-
+  _defaultTemplate: Handlebars.VM.noop,
   _collectionSelector: '[' + collectionElementAttributeName + ']',
   
   // preserve collection element if it was not created with {{collection}} helper

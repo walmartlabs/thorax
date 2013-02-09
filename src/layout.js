@@ -1,22 +1,17 @@
 var layoutCidAttributeName = 'data-layout-cid';
 
 Thorax.LayoutView = Thorax.View.extend({
-  render: function(output) {
-    // TODO: fixme, lumbar inserts templates after JS, most of the time this is fine
-    // but Application will be created in init.js (unlike most views)
-    // so need to put this here so the template will be picked up
-    assignTemplate.call(this, 'template', {
-      required: false
-    });
-    // a template is optional in a layout
-    if (output || this.template) {
-      // but if present, it must have embedded an element containing layoutCidAttributeName 
-      var response = Thorax.View.prototype.render.call(this, output || this.template);
-      ensureLayoutViewsTargetElement.call(this);
-      return response;
-    } else {
+  _defaultTemplate: Handlebars.VM.noop,
+  render: function() {
+    var response = Thorax.View.prototype.render.apply(this, arguments);
+    if (this.template === Handlebars.VM.noop) {
+      // if there is no template setView will append to this.$el
       ensureLayoutCid.call(this);
+    } else {
+      // if a template was specified is must declare a layout-element
+      ensureLayoutViewsTargetElement.call(this);
     }
+    return response;
   },
   setView: function(view, options) {
     options = _.extend({
