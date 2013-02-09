@@ -123,7 +123,7 @@ Thorax.View = Backbone.View.extend({
     });
     this.children = children;
 
-    if (_.isUndefined(output) || (!_.isElement(output) && !Thorax.Util.is$(output) && !(output && output.el) && !_.isString(output) && typeof !_.isFunction(output))) {
+    if (_.isUndefined(output) || (!_.isElement(output) && !Thorax.Util.is$(output) && !(output && output.el) && !_.isString(output) && !_.isFunction(output))) {
       // try one more time to assign the template, if we don't
       // yet have one we must raise
       assignTemplate.call(this, 'template', {
