@@ -7,10 +7,10 @@ Handlebars.registerHelper('super', function(options) {
       if (!parent.name) {
         throw new Error('Cannot use super helper when parent has no name or template.');
       }
-      template = Thorax.Util.getTemplate(parent.name, false);
+      template = parent.name;
     }
     if (typeof template === 'string') {
-      template = Handlebars.compile(template, {data: true});
+      template = Thorax.Util.getTemplate(template, false);
     }
     return new Handlebars.SafeString(template(this, options));
   } else {

@@ -9,6 +9,7 @@ function createRegistryWrapper(klass, hash) {
     return child;
   };
 }
+
 function registryGet(object, type, name, ignoreErrors) {
   var target = object[type],
       value;
@@ -24,6 +25,30 @@ function registryGet(object, type, name, ignoreErrors) {
     throw new Error(type + ': ' + name + ' does not exist.');
   } else {
     return value;
+  }
+}
+
+function assignTemplate(attributeName, options) {
+  var template;
+  // if attribute is the name of template to fetch
+  if (typeof this[attributeName] === 'string') {
+    template = Thorax.Util.getTemplate(this[attributeName], true);
+  // else try and fetch the template based on the name
+  } else if (this.name && typeof this[attributeName] !== 'function') {
+    template = Thorax.Util.getTemplate(this.name + (options.extension || ''), true);
+  }
+  // CollectionView and LayoutView have a defaultTemplate that may be used if none
+  // was found, regular views must have a template if render() is called
+  if (!template && attributeName === 'template' && this._defaultTemplate) {
+    template = this._defaultTemplate;
+  }
+  // if we found something, assign it
+  if (template && typeof this[attributeName] !== 'function') {
+    this[attributeName] = template;
+  }
+  // if nothing was found and it's required, throw
+  if (options.required && typeof this[attributeName] !== 'function') {
+    throw new Error('View ' + (this.name || this.cid) + ' requires: ' + attributeName);
   }
 }
 
@@ -161,9 +186,7 @@ Thorax.Util = {
       template = Thorax.templates[file];
     }
 
-    if (template && typeof template === 'string') {
-      template = Thorax.templates[file] = Handlebars.compile(template, {data: true});
-    } else if (!template && !ignoreErrors) {
+    if (!template && !ignoreErrors) {
       throw new Error('templates: ' + file + ' does not exist.');
     }
     return template;

@@ -6,7 +6,7 @@ describe('collection helper', function() {
 
   it("transition from no collection to collection", function() {
     var view = new Thorax.View({
-      template: '{{#collection tag="ul"}}<li>{{letter}}</li>{{/collection}}'
+      template: Handlebars.compile('{{#collection tag="ul"}}<li>{{letter}}</li>{{/collection}}')
     });
     view.render();
     expect(view.$('li').length).to.equal(0);
@@ -24,7 +24,7 @@ describe('collection helper', function() {
 
   it("collection-element declared outside of CollectionView will raise", function() {
     var view = new Thorax.View({
-      template: '{{collection-element}}'
+      template: Handlebars.compile('{{collection-element}}')
     });
     expect(view.render).to['throw']();
   });
@@ -36,7 +36,7 @@ describe('collection helper', function() {
       events: {
         rendered: spy
       },
-      template: '{{#collection tag="ul"}}<li>{{letter}}</li>{{/collection}}'
+      template: Handlebars.compile('{{#collection tag="ul"}}<li>{{letter}}</li>{{/collection}}')
     });
     view.render();
     expect(spy.callCount).to.equal(1);
@@ -56,7 +56,7 @@ describe('collection helper', function() {
           test: spy
         }
       },
-      template: '{{#collection}}{{/collection}}',
+      template: Handlebars.compile('{{#collection}}{{/collection}}'),
       collection: new Thorax.Collection()
     });
     view.collection.trigger('test');
@@ -127,16 +127,16 @@ describe('collection helper', function() {
     //test with embedded view
     Thorax.View.extend({
       name: 'comments',
-      template: '{{#collection comments}}<p>{{comment}}</p>{{#collection authors}}<span>{{author}}</span>{{/collection}}{{/collection}}'
+      template: Handlebars.compile('{{#collection comments}}<p>{{comment}}</p>{{#collection authors}}<span>{{author}}</span>{{/collection}}{{/collection}}')
     });
     var view = new Thorax.View({
-      template: '{{#empty posts}}empty{{else}}{{#collection posts name="outer"}}<h2>{{title}}</h2>{{view "comments" comments=comments}}</div>{{/collection}}{{/empty}}'
+      template: Handlebars.compile('{{#empty posts}}empty{{else}}{{#collection posts name="outer"}}<h2>{{title}}</h2>{{view "comments" comments=comments}}</div>{{/collection}}{{/empty}}')
     });
     testNesting(view, 'nested view');
 
     //test with multiple inline nesting
     view = new Thorax.View({
-      template: '{{#empty posts}}empty{{else}}{{#collection posts name="outer"}}<h2>{{title}}</h2>{{#collection comments}}<p>{{comment}}</p>{{#collection authors}}<span>{{author}}</span>{{/collection}}{{/collection}}</div>{{/collection}}{{/empty}}'
+      template: Handlebars.compile('{{#empty posts}}empty{{else}}{{#collection posts name="outer"}}<h2>{{title}}</h2>{{#collection comments}}<p>{{comment}}</p>{{#collection authors}}<span>{{author}}</span>{{/collection}}{{/collection}}</div>{{/collection}}{{/empty}}')
     });
     testNesting(view, 'nested inline');
   });

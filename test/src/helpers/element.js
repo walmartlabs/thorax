@@ -3,7 +3,7 @@ describe('element helper', function() {
     var a = document.createElement('li');
     a.innerHTML = 'one';
     var view = new Thorax.View({
-      template: '<ul>{{element a tag="li"}}{{element b tag="li"}}{{element c}}{{element d}}</ul>',
+      template: Handlebars.compile('<ul>{{element a tag="li"}}{{element b tag="li"}}{{element c}}{{element d}}</ul>'),
       a: a,
       b: function() {
         var li = document.createElement('li');

@@ -64,14 +64,6 @@ Thorax.View = Backbone.View.extend({
     // Setup helpers
     bindHelpers.call(this);
 
-    //compile a string if it is set as this.template
-    if (typeof this.template === 'string') {
-      this.template = Handlebars.compile(this.template, {data: true});
-    } else if (this.name && !this.template) {
-      //fetch the template
-      this.template = Thorax.Util.getTemplate(this.name, true);
-    }
-
     _.each(inheritVars, function(obj) {
       if (obj.configure) {
         obj.configure.call(this);
@@ -132,15 +124,11 @@ Thorax.View = Backbone.View.extend({
     this.children = children;
 
     if (typeof output === 'undefined' || (!_.isElement(output) && !Thorax.Util.is$(output) && !(output && output.el) && typeof output !== 'string' && typeof output !== 'function')) {
-      if (!this.template) {
-        //if the name was set after the view was created try one more time to fetch a template
-        if (this.name) {
-          this.template = Thorax.Util.getTemplate(this.name, true);
-        }
-        if (!this.template) {
-          throw new Error('View ' + (this.name || this.cid) + '.render() was called with no content and no template set on the view.');
-        }
-      }
+      // try one more time to assign the template, if we don't
+      // yet have one we must raise
+      assignTemplate.call(this, 'template', {
+        required: true
+      });
       output = this.renderTemplate(this.template);
     } else if (typeof output === 'function') {
       output = this.renderTemplate(output);
@@ -195,14 +183,10 @@ Thorax.View = Backbone.View.extend({
     if (typeof file === 'function') {
       template = file;
     } else {
-      template = Thorax.Util.getTemplate(file);
+      template = Thorax.Util.getTemplate(file, ignoreErrors);
     }
     if (!template) {
-      if (ignoreErrors) {
-        return '';
-      } else {
-        throw new Error('Unable to find template ' + file);
-      }
+      return '';
     } else {
       return template(context, {
         helpers: this._getHelpers(),
