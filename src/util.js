@@ -31,10 +31,10 @@ function registryGet(object, type, name, ignoreErrors) {
 function assignTemplate(attributeName, options) {
   var template;
   // if attribute is the name of template to fetch
-  if (typeof this[attributeName] === 'string') {
+  if (_.isString(this[attributeName])) {
     template = Thorax.Util.getTemplate(this[attributeName], true);
   // else try and fetch the template based on the name
-  } else if (this.name && typeof this[attributeName] !== 'function') {
+  } else if (this.name && !_.isFunction(this[attributeName])) {
     template = Thorax.Util.getTemplate(this.name + (options.extension || ''), true);
   }
   // CollectionView and LayoutView have a defaultTemplate that may be used if none
@@ -43,11 +43,11 @@ function assignTemplate(attributeName, options) {
     template = this._defaultTemplate;
   }
   // if we found something, assign it
-  if (template && typeof this[attributeName] !== 'function') {
+  if (template && !_.isFunction(this[attributeName])) {
     this[attributeName] = template;
   }
   // if nothing was found and it's required, throw
-  if (options.required && typeof this[attributeName] !== 'function') {
+  if (options.required && !_.isFunction(this[attributeName])) {
     throw new Error('View ' + (this.name || this.cid) + ' requires: ' + attributeName);
   }
 }
@@ -159,10 +159,10 @@ function normalizeHTMLAttributeOptions(options) {
 Thorax.Util = {
   getViewInstance: function(name, attributes) {
     attributes = attributes || {};
-    if (typeof name === 'string') {
+    if (_.isString(name)) {
       var Klass = registryGet(Thorax, 'Views', name, false);
       return Klass.cid ? _.extend(Klass, attributes || {}) : new Klass(attributes);
-    } else if (typeof name === 'function') {
+    } else if (_.isFunction(name)) {
       return new name(attributes);
     } else {
       return name;
@@ -195,7 +195,7 @@ Thorax.Util = {
   //'selector' is not present in $('<p></p>')
   //TODO: investigage a better detection method
   is$: function(obj) {
-    return typeof obj === 'object' && ('length' in obj);
+    return _.isObject(obj) && ('length' in obj);
   },
   expandToken: function(input, scope) {
     if (input && input.indexOf && input.indexOf('{{') >= 0) {
@@ -242,7 +242,7 @@ Thorax.Util = {
     var htmlAttributes = _.omit(attributes, 'tagName'),
         tag = attributes.tagName || 'div';
     return '<' + tag + ' ' + _.map(htmlAttributes, function(value, key) {
-      if (typeof value === 'undefined' || key === 'expand-tokens') {
+      if (_.isUndefined(value) || key === 'expand-tokens') {
         return '';
       }
       var formattedValue = value;
@@ -250,6 +250,6 @@ Thorax.Util = {
         formattedValue = Thorax.Util.expandToken(value, scope);
       }
       return (key === 'className' ? 'class' : key) + '="' + Handlebars.Utils.escapeExpression(formattedValue) + '"';
-    }).join(' ') + '>' + (typeof content === 'undefined' ? '' : content) + '</' + tag + '>';
+    }).join(' ') + '>' + (_.isUndefined(content) ? '' : content) + '</' + tag + '>';
   }
 };

@@ -92,7 +92,7 @@ Thorax.CollectionView = Thorax.View.extend({
     //if index argument is a view
     index && index.el && (index = $el.children().indexOf(index.el) + 1);
     //if argument is a view, or html string
-    if (model.el || typeof model === 'string') {
+    if (model.el || _.isString(model)) {
       itemView = model;
       model = false;
     } else {
@@ -104,7 +104,7 @@ Thorax.CollectionView = Thorax.View.extend({
       //if the renderer's output wasn't contained in a tag, wrap it in a div
       //plain text, or a mixture of top level text nodes and element nodes
       //will get wrapped
-      if (typeof itemView === 'string' && !itemView.match(/^\s*</m)) {
+      if (_.isString(itemView) && !itemView.match(/^\s*</m)) {
         itemView = '<div>' + itemView + '</div>';
       }
       var itemElement = itemView.el ? [itemView.el] : _.filter($(itemView), function(node) {
