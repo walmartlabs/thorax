@@ -422,7 +422,7 @@ inheritVars.collection.loading = function() {
   }
 };
 
-if (!_.isUndefined(collectionOptionNames)) {
+if (collectionOptionNames) {
   collectionOptionNames['loading-template'] = 'loadingTemplate';
   collectionOptionNames['loading-view'] = 'loadingView';
   collectionOptionNames['loading-placement'] = 'loadingPlacement';
