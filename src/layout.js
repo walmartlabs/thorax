@@ -18,7 +18,7 @@ Thorax.LayoutView = Thorax.View.extend({
       scroll: true,
       destroy: true
     }, options || {});
-    if (typeof view === 'string') {
+    if (_.isString(view)) {
       view = new (Thorax.Util.registryGet(Thorax, 'Views', view, false))();
     }
     this.ensureRendered();
