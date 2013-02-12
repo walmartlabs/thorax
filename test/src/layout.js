@@ -127,7 +127,7 @@ describe('layout', function() {
     var view = new Thorax.View({
       template: Handlebars.compile('{{layout-element}}')
     });
-    expect(view.render).to['throw'];
+    expect(view.render).to['throw']();
   });
 
 });

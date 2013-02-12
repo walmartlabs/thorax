@@ -26,7 +26,7 @@ describe('collection helper', function() {
     var view = new Thorax.View({
       template: Handlebars.compile('{{collection-element}}')
     });
-    expect(view.render).to['throw'];
+    expect(view.render).to['throw']();
   });
 
   it("collection helper won't re-render parent on add", function() {

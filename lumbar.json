@@ -64,7 +64,6 @@
     "thorax-mobile": {
       "scripts": [
         {"src": "src/mobile.js"},
-        {"src": "src/mobile/fast-click.js"},
         {"src": "src/mobile/tap-highlight.js"}
       ]
     }
