@@ -61,7 +61,7 @@ dataObject('collection', {
 Thorax.CollectionView = Thorax.View.extend({
   _defaultTemplate: Handlebars.VM.noop,
   _collectionSelector: '[' + collectionElementAttributeName + ']',
-  
+
   // preserve collection element if it was not created with {{collection}} helper
   _replaceHTML: function(html) {
     if (this.collection && this._objectOptionsByCid[this.collection.cid] && this._renderCount) {
@@ -117,7 +117,7 @@ Thorax.CollectionView = Thorax.View.extend({
         $el.prepend(itemElement);
       } else {
         //use last() as appendItem can accept multiple nodes from a template
-        var last = $el.find('[' + modelCidAttributeName + '="' + previousModel.cid + '"]').last();
+        var last = $el.children('[' + modelCidAttributeName + '="' + previousModel.cid + '"]').last();
         last.after(itemElement);
       }
 
