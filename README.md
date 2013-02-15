@@ -172,7 +172,7 @@ Embed a DOM element in the view. This uses a placeholder technique to work, if t
 
     {{element domElement tag="tbody"}}
 
-### button *{{#button methodName [htmlAttributes]}}*
+### button *{{#button methodName [htmlAttributes...]}}*
 
 Creates a `button` tag that will call the specified methodName on the view when clicked. Arbitrary HTML attributes can also be specified.
 
@@ -204,7 +204,7 @@ Multiple arguments can be passed and will be joined with a "/":
 
     {{url "articles" id}}
 
-### link *{{#link url [htmlAttributes]}}*
+### link *{{#link url [htmlAttributes...]}}*
 
 Creates an `a` tag that will call `Backbone.history.navigate()` with the given url when clicked. Passes the `url` parameter to the `url` helper with the current context. Do not use this method for creating external links. Like the `url` helper, multiple arguments may be passed as well as an `expand-tokens` option.
 
@@ -280,7 +280,7 @@ Set the current view on the `LayoutView`, triggering `activated`, `ready` and `d
 
 Get the current view that was previously set with `setView`.
 
-### layout-element *{{layout-element [*htmlAttributes]}}*
+### layout-element *{{layout-element [htmlAttributes...]}}*
 
 By default `Thorax.LayoutView` instances have no template, `setView` will append directly to the view's `el`. Alternatively a template can be specified and a `layout-element` and `setView` will append to that element.
 
@@ -410,7 +410,7 @@ Equivelent to calling `removeItem` then `appendItem`. Note that this is mainly m
 
 ## Collection Helpers
 
-### collection helper *{{collection [collection] [*options]}}*
+### collection helper *{{collection [collection] [options...]}}*
 
 Creates and embeds a `CollectionView` instance, updating when items are added, removed or changed in the collection. If a block is passed it will be used as the `item-template`, which will be called with a context of the `model.attributes` for each model in the collection.
 
@@ -491,7 +491,7 @@ To embed a row within a `collection` helper if it the collection is empty, speci
       <li>So very empty</li>
     {{/collection}}
 
-### collection-element helper *{{collection-element [*htmlAttributes]}}
+### collection-element helper *{{collection-element [htmlAttributes...]}}
 
 By default `Thorax.CollectionView` instances have no template. Items will be appended to and removed from the view's `el`. Alternatively a template can be specified and `collection-element` used to specify where the individal items in a collection will be rendered.
 
