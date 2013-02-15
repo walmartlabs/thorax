@@ -214,7 +214,7 @@ The href attribute is required but may also be specified as an attribute:
 
     {{#link href="articles/{{id}}" expand-tokens=true}}Link Test{{/link}}
 
-## HelperView
+## Thorax.HelperView
 
 ### registerViewHelper *Handlebars.registerViewHelper(name [,viewClass] ,callback)*
 
