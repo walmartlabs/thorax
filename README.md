@@ -121,6 +121,125 @@ Calls `remove` (and therefore `$el.remove` and `stopListening`) on your view, un
 
 `destroy` will also be called on a view if it was previously passed to the `setView` method on a `LayoutView`, and then another view is passed to `setView`.
 
+### setModel *view.setModel(model [,options])*
+
+Setting `model` in the construtor will automatically call `setModel`, so the following are equivelent:
+
+    var view = new Thorax.View({
+      model: myModel
+    });
+    // identical functionality as above
+    view.setModel(myModel);
+
+Sets the `model` attribute of a view then attempts to fetch the model if it has not yet been populated. Once set the default `context` implementation will merge the model's `attributes` into the context, so any model attributes will automatically become available in a template. In addition any events declared via `view.on({model: events})` will be bound to the model with `listenTo`.
+
+Accepts any of the following options:
+
+- **fetch** - Boolean, wether to fetch the model when it is set, defaults to true.
+- **success** - Callback on fetch success, defaults to noop
+- **render** - Render on the view on model:change? Defaults to true
+- **populate** - Call `populate` with the model's attributes when it is set? Defaults to true. Pass `populate: {children: false}` to prevent child views from having their inputs populated.
+- **errors** - When the model triggers an `error` event, trigger the event on the view? Defaults to true
+
+### setCollection *view.setCollection(collection [,options])*
+
+Setting `collection` in the construtor will automatically call `setCollection`, so the following are equivelent:
+
+    var view = new Thorax.View({
+      collection: myCollection
+    });
+    // identical functionality as above
+    view.setCollection(myCollection);
+
+Sets the `collection` attribute of a view then attempts to fetch the collection if it has not yet been populated. In addition any events declared via `view.on({collection: events})` will be bound to the collection with `listenTo`.
+
+Accepts any of the following options:
+
+- **render** - Wether to render the collection if it is populated, or render it after it has been loaded
+- **fetch** - Wether or not to try to call `fetch` on the collection if `shouldFetch` returns true
+- **success** - Callback on fetch success, defaults to noop
+- **errors** - Wether or not to trigger an `error` event on the view when an `error` event is triggered on the collection
+
+Note that while any view may bind a collection only a `CollectionView` will actually render a collection. A regular `Thorax.View` may declare a `collection` helper which in turn will generate and embed a `CollectionView`.
+
+### serialize *view.serialize([event], callback [,options])*
+
+Serializes a form. `callback` will receive the attributes from the form, followed by a `release` method which must be called before the form can be submitted again. `callback` will only be called if `validateInput` returns nothing or an empty array. `options` may contain:
+
+- `set` - defaults to true, wether or not to set the attributes if valid on a model if one was set with `setModel`
+- `validate - defaults to true, wether or not to call `validateInput` during serialization
+- `children` - defaults to true, wether or not to serialize inputs in child views
+- `silent` - defaults to true, wether or not to pass `silent: true` to `model.set`
+
+Each form input in your application should contain a corresponding label. Since you may want to re-use the same form multiple times in the same view a `@cid` attribute with a unique value is provided to each render call of each template:
+    
+    <label for="{{@cid}}-last-name"/>
+    <input name="last-name" id="{{@cid}}-last-name" value="Beastridge"/>
+    <label for="{{@cid}}-address[street]"/>
+    <input name="address[street]" value="123 Chestnut" id="{{@cid}}-address[street]"/>
+
+    new Thorax.View({
+      events: {
+        "submit form": function(event) {
+          this.serialize(event, function(attributes, release) {
+            attributes["last-name"] === "Beastridge";
+            attributes.address.street === "123 Chestnut";
+            //form is locked to prevent duplicate submission
+            //until release is called
+            release();
+          });
+        }
+      }
+    });
+
+`serialize` Triggers the following events:
+
+- `serialize` - called before validation with serialized attributes
+- `validate` - with an attributes hash and errors array after `validateInput` is called
+- `error` - with an errors array, if validateInput returned an array with any errors
+
+If your view uses inputs with non standard names (or no names, multiple inputs with the same name, etc), use the `serialize` event:
+
+    this.on('serialize', _.bind(function(attributes) {
+      attributes.custom = this.$('.my-input').val();
+    }, this));
+
+### populate *view.populate([attributes] [,options])*
+
+Populate the form fields in the view with the given attributes. The keys of the attributes should correspond to the names of the inputs. `populate` is automatically called with the response from `view.context()` when `setModel` is called. By default this is just `model.attributes`.
+
+    view.populate({
+      "last-name": "Beastridge"
+      address: {
+        street: "123 Chestnut"
+      }
+    });
+
+`populate` triggers a `populate` event. If your view uses inputs with non standard names (or no names, multiple inputs with the same name, etc), use this event:
+
+    this.on('populate', _.bind(function(attributes) {
+      this.$('.my-input').val(attributes.custom);
+    }, this));
+
+To prevent child views from having their inputs populated use:
+
+    view.populate(object, {
+      children: false
+    });
+
+### validateInput *view.validateInput(attributes)*
+
+Validate the attributes created by `serialize`, must return an array or nothing (if valid). It's recommended that the array contain hashes with `name` and `message` attributes, but arbitrary data or objects may be passed. If the array has a zero length the attributes are considered to be valid. Returning an array with any errors will trigger the `error` event.
+
+    validateInput: function(attributes) {
+      var errors = [];
+      if (attributes.password && !attributes.password.match(/.{6,11}/)) {
+        errors.push({name: 'password', message: 'Invalid Password'});
+      }
+      return errors;
+    }
+
+
 ## Thorax.HelperView
 
 ### registerViewHelper *Handlebars.registerViewHelper(name [,viewClass] ,callback)*
@@ -174,49 +293,6 @@ Set the current view on the `LayoutView`, triggering `activated`, `ready` and `d
 ### getView *view.getView()*
 
 Get the current view that was previously set with `setView`.
-
-## Data Binding
-
-### setModel *view.setModel(model [,options])*
-
-Setting `model` in the construtor will automatically call `setModel`, so the following are equivelent:
-
-    var view = new Thorax.View({
-      model: myModel
-    });
-    // identical functionality as above
-    view.setModel(myModel);
-
-Sets the `model` attribute of a view then attempts to fetch the model if it has not yet been populated. Once set the default `context` implementation will merge the model's `attributes` into the context, so any model attributes will automatically become available in a template. In addition any events declared via `view.on({model: events})` will be bound to the model with `listenTo`.
-
-Accepts any of the following options:
-
-- **fetch** - Boolean, wether to fetch the model when it is set, defaults to true.
-- **success** - Callback on fetch success, defaults to noop
-- **render** - Render on the view on model:change? Defaults to true
-- **populate** - Call `populate` with the model's attributes when it is set? Defaults to true. Pass `populate: {children: false}` to prevent child views from having their inputs populated.
-- **errors** - When the model triggers an `error` event, trigger the event on the view? Defaults to true
-
-### setCollection *view.setCollection(collection [,options])*
-
-Setting `collection` in the construtor will automatically call `setCollection`, so the following are equivelent:
-
-    var view = new Thorax.View({
-      collection: myCollection
-    });
-    // identical functionality as above
-    view.setCollection(myCollection);
-
-Sets the `collection` attribute of a view then attempts to fetch the collection if it has not yet been populated. In addition any events declared via `view.on({collection: events})` will be bound to the collection with `listenTo`.
-
-Accepts any of the following options:
-
-- **render** - Wether to render the collection if it is populated, or render it after it has been loaded
-- **fetch** - Wether or not to try to call `fetch` on the collection if `shouldFetch` returns true
-- **success** - Callback on fetch success, defaults to noop
-- **errors** - Wether or not to trigger an `error` event on the view when an `error` event is triggered on the collection
-
-Note that while any view may bind a collection only a `CollectionView` will actually render a collection. A regular `Thorax.View` may declare a `collection` helper which in turn will generate and embed a `CollectionView`.
 
 ## Thorax.Model
 
@@ -299,6 +375,42 @@ Remove an item from the view.
 ### updateItem *view.updateItem(model)*
 
 Equivelent to calling `removeItem` then `appendItem`. Note that this is mainly meant to cover edge cases, by default changing a model will update the needed item (wether using `itemTemplate` or `itemView`).
+
+## Thorax.Util
+
+### tag *Thorax.Util.tag(name, htmlAttributes [,content] [,expand-tokens])*
+
+Generate an HTML string. All built in HTML generation uses this method. If `context` is passed any Handlebars references inside of the htmlAttributes values will rendered with the context.
+
+    Thorax.Util.tag("div", {
+      id: "div-{{number}}"
+    }, "content of the div", {
+      number: 3
+    });
+
+## $
+
+### $.view *$(event.target).view([options])*
+
+Get a reference to the nearest parent view. Pass `helper: false` to options to exclude `HelperView`s from the lookup. Useful when registering DOM event handlers:
+
+    $(event.target).view();
+
+### $.model *$(event.target).model([view])*
+
+Get a reference to the nearest bound model. Can be used with any `$` object but most useful in event handlers.
+
+    $(event.target).model();
+
+A `view` may be optionally passed to limit the lookup to a specific view.
+
+### $.collection *$(event.target).collection([view])*
+
+Get a reference to the nearest bound collection. Can be used with any `$` object but most useful in event handlers.
+
+    $(event.target).collection();
+
+A `view` may be optionally passed to limit the lookup to a specific view.
 
 ## Event Enhancements
 
@@ -383,209 +495,6 @@ This method is never called directly, but can be specified to override the behav
 
 All of the behavior described in this section is implemented via this method, so if overriding make sure to call `Thorax.View.prototype._addEvent` in your child view.
 
-## Catalog of Built-in Events
-
-### rendered *rendered ()*
-
-Triggered on a view when the `rendered` method is called.
-
-### child *child (instance)*
-
-Triggered on a view every time a child view is appened into the view with the `view` helper.
-
-### ready *ready (options)*
-
-Triggered when a view is append to the DOM with `appendTo` or when a view is appeneded to a `LayoutView` via `setView`. Setting focus and other behaviors that depend on the view being present in the DOM should be handled in this event.
-
-This event propagates to all children, including children that will be bound after the view is created. `options` will contain a `target` view, which is the view that triggered the event.
-
-### activated *activated (options)*
-
-Triggered on a view immediately after it was passed to a `LayoutView`'s `setView` method. Like `ready` this event propagates to children and the `options` hash will contain a `target` view.
-
-### deactivated *deactivated (options)*
-
-Triggered on a view when it was previously passed to the `setView` method on a `LayoutView`, and then another view is passed to `setView`. Triggered when the current view's `el` is still attached to the parent. Like `ready` this event propagates to children and the `options` hash will contain a `target` view.
-
-### destroyed *destroyed ()*
-
-Triggered on a view when the `destroy` method is called. Useful for implementing custom view cleanup behaviors. `destroy` will be also be called if it was previously passed to the `setView` method on a `LayoutView`, and then another view is passed to `setView`.
-
-### change:view:start *change:view:start (newView [,oldView] ,options)*
-
-Trigged on a `Thorax.LayoutView` immediately after `setView` is called.
-
-### change:view:end *change:view:end (newView [,oldView] ,options)*
-
-Trigged on a `Thorax.LayoutView` after `setView` is called, the old view has been destroyed (if present) and the new view has been attached to the DOM and had it's `ready` event triggered.
-
-### helper *helper (name [,args...] ,helperView)*
-
-Triggered on a view when a view helper (such as `collection`, `empty`, etc) create a new `HelperView` instance.
-
-### helper:name *helper:name ([,args...] ,helperView)*
-
-Triggered on a view when a given view helper creates a new `HelperView` instance.
-
-    {{#collection cats}}{{/collection}}
-
-    view.on('helper:collection', function(collection, collectionView) {
-
-    });
-
-### serialize *serialize (attributes)*
-
-Triggered on a view when `serialize` is called, before `validateInput` is called with the serialized attributes.
-
-### validate *validate (attributes, errors)*
-
-Triggered on a view when `serialize` is called, passed an an attributes hash and errors array after `validateInput` is called.
-
-### error *error (errors)*
-
-Triggered on a view when `serialize` is called, if validateInput returned an array with any errors.
-
-### populate *populate (attributes)*
-
-Triggered on a view when `populate` is called. Passed a hash containing the attributes that the view will be populated with.
-
-### load:start *load:start (message, background, target)*
-
-Triggered on a model or collection by `fetch` or `load` and on a view if it has bound the model or collection with `setModel` or `setCollection`. Always generate a handler for a `load:start` event with `Thorax.loadHandler`.
- 
-### load:end *load:end (target)*
-
-Triggered on a model or collection by `fetch` or `load` and on a view if it has bound the model or collection with `setModel` or `setCollection`. Never observe this directly, always use `Thorax.loadHandler` on `load:start`.
-
-### rendered:collection *rendred:collection (collectionView, collection)*
-
-Triggered on a `CollectionView` or a the view calling the `collection` helper every time `render` is called on the `CollectionView`.
-
-### rendered:item *rendered:item (collectionView, collection, model, itemElement, index)*
-
-Triggered on a `CollectionView` or a the view calling the `collection` helper every time an item is rendered in the `CollectionView`.
-
-### rendered:empty *rendered:empty (collectionView, collection)*
-
-Triggered on a `CollectionView` or a the view calling the `collection` helper every time the `emptyView` or `emptyTemplate` is rendered in the `CollectionView`.
-
-## Form Handling
-
-Thorax provides helpers to assist with form handling, but makes no user interface decisions for you. Use the `validate` and `error` events to implement error messages in your application.
-
-    Application.View.registerEvents({
-      validate: function(attributes, errors) {
-        //clear previous errors if present
-      },
-      error: function(errors) {
-        errors.forEach(function(error) {
-          //lookup input by error.name
-          //display error from error.message
-        });
-      }
-    });
-
-### serialize *view.serialize([event], callback [,options])*
-
-Serializes a form. `callback` will receive the attributes from the form, followed by a `release` method which must be called before the form can be submitted again. `callback` will only be called if `validateInput` returns nothing or an empty array. `options` may contain:
-
-- `set` - defaults to true, wether or not to set the attributes if valid on a model if one was set with `setModel`
-- `validate - defaults to true, wether or not to call `validateInput` during serialization
-- `children` - defaults to true, wether or not to serialize inputs in child views
-- `silent` - defaults to true, wether or not to pass `silent: true` to `model.set`
-
-Each form input in your application should contain a corresponding label. Since you may want to re-use the same form multiple times in the same view a `@cid` attribute with a unique value is provided to each render call of each template:
-    
-    <label for="{{@cid}}-last-name"/>
-    <input name="last-name" id="{{@cid}}-last-name" value="Beastridge"/>
-    <label for="{{@cid}}-address[street]"/>
-    <input name="address[street]" value="123 Chestnut" id="{{@cid}}-address[street]"/>
-
-    new Thorax.View({
-      events: {
-        "submit form": function(event) {
-          this.serialize(event, function(attributes, release) {
-            attributes["last-name"] === "Beastridge";
-            attributes.address.street === "123 Chestnut";
-            //form is locked to prevent duplicate submission
-            //until release is called
-            release();
-          });
-        }
-      }
-    });
-
-`serialize` Triggers the following events:
-
-- `serialize` - called before validation with serialized attributes
-- `validate` - with an attributes hash and errors array after `validateInput` is called
-- `error` - with an errors array, if validateInput returned an array with any errors
-
-If your view uses inputs with non standard names (or no names, multiple inputs with the same name, etc), use the `serialize` event:
-
-    this.on('serialize', _.bind(function(attributes) {
-      attributes.custom = this.$('.my-input').val();
-    }, this));
-
-### populate *view.populate([attributes] [,options])*
-
-Populate the form fields in the view with the given attributes. The keys of the attributes should correspond to the names of the inputs. `populate` is automatically called with the response from `view.context()` when `setModel` is called. By default this is just `model.attributes`.
-
-    view.populate({
-      "last-name": "Beastridge"
-      address: {
-        street: "123 Chestnut"
-      }
-    });
-
-`populate` triggers a `populate` event. If your view uses inputs with non standard names (or no names, multiple inputs with the same name, etc), use this event:
-
-    this.on('populate', _.bind(function(attributes) {
-      this.$('.my-input').val(attributes.custom);
-    }, this));
-
-To prevent child views from having their inputs populated use:
-
-    view.populate(object, {
-      children: false
-    });
-
-### validateInput *view.validateInput(attributes)*
-
-Validate the attributes created by `serialize`, must return an array or nothing (if valid). It's recommended that the array contain hashes with `name` and `message` attributes, but arbitrary data or objects may be passed. If the array has a zero length the attributes are considered to be valid. Returning an array with any errors will trigger the `error` event.
-
-    validateInput: function(attributes) {
-      var errors = [];
-      if (attributes.password && !attributes.password.match(/.{6,11}/)) {
-        errors.push({name: 'password', message: 'Invalid Password'});
-      }
-      return errors;
-    }
-
-## $
-
-### $.view *$(event.target).view([options])*
-
-Get a reference to the nearest parent view. Pass `helper: false` to options to exclude `HelperView`s from the lookup. Useful when registering DOM event handlers:
-
-    $(event.target).view();
-
-### $.model *$(event.target).model([view])*
-
-Get a reference to the nearest bound model. Can be used with any `$` object but most useful in event handlers.
-
-    $(event.target).model();
-
-A `view` may be optionally passed to limit the lookup to a specific view.
-
-### $.collection *$(event.target).collection([view])*
-
-Get a reference to the nearest bound collection. Can be used with any `$` object but most useful in event handlers.
-
-    $(event.target).collection();
-
-A `view` may be optionally passed to limit the lookup to a specific view.
-
 ## Data Loading
 
 ### Queuing
@@ -657,19 +566,7 @@ Timeout duration in seconds before a `load:start` callback will be triggered. De
 
 Just like `_loadingTimeoutDuration` but applies to `load:end`. Defaults to 0.10 seconds.
 
-## Thorax.Util
-
-### tag *Thorax.Util.tag(name, htmlAttributes [,content] [,expand-tokens])*
-
-Generate an HTML string. All built in HTML generation uses this method. If `context` is passed any Handlebars references inside of the htmlAttributes values will rendered with the context.
-
-    Thorax.Util.tag("div", {
-      id: "div-{{number}}"
-    }, "content of the div", {
-      number: 3
-    });
-
-## View Helpers
+## Template Helpers
 
 ### template *{{template name [options]}}*
 
@@ -762,7 +659,7 @@ The href attribute is required but may also be specified as an attribute:
 
     {{#link href="articles/{{id}}" expand-tokens=true}}Link Test{{/link}}
 
-### collection helper *{{collection [collection] [options...]}}*
+### collection *{{collection [collection] [options...]}}*
 
 Creates and embeds a `CollectionView` instance, updating when items are added, removed or changed in the collection. If a block is passed it will be used as the `item-template`, which will be called with a context of the `model.attributes` for each model in the collection.
 
@@ -825,7 +722,7 @@ As a result the following two views are equivelenet:
       template: '{{view collectionView}}'
     });
 
-### empty helper *{{#empty [modelOrCollection]}}*
+### empty *{{#empty [modelOrCollection]}}*
 
 A conditional helper much like `if` that calls `isEmpty` on the specified object. In addition it will bind events to re-render the view should the object's state change from empty to not empty, or visa versa.
 
@@ -843,7 +740,7 @@ To embed a row within a `collection` helper if it the collection is empty, speci
       <li>So very empty</li>
     {{/collection}}
 
-### collection-element helper *{{collection-element [htmlAttributes...]}}*
+### collection-element *{{collection-element [htmlAttributes...]}}*
 
 By default `Thorax.CollectionView` instances have no template. Items will be appended to and removed from the view's `el`. Alternatively a template can be specified and `collection-element` used to specify where the individal items in a collection will be rendered.
 
@@ -868,6 +765,104 @@ A block helper to use when the view is loading. For collection specific loading 
     {{else}}
       View is not loading a model or collection.
     {{/loading}}
+
+## Catalog of Built-in Events
+
+### rendered *rendered ()*
+
+Triggered on a view when the `rendered` method is called.
+
+### child *child (instance)*
+
+Triggered on a view every time a child view is appened into the view with the `view` helper.
+
+### ready *ready (options)*
+
+Triggered when a view is append to the DOM with `appendTo` or when a view is appeneded to a `LayoutView` via `setView`. Setting focus and other behaviors that depend on the view being present in the DOM should be handled in this event.
+
+This event propagates to all children, including children that will be bound after the view is created. `options` will contain a `target` view, which is the view that triggered the event.
+
+### activated *activated (options)*
+
+Triggered on a view immediately after it was passed to a `LayoutView`'s `setView` method. Like `ready` this event propagates to children and the `options` hash will contain a `target` view.
+
+### deactivated *deactivated (options)*
+
+Triggered on a view when it was previously passed to the `setView` method on a `LayoutView`, and then another view is passed to `setView`. Triggered when the current view's `el` is still attached to the parent. Like `ready` this event propagates to children and the `options` hash will contain a `target` view.
+
+### destroyed *destroyed ()*
+
+Triggered on a view when the `destroy` method is called. Useful for implementing custom view cleanup behaviors. `destroy` will be also be called if it was previously passed to the `setView` method on a `LayoutView`, and then another view is passed to `setView`.
+
+### change:view:start *change:view:start (newView [,oldView] ,options)*
+
+Trigged on a `Thorax.LayoutView` immediately after `setView` is called.
+
+### change:view:end *change:view:end (newView [,oldView] ,options)*
+
+Trigged on a `Thorax.LayoutView` after `setView` is called, the old view has been destroyed (if present) and the new view has been attached to the DOM and had it's `ready` event triggered.
+
+### helper *helper (name [,args...] ,helperView)*
+
+Triggered on a view when a view helper (such as `collection`, `empty`, etc) create a new `HelperView` instance.
+
+### helper:name *helper:name ([,args...] ,helperView)*
+
+Triggered on a view when a given view helper creates a new `HelperView` instance.
+
+    {{#collection cats}}{{/collection}}
+
+    view.on('helper:collection', function(collection, collectionView) {
+
+    });
+
+### serialize *serialize (attributes)*
+
+Triggered on a view when `serialize` is called, before `validateInput` is called with the serialized attributes.
+
+### validate *validate (attributes, errors)*
+
+Triggered on a view when `serialize` is called, passed an an attributes hash and errors array after `validateInput` is called. Use in combination with the `error` event to display and clear errors from your views.
+
+    Thorax.View.on({
+      validate: function(attributes, errors) {
+        //clear previous errors if present
+      },
+      error: function(errors) {
+        errors.forEach(function(error) {
+          //lookup input by error.name
+          //display error from error.message
+        });
+      }
+    });
+
+### error *error (errors)*
+
+Triggered on a view when `serialize` is called, if validateInput returned an array with any errors.
+
+### populate *populate (attributes)*
+
+Triggered on a view when `populate` is called. Passed a hash containing the attributes that the view will be populated with.
+
+### load:start *load:start (message, background, target)*
+
+Triggered on a model or collection by `fetch` or `load` and on a view if it has bound the model or collection with `setModel` or `setCollection`. Always generate a handler for a `load:start` event with `Thorax.loadHandler`.
+ 
+### load:end *load:end (target)*
+
+Triggered on a model or collection by `fetch` or `load` and on a view if it has bound the model or collection with `setModel` or `setCollection`. Never observe this directly, always use `Thorax.loadHandler` on `load:start`.
+
+### rendered:collection *rendred:collection (collectionView, collection)*
+
+Triggered on a `CollectionView` or a the view calling the `collection` helper every time `render` is called on the `CollectionView`.
+
+### rendered:item *rendered:item (collectionView, collection, model, itemElement, index)*
+
+Triggered on a `CollectionView` or a the view calling the `collection` helper every time an item is rendered in the `CollectionView`.
+
+### rendered:empty *rendered:empty (collectionView, collection)*
+
+Triggered on a `CollectionView` or a the view calling the `collection` helper every time the `emptyView` or `emptyTemplate` is rendered in the `CollectionView`.
 
 ## HTML Attributes
 
