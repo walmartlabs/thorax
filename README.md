@@ -121,99 +121,6 @@ Calls `remove` (and therefore `$el.remove` and `stopListening`) on your view, un
 
 `destroy` will also be called on a view if it was previously passed to the `setView` method on a `LayoutView`, and then another view is passed to `setView`.
 
-## View Helpers
-
-### template *{{template name [options]}}*
-
-Embed a template inside of another, as a string. An associated view (if any) will not be initialized. By default the template will be called with the current context but extra options may be passed which will be added to the context.
-
-    {{template "path/to/template" key="value"}}
-
-If a block is used, the template will have a variable named `@yield` available that will contain the contents of the block.
-
-    {{#template "child"}}
-      content in the block will be available in a variable 
-      named "@yield" inside the template "child"
-    {{/template}}
-
-This is useful when a child template will be called from multiple different parents.
-
-### super *{{super}}*
-
-Embed the `template` from the parent view within the child template.
-
-    {{super}}
-
-### view *{{view name [options]}}*
-
-Embed one view in another. The first argument may be the name of a new view to initialize or a reference to a view that has already been initialized.
-
-    {{view "path/to/view" key="value"}}
-    {{view viewInstance}}
-
-If a block is specified it will be assigned as the `template` to the view instance:
-
-    {{#view viewInstance}}
-      viewInstance will have this block
-      set as it's template property
-    {{/view}}
-
-### element *{{element name [options]}}*
-
-Embed a DOM element in the view. This uses a placeholder technique to work, if the placeholder must be of a certain type in order to be valid (for instance a `tbody` inside of a `table`) specify a `tag` option.
-
-    {{element domElement tag="tbody"}}
-
-### button *{{#button methodName [htmlAttributes...]}}*
-
-Creates a `button` tag that will call the specified methodName on the view when clicked. Arbitrary HTML attributes can also be specified.
-
-    {{#button "methodName" class="btn"}}Click Me{{/button}}
-
-The tag name may also be specified:
-
-    {{#button "methodName" tag="a" class="btn"}}A Link{{/button}}
-
-A `trigger` attribute will trigger an event on the declaring view:
-
-    {{#button trigger="eventName"}}Button{{/button}}
-
-A button can have both a `trigger` attribute and a method to call:
-
-    {{#button "methodName" trigger="eventName"}}Button{{/button}}
-
-The method may also be specified as a `method` attribute:
-
-    {{#button method="methodName"}}Button{{/button}}
-
-### url *{{url urlString expand-tokens=bool}}*
-
-Prepends "#" if `Backbone.history.pushSate` is disabled or prepends `Backbone.history.root` if it is enabled. If `expand-tokens=true` is passed, then any handlebars tokens will be resolved with the current context. For example if the context had an `id` attribute `{{id}}` would be replaced with the value of `id`:
-
-    {{url "articles/{{id}}" expand-tokens=true}}
-
-Multiple arguments can be passed and will be joined with a "/":
-
-    {{url "articles" id}}
-
-### link *{{#link url [htmlAttributes...]}}*
-
-Creates an `a` tag that will call `Backbone.history.navigate()` with the given url when clicked. Passes the `url` parameter to the `url` helper with the current context. Do not use this method for creating external links. Like the `url` helper, multiple arguments may be passed as well as an `expand-tokens` option.
-
-    {{#link "articles/{{id}}" expand-tokens=true class="article-link"}}Link Text{{/link}}
-
-To call a method from an `a` tag use the `button` helper:
-
-    {{#button "methodName" tag="a"}}My Link{{/button}}
-
-Like the `button` helper, a `trigger` attribute may be specified that will trigger an event on the delcaring view in addition to navigating to the specified url:
-
-    {{#link "articles" id trigger="customEvent"}}Link Text{{/link}}
-
-The href attribute is required but may also be specified as an attribute:
-
-    {{#link href="articles/{{id}}" expand-tokens=true}}Link Test{{/link}}
-
 ## Thorax.HelperView
 
 ### registerViewHelper *Handlebars.registerViewHelper(name [,viewClass] ,callback)*
@@ -268,17 +175,17 @@ Set the current view on the `LayoutView`, triggering `activated`, `ready` and `d
 
 Get the current view that was previously set with `setView`.
 
-### layout-element *{{layout-element [htmlAttributes...]}}*
-
-By default `Thorax.LayoutView` instances have no template, `setView` will append directly to the view's `el`. Alternatively a template can be specified and a `layout-element` and `setView` will append to that element.
-
-    <ul>
-      {{layout-element tag="li" id="my-layout"}}
-    </ul>
-
 ## Data Binding
 
 ### setModel *view.setModel(model [,options])*
+
+Setting `model` in the construtor will automatically call `setModel`, so the following are equivelent:
+
+    var view = new Thorax.View({
+      model: myModel
+    });
+    // identical functionality as above
+    view.setModel(myModel);
 
 Sets the `model` attribute of a view then attempts to fetch the model if it has not yet been populated. Once set the default `context` implementation will merge the model's `attributes` into the context, so any model attributes will automatically become available in a template. In addition any events declared via `view.on({model: events})` will be bound to the model with `listenTo`.
 
@@ -290,14 +197,15 @@ Accepts any of the following options:
 - **populate** - Call `populate` with the model's attributes when it is set? Defaults to true. Pass `populate: {children: false}` to prevent child views from having their inputs populated.
 - **errors** - When the model triggers an `error` event, trigger the event on the view? Defaults to true
 
-Setting `model` in the construtor will automatically call `setModel`, so the following are equivelent:
+### setCollection *view.setCollection(collection [,options])*
+
+Setting `collection` in the construtor will automatically call `setCollection`, so the following are equivelent:
 
     var view = new Thorax.View({
-      model: myModel
+      collection: myCollection
     });
-    view.setModel(myModel);
-
-### setCollection *view.setCollection(collection [,options])*
+    // identical functionality as above
+    view.setCollection(myCollection);
 
 Sets the `collection` attribute of a view then attempts to fetch the collection if it has not yet been populated. In addition any events declared via `view.on({collection: events})` will be bound to the collection with `listenTo`.
 
@@ -391,97 +299,6 @@ Remove an item from the view.
 ### updateItem *view.updateItem(model)*
 
 Equivelent to calling `removeItem` then `appendItem`. Note that this is mainly meant to cover edge cases, by default changing a model will update the needed item (wether using `itemTemplate` or `itemView`).
-
-## Collection Helpers
-
-### collection helper *{{collection [collection] [options...]}}*
-
-Creates and embeds a `CollectionView` instance, updating when items are added, removed or changed in the collection. If a block is passed it will be used as the `item-template`, which will be called with a context of the `model.attributes` for each model in the collection.
-
-    {{#collection tag="ul"}}
-      <li>{{modelAttr}}</li>
-    {{/collection}}
-
-Options may contain `tag`, `class`, `id` and the following attributes which will map to the generated `CollectionView` instance:
-
-- `item-template` &rarr; `itemTemplate`
-- `item-view` &rarr; `itemView`
-- `empty-template` &rarr; `emptyTemplate`
-- `empty-view` &rarr; `emptyView`
-- `loading-template` &rarr; `loading-template`
-- `loading-view` &rarr; `loadingView`
-
-Any of the options can be specified as variables in addition to strings:
-
-    {{collection item-view=itemViewClass}}
-
-By default the collection helper will look for `this.collection`, but if your view contains multiple collections a collection argument may be passed:
-
-    {{collection myCollection}}
-
-When rendering `this.collection` many properties will be forwarded from the view that is declaring the collection helper to the generated `CollectionView` instance:
-
-- `itemTemplate`
-- `itemView`
-- `itemContext`
-- `itemFilter`
-- `emptyTemplate`
-- `emptyView`
-- `loadingTemplate`
-- `loadingView`
-- `loadingPlacement`
-
-As a result the following two views are equivelenet:
-
-    // render with collection helper, collection
-    // properties are forwarded
-    var view = new Thorax.View({
-      collection: new Thorax.Collection(),
-      itemView: MyItemClass,
-      itemContext: function(model, i) {
-        return model.attributes;
-      },
-      template: '{{collection}}'
-    });
-
-    // directly create collection view, no property
-    // forwarding will occur 
-    var view = new Thorax.View({
-      collectionView: new Thorax.CollectionView({
-        collection: new Thorax.Collection(),
-        itemView: MyItemClass
-        itemContext: function(model, i) {
-          return model.attributes;
-        }
-      }),
-      template: '{{view collectionView}}'
-    });
-
-### empty helper *{{#empty [modelOrCollection]}}*
-
-A conditional helper much like `if` that calls `isEmpty` on the specified object. In addition it will bind events to re-render the view should the object's state change from empty to not empty, or visa versa.
-
-    {{#empty collection}}
-      So empty!
-    {{else}}
-      {{#collection}}{{/collection}}
-    {{/empty}}
-
-To embed a row within a `collection` helper if it the collection is empty, specify an `empty-view` or `empty-template`. Or use the `else` block of the `collection` helper:
-
-    {{#collection tag="ul"}}
-      <li>Some very fine data</li>
-    {{else}}
-      <li>So very empty</li>
-    {{/collection}}
-
-### collection-element helper *{{collection-element [htmlAttributes...]}}*
-
-By default `Thorax.CollectionView` instances have no template. Items will be appended to and removed from the view's `el`. Alternatively a template can be specified and `collection-element` used to specify where the individal items in a collection will be rendered.
-
-    <div>
-      {{collection-element tag="ul" class="my-list"}}
-    </div>
 
 ## Event Enhancements
 
@@ -828,16 +645,6 @@ Generates an `load:start` event handler that when triggered will then monitor th
         view.$el.removeClass("loading");
       }));
 
-### loading helper *{{#loading}}*
-
-A block helper to use when the view is loading. For collection specific loading the a `CollectionView` accepts `loadingView` and `loadingTemplate` options to append an item in a collection when it is loading.
-
-    {{#loading}}
-      View is loading a model or collection.
-    {{else}}
-      View is not loading a model or collection.
-    {{/loading}}
-
 ### _loadingClassName *view._loadingClassName*
 
 Class name to add and remove from a view's `el` when it is loading. Defaults to `loading`.
@@ -850,7 +657,7 @@ Timeout duration in seconds before a `load:start` callback will be triggered. De
 
 Just like `_loadingTimeoutDuration` but applies to `load:end`. Defaults to 0.10 seconds.
 
-## Util
+## Thorax.Util
 
 ### tag *Thorax.Util.tag(name, htmlAttributes [,content] [,expand-tokens])*
 
@@ -861,6 +668,206 @@ Generate an HTML string. All built in HTML generation uses this method. If `cont
     }, "content of the div", {
       number: 3
     });
+
+## View Helpers
+
+### template *{{template name [options]}}*
+
+Embed a template inside of another, as a string. An associated view (if any) will not be initialized. By default the template will be called with the current context but extra options may be passed which will be added to the context.
+
+    {{template "path/to/template" key="value"}}
+
+If a block is used, the template will have a variable named `@yield` available that will contain the contents of the block.
+
+    {{#template "child"}}
+      content in the block will be available in a variable 
+      named "@yield" inside the template "child"
+    {{/template}}
+
+This is useful when a child template will be called from multiple different parents.
+
+### super *{{super}}*
+
+Embed the `template` from the parent view within the child template.
+
+    {{super}}
+
+### view *{{view name [options]}}*
+
+Embed one view in another. The first argument may be the name of a new view to initialize or a reference to a view that has already been initialized.
+
+    {{view "path/to/view" key="value"}}
+    {{view viewInstance}}
+
+If a block is specified it will be assigned as the `template` to the view instance:
+
+    {{#view viewInstance}}
+      viewInstance will have this block
+      set as it's template property
+    {{/view}}
+
+### element *{{element name [options]}}*
+
+Embed a DOM element in the view. This uses a placeholder technique to work, if the placeholder must be of a certain type in order to be valid (for instance a `tbody` inside of a `table`) specify a `tag` option.
+
+    {{element domElement tag="tbody"}}
+
+### button *{{#button methodName [htmlAttributes...]}}*
+
+Creates a `button` tag that will call the specified methodName on the view when clicked. Arbitrary HTML attributes can also be specified.
+
+    {{#button "methodName" class="btn"}}Click Me{{/button}}
+
+The tag name may also be specified:
+
+    {{#button "methodName" tag="a" class="btn"}}A Link{{/button}}
+
+A `trigger` attribute will trigger an event on the declaring view:
+
+    {{#button trigger="eventName"}}Button{{/button}}
+
+A button can have both a `trigger` attribute and a method to call:
+
+    {{#button "methodName" trigger="eventName"}}Button{{/button}}
+
+The method may also be specified as a `method` attribute:
+
+    {{#button method="methodName"}}Button{{/button}}
+
+### url *{{url urlString expand-tokens=bool}}*
+
+Prepends "#" if `Backbone.history.pushSate` is disabled or prepends `Backbone.history.root` if it is enabled. If `expand-tokens=true` is passed, then any handlebars tokens will be resolved with the current context. For example if the context had an `id` attribute `{{id}}` would be replaced with the value of `id`:
+
+    {{url "articles/{{id}}" expand-tokens=true}}
+
+Multiple arguments can be passed and will be joined with a "/":
+
+    {{url "articles" id}}
+
+### link *{{#link url [htmlAttributes...]}}*
+
+Creates an `a` tag that will call `Backbone.history.navigate()` with the given url when clicked. Passes the `url` parameter to the `url` helper with the current context. Do not use this method for creating external links. Like the `url` helper, multiple arguments may be passed as well as an `expand-tokens` option.
+
+    {{#link "articles/{{id}}" expand-tokens=true class="article-link"}}Link Text{{/link}}
+
+To call a method from an `a` tag use the `button` helper:
+
+    {{#button "methodName" tag="a"}}My Link{{/button}}
+
+Like the `button` helper, a `trigger` attribute may be specified that will trigger an event on the delcaring view in addition to navigating to the specified url:
+
+    {{#link "articles" id trigger="customEvent"}}Link Text{{/link}}
+
+The href attribute is required but may also be specified as an attribute:
+
+    {{#link href="articles/{{id}}" expand-tokens=true}}Link Test{{/link}}
+
+### collection helper *{{collection [collection] [options...]}}*
+
+Creates and embeds a `CollectionView` instance, updating when items are added, removed or changed in the collection. If a block is passed it will be used as the `item-template`, which will be called with a context of the `model.attributes` for each model in the collection.
+
+    {{#collection tag="ul"}}
+      <li>{{modelAttr}}</li>
+    {{/collection}}
+
+Options may contain `tag`, `class`, `id` and the following attributes which will map to the generated `CollectionView` instance:
+
+- `item-template` &rarr; `itemTemplate`
+- `item-view` &rarr; `itemView`
+- `empty-template` &rarr; `emptyTemplate`
+- `empty-view` &rarr; `emptyView`
+- `loading-template` &rarr; `loading-template`
+- `loading-view` &rarr; `loadingView`
+
+Any of the options can be specified as variables in addition to strings:
+
+    {{collection item-view=itemViewClass}}
+
+By default the collection helper will look for `this.collection`, but if your view contains multiple collections a collection argument may be passed:
+
+    {{collection myCollection}}
+
+When rendering `this.collection` many properties will be forwarded from the view that is declaring the collection helper to the generated `CollectionView` instance:
+
+- `itemTemplate`
+- `itemView`
+- `itemContext`
+- `itemFilter`
+- `emptyTemplate`
+- `emptyView`
+- `loadingTemplate`
+- `loadingView`
+- `loadingPlacement`
+
+As a result the following two views are equivelenet:
+
+    // render with collection helper, collection
+    // properties are forwarded
+    var view = new Thorax.View({
+      collection: new Thorax.Collection(),
+      itemView: MyItemClass,
+      itemContext: function(model, i) {
+        return model.attributes;
+      },
+      template: '{{collection}}'
+    });
+
+    // directly create collection view, no property
+    // forwarding will occur 
+    var view = new Thorax.View({
+      collectionView: new Thorax.CollectionView({
+        collection: new Thorax.Collection(),
+        itemView: MyItemClass
+        itemContext: function(model, i) {
+          return model.attributes;
+        }
+      }),
+      template: '{{view collectionView}}'
+    });
+
+### empty helper *{{#empty [modelOrCollection]}}*
+
+A conditional helper much like `if` that calls `isEmpty` on the specified object. In addition it will bind events to re-render the view should the object's state change from empty to not empty, or visa versa.
+
+    {{#empty collection}}
+      So empty!
+    {{else}}
+      {{#collection}}{{/collection}}
+    {{/empty}}
+
+To embed a row within a `collection` helper if it the collection is empty, specify an `empty-view` or `empty-template`. Or use the `else` block of the `collection` helper:
+
+    {{#collection tag="ul"}}
+      <li>Some very fine data</li>
+    {{else}}
+      <li>So very empty</li>
+    {{/collection}}
+
+### collection-element helper *{{collection-element [htmlAttributes...]}}*
+
+By default `Thorax.CollectionView` instances have no template. Items will be appended to and removed from the view's `el`. Alternatively a template can be specified and `collection-element` used to specify where the individal items in a collection will be rendered.
+
+    <div>
+      {{collection-element tag="ul" class="my-list"}}
+    </div>
+
+### layout-element *{{layout-element [htmlAttributes...]}}*
+
+By default `Thorax.LayoutView` instances have no template, `setView` will append directly to the view's `el`. Alternatively a template can be specified and a `layout-element` and `setView` will append to that element.
+
+    <ul>
+      {{layout-element tag="li" id="my-layout"}}
+    </ul>
+
+### loading *{{#loading}}*
+
+A block helper to use when the view is loading. For collection specific loading the a `CollectionView` accepts `loadingView` and `loadingTemplate` options to append an item in a collection when it is loading.
+
+    {{#loading}}
+      View is loading a model or collection.
+    {{else}}
+      View is not loading a model or collection.
+    {{/loading}}
 
 ## HTML Attributes
 
