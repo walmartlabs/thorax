@@ -921,7 +921,7 @@ Then in your `Gruntfile.js`:
 
     grunt.loadNpmTasks('thorax');
 
-### templates
+### thorax:templates
 
 If using Thorax outside of the provided node or Rails downloads you can inline a directory of templates into a single file by running the `thorax:templates` task.
 
