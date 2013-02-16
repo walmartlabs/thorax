@@ -1,12 +1,16 @@
 An opinionated, battle tested [Backbone](http://backbonejs.org/) + [Handlebars](http://handlebarsjs.com/) framework to build large scale web applications. 
 
-Thorax can be used standalone in any JavaScript environment in addition the [boilerplate projects](https://github.com/walmartlabs/thorax-boilerplate) provided above.
+Thorax can be used standalone in any JavaScript environment in addition the Node, Rails .
 
     var view = new Thorax.View({
       greeting: "Hello",
       template: Handlebars.compile("{{greeting}} world!")
     });
     view.appendTo('body');
+
+- add note about CDN availability
+- add note about cloning thorax-seed
+- add mobile, standalone and rails downloads
 
 ## Registry
 
@@ -376,7 +380,7 @@ Equivelent to calling `removeItem` then `appendItem`. Note that this is mainly m
 
 ## Thorax.Util
 
-### tag *Thorax.Util.tag(name, htmlAttributes [,content] [,expand-tokens])*
+### tag *Thorax.Util.tag(name, htmlAttributes [,content] [,context])*
 
 Generate an HTML string. All built in HTML generation uses this method. If `context` is passed any Handlebars references inside of the htmlAttributes values will rendered with the context.
 
@@ -907,15 +911,37 @@ Bound DOM event handlers in Thorax are wrapped with a try / catch block, calling
 
 Override this function with your own logging / debugging handler. `name` will be the event name where the error was thrown.
 
-## Command Line
+## Grunt Tasks
 
-To use the command line utilities:
+A number of [Grunt](http://gruntjs.com) tasks are included with Thorax, to use them add `thorax` as a dependency in your package.json file, or run:
 
-    npm install -g thorax
+    npm install thorax
 
-### templates *thorax templates ./templates ./templates.js*
+Then in your `Gruntfile.js`:
 
-If using Thorax outside of the provided node or Rails downloads you can inline a directory of templates into a single file by running the `thorax templates` command.
+    grunt.loadNpmTasks('thorax');
 
-    npm install -g thorax
-    thorax templates ./templates-dir ./templates.js
+### templates
+
+If using Thorax outside of the provided node or Rails downloads you can inline a directory of templates into a single file by running the `thorax:templates` task.
+
+  grunt.initConfig({
+    thorax: {
+      templates: {
+        source: './templates',
+        target: './templates.js',
+        applicationName: 'Application'
+      }
+    }
+  });
+
+Combine this with watch to update your generated `templates.js` as files change:
+
+  grunt.initConfig({
+    watch: {
+      templates: {
+        files: './templates/**/*.handlebars',
+        tasks: ['thorax:templates']
+      }
+    }
+  });
