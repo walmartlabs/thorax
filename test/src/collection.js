@@ -573,7 +573,7 @@ describe('collection', function() {
     var collection = new Thorax.Collection();
     var view = new Thorax.View({
       collection: collection,
-      template: Handlebars.compile(''),
+      template: function() {},
       events: {
         collection: {
           all: function() {

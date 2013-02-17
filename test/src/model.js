@@ -85,7 +85,7 @@ describe('model', function() {
       test2: 0
     };
     var view = new Thorax.View({
-      template: Handlebars.compile(''),
+      template: function() {},
       events: {
         model: {
           all: function() {

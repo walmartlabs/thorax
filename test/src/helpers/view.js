@@ -241,7 +241,7 @@ describe('view helper', function() {
     // ensure overrides do not modify either
     view = new Thorax.View({
       child: new Thorax.View({
-        template: Handlebars.compile('')
+        template: function() {}
       }),
       template: Handlebars.compile('{{#view child}}{{#collection}}{{/collection}}{{/view}}'),
       collection: new Thorax.Collection()

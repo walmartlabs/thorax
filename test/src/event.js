@@ -230,7 +230,7 @@ describe('event', function() {
         layoutView = new Thorax.LayoutView(),
         view = new Thorax.View({
           child: new Thorax.View({
-            template: Handlebars.compile(''),
+            template: function() {},
             events: {
               ready: spy
             }

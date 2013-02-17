@@ -79,7 +79,7 @@ describe('layout', function() {
     });
     parent.render();
     parent.layout.setView(new Thorax.View({
-      template: Handlebars.compile(""),
+      template: function() {},
       events: {
         destroyed: function() {
           ++callCounts.child;
