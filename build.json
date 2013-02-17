@@ -10,7 +10,7 @@
         {"name": "thorax-dep-zepto", "ignoreWarnings": true}
       ],
       "scripts": [
-        {"src": "lib/handlebars.js", "ignoreWarnings": true}
+        {"src": "lib/handlebars.js", "ignoreWarnings": true, "global": true}
       ]
     },
 
