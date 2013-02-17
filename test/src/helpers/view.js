@@ -19,7 +19,7 @@ describe('view helper', function() {
     };
 
     var view = new Thorax.View({
-      template: '<p>{{view "Outer.Inner" tag="span"}}</p><div>{{view "Outer.More.Nested" tag="span"}}</div>'
+      template: Handlebars.compile('<p>{{view "Outer.Inner" tag="span"}}</p><div>{{view "Outer.More.Nested" tag="span"}}</div>')
     });
     view.render();
     expect(view.$('p > span').html()).to.equal('inner', 'test nested registryGet');
@@ -34,7 +34,7 @@ describe('view helper', function() {
 
   it("fail silently when no view initialized", function() {
     var parent = new Thorax.View({
-      template: "{{view child}}"
+      template: Handlebars.compile("{{view child}}")
     });
     parent.render();
     expect(parent.$el.html()).to.equal('');
@@ -91,13 +91,13 @@ describe('view helper', function() {
 
   it("child views within #each", function() {
     var parent = new Thorax.View({
-      template: '{{#each views}}{{view this}}{{/each}}',
+      template: Handlebars.compile('{{#each views}}{{view this}}{{/each}}'),
       views: [
         new Thorax.View({
-          template: "a"
+          template: Handlebars.compile("a")
         }),
         new Thorax.View({
-          template: "b"
+          template: Handlebars.compile("b")
         })
       ]
     });
@@ -108,21 +108,21 @@ describe('view helper', function() {
 
   it("template passed to constructor and view block", function() {
     var view = new Thorax.View({
-      template: '<p>{{key}}</p>',
+      template: Handlebars.compile('<p>{{key}}</p>'),
       key: 'value'
     });
     view.render();
     expect(view.$('p').html()).to.equal('value');
 
     var view = new (Thorax.View.extend({
-      template: '<p>{{key}}</p>',
+      template: Handlebars.compile('<p>{{key}}</p>'),
       key: 'value'
     }))();
     view.render();
     expect(view.$('p').html()).to.equal('value');
 
     var Child = Thorax.View.extend({
-      template: '<div class="child-a">{{key}}</div>',
+      template: Handlebars.compile('<div class="child-a">{{key}}</div>'),
       key: 'value'
     });
 
@@ -130,7 +130,7 @@ describe('view helper', function() {
     var b = new Child();
 
     var parent = new Thorax.View({
-      template: '<div class="parent">{{#view b}}<div class="child-b">{{key}}</div>{{/view}}{{view a}}</div>',
+      template: Handlebars.compile('<div class="parent">{{#view b}}<div class="child-b">{{key}}</div>{{/view}}{{view a}}</div>'),
       a: a,
       b: b
     });
@@ -146,7 +146,7 @@ describe('view helper', function() {
 
     //test nesting
     var outer = new Thorax.View({
-      template: '<div class="a">{{#view inner}}<div class="b">{{#view child}}<div class="c">value</div>{{/view}}</div>{{/view}}</div>',
+      template: Handlebars.compile('<div class="a">{{#view inner}}<div class="b">{{#view child}}<div class="c">value</div>{{/view}}</div>{{/view}}</div>'),
       inner: new Thorax.View({
         child: new Thorax.View()
       })
@@ -168,7 +168,7 @@ describe('view helper', function() {
         },
         template: function() { return '<div class="test"></div>'; }
       }),
-      template: "{{view child}}"
+      template: Handlebars.compile("{{view child}}")
     });
     parent.render();
     document.body.appendChild(parent.el);
@@ -182,12 +182,12 @@ describe('view helper', function() {
 
   it("$.fn.view", function() {
     var child = new Thorax.View({
-      template: '<div class="child"></div>'
+      template: Handlebars.compile('<div class="child"></div>')
     });
     child.render();
     expect(child.$('div.child').view()).to.equal(child);
     var parent = new Thorax.View({
-      template: '<div class="parent">{{view child}}</div>',
+      template: Handlebars.compile('<div class="parent">{{view child}}</div>'),
       child: child
     });
     parent.render();
@@ -201,11 +201,11 @@ describe('view helper', function() {
     });
     Thorax.View.extend({
       name: 'named-view',
-      template: 'inner',
+      template: Handlebars.compile('inner'),
       initialize: spy
     });
     var view = new Thorax.View({
-      template: '{{view "named-view"}}{{view "named-view"}}'
+      template: Handlebars.compile('{{view "named-view"}}{{view "named-view"}}')
     });
     view.render();
     var firstCids = _.keys(view.children);
@@ -227,9 +227,9 @@ describe('view helper', function() {
   it("views embedded with view helper do not incorrectly set parent", function() {
     var view = new Thorax.View({
       child: new Thorax.View({
-        template: '{{#collection}}{{/collection}}'
+        template: Handlebars.compile('{{#collection}}{{/collection}}')
       }),
-      template: '{{view child}}',
+      template: Handlebars.compile('{{view child}}'),
       collection: new Thorax.Collection()
     });
     view.render();
@@ -241,9 +241,9 @@ describe('view helper', function() {
     // ensure overrides do not modify either
     view = new Thorax.View({
       child: new Thorax.View({
-        template: ''
+        template: function() {}
       }),
-      template: '{{#view child}}{{#collection}}{{/collection}}{{/view}}',
+      template: Handlebars.compile('{{#view child}}{{#collection}}{{/collection}}{{/view}}'),
       collection: new Thorax.Collection()
     });
     view.render();

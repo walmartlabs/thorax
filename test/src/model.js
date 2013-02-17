@@ -34,13 +34,13 @@ describe('model', function() {
     var modelC = new Thorax.Model({letter: 'c'});
 
     var a = new Thorax.View({
-      template: '<li>{{letter}}</li>',
+      template: Handlebars.compile('<li>{{letter}}</li>'),
       model: modelA
     });
     expect(a.el.firstChild.innerHTML).to.equal('a', 'set via constructor');
 
     var b = new Thorax.View({
-      template: '<li>{{letter}}</li>'
+      template: Handlebars.compile('<li>{{letter}}</li>')
     });
     b.setModel(modelB);
     expect(b.el.firstChild.innerHTML).to.equal('b', 'set via setModel');
@@ -50,7 +50,7 @@ describe('model', function() {
     modelB.set({letter: 'b'});
 
     var c = new Thorax.View({
-      template: '<li>{{letter}}</li>'
+      template: Handlebars.compile('<li>{{letter}}</li>')
     });
     c.setModel(modelC, {
       render: false
@@ -71,7 +71,7 @@ describe('model', function() {
     });
     var view = new Thorax.View({
       model: model,
-      template: '{{key}}'
+      template: Handlebars.compile('{{key}}')
     });
     view.render();
     expect(view.html()).to.equal('value');
@@ -85,7 +85,7 @@ describe('model', function() {
       test2: 0
     };
     var view = new Thorax.View({
-      template: '',
+      template: function() {},
       events: {
         model: {
           all: function() {
@@ -129,7 +129,7 @@ describe('model', function() {
           reset: spy
         }
       },
-      template: '{{key}}',
+      template: Handlebars.compile('{{key}}'),
       context: function() {
         return this.model;
       }
@@ -153,7 +153,7 @@ describe('model', function() {
     }))([{id: 1, text: 'test'}]);
     collection.key = 'value';
     view = new Thorax.View({
-      template: '{{key}}',
+      template: Handlebars.compile('{{key}}'),
       context: function() {
         return this.model;
       }

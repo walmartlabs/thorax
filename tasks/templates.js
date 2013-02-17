@@ -1,20 +1,22 @@
 var fs = require('fs'),
     path = require('path'),
-    timeout,
-    watchTree = require('fs-watch-tree').watchTree;
+    cwd = process.cwd();
 
-module.exports = function(templatesDir, outputFile, applicationName) {
-  console.log('Watching ' + templatesDir + ' for changes');
-  watchTree(templatesDir, function() {
-    clearTimeout(timeout);
-    timeout = setTimeout(function() {
-      compileTemplates(templatesDir, outputFile, applicationName);
-    }, 250);
+module.exports = function(grunt) {
+  grunt.registerTask('thorax:templates', function() {
+    this.requiresConfig('thorax.templates');
+    this.requiresConfig('thorax.templates.source');
+    this.requiresConfig('thorax.templates.target');
+    this.requiresConfig('thorax.templates.applicationName');
+    var config = grunt.config('thorax.templates');
+    var done = this.async();
+    compileTemplates(config.source, config.target, config.applicationName, function() {
+      done(true);
+    });
   });
-  compileTemplates(templatesDir, outputFile, applicationName);
 };
 
-function compileTemplates(templatesDir, outputFile, applicationName) {
+function compileTemplates(templatesDir, outputFile, applicationName, callback) {
   var target = path.join(process.cwd(), templatesDir);
   readDir(target, function(err, results) {
     if (err) {
@@ -32,6 +34,7 @@ function compileTemplates(templatesDir, outputFile, applicationName) {
     }).join('');
     fs.writeFileSync(outputFile, output);
     console.log('Inlined templates from ' + templatesDir + ' into ' + outputFile);
+    callback && callback();
   });
 }
 

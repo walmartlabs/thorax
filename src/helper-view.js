@@ -1,4 +1,4 @@
-/*global getOptionsData, viewHelperAttributeName */
+/*global getOptionsData, htmlAttributesToCopy, normalizeHTMLAttributeOptions, viewHelperAttributeName */
 var viewPlaceholderAttributeName = 'data-view-tmp',
     viewTemplateOverrides = {};
 
@@ -163,8 +163,12 @@ function compareHelperOptions(a, b) {
           if (key === 'data' || key === 'hash') {
             return compareValues(a.options[key], b.options[key]);
           } else if (key === 'fn' || key === 'inverse') {
-            return b.options[key] === value
-                || (value && _.has(value, 'program') && ((b.options[key] || {}).program === value.program));
+            if (b.options[key] === value) {
+              return true;
+            }
+
+            var other = b.options[key] || {};
+            return value && _.has(value, 'program') && !value.depth && other.program === value.program;
           }
           return b.options[key] === value;
         });

@@ -113,7 +113,7 @@ function loadObject(dataObject, options) {
 }
 
 function getEventCallback(callback, context) {
-  if (typeof callback === 'function') {
+  if (_.isFunction(callback)) {
     return callback;
   } else {
     return context[callback];

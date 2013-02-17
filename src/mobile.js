@@ -1,6 +1,5 @@
 /*global pushDomEvents */
-var isMobile = 'ontouchstart' in document.documentElement,
-    isiOS = navigator.userAgent.match(/(iPhone|iPod|iPad)/i),
+var isiOS = navigator.userAgent.match(/(iPhone|iPod|iPad)/i),
     isAndroid = navigator.userAgent.toLowerCase().indexOf("android") > -1 ? 1 : 0,
     minimumScrollYOffset = isAndroid ? 1 : 0;
 

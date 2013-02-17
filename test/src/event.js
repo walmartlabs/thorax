@@ -230,12 +230,12 @@ describe('event', function() {
         layoutView = new Thorax.LayoutView(),
         view = new Thorax.View({
           child: new Thorax.View({
-            template: '',
+            template: function() {},
             events: {
               ready: spy
             }
           }),
-          template: '{{view child}}'
+          template: Handlebars.compile('{{view child}}')
         });
     expect(spy.callCount).to.equal(0, 'ready event will trigger via LayoutView');
     layoutView.setView(view);
@@ -246,7 +246,7 @@ describe('event', function() {
           events: {
             ready: secondChildSpy
           },
-          template: 'test'
+          template: Handlebars.compile('test')
         });
     expect(secondChildSpy.callCount).to.equal(0, 'adding a child to a view that is ready should immediately trigger');
     view._addChild(secondChild);
@@ -259,14 +259,14 @@ describe('event', function() {
           ready: itemViewSpy
         },
         tagName: 'li',
-        template: '{{key}}'
+        template: Handlebars.compile('{{key}}')
       }),
       collection: new Thorax.Collection([
         {key: 'one'},
         {key: 'two'},
         {key: 'three'}
       ]),
-      template: '{{collection tag="ul"}}'
+      template: Handlebars.compile('{{collection tag="ul"}}')
     });
     expect(itemViewSpy.callCount).to.equal(0, 'ready event triggered via collection');
     collectionView.trigger('ready');

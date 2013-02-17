@@ -8,7 +8,7 @@ describe('button-link helpers', function() {
 
   it("multiple arguments to link", function() {
     var view = new Thorax.View({
-      template: '{{#link a b c class="test"}}link{{/link}}',
+      template: Handlebars.compile('{{#link a b c class="test"}}link{{/link}}'),
       a: 'a',
       b: 'b',
       c: 'c'
@@ -19,14 +19,14 @@ describe('button-link helpers', function() {
 
   it("expand-tokens in link", function() {
     var view = new Thorax.View({
-      template: '{{#link "a/{{key}}"}}link{{/link}}',
+      template: Handlebars.compile('{{#link "a/{{key}}"}}link{{/link}}'),
       key: 'b'
     });
     view.render();
     expect(view.$('a').attr('href')).to.equal('#a/{{key}}');
 
     view = new Thorax.View({
-      template: '{{#link "a/{{key}}" expand-tokens=true}}link{{/link}}',
+      template: Handlebars.compile('{{#link "a/{{key}}" expand-tokens=true}}link{{/link}}'),
       key: 'b'
     });
     view.render();
@@ -36,7 +36,7 @@ describe('button-link helpers', function() {
 
   it("allow empty string as link", function() {
     var view = new Thorax.View({
-      template: '{{#link ""}}text{{/link}}'
+      template: Handlebars.compile('{{#link ""}}text{{/link}}')
     });
     view.render();
     expect(view.$('a').html()).to.equal('text');
@@ -48,7 +48,7 @@ describe('button-link helpers', function() {
         testEvent: function() {}
       },
       someMethod: function() {},
-      template: '{{#button "someMethod"}}Button{{/button}}{{#button trigger="testEvent"}}Button 2{{/button}}{{#link "href"}}content{{/link}}'
+      template: Handlebars.compile('{{#button "someMethod"}}Button{{/button}}{{#button trigger="testEvent"}}Button 2{{/button}}{{#link "href"}}content{{/link}}')
     });
     view.render();
     expect($(view.$('button')[0]).html()).to.equal('Button');

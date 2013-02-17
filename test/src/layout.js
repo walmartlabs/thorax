@@ -68,7 +68,7 @@ describe('layout', function() {
           ++callCounts.parent;
         }
       },
-      template: "{{view this.layout}}",
+      template: Handlebars.compile("{{view this.layout}}"),
       layout: new Thorax.LayoutView({
         events: {
           destroyed: function() {
@@ -79,7 +79,7 @@ describe('layout', function() {
     });
     parent.render();
     parent.layout.setView(new Thorax.View({
-      template: "",
+      template: function() {},
       events: {
         destroyed: function() {
           ++callCounts.child;
@@ -104,30 +104,30 @@ describe('layout', function() {
 
   it('layouts with templates and {{layout-element}}', function() {
     var layoutWithTemplate = new Thorax.LayoutView({
-      template: '<div class="outer">{{layout-element}}</div>'
+      template: Handlebars.compile('<div class="outer">{{layout-element}}</div>')
     });
     layoutWithTemplate.setView(new Thorax.View({
-      template: '<div class="inner"></div>'
+      template: Handlebars.compile('<div class="inner"></div>')
     }));
     expect($(layoutWithTemplate.el).attr('data-layout-cid')).to.not.exist;
     expect(layoutWithTemplate.$('[data-layout-cid]').length).to.equal(1);
     expect(layoutWithTemplate.$('.outer').length).to.equal(1);
     expect(layoutWithTemplate.$('.inner').length).to.equal(1);
     var layoutWithTemplateWithoutLayoutTag = new Thorax.LayoutView({
-      template: '<div class="outer"></div>'
+      template: Handlebars.compile('<div class="outer"></div>')
     });
     expect(function() {
       layoutWithTemplateWithoutLayoutTag.setView(new Thorax.View({
-        template: '<div class="inner"></div>'
+        template: Handlebars.compile('<div class="inner"></div>')
       }));
     }).to['throw']();
   });
 
   it("layout-element used outside of a LayoutView with throw", function() {
     var view = new Thorax.View({
-      template: '{{layout-element}}'
+      template: Handlebars.compile('{{layout-element}}')
     });
-    expect(view.render).to['throw'];
+    expect(view.render).to['throw']();
   });
 
 });
