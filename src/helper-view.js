@@ -1,4 +1,4 @@
-/*global getOptionsData, viewHelperAttributeName */
+/*global getOptionsData, htmlAttributesToCopy, normalizeHTMLAttributeOptions, viewHelperAttributeName */
 var viewPlaceholderAttributeName = 'data-view-tmp',
     viewTemplateOverrides = {};
 
