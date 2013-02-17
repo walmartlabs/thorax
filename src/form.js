@@ -120,7 +120,9 @@ _.extend(Thorax.View.prototype, {
     //callback has context of element
     eachNamedInput.call(this, options, function() {
       objectAndKeyFromAttributesAndName.call(this, attributes, this.name, {mode: 'populate'}, function(object, key) {
-        if (object && !_.isUndefined(value = object[key])) {
+        value = object && object[key];
+
+        if (!_.isUndefined(value)) {
           //will only execute if we have a name that matches the structure in attributes
           if (this.type === 'checkbox' && _.isBoolean(value)) {
             this.checked = value;
