@@ -910,38 +910,3 @@ Bound DOM event handlers in Thorax are wrapped with a try / catch block, calling
     };
 
 Override this function with your own logging / debugging handler. `name` will be the event name where the error was thrown.
-
-## Grunt Tasks
-
-A number of [Grunt](http://gruntjs.com) tasks are included with Thorax, to use them add `thorax` as a dependency in your package.json file, or run:
-
-    npm install thorax
-
-Then in your `Gruntfile.js`:
-
-    grunt.loadNpmTasks('thorax');
-
-### thorax:templates
-
-If using Thorax outside of the provided node or Rails downloads you can inline a directory of templates into a single file by running the `thorax:templates` task.
-
-  grunt.initConfig({
-    thorax: {
-      templates: {
-        source: './templates',
-        target: './templates.js',
-        applicationName: 'Application'
-      }
-    }
-  });
-
-Combine this with watch to update your generated `templates.js` as files change:
-
-  grunt.initConfig({
-    watch: {
-      templates: {
-        files: './templates/**/*.handlebars',
-        tasks: ['thorax:templates']
-      }
-    }
-  });
