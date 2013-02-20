@@ -107,7 +107,7 @@ Thorax.CollectionView = Thorax.View.extend({
       if (_.isString(itemView) && !itemView.match(/^\s*</m)) {
         itemView = '<div>' + itemView + '</div>';
       }
-      var itemElement = itemView.el ? [itemView.el] : _.filter($(itemView), function(node) {
+      var itemElement = itemView.el ? [itemView.el] : _.filter($($.trim(itemView)), function(node) {
         //filter out top level whitespace nodes
         return node.nodeType === ELEMENT_NODE_TYPE;
       });
