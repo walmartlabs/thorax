@@ -1,6 +1,19 @@
-An opinionated, battle tested [Backbone](http://backbonejs.org/) + [Handlebars](http://handlebarsjs.com/) framework to build large scale web applications. 
+# Thorax
 
-Thorax can be used standalone in any JavaScript environment in addition the Node, Rails .
+An opinionated, battle tested [Backbone](http://backbonejs.org/) + [Handlebars](http://handlebarsjs.com/) framework to build large scale web applications.
+
+# Quick Start
+
+- Clone the [Seed Project](http://github.com/walmartlabs/thorax-seed) and start building your own application.
+- Read about how Thorax works in the new [Backbone Fundamentals Book](http://addyosmani.github.com/backbone-fundamentals/#thorax).
+- Install the [Thorax Inspector](https://chrome.google.com/webstore/detail/thorax-inspector/poioalbefcopgeaeaadelomciijaondk) Chrome extension.
+- Don't fancy the structure of the seed project? Just link the [core library](http://github.com/walmartlabs/thorax) as a [single file from cdnjs](http://cdnjs.cloudflare.com/ajax/libs/thorax/2.0.0rc3/thorax.js) compiled with all of it's dependencies and use it anywhere.
+
+# Features
+
+## Hello World
+
+Thorax is used to build some of the biggest Backbone applications in the world but it's easy to get started.
 
     var view = new Thorax.View({
       greeting: "Hello",
@@ -8,9 +21,183 @@ Thorax can be used standalone in any JavaScript environment in addition the Node
     });
     view.appendTo('body');
 
-- add note about CDN availability
-- add note about cloning thorax-seed
-- add mobile, standalone and rails downloads
+## Easy Data Binding
+
+By default every property of your view is automatically available in the template. If a model is bound it's attributes will also be made available.
+
+    var view = new Thorax.View({
+      greeting: 'Hello',
+      model: new Thorax.Model({
+        location: 'world!'
+      }),
+      template: ...
+    });
+
+Then in your template:
+
+    {{greeting}} {{location}}
+
+## Context Control
+
+Don't like every property in your view being available in your template, or need to modify some model attributes? Just specify a `context` method to control what your template sees:
+
+    var view = new Thorax.View({
+      model: new Thorax.Model({
+        greeting: 'hello'
+      }),
+      context: function() {
+        return {
+          greeting: this.model.get('greeting').toUpperCase()
+        };
+      },
+      template: ...
+    });
+
+Then in your template:
+
+    {{greeting}}
+
+## Collection Rendering
+
+Easily render collections with the `collection` helper. Thorax will make sure that your view stays current as models in your collection are added, removed or updated.
+    
+    var view = new Thorax.View({
+      collection: new Thorax.Collection([{
+        title: 'Finish screencast',
+        done: true
+      }]),
+      template: ...
+    });
+
+Then in your template:
+
+    {{#collection tag="ul"}}
+      <li>
+        <input type="checkbox" {{#done}}checked{{/done}}
+        {{title}}
+      </li>
+    {{else}}
+      <li>No todos yet.</li>
+    {{/collection}}
+
+## jQuery / Zepto Integration
+
+Thorax extends the jQuery or Zepto `$` object to allow you to get a reference to the nearest bound `model`, `collection`, or `view`.
+
+    var view = new Thorax.View({
+      events: {
+        'change input[type=checkbox]': function(event) {
+          var model = $(event.target).model();
+          model.set({done: event.target.checked});
+        }
+      }
+    });
+
+## Event Enhancements
+
+Thorax extends the events hash to let you listen to view events in addition to DOM events, and let's you pass a hash of `model` or `collection` events to `listenTo` when a model or collection is bound to your view.
+
+    var view = new Thorax.View({
+      events: {
+        rendered: function() {}
+        model: {
+          change: function() {}
+        }
+      },
+      model: new Thorax.Model()
+    });
+
+Thorax also adds inheritable events to view classes, just call `on` on any class to listen for a DOM, view, model or collection event on any view.
+
+    Thorax.View.on('eventName', handler);
+
+## Form Handling
+  
+Easily capture entered form data with the `serialize` method which also provides event hooks for form validation. Models bound to the view will also automatically `populate` your forms.
+
+    var view = new Thorax.View({
+      events: {
+        'submit form': function(event) {
+          event.preventDefault();
+          var attrs = this.serialize();
+          this.collection.add(attrs);
+        }
+      },
+      collection: new Thorax.Collection()
+    });
+
+## Embeddable Views
+
+Easily embed one view within another with the `view` helper.
+
+    var view = new Thorax.View({
+      child: new Thorax.View(...),
+      template: ...
+    });
+
+Then in your template:
+
+    {{view child}}
+
+## Layouts and Lifecycle
+
+`Thorax.LayoutView` provides a container to place your views, and triggers lifecycle events on views placed within them. Layouts can be embedded in other views as well.
+
+    var layout = new Thorax.LayoutView();
+    layout.appendTo('body');
+    var view = new Thorax.View({
+      events: {
+        ready: function() {},
+        destroyed: function() {}
+      }
+    })
+    layout.setView(view);
+
+# Getting Started
+
+## Tutorials
+
+### [From zero to todos](https://github.com/walmartlabs/thorax-seed/blob/master/README.md)
+
+Did you enjoy the [screencast](http://vimeo.com/60230630)? Learn how to build your own simple todos app from scratch, with [step by step explanations](https://github.com/walmartlabs/thorax-seed/blob/master/README.md) of how the app was built.
+
+### [Thorax in Backbone Fundamentals](http://addyosmani.github.com/backbone-fundamentals/#thorax)
+
+Read an overview of the features of Thorax, as well as some of the theory behind some of the implementation details.
+
+### [Route Based Module Loading](http://addyosmani.github.com/backbone-fundamentals/#route-based-module-loading)
+
+[Backbone Fundamentals](http://addyosmani.github.com/backbone-fundamentals/) also covers [Lumbar's](http://walmartlabs.github.com/lumbar) approach to modular application development and routing, which is used in all of the seed projects except the standalone and Rails seeds.
+
+### TodoMVC
+See the [TodoMVC Thorax implementation](http://addyosmani.github.com/todomvc/labs/architecture-examples/thorax/) and it's [source code](https://github.com/addyosmani/todomvc/tree/gh-pages/labs/architecture-examples/thorax). There is also a [Lumbar flavored version](https://github.com/addyosmani/todomvc/tree/gh-pages/labs/dependency-examples/thorax_lumbar) of the implementation.
+
+## Resources
+
+### Seeds
+
+Cloning a seed is the easiest way to get started building your own project.
+
+- [Root Seed](https://github.com/walmartlabs/thorax-seed)
+- [with Mocha test harness](https://github.com/eastridge/thorax-seed-mocha)
+- [with simple Todos](https://github.com/eastridge/thorax-seed-todos)
+- [Rails Seed (zip)](https://github.com/walmartlabs/thorax-boilerplate/blob/master/rails.zip?raw=true)
+- [Standalone / HTML only Seed (zip)](https://github.com/walmartlabs/thorax-boilerplate/blob/master/standalone.zip?raw=true)
+
+### Chrome Inspector Extension
+
+Chrome users can install the [Thorax Inspector](https://chrome.google.com/webstore/detail/thorax-inspector/poioalbefcopgeaeaadelomciijaondk) Chrome extension which will allow you to inspect any element and see the associated Thorax views, models and collections that may be bound. The [Thorax Seed](https://github.com/walmartlabs/thorax-seed) also integrates the [thorax-inspector](https://npmjs.org/package/thorax-inspector) npm package which allows you to open files in your project that relate to a given element, directly from Chrome.
+
+### cdnjs
+
+Thorax is available on [cdnjs](http://cdnjs.com/), each build includes jQuery 1.9.0 (or Zepto 1.0.0rc1 on mobile), Backbone 0.9.9, Underscore 1.4.2 and Handlebars 1.0.0rc6.
+
+- [Thorax](http://cdnjs.cloudflare.com/ajax/libs/thorax/2.0.0rc3/thorax.js)
+- [Thorax (compressed)](http://cdnjs.cloudflare.com/ajax/libs/thorax/2.0.0rc3/thorax.min.js)
+- [Thorax Mobile](http://cdnjs.cloudflare.com/ajax/libs/thorax/2.0.0rc3/thorax-mobile.js)
+- [Thorax Mobile (compressed)](http://cdnjs.cloudflare.com/ajax/libs/thorax/2.0.0rc3/thorax-mobile.min.js)
+
+# API Reference
 
 ## Registry
 
