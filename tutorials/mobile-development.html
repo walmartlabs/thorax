@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>Thorax: Backbone + Handlebars</title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="canonical" href="http://thoraxjs.org/tutorials/mobile-development"/>
+
+  <script type="text/javascript" src="//use.typekit.net/vyf6wqz.js"></script>
+  <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
+
+  <link rel="stylesheet" href="/css/main.css">
+
+  <script src="/js/vendor/modernizr-2.6.2.min.js"></script>
+
+  <!--[if (lt IE 9) & (!IEMobile)]>
+  <script>yepnope('/css/ie.css')</script>
+  <![endif]-->
+</head>
+<body class="content tutorial-page">
+<a class="github-banner" href="https://github.com/walmartlabs/thorax">
+  <img src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub">
+</a>
+<header id="top" class="header clearfix">
+  <div class="l-constrained">
+    <h1 class="logo"><a href="/">Thor<span>a</span>x</a></h1>
+
+    <nav class="nav">
+      <ul>
+        <li><a href="/api.html">API Reference</a></li>
+        <li><a href="/tutorials.html">Tutorials</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+<div class="l-constrained">
+  <nav class="sidebar">
+ 
+    <a class="top" href="#top"><span>&#x25B2;</span> Back to Top</a>
+  </nav>
+
+  <div class="l-main">
+
+
+<h1 id="mobile-development">Mobile Development</h1>
+<p>The Thorax mobile plugin deals stricly with behavioral fixes for mobile web applications that make sense to implement in the View layer rather than directly in Zepto. In addition to this plugin the <a href="https://github.com/walmartlabs/thorax-boilerplate">mobile boilerplate project</a> is provided which is a starter <a href="http://walmartlabs.github.com/lumbar">Lumbar</a> project that includes this plugin and is set up to build for mobile environments.
+
+</p>
+<h2 id="fast-click">Fast Click</h2>
+<p>Mobile WebKit will delay <code>click</code> events by 300ms. The mobile plugin will transparently re-write this event as a custom <code>fast-click</code> event which is not delayed in the following cases:
+
+</p>
+<pre><code>//passing a dom event to "on" 
+view.on('click selector', function(){});
+
+//using the events hash
+Thorax.View.extend({
+  events: {
+    'click selector': function(){}
+  }
+});
+
+//using the button or link helpers
+{{#button "methodName"}}A Button{{/button}}
+{{#link "url"}}A Link{{/link}}</code></pre>
+<p>This behavior can be disabled by calling <code>Thorax.configureFastClick(false)</code>. If you need to mix and match fast and slow clicks, fall back to Zepto directly:
+
+</p>
+<pre><code><span class="comment">//fast-click is implemented in the View class</span>
+<span class="comment">//layer and not directly on Zepto</span>
+$(<span class="string">'selector'</span>).on(<span class="string">'click'</span>, <span class="keyword">function</span>() {})</code></pre>
+<h3 id="configure-fast-click">configureFastClick <em>Thorax.configureFastClick(useFastClick)</em></h3>
+<p>Sets the boolean <code>useFastClick</code> for wether or not to use the fast click implementation provided by thorax. Defaults to true.
+
+</p>
+<h2 id="tap-highlights">Tap Highlights</h2>
+<p>Tap higlights are inconsitently or incorrectly implemented on iOS and Android. The mobile plugin normalizes the behavior and provides a reliable <code>active</code> class name which can be used. Some additonal <code>-webkit-tap-highlight-color</code> CSS styles may be needed to normalize tap highlight behavior and examples are provided in the <a href="https://github.com/walmartlabs/thorax-boilerplate">mobile boilerplate project</a>.
+
+</p>
+<p>The following selector is used to apply tap highlight behaviors to elements inside <code>Thorax.View</code> instances:
+
+</p>
+<pre><code>[data-tappable=<span class="literal">true</span>], a, input, button, select, textarea</code></pre>
+<h3 id="data-tappable">data-tappable <em>data-tappable="true"</em></h3>
+<p>Add this attribute to any HTML tag to apply tap highlight behaviors to it.
+
+</p>
+<h3 id="configure-tap-highlight">configureTapHighlight <em>Thorax.configureTapHighlight(useTapHighlight)</em></h3>
+<p>Set the boolean <code>useNative</code> for wether or not to use the built in (native) tap highlights in the device. Defaults to true.
+
+</p>
+<h3 id="_tap-highlight-class-name">_tapHighlightClassName <em>view._tapHighlightClassName</em></h3>
+<p>Class name to use when a tap highlight is active. Defaults to <code>active</code>.
+
+</p>
+<h3 id="_tap-highlight-start">_tapHighlightStart <em>view._tapHighlightStart(event)</em></h3>
+<p>A built in handler that will be called when a tap highlight starts. Override this to implement custom behaviors, by default it will add the <code>_tapHighlightClassName</code>.
+
+</p>
+<h3 id="_tap-highlight-end">_tapHighlightEnd <em>view._tapHighlightEnd(event)</em></h3>
+<p>A built in handler that will be called when a tap highlight ends. Override this to implement custom behaviors, by default it will remove the <code>_tapHighlightClassName</code>.
+
+</p>
+<h3 id="tap-hold-and-end">tapHoldAndEnd <em>view.$el.tapHoldAndEnd(selector, callbackStart, callbackEnd)</em></h3>
+<p>This function adds the tap and hold event to the given elements. The registered handlers are activated by the user pressing and holding a position for 150 msec. This function is used by the tap highlight implementation.
+
+</p>
+<p><code>callbackStart</code> is called after the 150 msec delay between when the user first touched the screen and before they moved their position or let go.
+
+</p>
+<p><code>callbackEnd</code> is called after the user moves from their initial tapped position or lets go of the screen. Note that this function is not called unless the <code>callbackStart</code> is called first.
+
+</p>
+<pre><code>view.$el.tapHoldAndEnd(<span class="string">'a'</span>, <span class="keyword">function</span>(){}, <span class="keyword">function</span>(){});</code></pre>
+<h2 id="scrolling">Scrolling</h2>
+<p>These utility methods normalize two bugs present in mobile environments:
+
+</p>
+<ul>
+<li>iOS: needs <code>window.scrollTo</code> to be deferred in some circumstances</li>
+<li>Android: needs the minimum scroll <code>y</code> to be 1 in order to scroll to the top</li>
+</ul>
+<h3 id="scroll-to">scrollTo <em>Thorax.Util.scrollTo(x, y)</em></h3>
+<h3 id="scroll-to-top">scrollToTop <em>Thorax.Util.scrollToTop()</em></h3>
+<h2 id="auto-form-hiding">Auto Form Hiding</h2>
+<p>Some Android devices exhibit a "stuck" keyboard after a form has been submitted. Thorax will ensure that after any form <code>submit</code> event that any virtual keyboards will be hidden.
+</p>
+      </div>
+      <footer class="footer">
+        <p><small>Copyright 2012 <a href="http://walmartlabs.com">@WalmartLabs</a></small></p>
+      </footer>
+
+    </div>
+    
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+    <script>window.jQuery || document.write('<script src="/js/vendor/jquery-1.8.2.min.js"><\/script>')</script>
+    
+    <script src="/js/compiled/site.js"></script>
+  </body>
+</html>

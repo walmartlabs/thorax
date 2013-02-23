@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>Thorax: Backbone + Handlebars</title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="canonical" href="http://thoraxjs.org/api.html"/>
+  <script type="text/javascript" src="//use.typekit.net/vyf6wqz.js"></script>
+  <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
+  <link rel="stylesheet" href="/css/main.css">
+
+  <script src="/js/vendor/modernizr-2.6.2.min.js"></script>
+  <script>
+    var autoCompleteData = {"Registry":"registry","name ":"name","templates ":"templates","Thorax.View":"thorax.view","template ":"template","render ":"render","context ":"context","appendTo ":"append-to","renderTemplate ":"render-template","ensureRendered ":"ensure-rendered","html ":"html","children ":"children","parent ":"parent","destroy ":"destroy","setModel ":"set-model","setCollection ":"set-collection","serialize ":"serialize","populate ":"populate","validateInput ":"validate-input","Thorax.HelperView":"thorax.helper-view","registerViewHelper ":"register-view-helper","Thorax.LayoutView":"thorax.layout-view","setView ":"set-view","getView ":"get-view","Thorax.Model":"thorax.model","isEmpty ":"is-empty","isPopulated ":"is-populated","Thorax.Collection":"thorax.collection","Thorax.CollectionView":"thorax.collection-view","itemTemplate ":"item-template","itemView ":"item-view","itemContext ":"item-context","itemFilter ":"item-filter","emptyTemplate ":"empty-template","emptyView ":"empty-view","loadingTemplate ":"loading-template","loadingView ":"loading-view","loadingPlacement ":"loading-placement","appendItem ":"append-item","removeItem ":"remove-item","updateItem ":"update-item","Thorax.Util":"thorax.util","tag ":"tag","$":"$","$.view ":"$.view","$.model ":"$.model","$.collection ":"$.collection","Event Enhancements":"event-enhancements","Inheritable Events ":"inheritable-events","Model Events":"model-events","Collection Events":"collection-events","View Events ":"view-events","DOM Events ":"dom-events","_addEvent ":"_add-event","Data Loading":"data-loading","Queuing":"queuing","bindToRoute ":"bind-to-route","load ":"load","setRootObject ":"set-root-object","loadHandler ":"load-handler","_loadingClassName ":"_loading-class-name","_loadingTimeoutDuration ":"_loading-timeout-duration","_loadingTimeoutEndDuration ":"_loading-timeout-end-duration","Template Helpers":"template-helpers","super ":"super","view ":"view","element ":"element","button ":"button","url ":"url","link ":"link","collection ":"collection","empty ":"empty","collection-element ":"collection-element","layout-element ":"layout-element","loading ":"loading","Catalog of Built-in Events":"catalog-of-built-in-events","rendered ":"rendered","child ":"child","ready ":"ready","activated ":"activated","deactivated ":"deactivated","destroyed ":"destroyed","change:view:start ":"change:view:start","change:view:end ":"change:view:end","helper ":"helper","helper:name ":"helper:name","validate ":"validate","error ":"error","load:start ":"load:start","load:end ":"load:end","rendered:collection ":"rendered:collection","rendered:item ":"rendered:item","rendered:empty ":"rendered:empty","HTML Attributes":"html-attributes","Error Handling":"error-handling","onException ":"on-exception"};
+  </script>
+
+  <!--[if (lt IE 9) & (!IEMobile)]>
+  <script>yepnope('/css/ie.css')</script>
+  <![endif]-->
+</head>
+<body class="docs">
+<a class="github-banner" href="https://github.com/walmartlabs/thorax">
+  <img src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub">
+</a>
+<header id="top" class="header clearfix">
+  <div class="l-constrained">
+    <h1 class="logo"><a href="/">Thor<span>a</span>x</a></h1>
+
+    <nav class="nav">
+      <ul>
+        <li><a href="/start.html">Getting Started</a></li>
+        <li><a href="/api.html">API Reference</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+<div class="l-constrained">
+  <nav class="sidebar">
+    <div class="search-container">
+      <label class="visuallyhidden" for="search">API Search</label>
+      <input type="search" placeholder="API Search" id="search" name="search">
+      <button type="reset" id="search-reset" name="search-reset">Reset</button>
+    </div>
+    <ul class="sidebar-primary"><li><a href="#registry">Registry</a><ul class="sidebar-secondary"><li><a href="#name">name </a><li><a href="#templates">templates </a></ul></li><li><a href="#thorax.view">Thorax.View</a><ul class="sidebar-secondary"><li><a href="#template">template </a><li><a href="#render">render </a><li><a href="#context">context </a><li><a href="#append-to">appendTo </a><li><a href="#render-template">renderTemplate </a><li><a href="#ensure-rendered">ensureRendered </a><li><a href="#html">html </a><li><a href="#children">children </a><li><a href="#parent">parent </a><li><a href="#destroy">destroy </a><li><a href="#set-model">setModel </a><li><a href="#set-collection">setCollection </a><li><a href="#serialize">serialize </a><li><a href="#populate">populate </a><li><a href="#validate-input">validateInput </a></ul></li><li><a href="#thorax.helper-view">Thorax.HelperView</a><ul class="sidebar-secondary"><li><a href="#register-view-helper">registerViewHelper </a></ul></li><li><a href="#thorax.layout-view">Thorax.LayoutView</a><ul class="sidebar-secondary"><li><a href="#set-view">setView </a><li><a href="#get-view">getView </a></ul></li><li><a href="#thorax.model">Thorax.Model</a><ul class="sidebar-secondary"><li><a href="#is-empty">isEmpty </a><li><a href="#is-populated">isPopulated </a></ul></li><li><a href="#thorax.collection">Thorax.Collection</a><ul class="sidebar-secondary"><li><a href="#is-empty">isEmpty </a><li><a href="#is-populated">isPopulated </a></ul></li><li><a href="#thorax.collection-view">Thorax.CollectionView</a><ul class="sidebar-secondary"><li><a href="#item-template">itemTemplate </a><li><a href="#item-view">itemView </a><li><a href="#item-context">itemContext </a><li><a href="#item-filter">itemFilter </a><li><a href="#empty-template">emptyTemplate </a><li><a href="#empty-view">emptyView </a><li><a href="#loading-template">loadingTemplate </a><li><a href="#loading-view">loadingView </a><li><a href="#loading-placement">loadingPlacement </a><li><a href="#append-item">appendItem </a><li><a href="#remove-item">removeItem </a><li><a href="#update-item">updateItem </a></ul></li><li><a href="#thorax.util">Thorax.Util</a><ul class="sidebar-secondary"><li><a href="#tag">tag </a></ul></li><li><a href="#$">$</a><ul class="sidebar-secondary"><li><a href="#$.view">$.view </a><li><a href="#$.model">$.model </a><li><a href="#$.collection">$.collection </a></ul></li><li><a href="#event-enhancements">Event Enhancements</a><ul class="sidebar-secondary"><li><a href="#inheritable-events">Inheritable Events </a><li><a href="#model-events">Model Events</a><li><a href="#collection-events">Collection Events</a><li><a href="#view-events">View Events </a><li><a href="#dom-events">DOM Events </a><li><a href="#_add-event">_addEvent </a></ul></li><li><a href="#data-loading">Data Loading</a><ul class="sidebar-secondary"><li><a href="#queuing">Queuing</a><li><a href="#bind-to-route">bindToRoute </a><li><a href="#load">load </a><li><a href="#set-root-object">setRootObject </a><li><a href="#load-handler">loadHandler </a><li><a href="#_loading-class-name">_loadingClassName </a><li><a href="#_loading-timeout-duration">_loadingTimeoutDuration </a><li><a href="#_loading-timeout-end-duration">_loadingTimeoutEndDuration </a></ul></li><li><a href="#template-helpers">Template Helpers</a><ul class="sidebar-secondary"><li><a href="#template">template </a><li><a href="#super">super </a><li><a href="#view">view </a><li><a href="#element">element </a><li><a href="#button">button </a><li><a href="#url">url </a><li><a href="#link">link </a><li><a href="#collection">collection </a><li><a href="#empty">empty </a><li><a href="#collection-element">collection-element </a><li><a href="#layout-element">layout-element </a><li><a href="#loading">loading </a></ul></li><li><a href="#catalog-of-built-in-events">Catalog of Built-in Events</a><ul class="sidebar-secondary"><li><a href="#rendered">rendered </a><li><a href="#child">child </a><li><a href="#ready">ready </a><li><a href="#activated">activated </a><li><a href="#deactivated">deactivated </a><li><a href="#destroyed">destroyed </a><li><a href="#change:view:start">change:view:start </a><li><a href="#change:view:end">change:view:end </a><li><a href="#helper">helper </a><li><a href="#helper:name">helper:name </a><li><a href="#serialize">serialize </a><li><a href="#validate">validate </a><li><a href="#error">error </a><li><a href="#populate">populate </a><li><a href="#load:start">load:start </a><li><a href="#load:end">load:end </a><li><a href="#rendered:collection">rendered:collection </a><li><a href="#rendered:item">rendered:item </a><li><a href="#rendered:empty">rendered:empty </a></ul></li><li><a href="#html-attributes">HTML Attributes</a></li><li><a href="#error-handling">Error Handling</a><ul class="sidebar-secondary"><li><a href="#on-exception">onException </a></ul></li></ul>
+    <a class="top" href="#top"><span>&#x25B2;</span> Back to Top</a>
+  </nav>
+
+  <div class="l-main">
+
+
+<h1 id="api-reference">API Reference</h1>
+<h2 id="registry">Registry</h2>
+<p>Thorax creates a special hash for each type of class to store all subclasses in your application. The use of <code>Thorax.Views</code> and <code>Thorax.templates</code> is required to allow the <code>view</code>, <code>template</code> and other helper methods to operate, but the use of <code>Thorax.Models</code> and <code>Thorax.Collections</code> are optional and provided for consitency.
+
+</p>
+<table cellpadding="0" cellspacing="0" border="0" width="100%">
+  <thead>
+    <tr>
+      <th>Class</th>
+      <th>Registry</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>Thorax.View</td><td>Thorax.Views</td></tr>
+    <tr><td>Thorax.Model</td><td>Thorax.Models</td></tr>
+    <tr><td>Thorax.Collection</td><td>Thorax.Collections</td></tr>
+    <tr><td>templates</td><td>Thorax.templates</td></tr>
+  </tbody>
+</table>
+
+<h3 id="name">name <em>klass.prototype.name</em></h3>
+<p>If a <code>name</code> property is passed to any Thorax classes' <code>extend</code> method the resulting class will be automatically set in the corresponding registry.
+
+</p>
+<pre><code><span class="comment">//set class</span>
+Thorax.View.extend({
+  name: <span class="string">"my-view"</span>
+});
+
+<span class="comment">//get class</span>
+Thorax.Views[<span class="string">"my-view"</span>]</code></pre>
+<h3 id="templates">templates <em>Thorax.templates</em></h3>
+<p>A hash of templates, used by various Thorax helpers. If using the Lumbar or Rails boilerplate projects this hash will be automatically generated from the files in your <code>templates</code> directories. To manually add a template to the hash:
+
+</p>
+<pre><code>Thorax.templates[<span class="string">'my-template-name'</span>] = Handlebars.compile(<span class="string">'template string'</span>);</code></pre>
+<p>If a <code>View</code> has the same <code>name</code> as a template in the <code>templates</code> hash, it's `template' property will be automatically assigned.
+
+</p>
+<h2 id="thorax.view">Thorax.View</h2>
+<p><code>Thorax.View</code> provides additive functionality over <code>Backbone.View</code> but breaks compatibility in one imporant way in that it does not use an <code>options</code> object. All properties passed to the constructor become available on the instance:
+
+</p>
+<pre><code><span class="keyword">var</span> view = <span class="keyword">new</span> Thorax.View({
+  key: <span class="string">"value"</span>
+});
+view.key === <span class="string">"value"</span></code></pre>
+<p>By default all instance properties are available in the template context. So when setting a key on the view it will by default be available in the template.
+
+</p>
+<h3 id="template">template <em>view.template</em></h3>
+<p>Assign a template to a view. This may be a string or a function which recieves a single <code>context</code> argument and returns a string. If the view has a <code>name</code> and a template of the same <code>name</code> is available the <code>template</code> will be auto-assigned.
+
+</p>
+<pre><code><span class="keyword">new</span> Thorax.View({
+  template: Handlebars.compile(<span class="string">"{{key}}"</span>)
+});</code></pre>
+<h3 id="render">render <em>view.render([content])</em></h3>
+<p>Renders the view's <code>template</code> updating the view's <code>el</code> with the result, triggering the <code>rendered</code> event.
+
+</p>
+<pre><code>view.render();</code></pre>
+<p><code>render</code> can also accept a content argument that may be an element, string or a template function:
+
+</p>
+<pre><code>view.render(<span class="string">'custom html'</span>);</code></pre>
+<h3 id="context">context <em>view.context()</em></h3>
+<p>Used by <code>render</code> to determine what attributes are available in the view's <code>template</code>. The default context function returns <code>this</code> + <code>this.model.attributes</code> if a <code>model</code> is present on the view. The <code>context</code> method may be overriden to provide a custom context:
+
+</p>
+<pre><code><span class="keyword">new</span> Thorax.View({
+  template: Handlebars.compile(<span class="string">'{{key}}'</span>),
+  context: <span class="keyword">function</span>() {
+    <span class="keyword">return</span> _.defaults(<span class="keyword">this</span>.model.attributes, {
+      key: <span class="string">'value'</span>
+    });
+  }
+});</code></pre>
+<h3 id="append-to">appendTo <em>view.appendTo(element)</em></h3>
+<p>Appends the view to a given <code>element</code> which may be a CSS selector or DOM element. <code>ensureRendered</code> will be called and a <code>ready</code> event will be triggered. This is the preferred way to append your outer most view onto a page.
+
+</p>
+<h3 id="render-template">renderTemplate <em>view.renderTemplate(name [,context])</em></h3>
+<p>Renders a given template with the view's <code>context</code> or the given context argument.
+
+</p>
+<h3 id="ensure-rendered">ensureRendered <em>view.ensureRendered()</em></h3>
+<p>Ensure that the view has been rendered at least once.
+
+</p>
+<h3 id="html">html <em>view.html([content])</em></h3>
+<p>Get or set the <code>innerHTML</code> of the view, without triggering the <code>rendered</code> event.
+
+</p>
+<h3 id="children">children <em>view.children</em></h3>
+<p>A hash of child view's indexed by <code>cid</code>. Child views may become attached to the parent with the <code>view</code> helper or may be automatically attached <code>HelperView</code> instances created by helpers created with <code>regsterViewHelper</code> (such as the <code>collection</code> and <code>empty</code> helpers).
+
+</p>
+<h3 id="parent">parent <em>view.parent</em></h3>
+<p>If a view was embedded inside another with the <code>view</code> helper, or a generated <code>HelperView</code> (for instance the <code>collection</code> or <code>empty</code> helpers) it will have a <code>parent</code> view attribute. In the case of <code>HelperView</code>s, the <code>parent</code> will be the view that declared the helper in it's template.
+
+</p>
+<h3 id="destroy">destroy <em>view.destroy([options])</em></h3>
+<p>Calls <code>remove</code> (and therefore <code>$el.remove</code> and <code>stopListening</code>) on your view, unbinds any model or collection bound with <code>setCollection</code> or <code>setModel</code>, calls <code>destroy</code> on all children, then triggers a <code>destroyed</code> event which can be used to implement specific cleanup behaviors in your views. Pass <code>children: false</code> to this method to prevent the view's children from being destroyed.
+
+</p>
+<p><code>destroy</code> will also be called on a view if it was previously passed to the <code>setView</code> method on a <code>LayoutView</code>, and then another view is passed to <code>setView</code>.
+
+</p>
+<h3 id="set-model">setModel <em>view.setModel(model [,options])</em></h3>
+<p>Setting <code>model</code> in the construtor will automatically call <code>setModel</code>, so the following are equivelent:
+
+</p>
+<pre><code><span class="keyword">var</span> view = <span class="keyword">new</span> Thorax.View({
+  model: myModel
+});
+<span class="comment">// identical functionality as above</span>
+view.setModel(myModel);</code></pre>
+<p>Sets the <code>model</code> attribute of a view then attempts to fetch the model if it has not yet been populated. Once set the default <code>context</code> implementation will merge the model's <code>attributes</code> into the context, so any model attributes will automatically become available in a template. In addition any events declared via <code>view.on({model: events})</code> will be bound to the model with <code>listenTo</code>.
+
+</p>
+<p>Accepts any of the following options:
+
+</p>
+<ul>
+<li><strong>fetch</strong> - Boolean, wether to fetch the model when it is set, defaults to true.</li>
+<li><strong>success</strong> - Callback on fetch success, defaults to noop</li>
+<li><strong>render</strong> - Render on the view on model:change? Defaults to true</li>
+<li><strong>populate</strong> - Call <code>populate</code> with the model's attributes when it is set? Defaults to true. Pass <code>populate: {children: false}</code> to prevent child views from having their inputs populated.</li>
+<li><strong>errors</strong> - When the model triggers an <code>error</code> event, trigger the event on the view? Defaults to true</li>
+</ul>
+<h3 id="set-collection">setCollection <em>view.setCollection(collection [,options])</em></h3>
+<p>Setting <code>collection</code> in the construtor will automatically call <code>setCollection</code>, so the following are equivelent:
+
+</p>
+<pre><code><span class="keyword">var</span> view = <span class="keyword">new</span> Thorax.View({
+  collection: myCollection
+});
+<span class="comment">// identical functionality as above</span>
+view.setCollection(myCollection);</code></pre>
+<p>Sets the <code>collection</code> attribute of a view then attempts to fetch the collection if it has not yet been populated. In addition any events declared via <code>view.on({collection: events})</code> will be bound to the collection with <code>listenTo</code>.
+
+</p>
+<p>Accepts any of the following options:
+
+</p>
+<ul>
+<li><strong>render</strong> - Wether to render the collection if it is populated, or render it after it has been loaded</li>
+<li><strong>fetch</strong> - Wether or not to try to call <code>fetch</code> on the collection if <code>shouldFetch</code> returns true</li>
+<li><strong>success</strong> - Callback on fetch success, defaults to noop</li>
+<li><strong>errors</strong> - Wether or not to trigger an <code>error</code> event on the view when an <code>error</code> event is triggered on the collection</li>
+</ul>
+<p>Note that while any view may bind a collection only a <code>CollectionView</code> will actually render a collection. A regular <code>Thorax.View</code> may declare a <code>collection</code> helper which in turn will generate and embed a <code>CollectionView</code>.
+
+</p>
+<h3 id="serialize">serialize <em>view.serialize([event], callback [,options])</em></h3>
+<p>Serializes a form. <code>callback</code> will receive the attributes from the form, followed by a <code>release</code> method which must be called before the form can be submitted again. <code>callback</code> will only be called if <code>validateInput</code> returns nothing or an empty array. <code>options</code> may contain:
+
+</p>
+<ul>
+<li><code>set</code> - defaults to true, wether or not to set the attributes if valid on a model if one was set with <code>setModel</code></li>
+<li><code>validate - defaults to true, wether or not to call </code>validateInput` during serialization</li>
+<li><code>children</code> - defaults to true, wether or not to serialize inputs in child views</li>
+<li><code>silent</code> - defaults to true, wether or not to pass <code>silent: true</code> to <code>model.set</code></li>
+</ul>
+<p>Each form input in your application should contain a corresponding label. Since you may want to re-use the same form multiple times in the same view a <code>@cid</code> attribute with a unique value is provided to each render call of each template:
+
+</p>
+<pre><code>&lt;label <span class="keyword">for</span>=<span class="string">"{{@cid}}-last-name"</span>/&gt;
+<span class="xml"><span class="tag">&lt;<span class="title">input</span> <span class="attribute">name</span>=<span class="value">"last-name"</span> <span class="attribute">id</span>=<span class="value">"{{@cid}}-last-name"</span> <span class="attribute">value</span>=<span class="value">"Beastridge"</span>/&gt;</span>
+<span class="tag">&lt;<span class="title">label</span> <span class="attribute">for</span>=<span class="value">"{{@cid}}-address[street]"</span>/&gt;</span>
+<span class="tag">&lt;<span class="title">input</span> <span class="attribute">name</span>=<span class="value">"address[street]"</span> <span class="attribute">value</span>=<span class="value">"123 Chestnut"</span> <span class="attribute">id</span>=<span class="value">"{{@cid}}-address[street]"</span>/&gt;</span>
+
+new Thorax.View({
+  events: {
+    "submit form": function(event) {
+      this.serialize(event, function(attributes, release) {
+        attributes["last-name"] === "Beastridge";
+        attributes.address.street === "123 Chestnut";
+        //form is locked to prevent duplicate submission
+        //until release is called
+        release();
+      });
+    }
+  }
+});</span></code></pre>
+<p><code>serialize</code> Triggers the following events:
+
+</p>
+<ul>
+<li><code>serialize</code> - called before validation with serialized attributes</li>
+<li><code>validate</code> - with an attributes hash and errors array after <code>validateInput</code> is called</li>
+<li><code>error</code> - with an errors array, if validateInput returned an array with any errors</li>
+</ul>
+<p>If your view uses inputs with non standard names (or no names, multiple inputs with the same name, etc), use the <code>serialize</code> event:
+
+</p>
+<pre><code><span class="keyword">this</span>.on(<span class="string">'serialize'</span>, _.bind(<span class="keyword">function</span>(attributes) {
+  attributes.custom = <span class="keyword">this</span>.$(<span class="string">'.my-input'</span>).val();
+}, <span class="keyword">this</span>));</code></pre>
+<h3 id="populate">populate <em>view.populate([attributes] [,options])</em></h3>
+<p>Populate the form fields in the view with the given attributes. The keys of the attributes should correspond to the names of the inputs. <code>populate</code> is automatically called with the response from <code>view.context()</code> when <code>setModel</code> is called. By default this is just <code>model.attributes</code>.
+
+</p>
+<pre><code>view.populate({
+  <span class="string">"last-name"</span>: <span class="string">"Beastridge"</span>
+  address: {
+    street: <span class="string">"123 Chestnut"</span>
+  }
+});</code></pre>
+<p><code>populate</code> triggers a <code>populate</code> event. If your view uses inputs with non standard names (or no names, multiple inputs with the same name, etc), use this event:
+
+</p>
+<pre><code><span class="keyword">this</span>.on(<span class="string">'populate'</span>, _.bind(<span class="keyword">function</span>(attributes) {
+  <span class="keyword">this</span>.$(<span class="string">'.my-input'</span>).val(attributes.custom);
+}, <span class="keyword">this</span>));</code></pre>
+<p>To prevent child views from having their inputs populated use:
+
+</p>
+<pre><code>view.populate(object, {
+  children: <span class="literal">false</span>
+});</code></pre>
+<h3 id="validate-input">validateInput <em>view.validateInput(attributes)</em></h3>
+<p>Validate the attributes created by <code>serialize</code>, must return an array or nothing (if valid). It's recommended that the array contain hashes with <code>name</code> and <code>message</code> attributes, but arbitrary data or objects may be passed. If the array has a zero length the attributes are considered to be valid. Returning an array with any errors will trigger the <code>error</code> event.
+
+</p>
+<pre><code>validateInput: <span class="keyword">function</span>(attributes) {
+  <span class="keyword">var</span> errors = [];
+  <span class="keyword">if</span> (attributes.password &amp;&amp; !attributes.password.match(<span class="regexp">/.{6,11}/</span>)) {
+    errors.push({name: <span class="string">'password'</span>, message: <span class="string">'Invalid Password'</span>});
+  }
+  <span class="keyword">return</span> errors;
+}</code></pre>
+<h2 id="thorax.helper-view">Thorax.HelperView</h2>
+<h3 id="register-view-helper">registerViewHelper <em>Handlebars.registerViewHelper(name [,viewClass] ,callback)</em></h3>
+<p>Note that this differs from <code>Handlebars.registerHelper</code>. Registers a helper that will create and append a new <code>HelperView</code> instance, with it's <code>template</code> attribute set to the value of the captured block. <code>callback</code> will recieve any arguments passed to the helper followed by a <code>HelperView</code> instance. Named arguments to the helper will be present on <code>options</code> attribute of the <code>HelperView</code> instance.
+
+</p>
+<p>A <code>HelperView</code> instance differs from a regular view instance in that it has a <code>parent</code> attribute which is always set to the declaring view, and a <code>context</code> which always returns the value of the <code>parent</code>'s context method. The <code>collection</code>, <code>empty</code> and other built in block view helpers are created with <code>registerViewHelper</code>.
+
+</p>
+<p>A helper that re-rendered a <code>HelperView</code> every time an event was triggered on the declaring view could be implemented as:
+
+</p>
+<pre><code>Handlebars.registerViewHelper(<span class="string">'on'</span>, <span class="keyword">function</span>(eventName, helperView) {
+  helperView.listenTo(helperView.parent, eventName, <span class="keyword">function</span>() {
+    helperView.render();
+  });
+});</code></pre>
+<p>An example use of this would be to have a counter that would incriment each time a button was clicked. In Handlebars:
+
+</p>
+<pre><code>{{#on "incrimented"}}{{i}}{/on}}
+{{#button trigger="incrimented"}}Add{{/button}}</code></pre>
+<p>And the corresponding view class:
+
+</p>
+<pre><code><span class="keyword">new</span> Thorax.View({
+  events: {
+    incrimented: <span class="keyword">function</span>() {
+      ++<span class="keyword">this</span>.i;
+    }
+  },
+  initialize: <span class="keyword">function</span>() {
+    <span class="keyword">this</span>.i = <span class="number">0</span>;
+  },
+  template: ...
+});</code></pre>
+<p>In addition, if a view class is specified as the second argument to <code>registerViewHelper</code>, the helper will always initialize a view of that class instead of a <code>HelperView</code>:
+
+</p>
+<pre><code>Handlebars.registerViewHelper(<span class="string">'collection'</span>,
+  Thorax.CollectionHelperView, <span class="keyword">function</span>(collection, view) {
+
+});</code></pre>
+<h2 id="thorax.layout-view">Thorax.LayoutView</h2>
+<p>A view to contain a single other view which will change over time, (multi-pane single page applications for instance), triggering a series of events . By default this class has no template. If one is specified use the <code>layout</code> helper to determine where <code>setView</code> will place a view. A <code>Thorax.LayoutView</code> is a subclass of <code>Thorax.View</code> and may be treated as a view in every regard (i.e. embed multiple <code>LayoutView</code> instances in a parent view with the <code>view</code> helper).
+
+</p>
+<h3 id="set-view">setView <em>view.setView(view [,options])</em></h3>
+<p>Set the current view on the <code>LayoutView</code>, triggering <code>activated</code>, <code>ready</code> and <code>deactivated</code> events on the current and previous view during the lifecycle. <code>ensureRendered</code> is called on views passed to <code>setView</code>. By default <code>destroy</code> is called on the previous view when the new view is set. Pass <code>destroy: false</code> when setting a view to prevent it from being destroyed at a later time.
+
+</p>
+<h3 id="get-view">getView <em>view.getView()</em></h3>
+<p>Get the current view that was previously set with <code>setView</code>.
+
+</p>
+<h2 id="thorax.model">Thorax.Model</h2>
+<p>Enhances <code>Backbone.Model</code> with the concept of wether or not the model is populated and wether or not it should be automatically fetched. Note that when passing a model to <code>view.setModel</code> it must be an instance of <code>Thorax.Model</code> and not <code>Backbone.Model</code>.
+
+</p>
+<h3 id="is-empty">isEmpty <em>model.isEmpty()</em></h3>
+<p>Used by the <code>empty</code> helper. In a collection the implementations of <code>isEmpty</code> and <code>isPopulated</code> differ, but in a model <code>isEmpty</code> is an alias for <code>!isPopulated</code>.
+
+</p>
+<h3 id="is-populated">isPopulated <em>model.isPopulated()</em></h3>
+<p>Used by <code>setModel</code> to determine wether or not to fetch the model. The default implementation checks to see if any keys that are not <code>id</code> and are not default values have been set.
+
+</p>
+<h2 id="thorax.collection">Thorax.Collection</h2>
+<p>Enhances <code>Backbone.Collection</code> with the concept of wether or not the collection is populated and wether or not it should be automatically fetched. Note that when passing a collection to <code>view.setCollection</code> it must be an instance of <code>Thorax.Collection</code> and not <code>Backbone.Collection</code>.
+
+</p>
+<h3 id="is-empty">isEmpty <em>collection.isEmpty()</em></h3>
+<p>Used by the <code>empty</code> helper and the <code>emptyTemplate</code> and <code>emptyItem</code> options of a <code>CollectionView</code> to check wether a collection is empty. A collection is only treated as empty if it <code>isPopulated</code> and zero length.
+
+</p>
+<h3 id="is-populated">isPopulated <em>collection.isPopulated()</em></h3>
+<p>Used by <code>setCollection</code> to determine wether or not to fetch the collection.
+
+</p>
+<h2 id="thorax.collection-view">Thorax.CollectionView</h2>
+<p>A class that renders an <code>itemTemplate</code> or <code>itemView</code> for each item in a <code>collection</code> passed to it in it's constructor, or via <code>setCollection</code>. The view will automatically update when items are added, removed or changed. 
+
+</p>
+<p>The <code>collection</code> helper will automatically create and embed a <code>CollectionView</code> instance for you. If programatic access to the view's methods are needed (for instance calling <code>appendItem</code> or specifying an <code>itemFilter</code>) it's best to create a <code>CollectionView</code> directly and embed it with the <code>view</code> helper as you would any other view.
+
+</p>
+<h3 id="item-template">itemTemplate <em>view.itemTemplate</em></h3>
+<p>A template name or template function to use when rendering each model. If using the <code>collection</code> helper the passed block will become the <code>itemTemplate</code>. Defaults to <code>view.name + '-item'</code>
+
+</p>
+<h3 id="item-view">itemView <em>view.itemView</em></h3>
+<p>A view class to be initialized for each item. Can be used in conjunction with <code>itemTemplate</code>.
+
+</p>
+<h3 id="item-context">itemContext <em>view.itemContext(model, index)</em></h3>
+<p>A function in the declaring view to specify the context for an <code>itemTemplate</code>, recieves model and index as arguments. <code>itemContext</code> will not be used if an <code>itemView</code> is specified as the <code>itemView</code>'s own <code>context</code> method will instead be used.
+
+</p>
+<h3 id="item-filter">itemFilter <em>view.itemFilter(model, index)</em></h3>
+<p>A method, which if present will filter what items are rendered in a collection. Recieves <code>model</code> and <code>index</code> and must return boolean. The filter will be applied when models' fire a change event, or models are added and removed from the collection. To force a collection to re-filter, trigger a <code>filter</code> event on the collection.
+
+</p>
+<p>Items are hidden and shown with <code>$.hide</code> and <code>$.show</code> rather than being removed or appended. In performance critical views with large collections consider filtering the collection before it is passed to the view or on the server.
+
+</p>
+<h3 id="empty-template">emptyTemplate <em>view.emptyTemplate</em></h3>
+<p>A template name or template function to display when the collection is empty. If used in a <code>collection</code> helper the inverse block will become the <code>emptyTemplate</code>. Defaults to <code>view.name + '-empty'</code>
+
+</p>
+<h3 id="empty-view">emptyView <em>view.emptyView</em></h3>
+<p>A view class to create an instance of when the collection is empty. Can be used in conjunction with <code>emptyTemplate</code>.
+
+</p>
+<h3 id="loading-template">loadingTemplate <em>view.loadingTemplate</em></h3>
+<p>A template name or template function to display when the collection is loading.
+
+</p>
+<h3 id="loading-view">loadingView <em>view.loadingView</em></h3>
+<p>A view class to create an instance of when the collection is loading.  Can be used in conjunction with <code>loadingTemplate</code>.
+
+</p>
+<h3 id="loading-placement">loadingPlacement <em>view.loadingPlacement()</em></h3>
+<p>An index to place the <code>loadingView</code> or <code>loadingTemplate</code> at. Defaults to <code>this.collection.length</code>.
+
+</p>
+<h3 id="append-item">appendItem <em>view.appendItem(modelOrView [,index] [,options])</em></h3>
+<p>Append a model (which will used to generate a new <code>itemView</code> or render an <code>itemTemplate</code>) or a view at a given index in the <code>CollectionView</code>. If passing a view as the first argument <code>index</code> may be a model which will be used to look up the index.
+
+</p>
+<p>By default this will trigger a <code>rendered:item</code> event, <code>silent: true</code> may be passed in the options hash to prevent this. To also prevent the appeneded item from being filtered if an <code>itemFilter</code> is present pass <code>filter: false</code> in the options hash.
+
+</p>
+<h3 id="remove-item">removeItem <em>view.removeItem(model)</em></h3>
+<p>Remove an item from the view.
+
+</p>
+<h3 id="update-item">updateItem <em>view.updateItem(model)</em></h3>
+<p>Equivelent to calling <code>removeItem</code> then <code>appendItem</code>. Note that this is mainly meant to cover edge cases, by default changing a model will update the needed item (wether using <code>itemTemplate</code> or <code>itemView</code>).
+
+</p>
+<h2 id="thorax.util">Thorax.Util</h2>
+<h3 id="tag">tag <em>Thorax.Util.tag(name, htmlAttributes [,content] [,context])</em></h3>
+<p>Generate an HTML string. All built in HTML generation uses this method. If <code>context</code> is passed any Handlebars references inside of the htmlAttributes values will rendered with the context.
+
+</p>
+<pre><code>Thorax.Util.tag(<span class="string">"div"</span>, {
+  id: <span class="string">"div-{{number}}"</span>
+}, <span class="string">"content of the div"</span>, {
+  number: <span class="number">3</span>
+});</code></pre>
+<h2 id="$">$</h2>
+<h3 id="$.view">$.view <em>$(event.target).view([options])</em></h3>
+<p>Get a reference to the nearest parent view. Pass <code>helper: false</code> to options to exclude <code>HelperView</code>s from the lookup. Useful when registering DOM event handlers:
+
+</p>
+<pre><code>$(event.target).view();</code></pre>
+<h3 id="$.model">$.model <em>$(event.target).model([view])</em></h3>
+<p>Get a reference to the nearest bound model. Can be used with any <code>$</code> object but most useful in event handlers.
+
+</p>
+<pre><code>$(event.target).model();</code></pre>
+<p>A <code>view</code> may be optionally passed to limit the lookup to a specific view.
+
+</p>
+<h3 id="$.collection">$.collection <em>$(event.target).collection([view])</em></h3>
+<p>Get a reference to the nearest bound collection. Can be used with any <code>$</code> object but most useful in event handlers.
+
+</p>
+<pre><code>$(event.target).collection();</code></pre>
+<p>A <code>view</code> may be optionally passed to limit the lookup to a specific view.
+
+</p>
+<h2 id="event-enhancements">Event Enhancements</h2>
+<p>Thorax adds inheritable class events for all Thorax classes and significant enhancements to the Thorax.View event handling.
+
+</p>
+<h3 id="inheritable-events">Inheritable Events <em>ViewClass.on(eventName, callback)</em></h3>
+<p>All Thorax classes have an <code>on</code> method to observe events on all instances of the class. Subclasses inherit their parents' event handlers. Accepts any arguments that can be passed to <code>viewInstance.on</code> or declared in the <code>events</code> hash.
+
+</p>
+<pre><code>Thorax.View.on({
+  <span class="string">'click a'</span>: <span class="keyword">function</span>(event) {
+
+  }
+});</code></pre>
+<h3 id="model-events">Model Events</h3>
+<p>When a model is bound to a view with <code>setModel</code> (automatically called by passing a <code>model</code> option in the constructor) any events on the model can be observed by the view in this way. For instance to observe any model <code>change</code> event when it is bound to any view:
+
+</p>
+<pre><code>Thorax.View.on({
+  model: {
+    change: <span class="keyword">function</span>() {
+      <span class="comment">// "this" will refer to the view</span>
+    }
+  }
+});</code></pre>
+<h3 id="collection-events">Collection Events</h3>
+<p>When a collection is bound to a view with <code>setCollection</code> (automatically called by passing a <code>collection</code> option in the constructor) any events on the collection can be observed by the view in this way. For instance to observe any collection <code>reset</code> event when it is bound to any view:
+
+</p>
+<pre><code>Thorax.View.on({
+  collection: {
+    reset: <span class="keyword">function</span>() {
+      <span class="comment">// "this" will refer to the view</span>
+    }
+  }
+});</code></pre>
+<h3 id="view-events">View Events <em>view.events.viewEventName</em></h3>
+<p>The <code>events</code> hash has been enhanced to allow view events to be registered along side DOM events:
+
+</p>
+<pre><code>Thorax.View.extend({
+  events: {
+    <span class="string">'click a'</span>: <span class="keyword">function</span>(event) {},
+    rendered: <span class="keyword">function</span>() {}
+  }
+});</code></pre>
+<h3 id="dom-events">DOM Events <em>view.on(eventNameAndSelector, callback [,context])</em></h3>
+<p>The <code>on</code> method will now accept event strings in the same format as the events hash, for instance <code>click a</code>. Events separated by a space will still be treated as registering multiple events so long as the event name does not start with a DOM event name (<code>click</code>, <code>change</code>, <code>mousedown</code> etc).
+
+</p>
+<p>DOM events observed in this way will only operate on the view itself. If the view embeds other views with the <code>view</code> helper that would match the event name and selector, they will be ignored. For instance declaring:
+
+</p>
+<pre><code>view.on(<span class="string">'click a'</span>, <span class="keyword">function</span>(event) {})</code></pre>
+<p>Will only listen for clicks on <code>a</code> elements within the view. If the view has children that has <code>a</code> elements, this handler will not observe clicks on them.
+
+</p>
+<p>DOM events may be prefixed with the special keyword <code>nested</code> which will apply the event to all elements in child views:
+
+</p>
+<pre><code>view.on(<span class="string">'nested click a'</span>, <span class="keyword">function</span>() {})</code></pre>
+<p>Thorax will add an attribute to the event named <code>originalContext</code> that will be the <code>Element</code> object that would have been set as <code>this</code> had the handler been registered with jQuery / Zepto:
+
+</p>
+<pre><code>$(<span class="string">'a'</span>).on(<span class="string">'click'</span>, <span class="keyword">function</span>() {});
+view.on(<span class="string">'click a'</span>, <span class="keyword">function</span>(event) {
+  <span class="comment">// event.originalContext === what "this" would be in the</span>
+  <span class="comment">// first handler</span>
+});</code></pre>
+<h3 id="_add-event">_addEvent <em>view._addEvent(eventParams)</em></h3>
+<p>This method is never called directly, but can be specified to override the behavior of the <code>events</code> hash or any event arguments passed to <code>on</code>. For each event declared in either manner <code>_addEvent</code> will be called with a hash containing:
+
+</p>
+<ul>
+<li>type "view" || "DOM"</li>
+<li>name (DOM events will begin with ".delegateEvents")</li>
+<li>originalName</li>
+<li>selector (DOM events only)</li>
+<li>handler</li>
+</ul>
+<p>All of the behavior described in this section is implemented via this method, so if overriding make sure to call <code>Thorax.View.prototype._addEvent</code> in your child view.
+
+</p>
+<h2 id="data-loading">Data Loading</h2>
+<h3 id="queuing">Queuing</h3>
+<p>Thorax wraps <code>fetch</code> (and therefore <code>load</code>) on models and collections with a queuing mechansim to ensure that multiple <code>sync</code> calls for the same url will not trigger multiple HTTP requests. To force a <code>fetch</code> or <code>load</code> call to create a new HTTP request regardless of wether an identical request is in the queue use the <code>resetQueue</code> option:
+
+</p>
+<pre><code>model.fetch({
+  resetQueue: <span class="literal">true</span>
+  success: <span class="keyword">function</span>() {}
+});</code></pre>
+<h3 id="bind-to-route">bindToRoute <em>Thorax.Util.bindToRoute(callback [,failback])</em></h3>
+<p>Used by <code>model.load</code> and <code>collection.load</code>. Binds the callback to the current route. If the browser navigtates to another route in the time between when the callback is bound and when it is executed, callback will not be called. Else failback will be called if present.
+
+</p>
+<pre><code>routerMethod: <span class="keyword">function</span>() {
+  <span class="keyword">var</span> callback = Thorax.Util.bindToRoute(<span class="keyword">function</span>() {
+    <span class="comment">//callback called if browser is still on route</span>
+  });
+  setTimeout(callback, <span class="number">5000</span>);
+}</code></pre>
+<h3 id="load">load <em>modelOrCollection.load(callback [,failback] [,options])</em></h3>
+<p>Calls <code>fetch</code> on the model or collection ensuring the callbacks will only be called if the route does not change. <code>callback</code> and <code>failback</code> will be used as arguments to <code>bindToRoute</code>. <code>options</code> will be passed to the <code>fetch</code> call on the model or collection if present.
+
+</p>
+<pre><code>routerMethod: <span class="keyword">function</span>(id) {
+  <span class="keyword">var</span> view = <span class="keyword">new</span> Thorax.View();
+  <span class="keyword">var</span> model = <span class="keyword">new</span> Application.Model({id: id});
+  model.load(<span class="keyword">function</span>() {
+    <span class="comment">//callback only called if browser still on this route</span>
+    view.setModel(model);
+    myLayoutView.setView(view);
+  }, <span class="keyword">function</span>() {
+    <span class="comment">//failback only called if browser has left this route</span>
+  });
+}</code></pre>
+<p>Triggers <code>load:start</code> and <code>load:end</code> events on the model or collection, and additionally on a view if it has bound the object via <code>setModel</code> or <code>setCollection</code>.
+
+</p>
+<p>By default the events will propagate to a root object set with <code>setRootObject</code>. Pass <code>background: true</code> as an option to prevent the event from being triggered on the rootObject.
+
+
+</p>
+<h3 id="set-root-object">setRootObject <em>Thorax.setRootObject(obj)</em></h3>
+<p>Set the root object that will recieve <code>load:start</code> and <code>load:end</code> events if the <code>load:start</code> was not a <code>background</code> event. This is useful to implement a global loading indicator.
+
+</p>
+<h3 id="load-handler">loadHandler <em>Thorax.loadHandler(startCallback, endCallback)</em></h3>
+<p>Generates an <code>load:start</code> event handler that when triggered will then monitor the associated object for a <code>load:end</code> event. If the duration between the start and and the end events exceed <code>_loadingTimeoutDuration</code> then the <code>start</code> and <code>end</code> callbacks will be triggered at the appropriate times to allow the display of a loading UI.
+
+</p>
+<pre><code>view.on(<span class="string">"load:start"</span>, Thorax.loadHandler(
+  <span class="keyword">function</span>(message, background, object) {
+    view.$el.addClass(<span class="string">"loading"</span>);
+  },
+  <span class="keyword">function</span>(background, object) {
+    view.$el.removeClass(<span class="string">"loading"</span>);
+  }));</code></pre>
+<h3 id="_loading-class-name">_loadingClassName <em>view._loadingClassName</em></h3>
+<p>Class name to add and remove from a view's <code>el</code> when it is loading. Defaults to <code>loading</code>.
+
+</p>
+<h3 id="_loading-timeout-duration">_loadingTimeoutDuration <em>view._loadingTimeoutDuration</em></h3>
+<p>Timeout duration in seconds before a <code>load:start</code> callback will be triggered. Defaults to 0.33 seconds. If for instance the <code>load:end</code> event was triggered 0.32 seconds after the <code>load:start</code> event the <code>load:start</code> callback would not be called.
+
+</p>
+<h3 id="_loading-timeout-end-duration">_loadingTimeoutEndDuration <em>view._loadingTimeoutEndDuration</em></h3>
+<p>Just like <code>_loadingTimeoutDuration</code> but applies to <code>load:end</code>. Defaults to 0.10 seconds.
+
+</p>
+<h2 id="template-helpers">Template Helpers</h2>
+<h3 id="template">template <em>{{template name [options]}}</em></h3>
+<p>Embed a template inside of another, as a string. An associated view (if any) will not be initialized. By default the template will be called with the current context but extra options may be passed which will be added to the context.
+
+</p>
+<pre><code>{{template <span class="string">"path/to/template"</span> key=<span class="string">"value"</span>}}</code></pre>
+<p>If a block is used, the template will have a variable named <code>@yield</code> available that will contain the contents of the block.
+
+</p>
+<pre><code>{{#template <span class="string">"child"</span>}}
+  content <span class="keyword">in</span> the block will be available <span class="keyword">in</span> a variable 
+  named <span class="string">"@yield"</span> inside the template <span class="string">"child"</span>
+{{<span class="regexp">/template}}</span></code></pre>
+<p>This is useful when a child template will be called from multiple different parents.
+
+</p>
+<h3 id="super">super <em>{{super}}</em></h3>
+<p>Embed the <code>template</code> from the parent view within the child template.
+
+</p>
+<pre><code>{{super}}</code></pre>
+<h3 id="view">view <em>{{view name [options]}}</em></h3>
+<p>Embed one view in another. The first argument may be the name of a new view to initialize or a reference to a view that has already been initialized.
+
+</p>
+<pre><code>{{view <span class="string">"path/to/view"</span> key=<span class="string">"value"</span>}}
+{{view viewInstance}}</code></pre>
+<p>If a block is specified it will be assigned as the <code>template</code> to the view instance:
+
+</p>
+<pre><code>{{#view viewInstance}}
+  viewInstance will have this block
+  set as it's template property
+{{/view}}</code></pre>
+<h3 id="element">element <em>{{element name [options]}}</em></h3>
+<p>Embed a DOM element in the view. This uses a placeholder technique to work, if the placeholder must be of a certain type in order to be valid (for instance a <code>tbody</code> inside of a <code>table</code>) specify a <code>tag</code> option.
+
+</p>
+<pre><code>{{element domElement tag=<span class="string">"tbody"</span>}}</code></pre>
+<h3 id="button">button <em>{{#button methodName [htmlAttributes...]}}</em></h3>
+<p>Creates a <code>button</code> tag that will call the specified methodName on the view when clicked. Arbitrary HTML attributes can also be specified.
+
+</p>
+<pre><code>{{#button <span class="string">"methodName"</span> class=<span class="string">"btn"</span>}}Click Me{{<span class="regexp">/button}}</span></code></pre>
+<p>The tag name may also be specified:
+
+</p>
+<pre><code>{{#button <span class="string">"methodName"</span> tag=<span class="string">"a"</span> class=<span class="string">"btn"</span>}}A Link{{<span class="regexp">/button}}</span></code></pre>
+<p>A <code>trigger</code> attribute will trigger an event on the declaring view:
+
+</p>
+<pre><code>{{#button trigger=<span class="string">"eventName"</span>}}Button{{<span class="regexp">/button}}</span></code></pre>
+<p>A button can have both a <code>trigger</code> attribute and a method to call:
+
+</p>
+<pre><code>{{#button <span class="string">"methodName"</span> trigger=<span class="string">"eventName"</span>}}Button{{<span class="regexp">/button}}</span></code></pre>
+<p>The method may also be specified as a <code>method</code> attribute:
+
+</p>
+<pre><code>{{#button method=<span class="string">"methodName"</span>}}Button{{<span class="regexp">/button}}</span></code></pre>
+<h3 id="url">url <em>{{url urlString expand-tokens=bool}}</em></h3>
+<p>Prepends "#" if <code>Backbone.history.pushSate</code> is disabled or prepends <code>Backbone.history.root</code> if it is enabled. If <code>expand-tokens=true</code> is passed, then any handlebars tokens will be resolved with the current context. For example if the context had an <code>id</code> attribute <code>{{id}}</code> would be replaced with the value of <code>id</code>:
+
+</p>
+<pre><code>{{url <span class="string">"articles/{{id}}"</span> expand-tokens=<span class="literal">true</span>}}</code></pre>
+<p>Multiple arguments can be passed and will be joined with a "/":
+
+</p>
+<pre><code>{{url <span class="string">"articles"</span> id}}</code></pre>
+<h3 id="link">link <em>{{#link url [htmlAttributes...]}}</em></h3>
+<p>Creates an <code>a</code> tag that will call <code>Backbone.history.navigate()</code> with the given url when clicked. Passes the <code>url</code> parameter to the <code>url</code> helper with the current context. Do not use this method for creating external links. Like the <code>url</code> helper, multiple arguments may be passed as well as an <code>expand-tokens</code> option.
+
+</p>
+<pre><code>{{#link <span class="string">"articles/{{id}}"</span> expand-tokens=<span class="literal">true</span> class=<span class="string">"article-link"</span>}}Link Text{{<span class="regexp">/link}}</span></code></pre>
+<p>To call a method from an <code>a</code> tag use the <code>button</code> helper:
+
+</p>
+<pre><code>{{#button <span class="string">"methodName"</span> tag=<span class="string">"a"</span>}}My Link{{<span class="regexp">/button}}</span></code></pre>
+<p>Like the <code>button</code> helper, a <code>trigger</code> attribute may be specified that will trigger an event on the delcaring view in addition to navigating to the specified url:
+
+</p>
+<pre><code>{{#link <span class="string">"articles"</span> id trigger=<span class="string">"customEvent"</span>}}Link Text{{<span class="regexp">/link}}</span></code></pre>
+<p>The href attribute is required but may also be specified as an attribute:
+
+</p>
+<pre><code>{{#link href=<span class="string">"articles/{{id}}"</span> expand-tokens=<span class="literal">true</span>}}Link Test{{<span class="regexp">/link}}</span></code></pre>
+<h3 id="collection">collection <em>{{collection [collection] [options...]}}</em></h3>
+<p>Creates and embeds a <code>CollectionView</code> instance, updating when items are added, removed or changed in the collection. If a block is passed it will be used as the <code>item-template</code>, which will be called with a context of the <code>model.attributes</code> for each model in the collection.
+
+</p>
+<pre><code>{{#collection tag="ul"}}
+  &lt;li&gt;{{modelAttr}}&lt;/li&gt;
+{{/collection}}</code></pre>
+<p>Options may contain <code>tag</code>, <code>class</code>, <code>id</code> and the following attributes which will map to the generated <code>CollectionView</code> instance:
+
+</p>
+<ul>
+<li><code>item-template</code> → <code>itemTemplate</code></li>
+<li><code>item-view</code> → <code>itemView</code></li>
+<li><code>empty-template</code> → <code>emptyTemplate</code></li>
+<li><code>empty-view</code> → <code>emptyView</code></li>
+<li><code>loading-template</code> → <code>loading-template</code></li>
+<li><code>loading-view</code> → <code>loadingView</code></li>
+</ul>
+<p>Any of the options can be specified as variables in addition to strings:
+
+</p>
+<pre><code>{{collection item-view=itemViewClass}}</code></pre>
+<p>By default the collection helper will look for <code>this.collection</code>, but if your view contains multiple collections a collection argument may be passed:
+
+</p>
+<pre><code>{{collection myCollection}}</code></pre>
+<p>When rendering <code>this.collection</code> many properties will be forwarded from the view that is declaring the collection helper to the generated <code>CollectionView</code> instance:
+
+</p>
+<ul>
+<li><code>itemTemplate</code></li>
+<li><code>itemView</code></li>
+<li><code>itemContext</code></li>
+<li><code>itemFilter</code></li>
+<li><code>emptyTemplate</code></li>
+<li><code>emptyView</code></li>
+<li><code>loadingTemplate</code></li>
+<li><code>loadingView</code></li>
+<li><code>loadingPlacement</code></li>
+</ul>
+<p>As a result the following two views are equivelenet:
+
+</p>
+<pre><code><span class="comment">// render with collection helper, collection</span>
+<span class="comment">// properties are forwarded</span>
+<span class="keyword">var</span> view = <span class="keyword">new</span> Thorax.View({
+  collection: <span class="keyword">new</span> Thorax.Collection(),
+  itemView: MyItemClass,
+  itemContext: <span class="keyword">function</span>(model, i) {
+    <span class="keyword">return</span> model.attributes;
+  },
+  template: Handlebars.compile(<span class="string">'{{collection}}'</span>)
+});
+
+<span class="comment">// directly create collection view, no property</span>
+<span class="comment">// forwarding will occur </span>
+<span class="keyword">var</span> view = <span class="keyword">new</span> Thorax.View({
+  collectionView: <span class="keyword">new</span> Thorax.CollectionView({
+    collection: <span class="keyword">new</span> Thorax.Collection(),
+    itemView: MyItemClass
+    itemContext: <span class="keyword">function</span>(model, i) {
+      <span class="keyword">return</span> model.attributes;
+    }
+  }),
+  template: Handlebars.compile(<span class="string">'{{view collectionView}}'</span>)
+});</code></pre>
+<h3 id="empty">empty <em>{{#empty [modelOrCollection]}}</em></h3>
+<p>A conditional helper much like <code>if</code> that calls <code>isEmpty</code> on the specified object. In addition it will bind events to re-render the view should the object's state change from empty to not empty, or visa versa.
+
+</p>
+<pre><code>{{#empty collection}}
+  So empty!
+{{else}}
+  {{#collection}}{{/collection}}
+{{/empty}}</code></pre>
+<p>To embed a row within a <code>collection</code> helper if it the collection is empty, specify an <code>empty-view</code> or <code>empty-template</code>. Or use the <code>else</code> block of the <code>collection</code> helper:
+
+</p>
+<pre><code>{{#collection tag="ul"}}
+  &lt;li&gt;Some very fine data&lt;/li&gt;
+{{else}}
+  &lt;li&gt;So very empty&lt;/li&gt;
+{{/collection}}</code></pre>
+<h3 id="collection-element">collection-element <em>{{collection-element [htmlAttributes...]}}</em></h3>
+<p>By default <code>Thorax.CollectionView</code> instances have no template. Items will be appended to and removed from the view's <code>el</code>. Alternatively a template can be specified and <code>collection-element</code> used to specify where the individal items in a collection will be rendered.
+
+</p>
+<pre><code>&lt;div&gt;
+  {{collection-element tag=<span class="string">"ul"</span> class=<span class="string">"my-list"</span>}}
+&lt;<span class="regexp">/div&gt;</span></code></pre>
+<h3 id="layout-element">layout-element <em>{{layout-element [htmlAttributes...]}}</em></h3>
+<p>By default <code>Thorax.LayoutView</code> instances have no template, <code>setView</code> will append directly to the view's <code>el</code>. Alternatively a template can be specified and a <code>layout-element</code> and <code>setView</code> will append to that element.
+
+</p>
+<pre><code>&lt;ul&gt;
+  {{layout-element tag=<span class="string">"li"</span> id=<span class="string">"my-layout"</span>}}
+&lt;<span class="regexp">/ul&gt;</span></code></pre>
+<h3 id="loading">loading <em>{{#loading}}</em></h3>
+<p>A block helper to use when the view is loading. For collection specific loading the a <code>CollectionView</code> accepts <code>loadingView</code> and <code>loadingTemplate</code> options to append an item in a collection when it is loading.
+
+</p>
+<pre><code>{{#loading}}
+  View is loading a model or collection.
+{{<span class="keyword">else</span>}}
+  View is not loading a model or collection.
+{{<span class="regexp">/loading}}</span></code></pre>
+<h2 id="catalog-of-built-in-events">Catalog of Built-in Events</h2>
+<h3 id="rendered">rendered <em>rendered ()</em></h3>
+<p>Triggered on a view when the <code>rendered</code> method is called.
+
+</p>
+<h3 id="child">child <em>child (instance)</em></h3>
+<p>Triggered on a view every time a child view is appened into the view with the <code>view</code> helper.
+
+</p>
+<h3 id="ready">ready <em>ready (options)</em></h3>
+<p>Triggered when a view is append to the DOM with <code>appendTo</code> or when a view is appeneded to a <code>LayoutView</code> via <code>setView</code>. Setting focus and other behaviors that depend on the view being present in the DOM should be handled in this event.
+
+</p>
+<p>This event propagates to all children, including children that will be bound after the view is created. <code>options</code> will contain a <code>target</code> view, which is the view that triggered the event.
+
+</p>
+<h3 id="activated">activated <em>activated (options)</em></h3>
+<p>Triggered on a view immediately after it was passed to a <code>LayoutView</code>'s <code>setView</code> method. Like <code>ready</code> this event propagates to children and the <code>options</code> hash will contain a <code>target</code> view.
+
+</p>
+<h3 id="deactivated">deactivated <em>deactivated (options)</em></h3>
+<p>Triggered on a view when it was previously passed to the <code>setView</code> method on a <code>LayoutView</code>, and then another view is passed to <code>setView</code>. Triggered when the current view's <code>el</code> is still attached to the parent. Like <code>ready</code> this event propagates to children and the <code>options</code> hash will contain a <code>target</code> view.
+
+</p>
+<h3 id="destroyed">destroyed <em>destroyed ()</em></h3>
+<p>Triggered on a view when the <code>destroy</code> method is called. Useful for implementing custom view cleanup behaviors. <code>destroy</code> will be also be called if it was previously passed to the <code>setView</code> method on a <code>LayoutView</code>, and then another view is passed to <code>setView</code>.
+
+</p>
+<h3 id="change:view:start">change:view:start <em>change:view:start (newView [,oldView] ,options)</em></h3>
+<p>Trigged on a <code>Thorax.LayoutView</code> immediately after <code>setView</code> is called.
+
+</p>
+<h3 id="change:view:end">change:view:end <em>change:view:end (newView [,oldView] ,options)</em></h3>
+<p>Trigged on a <code>Thorax.LayoutView</code> after <code>setView</code> is called, the old view has been destroyed (if present) and the new view has been attached to the DOM and had it's <code>ready</code> event triggered.
+
+</p>
+<h3 id="helper">helper <em>helper (name [,args...] ,helperView)</em></h3>
+<p>Triggered on a view when a view helper (such as <code>collection</code>, <code>empty</code>, etc) create a new <code>HelperView</code> instance.
+
+</p>
+<h3 id="helper:name">helper:name <em>helper:name ([,args...] ,helperView)</em></h3>
+<p>Triggered on a view when a given view helper creates a new <code>HelperView</code> instance.
+
+</p>
+<pre><code>{{#collection cats}}{{/collection}}
+
+view.on('helper:collection', function(collection, collectionView) {
+
+});</code></pre>
+<h3 id="serialize">serialize <em>serialize (attributes)</em></h3>
+<p>Triggered on a view when <code>serialize</code> is called, before <code>validateInput</code> is called with the serialized attributes.
+
+</p>
+<h3 id="validate">validate <em>validate (attributes, errors)</em></h3>
+<p>Triggered on a view when <code>serialize</code> is called, passed an an attributes hash and errors array after <code>validateInput</code> is called. Use in combination with the <code>error</code> event to display and clear errors from your views.
+
+</p>
+<pre><code>Thorax.View.on({
+  validate: <span class="keyword">function</span>(attributes, errors) {
+    <span class="comment">//clear previous errors if present</span>
+  },
+  error: <span class="keyword">function</span>(errors) {
+    errors.forEach(<span class="keyword">function</span>(error) {
+      <span class="comment">//lookup input by error.name</span>
+      <span class="comment">//display error from error.message</span>
+    });
+  }
+});</code></pre>
+<h3 id="error">error <em>error (errors)</em></h3>
+<p>Triggered on a view when <code>serialize</code> is called, if validateInput returned an array with any errors.
+
+</p>
+<h3 id="populate">populate <em>populate (attributes)</em></h3>
+<p>Triggered on a view when <code>populate</code> is called. Passed a hash containing the attributes that the view will be populated with.
+
+</p>
+<h3 id="load:start">load:start <em>load:start (message, background, target)</em></h3>
+<p>Triggered on a model or collection by <code>fetch</code> or <code>load</code> and on a view if it has bound the model or collection with <code>setModel</code> or <code>setCollection</code>. Always generate a handler for a <code>load:start</code> event with <code>Thorax.loadHandler</code>.
+
+</p>
+<h3 id="load:end">load:end <em>load:end (target)</em></h3>
+<p>Triggered on a model or collection by <code>fetch</code> or <code>load</code> and on a view if it has bound the model or collection with <code>setModel</code> or <code>setCollection</code>. Never observe this directly, always use <code>Thorax.loadHandler</code> on <code>load:start</code>.
+
+</p>
+<h3 id="rendered:collection">rendered:collection <em>rendred:collection (collectionView, collection)</em></h3>
+<p>Triggered on a <code>CollectionView</code> or a the view calling the <code>collection</code> helper every time <code>render</code> is called on the <code>CollectionView</code>.
+
+</p>
+<h3 id="rendered:item">rendered:item <em>rendered:item (collectionView, collection, model, itemElement, index)</em></h3>
+<p>Triggered on a <code>CollectionView</code> or a the view calling the <code>collection</code> helper every time an item is rendered in the <code>CollectionView</code>.
+
+</p>
+<h3 id="rendered:empty">rendered:empty <em>rendered:empty (collectionView, collection)</em></h3>
+<p>Triggered on a <code>CollectionView</code> or a the view calling the <code>collection</code> helper every time the <code>emptyView</code> or <code>emptyTemplate</code> is rendered in the <code>CollectionView</code>.
+
+</p>
+<h2 id="html-attributes">HTML Attributes</h2>
+<p>Thorax and it's view helpers generate a number of custom HTML attributes that may be useful in debugging or generating CSS selectors to be used as arguments to <code>$</code> or to create CSS. The <code>*-cid</code> attributes are generally used only internally. See <code>$.model</code>, <code>$.collection</code> and <code>$.view</code> to get a reference to objects directly from the DOM. The <code>*-name</code> attributes will only be present if the given objects have a <code>name</code> property.</p>
+
+
+<table class="table table-bordered table-striped">
+  <thead>
+    <tr>
+      <th>Attribute Name</th>
+      <th>Attached To</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td><code>data-view-cid</code></td><td>Every view instances' <code>el</code></td></tr>
+    <tr><td><code>data-view-name</code></td><td>Same as above, only present on named views</td></tr>
+    <tr><td><code>data-collection-cid</code></td><td>Element generated by the <code>collection helper</code></td></tr>
+    <tr><td><code>data-collection-name</code></td><td>Same as above, only present when the bound collection is named</td></tr>
+    <tr><td><code>data-collection-empty</code></td><td>Set to "true" or "false" depending on wether the bound collection <code>isEmpty</code></td></tr>
+    <tr><td><code>data-collection-element</code></td><td>Set by the <code>collection-element</code>, determines where a collection in a <code>CollectionView</code> will be rendered.</td></tr>
+    <tr><td><code>data-model-cid</code></td><td>A view's <code>el</code> if a model was bound to the view or each item element inside of elements generated by the collection helper</td></tr>
+    <tr><td><code>data-model-name</code></td><td>Same as above, only present if the model is named</td></tr>
+    <tr><td><code>data-layout-cid</code></td><td>The element generated by the <code>layout</code> helper or <code>el</code> inside of a <code>LayoutView</code> or <code>ViewController</code> instance</td></tr>
+    <tr><td><code>data-view-helper</code></td><td>Elements generated by various helpers including <code>collection</code> and <code>empty</code> from the collection plugin</td></tr>
+    <tr><td><code>data-call-method</code></td><td>Elements generated by the <code>link</code> and <code>button</code> helpers</td></tr>
+    <tr><td><code>data-trigger-event</code></td><td>Elements generated by the <code>link</code> and <code>button</code> helpers</td></tr>
+  </tbody>
+</table>
+
+<p>When creating CSS selectors it's recommended to use the generated attributes (especially <code>data-view-name</code>) rather than assigning custom IDs or class names for the sole purpose of styling.
+
+</p>
+<pre><code>[data-view-name=<span class="string">"my-view-name"</span>] {
+  border: <span class="number">1</span>px solid #ccc;
+}</code></pre>
+<h2 id="error-handling">Error Handling</h2>
+<h3 id="on-exception">onException <em>Thorax.onException(name, error)</em></h3>
+<p>Bound DOM event handlers in Thorax are wrapped with a try / catch block, calling this function if an error is caught. This hook is provided primarily to allow for easier debugging in Android environments where it is difficult to determine the source of the error. The default error handler is simply:
+
+</p>
+<pre><code>Thorax.onException = <span class="keyword">function</span>(name, error) {
+  <span class="keyword">throw</span> error;
+};</code></pre>
+<p>Override this function with your own logging / debugging handler. <code>name</code> will be the event name where the error was thrown.</p>
+      </div>
+      <footer class="footer">
+        <p><small>Copyright 2013 <a href="http://walmartlabs.com">@WalmartLabs</a></small></p>
+      </footer>
+
+    </div>
+    
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+    <script>window.jQuery || document.write('<script src="/js/vendor/jquery-1.8.2.min.js"><\/script>')</script>
+
+    <script src="/js/compiled/site.js"></script>
+  </body>
+</html>

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>Thorax: Backbone + Handlebars</title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="canonical" href="http://thoraxjs.org/tutorials/"/>
+
+  <script type="text/javascript" src="//use.typekit.net/vyf6wqz.js"></script>
+  <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
+
+  <link rel="stylesheet" href="/css/main.css">
+
+  <script src="/js/vendor/modernizr-2.6.2.min.js"></script>
+
+  <!--[if (lt IE 9) & (!IEMobile)]>
+  <script>yepnope('/css/ie.css')</script>
+  <![endif]-->
+</head>
+<body class="content tutorial-page">
+<a class="github-banner" href="https://github.com/walmartlabs/thorax">
+  <img src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub">
+</a>
+<header id="top" class="header clearfix">
+  <div class="l-constrained">
+    <h1 class="logo"><a href="/">Thor<span>a</span>x</a></h1>
+
+    <nav class="nav">
+      <ul>
+        <li><a href="/start.html">Getting Started</a></li>
+        <li><a href="/api.html">API Reference</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+<div class="l-constrained">
+
+
+
+  
+  <h1>Getting Started</h1>
+  <div class="l-row clearfix">
+    <div class="l-col2">
+      <h2 id="tutorials">Tutorials</h2>
+<h3><a href="https://github.com/walmartlabs/thorax-seed/blob/master/README.md">From zero to todos</a></h3>
+<p>Did you enjoy the <a href="http://vimeo.com/60230630">screencast</a>? Learn how to build your own simple todos app from scratch, with <a href="https://github.com/walmartlabs/thorax-seed/blob/master/README.md">step by step explanations</a> of how the app was built.
+
+</p>
+<h3><a href="http://addyosmani.github.com/backbone-fundamentals/#thorax">Thorax in Backbone Fundamentals</a></h3>
+<p>Read an overview of the features of Thorax, as well as some of the theory behind some of the implementation details.
+
+</p>
+<h3><a href="http://addyosmani.github.com/backbone-fundamentals/#route-based-module-loading">Route Based Module Loading</a></h3>
+<p><a href="http://addyosmani.github.com/backbone-fundamentals/">Backbone Fundamentals</a> also covers <a href="http://walmartlabs.github.com/lumbar">Lumbar's</a> approach to modular application development and routing, which is used in all of the seed projects except the standalone and Rails seeds.
+
+</p>
+<h3 id="todo-mvc">TodoMVC</h3>
+<p>See the <a href="http://addyosmani.github.com/todomvc/labs/architecture-examples/thorax/">TodoMVC Thorax implementation</a> and it's <a href="https://github.com/addyosmani/todomvc/tree/gh-pages/labs/architecture-examples/thorax">source code</a>. There is also a <a href="https://github.com/addyosmani/todomvc/tree/gh-pages/labs/dependency-examples/thorax_lumbar">Lumbar flavored version</a> of the implementation.
+</p>
+
+    </div>
+    <div class="l-col2">
+      <h2 id="resources">Resources</h2>
+<h3 id="seeds">Seeds</h3>
+<p>Cloning a seed is the easiest way to get started building your own project.
+
+</p>
+<ul>
+<li><a href="https://github.com/walmartlabs/thorax-seed">Root Seed</a></li>
+<li><a href="https://github.com/eastridge/thorax-seed-mocha">with Mocha test harness</a></li>
+<li><a href="https://github.com/eastridge/thorax-seed-todos">with simple Todos</a></li>
+<li><a href="https://github.com/walmartlabs/thorax-boilerplate/blob/master/rails.zip?raw=true">Rails Seed (zip)</a></li>
+<li><a href="https://github.com/walmartlabs/thorax-boilerplate/blob/master/standalone.zip?raw=true">Standalone / HTML only Seed (zip)</a></li>
+</ul>
+<h3 id="chrome-inspector-extension">Chrome Inspector Extension</h3>
+<p>Chrome users can install the <a href="https://chrome.google.com/webstore/detail/thorax-inspector/poioalbefcopgeaeaadelomciijaondk">Thorax Inspector</a> Chrome extension which will allow you to inspect any element and see the associated Thorax views, models and collections that may be bound. The <a href="https://github.com/walmartlabs/thorax-seed">Thorax Seed</a> also integrates the <a href="https://npmjs.org/package/thorax-inspector">thorax-inspector</a> npm package which allows you to open files in your project that relate to a given element, directly from Chrome.
+
+</p>
+<h3 id="cdnjs">cdnjs</h3>
+<p>Thorax is available on <a href="http://cdnjs.com/">cdnjs</a>, each build includes jQuery 1.9.0 (or Zepto 1.0.0rc1 on mobile), Backbone 0.9.9, Underscore 1.4.2 and Handlebars 1.0.0rc6.
+
+</p>
+<ul>
+<li><a href="http://cdnjs.cloudflare.com/ajax/libs/thorax/2.0.0rc3/thorax.js">Thorax</a></li>
+<li><a href="http://cdnjs.cloudflare.com/ajax/libs/thorax/2.0.0rc3/thorax.min.js">Thorax (compressed)</a></li>
+<li><a href="http://cdnjs.cloudflare.com/ajax/libs/thorax/2.0.0rc3/thorax-mobile.js">Thorax Mobile</a></li>
+<li><a href="http://cdnjs.cloudflare.com/ajax/libs/thorax/2.0.0rc3/thorax-mobile.min.js">Thorax Mobile (compressed)</a></li>
+</ul>
+
+    </div>
+  </div>
+
+      <footer class="footer">
+        <p><small>Copyright 2013 <a href="http://walmartlabs.com">@WalmartLabs</a></small></p>
+      </footer>
+
+    </div>
+    
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+    <script>window.jQuery || document.write('<script src="/js/vendor/jquery-1.8.2.min.js"><\/script>')</script>
+    
+    <script src="/js/compiled/site.js"></script>
+  </body>
+</html>

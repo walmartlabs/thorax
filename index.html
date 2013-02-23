@@ -1,581 +1,261 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>Thorax: Backbone + Handlebars</title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="canonical" href="http://thoraxjs.org/"/>
 
-<html>
-  <head>
-    <meta charset="utf-8">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thorax: Backbone + Handlebars</title>
-    
-    <link rel="stylesheet" type="text/css" href="screen.css">
-    
-    
+  <script type="text/javascript" src="//use.typekit.net/vyf6wqz.js"></script>
+  <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
 
-    
+  <link rel="stylesheet" href="/css/main.css">
 
-    <!-- Typekit -->
-    
-      <script type="text/javascript">
-        (function() {
-          var config = {
-            kitId: 'hjp0pft',
-            scriptTimeout: 3000
-          };
-          var h=document.getElementsByTagName("html")[0];h.className+=" wf-loading";var t=setTimeout(function(){h.className=h.className.replace(/( |^)wf-loading( |$)/g,"");h.className+=" wf-inactive"},config.scriptTimeout);var tk=document.createElement("script");tk.src='//use.typekit.net/'+config.kitId+'.js';tk.type="text/javascript";tk.async="true";tk.onload=tk.onreadystatechange=function(){var a=this.readyState;if(a&&a!="complete"&&a!="loaded")return;clearTimeout(t);try{Typekit.load(config)}catch(b){}};var s=document.getElementsByTagName("script")[0];s.parentNode.insertBefore(tk,s)
-        })();
-      </script>
-    
-  </head>
-  <body><div id="container">
-  <div id="nav">
-    
-      <div id="header">
-        <a href="#" id="logo">Thorax</a>
-      </div>
-    
-    <ul id="sections">
-      
-        <li>
-          <a href="#registry">Registry</a>
-          
-            <ul>
-              
-                <li>
-                  <a href="#registry/name-klass-prototype-name">name </a>
-                </li>
-              
-                <li>
-                  <a href="#registry/templates-thorax-templates">templates </a>
-                </li>
-              
-            </ul>
-          
-        </li>
-      
-        <li>
-          <a href="#thorax-view">Thorax.View</a>
-          
-            <ul>
-              
-                <li>
-                  <a href="#thorax-view/children-view-children">children </a>
-                </li>
-              
-                <li>
-                  <a href="#thorax-view/parent-view-parent">parent </a>
-                </li>
-              
-                <li>
-                  <a href="#thorax-view/template-view-template">template </a>
-                </li>
-              
-                <li>
-                  <a href="#thorax-view/destroy-view-destroy-options">destroy </a>
-                </li>
-              
-                <li>
-                  <a href="#thorax-view/render-view-render-content">render </a>
-                </li>
-              
-                <li>
-                  <a href="#thorax-view/context-view-context">context </a>
-                </li>
-              
-                <li>
-                  <a href="#thorax-view/rendertemplate-view-rendertemplate-name-extracontext-ignoreerrors">renderTemplate </a>
-                </li>
-              
-                <li>
-                  <a href="#thorax-view/ensurerendered-view-ensurerendered">ensureRendered </a>
-                </li>
-              
-                <li>
-                  <a href="#thorax-view/html-view-html-content">html </a>
-                </li>
-              
-            </ul>
-          
-        </li>
-      
-        <li>
-          <a href="#view-helpers">View Helpers</a>
-          
-            <ul>
-              
-                <li>
-                  <a href="#view-helpers/super-super">super </a>
-                </li>
-              
-                <li>
-                  <a href="#view-helpers/template-template-name-options">template </a>
-                </li>
-              
-                <li>
-                  <a href="#view-helpers/view-view-name-options">view </a>
-                </li>
-              
-                <li>
-                  <a href="#view-helpers/element-element-name-options">element </a>
-                </li>
-              
-                <li>
-                  <a href="#view-helpers/registerviewhelper-handlebars-registerviewhelper-name-viewclass-callback">registerViewHelper </a>
-                </li>
-              
-            </ul>
-          
-        </li>
-      
-        <li>
-          <a href="#util">Util</a>
-          
-            <ul>
-              
-                <li>
-                  <a href="#util/tag-thorax-util-tag-name-htmlattributes-content-context">tag </a>
-                </li>
-              
-            </ul>
-          
-        </li>
-      
-        <li>
-          <a href="#">$</a>
-          
-            <ul>
-              
-                <li>
-                  <a href="#/view-event-target-view-options">$.view </a>
-                </li>
-              
-            </ul>
-          
-        </li>
-      
-        <li>
-          <a href="#events">Events</a>
-          
-            <ul>
-              
-                <li>
-                  <a href="#events/destroyed-destroyed">destroyed </a>
-                </li>
-              
-                <li>
-                  <a href="#events/rendered-rendered">rendered </a>
-                </li>
-              
-                <li>
-                  <a href="#events/child-child-instance">child </a>
-                </li>
-              
-                <li>
-                  <a href="#events/helper-helper-name-args-helperview">helper </a>
-                </li>
-              
-                <li>
-                  <a href="#events/helper-name-helper-name-args-helperview">helper:name </a>
-                </li>
-              
-            </ul>
-          
-        </li>
-      
-        <li>
-          <a href="#html-attributes">HTML Attributes</a>
-          
-        </li>
-      
-        <li>
-          <a href="#command-line">Command Line</a>
-          
-            <ul>
-              
-                <li>
-                  <a href="#command-line/build-thorax-build-target-plugin-plugin">build </a>
-                </li>
-              
-                <li>
-                  <a href="#command-line/templates-thorax-templates-templates-templates-js">templates </a>
-                </li>
-              
-            </ul>
-          
-        </li>
-      
-        <li>
-          <a href="#error-handling">Error Handling</a>
-          
-            <ul>
-              
-                <li>
-                  <a href="#error-handling/onexception-thorax-onexception-name-error">onException </a>
-                </li>
-              
-            </ul>
-          
-        </li>
-      
-    </ul><div class="header"><a href="#">Plugins</a></div><ul class="sections"><li><a href="collection.html">Collection</a></li><li><a href="event.html">Event</a></li><li><a href="form.html">Form</a></li><li><a href="helpers.html">Helpers</a></li><li><a href="loading.html">Loading</a></li><li><a href="mobile.html">Mobile</a></li><li><a href="model.html">Model</a></li><li><a href="view-controller.html">ViewController</a></li></ul>
-    
-    
+  <script src="/js/vendor/modernizr-2.6.2.min.js"></script>
+
+  <!--[if (lt IE 9) & (!IEMobile)]>
+  <script>yepnope('/css/ie.css')</script>
+  <![endif]-->
+</head>
+<body class="content">
+<a class="github-banner" href="https://github.com/walmartlabs/thorax">
+  <img src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub">
+</a>
+<header class="header clearfix">
+  <div class="l-constrained">
+    <h1 class="logo"><a href="/">Thor<span>a</span>x</a></h1>
+
+    <nav class="nav">
+      <ul>
+        <li><a href="/start.html">Getting Started</a></li>
+        <li><a href="/api.html">API Reference</a></li>
+      </ul>
+    </nav>
   </div>
-  <div id="content"><h1 id="title">Thorax</h1>
-    
-    <p>An opinionated, battle tested <a href="http://backbonejs.org/">Backbone</a> + <a href="http://handlebarsjs.com/">Handlebars</a> framework to build large scale web applications. 
+</header>
+
+
+<div class="hero clearfix">
+  <div class="hero-content l-constrained">
+    <h2 class="tagline">An opinionated, battle-tested <a href="http://backbonejs.org/">Backbone</a> + <a href="http://handlebarsjs.com">Handlebars</a> framework to build large scale web applications.</h2>
+
+    <a class="btn btn-primary btn-large" href="https://github.com/walmartlabs/thorax-seed">Clone Seed Project</a>
+
+    <ul class="resources">
+        <li><a class="btn icon icon-play js-screencast" href="http://vimeo.com/60230630">Screencast</a></li>
+        <li><a class="btn icon icon-book" href="/start.html">Getting Started</a></li>
+        <li><a class="btn icon icon-list" href="/api.html">API Reference</a></li>
+      </ul>
+  </div>
+  <div class="video">
+    <div class="l-constrained">
+      <button class="close-btn js-screencast">Close Video</button>
+      <!-- Vimeo Embed src must include &amp;api=1 at the end -->
+      <div class="video-container"><iframe src="http://player.vimeo.com/video/60230630?title=0&amp;byline=0&amp;portrait=0&amp;badge=0&amp;api=1" width="853" height="480" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe></div>
+    </div>
+  </div>
+</div>
+
+<div class="l-constrained">
+  <div class="used-by">
+    <p class="used-by-caption">Used By</p>
+    <ul class="used-by-list">
+      <li><a class="ir used-by-walmart" href="http://walmart.com">Walmart</a></li>
+      <li><a class="ir used-by-asda" href="http://asda.com">ASDA</a></li>
+      <li><a class="ir used-by-metalab" href="http://metalabdesign.com">Metalab</a></li>
+    </ul>
+  </div>
+  <div class="l-row clearfix">
+    <div class="l-col3">
+      <div class="l-col2 l-nested-first clearfix">
+        <h2 id="hello-world">Hello World</h2>
+<p>Thorax is used to build some of the biggest Backbone applications in the world but it's easy to get started.
 
 </p>
-<table cellpadding="0" cellspacing="0" border="0" width="100%" id="downloads">
-  <tr>
-    <td width="25%">
-      <h3>Standalone</h3>
-      <p>Open the <code>index.html</code> file from the downloaded project in your browser.</p>
-    </td>
-    <td width="25%">
-      <h3>Node + <a href="http://walmartlabs.github.com/lumbar">Lumbar</a></h3>
-      <p>Run <code>npm start</code> from the downloaded project.</p>
-    </td>
-    <td width="25%">
-      <h3>Mobile</h3>
-      <p>Run <code>npm start</code> from the downloaded project.</p>
-    </td>
-    <td width="25%">
-      <h3>Rails</h3>
-      <p>Run <code>rails server</code> from the downloaded project.</p>
-    </td>
-  </tr>
-  <tr>
-    <td width="25%"><a href="https://github.com/walmartlabs/thorax-boilerplate/raw/master/thorax-html.zip" class="btn">Download 2.0.0b5</a></td>
-    <td width="25%"><a href="https://github.com/walmartlabs/thorax-boilerplate/raw/master/thorax-lumbar.zip" class="btn btn-primary">Download 2.0.0b5</a></td>
-    <td width="25%"><a href="https://github.com/walmartlabs/thorax-boilerplate/raw/master/thorax-mobile.zip" class="btn">Download 2.0.0b5</a></td>
-    <td width="25%"><a href="https://github.com/walmartlabs/thorax-boilerplate/raw/master/thorax-rails.zip" class="btn">Download 2.0.0b5</a></td>
-  </tr>
-</table>
-
-<p><strong>Thorax 2 is presently in beta, the <a href="https://github.com/walmartlabs/thorax/tree/1.2">stable source</a> and <a href="http://walmartlabs.github.com/thorax/stable">documentation</a> are still available.</strong>
-
-</p>
-<p>Thorax can be used standalone in any JavaScript environment in addition the <a href="https://github.com/walmartlabs/thorax-boilerplate">boilerplate projects</a> provided above.
-
-</p>
-<pre><code>var view = new Thorax<span class="preprocessor">.View</span>({
-  template: <span class="string">"Hello world!"</span>
-})<span class="comment">;</span>
-view<span class="preprocessor">.render</span>()<span class="comment">;</span>
-$(<span class="string">"body"</span>)<span class="preprocessor">.append</span>(view<span class="preprocessor">.el</span>)<span class="comment">;</span></code></pre>
-<table cellpadding="0" cellspacing="0" border="0" width="100%">
-  <thead>
-    <tr>
-      <th>Editable Examples</th>
-      <th>Resources</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td width="50%">
-        <p>All of the examples use the <a href="https://raw.github.com/gist/3504663/d1e6321e9fdb69ff47d636eab5df5e52acb64ae0/gistfile1.txt">same sample data</a>.</p>
-        <ul>
-          <li><a href="http://jsfiddle.net/QDMyk/">Simple Todos</a></li>
-          <li><a href="http://jsfiddle.net/jLVqN/">$.model</a></li>
-          <li><a href="http://jsfiddle.net/BN2v3/">Context</a></li>
-          <li><a href="http://jsfiddle.net/EcvvM/">view &amp; template helpers</a></li>
-          <li><a href="http://jsfiddle.net/ttZxv/">empty helper</a></li>
-          <li><a href="http://jsfiddle.net/s7YbW/">freeze</a></li>
-          <li><a href="http://jsfiddle.net/tVFfj/">LayoutView</a></li>
-          <li><a href="http://jsfiddle.net/XXUVu/">registerViewHelper</a></li>
-        </ul>
-      </td>
-      <td style="vertical-align: top;" width="50%">
-        <ul>
-          <li>
-            <a href="http://todomvc.com/labs/architecture-examples/thorax/">Thorax TodoMVC</a>
-            <ul>
-              <li><a href="https://github.com/addyosmani/todomvc/tree/gh-pages/labs/architecture-examples/thorax">Standalone Source</a></li>
-              <li><a href="https://github.com/addyosmani/todomvc/tree/gh-pages/labs/dependency-examples/thorax_lumbar">Thorax + Lumbar Source</a></li>
-              <li><a href="https://github.com/addyosmani/todomvc/tree/gh-pages/labs/dependency-examples/thorax_require">Thorax + Require.js Source</a>
-            </li></ul>
-          </li>
-        </ul>
-      </td>
-    </tr>
-  </tbody>
-</table>
-
-
-<h2 id="registry">Registry</h2>
-<p>Thorax creates a special hash for each type of class to store all subclasses in your application. The use of <code>Thorax.Views</code> and <code>Thorax.templates</code> is required to allow the <code>view</code>, <code>template</code> and other helper methods to operate, but the use of the others are optional and provided for consitency.
-
-</p>
-<table cellpadding="0" cellspacing="0" border="0" width="100%">
-  <thead>
-    <tr>
-      <th>Class</th>
-      <th>Registry</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr><td>Thorax.View</td><td>Thorax.Views</td></tr>
-    <tr><td>Thorax.Model</td><td>Thorax.Models</td></tr>
-    <tr><td>Thorax.Collection</td><td>Thorax.Collections</td></tr>
-    <tr><td>Thorax.Router</td><td>Thorax.Routers</td></tr>
-    <tr><td>templates</td><td>Thorax.templates</td></tr>
-  </tbody>
-</table>
-
-<h3 id="registry/name-klass-prototype-name" class="signature">name <em>klass.prototype.name</em></h3>
-<p>If a <code>name</code> property is passed to any Thorax classes' <code>extend</code> method the resulting class will be automatically set in the corresponding registry.
-
-</p>
-<pre><code><span class="comment">//set class</span>
-Thorax<span class="variable">.View</span><span class="variable">.extend</span>({
-  name: <span class="string">"my-view"</span>
+<pre><code><span class="keyword">var</span> view = <span class="keyword">new</span> Thorax.View({
+  greeting: <span class="string">"Hello"</span>,
+  template: Handlebars.compile(<span class="string">"{{greeting}} world!"</span>)
 });
-
-<span class="comment">//get class</span>
-Thorax<span class="variable">.Views</span>[<span class="string">"my-view"</span>]</code></pre>
-<h3 id="registry/templates-thorax-templates" class="signature">templates <em>Thorax.templates</em></h3>
-<p>A hash of templates, used by various Thorax helpers. If using the node or Rails boilerplate projects this hash will be automatically generated from the files in your <code>templates</code> directories. To manually add a template to the hash:
+view.appendTo(<span class="string">'body'</span>);</code></pre>
+<h2 id="easy-data-binding">Easy Data Binding</h2>
+<p>By default every property of your view is automatically available in the template. If a model is bound it's attributes will also be made available.
 
 </p>
-<pre><code>Thorax.templates[<span class="attribute">'my</span>-template-name'] = Handlebars.compile(<span class="attribute">'template</span> <span class="typename">string</span>');</code></pre>
-<p>If a <code>View</code> has the same <code>name</code> as a template in the <code>templates</code> hash, it's `template' property will be automatically assigned.
-
-</p>
-<h2 id="thorax-view">Thorax.View</h2>
-<p>The base <code>Thorax.View</code> implementation is concerned only with Handlebars + Backbone integration. A variety of additional functionality is provided by the various included plugins. The boilerplate projects have a build of Thorax with all plugins included.
-
-</p>
-<pre><code><span class="keyword">var</span> view = <span class="built_in">new</span> Thorax.View({
-  template: <span class="string">"{{key}}"</span>,
-  key: <span class="string">"value"</span>
-});
-view.render();
-$(<span class="string">'body'</span>).<span class="built_in">append</span>(view.el);</code></pre>
-<h3 id="thorax-view/children-view-children" class="signature">children <em>view.children</em></h3>
-<p>A hash of child view's indexed by <code>cid</code>. Child views may become attached to the parent with the <code>view</code> helper or may be automatically attached <code>HelperView</code> instanced created by helpers created with <code>regsterViewHelper</code>.
-
-</p>
-<h3 id="thorax-view/parent-view-parent" class="signature">parent <em>view.parent</em></h3>
-<p>If a view was embedded inside another with the <code>view</code> helper, or is a <code>HelperView</code> created by a helper creted with <code>registerViewHelper</code> the view will have a <code>parent</code> attribute.
-
-</p>
-<h3 id="thorax-view/template-view-template" class="signature">template <em>view.template</em></h3>
-<p>Assign a template to a view. This may be a string or a function which recieves a single <code>context</code> argument and returns a string. If the view has a <code>name</code> and a template of the same <code>name</code> is available the <code>template</code> will be auto-assigned.
-
-</p>
-<pre><code><span class="tag">new</span> <span class="tag">Thorax</span><span class="class">.View</span>(<span class="rules">{
-  <span class="rule"><span class="attribute">template</span>:<span class="value"> <span class="string">"{{key}}"</span>
-</span>}</span></span>);</code></pre>
-<h3 id="thorax-view/destroy-view-destroy-options" class="signature">destroy <em>view.destroy([options])</em></h3>
-<p>By default this will only call <code>destroy</code> on all child views. Other plugins override this method to implement custom cleanup behaviors. Your own behaviors can be added with the <code>destroyed</code> event. Pass <code>children: false</code> to this method to prevent the view's children from being destroyed.
-
-</p>
-<h3 id="thorax-view/render-view-render-content" class="signature">render <em>view.render([content])</em></h3>
-<p>Renders the view's <code>template</code> updating the view's <code>el</code> with the result, triggering the <code>rendered</code> event. <code>content</code> may be empty (render the <code>template</code>) or a function that will be called with the response from <code>context</code> or a string.
-
-</p>
-<pre><code><span class="comment">//will render template</span>
-view.<span class="keyword">render</span>()
-<span class="comment">//will insert custom content</span>
-view.<span class="keyword">render</span>(<span class="string">'custom html'</span>)</code></pre>
-<h3 id="thorax-view/context-view-context" class="signature">context <em>view.context()</em></h3>
-<p>Used by <code>render</code> to determine what attributes are available in the view's <code>template</code>. The default context function returns <code>this</code>. If the model plugin is used, <code>this</code> + <code>model.attributes</code> will be the context.
-
-</p>
-<h3 id="thorax-view/rendertemplate-view-rendertemplate-name-extracontext-ignoreerrors" class="signature">renderTemplate <em>view.renderTemplate(name, [,extraContext] [,ignoreErrors])</em></h3>
-<p>Render a template with the view's <code>context</code> plus any optional <code>extraContext</code> parameters passed in.
-
-</p>
-<h3 id="thorax-view/ensurerendered-view-ensurerendered" class="signature">ensureRendered <em>view.ensureRendered()</em></h3>
-<p>Ensure that the view has been rendered at least once.
-
-</p>
-<h3 id="thorax-view/html-view-html-content" class="signature">html <em>view.html([content])</em></h3>
-<p>Get or set the <code>innerHTML</code> of the view, without triggering the <code>rendered</code> event.
-
-</p>
-<h2 id="view-helpers">View Helpers</h2>
-<h3 id="view-helpers/super-super" class="signature">super <em>{{super}}</em></h3>
-<p>Embed the <code>template</code> from the parent view within the child template.
-
-</p>
-<pre><code><span class="variable">{{super}}</span></code></pre>
-<h3 id="view-helpers/template-template-name-options" class="signature">template <em>{{template name [options]}}</em></h3>
-<p>Embed a template inside of another, as a string. An associated view (if any) will not be initialized. By default the template will be called with the current scope but extra options may be passed which will be added to the context.
-
-</p>
-<pre><code>{{<span class="title">template</span> <span class="string">"path/to/template"</span> key=<span class="string">"value"</span>}}</code></pre>
-<p>If a block is used, the template will have a variable named <code>yield</code> available that will contain the contents of the block.
-
-</p>
-<pre><code>{{#<span class="keyword">template</span> <span class="string">"child"</span>}}
-  content <span class="keyword">in</span> the block will be available <span class="keyword">in</span> a variable 
-  named <span class="string">"yield"</span> inside the <span class="keyword">template</span> <span class="string">"child"</span>
-{{/<span class="keyword">template</span>}}</code></pre>
-<p>This is useful when a child template will be called from multiple different parents.
-
-</p>
-<h3 id="view-helpers/view-view-name-options" class="signature">view <em>{{view name [options]}}</em></h3>
-<p>Embed one view in another. The first argument may be the name of a new view to initialize or a reference to a view that has already been initialized.
-
-</p>
-<pre><code>{{<span class="title">view</span> <span class="string">"path/to/view"</span> key=<span class="string">"value"</span>}}
-{{<span class="title">view</span> viewInstance}}</code></pre>
-<h3 id="view-helpers/element-element-name-options" class="signature">element <em>{{element name [options]}}</em></h3>
-<p>Embed a DOM element in the view. This uses a placeholder technique to work, if the placeholder must be of a certain type in order to work (for instance a <code>tbody</code> inside of a <code>table</code>) specify a <code>tag</code> option.
-
-</p>
-<pre><code>{{<span class="title">element</span> domElement tag=<span class="string">"tbody"</span>}}</code></pre>
-<h3 id="view-helpers/registerviewhelper-handlebars-registerviewhelper-name-viewclass-callback" class="signature">registerViewHelper <em>Handlebars.registerViewHelper(name [,viewClass] ,callback)</em></h3>
-<p>Note that this differs from <code>Handlebars.registerHelper</code>. Registers a helper that will create and append a new <code>HelperView</code> instance, with it's <code>template</code> attribute set to the value of the captured block. <code>callback</code> will recieve any arguments passed to the helper followed by a <code>HelperView</code> instance. Named arguments to the helper will be present on <code>options</code> attribute of the <code>HelperView</code> instance.
-
-</p>
-<p>A <code>HelperView</code> instance differs from a regular view instance in that it has a <code>parent</code> attribute which is always set to the declaring view, and a <code>context</code> which always returns the value of the <code>parent</code>'s context method. The <code>collection</code>, <code>empty</code> and other built in block view helpers are created with <code>registerViewHelper</code>.
-
-</p>
-<p>A helper that re-rendered a <code>HelperView</code> every time an event was triggered on the declaring view could be implemented as:
-
-</p>
-<pre><code>Handlebars.registerViewHelper(<span class="string">'on'</span>, <span class="reserved">function</span>(eventName, helperView) {
-  //register a handler <span class="literal">on</span> the parent view, which will be automatically
-  //unregistered <span class="keyword">when</span> helperView <span class="keyword">is</span> destroyed
-  helperView.<span class="literal">on</span>(helperView.parent, eventName, <span class="reserved">function</span>() {
-    helperView.render();
-  });
+<pre><code><span class="keyword">var</span> view = <span class="keyword">new</span> Thorax.View({
+  greeting: <span class="string">'Hello'</span>,
+  model: <span class="keyword">new</span> Thorax.Model({
+    location: <span class="string">'world!'</span>
+  }),
+  template: ...
 });</code></pre>
-<p>An example use of this would be to have a counter that would incriment each time a button was clicked. In Handlebars:
+<p>Then in your template:
 
 </p>
-<pre><code><span class="variable">{{#on "incrimented"}}</span><span class="variable">{{i}}</span>{/on}}
-<span class="variable">{{#button trigger="incrimented"}}</span>Add<span class="variable">{{/button}}</span></code></pre>
-<p>And the corresponding view class:
+<pre><code>{{greeting}} {{location}}</code></pre>
+<h2 id="context-control">Context Control</h2>
+<p>Don't like every property in your view being available in your template, or need to modify some model attributes? Just specify a <code>context</code> method to control what your template sees:
 
 </p>
-<pre><code>new Thorax.View({
+<pre><code><span class="keyword">var</span> view = <span class="keyword">new</span> Thorax.View({
+  model: <span class="keyword">new</span> Thorax.Model({
+    greeting: <span class="string">'hello'</span>
+  }),
+  context: <span class="keyword">function</span>() {
+    <span class="keyword">return</span> {
+      greeting: <span class="keyword">this</span>.model.get(<span class="string">'greeting'</span>).toUpperCase()
+    };
+  },
+  template: ...
+});</code></pre>
+<p>Then in your template:
+
+</p>
+<pre><code>{{greeting}}</code></pre>
+<h2 id="collection-rendering">Collection Rendering</h2>
+<p>Easily render collections with the <code>collection</code> helper. Thorax will make sure that your view stays current as models in your collection are added, removed or updated.
+
+</p>
+<pre><code><span class="keyword">var</span> view = <span class="keyword">new</span> Thorax.View({
+  collection: <span class="keyword">new</span> Thorax.Collection([{
+    title: <span class="string">'Finish screencast'</span>,
+    done: <span class="literal">true</span>
+  }]),
+  template: ...
+});</code></pre>
+<p>Then in your template:
+
+</p>
+<pre><code>{{#collection tag=<span class="string">"ul"</span>}}
+  &lt;li&gt;
+    <span class="xml"><span class="tag">&lt;<span class="title">input</span> <span class="attribute">type</span>=<span class="value">"checkbox"</span> {{#<span class="attribute">done</span>}}<span class="attribute">checked</span>{{/<span class="attribute">done</span>}}
+    {{<span class="attribute">title</span>}}
+  &lt;/<span class="attribute">li</span>&gt;</span>
+{{else}}
+  <span class="tag">&lt;<span class="title">li</span>&gt;</span>No todos yet.<span class="tag">&lt;/<span class="title">li</span>&gt;</span>
+{{/collection}}</span></code></pre>
+<h2 id="j-query-and-zepto-integration">jQuery and Zepto Integration</h2>
+<p>Thorax extends the jQuery or Zepto <code>$</code> object to allow you to get a reference to the nearest bound <code>model</code>, <code>collection</code>, or <code>view</code>.
+
+</p>
+<pre><code><span class="keyword">var</span> view = <span class="keyword">new</span> Thorax.View({
   events: {
-    incrimented: <span class="keyword">function</span>() {
-      ++this.i;
+    <span class="string">'change input[type=checkbox]'</span>: <span class="keyword">function</span>(event) {
+      <span class="keyword">var</span> model = $(event.target).model();
+      model.set({done: event.target.checked});
+    }
+  }
+});</code></pre>
+<h2 id="event-enhancements">Event Enhancements</h2>
+<p>Thorax extends the events hash to let you listen to view events in addition to DOM events, and let's you pass a hash of <code>model</code> or <code>collection</code> events to <code>listenTo</code> when a model or collection is bound to your view.
+
+</p>
+<pre><code><span class="keyword">var</span> view = <span class="keyword">new</span> Thorax.View({
+  events: {
+    rendered: <span class="keyword">function</span>() {}
+    model: {
+      change: <span class="keyword">function</span>() {}
     }
   },
-  initialize: <span class="keyword">function</span>() {
-    this.i = <span class="number">0</span>;
+  model: <span class="keyword">new</span> Thorax.Model()
+});</code></pre>
+<p>Thorax also adds inheritable events to view classes, just call <code>on</code> on any class to listen for a DOM, view, model or collection event on any view.
+
+</p>
+<pre><code>Thorax.View.on(<span class="string">'eventName'</span>, handler);</code></pre>
+<h2 id="form-handling">Form Handling</h2>
+<p>Easily capture entered form data with the <code>serialize</code> method which also provides event hooks for form validation. Models bound to the view will also automatically <code>populate</code> your forms.
+
+</p>
+<pre><code><span class="keyword">var</span> view = <span class="keyword">new</span> Thorax.View({
+  events: {
+    <span class="string">'submit form'</span>: <span class="keyword">function</span>(event) {
+      event.preventDefault();
+      <span class="keyword">var</span> attrs = <span class="keyword">this</span>.serialize();
+      <span class="keyword">this</span>.collection.add(attrs);
+    }
   },
-  template: <span class="keyword">...</span>
+  collection: <span class="keyword">new</span> Thorax.Collection()
 });</code></pre>
-<h2 id="util">Util</h2>
-<h3 id="util/tag-thorax-util-tag-name-htmlattributes-content-context" class="signature">tag <em>Thorax.Util.tag(name, htmlAttributes [,content] [,context])</em></h3>
-<p>Generate an HTML string. All built in HTML generation uses this method. If <code>context</code> is passed any Handlebars references inside of the htmlAttributes values will rendered with the context.
+<h2 id="embeddable-views">Embeddable Views</h2>
+<p>Easily embed one view within another with the <code>view</code> helper.
 
 </p>
-<pre><code><span class="tag">Thorax</span><span class="class">.Util</span><span class="class">.tag</span>("<span class="tag">div</span>", <span class="rules">{
-  <span class="rule"><span class="attribute">id</span>:<span class="value"> <span class="string">"div-{{number}}"</span>
-</span>}</span></span>, "<span class="tag">content</span> <span class="tag">of</span> <span class="tag">the</span> <span class="tag">div</span>", <span class="rules">{
-  <span class="rule"><span class="attribute">number</span>:<span class="value"> <span class="number">3</span>
-</span>}</span></span>);</code></pre>
-<h2 id="">$</h2>
-<h3 id="/view-event-target-view-options" class="signature">$.view <em>$(event.target).view([options])</em></h3>
-<p>Get a reference to the nearest parent view. Pass <code>helper: false</code> to options to exclude <code>HelperView</code>s from the lookup. <code>$.model</code> and <code>$.collection</code> will also be available if you include the model and collection plugins.
-
-</p>
-<pre><code>$(event<span class="variable">.target</span>)<span class="variable">.view</span>()</code></pre>
-<h2 id="events">Events</h2>
-<h3 id="events/destroyed-destroyed" class="signature">destroyed <em>destroyed ()</em></h3>
-<p>Triggered when the <code>destroy</code> method is called.
-
-</p>
-<h3 id="events/rendered-rendered" class="signature">rendered <em>rendered ()</em></h3>
-<p>Triggered when the <code>rendered</code> method is called.
-
-</p>
-<h3 id="events/child-child-instance" class="signature">child <em>child (instance)</em></h3>
-<p>Triggered every time a child view is inserted into the view with the <code>view</code> helper. Will not be triggered from view instances created by helper view helpers.
-
-</p>
-<h3 id="events/helper-helper-name-args-helperview" class="signature">helper <em>helper (name [,args...] ,helperView)</em></h3>
-<p>Triggered when a view helper (such as <code>collection</code>, <code>empty</code>, etc) create a new <code>HelperView</code> instance.
-
-</p>
-<h3 id="events/helper-name-helper-name-args-helperview" class="signature">helper:name <em>helper:name [,args...] ,helperView)</em></h3>
-<p>Triggered when a given view helper creates a new <code>HelperView</code> instance.
-
-</p>
-<pre><code>{{<span class="comment">#collection cats}}{{/collection}}</span>
-
-view.<span class="literal">on</span>(<span class="string">'helper:collection'</span>, <span class="reserved">function</span>(collection, collectionView) {
-
+<pre><code><span class="keyword">var</span> view = <span class="keyword">new</span> Thorax.View({
+  child: <span class="keyword">new</span> Thorax.View(...),
+  template: ...
 });</code></pre>
-<h2 id="html-attributes">HTML Attributes</h2>
-<p>Thorax and it's view helpers generate a number of custom HTML attributes that may be useful in debugging or generating CSS selectors to be used as arguments to <code>$</code> or to create CSS. The <code>*-cid</code> attributes are generally used only internally. See <code>$.model</code>, <code>$.collection</code> and <code>$.view</code> to get a reference to objects directly from the DOM. The <code>*-name</code> attributes will only be present if the given objects have a <code>name</code> property.</p>
-
-
-<table class="table table-bordered table-striped">
-  <thead>
-    <tr>
-      <th>Attribute Name</th>
-      <th>Attached To</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr><td><code>data-view-cid</code></td><td>Every view instances' <code>el</code></td></tr>
-    <tr><td><code>data-view-name</code></td><td>Same as above, only present on named views</td></tr>
-    <tr><td><code>data-collection-cid</code></td><td>Element generated by the <code>collection helper</code></td></tr>
-    <tr><td><code>data-collection-name</code></td><td>Same as above, only present when the bound collection is named</td></tr>
-    <tr><td><code>data-collection-empty</code></td><td>Set to "true" or "false" depending on wether the bound collection <code>isEmpty</code></td></tr>
-    <tr><td><code>data-model-cid</code></td><td>A view's <code>el</code> if a model was bound to the view or each item element inside of elements generated by the collection helper</td></tr>
-    <tr><td><code>data-model-name</code></td><td>Same as above, only present if the model is named</td></tr>
-    <tr><td><code>data-layout-cid</code></td><td>The element generated by the <code>layout</code> helper or <code>el</code> inside of a <code>LayoutView</code> or <code>ViewController</code> instance</td></tr>
-    <tr><td><code>data-view-helper</code></td><td>Elements generated by various helpers including <code>collection</code> and <code>empty</code> from the collection plugin</td></tr>
-    <tr><td><code>data-call-method</code></td><td>Elements generated by the <code>link</code> and <code>button</code> helpers</td></tr>
-    <tr><td><code>data-trigger-event</code></td><td>Elements generated by the <code>link</code> and <code>button</code> helpers</td></tr>
-  </tbody>
-</table>
-
-<p>When creating CSS selectors it's recommended to use the generated attributes (especially <code>data-view-name</code>) rather than assigning custom IDs or class names for the sole purpose of styling.
+<p>Then in your template:
 
 </p>
-<pre><code>[<span class="typedef"><span class="keyword">data</span>-view-name="my-view-name"] <span class="container">{
-  <span class="title">border</span>: 1<span class="title">px</span> <span class="title">solid</span> #<span class="title">ccc</span>;
-}</span></span></code></pre>
-<h2 id="command-line">Command Line</h2>
-<p>To use the command line utilities:
+<pre><code>{{view child}}</code></pre>
+<h2 id="layouts-and-lifecycle">Layouts and Lifecycle</h2>
+<p><code>Thorax.LayoutView</code> provides a container to place your views, and triggers lifecycle events on views placed within them. Layouts can be embedded in other views as well.
 
 </p>
-<pre><code><span class="title">npm</span> install -g thorax</code></pre>
-<h3 id="command-line/build-thorax-build-target-plugin-plugin" class="signature">build <em>thorax build target [plugin] [plugin...]</em></h3>
-<p>Build a custom version of Thorax using a list of any of the given plugins:
+<pre><code><span class="keyword">var</span> layout = <span class="keyword">new</span> Thorax.LayoutView();
+layout.appendTo(<span class="string">'body'</span>);
+<span class="keyword">var</span> view = <span class="keyword">new</span> Thorax.View({
+  events: {
+    ready: <span class="keyword">function</span>() {},
+    destroyed: <span class="keyword">function</span>() {}
+  }
+})
+layout.setView(view);</code></pre>
 
-</p>
+      </div>
+      <div class="l-col1 features">
+        <h3>Features</h3>
+        <ul class="links examples">
+          
+            <li><a href="#hello-world">Hello World</a></li>
+          
+            <li><a href="#easy-data-binding">Easy Data Binding</a></li>
+          
+            <li><a href="#context-control">Context Control</a></li>
+          
+            <li><a href="#collection-rendering">Collection Rendering</a></li>
+          
+            <li><a href="#j-query-and-zepto-integration">jQuery and Zepto Integration</a></li>
+          
+            <li><a href="#event-enhancements">Event Enhancements</a></li>
+          
+            <li><a href="#form-handling">Form Handling</a></li>
+          
+            <li><a href="#embeddable-views">Embeddable Views</a></li>
+          
+            <li><a href="#layouts-and-lifecycle">Layouts and Lifecycle</a></li>
+          
+        </ul>
+      </div>
+    </div>
+    <div class="l-col1 quick-start">
+      <h1 id="quick-start">Quick Start</h1>
 <ul>
-<li>mixin</li>
-<li>event</li>
-<li>model</li>
-<li>collection</li>
-<li>helpers</li>
-<li>form</li>
-<li>view-controller</li>
-<li>loading</li>
-<li>mobile</li>
+<li>Clone the <a href="http://github.com/walmartlabs/thorax-seed">Seed Project</a> and start building your own application.</li>
+<li>Read about how Thorax works in the new <a href="http://addyosmani.github.com/backbone-fundamentals/#thorax">Backbone Fundamentals Book</a>.</li>
+<li>Install the <a href="https://chrome.google.com/webstore/detail/thorax-inspector/poioalbefcopgeaeaadelomciijaondk">Thorax Inspector</a> Chrome extension.</li>
+<li>Don't fancy the structure of the seed project? Just link the <a href="http://github.com/walmartlabs/thorax">core library</a> as a <a href="http://cdnjs.cloudflare.com/ajax/libs/thorax/2.0.0rc3/thorax.js">single file from cdnjs</a> compiled with all of it's dependencies and use it anywhere.</li>
 </ul>
-<p>Not specifying any plugins will build a version with all plugins except mobile. To build a version of Thorax with all plugins including the mobile plugin run:
 
-</p>
-<pre><code><span class="title">thorax</span> build ./thorax-mobile.js <span class="comment">--mobile</span></code></pre>
-<h3 id="command-line/templates-thorax-templates-templates-templates-js" class="signature">templates <em>thorax templates ./templates ./templates.js</em></h3>
-<p>If using Thorax outside of the provided node or Rails downloads you can inline a directory of templates into a single file by running the <code>thorax templates</code> command.
+    </div>
+  </div>
+</div>
 
-</p>
-<pre><code><span class="title">npm</span> install -g thorax
-<span class="title">thorax</span> templates ./templates-dir ./templates.js</code></pre>
-<h2 id="error-handling">Error Handling</h2>
-<h3 id="error-handling/onexception-thorax-onexception-name-error" class="signature">onException <em>Thorax.onException(name, error)</em></h3>
-<p>Bound DOM event handlers in Thorax are wrapped with a try / catch block, calling this function if an error is caught. This hook is provided primarily to allow for easier debugging in Android environments where it is difficult to determine the source of the error. The default error handler is simply:
 
-</p>
-<pre><code><span class="function"><span class="title">function</span><span class="params">(name, error)</span> {
-  <span class="title">throw</span> <span class="title">error</span>;
-}</span></code></pre>
-<p>Override this function with your own logging / debugging handler. <code>name</code> will be the event name where the error was thrown.
-</p>
 
-  <p>Copyright 2012 <a href="http://walmartlabs.com">@WalmartLabs</a></p></div>
-</div><a href="https://github.com/walmartlabs/thorax"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"></a></body>
+  <footer class="footer l-constrained">
+    <p><small>Copyright 2013 <a href="http://walmartlabs.com">@WalmartLabs</a></small></p>
+  </footer>
+</div>
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+<script>window.jQuery || document.write('<script src="/js/vendor/jquery-1.8.2.min.js"><\/script>')</script>
+
+<script src="/js/compiled/site.js"></script>
+</body>
 </html>
