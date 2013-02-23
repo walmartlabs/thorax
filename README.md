@@ -80,7 +80,7 @@ Then in your template:
       <li>No todos yet.</li>
     {{/collection}}
 
-## jQuery / Zepto Integration
+## jQuery and Zepto Integration
 
 Thorax extends the jQuery or Zepto `$` object to allow you to get a reference to the nearest bound `model`, `collection`, or `view`.
 
