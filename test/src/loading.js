@@ -745,7 +745,7 @@ describe('loading', function() {
           options = collectionView._objectOptionsByCid[collectionCid];
       expect(options.ignoreErrors).to.equal(true);
       expect(options.background).to.equal(true);
-      expect(view.$el.hasClass('loading')).to.be.true;
+      expect(view.$el.hasClass('loading')).to.be['true'];
     });
 
     it("load callback should be called with collection and not array", function() {
