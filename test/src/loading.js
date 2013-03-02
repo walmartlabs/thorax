@@ -482,6 +482,27 @@ describe('loading', function() {
       expect(this.startSpy).to.have.been.calledOnce;
       expect(this.endSpy).to.have.been.calledOnce;
     });
+
+    it('failback does not get called twice if it triggers route event', function() {
+      var fragment = 'data-bar';
+      this.stub(Backbone.history, 'getFragment', function() { return fragment; });
+
+      var success = this.spy(),
+          failback = this.spy(function() {
+            fragment = 'data-foo';
+            Backbone.history.trigger('route');
+          });
+
+      this.model.load(success, failback);
+      this.requests[0].respond(0, {}, '');
+
+      expect(success).to.not.have.been.called;
+      expect(failback).to.have.been.calledOnce;
+      expect(failback).to.have.been.calledWith(true);
+      expect(this.startSpy).to.have.been.calledOnce;
+      expect(this.endSpy).to.have.been.calledOnce;
+    });
+
     it('data load on route change sends load events', function() {
       var success = this.spy(),
           failback = this.spy();
@@ -562,8 +583,6 @@ describe('loading', function() {
       expect(rootEnd).to.have.been.calledWith(false);
       expect(this.startSpy.callCount).to.equal(4);
       expect(this.endSpy.callCount).to.equal(4);
-
-      //exports.off('load:start');
     });
 
     it('data load on populated object does not send events', function() {
@@ -598,10 +617,10 @@ describe('loading', function() {
         return fragment;
       };
 
-      var _this = this;
+      var self = this;
       function reset() {
-        callback = _this.spy();
-        failback = _this.spy();
+        callback = self.spy();
+        failback = self.spy();
         return router.bindToRoute(callback, failback);
       }
 

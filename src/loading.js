@@ -165,7 +165,7 @@ Thorax.mixinLoadable = function(target, useParent) {
       if (!that || !that.el) {
         return;
       }
-      
+
       that._isLoading = false;
       $(that.el).removeClass(that._loadingClassName);
       // used by loading helper
@@ -269,13 +269,11 @@ function loadData(callback, failback, options) {
 
   this.fetch(_.defaults({
     success: successCallback,
-    error: failback && function() {
-      if (!routeChanged) {
+    error: function() {
+      successCallback.cancel();
+      if (!routeChanged && failback) {
         failback.apply(self, [true].concat(_.toArray(arguments)));
       }
-    },
-    complete: function() {
-      successCallback.cancel();
     }
   }, options));
 }
