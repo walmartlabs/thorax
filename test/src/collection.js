@@ -1,8 +1,8 @@
 describe('collection', function() {
-  Thorax.templates.letter = Handlebars.compile('{{collection tag="ul"}}');
-  Thorax.templates['letter-item'] = Handlebars.compile('<li>{{letter}}</li>');
-  Thorax.templates['letter-empty'] = Handlebars.compile('<li>empty</li>');
-  Thorax.templates['letter-multiple-item'] = Handlebars.compile('<li>{{letter}}</li><li>{{letter}}</li>');
+  Handlebars.templates.letter = Handlebars.compile('{{collection tag="ul"}}');
+  Handlebars.templates['letter-item'] = Handlebars.compile('<li>{{letter}}</li>');
+  Handlebars.templates['letter-empty'] = Handlebars.compile('<li>empty</li>');
+  Handlebars.templates['letter-multiple-item'] = Handlebars.compile('<li>{{letter}}</li><li>{{letter}}</li>');
 
   var LetterModel = Thorax.Model.extend({});
   var letterCollection = new (Thorax.Collection.extend({
@@ -455,7 +455,7 @@ describe('collection', function() {
     var view = new Thorax.CollectionView({
       collection: letterCollection,
       template: Handlebars.compile('<div class="test">{{collection-element tag="ul"}}</div>'),
-      itemTemplate: Thorax.templates['letter-item']
+      itemTemplate: Handlebars.templates['letter-item']
     });
     expect(view.$('li').length).to.equal(letterCollection.length);
   });
@@ -682,7 +682,7 @@ describe('collection', function() {
   });
 
   it("CollectionView will assign template if view only has name", function() {
-    Thorax.templates['collection-view-with-name'] = Handlebars.compile('<div class="named">{{collection-element tag="ul"}}</div>');
+    Handlebars.templates['collection-view-with-name'] = Handlebars.compile('<div class="named">{{collection-element tag="ul"}}</div>');
     var view = new Thorax.CollectionView({
       name: 'collection-view-with-name',
       itemTemplate: Handlebars.compile('<li>{{key}}</li>'),

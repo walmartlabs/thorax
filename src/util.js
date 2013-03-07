@@ -179,11 +179,11 @@ Thorax.Util = {
 
     // Without extension
     file = file.replace(/\.handlebars$/, '');
-    template = Thorax.templates[file];
+    template = Handlebars.templates[file];
     if (!template) {
       // With extension
       file = file + '.handlebars';
-      template = Thorax.templates[file];
+      template = Handlebars.templates[file];
     }
 
     if (!template && !ignoreErrors) {
