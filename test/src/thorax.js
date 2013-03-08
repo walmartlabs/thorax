@@ -167,6 +167,30 @@ describe('core', function() {
     view.$el.remove();
   });
 
+  describe('elements hash', function() {
+    it("may have an elements hash", function() {
+      var view;
+      var spy = this.spy(function($el) {
+        expect(this).to.equal(view);
+        expect($el.length).to.equal(2);
+      });
+      view = new Thorax.View({
+        elements: {
+          'li': spy,
+          'ul': 'methodName'
+        },
+        template: Handlebars.compile('<ul><li></li><li></li></ul>'),
+        methodName: function($el) {
+          expect($el.length).to.equal(1);
+        }
+      });
+      view.render();
+      expect(spy.callCount).to.equal(1);
+      view.render();
+      expect(spy.callCount).to.equal(2);
+    });
+  });
+
   describe('context', function() {
     it("may be an object", function() {
       var view = new (Thorax.View.extend({

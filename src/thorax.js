@@ -212,6 +212,7 @@ Thorax.View = Backbone.View.extend({
       // Event for IE element fixes
       this.trigger('before:append');
       var element = this._replaceHTML(html);
+      notifyElementsHash.call(this);
       this.trigger('append');
       return element;
     }
@@ -259,6 +260,15 @@ function bindHelpers() {
         options.context = this;
         return helper.apply(view, args);
       };
+    }, this);
+  }
+}
+
+function notifyElementsHash() {
+  if (this.elements) {
+    _.each(this.elements, function(callback, selector) {
+      callback = _.isFunction(callback) ? callback : this[callback];
+      callback.call(this, this.$(selector));
     }, this);
   }
 }
