@@ -60,7 +60,7 @@ Then in your template:
 ## Collection Rendering
 
 Easily render collections with the `collection` helper. Thorax will make sure that your view stays current as models in your collection are added, removed or updated.
-    
+
     var view = new Thorax.View({
       collection: new Thorax.Collection([{
         title: 'Finish screencast',
@@ -112,7 +112,7 @@ Thorax also adds inheritable events to view classes, just call `on` on any class
     Thorax.View.on('eventName', handler);
 
 ## Form Handling
-  
+
 Easily capture entered form data with the `serialize` method which also provides event hooks for form validation. Models bound to the view will also automatically `populate` your forms.
 
     var view = new Thorax.View({
@@ -335,7 +335,7 @@ Sets the `model` attribute of a view then attempts to fetch the model if it has 
 
 Accepts any of the following options:
 
-- **fetch** - Boolean, wether to fetch the model when it is set, defaults to true.
+- **fetch** - Boolean, whether to fetch the model when it is set, defaults to true.
 - **success** - Callback on fetch success, defaults to noop
 - **render** - Render on the view on model:change? Defaults to true
 - **populate** - Call `populate` with the model's attributes when it is set? Defaults to true. Pass `populate: {children: false}` to prevent child views from having their inputs populated.
@@ -355,10 +355,10 @@ Sets the `collection` attribute of a view then attempts to fetch the collection 
 
 Accepts any of the following options:
 
-- **render** - Wether to render the collection if it is populated, or render it after it has been loaded
-- **fetch** - Wether or not to try to call `fetch` on the collection if `shouldFetch` returns true
+- **render** - Whether to render the collection if it is populated, or render it after it has been loaded
+- **fetch** - Whether or not to try to call `fetch` on the collection if `shouldFetch` returns true
 - **success** - Callback on fetch success, defaults to noop
-- **errors** - Wether or not to trigger an `error` event on the view when an `error` event is triggered on the collection
+- **errors** - Whether or not to trigger an `error` event on the view when an `error` event is triggered on the collection
 
 Note that while any view may bind a collection only a `CollectionView` will actually render a collection. A regular `Thorax.View` may declare a `collection` helper which in turn will generate and embed a `CollectionView`.
 
@@ -366,13 +366,13 @@ Note that while any view may bind a collection only a `CollectionView` will actu
 
 Serializes a form. `callback` will receive the attributes from the form, followed by a `release` method which must be called before the form can be submitted again. `callback` will only be called if `validateInput` returns nothing or an empty array. `options` may contain:
 
-- `set` - defaults to true, wether or not to set the attributes if valid on a model if one was set with `setModel`
-- `validate - defaults to true, wether or not to call `validateInput` during serialization
-- `children` - defaults to true, wether or not to serialize inputs in child views
-- `silent` - defaults to true, wether or not to pass `silent: true` to `model.set`
+- `set` - defaults to true, whether or not to set the attributes if valid on a model if one was set with `setModel`
+- `validate - defaults to true, whether or not to call `validateInput` during serialization
+- `children` - defaults to true, whether or not to serialize inputs in child views
+- `silent` - defaults to true, whether or not to pass `silent: true` to `model.set`
 
 Each form input in your application should contain a corresponding label. Since you may want to re-use the same form multiple times in the same view a `@cid` attribute with a unique value is provided to each render call of each template:
-    
+
     <label for="{{@cid}}-last-name"/>
     <input name="last-name" id="{{@cid}}-last-name" value="Beastridge"/>
     <label for="{{@cid}}-address[street]"/>
@@ -456,16 +456,16 @@ A helper that re-rendered a `HelperView` every time an event was triggered on th
       });
     });
 
-An example use of this would be to have a counter that would incriment each time a button was clicked. In Handlebars:
+An example use of this would be to have a counter that would increment each time a button was clicked. In Handlebars:
 
-    {{#on "incrimented"}}{{i}}{/on}}
-    {{#button trigger="incrimented"}}Add{{/button}}
+    {{#on "incremented"}}{{i}}{/on}}
+    {{#button trigger="incremented"}}Add{{/button}}
 
 And the corresponding view class:
 
     new Thorax.View({
       events: {
-        incrimented: function() {
+        incremented: function() {
           ++this.i;
         }
       },
@@ -496,7 +496,7 @@ Get the current view that was previously set with `setView`.
 
 ## Thorax.Model
 
-Enhances `Backbone.Model` with the concept of wether or not the model is populated and wether or not it should be automatically fetched. Note that when passing a model to `view.setModel` it must be an instance of `Thorax.Model` and not `Backbone.Model`.
+Enhances `Backbone.Model` with the concept of whether or not the model is populated and whether or not it should be automatically fetched. Note that when passing a model to `view.setModel` it must be an instance of `Thorax.Model` and not `Backbone.Model`.
 
 ### isEmpty *model.isEmpty()*
 
@@ -504,23 +504,23 @@ Used by the `empty` helper. In a collection the implementations of `isEmpty` and
 
 ### isPopulated *model.isPopulated()*
 
-Used by `setModel` to determine wether or not to fetch the model. The default implementation checks to see if any keys that are not `id` and are not default values have been set.
+Used by `setModel` to determine whether or not to fetch the model. The default implementation checks to see if any keys that are not `id` and are not default values have been set.
 
 ## Thorax.Collection
 
-Enhances `Backbone.Collection` with the concept of wether or not the collection is populated and wether or not it should be automatically fetched. Note that when passing a collection to `view.setCollection` it must be an instance of `Thorax.Collection` and not `Backbone.Collection`.
+Enhances `Backbone.Collection` with the concept of whether or not the collection is populated and whether or not it should be automatically fetched. Note that when passing a collection to `view.setCollection` it must be an instance of `Thorax.Collection` and not `Backbone.Collection`.
 
 ### isEmpty *collection.isEmpty()*
 
-Used by the `empty` helper and the `emptyTemplate` and `emptyItem` options of a `CollectionView` to check wether a collection is empty. A collection is only treated as empty if it `isPopulated` and zero length.
+Used by the `empty` helper and the `emptyTemplate` and `emptyItem` options of a `CollectionView` to check whether a collection is empty. A collection is only treated as empty if it `isPopulated` and zero length.
 
 ### isPopulated *collection.isPopulated()*
 
-Used by `setCollection` to determine wether or not to fetch the collection.
+Used by `setCollection` to determine whether or not to fetch the collection.
 
 ## Thorax.CollectionView
 
-A class that renders an `itemTemplate` or `itemView` for each item in a `collection` passed to it in it's constructor, or via `setCollection`. The view will automatically update when items are added, removed or changed. 
+A class that renders an `itemTemplate` or `itemView` for each item in a `collection` passed to it in it's constructor, or via `setCollection`. The view will automatically update when items are added, removed or changed.
 
 The `collection` helper will automatically create and embed a `CollectionView` instance for you. If programatic access to the view's methods are needed (for instance calling `appendItem` or specifying an `itemFilter`) it's best to create a `CollectionView` directly and embed it with the `view` helper as you would any other view.
 
@@ -574,7 +574,7 @@ Remove an item from the view.
 
 ### updateItem *view.updateItem(model)*
 
-Equivelent to calling `removeItem` then `appendItem`. Note that this is mainly meant to cover edge cases, by default changing a model will update the needed item (wether using `itemTemplate` or `itemView`).
+Equivelent to calling `removeItem` then `appendItem`. Note that this is mainly meant to cover edge cases, by default changing a model will update the needed item (whether using `itemTemplate` or `itemView`).
 
 ## Thorax.Util
 
@@ -699,7 +699,7 @@ All of the behavior described in this section is implemented via this method, so
 
 ### Queuing
 
-Thorax wraps `fetch` (and therefore `load`) on models and collections with a queuing mechansim to ensure that multiple `sync` calls for the same url will not trigger multiple HTTP requests. To force a `fetch` or `load` call to create a new HTTP request regardless of wether an identical request is in the queue use the `resetQueue` option:
+Thorax wraps `fetch` (and therefore `load`) on models and collections with a queuing mechansim to ensure that multiple `sync` calls for the same url will not trigger multiple HTTP requests. To force a `fetch` or `load` call to create a new HTTP request regardless of whether an identical request is in the queue use the `resetQueue` option:
 
     model.fetch({
       resetQueue: true
@@ -777,7 +777,7 @@ Embed a template inside of another, as a string. An associated view (if any) wil
 If a block is used, the template will have a variable named `@yield` available that will contain the contents of the block.
 
     {{#template "child"}}
-      content in the block will be available in a variable 
+      content in the block will be available in a variable
       named "@yield" inside the template "child"
     {{/template}}
 
@@ -910,7 +910,7 @@ As a result the following two views are equivelenet:
     });
 
     // directly create collection view, no property
-    // forwarding will occur 
+    // forwarding will occur
     var view = new Thorax.View({
       collectionView: new Thorax.CollectionView({
         collection: new Thorax.Collection(),
@@ -1047,7 +1047,7 @@ Triggered on a view when `populate` is called. Passed a hash containing the attr
 ### load:start *load:start (message, background, target)*
 
 Triggered on a model or collection by `fetch` or `load` and on a view if it has bound the model or collection with `setModel` or `setCollection`. Always generate a handler for a `load:start` event with `Thorax.loadHandler`.
- 
+
 ### load:end *load:end (target)*
 
 Triggered on a model or collection by `fetch` or `load` and on a view if it has bound the model or collection with `setModel` or `setCollection`. Never observe this directly, always use `Thorax.loadHandler` on `load:start`.
@@ -1080,7 +1080,7 @@ Thorax and it's view helpers generate a number of custom HTML attributes that ma
     <tr><td><code>data-view-name</code></td><td>Same as above, only present on named views</td></tr>
     <tr><td><code>data-collection-cid</code></td><td>Element generated by the `collection helper`</td></tr>
     <tr><td><code>data-collection-name</code></td><td>Same as above, only present when the bound collection is named</td></tr>
-    <tr><td><code>data-collection-empty</code></td><td>Set to "true" or "false" depending on wether the bound collection <code>isEmpty</code></td></tr>
+    <tr><td><code>data-collection-empty</code></td><td>Set to "true" or "false" depending on whether the bound collection <code>isEmpty</code></td></tr>
     <tr><td><code>data-collection-element</code></td><td>Set by the <code>collection-element</code>, determines where a collection in a <code>CollectionView</code> will be rendered.</td></tr>
     <tr><td><code>data-model-cid</code></td><td>A view's <code>el</code> if a model was bound to the view or each item element inside of elements generated by the collection helper</td></tr>
     <tr><td><code>data-model-name</code></td><td>Same as above, only present if the model is named</td></tr>
@@ -1102,7 +1102,7 @@ When creating CSS selectors it's recommended to use the generated attributes (es
 ### onException *Thorax.onException(name, error)*
 
 Bound DOM event handlers in Thorax are wrapped with a try / catch block, calling this function if an error is caught. This hook is provided primarily to allow for easier debugging in Android environments where it is difficult to determine the source of the error. The default error handler is simply:
-  
+
     Thorax.onException = function(name, error) {
       throw error;
     };
