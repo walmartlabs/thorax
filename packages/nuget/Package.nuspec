@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>Thorax.MVC</id>
+    <version>1.0.0</version>
+    <authors>Kyle Jennings</authors>
+    <owners>Kyle Jennings</owners>
+    <licenseUrl>https://raw.github.com/walmartlabs/thorax/master/LICENSE</licenseUrl>
+    <projectUrl>http://www.thoraxjs.org</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>A nuget pacakge for setting up Thorax.js in an MVC project.</description>
+    <releaseNotes>This is the initial build for Thorax.js</releaseNotes>
+    <copyright>Copyright 2013</copyright>
+    <tags>ASP.NET MVC</tags>
+  </metadata>
+</package>
