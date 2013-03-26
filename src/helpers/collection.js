@@ -54,6 +54,15 @@ Thorax.CollectionHelperView = Thorax.CollectionView.extend({
         return this.parent.itemContext.apply(this.parent, arguments);
       };
     }
+
+    var self = this;
+    _.each(['renderItem', 'renderEmpty'], function(propertyName) {
+      if (self.parent[propertyName]) {
+        self[propertyName] = function() {
+          return self.parent[propertyName].apply(self.parent, arguments);
+      };
+      }
+    });
   }
 });
 
