@@ -178,7 +178,7 @@ view.setModel(myModel);</code></pre>
 
 </p>
 <ul>
-<li><strong>fetch</strong> - Boolean, wether to fetch the model when it is set, defaults to true.</li>
+<li><strong>fetch</strong> - Boolean, whether to fetch the model when it is set, defaults to true.</li>
 <li><strong>success</strong> - Callback on fetch success, defaults to noop</li>
 <li><strong>render</strong> - Render on the view on model:change? Defaults to true</li>
 <li><strong>populate</strong> - Call <code>populate</code> with the model's attributes when it is set? Defaults to true. Pass <code>populate: {children: false}</code> to prevent child views from having their inputs populated.</li>
@@ -200,10 +200,10 @@ view.setCollection(myCollection);</code></pre>
 
 </p>
 <ul>
-<li><strong>render</strong> - Wether to render the collection if it is populated, or render it after it has been loaded</li>
-<li><strong>fetch</strong> - Wether or not to try to call <code>fetch</code> on the collection if <code>shouldFetch</code> returns true</li>
+<li><strong>render</strong> - Whether to render the collection if it is populated, or render it after it has been loaded</li>
+<li><strong>fetch</strong> - Whether or not to try to call <code>fetch</code> on the collection if <code>shouldFetch</code> returns true</li>
 <li><strong>success</strong> - Callback on fetch success, defaults to noop</li>
-<li><strong>errors</strong> - Wether or not to trigger an <code>error</code> event on the view when an <code>error</code> event is triggered on the collection</li>
+<li><strong>errors</strong> - Whether or not to trigger an <code>error</code> event on the view when an <code>error</code> event is triggered on the collection</li>
 </ul>
 <p>Note that while any view may bind a collection only a <code>CollectionView</code> will actually render a collection. A regular <code>Thorax.View</code> may declare a <code>collection</code> helper which in turn will generate and embed a <code>CollectionView</code>.
 
@@ -213,10 +213,10 @@ view.setCollection(myCollection);</code></pre>
 
 </p>
 <ul>
-<li><code>set</code> - defaults to true, wether or not to set the attributes if valid on a model if one was set with <code>setModel</code></li>
-<li><code>validate - defaults to true, wether or not to call </code>validateInput` during serialization</li>
-<li><code>children</code> - defaults to true, wether or not to serialize inputs in child views</li>
-<li><code>silent</code> - defaults to true, wether or not to pass <code>silent: true</code> to <code>model.set</code></li>
+<li><code>set</code> - defaults to true, whether or not to set the attributes if valid on a model if one was set with <code>setModel</code></li>
+<li><code>validate - defaults to true, whether or not to call </code>validateInput` during serialization</li>
+<li><code>children</code> - defaults to true, whether or not to serialize inputs in child views</li>
+<li><code>silent</code> - defaults to true, whether or not to pass <code>silent: true</code> to <code>model.set</code></li>
 </ul>
 <p>Each form input in your application should contain a corresponding label. Since you may want to re-use the same form multiple times in the same view a <code>@cid</code> attribute with a unique value is provided to each render call of each template:
 
@@ -302,17 +302,17 @@ new Thorax.View({
     helperView.render();
   });
 });</code></pre>
-<p>An example use of this would be to have a counter that would incriment each time a button was clicked. In Handlebars:
+<p>An example use of this would be to have a counter that would increment each time a button was clicked. In Handlebars:
 
 </p>
-<pre><code>{{#on "incrimented"}}{{i}}{/on}}
-{{#button trigger="incrimented"}}Add{{/button}}</code></pre>
+<pre><code>{{#on "incremented"}}{{i}}{/on}}
+{{#button trigger="incremented"}}Add{{/button}}</code></pre>
 <p>And the corresponding view class:
 
 </p>
 <pre><code><span class="keyword">new</span> Thorax.View({
   events: {
-    incrimented: <span class="keyword">function</span>() {
+    incremented: <span class="keyword">function</span>() {
       ++<span class="keyword">this</span>.i;
     }
   },
@@ -341,7 +341,7 @@ new Thorax.View({
 
 </p>
 <h2 id="thorax.model">Thorax.Model</h2>
-<p>Enhances <code>Backbone.Model</code> with the concept of wether or not the model is populated and wether or not it should be automatically fetched. Note that when passing a model to <code>view.setModel</code> it must be an instance of <code>Thorax.Model</code> and not <code>Backbone.Model</code>.
+<p>Enhances <code>Backbone.Model</code> with the concept of whether or not the model is populated and whether or not it should be automatically fetched. Note that when passing a model to <code>view.setModel</code> it must be an instance of <code>Thorax.Model</code> and not <code>Backbone.Model</code>.
 
 </p>
 <h3 id="is-empty">isEmpty <em>model.isEmpty()</em></h3>
@@ -349,23 +349,23 @@ new Thorax.View({
 
 </p>
 <h3 id="is-populated">isPopulated <em>model.isPopulated()</em></h3>
-<p>Used by <code>setModel</code> to determine wether or not to fetch the model. The default implementation checks to see if any keys that are not <code>id</code> and are not default values have been set.
+<p>Used by <code>setModel</code> to determine whether or not to fetch the model. The default implementation checks to see if any keys that are not <code>id</code> and are not default values have been set.
 
 </p>
 <h2 id="thorax.collection">Thorax.Collection</h2>
-<p>Enhances <code>Backbone.Collection</code> with the concept of wether or not the collection is populated and wether or not it should be automatically fetched. Note that when passing a collection to <code>view.setCollection</code> it must be an instance of <code>Thorax.Collection</code> and not <code>Backbone.Collection</code>.
+<p>Enhances <code>Backbone.Collection</code> with the concept of whether or not the collection is populated and whether or not it should be automatically fetched. Note that when passing a collection to <code>view.setCollection</code> it must be an instance of <code>Thorax.Collection</code> and not <code>Backbone.Collection</code>.
 
 </p>
 <h3 id="is-empty">isEmpty <em>collection.isEmpty()</em></h3>
-<p>Used by the <code>empty</code> helper and the <code>emptyTemplate</code> and <code>emptyItem</code> options of a <code>CollectionView</code> to check wether a collection is empty. A collection is only treated as empty if it <code>isPopulated</code> and zero length.
+<p>Used by the <code>empty</code> helper and the <code>emptyTemplate</code> and <code>emptyItem</code> options of a <code>CollectionView</code> to check whether a collection is empty. A collection is only treated as empty if it <code>isPopulated</code> and zero length.
 
 </p>
 <h3 id="is-populated">isPopulated <em>collection.isPopulated()</em></h3>
-<p>Used by <code>setCollection</code> to determine wether or not to fetch the collection.
+<p>Used by <code>setCollection</code> to determine whether or not to fetch the collection.
 
 </p>
 <h2 id="thorax.collection-view">Thorax.CollectionView</h2>
-<p>A class that renders an <code>itemTemplate</code> or <code>itemView</code> for each item in a <code>collection</code> passed to it in it's constructor, or via <code>setCollection</code>. The view will automatically update when items are added, removed or changed. 
+<p>A class that renders an <code>itemTemplate</code> or <code>itemView</code> for each item in a <code>collection</code> passed to it in it's constructor, or via <code>setCollection</code>. The view will automatically update when items are added, removed or changed.
 
 </p>
 <p>The <code>collection</code> helper will automatically create and embed a <code>CollectionView</code> instance for you. If programatic access to the view's methods are needed (for instance calling <code>appendItem</code> or specifying an <code>itemFilter</code>) it's best to create a <code>CollectionView</code> directly and embed it with the <code>view</code> helper as you would any other view.
@@ -422,7 +422,7 @@ new Thorax.View({
 
 </p>
 <h3 id="update-item">updateItem <em>view.updateItem(model)</em></h3>
-<p>Equivelent to calling <code>removeItem</code> then <code>appendItem</code>. Note that this is mainly meant to cover edge cases, by default changing a model will update the needed item (wether using <code>itemTemplate</code> or <code>itemView</code>).
+<p>Equivelent to calling <code>removeItem</code> then <code>appendItem</code>. Note that this is mainly meant to cover edge cases, by default changing a model will update the needed item (whether using <code>itemTemplate</code> or <code>itemView</code>).
 
 </p>
 <h2 id="thorax.util">Thorax.Util</h2>
@@ -541,7 +541,7 @@ view.on(<span class="string">'click a'</span>, <span class="keyword">function</s
 </p>
 <h2 id="data-loading">Data Loading</h2>
 <h3 id="queuing">Queuing</h3>
-<p>Thorax wraps <code>fetch</code> (and therefore <code>load</code>) on models and collections with a queuing mechansim to ensure that multiple <code>sync</code> calls for the same url will not trigger multiple HTTP requests. To force a <code>fetch</code> or <code>load</code> call to create a new HTTP request regardless of wether an identical request is in the queue use the <code>resetQueue</code> option:
+<p>Thorax wraps <code>fetch</code> (and therefore <code>load</code>) on models and collections with a queuing mechansim to ensure that multiple <code>sync</code> calls for the same url will not trigger multiple HTTP requests. To force a <code>fetch</code> or <code>load</code> call to create a new HTTP request regardless of whether an identical request is in the queue use the <code>resetQueue</code> option:
 
 </p>
 <pre><code>model.fetch({
@@ -617,7 +617,7 @@ view.on(<span class="string">'click a'</span>, <span class="keyword">function</s
 
 </p>
 <pre><code>{{#template <span class="string">"child"</span>}}
-  content <span class="keyword">in</span> the block will be available <span class="keyword">in</span> a variable 
+  content <span class="keyword">in</span> the block will be available <span class="keyword">in</span> a variable
   named <span class="string">"@yield"</span> inside the template <span class="string">"child"</span>
 {{<span class="regexp">/template}}</span></code></pre>
 <p>This is useful when a child template will be called from multiple different parents.
@@ -748,7 +748,7 @@ view.on(<span class="string">'click a'</span>, <span class="keyword">function</s
 });
 
 <span class="comment">// directly create collection view, no property</span>
-<span class="comment">// forwarding will occur </span>
+<span class="comment">// forwarding will occur</span>
 <span class="keyword">var</span> view = <span class="keyword">new</span> Thorax.View({
   collectionView: <span class="keyword">new</span> Thorax.CollectionView({
     collection: <span class="keyword">new</span> Thorax.Collection(),
@@ -911,7 +911,7 @@ view.on('helper:collection', function(collection, collectionView) {
     <tr><td><code>data-view-name</code></td><td>Same as above, only present on named views</td></tr>
     <tr><td><code>data-collection-cid</code></td><td>Element generated by the <code>collection helper</code></td></tr>
     <tr><td><code>data-collection-name</code></td><td>Same as above, only present when the bound collection is named</td></tr>
-    <tr><td><code>data-collection-empty</code></td><td>Set to "true" or "false" depending on wether the bound collection <code>isEmpty</code></td></tr>
+    <tr><td><code>data-collection-empty</code></td><td>Set to "true" or "false" depending on whether the bound collection <code>isEmpty</code></td></tr>
     <tr><td><code>data-collection-element</code></td><td>Set by the <code>collection-element</code>, determines where a collection in a <code>CollectionView</code> will be rendered.</td></tr>
     <tr><td><code>data-model-cid</code></td><td>A view's <code>el</code> if a model was bound to the view or each item element inside of elements generated by the collection helper</td></tr>
     <tr><td><code>data-model-name</code></td><td>Same as above, only present if the model is named</td></tr>
