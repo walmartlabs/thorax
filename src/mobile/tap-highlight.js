@@ -58,7 +58,7 @@ $.fn.tapHoldAndEnd = function(selector, callbackStart, callbackEnd) {
           _.each(timers, clearTimeout);
           timers = [];
         }
-      }, 150);
+      }, 10);
       timers.push(timer);
     });
   });
