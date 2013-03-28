@@ -113,6 +113,15 @@ Thorax.View = Backbone.View.extend({
   },
 
   render: function(output) {
+    if (this._rendering) {
+      // Nested rendering of the same view instances can lead to some very nasty issues with
+      // the root render process overwriting any updated data that may have been output in the child
+      // execution. If in a situation where you need to rerender in response to an event that is
+      // triggered sync in the rendering lifecycle it's recommended to defer the subsequent render
+      // or refactor so that all preconditions are known prior to exec.
+      throw new Error('nested-render');
+    }
+
     this._previousHelpers = _.filter(this.children, function(child) { return child._helperOptions; });
 
     var children = {};
@@ -122,6 +131,8 @@ Thorax.View = Backbone.View.extend({
       }
     });
     this.children = children;
+
+    this._rendering = true;
 
     if (_.isUndefined(output) || (!_.isElement(output) && !Thorax.Util.is$(output) && !(output && output.el) && !_.isString(output) && !_.isFunction(output))) {
       // try one more time to assign the template, if we don't
@@ -133,6 +144,8 @@ Thorax.View = Backbone.View.extend({
     } else if (_.isFunction(output)) {
       output = this.renderTemplate(output);
     }
+
+    this._rendering = false;
 
     // Destroy any helpers that may be lingering
     _.each(this._previousHelpers, function(child) {
