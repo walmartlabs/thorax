@@ -254,7 +254,7 @@ function bindToRoute(callback, failback) {
 
 function loadData(callback, failback, options) {
   if (this.isPopulated()) {
-    return callback(this);
+    return _.defer(callback, this);
   }
 
   if (arguments.length === 2 && !_.isFunction(failback) && _.isObject(failback)) {
