@@ -299,7 +299,10 @@ function fetchQueue(options, $super) {
       error: flushQueue(this, this.fetchQueue, 'error'),
       complete: flushQueue(this, this.fetchQueue, 'complete')
     }, options);
-    $super.call(this, options);
+    if ($super) {
+      $super.call(this, options);
+    }
+    return options;
   } else {
     // Currently fetching. Queue and process once complete
     this.fetchQueue.push(options);
