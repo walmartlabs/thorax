@@ -7,7 +7,7 @@ An opinionated, battle tested [Backbone](http://backbonejs.org/) + [Handlebars](
 - Clone the [Seed Project](http://github.com/walmartlabs/thorax-seed) and start building your own application.
 - Read about how Thorax works in the new [Backbone Fundamentals Book](http://addyosmani.github.com/backbone-fundamentals/#thorax).
 - Install the [Thorax Inspector](https://chrome.google.com/webstore/detail/thorax-inspector/poioalbefcopgeaeaadelomciijaondk) Chrome extension.
-- Building something smaller? Just link the [core library](http://github.com/walmartlabs/thorax) as a [single file from cdnjs](http://cdnjs.cloudflare.com/ajax/libs/thorax/2.0.0rc3/thorax.js) compiled with all of it's dependencies and use it anywhere or play with our [Hello World fiddle](http://jsfiddle.net/KRuPZ/) or [Todos fiddle](http://jsfiddle.net/mZzhy/).
+- Building something smaller? Just link the [core library](http://github.com/walmartlabs/thorax) as a [single file from cdnjs](http://cdnjs.cloudflare.com/ajax/libs/thorax/2.0.0rc3/thorax.js) compiled with all of its dependencies and use it anywhere or play with our [Hello World fiddle](http://jsfiddle.net/KRuPZ/) or [Todos fiddle](http://jsfiddle.net/mZzhy/).
 
 # Features
 
@@ -23,7 +23,7 @@ Thorax is used to build some of the biggest Backbone applications in the world b
 
 ## Easy Data Binding
 
-By default every property of your view is automatically available in the template. If a model is bound it's attributes will also be made available.
+By default every property of your view is automatically available in the template. If a model is bound its attributes will also be made available.
 
     var view = new Thorax.View({
       greeting: 'Hello',
@@ -170,7 +170,7 @@ Read an overview of the features of Thorax, as well as some of the theory behind
 [Backbone Fundamentals](http://addyosmani.github.com/backbone-fundamentals/) also covers [Lumbar's](http://walmartlabs.github.com/lumbar) approach to modular application development and routing, which is used in all of the seed projects except the standalone and Rails seeds.
 
 ### TodoMVC
-See the [TodoMVC Thorax implementation](http://addyosmani.github.com/todomvc/labs/architecture-examples/thorax/) and it's [source code](https://github.com/addyosmani/todomvc/tree/gh-pages/labs/architecture-examples/thorax). There is also a [Lumbar flavored version](https://github.com/addyosmani/todomvc/tree/gh-pages/labs/dependency-examples/thorax_lumbar) of the implementation.
+See the [TodoMVC Thorax implementation](http://addyosmani.github.com/todomvc/labs/architecture-examples/thorax/) and its [source code](https://github.com/addyosmani/todomvc/tree/gh-pages/labs/architecture-examples/thorax). There is also a [Lumbar flavored version](https://github.com/addyosmani/todomvc/tree/gh-pages/labs/dependency-examples/thorax_lumbar) of the implementation.
 
 ## Resources
 
@@ -247,7 +247,7 @@ A hash of templates, used by various Thorax helpers. If using the Lumbar or Rail
 
     Thorax.templates['my-template-name'] = Handlebars.compile('template string');
 
-If a `View` has the same `name` as a template in the `templates` hash, it's `template' property will be automatically assigned.
+If a `View` has the same `name` as a template in the `templates` hash, its `template' property will be automatically assigned.
 
 ## Thorax.View
 
@@ -313,7 +313,7 @@ A hash of child view's indexed by `cid`. Child views may become attached to the 
 
 ### parent *view.parent*
 
-If a view was embedded inside another with the `view` helper, or a generated `HelperView` (for instance the `collection` or `empty` helpers) it will have a `parent` view attribute. In the case of `HelperView`s, the `parent` will be the view that declared the helper in it's template.
+If a view was embedded inside another with the `view` helper, or a generated `HelperView` (for instance the `collection` or `empty` helpers) it will have a `parent` view attribute. In the case of `HelperView`s, the `parent` will be the view that declared the helper in its template.
 
 ### destroy *view.destroy([options])*
 
@@ -444,7 +444,7 @@ Validate the attributes created by `serialize`, must return an array or nothing 
 
 ### registerViewHelper *Handlebars.registerViewHelper(name [,viewClass] ,callback)*
 
-Note that this differs from `Handlebars.registerHelper`. Registers a helper that will create and append a new `HelperView` instance, with it's `template` attribute set to the value of the captured block. `callback` will recieve any arguments passed to the helper followed by a `HelperView` instance. Named arguments to the helper will be present on `options` attribute of the `HelperView` instance.
+Note that this differs from `Handlebars.registerHelper`. Registers a helper that will create and append a new `HelperView` instance, with its `template` attribute set to the value of the captured block. `callback` will recieve any arguments passed to the helper followed by a `HelperView` instance. Named arguments to the helper will be present on `options` attribute of the `HelperView` instance.
 
 A `HelperView` instance differs from a regular view instance in that it has a `parent` attribute which is always set to the declaring view, and a `context` which always returns the value of the `parent`'s context method. The `collection`, `empty` and other built in block view helpers are created with `registerViewHelper`.
 
@@ -520,7 +520,7 @@ Used by `setCollection` to determine whether or not to fetch the collection.
 
 ## Thorax.CollectionView
 
-A class that renders an `itemTemplate` or `itemView` for each item in a `collection` passed to it in it's constructor, or via `setCollection`. The view will automatically update when items are added, removed or changed.
+A class that renders an `itemTemplate` or `itemView` for each item in a `collection` passed to it in its constructor, or via `setCollection`. The view will automatically update when items are added, removed or changed.
 
 The `collection` helper will automatically create and embed a `CollectionView` instance for you. If programatic access to the view's methods are needed (for instance calling `appendItem` or specifying an `itemFilter`) it's best to create a `CollectionView` directly and embed it with the `view` helper as you would any other view.
 
@@ -800,7 +800,7 @@ If a block is specified it will be assigned as the `template` to the view instan
 
     {{#view viewInstance}}
       viewInstance will have this block
-      set as it's template property
+      set as its template property
     {{/view}}
 
 ### element *{{element name [options]}}*
@@ -1000,7 +1000,7 @@ Trigged on a `Thorax.LayoutView` immediately after `setView` is called.
 
 ### change:view:end *change:view:end (newView [,oldView] ,options)*
 
-Trigged on a `Thorax.LayoutView` after `setView` is called, the old view has been destroyed (if present) and the new view has been attached to the DOM and had it's `ready` event triggered.
+Trigged on a `Thorax.LayoutView` after `setView` is called, the old view has been destroyed (if present) and the new view has been attached to the DOM and had its `ready` event triggered.
 
 ### helper *helper (name [,args...] ,helperView)*
 
@@ -1066,7 +1066,7 @@ Triggered on a `CollectionView` or a the view calling the `collection` helper ev
 
 ## HTML Attributes
 
-Thorax and it's view helpers generate a number of custom HTML attributes that may be useful in debugging or generating CSS selectors to be used as arguments to `$` or to create CSS. The `*-cid` attributes are generally used only internally. See `$.model`, `$.collection` and `$.view` to get a reference to objects directly from the DOM. The `*-name` attributes will only be present if the given objects have a `name` property.</p>
+Thorax and its view helpers generate a number of custom HTML attributes that may be useful in debugging or generating CSS selectors to be used as arguments to `$` or to create CSS. The `*-cid` attributes are generally used only internally. See `$.model`, `$.collection` and `$.view` to get a reference to objects directly from the DOM. The `*-name` attributes will only be present if the given objects have a `name` property.</p>
 
 <table class="table table-bordered table-striped">
   <thead>
