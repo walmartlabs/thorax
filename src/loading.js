@@ -56,7 +56,7 @@ Thorax.loadHandler = function(start, end, context) {
 
     // Prevent binds to the same object multiple times as this can cause very bad things
     // to happen for the load;load;end;end execution flow.
-    if (loadInfo.events.indexOf(object) >= 0) {
+    if (_.indexOf(loadInfo.events, object) >= 0) {
       loadInfo.events.push(object);
       return;
     }
@@ -71,11 +71,11 @@ Thorax.loadHandler = function(start, end, context) {
       }
 
       var events = loadInfo.events,
-          index = events.indexOf(object);
+          index = _.indexOf(events, object);
       if (index >= 0) {
         events.splice(index, 1);
 
-        if (events.indexOf(object) < 0) {
+        if (_.indexOf(events, object) < 0) {
           // Last callback for this particlar object, remove the bind
           object.off(loadEnd, endCallback);
         }
