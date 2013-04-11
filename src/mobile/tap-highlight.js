@@ -104,6 +104,9 @@ var NATIVE_TAPPABLE = {
   'TEXTAREA': true
 };
 
+// Out here so we do not retain a scope
+function NOP(){}
+
 function fixupTapHighlight() {
   _.each(this._domEvents || [], function(bind) {
     var components = bind.split(' '),
@@ -116,7 +119,7 @@ function fixupTapHighlight() {
 
         if (useNativeHighlight && !NATIVE_TAPPABLE[el.tagName]) {
           // Add an explicit NOP bind to allow tap-highlight support
-          $el.on('click', function() {});
+          $el.on('click', NOP);
         }
       });
     }
