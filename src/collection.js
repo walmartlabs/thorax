@@ -130,15 +130,28 @@ Thorax.CollectionView = Thorax.View.extend({
     }
     return itemView;
   },
+
   // updateItem only useful if there is no item view, otherwise
   // itemView.render() provides the same functionality
   updateItem: function(model) {
-    this.removeItem(model);
-    this.appendItem(model);
-  },
-  removeItem: function(model) {
     var $el = this.getCollectionElement(),
         viewEl = $el.find('[' + modelCidAttributeName + '="' + model.cid + '"]');
+
+    // NOP For views
+    if (viewEl.attr(viewNameAttributeName)) {
+      return;
+    }
+
+    this.removeItem(viewEl);
+    this.appendItem(model);
+  },
+
+  removeItem: function(model) {
+    var viewEl = model;
+    if (model.cid) {
+      var $el = this.getCollectionElement();
+      viewEl = $el.find('[' + modelCidAttributeName + '="' + model.cid + '"]');
+    }
     if (!viewEl.length) {
       return false;
     }
@@ -151,6 +164,7 @@ Thorax.CollectionView = Thorax.View.extend({
     }
     return true;
   },
+
   renderCollection: function() {
     if (this.collection) {
       if (this.collection.isEmpty()) {
@@ -240,7 +254,7 @@ Thorax.CollectionView.on({
       // If we rendered with item views, model changes will be observed
       // by the generated item view but if we rendered with templates
       // then model changes need to be bound as nothing is watching
-      !this.itemView && this.updateItem(model);
+      this.updateItem(model);
       applyItemVisiblityFilter.call(this, model);
     },
     add: function(model) {
