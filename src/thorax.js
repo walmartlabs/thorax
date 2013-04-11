@@ -109,6 +109,7 @@ Thorax.View = Backbone.View.extend({
     if (this.parent) {
       this.parent._removeChild(this);
     }
+    this.undelegateEvents();
     this.remove(); // Will call stopListening()
   },
 
