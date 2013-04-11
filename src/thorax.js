@@ -106,11 +106,20 @@ Thorax.View = Backbone.View.extend({
         child.destroy();
       }
     }, this);
+
     if (this.parent) {
       this.parent._removeChild(this);
     }
+
     this.undelegateEvents();
     this.remove(); // Will call stopListening()
+
+    // Absolute worst case scenario, kill off some known fields to minimize the impact
+    // of being retained.
+    this.el = this.$el = undefined;
+    this.parent = undefined;
+    this.model = this.collection = this._collection = undefined;
+    this._helperOptions = undefined;
   },
 
   render: function(output) {
