@@ -93,7 +93,8 @@ _.extend(Thorax.View.prototype, {
   _addEvent: function(params) {
     if (params.type === 'view') {
       _.each(params.name.split(/\s+/), function(name) {
-        _on.call(this, name, bindEventHandler.call(this, 'view-event:', params));
+        // Must pass context here so stopListening will clean up our junk
+        _on.call(this, name, bindEventHandler.call(this, 'view-event:', params), params.context || this);
       }, this);
     } else {
       var boundHandler = bindEventHandler.call(this, 'dom-event:', params);
@@ -161,13 +162,19 @@ function bindEventHandler(eventName, params) {
   if (!method) {
     throw new Error('Event "' + callback + '" does not exist ' + (this.name || this.cid) + ':' + eventName);
   }
-  return _.bind(function() {
+
+  var context = params.context || this;
+  function ret() {
     try {
-      method.apply(this, arguments);
+      method.apply(context, arguments);
     } catch (e) {
-      Thorax.onException('thorax-exception: ' + (this.name || this.cid) + ':' + eventName, e);
+      Thorax.onException('thorax-exception: ' + (context.name || context.cid) + ':' + eventName, e);
     }
-  }, params.context || this);
+  }
+  // Backbone will delegate to _callback in off calls so we should still be able to support
+  // calling off on specific handlers.
+  ret._callback = method;
+  return ret;
 }
 
 function eventParamsFromEventItem(name, handler, context) {
