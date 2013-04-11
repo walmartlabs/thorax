@@ -100,11 +100,12 @@ _.extend(Thorax.View.prototype, {
       if (!params.nested) {
         boundHandler = containHandlerToCurentView(boundHandler, this.cid);
       }
+
+      var name = params.name + '.delegateEvents' + this.cid;
       if (params.selector) {
-        var name = params.name + '.delegateEvents' + this.cid;
         this.$el.on(name, params.selector, boundHandler);
       } else {
-        this.$el.on(params.name, boundHandler);
+        this.$el.on(name, boundHandler);
       }
     }
   }
