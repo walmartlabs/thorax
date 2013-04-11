@@ -66,8 +66,34 @@ $.fn.tapHoldAndEnd = function(selector, callbackStart, callbackEnd) {
 
 //only enable on android
 var useNativeHighlight = !isAndroid;
-Thorax.configureTapHighlight = function(useNative) {
+Thorax.configureTapHighlight = function(useNative, highlightClass) {
   useNativeHighlight = useNative;
+  highlightClass = highlightClass || 'tap-highlight';
+
+  if (!useNative) {
+    function _tapHighlightStart(event) {
+      var target = event.currentTarget,
+          tagName = target && target.tagName.toLowerCase();
+
+      // User input controls may be visually part of a larger group. For these cases
+      // we want to give priority to any parent that may provide a focus operation.
+      if (tagName === 'input' || tagName === 'select' || tagName === 'textarea') {
+        target = $(target).closest('[data-tappable=true]')[0] || target;
+      }
+
+      if (target) {
+        $(target).addClass(highlightClass);
+        return false;
+      }
+    }
+    function _tapHighlightEnd(/* event */) {
+      $('.' + highlightClass).removeClass(highlightClass);
+    }
+    $(document.body).tapHoldAndEnd(
+          '[data-tappable=true], a, input, button, select, textarea',
+          _tapHighlightStart,
+          _tapHighlightEnd);
+  }
 };
 
 var NATIVE_TAPPABLE = {
@@ -97,57 +123,12 @@ function fixupTapHighlight() {
   }, this);
 }
 
-_.extend(Thorax.View.prototype, {
-  _tapHighlightClassName: 'active',
-  _tapHighlightStart: function(event) {
-    var target = event.currentTarget,
-        tagName = target && target.tagName.toLowerCase();
-
-    // User input controls may be visually part of a larger group. For these cases
-    // we want to give priority to any parent that may provide a focus operation.
-    if (tagName === 'input' || tagName === 'select' || tagName === 'textarea') {
-      target = $(target).closest('[data-tappable=true]')[0] || target;
-    }
-
-    if (target) {
-      $(target).addClass(this._tapHighlightClassName);
-      return false;
-    }
-  },
-  _tapHighlightEnd: function(/* event */) {
-    $('.' + this._tapHighlightClassName).removeClass(this._tapHighlightClassName);
-  }
-});
-
 Thorax.View.on({
   'rendered': fixupTapHighlight,
   'rendered:collection': fixupTapHighlight,
   'rendered:item': fixupTapHighlight,
   'rendered:empty': fixupTapHighlight
 });
-
-var _setElement = Thorax.View.prototype.setElement,
-    tapHighlightSelector = '[data-tappable=true], a, input, button, select, textarea';
-
-Thorax.View.prototype.setElement = function() {
-  var response = _setElement.apply(this, arguments);
-  if (!this.noTapHighlight) {
-    if (!useNativeHighlight) {
-      var self = this;
-      function exec(name) {
-        return function() {
-          try {
-            self[name].apply(self, arguments);
-          } catch(e) {
-            Thorax.onException(name, e);
-          }
-        };
-      }
-      this.$el.tapHoldAndEnd(tapHighlightSelector, exec('_tapHighlightStart'), exec('_tapHighlightEnd'));
-    }
-  }
-  return response;
-};
 
 var _addEvent = Thorax.View.prototype._addEvent;
 Thorax.View.prototype._addEvent = function(params) {
