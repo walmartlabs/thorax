@@ -78,14 +78,14 @@ var NATIVE_TAPPABLE = {
   'TEXTAREA': true
 };
 
-function fixupTapHighlight(scope) {
+function fixupTapHighlight() {
   _.each(this._domEvents || [], function(bind) {
     var components = bind.split(' '),
         selector = components.slice(1).join(' ') || undefined;  // Needed to make zepto happy
 
     if (components[0] === 'click') {
       // !selector case is for root click handlers on the view, i.e. 'click'
-      $(selector || this.el, selector && (scope || this.el)).forEach(function(el) {
+      $(selector || this.el, selector && this.el).forEach(function(el) {
         var $el = $(el).data('tappable', true);
 
         if (useNativeHighlight && !NATIVE_TAPPABLE[el.tagName]) {
@@ -119,16 +119,11 @@ _.extend(Thorax.View.prototype, {
   }
 });
 
-//TODO: examine if these are still needed
-var fixupTapHighlightCallback = function() {
-  fixupTapHighlight.call(this);
-};
-
 Thorax.View.on({
-  'rendered': fixupTapHighlightCallback,
-  'rendered:collection': fixupTapHighlightCallback,
-  'rendered:item': fixupTapHighlightCallback,
-  'rendered:empty': fixupTapHighlightCallback
+  'rendered': fixupTapHighlight,
+  'rendered:collection': fixupTapHighlight,
+  'rendered:item': fixupTapHighlight,
+  'rendered:empty': fixupTapHighlight
 });
 
 var _setElement = Thorax.View.prototype.setElement,
