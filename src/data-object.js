@@ -107,8 +107,8 @@ function bindEvents(type, target, source) {
         callback.apply(eventContext, arguments);
       } else {
         // If our event handler is removed by destroy while another event is processing then we
-        // we might see one latent event percolate through. If we see multiple events this is
-        // a concern and a sign that something was not cleaned properly.
+        // we might see one latent event percolate through due to caching in the event loop. If we
+        // see multiple events this is a concern and a sign that something was not cleaned properly.
         if (destroyedCount) {
           throw new Error('destroyed-event:' + context.name + ':' + event[0]);
         }
