@@ -1,66 +1,34 @@
 /*global isAndroid */
 
 $.fn.tapHoldAndEnd = function(selector, callbackStart, callbackEnd) {
-  function triggerEvent(obj, eventType, callback, event) {
-    var originalType = event.type,
-        result;
-
-    event.type = eventType;
-    if (callback) {
-      result = callback.call(obj, event);
-    }
-    event.type = originalType;
-    return result;
-  }
-
-  var timers = [];
   return this.each(function() {
-    var thisObject = this,
-        tapHoldStart = false,
-        $this = $(thisObject);
+    var tapHoldStart,
+        timer,
+        target;
 
-    $this.on('touchstart', selector, function(event) {
-      tapHoldStart = false;
-      var origEvent = event,
-          timer;
+    function clearTapTimer(event) {
+      clearTimeout(timer);
 
-      function clearTapTimer(event) {
-        clearTimeout(timer);
-
-        if (tapHoldStart) {
-          var retval = false;
-          if (event) {
-            // We aren't sending any end events for touchcancel cases,
-            // prevent an exception
-            retval = triggerEvent(thisObject, 'tapHoldEnd', callbackEnd, event);
-          }
-          if (retval === false) {
-            _.each(timers, clearTimeout);
-            timers = [];
-          }
-        }
+      if (tapHoldStart && target) {
+        callbackEnd(target);
       }
 
-      $(document).one('touchcancel', function() {
+      target = undefined;
+      tapHoldStart = false;
+    }
+
+    $(this).on('touchstart', selector, function(event) {
         clearTapTimer();
 
-        $this.off('touchmove', selector, clearTapTimer);
-        $this.off('touchend', selector, clearTapTimer);
-      });
+        target = event.currentTarget;
+        timer = setTimeout(function() {
+          tapHoldStart = true;
+          callbackStart(target);
+        }, 50);
+      })
+      .on('touchmove touchend', clearTapTimer);
 
-      $this.on('touchend', selector, clearTapTimer);
-      $this.on('touchmove', selector, clearTapTimer);
-
-      timer = setTimeout(function() {
-        tapHoldStart = true;
-        var retval = triggerEvent(thisObject, 'tapHoldStart', callbackStart, origEvent);
-        if (retval === false) {
-          _.each(timers, clearTimeout);
-          timers = [];
-        }
-      }, 10);
-      timers.push(timer);
-    });
+    $(document).on('touchcancel', clearTapTimer);
   });
 };
 
@@ -71,9 +39,8 @@ Thorax.configureTapHighlight = function(useNative, highlightClass) {
   highlightClass = highlightClass || 'tap-highlight';
 
   if (!useNative) {
-    function _tapHighlightStart(event) {
-      var target = event.currentTarget,
-          tagName = target && target.tagName.toLowerCase();
+    function _tapHighlightStart(target) {
+      var tagName = target && target.tagName.toLowerCase();
 
       // User input controls may be visually part of a larger group. For these cases
       // we want to give priority to any parent that may provide a focus operation.
@@ -86,7 +53,7 @@ Thorax.configureTapHighlight = function(useNative, highlightClass) {
         return false;
       }
     }
-    function _tapHighlightEnd(/* event */) {
+    function _tapHighlightEnd() {
       $('.' + highlightClass).removeClass(highlightClass);
     }
     $(document.body).tapHoldAndEnd(
