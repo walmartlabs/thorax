@@ -594,8 +594,10 @@ describe('loading', function() {
 
       this.model.isPopulated = function() { return true; };
       this.model.load(success, failback);
-      expect(this.requests).to.be.empty;
 
+      this.clock.tick(10);
+
+      expect(this.requests).to.be.empty;
       expect(success).to.have.been.calledOnce;
       expect(failback).to.not.have.been.called;
       expect(rootStart).to.not.have.been.called;
