@@ -260,7 +260,7 @@ describe('collection', function() {
     expect(view.$('li').eq(0).html()).to.equal('d');
   });
 
-  it("bindDataObject or model.set can be called in context()", function() {
+  it("nested render should throw", function() {
     //this causes recursion
     function doNestedRender() {
       var view = new Thorax.View({
