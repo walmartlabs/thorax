@@ -86,9 +86,7 @@ Thorax.loadHandler = function(start, end, context) {
         loadInfo.endTimeout = setTimeout(function() {
           try {
             if (!events.length) {
-              var run = loadInfo.run;
-
-              if (run) {
+              if (loadInfo.run) {
                 // Emit the end behavior, but only if there is a paired start
                 end.call(self, loadInfo.background, loadInfo);
                 loadInfo.trigger(loadEnd, loadInfo);
