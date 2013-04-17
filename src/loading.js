@@ -63,13 +63,7 @@ Thorax.loadHandler = function(start, end, context) {
 
     loadInfo.events.push(object);
 
-    // Thorax replaces Backbone's `on` method for views which breaks `off` behavior.
-    // The Backbone's `on` is saved in `_on` attribute, so using that if available.
-    // TODO: get rid of this hack once the underlying issue is fixed:
-    // https://github.com/walmartlabs/thorax/issues/134
-    var on = _.isFunction(object._on) ? object._on : object.on;
-
-    on.call(object, loadEnd, function endCallback() {
+    object.on(loadEnd, function endCallback() {
       var loadingEndTimeout = self._loadingTimeoutEndDuration;
       if (loadingEndTimeout === void 0) {
         // If we are running on a non-view object pull the default timeout
