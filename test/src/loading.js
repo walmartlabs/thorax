@@ -338,6 +338,28 @@ describe('loading', function() {
       expect(this.ends).to.eql([{background: false, model: loaderWrapper}]);
     });
 
+    it('forwarded events emit one event', function() {
+      var object = _.extend({}, Backbone.Events);
+      Thorax.mixinLoadableEvents(object);
+
+      Thorax.forwardLoadEvents(object, this.object);
+      Thorax.forwardLoadEvents(object, this.object);
+      Thorax.forwardLoadEvents(object, this.object);
+
+      object.loadStart('foo', false);
+      this.clock.tick(1000);
+      var loaderWrapper = _.last(_.values(this.object._loadInfo));
+
+      expect(this.loads).to.eql([{msg: 'foo', background: false, model: loaderWrapper}]);
+      expect(this.ends).to.eql([]);
+
+      object.loadEnd();
+      this.clock.tick(1000);
+
+      expect(this.loads).to.eql([{msg: 'foo', background: false, model: loaderWrapper}]);
+      expect(this.ends).to.eql([{background: false, model: loaderWrapper}]);
+    });
+
     it('loadHandlers are isolated', function() {
       var startSpy = this.spy(),
           endSpy = this.spy();
