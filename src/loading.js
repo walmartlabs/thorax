@@ -9,7 +9,7 @@ Thorax.setRootObject = function(obj) {
 };
 
 Thorax.loadHandler = function(start, end, context) {
-  var loadCounter = _.uniqueId();
+  var loadCounter = _.uniqueId('load');
   return function(message, background, object) {
     var self = context || this;
     self._loadInfo = self._loadInfo || [];
@@ -38,6 +38,7 @@ Thorax.loadHandler = function(start, end, context) {
 
     if (!loadInfo) {
       loadInfo = self._loadInfo[loadCounter] = _.extend({
+        cid: loadCounter,
         events: [],
         timeout: 0,
         message: message,
