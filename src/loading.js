@@ -38,6 +38,10 @@ Thorax.loadHandler = function(start, end, context) {
 
     if (!loadInfo) {
       loadInfo = self._loadInfo[loadCounter] = _.extend({
+        isLoading: function() {
+          return loadInfo.events.length;
+        },
+
         cid: loadCounter,
         events: [],
         timeout: 0,
@@ -58,7 +62,6 @@ Thorax.loadHandler = function(start, end, context) {
     // Prevent binds to the same object multiple times as this can cause very bad things
     // to happen for the load;load;end;end execution flow.
     if (loadInfo.events.indexOf(object) >= 0) {
-      loadInfo.events.push(object);
       return;
     }
 
@@ -73,7 +76,7 @@ Thorax.loadHandler = function(start, end, context) {
 
       var events = loadInfo.events,
           index = events.indexOf(object);
-      if (index >= 0) {
+      if (index >= 0 && !object.isLoading()) {
         events.splice(index, 1);
 
         if (events.indexOf(object) < 0) {
