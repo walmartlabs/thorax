@@ -175,11 +175,21 @@ Thorax.mixinLoadable = function(target, useParent) {
 
 Thorax.mixinLoadableEvents = function(target, useParent) {
   _.extend(target, {
+    _loadCount: 0,
+
+    isLoading: function() {
+      return this._loadCount > 0;
+    },
+
     loadStart: function(message, background) {
+      this._loadCount++;
+
       var that = useParent ? this.parent : this;
       that.trigger(loadStart, message, background, that);
     },
     loadEnd: function() {
+      this._loadCount--
+
       var that = useParent ? this.parent : this;
       that.trigger(loadEnd, that);
     }
