@@ -1,5 +1,8 @@
 /*global isAndroid */
 
+// This doesn't work on HTC devices with Android 4.0.
+// Not much can be done about it as it seems to be a browser bug
+// (it doesn't update visual styling while you hold your finger on the screen)
 $.fn.tapHoldAndEnd = function(selector, callbackStart, callbackEnd) {
   return this.each(function() {
     var tapHoldStart,
