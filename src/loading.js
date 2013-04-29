@@ -373,6 +373,8 @@ if (Thorax.Router) {
 Thorax.View.prototype._modifyDataObjectOptions = function(dataObject, options) {
   options.ignoreErrors = this.ignoreFetchError;
   options.background = this.nonBlockingLoad;
+  // avoid default collection set behavior to ensure reset event can trigger rendering
+  options.reset = true;
   return options;
 };
 
