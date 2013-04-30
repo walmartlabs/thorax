@@ -191,7 +191,7 @@ describe('event', function() {
         parentClickedCount = 0;
 
     var Child = Thorax.View.extend({
-      template: Thorax.templates.child,
+      template: Handlebars.templates.child,
       events: {
         'click div': function() {
           ++childClickedCount;
@@ -200,7 +200,7 @@ describe('event', function() {
     });
 
     var Parent = Thorax.View.extend({
-      template: Thorax.templates.parent,
+      template: Handlebars.templates.parent,
       events: {
         'click div': function() {
           ++parentClickedCount;

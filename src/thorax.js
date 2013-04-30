@@ -16,10 +16,13 @@ var viewNameAttributeName = 'data-view-name',
 //view instances
 var viewsIndexedByCid = {};
 
+if (!Handlebars.templates) {
+  Handlebars.templates = {};
+}
+
 var Thorax = this.Thorax = {
-  VERSION: '2.0.0rc1',
+  VERSION: '2.0.0rc4',
   templatePathPrefix: '',
-  templates: {},
   //view classes
   Views: {},
   //certain error prone pieces of code (on Android only it seems)
@@ -29,7 +32,9 @@ var Thorax = this.Thorax = {
   //to debug / log / etc
   onException: function(name, err) {
     throw err;
-  }
+  },
+  //deprecated, here to ensure existing projects aren't mucked with
+  templates: Handlebars.templates 
 };
 
 Thorax.View = Backbone.View.extend({

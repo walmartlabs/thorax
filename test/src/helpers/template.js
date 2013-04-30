@@ -25,8 +25,8 @@ describe('template helper', function() {
   });
 
   it("template yield", function() {
-    Thorax.templates['yield-child'] = Handlebars.compile('<span>{{@yield}}</span>');
-    Thorax.templates['yield-parent'] = Handlebars.compile('<p>{{#template "yield-child"}}content{{/template}}</p>');
+    Handlebars.templates['yield-child'] = Handlebars.compile('<span>{{@yield}}</span>');
+    Handlebars.templates['yield-parent'] = Handlebars.compile('<p>{{#template "yield-child"}}content{{/template}}</p>');
     var view = new Thorax.View({
       name: 'yield-parent'
     });

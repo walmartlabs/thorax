@@ -212,7 +212,7 @@ Thorax is available on [cdnjs](http://cdnjs.com/), each build includes jQuery 1.
 
 ## Registry
 
-Thorax creates a special hash for each type of class to store all subclasses in your application. The use of `Thorax.Views` and `Thorax.templates` is required to allow the `view`, `template` and other helper methods to operate, but the use of `Thorax.Models` and `Thorax.Collections` are optional and provided for consitency.
+Thorax creates a special hash for each type of class to store all subclasses in your application. The use of `Thorax.Views` and `Handlebars.templates` (usually defined by Handlebars) is required to allow the `view`, `template` and other helper methods to operate, but the use of `Thorax.Models` and `Thorax.Collections` are optional and provided for consitency.
 
 <table cellpadding="0" cellspacing="0" border="0" width="100%">
   <thead>
@@ -225,7 +225,7 @@ Thorax creates a special hash for each type of class to store all subclasses in 
     <tr><td>Thorax.View</td><td>Thorax.Views</td></tr>
     <tr><td>Thorax.Model</td><td>Thorax.Models</td></tr>
     <tr><td>Thorax.Collection</td><td>Thorax.Collections</td></tr>
-    <tr><td>templates</td><td>Thorax.templates</td></tr>
+    <tr><td>templates</td><td>Handlebars.templates</td></tr>
   </tbody>
 </table>
 
@@ -241,11 +241,11 @@ If a `name` property is passed to any Thorax classes' `extend` method the result
     //get class
     Thorax.Views["my-view"]
 
-### templates *Thorax.templates*
+### templates *Handlebars.templates*
 
-A hash of templates, used by various Thorax helpers. If using the Lumbar or Rails boilerplate projects this hash will be automatically generated from the files in your `templates` directories. To manually add a template to the hash:
+A hash of templates, used by various Thorax helpers. If using the Lumbar or Rails boilerplate projects or the [Thorax Seed](http://github.com/walmartlabs/thorax-seed) this hash will be automatically generated from the files in your `templates` directories. To manually add a template to the hash:
 
-    Thorax.templates['my-template-name'] = Handlebars.compile('template string');
+    Handlebars.templates['my-template-name'] = Handlebars.compile('template string');
 
 If a `View` has the same `name` as a template in the `templates` hash, its `template' property will be automatically assigned.
 
