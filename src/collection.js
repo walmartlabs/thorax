@@ -300,9 +300,7 @@ function onSetCollection() {
 
 function applyVisibilityFilter() {
   if (this.itemFilter) {
-    this.collection.forEach(function(model) {
-      applyItemVisiblityFilter.call(this, model);
-    }, this);
+    this.collection.forEach(applyItemVisiblityFilter, this);
   }
 }
 
