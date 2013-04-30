@@ -235,6 +235,19 @@ describe('event', function() {
     view.$el.remove();
   });
 
+  it("on works after data object is set", function() {
+    var spy = this.spy();
+    var view = new Thorax.View({
+      template: function() {return '';},
+      model: new Thorax.Model({
+        key: 'value',
+      })
+    });
+    view.on({model: {event: spy}});
+    view.model.trigger('event');
+    expect(spy.callCount).to.equal(1);
+  });
+
   it("should trigger ready event on children", function() {
     var spy = this.spy(),
         layoutView = new Thorax.LayoutView(),

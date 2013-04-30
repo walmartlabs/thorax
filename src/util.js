@@ -111,19 +111,31 @@ function objectEvents(target, eventName, callback, context) {
   if (_.isObject(callback)) {
     var spec = inheritVars[eventName];
     if (spec && spec.event) {
-      addEvents(target['_' + eventName + 'Events'], callback, context);
+      if (target && target.listenTo && target[eventName] && target[eventName].cid) {
+        addEvents(target, callback, context, eventName);
+      } else {
+        addEvents(target['_' + eventName + 'Events'], callback, context);
+      }
       return true;
     }
   }
 }
-function addEvents(target, source, context) {
+function addEvents(target, source, context, listenTo) {
   _.each(source, function(callback, eventName) {
     if (_.isArray(callback)) {
       _.each(callback, function(cb) {
-        target.push([eventName, cb, context]);
+        if (listenTo) {
+          target.listenTo(target[listenTo], eventName, getEventCallback(cb, target), context);
+        } else {
+          target.push([eventName, cb, context]);
+        }
       });
     } else {
-      target.push([eventName, callback, context]);
+      if (listenTo) {
+        target.listenTo(target[listenTo], eventName, getEventCallback(callback, target), context);
+      } else {
+        target.push([eventName, callback, context]);
+      }
     }
   });
 }
