@@ -138,7 +138,7 @@ Thorax.CollectionView = Thorax.View.extend({
         viewEl = $el.find('[' + modelCidAttributeName + '="' + model.cid + '"]');
 
     // NOP For views
-    if (viewEl.attr(viewNameAttributeName)) {
+    if (viewEl.attr(viewCidAttributeName)) {
       return;
     }
 

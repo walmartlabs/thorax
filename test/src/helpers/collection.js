@@ -197,6 +197,23 @@ describe('collection helper', function() {
           .to.have.been.calledOn(view)
           .to.have.been.calledWith(view.collection.models[0]);
     });
+    it('should not destroy views rendered with renderItem on change', function() {
+      var child = new (Thorax.View.extend({
+        destroy: function() { throw new Error('Destroy'); },
+
+        template: function() { return '<div>foo</div>'; }
+      }));
+      child.ensureRendered();
+
+      view.renderItem = this.spy(function() {
+        return child;
+      });
+
+      view.setCollection(new Thorax.Collection([{id: 1}]));
+      view.collection.at(0).set('foo', 'bar');
+
+      expect(view.renderItem).to.have.been.calledOnce;
+    });
 
     it('should forward rendered:empty', function() {
       view.on('rendered:empty', spy);
