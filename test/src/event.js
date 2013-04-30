@@ -339,7 +339,7 @@ describe('event', function() {
       beforeEach(function() {
         this.stub(view.$el, 'on', function(event, selector, callback) {
           if (selector === 'foo') {
-            callback($.Event());
+            callback($.Event('click'));
           }
         });
         this.stub($.fn, 'view', function() { return view; });

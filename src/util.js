@@ -13,7 +13,7 @@ function createRegistryWrapper(klass, hash) {
 function registryGet(object, type, name, ignoreErrors) {
   var target = object[type],
       value;
-  if (name.indexOf('.') >= 0) {
+  if (_.indexOf(name, '.') >= 0) {
     var bits = name.split(/\./);
     name = bits.pop();
     _.each(bits, function(key) {
