@@ -388,11 +388,14 @@ describe('collection', function() {
     view.render();
     expect(renderCount).to.equal(1);
     expect(view.$('li').html()).to.equal('a');
+
     collection.at(0).set({name: 'A'});
     expect(view.$('li').html()).to.equal('A');
     expect(renderCount).to.equal(1);
+
     collection.add({name: 'b'});
     expect(view.$('li:last-child').html()).to.equal('b');
+
     collection.at(1).set({name: 'B'});
     expect(view.$('li:last-child').html()).to.equal('B');
     expect(renderCount).to.equal(1);
@@ -402,17 +405,22 @@ describe('collection', function() {
     collection.at(1).set({name: 'c'});
     expect(view.$('li:first-child').html()).to.equal('a');
     expect(view.$('li:last-child').html()).to.equal('c');
+
     collection.at(0).set({name: 'A'});
     collection.add({name: 'b'});
     expect(collection.at(2).attributes.name).to.equal('c');
+
     collection.at(2).set({name: 'C'});
     expect(view.$('li:first-child').html()).to.equal('A');
     expect(view.$('li:last-child').html()).to.equal('C');
+  });
 
-    collection = new Thorax.Collection({name: 'one'});
-    renderCount = 0;
-    var itemRenderCount = 0;
-    view = new Thorax.View({
+  it('model update will update item view', function() {
+    var collection = new Thorax.Collection({name: 'one'}),
+        renderCount = 0,
+        itemRenderCount = 0,
+        children = [];
+    var view = new Thorax.View({
       name: 'outer-view',
       initialize: function() {
         this.on('rendered', function() {
@@ -432,22 +440,27 @@ describe('collection', function() {
       myCollection: collection,
       template: Handlebars.compile('{{collection myCollection tag="ul" item-view=itemView}}')
     });
+
     view.render();
-    expect(itemRenderCount).to.equal(1);
     expect(renderCount).to.equal(1);
+
+    expect(itemRenderCount).to.equal(1);
     expect(view.$('li').html()).to.equal('one');
+
     collection.at(0).set({
       name: 'two'
     });
     expect(itemRenderCount).to.equal(2);
     expect(view.$('li').html()).to.equal('two');
-    expect(renderCount).to.equal(1);
+
     collection.add({name: 'three'});
     expect(itemRenderCount).to.equal(3);
     expect(view.$('li:last-child').html()).to.equal('three');
+
     collection.at(1).set({name: 'four'});
     expect(itemRenderCount).to.equal(4);
     expect(view.$('li:last-child').html()).to.equal('four');
+
     expect(renderCount).to.equal(1);
   });
 
