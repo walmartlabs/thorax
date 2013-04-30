@@ -428,10 +428,15 @@ describe('collection', function() {
         });
       },
       itemView: Thorax.View.extend({
+        itemRenderCount: 0,
+
         name: 'inner-view',
         initialize: function() {
+          children.push(this);
+
           this.on('rendered', function() {
-            ++itemRenderCount;
+            itemRenderCount++;
+            ++this.itemRenderCount;
           });
         },
         tagName: 'li',
@@ -445,23 +450,28 @@ describe('collection', function() {
     expect(renderCount).to.equal(1);
 
     expect(itemRenderCount).to.equal(1);
+    expect(children[0].itemRenderCount).to.equal(1);
     expect(view.$('li').html()).to.equal('one');
 
     collection.at(0).set({
       name: 'two'
     });
     expect(itemRenderCount).to.equal(2);
+    expect(children[0].itemRenderCount).to.equal(2);
     expect(view.$('li').html()).to.equal('two');
 
     collection.add({name: 'three'});
     expect(itemRenderCount).to.equal(3);
+    expect(children[1].itemRenderCount).to.equal(1);
     expect(view.$('li:last-child').html()).to.equal('three');
 
     collection.at(1).set({name: 'four'});
     expect(itemRenderCount).to.equal(4);
+    expect(children[1].itemRenderCount).to.equal(2);
     expect(view.$('li:last-child').html()).to.equal('four');
 
     expect(renderCount).to.equal(1);
+    expect(children.length).to.equal(2);
   });
 
   it("collection-element helper", function() {
