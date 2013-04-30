@@ -250,9 +250,6 @@ Thorax.CollectionView.on({
       applyVisibilityFilter.call(this);
     },
     change: function(model) {
-      // If we rendered with item views, model changes will be observed
-      // by the generated item view but if we rendered with templates
-      // then model changes need to be bound as nothing is watching
       this.updateItem(model);
       applyItemVisiblityFilter.call(this, model);
     },
