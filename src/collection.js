@@ -176,7 +176,6 @@ Thorax.CollectionView = Thorax.View.extend({
         }, this);
       }
       this.trigger('rendered:collection', this, this.collection);
-      applyVisibilityFilter.call(this);
     } else {
       handleChangeFromNotEmptyToEmpty.call(this);
     }
