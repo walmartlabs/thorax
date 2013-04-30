@@ -76,6 +76,7 @@ Thorax.loadHandler = function(start, end, context) {
 
       var events = loadInfo.events,
           index = _.indexOf(events, object);
+      if (index >= 0 && !object.isLoading()) {
         events.splice(index, 1);
 
         if (_.indexOf(events, object) < 0) {
