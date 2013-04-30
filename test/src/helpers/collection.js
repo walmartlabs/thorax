@@ -141,4 +141,78 @@ describe('collection helper', function() {
     testNesting(view, 'nested inline');
   });
 
+  describe('delgation', function() {
+    var view,
+        spy;
+    beforeEach(function() {
+      spy = this.spy();
+      view = new Thorax.View({
+        template: Handlebars.compile('{{#collection}}<span>{{test}}</span>{{/collection}}')
+      });
+    });
+
+    it('should delegate to #itemContext', function() {
+      view.itemContext = this.spy(function() {
+        return {
+          test: 'testing'
+        };
+      });
+      view.setCollection(new Thorax.Collection([{id: 1}]));
+
+      expect(view.itemContext)
+          .to.have.been.calledOnce
+          .to.have.been.calledOn(view);
+      expect(view.$('span').length).to.equal(1);
+      expect(view.$('span')[0].innerHTML).to.equal('testing');
+    });
+
+    it('should delegate to #itemFilter', function() {
+      view.itemFilter = this.spy(function() {
+        return false;
+      });
+      view.setCollection(new Thorax.Collection([{id: 1}]));
+
+      expect(view.itemFilter)
+          .to.have.been.calledOnce
+          .to.have.been.calledOn(view);
+      expect(view.$('span').length).to.equal(1);
+      expect(view.$('span')[0].style.display).to.equal('none');
+    });
+
+    it('should forward rendered:item', function() {
+      view.on('rendered:item', spy);
+      view.setCollection(new Thorax.Collection([{id: 1}]));
+
+      expect(spy)
+          .to.have.been.calledOnce
+          .to.have.been.calledOn(view)
+          .to.have.been.calledWith(_.values(view.children)[0], view.collection, view.collection.models[0]);
+    });
+    it('should delegate to #renderItem', function() {
+      view.renderItem = spy;
+      view.setCollection(new Thorax.Collection([{id: 1}]));
+
+      expect(view.renderItem)
+          .to.have.been.calledOnce
+          .to.have.been.calledOn(view)
+          .to.have.been.calledWith(view.collection.models[0]);
+    });
+
+    it('should forward rendered:empty', function() {
+      view.on('rendered:empty', spy);
+      view.setCollection(new Thorax.Collection([]));
+
+      expect(spy)
+          .to.have.been.calledOnce
+          .to.have.been.calledOn(view);
+    });
+    it('should delegate to #renderEmpty', function() {
+      view.renderEmpty = spy;
+      view.setCollection(new Thorax.Collection([]));
+
+      expect(view.renderEmpty)
+          .to.have.been.calledOnce
+          .to.have.been.calledOn(view);
+    });
+  });
 });

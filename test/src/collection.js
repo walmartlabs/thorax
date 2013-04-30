@@ -491,39 +491,6 @@ describe('collection', function() {
     expect(view.$('[data-collection-empty]').length).to.equal(0);
   });
 
-  it("itemContext", function() {
-    var view = new Thorax.View({
-      key: 'value',
-      collection: letterCollection,
-      template: Handlebars.compile("{{#collection}}<span>{{test}}</span>{{/collection}}"),
-      itemContext: function() {
-        // not checking for `view` or cid as itemContext will be called immediately
-        // before `view` var is assigned
-        expect(this.key).to.equal('value', 'itemContext called with correct context');
-        return {
-          test: 'testing'
-        };
-      }
-    });
-    view.render();
-    expect(view.$('span').length).to.equal(letterCollection.length);
-    expect(view.$('span')[0].innerHTML).to.equal('testing');
-
-    //will use default
-    view = new Thorax.View({
-      collection: new (Thorax.Collection.extend({
-        url: false,
-        isEmpty: function() {
-          return true;
-        }
-      }))(),
-      template: Handlebars.compile("{{#collection}}{{test}}{{else}}<b>{{test}}</b>{{/collection}}"),
-      test: 'testing'
-    });
-    view.render();
-    expect(view.$('b')[0].innerHTML).to.equal('testing');
-  });
-
   it("empty-class option", function() {
     var view = new Thorax.View({
       template: Handlebars.compile("{{#collection empty-class=\"a\" tag=\"ul\"}}{{/collection}}"),
