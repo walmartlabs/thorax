@@ -32,7 +32,9 @@ var Thorax = this.Thorax = {
   //to debug / log / etc
   onException: function(name, err) {
     throw err;
-  }
+  },
+  //deprecated, here to ensure existing projects aren't mucked with
+  templates: Handlebars.templates 
 };
 
 Thorax.View = Backbone.View.extend({
