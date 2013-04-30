@@ -225,6 +225,16 @@ describe('event', function() {
     parent.$el.remove();
   });
 
+  it("on works after el is created", function() {
+    var spy = this.spy();
+    var view = new Thorax.View();
+    view.on('click', spy);
+    view.$el.trigger('click');
+    expect(spy.callCount).to.equal(1);
+    $('body').append(view.el);
+    view.$el.remove();
+  });
+
   it("should trigger ready event on children", function() {
     var spy = this.spy(),
         layoutView = new Thorax.LayoutView(),

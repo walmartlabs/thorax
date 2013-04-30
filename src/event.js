@@ -60,7 +60,7 @@ _.extend(Thorax.View.prototype, {
       //accept on("click a", callback, context)
       _.each((_.isArray(callback) ? callback : [callback]), function(callback) {
         var params = eventParamsFromEventItem.call(this, eventName, callback, context || this);
-        if (params.type === 'DOM') {
+        if (params.type === 'DOM' && !this.$el) {
           //will call _addEvent during delegateEvents()
           if (!this._eventsToDelegate) {
             this._eventsToDelegate = [];
