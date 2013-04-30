@@ -44,16 +44,15 @@ Thorax.CollectionHelperView = Thorax.CollectionView.extend({
     _.each(forwardableProperties, function(propertyName) {
       forwardMissingProperty.call(this, propertyName);
     }, this);
-    if (this.parent.itemFilter && !this.itemFilter) {
-      this.itemFilter = function() {
-        return this.parent.itemFilter.apply(this.parent, arguments);
+
+    var self = this;
+    _.each(['itemFilter', 'itemContext', 'renderItem', 'renderEmpty'], function(propertyName) {
+      if (self.parent[propertyName] && !this[propertyName]) {
+        self[propertyName] = function() {
+          return self.parent[propertyName].apply(self.parent, arguments);
       };
-    }
-    if (this.parent.itemContext) {
-      this.itemContext = function() {
-        return this.parent.itemContext.apply(this.parent, arguments);
-      };
-    }
+      }
+    });
   }
 });
 
