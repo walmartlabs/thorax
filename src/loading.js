@@ -260,6 +260,7 @@ function bindToRoute(callback, failback) {
 
 function loadData(callback, failback, options) {
   if (this.isPopulated()) {
+    // Defer here to maintain async callback behavior for all loading cases
     return _.defer(callback, this);
   }
 
@@ -305,6 +306,9 @@ function fetchQueue(options, $super) {
       error: flushQueue(this, this.fetchQueue, 'error'),
       complete: flushQueue(this, this.fetchQueue, 'complete')
     }, options);
+
+    // Handle callers that do not pass in a super class and wish to implement their own
+    // fetch behavior
     if ($super) {
       $super.call(this, options);
     }
