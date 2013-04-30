@@ -1,6 +1,6 @@
 /*global createInheritVars, inheritVars, objectEvents, walkInheritTree */
 // Save a copy of the _on method to call as a $super method
-var _on = Thorax.View.prototype._on = Thorax.View.prototype.on;
+var _on = Thorax.View.prototype.on;
 
 inheritVars.event = {
   name: '_events',
