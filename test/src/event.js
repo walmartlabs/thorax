@@ -277,7 +277,64 @@ describe('event', function() {
     expect(collectionView.$('li').length).to.equal(4, 'ready event triggered via collection:add');
     expect(collectionView.$('li').eq(3).html()).to.equal('four', 'ready event triggered via collection:add');
     expect(itemViewSpy.callCount).to.equal(4, 'ready event triggered via collection:add');
+  });
 
+  describe('cleanup', function() {
+    it('should cleanup backbone events on off', function() {
+      var view = new Thorax.View(),
+          spy = this.spy();
+      view.on('foo', spy);
+
+      view.trigger('foo');
+      expect(spy).to.have.been.calledOnce;
+
+      view.off('foo', spy);
+
+      view.trigger('foo');
+      expect(spy).to.have.been.calledOnce;
+    });
+    it('should cleanup backbone events on destroy', function() {
+      var spy = this.spy()
+          view = new Thorax.View({
+            events: {
+              model: {
+                foo: spy
+              }
+            },
+            model: new Thorax.Model(),
+            template: function() {}
+          }),
+          model = view.model;
+
+      model.trigger('foo');
+      expect(spy).to.have.been.calledOnce;
+
+      view.destroy();
+
+      model.trigger('foo');
+      expect(spy).to.have.been.calledOnce;
+    });
+    it('should cleanup DOM events on destroy', function() {
+      var spy = this.spy(),
+          view = new Thorax.View({
+            events: {
+              'mousedown a': spy,
+              'mousedown': spy
+            }
+          }),
+          $el = view.$el;
+
+      $el.html('<a href="foo">bar</a>');
+      document.body.appendChild(view.el);
+
+      $el.find('a').trigger('mousedown');
+      expect(spy).to.have.been.calledTwice;
+
+      view.destroy();
+
+      $el.find('a').trigger('mousedown');
+      expect(spy).to.have.been.calledTwice;
+    });
   });
 
   describe('context', function() {

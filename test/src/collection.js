@@ -260,21 +260,22 @@ describe('collection', function() {
     expect(view.$('li').eq(0).html()).to.equal('d');
   });
 
-  it("bindDataObject or model.set can be called in context()", function() {
+  it("nested render should throw", function() {
     //this causes recursion
-    var view = new Thorax.View({
-      model: new Thorax.Model(),
-      template: Handlebars.compile('{{key}}{{#collection col}}{{key}}{{/collection}}'),
-      context: function() {
-        this.model.set({key: 'value'});
-        return {
-          key: 'value',
-          col: new Thorax.Collection([{key: 'value'}])
-        };
-      }
-    });
-    view.render();
-    expect(view.$('[data-collection-cid] div')[0].innerHTML).to.equal('value');
+    function doNestedRender() {
+      var view = new Thorax.View({
+        model: new Thorax.Model(),
+        template: Handlebars.compile('{{key}}{{#collection col}}{{key}}{{/collection}}'),
+        context: function() {
+          this.model.set({key: 'value'});
+          return {
+            key: 'value',
+            col: new Thorax.Collection([{key: 'value'}])
+          };
+        }
+      });
+    }
+    expect(doNestedRender).to.throw(Error);
   });
 
   it("filter what items are rendered in a collection", function() {
@@ -511,39 +512,6 @@ describe('collection', function() {
     view.letters.reset(letterCollection.models);
     expect(view.$('div[data-collection-cid] div').html()).to.equal('a');
     expect(view.$('[data-collection-empty]').length).to.equal(0);
-  });
-
-  it("itemContext", function() {
-    var view = new Thorax.View({
-      key: 'value',
-      collection: letterCollection,
-      template: Handlebars.compile("{{#collection}}<span>{{test}}</span>{{/collection}}"),
-      itemContext: function() {
-        // not checking for `view` or cid as itemContext will be called immediately
-        // before `view` var is assigned
-        expect(this.key).to.equal('value', 'itemContext called with correct context');
-        return {
-          test: 'testing'
-        };
-      }
-    });
-    view.render();
-    expect(view.$('span').length).to.equal(letterCollection.length);
-    expect(view.$('span')[0].innerHTML).to.equal('testing');
-
-    //will use default
-    view = new Thorax.View({
-      collection: new (Thorax.Collection.extend({
-        url: false,
-        isEmpty: function() {
-          return true;
-        }
-      }))(),
-      template: Handlebars.compile("{{#collection}}{{test}}{{else}}<b>{{test}}</b>{{/collection}}"),
-      test: 'testing'
-    });
-    view.render();
-    expect(view.$('b')[0].innerHTML).to.equal('testing');
   });
 
   it("empty-class option", function() {

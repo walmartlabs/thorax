@@ -9,10 +9,10 @@ Thorax.setRootObject = function(obj) {
 };
 
 Thorax.loadHandler = function(start, end, context) {
-  var loadCounter = _.uniqueId();
+  var loadCounter = _.uniqueId('load');
   return function(message, background, object) {
     var self = context || this;
-    self._loadInfo = self._loadInfo || [];
+    self._loadInfo = self._loadInfo || {};
     var loadInfo = self._loadInfo[loadCounter];
 
     function startLoadTimeout() {
@@ -38,6 +38,11 @@ Thorax.loadHandler = function(start, end, context) {
 
     if (!loadInfo) {
       loadInfo = self._loadInfo[loadCounter] = _.extend({
+        isLoading: function() {
+          return loadInfo.events.length;
+        },
+
+        cid: loadCounter,
         events: [],
         timeout: 0,
         message: message,
@@ -57,7 +62,6 @@ Thorax.loadHandler = function(start, end, context) {
     // Prevent binds to the same object multiple times as this can cause very bad things
     // to happen for the load;load;end;end execution flow.
     if (_.indexOf(loadInfo.events, object) >= 0) {
-      loadInfo.events.push(object);
       return;
     }
 
@@ -72,7 +76,7 @@ Thorax.loadHandler = function(start, end, context) {
 
       var events = loadInfo.events,
           index = _.indexOf(events, object);
-      if (index >= 0) {
+      if (index >= 0 && !object.isLoading()) {
         events.splice(index, 1);
 
         if (_.indexOf(events, object) < 0) {
@@ -86,9 +90,7 @@ Thorax.loadHandler = function(start, end, context) {
         loadInfo.endTimeout = setTimeout(function() {
           try {
             if (!events.length) {
-              var run = loadInfo.run;
-
-              if (run) {
+              if (loadInfo.run) {
                 // Emit the end behavior, but only if there is a paired start
                 end.call(self, loadInfo.background, loadInfo);
                 loadInfo.trigger(loadEnd, loadInfo);
@@ -165,7 +167,7 @@ Thorax.mixinLoadable = function(target, useParent) {
       if (!that || !that.el) {
         return;
       }
-      
+
       that._isLoading = false;
       $(that.el).removeClass(that._loadingClassName);
       // used by loading helper
@@ -176,11 +178,21 @@ Thorax.mixinLoadable = function(target, useParent) {
 
 Thorax.mixinLoadableEvents = function(target, useParent) {
   _.extend(target, {
+    _loadCount: 0,
+
+    isLoading: function() {
+      return this._loadCount > 0;
+    },
+
     loadStart: function(message, background) {
+      this._loadCount++;
+
       var that = useParent ? this.parent : this;
       that.trigger(loadStart, message, background, that);
     },
     loadEnd: function() {
+      this._loadCount--
+
       var that = useParent ? this.parent : this;
       that.trigger(loadEnd, that);
     }
@@ -248,7 +260,8 @@ function bindToRoute(callback, failback) {
 
 function loadData(callback, failback, options) {
   if (this.isPopulated()) {
-    return callback(this);
+    // Defer here to maintain async callback behavior for all loading cases
+    return _.defer(callback, this);
   }
 
   if (arguments.length === 2 && !_.isFunction(failback) && _.isObject(failback)) {
@@ -269,13 +282,11 @@ function loadData(callback, failback, options) {
 
   this.fetch(_.defaults({
     success: successCallback,
-    error: failback && function() {
-      if (!routeChanged) {
+    error: function() {
+      successCallback.cancel();
+      if (!routeChanged && failback) {
         failback.apply(self, [true].concat(_.toArray(arguments)));
       }
-    },
-    complete: function() {
-      successCallback.cancel();
     }
   }, options));
 }
@@ -295,7 +306,13 @@ function fetchQueue(options, $super) {
       error: flushQueue(this, this.fetchQueue, 'error'),
       complete: flushQueue(this, this.fetchQueue, 'complete')
     }, options);
-    $super.call(this, options);
+
+    // Handle callers that do not pass in a super class and wish to implement their own
+    // fetch behavior
+    if ($super) {
+      $super.call(this, options);
+    }
+    return options;
   } else {
     // Currently fetching. Queue and process once complete
     this.fetchQueue.push(options);
