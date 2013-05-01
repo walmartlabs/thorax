@@ -11,7 +11,7 @@ describe('loading', function() {
 
   describe('fetch set/reset test', function() {
     var colData = [{id: 1, name: "foo"}, {id: 2, name: "bar"}],
-        C = Phoenix.Collection.extend({
+        C = Thorax.Collection.extend({
           url: 'foo'
         }),
         c, resetSpy, setSpy, setCallback, resetCallback, resetEventSpy;
