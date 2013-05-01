@@ -9,6 +9,52 @@ describe('loading', function() {
 
   Thorax.setRootObject(Application);
 
+  describe('fetch set/reset test', function() {
+    var colData = [{id: 1, name: "foo"}, {id: 2, name: "bar"}],
+        C = Phoenix.Collection.extend({
+          url: 'foo'
+        }),
+        c, resetSpy, setSpy, setCallback, resetCallback, resetEventSpy;
+    beforeEach(function() {
+      c = new C();
+      resetSpy = this.spy(c, 'reset'),
+      setSpy = this.spy(c, 'set'),
+      setCallback = this.spy(),
+      resetCallback = this.spy(),
+      resetEventSpy = this.spy();
+      c.on('reset', resetEventSpy);
+    });
+  
+    it('should load correctly with concurrent reset and set', function() {
+      c.fetch({reset: true, success: resetCallback})
+      c.fetch({reset: false, success: setCallback})
+      this.requests[0].respond(200, {}, JSON.stringify(colData));
+      expect(c.models.length).to.be.equal(2);
+      expect(resetSpy).to.be.called.once;
+      this.requests[1].respond(200, {}, JSON.stringify(colData));
+      expect(setCallback).to.be.called.once;
+      expect(setSpy).to.be.called.once;
+      expect(resetCallback).to.be.called.once;
+      expect(_.pluck(c.models, 'attributes')).to.eql(colData);
+    });
+  
+    it('should load correctly with concurrent set and reset', function() {
+      c.fetch({reset: false, success: setCallback})
+      c.fetch({reset: true, success: resetCallback})
+      // we should have multiple requests because of different reset modes
+      expect(this.requests.length).to.be.equal(2);
+      this.requests[0].respond(200, {}, JSON.stringify(colData));
+      expect(setSpy).to.be.called.once;
+      expect(setCallback).to.be.called.once;
+      expect(c.models.length).to.be.equal(2);
+  
+      this.requests[1].respond(200, {}, JSON.stringify(colData));
+      expect(resetSpy).to.be.called.once;
+      expect(resetCallback).to.be.called.once;
+      expect(_.pluck(c.models, 'attributes')).to.eql(colData);
+    });
+  });
+
   describe('load events', function() {
     it('views should see load start from model', function() {
       var spy = this.spy(),

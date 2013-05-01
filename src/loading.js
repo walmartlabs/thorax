@@ -296,6 +296,12 @@ function fetchQueue(options, $super) {
     // WARN: Should ensure that loaders are protected from out of band data
     //    when using this option
     this.fetchQueue = undefined;
+  } else if (this.fetchQueue) {
+    // once we have a different reset mode, clear the queue
+    var reset = (this.fetchQueue[0] || {}).reset;
+    if (reset !== options.reset) {
+      this.fetchQueue = undefined;
+    }
   }
 
   if (!this.fetchQueue) {
