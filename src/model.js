@@ -40,7 +40,7 @@ dataObject('model', {
     render: true,
     fetch: true,
     success: false,
-    errors: true
+    invalid: true
   },
   change: onModelChange,
   $el: '$el',
@@ -57,9 +57,9 @@ function onModelChange(model) {
 
 Thorax.View.on({
   model: {
-    error: function(model, errors) {
-      if (this._objectOptionsByCid[model.cid].errors) {
-        this.trigger('error', errors, model);
+    invalid: function(model, errors) {
+      if (this._objectOptionsByCid[model.cid].invalid) {
+        this.trigger('invalid', errors, model);
       }
     },
     change: function(model) {

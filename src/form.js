@@ -73,7 +73,7 @@ _.extend(Thorax.View.prototype, {
       }
       this.trigger('validate', attributes, errors, options);
       if (errors.length) {
-        this.trigger('error', errors);
+        this.trigger('invalid', errors);
         return;
       }
     }
@@ -161,7 +161,7 @@ _.extend(Thorax.View.prototype, {
 });
 
 Thorax.View.on({
-  error: function() {
+  invalid: function() {
     resetSubmitState.call(this);
 
     // If we errored with a model we want to reset the content but leave the UI
