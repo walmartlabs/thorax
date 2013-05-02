@@ -62,6 +62,9 @@ Thorax.View.on({
         this.trigger('invalid', errors, model);
       }
     },
+    error: function(model, resp, options) {
+      this.trigger('error', resp, model);
+    },
     change: function(model) {
       onModelChange.call(this, model);
     }

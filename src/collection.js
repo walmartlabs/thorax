@@ -275,6 +275,9 @@ Thorax.View.on({
       if (this._objectOptionsByCid[collection.cid].invalid) {
         this.trigger('invalid', message, collection);
       }
+    },
+    error: function(collection, resp, options) {
+      this.trigger('error', resp, collection);
     }
   }
 });

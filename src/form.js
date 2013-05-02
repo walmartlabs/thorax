@@ -161,22 +161,27 @@ _.extend(Thorax.View.prototype, {
 });
 
 Thorax.View.on({
-  invalid: function() {
-    resetSubmitState.call(this);
-
-    // If we errored with a model we want to reset the content but leave the UI
-    // intact. If the user updates the data and serializes any overwritten data
-    // will be restored.
-    if (this.model && this.model.previousAttributes) {
-      this.model.set(this.model.previousAttributes(), {
-        silent: true
-      });
-    }
-  },
+  invalid: onErrorOrInvalidData,
+  error: onErrorOrInvalidData,
   deactivated: function() {
-    resetSubmitState.call(this);
+    if (this.$el) {
+      resetSubmitState.call(this);
+    }
   }
 });
+
+function onErrorOrInvalidData () {
+  resetSubmitState.call(this);
+
+  // If we errored with a model we want to reset the content but leave the UI
+  // intact. If the user updates the data and serializes any overwritten data
+  // will be restored.
+  if (this.model && this.model.previousAttributes) {
+    this.model.set(this.model.previousAttributes(), {
+      silent: true
+    });
+  }
+}
 
 function eachNamedInput(options, iterator, context) {
   var i = 0,
