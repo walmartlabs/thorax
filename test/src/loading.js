@@ -23,6 +23,10 @@ describe('loading', function() {
       resetCallback = this.spy(),
       resetEventSpy = this.spy();
       c.on('reset', resetEventSpy);
+      Thorax.loadHandler.allowMixedFetch=true;
+    });
+    afterEach(function() {
+      Thorax.loadHandler.allowMixedFetch=false;
     });
   
     it('should load correctly with concurrent reset and set', function() {
@@ -52,6 +56,18 @@ describe('loading', function() {
       expect(resetSpy).to.be.called.once;
       expect(resetCallback).to.be.called.once;
       expect(_.pluck(c.models, 'attributes')).to.eql(colData);
+    });
+
+    it('should throw an error if allowMixedFetch is not set', function() {
+      Thorax.loadHandler.allowMixedFetch=false;
+      var exc;
+      try {
+        c.fetch({reset: true, success: resetCallback});
+        c.fetch({reset: false, success: setCallback});
+      } catch (e) {
+        exc = e;
+      }
+      expect(exc).to.not.eql(undefined);
     });
   });
 
