@@ -70,6 +70,6 @@
   },
 
   "templates": {
-    "template": "Thorax.templates['{{{without-extension name}}}'] = {{handlebarsCall}}({{{data}}});"
+    "template": "Handlebars.templates['{{{without-extension name}}}'] = {{handlebarsCall}}({{{data}}});"
   }
 }

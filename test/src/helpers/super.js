@@ -2,7 +2,7 @@ describe('super helper', function() {
 
   it("super helper", function() {
     var parent, child;
-    Thorax.templates['super-named-test'] = Handlebars.compile('<div class="parent"></div>');
+    Handlebars.templates['super-named-test'] = Handlebars.compile('<div class="parent"></div>');
     parent = Thorax.View.extend({
       name: 'super-named-test'
     });

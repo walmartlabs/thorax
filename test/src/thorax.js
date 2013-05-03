@@ -2,9 +2,9 @@ describe('core', function() {
   Backbone.history || (Backbone.history = new Backbone.History());
   Backbone.history.start();
 
-  Thorax.templates.parent = Handlebars.compile('<div>{{view child}}</div>');
-  Thorax.templates.child = Handlebars.compile('<div>{{value}}</div>');
-  Thorax.templates['extension-test.handlebars'] = Handlebars.compile('123');
+  Handlebars.templates.parent = Handlebars.compile('<div>{{view child}}</div>');
+  Handlebars.templates.child = Handlebars.compile('<div>{{value}}</div>');
+  Handlebars.templates['extension-test.handlebars'] = Handlebars.compile('123');
 
   it("registry", function() {
     var ViewClass = Thorax.View.extend({name: 'a-name'}, {});
