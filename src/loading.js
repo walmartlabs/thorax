@@ -361,6 +361,12 @@ _.each(klasses, function(DataClass) {
 
     fetch: function(options) {
       options = options || {};
+      if (DataClass === Thorax.Collection) {
+        if (_.isUndefined(options.reset)) {
+          // use backbone < 1.0 behavior to allow triggering of reset events
+          options.reset = true;
+        }
+      }
 
       var self = this,
           complete = options.complete;
@@ -401,8 +407,6 @@ if (Thorax.Router) {
 Thorax.View.prototype._modifyDataObjectOptions = function(dataObject, options) {
   options.ignoreErrors = this.ignoreFetchError;
   options.background = this.nonBlockingLoad;
-  // avoid default collection set behavior to ensure reset event can trigger rendering
-  options.reset = true;
   return options;
 };
 
