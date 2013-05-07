@@ -23,42 +23,9 @@ describe('loading', function() {
       resetCallback = this.spy(),
       resetEventSpy = this.spy();
       c.on('reset', resetEventSpy);
-      Thorax.loadHandler.allowMixedFetch=true;
-    });
-    afterEach(function() {
-      Thorax.loadHandler.allowMixedFetch=false;
-    });
-  
-    it('should load correctly with concurrent reset and set', function() {
-      c.fetch({reset: true, success: resetCallback})
-      c.fetch({reset: false, success: setCallback})
-      this.requests[0].respond(200, {}, JSON.stringify(colData));
-      expect(c.models.length).to.be.equal(2);
-      expect(resetSpy).to.be.called.once;
-      this.requests[1].respond(200, {}, JSON.stringify(colData));
-      expect(setCallback).to.be.called.once;
-      expect(setSpy).to.be.called.once;
-      expect(resetCallback).to.be.called.once;
-      expect(_.pluck(c.models, 'attributes')).to.eql(colData);
-    });
-  
-    it('should load correctly with concurrent set and reset', function() {
-      c.fetch({reset: false, success: setCallback})
-      c.fetch({reset: true, success: resetCallback})
-      // we should have multiple requests because of different reset modes
-      expect(this.requests.length).to.be.equal(2);
-      this.requests[0].respond(200, {}, JSON.stringify(colData));
-      expect(setSpy).to.be.called.once;
-      expect(setCallback).to.be.called.once;
-      expect(c.models.length).to.be.equal(2);
-  
-      this.requests[1].respond(200, {}, JSON.stringify(colData));
-      expect(resetSpy).to.be.called.once;
-      expect(resetCallback).to.be.called.once;
-      expect(_.pluck(c.models, 'attributes')).to.eql(colData);
     });
 
-    it('should throw an error if allowMixedFetch is not set', function() {
+    it('should throw an error with mixed fetch', function() {
       Thorax.loadHandler.allowMixedFetch=false;
       var exc;
       try {

@@ -300,12 +300,8 @@ function fetchQueue(options, $super) {
     // concurrent set/reset fetch events are not advised
     var reset = (this.fetchQueue[0] || {}).reset;
     if (reset !== options.reset) {
-      if (Thorax.loadHandler.allowMixedFetch) {
-        this.fetchQueue = undefined;
-      } else {
-        throw new Error('Concurrent fetch with set & reset not allowed.  Set Thorax.loadHandler.allowMixedFetch=true to bypass.')
-      }
-      
+      // fetch with concurrent set & reset not allowed
+      throw new Error('mixed-fetch');
     }
   }
 
