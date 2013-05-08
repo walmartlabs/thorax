@@ -358,7 +358,7 @@ _.each(klasses, function(DataClass) {
     fetch: function(options) {
       options = options || {};
       if (DataClass === Thorax.Collection) {
-        if (_.isUndefined(options.reset)) {
+        if (!_.find(['reset', 'remove', 'add', 'update'], function(key) { return !_.isUndefined(options[key]); })) {
           // use backbone < 1.0 behavior to allow triggering of reset events
           options.reset = true;
         }
