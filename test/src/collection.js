@@ -1,8 +1,8 @@
 describe('collection', function() {
-  Thorax.templates.letter = Handlebars.compile('{{collection tag="ul"}}');
-  Thorax.templates['letter-item'] = Handlebars.compile('<li>{{letter}}</li>');
-  Thorax.templates['letter-empty'] = Handlebars.compile('<li>empty</li>');
-  Thorax.templates['letter-multiple-item'] = Handlebars.compile('<li>{{letter}}</li><li>{{letter}}</li>');
+  Handlebars.templates.letter = Handlebars.compile('{{collection tag="ul"}}');
+  Handlebars.templates['letter-item'] = Handlebars.compile('<li>{{letter}}</li>');
+  Handlebars.templates['letter-empty'] = Handlebars.compile('<li>empty</li>');
+  Handlebars.templates['letter-multiple-item'] = Handlebars.compile('<li>{{letter}}</li><li>{{letter}}</li>');
 
   var LetterModel = Thorax.Model.extend({});
   var letterCollection = new (Thorax.Collection.extend({
@@ -290,11 +290,14 @@ describe('collection', function() {
     view.render();
     expect(renderCount).to.equal(1);
     expect(view.$('li').html()).to.equal('a');
+
     collection.at(0).set({name: 'A'});
     expect(view.$('li').html()).to.equal('A');
     expect(renderCount).to.equal(1);
+
     collection.add({name: 'b'});
     expect(view.$('li:last-child').html()).to.equal('b');
+
     collection.at(1).set({name: 'B'});
     expect(view.$('li:last-child').html()).to.equal('B');
     expect(renderCount).to.equal(1);
@@ -304,17 +307,22 @@ describe('collection', function() {
     collection.at(1).set({name: 'c'});
     expect(view.$('li:first-child').html()).to.equal('a');
     expect(view.$('li:last-child').html()).to.equal('c');
+
     collection.at(0).set({name: 'A'});
     collection.add({name: 'b'});
     expect(collection.at(2).attributes.name).to.equal('c');
+
     collection.at(2).set({name: 'C'});
     expect(view.$('li:first-child').html()).to.equal('A');
     expect(view.$('li:last-child').html()).to.equal('C');
+  });
 
-    collection = new Thorax.Collection({name: 'one'});
-    renderCount = 0;
-    var itemRenderCount = 0;
-    view = new Thorax.View({
+  it('model update will update item view', function() {
+    var collection = new Thorax.Collection({name: 'one'}),
+        renderCount = 0,
+        itemRenderCount = 0,
+        children = [];
+    var view = new Thorax.View({
       name: 'outer-view',
       initialize: function() {
         this.on('rendered', function() {
@@ -322,10 +330,15 @@ describe('collection', function() {
         });
       },
       itemView: Thorax.View.extend({
+        itemRenderCount: 0,
+
         name: 'inner-view',
         initialize: function() {
+          children.push(this);
+
           this.on('rendered', function() {
-            ++itemRenderCount;
+            itemRenderCount++;
+            ++this.itemRenderCount;
           });
         },
         tagName: 'li',
@@ -334,30 +347,40 @@ describe('collection', function() {
       myCollection: collection,
       template: Handlebars.compile('{{collection myCollection tag="ul" item-view=itemView}}')
     });
+
     view.render();
-    expect(itemRenderCount).to.equal(1);
     expect(renderCount).to.equal(1);
+
+    expect(itemRenderCount).to.equal(1);
+    expect(children[0].itemRenderCount).to.equal(1);
     expect(view.$('li').html()).to.equal('one');
+
     collection.at(0).set({
       name: 'two'
     });
     expect(itemRenderCount).to.equal(2);
+    expect(children[0].itemRenderCount).to.equal(2);
     expect(view.$('li').html()).to.equal('two');
-    expect(renderCount).to.equal(1);
+
     collection.add({name: 'three'});
     expect(itemRenderCount).to.equal(3);
+    expect(children[1].itemRenderCount).to.equal(1);
     expect(view.$('li:last-child').html()).to.equal('three');
+
     collection.at(1).set({name: 'four'});
     expect(itemRenderCount).to.equal(4);
+    expect(children[1].itemRenderCount).to.equal(2);
     expect(view.$('li:last-child').html()).to.equal('four');
+
     expect(renderCount).to.equal(1);
+    expect(children.length).to.equal(2);
   });
 
   it("collection-element helper", function() {
     var view = new Thorax.CollectionView({
       collection: letterCollection,
       template: Handlebars.compile('<div class="test">{{collection-element tag="ul"}}</div>'),
-      itemTemplate: Thorax.templates['letter-item']
+      itemTemplate: Handlebars.templates['letter-item']
     });
     view.render();
     expect(view.$('li').length).to.equal(letterCollection.length);
@@ -374,39 +397,6 @@ describe('collection', function() {
     view.letters.reset(letterCollection.models);
     expect(view.$('div[data-collection-cid] div').html()).to.equal('a');
     expect(view.$('[data-collection-empty]').length).to.equal(0);
-  });
-
-  it("itemContext", function() {
-    var view = new Thorax.View({
-      key: 'value',
-      collection: letterCollection,
-      template: Handlebars.compile("{{#collection}}<span>{{test}}</span>{{/collection}}"),
-      itemContext: function() {
-        // not checking for `view` or cid as itemContext will be called immediately
-        // before `view` var is assigned
-        expect(this.key).to.equal('value', 'itemContext called with correct context');
-        return {
-          test: 'testing'
-        };
-      }
-    });
-    view.render();
-    expect(view.$('span').length).to.equal(letterCollection.length);
-    expect(view.$('span')[0].innerHTML).to.equal('testing');
-
-    //will use default
-    view = new Thorax.View({
-      collection: new (Thorax.Collection.extend({
-        url: false,
-        isEmpty: function() {
-          return true;
-        }
-      }))(),
-      template: Handlebars.compile("{{#collection}}{{test}}{{else}}<b>{{test}}</b>{{/collection}}"),
-      test: 'testing'
-    });
-    view.render();
-    expect(view.$('b')[0].innerHTML).to.equal('testing');
   });
 
   it("empty-class option", function() {
@@ -591,7 +581,7 @@ describe('collection view', function() {
   });
 
   it('will assign template if view only has name', function() {
-    Thorax.templates['collection-view-with-name'] = Handlebars.compile('<div class="named">{{collection-element tag="ul"}}</div>');
+    Handlebars.templates['collection-view-with-name'] = Handlebars.compile('<div class="named">{{collection-element tag="ul"}}</div>');
     var view = new Thorax.CollectionView({
       name: 'collection-view-with-name',
       itemTemplate: Handlebars.compile('<li>{{key}}</li>'),

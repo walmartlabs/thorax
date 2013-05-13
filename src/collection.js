@@ -152,7 +152,7 @@ Thorax.CollectionView = Thorax.View.extend({
         viewEl = $el.find('[' + modelCidAttributeName + '="' + model.cid + '"]');
 
     // NOP For views
-    if (viewEl.attr(viewNameAttributeName)) {
+    if (viewEl.attr(viewCidAttributeName)) {
       return;
     }
 
@@ -190,7 +190,6 @@ Thorax.CollectionView = Thorax.View.extend({
         }, this);
       }
       this.trigger('rendered:collection', this, this.collection);
-      applyVisibilityFilter.call(this);
     } else {
       handleChangeFromNotEmptyToEmpty.call(this);
     }
@@ -263,9 +262,6 @@ Thorax.CollectionView.on({
       applyVisibilityFilter.call(this);
     },
     change: function(model) {
-      // If we rendered with item views, model changes will be observed
-      // by the generated item view but if we rendered with templates
-      // then model changes need to be bound as nothing is watching
       this.updateItem(model);
       applyItemVisiblityFilter.call(this, model);
     },
@@ -317,9 +313,7 @@ function onSetCollection(collection) {
 
 function applyVisibilityFilter() {
   if (this.itemFilter) {
-    this.collection.forEach(function(model) {
-      applyItemVisiblityFilter.call(this, model);
-    }, this);
+    this.collection.forEach(applyItemVisiblityFilter, this);
   }
 }
 

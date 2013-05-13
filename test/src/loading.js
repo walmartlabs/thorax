@@ -729,8 +729,8 @@ describe('loading', function() {
 
     it("loading-template and loading-view collection helper options", function() {
       //use low level events as flusheQueue / fetchQueue interferes
-      Thorax.templates['collection-loading'] = Handlebars.compile('<li class="loading-item">loading</li>');
-      Thorax.templates['collection-loading-view'] = Handlebars.compile('loading');
+      Handlebars.templates['collection-loading'] = Handlebars.compile('<li class="loading-item">loading</li>');
+      Handlebars.templates['collection-loading-view'] = Handlebars.compile('loading');
       Thorax.View.extend({
         name: 'collection-loading-view',
         tagName: 'li'
