@@ -48,7 +48,7 @@ dataObject('collection', {
   set: 'setCollection',
   bindCallback: onSetCollection,
   defaultOptions: {
-    render: true,
+    render: undefined,
     fetch: true,
     success: false,
     errors: true
@@ -73,6 +73,15 @@ Thorax.CollectionView = Thorax.View.extend({
       }
     } else {
       return _replaceHTML.call(this, html);
+    }
+  },
+
+  render: function() {
+    var shouldRender = this.shouldRender();
+
+    Thorax.View.prototype.render.apply(this, arguments);
+    if (!shouldRender) {
+      this.renderCollection();
     }
   },
 
@@ -287,10 +296,9 @@ Thorax.View.on({
 });
 
 function onCollectionReset(collection) {
-  var options = collection && this._objectOptionsByCid[collection.cid];
-  // we would want to still render in the case that the
-  // collection has transitioned to being falsy
-  if (!collection || (options && options.render)) {
+  // Undefined to force conditional render
+  var options = (collection && this._objectOptionsByCid[collection.cid]) || undefined;
+  if (this.shouldRender(options && options.render)) {
     this.renderCollection && this.renderCollection();
   }
 }
@@ -298,8 +306,13 @@ function onCollectionReset(collection) {
 // Even if the view is not a CollectionView
 // ensureRendered() to provide similar behavior
 // to a model
-function onSetCollection() {
-  this.ensureRendered();
+function onSetCollection(collection) {
+  // Undefined to force conditional render
+  var options = (collection && this._objectOptionsByCid[collection.cid]) || undefined;
+  if (this.shouldRender(options && options.render)) {
+    // Ensure that something is there if we are going to render the collection.
+    this.ensureRendered();
+  }
 }
 
 function applyVisibilityFilter() {

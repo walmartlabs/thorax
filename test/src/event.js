@@ -252,7 +252,7 @@ describe('event', function() {
     view._addChild(secondChild);
     expect(secondChildSpy.callCount).to.equal(1, 'adding a child to a view that is ready should immediately trigger');
 
-    var itemViewSpy = this.spy();    
+    var itemViewSpy = this.spy();
     var collectionView = new Thorax.View({
       itemView: Thorax.View.extend({
         events: {
@@ -268,6 +268,7 @@ describe('event', function() {
       ]),
       template: Handlebars.compile('{{collection tag="ul"}}')
     });
+    collectionView.render();
     expect(itemViewSpy.callCount).to.equal(0, 'ready event triggered via collection');
     collectionView.trigger('ready');
     expect(collectionView.$('li').length).to.equal(3, 'ready event triggered via collection');

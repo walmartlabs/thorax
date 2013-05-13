@@ -262,7 +262,7 @@ describe('collection', function() {
       ]),
       template: Handlebars.compile('{{^empty collection}}{{#collection tag="ul"}}<li>{{letter}}</li>{{/collection}}{{/empty}}'),
       itemFilter: function(model) {
-        return model.get('letter') != 'a';
+        return model.get('letter') !== 'a';
       }
     });
     view.render();
@@ -495,6 +495,23 @@ describe('collection', function() {
     expect(view.$('div').length).to.equal(1, 'after setCollection (second)');
   });
 
+  it('should defer render collection after setCollection is called', function() {
+    var spy = this.spy();
+
+    var view = new Thorax.View({
+      events: {
+        'rendered rendered:item': spy
+      },
+      template: Handlebars.compile("{{collection}}"),
+      itemTemplate: function() { return '<div class="item">' + this.id + '</div>'; },
+      collection: new Thorax.Collection([{id:1},{id:2}])
+    });
+    expect(spy).to.not.have.been.called;
+    view.render();
+    expect(spy).to.have.been.calledThrice;
+    expect(view.$('.item').length).to.equal(2);
+  });
+
   it('should preserve itself in the DOM after re-rendering collection', function() {
     var spy = this.spy();
     var collection = new Thorax.Collection([{key: 'one'}, {key: 'two'}]);
@@ -505,6 +522,7 @@ describe('collection', function() {
         'rendered:item': spy
       }
     });
+    view.render();
     view.setCollection(collection);
     // Note that we want to compare HTML instead of the actual node
     // as in IE only we will clone the node. In other browsers will
@@ -541,7 +559,7 @@ describe('collection view', function() {
     var server = sinon.fakeServer.create();
     var collection = new (Thorax.Collection.extend({
       url: '/test'
-    }));
+    }))();
     var view = new Thorax.CollectionView({
       collection: collection,
       events: {
@@ -550,12 +568,14 @@ describe('collection view', function() {
       template: Handlebars.compile('{{collection-element}}'),
       itemTemplate: Handlebars.compile('<span>{{text}}</span>')
     });
+    view.render();
+
     server.requests[0].respond(
       200,
       { "Content-Type": "application/json" },
       JSON.stringify([{id: 1, text: "test"}])
     );
-    expect(spy.callCount).to.equal(1);
+    expect(spy.callCount).to.equal(2);
     expect(view.$('span').html()).to.equal('test');
     server.restore();
   });
@@ -566,6 +586,7 @@ describe('collection view', function() {
       collection: new Thorax.Collection([{key: 'value'}]),
       itemTemplate: Handlebars.compile('<li>{{key}}</li>')
     });
+    view.render();
     expect(view.$('li').length).to.equal(1);
   });
 
@@ -576,6 +597,7 @@ describe('collection view', function() {
       itemTemplate: Handlebars.compile('<li>{{key}}</li>'),
       collection: new Thorax.Collection([{key: 'value'}])
     });
+    view.render();
     expect(view.$('.named li').length).to.equal(1);
   });
 
