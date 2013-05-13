@@ -207,7 +207,11 @@ describe('collection helper', function() {
     beforeEach(function() {
       spy = this.spy();
       view = new Thorax.View({
-        template: Handlebars.compile('{{#collection}}<span>{{test}}</span>{{/collection}}')
+        template: Handlebars.compile('{{#collection}}<span>{{test}}</span>{{/collection}}'),
+        _modifyDataObjectOptions: function(dataObject, options) {
+          options.render = true;
+          return options;
+        }
       });
     });
 
