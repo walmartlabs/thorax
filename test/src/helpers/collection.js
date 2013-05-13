@@ -1,7 +1,67 @@
+/*global runCollectionTests*/
 describe('collection helper', function() {
   it('should have access to handlebars noop', function() {
     // Explicit verification that Handlebars is exposing this field.
     expect(Handlebars.VM.noop).to.exist;
+  });
+
+  it('should render block', function() {
+    var view = new Thorax.View({
+      template: Handlebars.compile('{{#collection tag="ul" empty-template="letter-empty"}}<li>{{letter}}</li>{{/collection}}')
+    });
+    runCollectionTests(view);
+  });
+
+  it('should render item-view', function() {
+    var view = new Thorax.View({
+      template: Handlebars.compile('{{collection tag="ul" empty-template="letter-empty" item-view="letter-item"}}')
+    });
+    runCollectionTests(view);
+  });
+
+  it('should render with item-view and block', function() {
+    var view = new Thorax.View({
+      template: Handlebars.compile('{{#collection tag="ul" empty-template="letter-empty" item-view="letter-item"}}<li class="testing">{{letter}}</li>{{/collection}}')
+    });
+    runCollectionTests(view);
+  });
+
+  it('should render with item-template', function() {
+    var view = new Thorax.View({
+      template: Handlebars.compile('{{collection tag="ul" empty-view="letter-empty" item-template="letter-item"}}')
+    });
+    runCollectionTests(view);
+  });
+
+  it('should item-view and item-template', function() {
+    var view = new Thorax.View({
+      template: Handlebars.compile('{{collection tag="ul" empty-view="letter-empty" item-view="letter-item" item-template="letter-item"}}')
+    });
+    runCollectionTests(view);
+  });
+
+  it('should render with empty-view and empty-template', function() {
+    var view = new Thorax.View({
+      template: Handlebars.compile('{{collection tag="ul" empty-template="letter-empty" empty-view="letter-empty" item-template="letter-item"}}')
+    });
+    runCollectionTests(view);
+  });
+
+  it("graceful failure of empty collection with no empty template", function() {
+    var view = new Thorax.View({
+      template: Handlebars.compile('{{collection item-template="letter-item"}}'),
+      collection: new Thorax.Collection({
+        isPopulated: function() {
+          return true;
+        }
+      })
+    });
+    view.render();
+    view = new Thorax.View({
+      template: Handlebars.compile('{{collection item-template="letter-item"}}'),
+      collection: new Thorax.Collection()
+    });
+    view.render();
   });
 
   it("transition from no collection to collection", function() {
