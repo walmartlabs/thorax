@@ -151,18 +151,20 @@ Thorax.View = Backbone.View.extend({
 
     this._rendering = true;
 
-    if (_.isUndefined(output) || (!_.isElement(output) && !Thorax.Util.is$(output) && !(output && output.el) && !_.isString(output) && !_.isFunction(output))) {
-      // try one more time to assign the template, if we don't
-      // yet have one we must raise
-      assignTemplate.call(this, 'template', {
-        required: true
-      });
-      output = this.renderTemplate(this.template);
-    } else if (_.isFunction(output)) {
-      output = this.renderTemplate(output);
+    try{
+      if (_.isUndefined(output) || (!_.isElement(output) && !Thorax.Util.is$(output) && !(output && output.el) && !_.isString(output) && !_.isFunction(output))) {
+        // try one more time to assign the template, if we don't
+        // yet have one we must raise
+        assignTemplate.call(this, 'template', {
+          required: true
+        });
+        output = this.renderTemplate(this.template);
+      } else if (_.isFunction(output)) {
+        output = this.renderTemplate(output);
+      }
+    } finally {
+      this._rendering = false;
     }
-
-    this._rendering = false;
 
     // Destroy any helpers that may be lingering
     _.each(this._previousHelpers, function(child) {

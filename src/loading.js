@@ -158,7 +158,7 @@ Thorax.mixinLoadable = function(target, useParent) {
       that._isLoading = true;
       $(that.el).addClass(that._loadingClassName);
       // used by loading helpers
-      that.trigger('change:load-state', 'start');
+      that.trigger('change:load-state', 'start', background);
     },
     onLoadEnd: function(/* background, object */) {
       var that = useParent ? this.parent : this;
