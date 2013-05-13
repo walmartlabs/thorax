@@ -126,7 +126,7 @@ describe('collection helper', function() {
   it("nested collection helper", function() {
     function testNesting(view, msg) {
       var blogModel = new Thorax.Model();
-      view.setModel(blogModel);
+      view.setModel(blogModel, {render: true});
       expect(view.html()).to.equal('empty', msg + ' : starts empty');
       var authors = [
         new Thorax.Model({author: 'author 1'}),

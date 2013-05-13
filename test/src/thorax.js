@@ -221,6 +221,7 @@ describe('core', function() {
         }),
         template: Handlebars.compile('{{modifyObject a}}{{modifyObject b}}')
       });
+      view.render();
       expect(view.a.mutated).to.be['undefined'];
       expect(view.model.attributes.b.mutated).to.be['undefined'];
       expect(view.html()).to.equal('ab');

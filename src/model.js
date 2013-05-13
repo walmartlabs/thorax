@@ -37,7 +37,7 @@ createRegistryWrapper(Thorax.Model, Thorax.Models);
 dataObject('model', {
   set: 'setModel',
   defaultOptions: {
-    render: true,
+    render: undefined,
     fetch: true,
     success: false,
     errors: true
@@ -50,9 +50,7 @@ dataObject('model', {
 function onModelChange(model) {
   var modelOptions = model && this._objectOptionsByCid[model.cid];
   // !modelOptions will be true when setModel(false) is called
-  if (!modelOptions || (modelOptions && modelOptions.render)) {
-    this.render();
-  }
+  this.conditionalRender(modelOptions && modelOptions.render);
 }
 
 Thorax.View.on({

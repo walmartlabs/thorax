@@ -99,8 +99,13 @@ Thorax.CollectionView = Thorax.View.extend({
       index = index || this.collection.indexOf(model) || 0;
       itemView = this.renderItem(model, index);
     }
+
     if (itemView) {
-      itemView.cid && this._addChild(itemView);
+      if (itemView.cid) {
+        itemView.ensureRendered();
+        this._addChild(itemView);
+      }
+
       //if the renderer's output wasn't contained in a tag, wrap it in a div
       //plain text, or a mixture of top level text nodes and element nodes
       //will get wrapped
@@ -217,9 +222,7 @@ Thorax.CollectionView = Thorax.View.extend({
       if (this.itemTemplate) {
         viewOptions.template = this.itemTemplate;
       }
-      var view = Thorax.Util.getViewInstance(this.itemView, viewOptions);
-      view.ensureRendered();
-      return view;
+      return Thorax.Util.getViewInstance(this.itemView, viewOptions);
     } else {
       return this.renderTemplate(this.itemTemplate, this.itemContext(model, i));
     }

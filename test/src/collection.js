@@ -165,7 +165,6 @@ describe('collection', function() {
     //this causes recursion
     function doNestedRender() {
       var view = new Thorax.View({
-        model: new Thorax.Model(),
         template: Handlebars.compile('{{key}}{{#collection col}}{{key}}{{/collection}}'),
         context: function() {
           this.model.set({key: 'value'});
@@ -175,6 +174,7 @@ describe('collection', function() {
           };
         }
       });
+      view.setModel(new Thorax.Model(), {render: true});
     }
     expect(doNestedRender).to.throw(Error);
   });
