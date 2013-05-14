@@ -37,7 +37,7 @@ createRegistryWrapper(Thorax.Model, Thorax.Models);
 dataObject('model', {
   set: 'setModel',
   defaultOptions: {
-    render: undefined,
+    render: undefined,    // Default to deferred rendering
     fetch: true,
     success: false,
     errors: true

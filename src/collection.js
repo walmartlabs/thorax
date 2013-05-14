@@ -48,7 +48,7 @@ dataObject('collection', {
   set: 'setCollection',
   bindCallback: onSetCollection,
   defaultOptions: {
-    render: undefined,
+    render: undefined,    // Default to deferred rendering
     fetch: true,
     success: false,
     errors: true
