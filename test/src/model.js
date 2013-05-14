@@ -28,36 +28,71 @@ describe('model', function() {
     expect(model.shouldFetch({fetch: true})).to.be['true'];
   });
 
-  it("model view binding", function() {
-    var modelA = new Thorax.Model({letter: 'a'});
-    var modelB = new Thorax.Model({letter: 'b'});
-    var modelC = new Thorax.Model({letter: 'c'});
-
-    var a = new Thorax.View({
-      template: Handlebars.compile('<li>{{letter}}</li>'),
-      model: modelA
+  describe('model view binding', function() {
+    var model,
+        template;
+    beforeEach(function() {
+      model = new Thorax.Model({letter: 'a'});
+      template = Handlebars.compile('<li>{{letter}}</li>');
     });
-    expect(a.el.firstChild.innerHTML).to.equal('a', 'set via constructor');
 
-    var b = new Thorax.View({
-      template: Handlebars.compile('<li>{{letter}}</li>')
+    it('should render properly', function() {
+      var a = new Thorax.View({
+        template: template,
+        model: model
+      });
+      a.render();
+      expect(a.el.firstChild.innerHTML).to.equal('a', 'set via constructor');
     });
-    b.setModel(modelB);
-    expect(b.el.firstChild.innerHTML).to.equal('b', 'set via setModel');
+    it('should update on setModel', function() {
+      var b = new Thorax.View({
+        template: template
+      });
+      b.render();
+      b.setModel(model);
+      expect(b.el.firstChild.innerHTML).to.equal('a', 'set via setModel');
+    });
+    it('should update on setModel', function() {
+      var b = new Thorax.View({
+        template: template
+      });
+      b.setModel(model, {render: true});
+      expect(b.el.firstChild.innerHTML).to.equal('a', 'set via setModel');
+    });
 
-    modelB.set({letter: 'B'});
-    expect(b.el.firstChild.innerHTML).to.equal('B', 'update attribute triggers render');
-    modelB.set({letter: 'b'});
+    it('should update on change', function() {
+      var a = new Thorax.View({
+        template: template,
+        model: model
+      });
+      a.render();
+      model.set({letter: 'B'});
+      expect(a.el.firstChild.innerHTML).to.equal('B', 'update attribute triggers render');
+    });
 
-    var c = new Thorax.View({
-      template: Handlebars.compile('<li>{{letter}}</li>')
+    it('should defer existing render', function() {
+      var c = new Thorax.View({
+        template: template
+      });
+      c.render();
+      c.setModel(model, {
+        render: false
+      });
+      expect(c.el.firstChild.innerHTML).to.equal('');
+      c.render();
+      expect(c.el.firstChild.innerHTML).to.equal('a', 'manual render');
     });
-    c.setModel(modelC, {
-      render: false
+    it('should defer new render', function() {
+      var a = new Thorax.View({
+        template: template,
+        model: new Thorax.Model({letter: 'foo-gazi'})
+      });
+      expect(a.el.firstChild).to.not.exist;
+      a.setModel(model);
+      expect(a.el.firstChild).to.not.exist;
+      a.render();
+      expect(a.el.firstChild.innerHTML).to.equal('a', 'set via constructor');
     });
-    expect(c.el.firstChild).to.not.exist;
-    c.render();
-    expect(c.el.firstChild.innerHTML).to.equal('c', 'manual render');
   });
 
   it("isPopulated", function() {
@@ -134,6 +169,7 @@ describe('model', function() {
         return this.model;
       }
     });
+    view.render();
     view.setModel(collection);
     expect(view.html()).to.equal('');
     expect(spy.callCount).to.equal(0);
@@ -158,6 +194,7 @@ describe('model', function() {
         return this.model;
       }
     });
+    view.render();
     view.setModel(collection);
     expect(view.html()).to.equal('value');
   });
