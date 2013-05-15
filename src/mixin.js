@@ -23,7 +23,7 @@ Thorax.View.prototype.mixin = function(name) {
   if (!this._appliedMixins) {
     this._appliedMixins = [];
   }
-  if (this._appliedMixins.indexOf(name) === -1) {
+  if (_.indexOf(this._appliedMixins, name) === 1) {
     this._appliedMixins.push(name);
     if (_.isFunction(name)) {
       name.call(this);

@@ -1,7 +1,67 @@
+/*global runCollectionTests*/
 describe('collection helper', function() {
   it('should have access to handlebars noop', function() {
     // Explicit verification that Handlebars is exposing this field.
     expect(Handlebars.VM.noop).to.exist;
+  });
+
+  it('should render block', function() {
+    var view = new Thorax.View({
+      template: Handlebars.compile('{{#collection tag="ul" empty-template="letter-empty"}}<li>{{letter}}</li>{{/collection}}')
+    });
+    runCollectionTests(view);
+  });
+
+  it('should render item-view', function() {
+    var view = new Thorax.View({
+      template: Handlebars.compile('{{collection tag="ul" empty-template="letter-empty" item-view="letter-item"}}')
+    });
+    runCollectionTests(view);
+  });
+
+  it('should render with item-view and block', function() {
+    var view = new Thorax.View({
+      template: Handlebars.compile('{{#collection tag="ul" empty-template="letter-empty" item-view="letter-item"}}<li class="testing">{{letter}}</li>{{/collection}}')
+    });
+    runCollectionTests(view);
+  });
+
+  it('should render with item-template', function() {
+    var view = new Thorax.View({
+      template: Handlebars.compile('{{collection tag="ul" empty-view="letter-empty" item-template="letter-item"}}')
+    });
+    runCollectionTests(view);
+  });
+
+  it('should item-view and item-template', function() {
+    var view = new Thorax.View({
+      template: Handlebars.compile('{{collection tag="ul" empty-view="letter-empty" item-view="letter-item" item-template="letter-item"}}')
+    });
+    runCollectionTests(view);
+  });
+
+  it('should render with empty-view and empty-template', function() {
+    var view = new Thorax.View({
+      template: Handlebars.compile('{{collection tag="ul" empty-template="letter-empty" empty-view="letter-empty" item-template="letter-item"}}')
+    });
+    runCollectionTests(view);
+  });
+
+  it("graceful failure of empty collection with no empty template", function() {
+    var view = new Thorax.View({
+      template: Handlebars.compile('{{collection item-template="letter-item"}}'),
+      collection: new Thorax.Collection({
+        isPopulated: function() {
+          return true;
+        }
+      })
+    });
+    view.render();
+    view = new Thorax.View({
+      template: Handlebars.compile('{{collection item-template="letter-item"}}'),
+      collection: new Thorax.Collection()
+    });
+    view.render();
   });
 
   it("transition from no collection to collection", function() {
@@ -66,7 +126,7 @@ describe('collection helper', function() {
   it("nested collection helper", function() {
     function testNesting(view, msg) {
       var blogModel = new Thorax.Model();
-      view.setModel(blogModel);
+      view.setModel(blogModel, {render: true});
       expect(view.html()).to.equal('empty', msg + ' : starts empty');
       var authors = [
         new Thorax.Model({author: 'author 1'}),
@@ -141,4 +201,99 @@ describe('collection helper', function() {
     testNesting(view, 'nested inline');
   });
 
+  describe('delgation', function() {
+    var view,
+        spy;
+    beforeEach(function() {
+      spy = this.spy();
+      view = new Thorax.View({
+        template: Handlebars.compile('{{#collection}}<span>{{test}}</span>{{/collection}}'),
+        _modifyDataObjectOptions: function(dataObject, options) {
+          options.render = true;
+          return options;
+        }
+      });
+    });
+
+    it('should delegate to #itemContext', function() {
+      view.itemContext = this.spy(function() {
+        return {
+          test: 'testing'
+        };
+      });
+      view.setCollection(new Thorax.Collection([{id: 1}]));
+
+      expect(view.itemContext)
+          .to.have.been.calledOnce
+          .to.have.been.calledOn(view);
+      expect(view.$('span').length).to.equal(1);
+      expect(view.$('span')[0].innerHTML).to.equal('testing');
+    });
+
+    it('should delegate to #itemFilter', function() {
+      view.itemFilter = this.spy(function() {
+        return false;
+      });
+      view.setCollection(new Thorax.Collection([{id: 1}]));
+
+      expect(view.itemFilter)
+          .to.have.been.calledOnce
+          .to.have.been.calledOn(view);
+      expect(view.$('span').length).to.equal(1);
+      expect(view.$('span')[0].style.display).to.equal('none');
+    });
+
+    it('should forward rendered:item', function() {
+      view.on('rendered:item', spy);
+      view.setCollection(new Thorax.Collection([{id: 1}]));
+
+      expect(spy)
+          .to.have.been.calledOnce
+          .to.have.been.calledOn(view)
+          .to.have.been.calledWith(_.values(view.children)[0], view.collection, view.collection.models[0]);
+    });
+    it('should delegate to #renderItem', function() {
+      view.renderItem = spy;
+      view.setCollection(new Thorax.Collection([{id: 1}]));
+
+      expect(view.renderItem)
+          .to.have.been.calledOnce
+          .to.have.been.calledOn(view)
+          .to.have.been.calledWith(view.collection.models[0]);
+    });
+    it('should not destroy views rendered with renderItem on change', function() {
+      var child = new (Thorax.View.extend({
+        destroy: function() { throw new Error('Destroy'); },
+
+        template: function() { return '<div>foo</div>'; }
+      }));
+      child.ensureRendered();
+
+      view.renderItem = this.spy(function() {
+        return child;
+      });
+
+      view.setCollection(new Thorax.Collection([{id: 1}]));
+      view.collection.at(0).set('foo', 'bar');
+
+      expect(view.renderItem).to.have.been.calledOnce;
+    });
+
+    it('should forward rendered:empty', function() {
+      view.on('rendered:empty', spy);
+      view.setCollection(new Thorax.Collection([]));
+
+      expect(spy)
+          .to.have.been.calledOnce
+          .to.have.been.calledOn(view);
+    });
+    it('should delegate to #renderEmpty', function() {
+      view.renderEmpty = spy;
+      view.setCollection(new Thorax.Collection([]));
+
+      expect(view.renderEmpty)
+          .to.have.been.calledOnce
+          .to.have.been.calledOn(view);
+    });
+  });
 });
