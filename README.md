@@ -303,6 +303,21 @@ Renders a given template with the view's `context` or the given context argument
 
 Ensure that the view has been rendered at least once.
 
+### conditionalRender *view.conditionalRender([flag])*
+
+Renders the view if and only if `shouldRender(flag)` is true. Useful for ensuring that updates occur while still deferring final rendering until the view has been inserted into the DOM.
+
+When `flag` is `undefined` this is effectively the opposite behavior of `ensureRendered`.
+
+### shouldRender *view.shouldRender([flag])*
+
+Returns `true` if the view should be rendered based on `flag` and the current rendered state.
+
+`flag` may be:
+- `true` : Always render
+- `false` : Never render
+- `undefined` : Render only if the view has been rendered previously
+
 ### html *view.html([content])*
 
 Get or set the `innerHTML` of the view, without triggering the `rendered` event.
@@ -337,7 +352,10 @@ Accepts any of the following options:
 
 - **fetch** - Boolean, whether to fetch the model when it is set, defaults to true.
 - **success** - Callback on fetch success, defaults to noop
-- **render** - Render on the view on model:change? Defaults to true
+- **render** - Render on the view on model:change? Defaults to undefined
+  - `true` : Always render on change
+  - `false` : Never render on change
+  - `undefined` : Rerender if we have already been rendered
 - **populate** - Call `populate` with the model's attributes when it is set? Defaults to true. Pass `populate: {children: false}` to prevent child views from having their inputs populated.
 - **errors** - When the model triggers an `error` event, trigger the event on the view? Defaults to true
 
@@ -355,7 +373,10 @@ Sets the `collection` attribute of a view then attempts to fetch the collection 
 
 Accepts any of the following options:
 
-- **render** - Whether to render the collection if it is populated, or render it after it has been loaded
+- **render** - Whether to render the collection if it is populated, or render it after it has been loadedundefined
+  - `true` : Always render on change
+  - `false` : Never render on change
+  - `undefined` : Rerender if we have already been rendered
 - **fetch** - Whether or not to try to call `fetch` on the collection if `shouldFetch` returns true
 - **success** - Callback on fetch success, defaults to noop
 - **errors** - Whether or not to trigger an `error` event on the view when an `error` event is triggered on the collection

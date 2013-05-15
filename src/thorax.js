@@ -230,6 +230,15 @@ Thorax.View = Backbone.View.extend({
   ensureRendered: function() {
     !this._renderCount && this.render();
   },
+  shouldRender: function(flag) {
+    // Render if flag is truthy or if we have already rendered and flag is undefined/null
+    return flag || (flag == null && this._renderCount);
+  },
+  conditionalRender: function(flag) {
+    if (this.shouldRender(flag)) {
+      this.render();
+    }
+  },
 
   appendTo: function(el) {
     this.ensureRendered();
