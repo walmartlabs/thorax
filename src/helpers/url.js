@@ -11,5 +11,14 @@ Handlebars.registerHelper('url', function(url) {
       fragment = url;
     }
   }
-  return (Backbone.history._hasPushState ? Backbone.history.options.root : '#') + fragment;
+  if (Backbone.history._hasPushState) {
+    var root = Backbone.history.options.root;
+    if (root === '/' && fragment.substr(0, 1) === '/') {
+      return fragment;
+    } else {
+      return root + fragment;
+    }
+  } else {
+    return '#' + fragment;
+  }
 });

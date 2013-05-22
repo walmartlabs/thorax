@@ -10,7 +10,7 @@ describe('link helper with pushState', function() {
 
   it("should not have double slashes if the argument starts with a slash", function() {
     var link = $(Handlebars.helpers.link({hash: {href: '/a'}}).toString());
-    expect(link.attr('href')).to.equal('#/a');
+    expect(link.attr('href')).to.equal('/a');
   });
 });
 
