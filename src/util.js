@@ -121,21 +121,21 @@ function objectEvents(target, eventName, callback, context) {
   }
 }
 function addEvents(target, source, context, listenTo) {
+  function addEvent(callback, eventName) {
+    if (listenTo) {
+      target.listenTo(target[listenTo], eventName, getEventCallback(callback, target), context);
+    } else {
+      target.push([eventName, callback, context]);
+    }
+  }
+
   _.each(source, function(callback, eventName) {
     if (_.isArray(callback)) {
       _.each(callback, function(cb) {
-        if (listenTo) {
-          target.listenTo(target[listenTo], eventName, getEventCallback(cb, target), context);
-        } else {
-          target.push([eventName, cb, context]);
-        }
+        addEvent(cb, eventName);
       });
     } else {
-      if (listenTo) {
-        target.listenTo(target[listenTo], eventName, getEventCallback(callback, target), context);
-      } else {
-        target.push([eventName, callback, context]);
-      }
+      addEvent(callback, eventName);
     }
   });
 }
