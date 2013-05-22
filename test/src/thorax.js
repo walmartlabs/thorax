@@ -226,5 +226,18 @@ describe('core', function() {
       expect(view.model.attributes.b.mutated).to.be['undefined'];
       expect(view.html()).to.equal('ab');
     });
+
+    it("template does not expose template cid", function() {
+      var view = new Thorax.View({
+        template: Handlebars.compile("{{cid}}")
+      });
+      view.render();
+      expect(view.html()).to.contain('view');
+      view = new Thorax.View({
+        template: Handlebars.compile("{{@cid}}")
+      });
+      view.render();
+      expect(view.html()).to.contain('t');
+    });
   });
 });
