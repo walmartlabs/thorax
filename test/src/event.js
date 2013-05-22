@@ -191,7 +191,7 @@ describe('event', function() {
         parentClickedCount = 0;
 
     var Child = Thorax.View.extend({
-      template: Thorax.templates.child,
+      template: Handlebars.templates.child,
       events: {
         'click div': function() {
           ++childClickedCount;
@@ -200,7 +200,7 @@ describe('event', function() {
     });
 
     var Parent = Thorax.View.extend({
-      template: Thorax.templates.parent,
+      template: Handlebars.templates.parent,
       events: {
         'click div': function() {
           ++parentClickedCount;
@@ -275,7 +275,7 @@ describe('event', function() {
     view._addChild(secondChild);
     expect(secondChildSpy.callCount).to.equal(1, 'adding a child to a view that is ready should immediately trigger');
 
-    var itemViewSpy = this.spy();    
+    var itemViewSpy = this.spy();
     var collectionView = new Thorax.View({
       itemView: Thorax.View.extend({
         events: {
@@ -291,6 +291,7 @@ describe('event', function() {
       ]),
       template: Handlebars.compile('{{collection tag="ul"}}')
     });
+    collectionView.render();
     expect(itemViewSpy.callCount).to.equal(0, 'ready event triggered via collection');
     collectionView.trigger('ready');
     expect(collectionView.$('li').length).to.equal(3, 'ready event triggered via collection');
@@ -300,7 +301,64 @@ describe('event', function() {
     expect(collectionView.$('li').length).to.equal(4, 'ready event triggered via collection:add');
     expect(collectionView.$('li').eq(3).html()).to.equal('four', 'ready event triggered via collection:add');
     expect(itemViewSpy.callCount).to.equal(4, 'ready event triggered via collection:add');
+  });
 
+  describe('cleanup', function() {
+    it('should cleanup backbone events on off', function() {
+      var view = new Thorax.View(),
+          spy = this.spy();
+      view.on('foo', spy);
+
+      view.trigger('foo');
+      expect(spy).to.have.been.calledOnce;
+
+      view.off('foo', spy);
+
+      view.trigger('foo');
+      expect(spy).to.have.been.calledOnce;
+    });
+    it('should cleanup backbone events on destroy', function() {
+      var spy = this.spy()
+          view = new Thorax.View({
+            events: {
+              model: {
+                foo: spy
+              }
+            },
+            model: new Thorax.Model(),
+            template: function() {}
+          }),
+          model = view.model;
+
+      model.trigger('foo');
+      expect(spy).to.have.been.calledOnce;
+
+      view.destroy();
+
+      model.trigger('foo');
+      expect(spy).to.have.been.calledOnce;
+    });
+    it('should cleanup DOM events on destroy', function() {
+      var spy = this.spy(),
+          view = new Thorax.View({
+            events: {
+              'mousedown a': spy,
+              'mousedown': spy
+            }
+          }),
+          $el = view.$el;
+
+      $el.html('<a href="foo">bar</a>');
+      document.body.appendChild(view.el);
+
+      $el.find('a').trigger('mousedown');
+      expect(spy).to.have.been.calledTwice;
+
+      view.destroy();
+
+      $el.find('a').trigger('mousedown');
+      expect(spy).to.have.been.calledTwice;
+    });
   });
 
   describe('context', function() {

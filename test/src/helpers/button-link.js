@@ -1,4 +1,21 @@
+describe('link helper with pushState', function() {
+  before(function() {
+    this.previousPushState = Backbone.history._hasPushState;
+    Backbone.history._hasPushState = true;
+  });
+
+  after(function() {
+    Backbone.history._hasPushState = this.previousPushState;
+  });
+
+  it("should not have double slashes if the argument starts with a slash", function() {
+    var link = $(Handlebars.helpers.link({hash: {href: '/a'}}).toString());
+    expect(link.attr('href')).to.equal('/a');
+  });
+});
+
 describe('button-link helpers', function() {
+
   it("option hash required arguments for button and link", function() {
     var link = $(Handlebars.helpers.link({hash: {href: 'a'}}).toString()),
         button = $(Handlebars.helpers.button({hash: {method: 'b'}}).toString());

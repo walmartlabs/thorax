@@ -1,8 +1,8 @@
 describe('collection', function() {
-  Thorax.templates.letter = Handlebars.compile('{{collection tag="ul"}}');
-  Thorax.templates['letter-item'] = Handlebars.compile('<li>{{letter}}</li>');
-  Thorax.templates['letter-empty'] = Handlebars.compile('<li>empty</li>');
-  Thorax.templates['letter-multiple-item'] = Handlebars.compile('<li>{{letter}}</li><li>{{letter}}</li>');
+  Handlebars.templates.letter = Handlebars.compile('{{collection tag="ul"}}');
+  Handlebars.templates['letter-item'] = Handlebars.compile('<li>{{letter}}</li>');
+  Handlebars.templates['letter-empty'] = Handlebars.compile('<li>empty</li>');
+  Handlebars.templates['letter-multiple-item'] = Handlebars.compile('<li>{{letter}}</li><li>{{letter}}</li>');
 
   var LetterModel = Thorax.Model.extend({});
   var letterCollection = new (Thorax.Collection.extend({
@@ -19,86 +19,7 @@ describe('collection', function() {
     expect(letterCollection.at(0).isPopulated()).to.be['true'];
   });
 
-  it("collection view binding", function() {
-    function runCollectionTests(view, indexMultiplier, msg) {
-      msg += ' : ';
-      function matchCids(collection) {
-        collection.forEach(function(model) {
-          expect(view.$('[data-model-cid="' + model.cid + '"]').length).to.equal(1 * indexMultiplier, 'match CIDs');
-        });
-      }
-      expect(view.el.firstChild).to.not.exist;
-      var clonedLetterCollection = new Thorax.Collection(letterCollection.models),
-          renderedItemCount = 0,
-          renderedCollectionCount = 0,
-          renderedEmptyCount = 0,
-          renderedCount = 0;
-
-      view.on('rendered', function() {
-        ++renderedCount;
-      });
-      view.on('rendered:collection', function() {
-        ++renderedCollectionCount;
-      });
-      view.on('rendered:item', function() {
-        ++renderedItemCount;
-      });
-      view.on('rendered:empty', function() {
-        ++renderedEmptyCount;
-      });
-
-      view.collection = clonedLetterCollection;
-      view.render();
-      expect(view.$('li').length).to.equal(4 * indexMultiplier, msg + 'rendered node length matches collection length');
-      expect(view.$('li')[0 * indexMultiplier].innerHTML + view.$('li')[3 * indexMultiplier].innerHTML).to.equal('ad', msg + 'rendered nodes in correct order');
-      expect(renderedCount).to.equal(1, msg + 'rendered event count');
-      expect(renderedCollectionCount).to.equal(1, msg + 'rendered:collection event count');
-      expect(renderedItemCount).to.equal(4, msg + 'rendered:item event count');
-      expect(renderedEmptyCount).to.equal(0, msg + 'rendered:empty event count');
-      matchCids(clonedLetterCollection);
-
-      //reorder
-      clonedLetterCollection.remove(clonedLetterCollection.at(0));
-      expect(view.$('li')[0 * indexMultiplier].innerHTML + view.$('li')[2 * indexMultiplier].innerHTML).to.equal('bd', msg + 'rendered nodes in correct order');
-      clonedLetterCollection.remove(clonedLetterCollection.at(2));
-      expect(view.$('li')[0 * indexMultiplier].innerHTML + view.$('li')[1 * indexMultiplier].innerHTML).to.equal('bc', msg + 'rendered nodes in correct order');
-      clonedLetterCollection.add(new LetterModel({letter: 'e'}));
-      expect(view.$('li')[2 * indexMultiplier].innerHTML).to.equal('e', msg + 'collection and nodes maintain sort order');
-      clonedLetterCollection.add(new LetterModel({letter: 'a'}), {at: 0});
-      expect(view.$('li')[0 * indexMultiplier].innerHTML).to.equal('a', msg + 'collection and nodes maintain sort order');
-      expect(renderedCount).to.equal(1, msg + 'rendered event count');
-      expect(renderedCollectionCount).to.equal(1, msg + 'rendered:collection event count');
-      expect(renderedItemCount).to.equal(6, msg + 'rendered:item event count');
-      expect(renderedEmptyCount).to.equal(0, msg + 'rendered:empty event count');
-      matchCids(clonedLetterCollection);
-
-      //empty
-      clonedLetterCollection.remove(clonedLetterCollection.models);
-      expect(view.$('li')[0].innerHTML).to.equal('empty', msg + 'empty collection renders empty');
-      clonedLetterCollection.add(new LetterModel({letter: 'a'}));
-
-      expect(view.$('li').length).to.equal(1 * indexMultiplier, msg + 'transition from empty to one item');
-      expect(view.$('li')[0 * indexMultiplier].innerHTML).to.equal('a', msg + 'transition from empty to one item');
-      expect(renderedCount).to.equal(1, msg + 'rendered event count');
-      expect(renderedCollectionCount).to.equal(1, msg + 'rendered:collection event count');
-      expect(renderedItemCount).to.equal(7, msg + 'rendered:item event count');
-      expect(renderedEmptyCount).to.equal(1, msg + 'rendered:empty event count');
-      matchCids(clonedLetterCollection);
-
-      var oldLength = view.$('li').length;
-      clonedLetterCollection.reset(_.clone(clonedLetterCollection.models));
-      expect(renderedEmptyCount).to.equal(1, msg + 'rendered:empty event count');
-      expect(view.$('li').length).to.equal(oldLength, msg + 'Reset does not cause change in number of rendered items');
-
-      clonedLetterCollection.off();
-
-      clonedLetterCollection.remove(clonedLetterCollection.models);
-      expect(renderedEmptyCount).to.equal(1, msg + 'rendered:empty event count');
-      expect(view.$('li')[0 * indexMultiplier].innerHTML).to.equal('a', msg + 'transition from empty to one item after freeze');
-    }
-
-    runCollectionTests(new LetterCollectionView(), 1, 'base');
-
+  describe('collection view binding', function() {
     //when the fragment is created bind
     function addRenderItemBinding() {
       this.on('helper:collection', function(fragment) {
@@ -106,59 +27,39 @@ describe('collection', function() {
       }, this);
     }
 
-    var viewReturningItemView = new (LetterCollectionView.extend({
-      initialize: addRenderItemBinding,
-      renderItem: function(model) {
-        return new LetterItemView({model: model});
-      }
-    }))();
-    runCollectionTests(viewReturningItemView, 1, 'renderItem returning LetterItemView');
-
-    var viewReturningMixed = new (LetterCollectionView.extend({
-      initialize: addRenderItemBinding,
-      renderItem: function(model, i) {
-        return i % 2 === 0 ? new LetterItemView({model: model}) : this.renderTemplate(this.name + '-item', model.attributes);
-      }
-    }))();
-    runCollectionTests(viewReturningMixed, 1, 'renderItem returning mixed');
-
-    var viewReturningMultiple = new (LetterCollectionView.extend({
-      initialize: addRenderItemBinding,
-      renderItem: function(model) {
-        return this.renderTemplate('letter-multiple-item', model.attributes);
-      }
-    }))();
-    runCollectionTests(viewReturningMultiple, 2, 'renderItem returning multiple');
-
-    var viewWithBlockCollectionHelper = new Thorax.View({
-      template: Handlebars.compile('{{#collection tag="ul" empty-template="letter-empty"}}<li>{{letter}}</li>{{/collection}}')
+    it('should render named templates', function() {
+      runCollectionTests(new LetterCollectionView());
     });
-    runCollectionTests(viewWithBlockCollectionHelper, 1, 'block helper');
 
-    var viewWithBlockCollectionHelperWithViews = new Thorax.View({
-      template: Handlebars.compile('{{collection tag="ul" empty-template="letter-empty" item-view="letter-item"}}')
+    it('should render views', function() {
+      var view = new (LetterCollectionView.extend({
+        initialize: addRenderItemBinding,
+        renderItem: function(model) {
+          return new LetterItemView({model: model});
+        }
+      }))();
+      runCollectionTests(view);
     });
-    runCollectionTests(viewWithBlockCollectionHelperWithViews, 1, 'block helper with item-view');
 
-    var viewWithBlockCollectionHelperWithViewsAndBlock = new Thorax.View({
-      template: Handlebars.compile('{{#collection tag="ul" empty-template="letter-empty" item-view="letter-item"}}<li class="testing">{{letter}}</li>{{/collection}}')
+    it('should render views and templates', function() {
+      var view = new (LetterCollectionView.extend({
+        initialize: addRenderItemBinding,
+        renderItem: function(model, i) {
+          return i % 2 === 0 ? new LetterItemView({model: model}) : this.renderTemplate(this.name + '-item', model.attributes);
+        }
+      }))();
+      runCollectionTests(view);
     });
-    runCollectionTests(viewWithBlockCollectionHelperWithViewsAndBlock, 1, 'block helper with item-view and fn');
 
-    var viewWithCollectionHelperWithEmptyView = new Thorax.View({
-      template: Handlebars.compile('{{collection tag="ul" empty-view="letter-empty" item-template="letter-item"}}')
+    it('should render multiple elements per-model', function() {
+      var view = new (LetterCollectionView.extend({
+        initialize: addRenderItemBinding,
+        renderItem: function(model) {
+          return this.renderTemplate('letter-multiple-item', model.attributes);
+        }
+      }))();
+      runCollectionTests(view, 2);
     });
-    runCollectionTests(viewWithCollectionHelperWithEmptyView, 1, 'block helper with item-template');
-
-    var viewWithCollectionHelperWithItemViewAndItemTemplate = new Thorax.View({
-      template: Handlebars.compile('{{collection tag="ul" empty-view="letter-empty" item-view="letter-item" item-template="letter-item"}}')
-    });
-    runCollectionTests(viewWithCollectionHelperWithItemViewAndItemTemplate, 1, 'block helper with item-template');
-
-    var viewWithCollectionHelperWithEmptyViewAndBlock = new Thorax.View({
-      template: Handlebars.compile('{{collection tag="ul" empty-template="letter-empty" empty-view="letter-empty" item-template="letter-item"}}')
-    });
-    runCollectionTests(viewWithCollectionHelperWithEmptyViewAndBlock, 1, 'block helper with empty view and block');
   });
 
   it('should render sync fetch', function() {
@@ -260,21 +161,22 @@ describe('collection', function() {
     expect(view.$('li').eq(0).html()).to.equal('d');
   });
 
-  it("bindDataObject or model.set can be called in context()", function() {
+  it("nested render should throw", function() {
     //this causes recursion
-    var view = new Thorax.View({
-      model: new Thorax.Model(),
-      template: Handlebars.compile('{{key}}{{#collection col}}{{key}}{{/collection}}'),
-      context: function() {
-        this.model.set({key: 'value'});
-        return {
-          key: 'value',
-          col: new Thorax.Collection([{key: 'value'}])
-        };
-      }
-    });
-    view.render();
-    expect(view.$('[data-collection-cid] div')[0].innerHTML).to.equal('value');
+    function doNestedRender() {
+      var view = new Thorax.View({
+        template: Handlebars.compile('{{key}}{{#collection col}}{{key}}{{/collection}}'),
+        context: function() {
+          this.model.set({key: 'value'});
+          return {
+            key: 'value',
+            col: new Thorax.Collection([{key: 'value'}])
+          };
+        }
+      });
+      view.setModel(new Thorax.Model(), {render: true});
+    }
+    expect(doNestedRender).to.throw(Error);
   });
 
   it("filter what items are rendered in a collection", function() {
@@ -360,7 +262,7 @@ describe('collection', function() {
       ]),
       template: Handlebars.compile('{{^empty collection}}{{#collection tag="ul"}}<li>{{letter}}</li>{{/collection}}{{/empty}}'),
       itemFilter: function(model) {
-        return model.get('letter') != 'a';
+        return model.get('letter') !== 'a';
       }
     });
     view.render();
@@ -478,26 +380,10 @@ describe('collection', function() {
     var view = new Thorax.CollectionView({
       collection: letterCollection,
       template: Handlebars.compile('<div class="test">{{collection-element tag="ul"}}</div>'),
-      itemTemplate: Thorax.templates['letter-item']
+      itemTemplate: Handlebars.templates['letter-item']
     });
+    view.render();
     expect(view.$('li').length).to.equal(letterCollection.length);
-  });
-
-  it("graceful failure of empty collection with no empty template", function() {
-    var view = new Thorax.View({
-      template: Handlebars.compile('{{collection item-template="letter-item"}}'),
-      collection: new Thorax.Collection({
-        isPopulated: function() {
-          return true;
-        }
-      })
-    });
-    view.render();
-    view = new Thorax.View({
-      template: Handlebars.compile('{{collection item-template="letter-item"}}'),
-      collection: new Thorax.Collection()
-    });
-    view.render();
   });
 
   it("item-template and empty-template can return text nodes", function() {
@@ -511,39 +397,6 @@ describe('collection', function() {
     view.letters.reset(letterCollection.models);
     expect(view.$('div[data-collection-cid] div').html()).to.equal('a');
     expect(view.$('[data-collection-empty]').length).to.equal(0);
-  });
-
-  it("itemContext", function() {
-    var view = new Thorax.View({
-      key: 'value',
-      collection: letterCollection,
-      template: Handlebars.compile("{{#collection}}<span>{{test}}</span>{{/collection}}"),
-      itemContext: function() {
-        // not checking for `view` or cid as itemContext will be called immediately
-        // before `view` var is assigned
-        expect(this.key).to.equal('value', 'itemContext called with correct context');
-        return {
-          test: 'testing'
-        };
-      }
-    });
-    view.render();
-    expect(view.$('span').length).to.equal(letterCollection.length);
-    expect(view.$('span')[0].innerHTML).to.equal('testing');
-
-    //will use default
-    view = new Thorax.View({
-      collection: new (Thorax.Collection.extend({
-        url: false,
-        isEmpty: function() {
-          return true;
-        }
-      }))(),
-      template: Handlebars.compile("{{#collection}}{{test}}{{else}}<b>{{test}}</b>{{/collection}}"),
-      test: 'testing'
-    });
-    view.render();
-    expect(view.$('b')[0].innerHTML).to.equal('testing');
   });
 
   it("empty-class option", function() {
@@ -632,6 +485,23 @@ describe('collection', function() {
     expect(view.$('div').length).to.equal(1, 'after setCollection (second)');
   });
 
+  it('should defer render collection after setCollection is called', function() {
+    var spy = this.spy();
+
+    var view = new Thorax.View({
+      events: {
+        'rendered rendered:item': spy
+      },
+      template: Handlebars.compile("{{collection}}"),
+      itemTemplate: function() { return '<div class="item">' + this.id + '</div>'; },
+      collection: new Thorax.Collection([{id:1},{id:2}])
+    });
+    expect(spy).to.not.have.been.called;
+    view.render();
+    expect(spy).to.have.been.calledThrice;
+    expect(view.$('.item').length).to.equal(2);
+  });
+
   it('should preserve itself in the DOM after re-rendering collection', function() {
     var spy = this.spy();
     var collection = new Thorax.Collection([{key: 'one'}, {key: 'two'}]);
@@ -642,6 +512,7 @@ describe('collection', function() {
         'rendered:item': spy
       }
     });
+    view.render();
     view.setCollection(collection);
     // Note that we want to compare HTML instead of the actual node
     // as in IE only we will clone the node. In other browsers will
@@ -670,13 +541,15 @@ describe('collection', function() {
     view.render();
     expect(parent.children('div')[0]).to.equal(oldEl);
   });
+});
 
+describe('collection view', function() {
   it('collection loaded via load() will be rendered', function() {
     var spy = this.spy();
     var server = sinon.fakeServer.create();
     var collection = new (Thorax.Collection.extend({
       url: '/test'
-    }));
+    }))();
     var view = new Thorax.CollectionView({
       collection: collection,
       events: {
@@ -685,36 +558,40 @@ describe('collection', function() {
       template: Handlebars.compile('{{collection-element}}'),
       itemTemplate: Handlebars.compile('<span>{{text}}</span>')
     });
+    view.render();
+
     server.requests[0].respond(
       200,
       { "Content-Type": "application/json" },
       JSON.stringify([{id: 1, text: "test"}])
     );
-    expect(spy.callCount).to.equal(1);
+    expect(spy.callCount).to.equal(2);
     expect(view.$('span').html()).to.equal('test');
     server.restore();
   });
 
-  it("CollectionView may have a blank template", function() {
+  it('may have a blank template', function() {
     var view = new Thorax.CollectionView({
       tagName: 'ul',
       collection: new Thorax.Collection([{key: 'value'}]),
       itemTemplate: Handlebars.compile('<li>{{key}}</li>')
     });
+    view.render();
     expect(view.$('li').length).to.equal(1);
   });
 
-  it("CollectionView will assign template if view only has name", function() {
-    Thorax.templates['collection-view-with-name'] = Handlebars.compile('<div class="named">{{collection-element tag="ul"}}</div>');
+  it('will assign template if view only has name', function() {
+    Handlebars.templates['collection-view-with-name'] = Handlebars.compile('<div class="named">{{collection-element tag="ul"}}</div>');
     var view = new Thorax.CollectionView({
       name: 'collection-view-with-name',
       itemTemplate: Handlebars.compile('<li>{{key}}</li>'),
       collection: new Thorax.Collection([{key: 'value'}])
     });
+    view.render();
     expect(view.$('.named li').length).to.equal(1);
   });
 
-  it("CollectionView with no itemTemplate will throw", function() {
+  it('should throw if no template can be found', function() {
     var view = new Thorax.View({
       template: Handlebars.compile('{{collection}}')
     });
@@ -726,3 +603,87 @@ describe('collection', function() {
   });
 
 });
+
+function runCollectionTests(view, indexMultiplier) {
+  indexMultiplier = indexMultiplier || 1;
+
+  function matchCids(collection) {
+    collection.forEach(function(model) {
+      expect(view.$('[data-model-cid="' + model.cid + '"]').length).to.equal(1 * indexMultiplier, 'match CIDs');
+    });
+  }
+  expect(view.el.firstChild).to.not.exist;
+
+  var LetterModel = Thorax.Model.extend({});
+  var letterCollection = new (Thorax.Collection.extend({
+        model: LetterModel
+      }))(['a', 'b', 'c', 'd'].map(function(letter) {
+        return {letter: letter};
+      })),
+      renderedItemCount = 0,
+      renderedCollectionCount = 0,
+      renderedEmptyCount = 0,
+      renderedCount = 0;
+
+  view.on('rendered', function() {
+    ++renderedCount;
+  });
+  view.on('rendered:collection', function() {
+    ++renderedCollectionCount;
+  });
+  view.on('rendered:item', function() {
+    ++renderedItemCount;
+  });
+  view.on('rendered:empty', function() {
+    ++renderedEmptyCount;
+  });
+
+  view.collection = letterCollection;
+  view.render();
+  expect(view.$('li').length).to.equal(4 * indexMultiplier, 'rendered node length matches collection length');
+  expect(view.$('li')[0 * indexMultiplier].innerHTML + view.$('li')[3 * indexMultiplier].innerHTML).to.equal('ad', 'rendered nodes in correct order');
+  expect(renderedCount).to.equal(1, 'rendered event count');
+  expect(renderedCollectionCount).to.equal(1, 'rendered:collection event count');
+  expect(renderedItemCount).to.equal(4, 'rendered:item event count');
+  expect(renderedEmptyCount).to.equal(0, 'rendered:empty event count');
+  matchCids(letterCollection);
+
+  //reorder
+  letterCollection.remove(letterCollection.at(0));
+  expect(view.$('li')[0 * indexMultiplier].innerHTML + view.$('li')[2 * indexMultiplier].innerHTML).to.equal('bd', 'rendered nodes in correct order');
+  letterCollection.remove(letterCollection.at(2));
+  expect(view.$('li')[0 * indexMultiplier].innerHTML + view.$('li')[1 * indexMultiplier].innerHTML).to.equal('bc', 'rendered nodes in correct order');
+  letterCollection.add(new LetterModel({letter: 'e'}));
+  expect(view.$('li')[2 * indexMultiplier].innerHTML).to.equal('e', 'collection and nodes maintain sort order');
+  letterCollection.add(new LetterModel({letter: 'a'}), {at: 0});
+  expect(view.$('li')[0 * indexMultiplier].innerHTML).to.equal('a', 'collection and nodes maintain sort order');
+  expect(renderedCount).to.equal(1, 'rendered event count');
+  expect(renderedCollectionCount).to.equal(1, 'rendered:collection event count');
+  expect(renderedItemCount).to.equal(6, 'rendered:item event count');
+  expect(renderedEmptyCount).to.equal(0, 'rendered:empty event count');
+  matchCids(letterCollection);
+
+  //empty
+  letterCollection.remove(letterCollection.models);
+  expect(view.$('li')[0].innerHTML).to.equal('empty', 'empty collection renders empty');
+  letterCollection.add(new LetterModel({letter: 'a'}));
+
+  expect(view.$('li').length).to.equal(1 * indexMultiplier, 'transition from empty to one item');
+  expect(view.$('li')[0 * indexMultiplier].innerHTML).to.equal('a', 'transition from empty to one item');
+  expect(renderedCount).to.equal(1, 'rendered event count');
+  expect(renderedCollectionCount).to.equal(1, 'rendered:collection event count');
+  expect(renderedItemCount).to.equal(7, 'rendered:item event count');
+  expect(renderedEmptyCount).to.equal(1, 'rendered:empty event count');
+  matchCids(letterCollection);
+
+  var oldLength = view.$('li').length;
+  letterCollection.reset(_.clone(letterCollection.models));
+  expect(renderedEmptyCount).to.equal(1, 'rendered:empty event count');
+  expect(view.$('li').length).to.equal(oldLength, 'Reset does not cause change in number of rendered items');
+
+  letterCollection.off();
+
+  letterCollection.remove(letterCollection.models);
+  expect(renderedEmptyCount).to.equal(1, 'rendered:empty event count');
+  expect(view.$('li')[0 * indexMultiplier].innerHTML).to.equal('a', 'transition from empty to one item after freeze');
+}

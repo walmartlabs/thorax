@@ -16,10 +16,13 @@ var viewNameAttributeName = 'data-view-name',
 //view instances
 var viewsIndexedByCid = {};
 
+if (!Handlebars.templates) {
+  Handlebars.templates = {};
+}
+
 var Thorax = this.Thorax = {
-  VERSION: '2.0.0rc1',
+  VERSION: '2.0.0rc4',
   templatePathPrefix: '',
-  templates: {},
   //view classes
   Views: {},
   //certain error prone pieces of code (on Android only it seems)
@@ -29,7 +32,9 @@ var Thorax = this.Thorax = {
   //to debug / log / etc
   onException: function(name, err) {
     throw err;
-  }
+  },
+  //deprecated, here to ensure existing projects aren't mucked with
+  templates: Handlebars.templates 
 };
 
 Thorax.View = Backbone.View.extend({
@@ -106,13 +111,34 @@ Thorax.View = Backbone.View.extend({
         child.destroy();
       }
     }, this);
+
     if (this.parent) {
       this.parent._removeChild(this);
     }
-    this.remove(); // Will call stopListening()
+
+    if (this.el) {
+      this.undelegateEvents();
+      this.remove(); // Will call stopListening()
+    }
+
+    // Absolute worst case scenario, kill off some known fields to minimize the impact
+    // of being retained.
+    this.el = this.$el = undefined;
+    this.parent = undefined;
+    this.model = this.collection = this._collection = undefined;
+    this._helperOptions = undefined;
   },
 
   render: function(output) {
+    if (this._rendering) {
+      // Nested rendering of the same view instances can lead to some very nasty issues with
+      // the root render process overwriting any updated data that may have been output in the child
+      // execution. If in a situation where you need to rerender in response to an event that is
+      // triggered sync in the rendering lifecycle it's recommended to defer the subsequent render
+      // or refactor so that all preconditions are known prior to exec.
+      throw new Error('nested-render');
+    }
+
     this._previousHelpers = _.filter(this.children, function(child) { return child._helperOptions; });
 
     var children = {};
@@ -123,15 +149,21 @@ Thorax.View = Backbone.View.extend({
     });
     this.children = children;
 
-    if (_.isUndefined(output) || (!_.isElement(output) && !Thorax.Util.is$(output) && !(output && output.el) && !_.isString(output) && !_.isFunction(output))) {
-      // try one more time to assign the template, if we don't
-      // yet have one we must raise
-      assignTemplate.call(this, 'template', {
-        required: true
-      });
-      output = this.renderTemplate(this.template);
-    } else if (_.isFunction(output)) {
-      output = this.renderTemplate(output);
+    this._rendering = true;
+
+    try{
+      if (_.isUndefined(output) || (!_.isElement(output) && !Thorax.Util.is$(output) && !(output && output.el) && !_.isString(output) && !_.isFunction(output))) {
+        // try one more time to assign the template, if we don't
+        // yet have one we must raise
+        assignTemplate.call(this, 'template', {
+          required: true
+        });
+        output = this.renderTemplate(this.template);
+      } else if (_.isFunction(output)) {
+        output = this.renderTemplate(output);
+      }
+    } finally {
+      this._rendering = false;
     }
 
     // Destroy any helpers that may be lingering
@@ -197,6 +229,15 @@ Thorax.View = Backbone.View.extend({
 
   ensureRendered: function() {
     !this._renderCount && this.render();
+  },
+  shouldRender: function(flag) {
+    // Render if flag is truthy or if we have already rendered and flag is undefined/null
+    return flag || (flag == null && this._renderCount);
+  },
+  conditionalRender: function(flag) {
+    if (this.shouldRender(flag)) {
+      this.render();
+    }
   },
 
   appendTo: function(el) {

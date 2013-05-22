@@ -267,7 +267,7 @@ describe('loading', function() {
     it('pair with timeout registers', function() {
       this.object.loadStart('foo', false);
       this.clock.tick(1000);
-      var loaderWrapper = this.object._loadInfo[this.object._loadInfo.length - 1];
+      var loaderWrapper = _.last(_.values(this.object._loadInfo));
 
       this.object.loadEnd();
       this.clock.tick(1000);
@@ -279,7 +279,7 @@ describe('loading', function() {
     it('consequtive pairs emit one event', function() {
       this.object.loadStart('foo', false);
       this.clock.tick(1000);
-      var loaderWrapper = this.object._loadInfo[this.object._loadInfo.length - 1];
+      var loaderWrapper = _.last(_.values(this.object._loadInfo));
 
       this.object.loadEnd();
       this.clock.tick(10);
@@ -299,7 +299,7 @@ describe('loading', function() {
     it('consequtive pairs emit two events after timeout', function() {
       this.object.loadStart('foo', false);
       this.clock.tick(1000);
-      var loaderWrapper = this.object._loadInfo[this.object._loadInfo.length - 1];
+      var loaderWrapper = _.last(_.values(this.object._loadInfo));
 
       this.object.loadEnd();
       this.clock.tick(1000);
@@ -309,7 +309,7 @@ describe('loading', function() {
 
       this.object.loadStart('bar', true);
       this.clock.tick(1000);
-      var loaderWrapper2 = this.object._loadInfo[this.object._loadInfo.length - 1];
+      var loaderWrapper2 = _.last(_.values(this.object._loadInfo));
 
       this.object.loadEnd();
       this.clock.tick(1000);
@@ -321,7 +321,7 @@ describe('loading', function() {
     it('overlapping pairs emit one event', function() {
       this.object.loadStart('foo', false);
       this.clock.tick(1000);
-      var loaderWrapper = this.object._loadInfo[this.object._loadInfo.length - 1];
+      var loaderWrapper = _.last(_.values(this.object._loadInfo));
 
       this.object.loadStart('bar', true);
       this.clock.tick(1000);
@@ -332,6 +332,28 @@ describe('loading', function() {
       this.object.loadEnd();
       this.clock.tick(1000);
       this.object.loadEnd();
+      this.clock.tick(1000);
+
+      expect(this.loads).to.eql([{msg: 'foo', background: false, model: loaderWrapper}]);
+      expect(this.ends).to.eql([{background: false, model: loaderWrapper}]);
+    });
+
+    it('forwarded events emit one event', function() {
+      var object = _.extend({}, Backbone.Events);
+      Thorax.mixinLoadableEvents(object);
+
+      Thorax.forwardLoadEvents(object, this.object);
+      Thorax.forwardLoadEvents(object, this.object);
+      Thorax.forwardLoadEvents(object, this.object);
+
+      object.loadStart('foo', false);
+      this.clock.tick(1000);
+      var loaderWrapper = _.last(_.values(this.object._loadInfo));
+
+      expect(this.loads).to.eql([{msg: 'foo', background: false, model: loaderWrapper}]);
+      expect(this.ends).to.eql([]);
+
+      object.loadEnd();
       this.clock.tick(1000);
 
       expect(this.loads).to.eql([{msg: 'foo', background: false, model: loaderWrapper}]);
@@ -482,6 +504,27 @@ describe('loading', function() {
       expect(this.startSpy).to.have.been.calledOnce;
       expect(this.endSpy).to.have.been.calledOnce;
     });
+
+    it('failback does not get called twice if it triggers route event', function() {
+      var fragment = 'data-bar';
+      this.stub(Backbone.history, 'getFragment', function() { return fragment; });
+
+      var success = this.spy(),
+          failback = this.spy(function() {
+            fragment = 'data-foo';
+            Backbone.history.trigger('route');
+          });
+
+      this.model.load(success, failback);
+      this.requests[0].respond(0, {}, '');
+
+      expect(success).to.not.have.been.called;
+      expect(failback).to.have.been.calledOnce;
+      expect(failback).to.have.been.calledWith(true);
+      expect(this.startSpy).to.have.been.calledOnce;
+      expect(this.endSpy).to.have.been.calledOnce;
+    });
+
     it('data load on route change sends load events', function() {
       var success = this.spy(),
           failback = this.spy();
@@ -562,8 +605,6 @@ describe('loading', function() {
       expect(rootEnd).to.have.been.calledWith(false);
       expect(this.startSpy.callCount).to.equal(4);
       expect(this.endSpy.callCount).to.equal(4);
-
-      //exports.off('load:start');
     });
 
     it('data load on populated object does not send events', function() {
@@ -575,8 +616,10 @@ describe('loading', function() {
 
       this.model.isPopulated = function() { return true; };
       this.model.load(success, failback);
-      expect(this.requests).to.be.empty;
 
+      this.clock.tick(10);
+
+      expect(this.requests).to.be.empty;
       expect(success).to.have.been.calledOnce;
       expect(failback).to.not.have.been.called;
       expect(rootStart).to.not.have.been.called;
@@ -598,10 +641,10 @@ describe('loading', function() {
         return fragment;
       };
 
-      var _this = this;
+      var self = this;
       function reset() {
-        callback = _this.spy();
-        failback = _this.spy();
+        callback = self.spy();
+        failback = self.spy();
         return router.bindToRoute(callback, failback);
       }
 
@@ -686,8 +729,8 @@ describe('loading', function() {
 
     it("loading-template and loading-view collection helper options", function() {
       //use low level events as flusheQueue / fetchQueue interferes
-      Thorax.templates['collection-loading'] = Handlebars.compile('<li class="loading-item">loading</li>');
-      Thorax.templates['collection-loading-view'] = Handlebars.compile('loading');
+      Handlebars.templates['collection-loading'] = Handlebars.compile('<li class="loading-item">loading</li>');
+      Handlebars.templates['collection-loading-view'] = Handlebars.compile('loading');
       Thorax.View.extend({
         name: 'collection-loading-view',
         tagName: 'li'
@@ -745,7 +788,7 @@ describe('loading', function() {
           options = collectionView._objectOptionsByCid[collectionCid];
       expect(options.ignoreErrors).to.equal(true);
       expect(options.background).to.equal(true);
-      expect(view.$el.hasClass('loading')).to.be.true;
+      expect(view.$el.hasClass('loading')).to.be['true'];
     });
 
     it("load callback should be called with collection and not array", function() {
