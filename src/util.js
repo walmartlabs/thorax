@@ -111,19 +111,56 @@ function objectEvents(target, eventName, callback, context) {
   if (_.isObject(callback)) {
     var spec = inheritVars[eventName];
     if (spec && spec.event) {
-      addEvents(target['_' + eventName + 'Events'], callback, context);
+      if (target && target.listenTo && target[eventName] && target[eventName].cid) {
+        addEvents(target, callback, context, eventName);
+      } else {
+        addEvents(target['_' + eventName + 'Events'], callback, context);
+      }
       return true;
     }
   }
 }
-function addEvents(target, source, context) {
+// internal listenTo function will error on destroyed
+// race condition
+function listenTo(object, target, eventName, callback, context) {
+  // getEventCallback will resolve if it is a string or a method
+  // and return a method
+  var callbackMethod = getEventCallback(callback, object),
+      destroyedCount = 0;
+
+  function eventHandler() {
+    if (object.el) {
+      callbackMethod.apply(context, arguments);
+    } else {
+      // If our event handler is removed by destroy while another event is processing then we
+      // we might see one latent event percolate through due to caching in the event loop. If we
+      // see multiple events this is a concern and a sign that something was not cleaned properly.
+      if (destroyedCount) {
+        throw new Error('destroyed-event:' + object.name + ':' + eventName);
+      }
+      destroyedCount++;
+    }
+  }
+  eventHandler._callback = callbackMethod;
+  object.listenTo(target, eventName, eventHandler);
+}
+
+function addEvents(target, source, context, listenToObject) {
+  function addEvent(callback, eventName) {
+    if (listenToObject) {
+      listenTo(target, target[listenToObject], eventName, callback, context || target);
+    } else {
+      target.push([eventName, callback, context]);
+    }
+  }
+
   _.each(source, function(callback, eventName) {
     if (_.isArray(callback)) {
       _.each(callback, function(cb) {
-        target.push([eventName, cb, context]);
+        addEvent(cb, eventName);
       });
     } else {
-      target.push([eventName, callback, context]);
+      addEvent(callback, eventName);
     }
   });
 }
