@@ -96,27 +96,7 @@ _.extend(Thorax.View.prototype, {
 function bindEvents(type, target, source) {
   var context = this;
   walkInheritTree(source, '_' + type + 'Events', true, function(event) {
-    // getEventCallback will resolve if it is a string or a method
-    // and return a method
-    var callback = getEventCallback(event[1], context),
-        eventContext = event[2] || context,
-        destroyedCount = 0;
-
-    function eventHandler() {
-      if (context.el) {
-        callback.apply(eventContext, arguments);
-      } else {
-        // If our event handler is removed by destroy while another event is processing then we
-        // we might see one latent event percolate through due to caching in the event loop. If we
-        // see multiple events this is a concern and a sign that something was not cleaned properly.
-        if (destroyedCount) {
-          throw new Error('destroyed-event:' + context.name + ':' + event[0]);
-        }
-        destroyedCount++;
-      }
-    }
-    eventHandler._callback = callback;
-    context.listenTo(target, event[0], eventHandler);
+    listenTo(context, target, event[0], event[1], event[2] || context);
   });
 }
 
