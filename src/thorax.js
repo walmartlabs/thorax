@@ -1,4 +1,4 @@
-/*global cloneInheritVars, createInheritVars, createRegistryWrapper, getValue, inheritVars */
+/*global cloneInheritVars, createInheritVars, resetInheritVars, createRegistryWrapper, getValue, inheritVars */
 
 //support zepto.forEach on jQuery
 if (!$.fn.forEach) {
@@ -34,7 +34,7 @@ var Thorax = this.Thorax = {
     throw err;
   },
   //deprecated, here to ensure existing projects aren't mucked with
-  templates: Handlebars.templates 
+  templates: Handlebars.templates
 };
 
 Thorax.View = Backbone.View.extend({
