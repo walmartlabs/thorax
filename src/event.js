@@ -120,7 +120,7 @@ Thorax.View.on('ready', function(options) {
   if (!this._isReady) {
     this._isReady = true;
     function triggerReadyOnChild(child) {
-      child.trigger('ready', options);
+      child._isReady || child.trigger('ready', options);
     }
     _.each(this.children, triggerReadyOnChild);
     this.on('child', triggerReadyOnChild);
