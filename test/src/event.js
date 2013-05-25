@@ -248,6 +248,21 @@ describe('event', function() {
     expect(spy.callCount).to.equal(1);
   });
 
+  it('should trigger ready event on layout view', function() {
+    var spy = this.spy(),
+        layoutView = new Thorax.LayoutView(),
+        view = new Thorax.View({
+          events: {
+            ready: spy
+          },
+          template: function() {}
+        });
+    expect(spy.callCount).to.equal(0, 'ready event will trigger via LayoutView');
+    layoutView.appendTo(document.body);
+    layoutView.setView(view);
+    expect(spy.callCount).to.equal(1, 'ready event will trigger via LayoutView');
+  });
+
   it("should trigger ready event on children", function() {
     var spy = this.spy(),
         layoutView = new Thorax.LayoutView(),
@@ -318,7 +333,7 @@ describe('event', function() {
       expect(spy).to.have.been.calledOnce;
     });
     it('should cleanup backbone events on destroy', function() {
-      var spy = this.spy()
+      var spy = this.spy(),
           view = new Thorax.View({
             events: {
               model: {

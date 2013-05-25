@@ -1,3 +1,4 @@
+/*global getOptionsData, normalizeHTMLAttributeOptions*/
 var layoutCidAttributeName = 'data-layout-cid';
 
 Thorax.LayoutView = Thorax.View.extend({
@@ -44,9 +45,9 @@ Thorax.LayoutView = Thorax.View.extend({
     if (view) {
       triggerLifecycleEvent.call(this, 'activated', options);
       view.trigger('activated', options);
-      this._addChild(view);
       this._view = view;
       this._view.appendTo(getLayoutViewsTargetElement.call(this));
+      this._addChild(view);
     } else {
       this._view = undefined;
     }

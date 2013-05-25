@@ -7,6 +7,7 @@
   "bitwise": true,
   "curly": true,
   "eqeqeq": true,
+  "eqnull": true,
   "forin": true,
   "immed": false,
   "latedef": false,
