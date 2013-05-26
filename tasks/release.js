@@ -50,6 +50,9 @@ module.exports = function(grunt) {
         fileList.forEach(function(file) {
           output += fs.readFileSync(path.join(__dirname, '..', file)).toString() + "\n";
         });
+        if (!fs.existsSync(path.join(__dirname, targetDir))) {
+          fs.mkdirSync(path.join(__dirname, targetDir));
+        }
         var targetFile = path.join(__dirname, targetDir, target);
         fs.writeFileSync(targetFile.replace(/\.js$/, '.min.js'), minify(output));
         fs.writeFileSync(targetFile, output);
