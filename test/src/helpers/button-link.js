@@ -74,4 +74,21 @@ describe('button-link helpers', function() {
     expect(view.$('a').html()).to.equal('content');
     expect(view.$('a').attr('href')).to.equal('#href');
   });
+
+  it('nested prevent default', function (done) {
+    var spy = this.spy(),
+        view = new Thorax.View({
+          template: Handlebars.compile('{{#link "test"}}<span>text</span>{{/link}}')
+        });
+    // Make sure that hash change is only triggered once
+    $(document).on('click.test.prevent-default', function (e) {
+      expect(e.isDefaultPrevented()).to.equal(true);
+      done();
+    });
+    // Append the view to the body for testing
+    view.appendTo(document.body);
+    view.$('a span').trigger('click');
+    view.$el.remove();
+    $(document).off('click.test.prevent-default');
+  });
 });

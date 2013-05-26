@@ -44,14 +44,14 @@ Handlebars.registerHelper('link', function() {
 var clickSelector = '[' + callMethodAttributeName + '], [' + triggerEventAttributeName + ']';
 
 function handleClick(event) {
-  var target = $(event.target),
-      view = target.view({helper: false}),
-      methodName = target.attr(callMethodAttributeName),
-      eventName = target.attr(triggerEventAttributeName),
+  var $this = $(this),
+      view = $this.view({helper: false}),
+      methodName = $this.attr(callMethodAttributeName),
+      eventName = $this.attr(triggerEventAttributeName),
       methodResponse = false;
   methodName && (methodResponse = view[methodName].call(view, event));
   eventName && view.trigger(eventName, event);
-  target.tagName === "A" && methodResponse === false && event.preventDefault();
+  this.tagName === 'A' && methodResponse === false && event.preventDefault();
 }
 
 var lastClickHandlerEventName;
