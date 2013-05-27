@@ -114,4 +114,50 @@ describe('form', function() {
       children: false
     }).childKey).to.equal('childValue');
   });
+
+  it("keep state on rerender", function() {
+    var FormView = Thorax.View.extend({
+      name: 'form',
+      template: function() {
+        return '<form><input name="test"><input name="nested[test]"><input name="merge"</form>';
+      }
+    });
+
+    var model = new Thorax.Model({
+      test: 'fail',
+      nested: {
+        test: 'fail'
+      }
+    });
+
+    var view = new FormView();
+
+    var populateSpy = this.spy(),
+        serializeSpy = this.spy();
+
+    // Set spies to make sure the event aren't firing
+    view.on('populate', populateSpy);
+    view.on('serialize', serializeSpy);
+
+    view.render();
+    view.setModel(model); // Triggers first data population
+
+    // Expect the populate event to have fired once
+    expect(populateSpy.callCount).to.equal(1);
+    expect(serializeSpy.callCount).to.equal(0);
+
+    model.set('merge', 'test'); // Set model data in between to test the merge
+    view.$('input[name="test"]').val('test');
+    view.$('input[name="nested[test]"]').val('test');
+    view.render(); // Should trigger another data population with user data
+
+    // Expect the user input to persist
+    expect(view.$('input[name="merge"]')[0].value).to.equal('test');
+    expect(view.$('input[name="test"]')[0].value).to.equal('test');
+    expect(view.$('input[name="nested[test]"]')[0].value).to.equal('test');
+
+    // Expect the events to not have fired
+    expect(populateSpy.callCount).to.equal(1);
+    expect(serializeSpy.callCount).to.equal(0);
+  });
 });
