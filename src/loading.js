@@ -382,10 +382,6 @@ _.each(klasses, function(DataClass) {
 
 Thorax.Util.bindToRoute = bindToRoute;
 
-if (Thorax.Router) {
-  Thorax.Router.bindToRoute = Thorax.Router.prototype.bindToRoute = bindToRoute;
-}
-
 // Propagates loading view parameters to the AJAX layer
 Thorax.View.prototype._modifyDataObjectOptions = function(dataObject, options) {
   options.ignoreErrors = this.ignoreFetchError;
