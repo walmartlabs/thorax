@@ -634,7 +634,7 @@ describe('loading', function() {
           failback,
           fragment = "foo",
           _getFragment = Backbone.history.getFragment,
-          _Router = Thorax.Router.extend({}),
+          _Router = Backbone.Router.extend({}),
           router = new _Router();
 
       Backbone.history.getFragment = function() {
@@ -645,7 +645,7 @@ describe('loading', function() {
       function reset() {
         callback = self.spy();
         failback = self.spy();
-        return router.bindToRoute(callback, failback);
+        return Thorax.Util.bindToRoute(callback, failback);
       }
 
       var func = reset();
