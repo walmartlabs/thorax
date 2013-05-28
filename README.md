@@ -186,7 +186,7 @@ Cloning a seed is the easiest way to get started building your own project.
 
 ### Bower component
 
-Thorax is available as a [Bower](http://http://bower.io/) component. Just run `bower install thorax` in your project.
+Thorax is available as a [Bower](http://bower.io/) component. Just run `bower install thorax` in your project.
 
 ### cdnjs
 
