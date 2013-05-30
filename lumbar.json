@@ -4,18 +4,18 @@
   "mixins": {
     "thorax-dep-jquery": {
       "scripts": [
-        {"src": "lib/jquery.js", "global": true, "ignoreWarnings": true},
-        {"src": "lib/underscore.js", "global": true, "ignoreWarnings": true},
-        {"src": "lib/backbone.js", "global": true, "ignoreWarnings": true},
-        {"src": "lib/handlebars.js", "global": true, "ignoreWarnings": true},
+        {"src": "components/jquery/jquery.js", "global": true, "ignoreWarnings": true},
+        {"src": "components/underscore/underscore.js", "global": true, "ignoreWarnings": true},
+        {"src": "components/backbone/backbone.js", "global": true, "ignoreWarnings": true},
+        {"src": "components/handlebars/handlebars.js", "global": true, "ignoreWarnings": true},
       ]
     },
     "thorax-dep-zepto": {
       "scripts": [
-        {"src": "lib/zepto.js", "global": true, "ignoreWarnings": true},
-        {"src": "lib/underscore.js", "global": true, "ignoreWarnings": true},
-        {"src": "lib/backbone.js", "global": true, "ignoreWarnings": true},
-        {"src": "lib/handlebars.runtime.js", "global": true, "ignoreWarnings": true},
+        {"src": "components/zepto/zepto.js", "global": true, "ignoreWarnings": true},
+        {"src": "components/underscore/underscore.js", "global": true, "ignoreWarnings": true},
+        {"src": "components/backbone/backbone.js", "global": true, "ignoreWarnings": true},
+        {"src": "components/handlebars/handlebars.runtime.js", "global": true, "ignoreWarnings": true},
       ]
     },
 
