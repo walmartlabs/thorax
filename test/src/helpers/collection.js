@@ -108,6 +108,20 @@ describe('collection helper', function() {
     expect(view.$('li').length).to.equal(2);
   });
 
+  it('should allow name attribute', function() {
+    var view = new Thorax.View({
+      template: Handlebars.compile('{{#collection tag="select" name="select" class="test-class"}}<option value="{{id}}">{{id}}</option>{{/collection}}'),
+      collection: new Thorax.Collection([{
+        id: 1
+      }, {
+        id: 2
+      }])
+    });
+    view.render();
+    expect(view.$('select').attr('name')).to.equal('select');
+    expect(view.$('select').attr('class')).to.equal('test-class');
+  });
+
   it("events handled on parent when collection view renders", function() {
     var spy = this.spy();
     var view = new Thorax.View({

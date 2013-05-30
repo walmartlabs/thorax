@@ -1,4 +1,4 @@
-/*global getOptionsData, htmlAttributesToCopy, normalizeHTMLAttributeOptions, viewHelperAttributeName */
+/*global getOptionsData, normalizeHTMLAttributeOptions, htmlAttributesToCopy, viewHelperAttributeName */
 var viewPlaceholderAttributeName = 'data-view-tmp',
     viewTemplateOverrides = {};
 
@@ -44,6 +44,7 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
       template: options.fn || Handlebars.VM.noop,
       inverse: options.inverse,
       options: options.hash,
+      attributes: _.omit(options.hash, htmlAttributesToOmit),
       declaringView: declaringView,
       parent: getParent(declaringView),
       _helperName: name,
@@ -53,8 +54,8 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
       }
     };
 
-    normalizeHTMLAttributeOptions(options.hash);
-    _.extend(viewOptions, _.pick(options.hash, htmlAttributesToCopy));
+    normalizeHTMLAttributeOptions(viewOptions.attributes);
+    _.extend(viewOptions, _.pick(viewOptions.attributes, htmlAttributesToCopy));
 
     // Check to see if we have an existing instance that we can reuse
     var instance = _.find(declaringView._previousHelpers, function(child) {
@@ -68,7 +69,6 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
         if (!instance) {
           return '';
         }
-
         instance._helperName = viewOptions._helperName;
         instance._helperOptions = viewOptions._helperOptions;
       } else {
@@ -86,11 +86,10 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
       declaringView.children[instance.cid] = instance;
     }
 
-    var htmlAttributes = _.pick(options.hash, htmlAttributesToCopy);
-    htmlAttributes[viewPlaceholderAttributeName] = instance.cid;
+    viewOptions.attributes[viewPlaceholderAttributeName] = instance.cid;
 
-    var expandTokens = options.hash['expand-tokens'];
-    return new Handlebars.SafeString(Thorax.Util.tag(htmlAttributes, '', expandTokens ? this : null));
+    var expandTokens = viewOptions.attributes['expand-tokens'];
+    return new Handlebars.SafeString(Thorax.Util.tag(viewOptions.attributes, '', expandTokens ? this : null));
   });
   var helper = Handlebars.helpers[name];
   return helper;
