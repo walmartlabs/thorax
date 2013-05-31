@@ -11,16 +11,16 @@ try {
 }
 
 var config = {
-  "thorax.js": [
+  "thorax-combined.js": [
     'lib/jquery.js',
     'lib/handlebars.js',
     'lib/underscore.js',
     'lib/backbone.js',
     'build/dev/thorax.js'
   ],
-  "thorax-mobile.js": [
+  "thorax-combined-mobile.js": [
     'lib/zepto.js',
-    'lib/handlebars.js',
+    'lib/handlebars.runtime.js',
     'lib/underscore.js',
     'lib/backbone.js',
     'build/dev/thorax-mobile.js'
@@ -39,11 +39,10 @@ function minify(code) {
 module.exports = function(grunt) {
   grunt.registerTask('thorax:release', function() {
     var done = this.async();
-    exec('jake lumbar', function(error, stdout, stderr) {
-      error && process.stdout.write(error);
+    exec('./node_modules/jake/bin/cli.js lumbar', function(error, stdout, stderr) {
+      error && process.stdout.write(error.toString());
       stdout && process.stdout.write(stdout);
       stderr && process.stdout.write(stderr);
-  
       for (var target in config) {
         var fileList = config[target],
             output = '';
@@ -59,7 +58,25 @@ module.exports = function(grunt) {
         console.log("Wrote: " + targetFile);
         console.log("Wrote: " + targetFile.replace(/\.js$/, '.min.js'));
       }
-      done(true);
+      var thoraxSrc = path.join(__dirname, '../build/dev/thorax.js'),
+          thoraxMobileSrc = path.join(__dirname, '../build/dev/thorax-mobile.js'),
+          thoraxDest = path.join(__dirname, targetDir, 'thorax.js'),
+          thoraxMobileDest = path.join(__dirname, targetDir, 'thorax-mobile.js');
+      var copyCommand = 
+        'cp ' + thoraxSrc + ' ' + thoraxDest + ';' +
+        'cp ' + thoraxMobileSrc + ' ' + thoraxMobileDest + ';';
+      exec(copyCommand, function(error, stdout, stderr) {
+        error && process.stdout.write(error.toString());
+        stdout && process.stdout.write(stdout);
+        stderr && process.stdout.write(stderr);
+        fs.writeFileSync(thoraxDest.replace(/\.js$/, '.min.js'), minify(fs.readFileSync(thoraxDest).toString()));
+        fs.writeFileSync(thoraxMobileDest.replace(/\.js$/, '.min.js'), minify(fs.readFileSync(thoraxMobileDest).toString()));
+        console.log("Wrote: " + thoraxDest);
+        console.log("Wrote: " + thoraxMobileDest);
+        console.log("Wrote: " + thoraxDest.replace(/\.js$/, '.min.js'));
+        console.log("Wrote: " + thoraxMobileDest.replace(/\.js$/, '.min.js'));
+        done(true);
+      });
     });
   });
 };
