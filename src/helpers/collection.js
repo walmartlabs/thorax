@@ -58,14 +58,6 @@ Thorax.CollectionHelperView = Thorax.CollectionView.extend({
 
 _.extend(Thorax.CollectionHelperView.prototype, helperViewPrototype);
 
-var collectionOptionNames = {
-  'item-template': 'itemTemplate',
-  'empty-template': 'emptyTemplate',
-  'item-view': 'itemView',
-  'empty-view': 'emptyView',
-  'empty-class': 'emptyClass'
-};
-
 function forwardRenderEvent(eventName) {
   return function() {
     var args = _.toArray(arguments);
@@ -73,13 +65,6 @@ function forwardRenderEvent(eventName) {
     this.parent.trigger.apply(this.parent, args);
   }
 }
-
-var forwardableProperties = [
-  'itemTemplate',
-  'itemView',
-  'emptyTemplate',
-  'emptyView'
-];
 
 function forwardMissingProperty(propertyName) {
   var parent = getParent(this);

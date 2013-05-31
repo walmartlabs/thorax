@@ -172,9 +172,24 @@ function getOptionsData(options) {
   return options.data;
 }
 
-// These whitelisted attributes will be the only ones passed
-// from the options hash to Thorax.Util.tag
+var collectionOptionNames = {
+  'item-template': 'itemTemplate',
+  'empty-template': 'emptyTemplate',
+  'item-view': 'itemView',
+  'empty-view': 'emptyView',
+  'empty-class': 'emptyClass'
+};
+
+var forwardableProperties = [
+  'itemTemplate',
+  'itemView',
+  'emptyTemplate',
+  'emptyView'
+];
+
 var htmlAttributesToCopy = ['id', 'className', 'tagName'];
+// This is duplicated from collection.js at the moment
+var htmlAttributesToOmit = _.keys(collectionOptionNames);
 
 // In helpers "tagName" or "tag" may be specified, as well
 // as "class" or "className". Normalize to "tagName" and
@@ -276,10 +291,11 @@ Thorax.Util = {
     return input;
   },
   tag: function(attributes, content, scope) {
-    var htmlAttributes = _.omit(attributes, 'tagName'),
+    var htmlAttributes = _.omit(attributes, 'tagName', 'expand-tokens'),
         tag = attributes.tagName || 'div';
+
     return '<' + tag + ' ' + _.map(htmlAttributes, function(value, key) {
-      if (_.isUndefined(value) || key === 'expand-tokens') {
+      if (_.isUndefined(value)) {
         return '';
       }
       var formattedValue = value;

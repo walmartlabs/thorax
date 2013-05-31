@@ -2,7 +2,7 @@
 Handlebars.registerViewHelper('view', {
   factory: function(args, options) {
     var View = args.length >= 1 ? args[0] : Thorax.View;
-    return Thorax.Util.getViewInstance(View, options.options);
+    return Thorax.Util.getViewInstance(View, options.attributes);
   },
   callback: function() {
     var instance = arguments[arguments.length-1],
