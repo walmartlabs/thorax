@@ -41,7 +41,6 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
         declaringView = getOptionsData(options).view;
 
     var viewOptions = {
-      template: options.fn || Handlebars.VM.noop,
       inverse: options.inverse,
       options: options.hash,
       declaringView: declaringView,
@@ -52,6 +51,16 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
         args: _.clone(args)
       }
     };
+
+    // Only assign if present, allow helper view class to
+    // declare template
+    if (options.fn) {
+      viewOptions.template = options.fn;
+    // ViewClass may also be an instance or object with factory method
+    // so need to do this check
+    } else if (ViewClass && ViewClass.prototype && !ViewClass.prototype.template) {
+      viewOptions.template = Handlebars.VM.noop;
+    }
 
     normalizeHTMLAttributeOptions(options.hash);
     _.extend(viewOptions, _.pick(options.hash, htmlAttributesToCopy));
