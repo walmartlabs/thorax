@@ -64,7 +64,7 @@ _.extend(Thorax.View.prototype, {
       }
     });
 
-    this.trigger('serialize', attributes, options);
+    this._populating || this.trigger('serialize', attributes, options);
 
     if (options.validate) {
       var validateInputErrors = this.validateInput(attributes);
@@ -135,7 +135,8 @@ _.extend(Thorax.View.prototype, {
       });
     });
 
-    this.trigger('populate', attributes);
+    ++this._populateCount;
+    this._populating || this.trigger('populate', attributes);
   },
 
   //perform form validation, implemented by child class
@@ -157,8 +158,46 @@ _.extend(Thorax.View.prototype, {
     } else {
       return input.value;
     }
+  },
+
+  _populateCount: 0
+});
+
+// Keeping state in the views
+Thorax.View.on({
+  'before:rendered': function() {
+    if (!this._renderCount) { return; }
+
+    var modelOptions = this.model && this._objectOptionsByCid[this.model.cid];
+    this._populating = true;
+    // When we have previously populated and rendered the view, reuse the user data
+    this.previousFormData = filterObject(
+      this.serialize(_.extend({ set: false, validate: false }, modelOptions)),
+      function(value) { return value !== '' && value != null; }
+    );
+  },
+  rendered: function() {
+    var populate = this.model && this._objectOptionsByCid[this.model.cid].populate || null,
+        context;
+    if (this.previousFormData) {
+      context = this._populateCount ? this._getContext() : {};
+      // Using jQuery/Zepto to extend objects since we need deep extends
+      this.populate($.extend(true, context, this.previousFormData), populate);
+    }
+    this._populating = false;
+    this.previousFormData = null;
   }
 });
+
+function filterObject(object, callback) {
+  _.each(object, function (value, key) {
+    if (_.isObject(value)) {
+      return filterObject(value, callback);
+    }
+    callback(value, key, object) === false && delete object[key];
+  });
+  return object;
+}
 
 Thorax.View.on({
   error: function() {

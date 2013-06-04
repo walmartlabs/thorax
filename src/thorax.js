@@ -149,9 +149,10 @@ Thorax.View = Backbone.View.extend({
     });
     this.children = children;
 
+    this.trigger('before:rendered');
     this._rendering = true;
 
-    try{
+    try {
       if (_.isUndefined(output) || (!_.isElement(output) && !Thorax.Util.is$(output) && !(output && output.el) && !_.isString(output) && !_.isFunction(output))) {
         // try one more time to assign the template, if we don't
         // yet have one we must raise
@@ -175,8 +176,10 @@ Thorax.View = Backbone.View.extend({
 
     //accept a view, string, Handlebars.SafeString or DOM element
     this.html((output && output.el) || (output && output.string) || output);
+
     ++this._renderCount;
     this.trigger('rendered');
+
     return output;
   },
 
