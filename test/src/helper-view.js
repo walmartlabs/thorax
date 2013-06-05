@@ -133,5 +133,17 @@ describe('helper-view', function() {
       expect(view.$('a').length).to.equal(1);
       expect(view.$('.b').length).to.equal(1);
     });
+
+    it("should preserve a class template if no block is passed", function() {
+      var ViewClass = Thorax.View.extend({
+        template: Handlebars.compile('hello')
+      });
+      Handlebars.registerViewHelper('test-view-helper', ViewClass, function() {});
+      var view = new Thorax.View({
+        template: Handlebars.compile("{{test-view-helper}}")
+      });
+      view.render();
+      expect(view.$('div').html()).to.equal('hello');
+    });
   });
 });
