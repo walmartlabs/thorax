@@ -52,13 +52,13 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
       }
     };
 
-    // Only assign if present, allow helper view class to
-    // declare template
     if (options.fn) {
+      // Only assign if present, allow helper view class to
+      // declare template
       viewOptions.template = options.fn;
-    // ViewClass may also be an instance or object with factory method
-    // so need to do this check
     } else if (ViewClass && ViewClass.prototype && !ViewClass.prototype.template) {
+      // ViewClass may also be an instance or object with factory method
+      // so need to do this check
       viewOptions.template = Handlebars.VM.noop;
     }
 
