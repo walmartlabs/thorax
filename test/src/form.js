@@ -44,12 +44,12 @@ describe('form', function() {
     view.validateInput = function() {
       return ['error'];
     };
-    var errorCallbackCallCount = 0;
-    view.on('error', function() {
-      ++errorCallbackCallCount;
+    var invalidCallbackCallCount = 0;
+    view.on('invalid', function() {
+      ++invalidCallbackCallCount;
     });
     expect(view.serialize()).to.be.undefined;
-    expect(errorCallbackCallCount).to.equal(1, "error event triggered when validateInput returned errors");
+    expect(invalidCallbackCallCount).to.equal(1, "invalid event triggered when validateInput returned errors");
   });
 
   it("nested serialize / populate", function() {

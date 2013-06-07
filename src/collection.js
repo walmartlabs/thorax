@@ -51,7 +51,7 @@ dataObject('collection', {
     render: undefined,    // Default to deferred rendering
     fetch: true,
     success: false,
-    errors: true
+    invalid: true
   },
   change: onCollectionReset,
   $el: 'getCollectionElement',
@@ -283,10 +283,13 @@ Thorax.CollectionView.on({
 
 Thorax.View.on({
   collection: {
-    error: function(collection, message) {
-      if (this._objectOptionsByCid[collection.cid].errors) {
-        this.trigger('error', message, collection);
+    invalid: function(collection, message) {
+      if (this._objectOptionsByCid[collection.cid].invalid) {
+        this.trigger('invalid', message, collection);
       }
+    },
+    error: function(collection, resp, options) {
+      this.trigger('error', resp, collection);
     }
   }
 });

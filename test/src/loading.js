@@ -9,6 +9,35 @@ describe('loading', function() {
 
   Thorax.setRootObject(Application);
 
+  describe('fetch set/reset test', function() {
+    var colData = [{id: 1, name: "foo"}, {id: 2, name: "bar"}],
+        C = Thorax.Collection.extend({
+          url: 'foo'
+        }),
+        c, resetSpy, setSpy, setCallback, resetCallback, resetEventSpy;
+    beforeEach(function() {
+      c = new C();
+      resetSpy = this.spy(c, 'reset'),
+      setSpy = this.spy(c, 'set'),
+      setCallback = this.spy(),
+      resetCallback = this.spy(),
+      resetEventSpy = this.spy();
+      c.on('reset', resetEventSpy);
+    });
+
+    it('should throw an error with mixed fetch', function() {
+      Thorax.loadHandler.allowMixedFetch=false;
+      var exc;
+      try {
+        c.fetch({reset: true, success: resetCallback});
+        c.fetch({reset: false, success: setCallback});
+      } catch (e) {
+        exc = e;
+      }
+      expect(exc).to.not.eql(undefined);
+    });
+  });
+
   describe('load events', function() {
     it('views should see load start from model', function() {
       var spy = this.spy(),
