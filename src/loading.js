@@ -296,6 +296,13 @@ function fetchQueue(options, $super) {
     // WARN: Should ensure that loaders are protected from out of band data
     //    when using this option
     this.fetchQueue = undefined;
+  } else if (this.fetchQueue) {
+    // concurrent set/reset fetch events are not advised
+    var reset = (this.fetchQueue[0] || {}).reset;
+    if (reset !== options.reset) {
+      // fetch with concurrent set & reset not allowed
+      throw new Error('mixed-fetch');
+    }
   }
 
   if (!this.fetchQueue) {
@@ -350,6 +357,12 @@ _.each(klasses, function(DataClass) {
 
     fetch: function(options) {
       options = options || {};
+      if (DataClass === Thorax.Collection) {
+        if (!_.find(['reset', 'remove', 'add', 'update'], function(key) { return !_.isUndefined(options[key]); })) {
+          // use backbone < 1.0 behavior to allow triggering of reset events
+          options.reset = true;
+        }
+      }
 
       var self = this,
           complete = options.complete;
