@@ -4,18 +4,18 @@
   "mixins": {
     "thorax-dep-jquery": {
       "scripts": [
-        {"src": "lib/jquery.js", "global": true, "ignoreWarnings": true},
-        {"src": "lib/underscore.js", "global": true, "ignoreWarnings": true},
-        {"src": "lib/backbone.js", "global": true, "ignoreWarnings": true},
-        {"src": "lib/handlebars.js", "global": true, "ignoreWarnings": true},
+        {"src": "jquery.js", "bower": "jquery", "global": true, "ignoreWarnings": true},
+        {"src": "underscore.js", "bower": "underscore", "global": true, "ignoreWarnings": true},
+        {"src": "backbone.js", "bower": "backbone", "global": true, "ignoreWarnings": true},
+        {"src": "handlebars.js", "bower": "handlebars", "global": true, "ignoreWarnings": true},
       ]
     },
     "thorax-dep-zepto": {
       "scripts": [
-        {"src": "lib/zepto.js", "global": true, "ignoreWarnings": true},
-        {"src": "lib/underscore.js", "global": true, "ignoreWarnings": true},
-        {"src": "lib/backbone.js", "global": true, "ignoreWarnings": true},
-        {"src": "lib/handlebars.runtime.js", "global": true, "ignoreWarnings": true},
+        {"src": "zepto.js", "bower": "zepto", "global": true, "ignoreWarnings": true},
+        {"src": "underscore.js", "bower": "underscore", "global": true, "ignoreWarnings": true},
+        {"src": "backbone.js", "bower": "backbone", "global": true, "ignoreWarnings": true},
+        {"src": "handlebars.runtime.js", "bower": "handlebars", "global": true, "ignoreWarnings": true},
       ]
     },
 

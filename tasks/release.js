@@ -7,22 +7,22 @@ var fs = require('fs'),
 try {
   fs.mkdirSync(path.join(__dirname, targetDir));
 } catch(e) {
-  
+  /* NOP */
 }
 
 var config = {
   "thorax-combined.js": [
-    'lib/jquery.js',
-    'lib/handlebars.js',
-    'lib/underscore.js',
-    'lib/backbone.js',
+    'components/jquery/jquery.js',
+    'components/handlebars/handlebars.js',
+    'components/underscore/underscore.js',
+    'components/backbone/backbone.js',
     'build/dev/thorax.js'
   ],
   "thorax-combined-mobile.js": [
-    'lib/zepto.js',
-    'lib/handlebars.runtime.js',
-    'lib/underscore.js',
-    'lib/backbone.js',
+    'components/zepto/zepto.js',
+    'components/handlebars/handlebars.runtime.js',
+    'components/underscore/underscore.js',
+    'components/backbone/backbone.js',
     'build/dev/thorax-mobile.js'
   ]
 };
@@ -39,7 +39,7 @@ function minify(code) {
 module.exports = function(grunt) {
   grunt.registerTask('thorax:release', function() {
     var done = this.async();
-    exec('./node_modules/jake/bin/cli.js lumbar', function(error, stdout, stderr) {
+    exec('jake lumbar', function(error, stdout, stderr) {
       error && process.stdout.write(error.toString());
       stdout && process.stdout.write(stdout);
       stderr && process.stdout.write(stderr);
