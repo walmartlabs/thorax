@@ -1,6 +1,7 @@
 .DS_STORE
 .project
 node_modules
+components
 build
 dist
 *.sublime-project
