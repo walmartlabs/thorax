@@ -160,4 +160,19 @@ describe('form', function() {
     expect(populateSpy.callCount).to.equal(1);
     expect(serializeSpy.callCount).to.equal(0);
   });
+
+  it("works when calling render before binding the model", function() {
+    var FormView = Thorax.View.extend({
+      name: 'form',
+      template: function() {
+        return '<form><input name="test"></form>';
+      },
+
+      initialize: function() {
+        this.render();
+      }
+    });
+    var view = new FormView({model: new Thorax.Model({test: 'test'})});
+    expect(view.$('input[name="test"]')[0].value).to.equal('test');
+  });
 });
