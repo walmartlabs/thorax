@@ -177,7 +177,8 @@ Thorax.View.on({
     );
   },
   rendered: function() {
-    var populate = this.model && this._objectOptionsByCid[this.model.cid].populate || null,
+    var modelOptions = this.model && this._objectOptionsByCid[this.model.cid],
+        populate = modelOptions && modelOptions.populate || null,
         context;
     if (this.previousFormData) {
       context = this._populateCount ? this._getContext() : {};
