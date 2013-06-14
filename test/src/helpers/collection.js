@@ -261,12 +261,36 @@ describe('collection helper', function() {
           .to.have.been.calledOn(view)
           .to.have.been.calledWith(view.collection.models[0]);
     });
+    it('should delegate to #renderItem with a named parent and no inline template', function() {
+      view.name = 'foo';
+      view.template = Handlebars.compile('{{collection}}');
+
+      view.renderItem = spy;
+      view.setCollection(new Thorax.Collection([{id: 1}]));
+
+      expect(view.renderItem)
+          .to.have.been.calledOnce
+          .to.have.been.calledOn(view)
+          .to.have.been.calledWith(view.collection.models[0]);
+    });
+    it('should delegate to #renderEmpty with a named parent and no inline template', function() {
+      view.name = 'foo';
+      view.template = Handlebars.compile('{{collection}}');
+
+      view.renderItem = function() {};
+      view.renderEmpty = spy;
+      view.setCollection(new Thorax.Collection([]));
+
+      expect(view.renderEmpty)
+          .to.have.been.calledOnce
+          .to.have.been.calledOn(view);
+    });
     it('should not destroy views rendered with renderItem on change', function() {
       var child = new (Thorax.View.extend({
         destroy: function() { throw new Error('Destroy'); },
 
         template: function() { return '<div>foo</div>'; }
-      }));
+      }))();
       child.ensureRendered();
 
       view.renderItem = this.spy(function() {

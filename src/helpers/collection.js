@@ -16,6 +16,7 @@ Thorax.CollectionHelperView = Thorax.CollectionView.extend({
         options[viewAttributeName] = value;
       }
     });
+
     // Handlebars.VM.noop is passed in the handlebars options object as
     // a default for fn and inverse, if a block was present. Need to
     // check to ensure we don't pick the empty / null block up.
@@ -27,12 +28,13 @@ Thorax.CollectionHelperView = Thorax.CollectionView.extend({
       options.emptyTemplate = options.inverse;
       options.inverse = Handlebars.VM.noop;
     }
+
     var response = Thorax.HelperView.call(this, options);
     if (this.parent.name) {
-      if (!this.emptyTemplate) {
+      if (!this.emptyTemplate && !this.parent.renderEmpty) {
         this.emptyTemplate = Thorax.Util.getTemplate(this.parent.name + '-empty', true);
       }
-      if (!this.itemTemplate) {
+      if (!this.itemTemplate && !this.parent.renderItem) {
         // item template must be present if an itemView is not
         this.itemTemplate = Thorax.Util.getTemplate(this.parent.name + '-item', !!this.itemView);
       }
