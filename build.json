@@ -52,7 +52,6 @@
     }
   },
   "mixins": [
-    "node_modules/phoenix-build/mixin",
     "."
   ],
   "scope": {
