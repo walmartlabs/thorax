@@ -85,7 +85,7 @@ function fixupTapHighlight() {
     if (components[0] === 'click') {
       // !selector case is for root click handlers on the view, i.e. 'click'
       $(selector || this.el, selector && this.el).forEach(function(el) {
-        var $el = $(el).data('tappable', true);
+        var $el = $(el).attr('data-tappable', true);
 
         if (useNativeHighlight && !NATIVE_TAPPABLE[el.tagName]) {
           // Add an explicit NOP bind to allow tap-highlight support
