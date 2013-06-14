@@ -18,7 +18,7 @@ Thorax.Util.scrollTo = function(x, y) {
 };
 
 Thorax.LayoutView.on('change:view:end', function(newView, oldView, options) {
-  options.scroll && Thorax.Util.scrollTo(0, 0);
+  options && options.scroll && Thorax.Util.scrollTo(0, 0);
 });
 
 Thorax.Util.scrollToTop = function() {
