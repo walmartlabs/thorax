@@ -422,6 +422,7 @@ Each form input in your application should contain a corresponding label. Since 
 - `serialize` - called before validation with serialized attributes
 - `validate` - with an attributes hash and errors array after `validateInput` is called
 - `error` - with an errors array, if validateInput returned an array with any errors
+- `root` - the root element to serialize within, defaults to `this.$el`
 
 If your view uses inputs with non standard names (or no names, multiple inputs with the same name, etc), use the `serialize` event:
 
