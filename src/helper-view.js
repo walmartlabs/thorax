@@ -48,11 +48,21 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
     var args = _.toArray(arguments),
         options = args.pop(),
         declaringView = getOptionsData(options).view,
-        htmlAttributes = _.clone(options.hash);
+        clonedOptions = _.clone(options.hash),
+        expandTokens = clonedOptions['expand-tokens'];
+
+    if (expandTokens) {
+      delete clonedOptions['expand-tokens'];
+      _.each(clonedOptions, function(value, key) {
+        clonedOptions[key] = Thorax.Util.expandToken(value, this);
+      }, this);
+    }
+
+    var htmlAttributes = _.clone(clonedOptions);
 
     var viewOptions = {
       inverse: options.inverse,
-      options: options.hash,
+      options: clonedOptions,
       declaringView: declaringView,
       parent: getParent(declaringView),
       _helperName: name,
@@ -61,7 +71,7 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
         args: _.clone(args)
       }
     };
-
+    
     if (options.fn) {
       // Only assign if present, allow helper view class to
       // declare template

@@ -15,6 +15,15 @@ describe('collection helper', function() {
     expect(view.$('div.value').length).to.equal(1);
   });
 
+  it('should allow arbitrary html attributes', function() {
+    var view = new Thorax.View({
+      template: Handlebars.compile('{{#collection random="value"}}{{/collection}}'),
+      collection: new Thorax.Collection([{a: 'a'}])
+    });
+    view.render();
+    expect(view.$('div[random="value"]').length).to.equal(1);
+  });
+
   it('should render block', function() {
     var view = new Thorax.View({
       template: Handlebars.compile('{{#collection tag="ul" empty-template="letter-empty"}}<li>{{letter}}</li>{{/collection}}')
