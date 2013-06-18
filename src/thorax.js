@@ -74,6 +74,8 @@ Thorax.View = Backbone.View.extend({
         obj.configure.call(this);
       }
     }, this);
+
+    this.trigger('configure');
   },
 
   setElement : function() {
