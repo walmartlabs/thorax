@@ -30,6 +30,7 @@ Handlebars.registerViewHelper('view', {
       ViewClass.$el.attr(htmlAttributesForInstance);
     } else {
       viewOptions.attributes = generateAttributesGenerator(ViewClass, htmlAttributes);
+      viewOptions._destroyOnScopeChange = true;
     }
     var instance = Thorax.Util.getViewInstance(ViewClass, viewOptions);
     return instance;

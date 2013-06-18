@@ -120,6 +120,7 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
         instance._helperName = viewOptions._helperName;
         instance._helperOptions = viewOptions._helperOptions;
       } else {
+        viewOptions._destroyOnScopeChange = true;
         viewOptions.attributes = generateAttributesGenerator(ViewClass, htmlAttributesForView);
         // tagName is a special case
         if (htmlAttributesForView.tagName) {
