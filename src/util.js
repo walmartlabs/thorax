@@ -172,10 +172,6 @@ function getOptionsData(options) {
   return options.data;
 }
 
-// These whitelisted attributes will be the only ones passed
-// from the options hash to Thorax.Util.tag
-var htmlAttributesToCopy = ['id', 'className', 'tagName'];
-
 // In helpers "tagName" or "tag" may be specified, as well
 // as "class" or "className". Normalize to "tagName" and
 // "className" to match the property names used by Backbone
@@ -196,13 +192,23 @@ function normalizeHTMLAttributeOptions(options) {
 Thorax.Util = {
   getViewInstance: function(name, attributes) {
     attributes = attributes || {};
-    if (_.isString(name)) {
-      var Klass = registryGet(Thorax, 'Views', name, false);
-      return Klass.cid ? _.extend(Klass, attributes || {}) : new Klass(attributes);
-    } else if (_.isFunction(name)) {
-      return new name(attributes);
-    } else {
+    var klass = Thorax.Util.getViewClass(name);
+    if (!klass) {
       return name;
+    } else if (klass.cid) {
+      return _.extend(klass, attributes || {});
+    } else {
+      return new klass(attributes);
+    }
+  },
+
+  getViewClass: function(name) {
+    if (_.isString(name)) {
+      return registryGet(Thorax, 'Views', name, false);
+    } else if (_.isFunction(name)) {
+      return name;
+    } else {
+      return false;
     }
   },
 
@@ -276,10 +282,10 @@ Thorax.Util = {
     return input;
   },
   tag: function(attributes, content, scope) {
-    var htmlAttributes = _.omit(attributes, 'tagName'),
+    var htmlAttributes = _.omit(attributes, 'tagName', 'expand-tokens'),
         tag = attributes.tagName || 'div';
     return '<' + tag + ' ' + _.map(htmlAttributes, function(value, key) {
-      if (_.isUndefined(value) || key === 'expand-tokens') {
+      if (_.isUndefined(value)) {
         return '';
       }
       var formattedValue = value;

@@ -32,6 +32,41 @@ describe('view helper', function() {
     expect(view.html()).to.equal('123');
   });
 
+  it("should not allow use of arbitrary HTML attributes", function() {
+    var view = new Thorax.View({
+      template: Handlebars.compile('{{view child random="value"}}'),
+      child: new Thorax.View({
+        template: Handlebars.compile("hello world")
+      })
+    });
+    view.render()
+    expect(view.$('[random="value"]').length).to.equal(0);
+  });
+
+  it("should allow use of class HTML attribute", function() {
+    var parent = new Thorax.View({
+      key: 'value',
+      template: Handlebars.compile('{{view child class="value"}}'),
+      child: new Thorax.View({
+        template: Handlebars.compile("hello world")
+      })
+    });
+    parent.render();
+    expect(parent.$('div.value').html()).to.equal('hello world');
+  });
+
+  it("should allow use of expand-tokens", function() {
+    var parent = new Thorax.View({
+      key: 'value',
+      template: Handlebars.compile('{{view child class="{{key}}" expand-tokens=true}}'),
+      child: new Thorax.View({
+        template: Handlebars.compile("hello world")
+      })
+    });
+    parent.render();
+    expect(parent.$('div.value').html()).to.equal('hello world');
+  });
+
   it("fail silently when no view initialized", function() {
     var parent = new Thorax.View({
       template: Handlebars.compile("{{view child}}")
@@ -180,6 +215,57 @@ describe('view helper', function() {
     $(parent.el).remove();
   });
 
+  it('ensure manually initialized child view is not destroyed if it goes out of scope in template', function() {
+    // should only be destroyed if parent is destroyed
+    // views generated from view helpers will be automatically
+    // destroyed
+    var parent = new Thorax.View({
+      child: new Thorax.View({
+        template: Handlebars.compile('<span>content</span>')
+      }),
+      showChild: true,
+      template: Handlebars.compile('{{#showChild}}{{view child}}{{/showChild}}')
+    });
+    parent.render();
+    expect(parent.$('span').length).to.equal(1);
+
+    parent.showChild = false;
+    parent.render();
+    expect(parent.$('span').length).to.equal(0);
+
+    parent.showChild = true;
+    parent.render();
+    expect(parent.$('span').length).to.equal(1);
+  });
+
+  it('ensure automatically initialized child view is destroyed if it goes out of scope in template', function() {
+    var spy = this.spy();
+    var ScopedChildTestView = Thorax.View.extend({
+      name: 'scoped-child-test',
+      events: {
+        rendered: spy
+      },
+      template: Handlebars.compile('<span>content</span>')
+    });
+    var parent = new Thorax.View({
+      showChild: true,
+      template: Handlebars.compile('{{#showChild}}{{view "scoped-child-test"}}{{/showChild}}')
+    });
+    parent.render();
+    expect(parent.$('span').length).to.equal(1);
+    expect(spy.callCount).to.equal(1);
+
+    parent.showChild = false;
+    parent.render();
+    expect(parent.$('span').length).to.equal(0);
+
+    parent.showChild = true;
+    parent.render();
+    expect(parent.$('span').length).to.equal(1);
+    // should be a new instance
+    expect(spy.callCount).to.equal(2);
+  });
+
   it("$.fn.view", function() {
     var child = new Thorax.View({
       template: Handlebars.compile('<div class="child"></div>')
@@ -222,6 +308,15 @@ describe('view helper', function() {
     expect(firstCids.length).to.equal(secondCids.length);
     expect(firstCids[0]).to.equal(secondCids[0]);
     expect(firstCids[1]).to.equal(secondCids[1]);
+  });
+
+  it("named view with view attributes", function() {
+    var view = new Thorax.View({
+      template: Handlebars.compile('{{view "named-view" key="value"}}')
+    });
+    view.render();
+    var firstKey = _.keys(view.children);
+    expect(view.children[firstKey].key).to.equal("value");
   });
 
   it("views embedded with view helper do not incorrectly set parent", function() {
