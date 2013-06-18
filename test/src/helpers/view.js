@@ -224,6 +224,15 @@ describe('view helper', function() {
     expect(firstCids[1]).to.equal(secondCids[1]);
   });
 
+  it("named view with view attributes", function() {
+    var view = new Thorax.View({
+      template: Handlebars.compile('{{view "named-view" key="value"}}')
+    });
+    view.render();
+    var firstKey = _.keys(view.children);
+    expect(view.children[firstKey].key).to.equal("value");
+  });
+
   it("views embedded with view helper do not incorrectly set parent", function() {
     var view = new Thorax.View({
       child: new Thorax.View({
