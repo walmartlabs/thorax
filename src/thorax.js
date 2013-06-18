@@ -165,22 +165,22 @@ Thorax.View = Backbone.View.extend({
       } else if (_.isFunction(output)) {
         output = this.renderTemplate(output);
       }
+
+      // Destroy any helpers that may be lingering
+      _.each(this._previousHelpers, function(child) {
+        child.destroy();
+        child.parent = undefined;
+      });
+      this._previousHelpers = undefined;
+
+      //accept a view, string, Handlebars.SafeString or DOM element
+      this.html((output && output.el) || (output && output.string) || output);
+
+      ++this._renderCount;
+      this.trigger('rendered');
     } finally {
       this._rendering = false;
     }
-
-    // Destroy any helpers that may be lingering
-    _.each(this._previousHelpers, function(child) {
-      child.destroy();
-      child.parent = undefined;
-    });
-    this._previousHelpers = undefined;
-
-    //accept a view, string, Handlebars.SafeString or DOM element
-    this.html((output && output.el) || (output && output.string) || output);
-
-    ++this._renderCount;
-    this.trigger('rendered');
 
     return output;
   },
