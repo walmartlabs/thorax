@@ -4,7 +4,7 @@ Handlebars.registerHelper('element', function(element, options) {
   normalizeHTMLAttributeOptions(options.hash);
   var cid = _.uniqueId('element'),
       declaringView = getOptionsData(options).view,
-      htmlAttributes = _.pick(options.hash, htmlAttributesToCopy);
+      htmlAttributes = _.omit(options.hash, htmlAttributesToOmit);
   htmlAttributes[elementPlaceholderAttributeName] = cid;
   declaringView._elementsByCid || (declaringView._elementsByCid = {});
   declaringView._elementsByCid[cid] = element;
