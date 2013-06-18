@@ -32,6 +32,19 @@ describe('view helper', function() {
     expect(view.html()).to.equal('123');
   });
 
+  it("should allow use of expand-tokens", function() {
+    var parent = new Thorax.View({
+      key: 'value',
+      template: Handlebars.compile('{{view child class="{{key}}" expand-tokens=true}}'),
+      child: new Thorax.View({
+        template: Handlebars.compile("hello world")
+      })
+    });
+    parent.render();
+    console.log(parent.html());
+    expect(parent.$('div.value').html()).to.equal('hello world');
+  });
+
   it("fail silently when no view initialized", function() {
     var parent = new Thorax.View({
       template: Handlebars.compile("{{view child}}")
