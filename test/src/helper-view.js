@@ -145,5 +145,35 @@ describe('helper-view', function() {
       view.render();
       expect(view.$('div').html()).to.equal('hello');
     });
+
+    it("should preserve view's attributes if view class specified them", function() {
+      var ViewClassWithObjectAttributes = Thorax.View.extend({
+        attributes: {
+          random: 'value'
+        }
+      });
+      Handlebars.registerViewHelper('test-view-helper-attributes-object', ViewClassWithObjectAttributes, function() {});
+      view = new Thorax.View({
+        template: Handlebars.compile('{{test-view-helper-attributes-object}}')
+      });
+      view.render();
+      expect(view.$('[random="value"]').length).to.equal(1);
+
+      var ViewClassWithObjectAttributes = Thorax.View.extend({
+        attributes: function() {
+          return {
+            random: 'value'
+          };
+        }
+      });
+      Handlebars.registerViewHelper('test-view-helper-attributes-callback', ViewClassWithObjectAttributes, function() {});
+      
+      view = new Thorax.View({
+        template: Handlebars.compile('{{test-view-helper-attributes-callback}}')
+      });
+      view.render();
+      expect(view.$('[random="value"]').length).to.equal(1);
+
+    });
   });
 });
