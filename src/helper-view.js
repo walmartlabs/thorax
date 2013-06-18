@@ -1,4 +1,4 @@
-/*global getOptionsData, normalizeHTMLAttributeOptions, htmlAttributesToCopy, viewHelperAttributeName */
+/*global getOptionsData, normalizeHTMLAttributeOptions, viewHelperAttributeName */
 var viewPlaceholderAttributeName = 'data-view-tmp',
     viewTemplateOverrides = {};
 
@@ -15,6 +15,14 @@ var helperViewPrototype = {
 
 Thorax.HelperView = Thorax.View.extend(helperViewPrototype);
 
+// Always pass through tag, class and id if specified in view helper
+// using JS names as they will have already passed through normalizeHTMLAttributeOptions
+var defaultViewOptionWhiteList = {
+  tagName: 'tagName',
+  className: 'className',
+  id: 'id'
+};
+
 // Ensure nested inline helpers will always have this.parent
 // set to the view containing the template
 function getParent(parent) {
@@ -27,6 +35,7 @@ function getParent(parent) {
 }
 
 Handlebars.registerViewHelper = function(name, ViewClass, callback) {
+  var htmlAttributesTo
   if (arguments.length === 2) {
     if (ViewClass.factory) {
       callback = ViewClass.callback;
@@ -38,12 +47,12 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
   Handlebars.registerHelper(name, function() {
     var args = _.toArray(arguments),
         options = args.pop(),
-        declaringView = getOptionsData(options).view;
+        declaringView = getOptionsData(options).view,
+        htmlAttributes = _.clone(options.hash);
 
     var viewOptions = {
       inverse: options.inverse,
       options: options.hash,
-      attributes: _.omit(options.hash, htmlAttributesToOmit),
       declaringView: declaringView,
       parent: getParent(declaringView),
       _helperName: name,
@@ -63,24 +72,50 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
       viewOptions.template = Handlebars.VM.noop;
     }
 
-    normalizeHTMLAttributeOptions(viewOptions.attributes);
-    _.extend(viewOptions, _.pick(viewOptions.attributes, htmlAttributesToCopy));
+    normalizeHTMLAttributeOptions(htmlAttributes);
+
+    // If ViewClass has white listed options they will be used as
+    // options on the instance, rather than on the HTML tag
+    if (ViewClass.viewOptionWhiteList) {
+      var optionWhiteList = _.keys(ViewClass.viewOptionWhiteList);
+      _.each(optionWhiteList, function(whiteListedOption) {
+        if (!_.isUndefined(htmlAttributes[whiteListedOption])) {
+          viewOptions[whiteListedOption] = htmlAttributes[whiteListedOption];
+          delete htmlAttributes[whiteListedOption];
+        }
+      });
+    }
+
+    // always forward defaultViewOptionWhiteList (tag, id, class) to view instance
+    _.each(defaultViewOptionWhiteList, function(value, key) {
+      if (!_.isUndefined(htmlAttributes[key])) {
+        viewOptions[key] = htmlAttributes[key];
+      }
+    });
 
     // Check to see if we have an existing instance that we can reuse
     var instance = _.find(declaringView._previousHelpers, function(child) {
       return compareHelperOptions(viewOptions, child);
     });
 
+    var htmlAttributesForView = _.clone(htmlAttributes);
+
     // Create the instance if we don't already have one
     if (!instance) {
       if (ViewClass.factory) {
-        instance = ViewClass.factory(args, viewOptions);
+        instance = ViewClass.factory(args, viewOptions, htmlAttributesForView);
         if (!instance) {
           return '';
         }
         instance._helperName = viewOptions._helperName;
         instance._helperOptions = viewOptions._helperOptions;
       } else {
+        viewOptions.attributes = generateAttributesGenerator(ViewClass, htmlAttributesForView);
+        // tagName is a special case
+        if (htmlAttributesForView.tagName) {
+          viewOptions.tagName = htmlAttributes.tagName;
+          delete htmlAttributesForView.tagName;
+        }
         instance = new ViewClass(viewOptions);
       }
 
@@ -95,14 +130,28 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
       declaringView.children[instance.cid] = instance;
     }
 
-    viewOptions.attributes[viewPlaceholderAttributeName] = instance.cid;
+    htmlAttributes[viewPlaceholderAttributeName] = instance.cid;
 
-    var expandTokens = viewOptions.attributes['expand-tokens'];
-    return new Handlebars.SafeString(Thorax.Util.tag(viewOptions.attributes, '', expandTokens ? this : null));
+    var expandTokens = htmlAttributes['expand-tokens'];
+    var output = new Handlebars.SafeString(Thorax.Util.tag(htmlAttributes, '', expandTokens ? this : null));
+    return output;
   });
   var helper = Handlebars.helpers[name];
   return helper;
 };
+
+function generateAttributesGenerator(ViewClass, htmlAttributes) {
+  return function attributesGenerator() {
+    var klass = Thorax.Util.getViewClass(ViewClass),
+        attrs;
+    if (_.isFunction(klass.prototype.attributes)) {
+      attrs = klass.prototype.attributes.apply(this, arguments);
+    } else {
+      attrs = klass.prototype.attributes;
+    }
+    return _.extend({}, attrs, _.omit(htmlAttributes, _.keys(defaultViewOptionWhiteList)));
+  }
+}
 
 Thorax.View.on('append', function(scope, callback) {
   (scope || this.$el).find('[' + viewPlaceholderAttributeName + ']').forEach(function(el) {

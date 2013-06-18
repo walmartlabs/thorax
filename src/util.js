@@ -172,25 +172,6 @@ function getOptionsData(options) {
   return options.data;
 }
 
-var collectionOptionNames = {
-  'item-template': 'itemTemplate',
-  'empty-template': 'emptyTemplate',
-  'item-view': 'itemView',
-  'empty-view': 'emptyView',
-  'empty-class': 'emptyClass'
-};
-
-var forwardableProperties = [
-  'itemTemplate',
-  'itemView',
-  'emptyTemplate',
-  'emptyView'
-];
-
-var htmlAttributesToCopy = ['id', 'className', 'tagName'];
-// This is duplicated from collection.js at the moment
-var htmlAttributesToOmit = _.keys(collectionOptionNames);
-
 // In helpers "tagName" or "tag" may be specified, as well
 // as "class" or "className". Normalize to "tagName" and
 // "className" to match the property names used by Backbone
@@ -211,13 +192,23 @@ function normalizeHTMLAttributeOptions(options) {
 Thorax.Util = {
   getViewInstance: function(name, attributes) {
     attributes = attributes || {};
-    if (_.isString(name)) {
-      var Klass = registryGet(Thorax, 'Views', name, false);
-      return Klass.cid ? _.extend(Klass, attributes || {}) : new Klass(attributes);
-    } else if (_.isFunction(name)) {
-      return new name(attributes);
-    } else {
+    var klass = Thorax.Util.getViewClass(name);
+    if (!klass) {
       return name;
+    } else if (klass.cid) {
+      return _.extend(klass, attributes || {});
+    } else {
+      return new klass(attributes);
+    }
+  },
+
+  getViewClass: function(name) {
+    if (_.isString(name)) {
+      return registryGet(Thorax, 'Views', name, false);
+    } else if (_.isFunction(name)) {
+      return name;
+    } else {
+      return false;
     }
   },
 
@@ -293,7 +284,6 @@ Thorax.Util = {
   tag: function(attributes, content, scope) {
     var htmlAttributes = _.omit(attributes, 'tagName', 'expand-tokens'),
         tag = attributes.tagName || 'div';
-
     return '<' + tag + ' ' + _.map(htmlAttributes, function(value, key) {
       if (_.isUndefined(value)) {
         return '';
