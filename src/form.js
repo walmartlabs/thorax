@@ -115,7 +115,8 @@ _.extend(Thorax.View.prototype, {
     }, options || {});
 
     var value,
-        attributes = attributes || this._getContext();
+        attributes = attributes || this._getContext(),
+        view = this;
 
     //callback has context of element
     eachNamedInput.call(this, options, function() {
@@ -128,6 +129,9 @@ _.extend(Thorax.View.prototype, {
             this.checked = value;
           } else if (this.type === 'checkbox' || this.type === 'radio') {
             this.checked = value == this.value;
+          } else if (this.name.match(/\[\]/) && _.isArray(value)) {
+            var index = indexOfInputInSequence(view, this);
+            this.value = value[index];
           } else {
             this.value = value;
           }
@@ -247,19 +251,38 @@ function objectAndKeyFromAttributesAndName(attributes, name, options, callback) 
       keys = name.split('['),
       mode = options.mode;
 
-  for (var i = 0; i < keys.length - 1; ++i) {
-    key = keys[i].replace(']', '');
+  // input name="key[]" case
+  if (keys.length === 2 && keys[1] === ']') {
+    key = keys[0];
     if (!object[key]) {
       if (mode === 'serialize') {
-        object[key] = {};
+        object[key] = [];
       } else {
         return callback.call(this, false, key);
       }
     }
-    object = object[key];
+  } else {
+    for (var i = 0; i < keys.length - 1; ++i) {
+      key = keys[i].replace(']', '');
+      if (!object[key]) {
+        if (mode === 'serialize') {
+          object[key] = {};
+        } else {
+          return callback.call(this, false, key);
+        }
+      }
+      object = object[key];
+    }
+    key = keys[keys.length - 1].replace(']', '');
   }
-  key = keys[keys.length - 1].replace(']', '');
   callback.call(this, object, key);
+}
+
+// for input name="key[]" case
+function indexOfInputInSequence(view, input) {
+  var inputs = view.$('[name="' + $(input).attr('name').replace(/"/g, '\"') + '"]');
+  // jQuery and Zepto differ in their naming
+  return inputs.index ? inputs.index(input) : inputs.indexOf(input);
 }
 
 function resetSubmitState() {
