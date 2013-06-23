@@ -191,15 +191,8 @@ function normalizeHTMLAttributeOptions(options) {
 
 Thorax.Util = {
   getViewInstance: function(name, attributes) {
-    attributes = attributes || {};
-    var klass = Thorax.Util.getViewClass(name);
-    if (!klass) {
-      return name;
-    } else if (klass.cid) {
-      return _.extend(klass, attributes || {});
-    } else {
-      return new klass(attributes);
-    }
+    var ViewClass = Thorax.Util.getViewClass(name);
+    return ViewClass ? new ViewClass(attributes || {}) : name;
   },
 
   getViewClass: function(name) {
