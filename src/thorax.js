@@ -141,7 +141,9 @@ Thorax.View = Backbone.View.extend({
       throw new Error('nested-render');
     }
 
-    this._previousHelpers = _.filter(this.children, function(child) { return child._helperOptions; });
+    this._previousHelpers = _.filter(this.children, function(child) {
+      return child._helperOptions;
+    });
 
     var children = {};
     _.each(this.children, function(child, key) {
@@ -168,8 +170,10 @@ Thorax.View = Backbone.View.extend({
 
       // Destroy any helpers that may be lingering
       _.each(this._previousHelpers, function(child) {
-        child.destroy();
-        child.parent = undefined;
+        if (child._destroyOnScopeChange) {
+          child.destroy();
+          child.parent = undefined;
+        }
       });
       this._previousHelpers = undefined;
 

@@ -81,6 +81,7 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
         instance._helperName = viewOptions._helperName;
         instance._helperOptions = viewOptions._helperOptions;
       } else {
+        viewOptions._destroyOnScopeChange = true;
         instance = new ViewClass(viewOptions);
       }
 
