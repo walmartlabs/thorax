@@ -47,8 +47,8 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
     var args = _.toArray(arguments),
         options = args.pop(),
         declaringView = getOptionsData(options).view,
-        clonedOptions = _.clone(options.hash),
-        expandTokens = clonedOptions['expand-tokens'];
+        expandTokens = clonedOptions['expand-tokens'],
+        clonedOptions = expandTokens ? _.clone(options.hash) : options.hash;
 
     if (expandTokens) {
       delete clonedOptions['expand-tokens'];
