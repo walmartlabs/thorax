@@ -176,21 +176,41 @@ describe('form', function() {
     expect(view.$('input[name="test"]')[0].value).to.equal('test');
   });
 
-  it("serialize input name=inputName[] works as expected", function() {
+  it("serialize and populate with input name=\"key[]\" works as expected", function() {
     var viewWithOneInput = new Thorax.View({
       template: Handlebars.compile('<input name="a[]" value="one">')
     });
     viewWithOneInput.render();
     viewWithOneInput.serialize(function(attrs) {
-      expect(attrs.a).to.equal(['one']);
+      expect(attrs.a[0]).to.equal('one');
+      expect(attrs.a[1]).to.be['undefined'];
+      viewWithOneInput.populate({
+        a: ['two']
+      });
+      viewWithOneInput.serialize(function(attrs) {
+        expect(attrs.a[0]).to.equal('two');
+        expect(attrs.a[1]).to.be['undefined'];
+      });
     });
 
     var viewWithTwoInputs = new Thorax.View({
-      template: Handlebars.compile('<input name="b[]" value="one"><input name="b[]" value="two">')
+      template: Handlebars.compile('<input name="b[]" value="one"><input name="b[]" value="two"><input name="b[]" value="three">')
     });
     viewWithTwoInputs.render();
     viewWithTwoInputs.serialize(function(attrs) {
-      expect(attrs.b).to.equal(['one', 'two']);
+      expect(attrs.b[0]).to.equal('one');
+      expect(attrs.b[1]).to.equal('two');
+      expect(attrs.b[2]).to.equal('three');
+      expect(attrs.b[3]).to.be['undefined'];
+      viewWithTwoInputs.populate({
+        b: ['four', 'five', 'six']
+      });
+      viewWithTwoInputs.serialize(function(attrs) {
+        expect(attrs.b[0]).to.equal('four');
+        expect(attrs.b[1]).to.equal('five');
+        expect(attrs.b[2]).to.equal('six');
+        expect(attrs.b[3]).to.be['undefined'];
+      });
     });
   });
 });
