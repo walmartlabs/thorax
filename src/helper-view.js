@@ -35,7 +35,6 @@ function getParent(parent) {
 }
 
 Handlebars.registerViewHelper = function(name, ViewClass, callback) {
-  var htmlAttributesTo
   if (arguments.length === 2) {
     if (ViewClass.factory) {
       callback = ViewClass.callback;
