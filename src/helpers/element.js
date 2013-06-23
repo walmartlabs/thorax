@@ -3,12 +3,11 @@ var elementPlaceholderAttributeName = 'data-element-tmp';
 Handlebars.registerHelper('element', function(element, options) {
   normalizeHTMLAttributeOptions(options.hash);
   var cid = _.uniqueId('element'),
-      declaringView = getOptionsData(options).view,
-      htmlAttributes = _.pick(options.hash, htmlAttributesToCopy);
-  htmlAttributes[elementPlaceholderAttributeName] = cid;
+      declaringView = getOptionsData(options).view;
+  options.hash[elementPlaceholderAttributeName] = cid;
   declaringView._elementsByCid || (declaringView._elementsByCid = {});
   declaringView._elementsByCid[cid] = element;
-  return new Handlebars.SafeString(Thorax.Util.tag(htmlAttributes));
+  return new Handlebars.SafeString(Thorax.Util.tag(options.hash));
 });
 
 Thorax.View.on('append', function(scope, callback) {

@@ -14,7 +14,7 @@ Thorax.CollectionHelperView = Thorax.CollectionView.extend({
   },
 
   constructor: function(options) {
-    _.each(collectionOptionNames, function(viewAttributeName, helperOptionName) {
+    _.each(Thorax.CollectionHelperView.viewOptionWhiteList, function(viewAttributeName, helperOptionName) {
       if (options.options[helperOptionName]) {
         var value = options.options[helperOptionName];
         if (viewAttributeName === 'itemTemplate' || viewAttributeName === 'emptyTemplate') {
@@ -65,15 +65,22 @@ Thorax.CollectionHelperView = Thorax.CollectionView.extend({
   }
 });
 
-_.extend(Thorax.CollectionHelperView.prototype, helperViewPrototype);
-
-var collectionOptionNames = {
+Thorax.CollectionHelperView.viewOptionWhiteList = {
   'item-template': 'itemTemplate',
   'empty-template': 'emptyTemplate',
   'item-view': 'itemView',
   'empty-view': 'emptyView',
   'empty-class': 'emptyClass'
 };
+
+_.extend(Thorax.CollectionHelperView.prototype, helperViewPrototype);
+
+var forwardableProperties = [
+  'itemTemplate',
+  'itemView',
+  'emptyTemplate',
+  'emptyView'
+];
 
 function forwardRenderEvent(eventName) {
   return function() {
@@ -82,13 +89,6 @@ function forwardRenderEvent(eventName) {
     this.parent.trigger.apply(this.parent, args);
   }
 }
-
-var forwardableProperties = [
-  'itemTemplate',
-  'itemView',
-  'emptyTemplate',
-  'emptyView'
-];
 
 function forwardMissingProperty(propertyName) {
   var parent = getParent(this);

@@ -347,7 +347,6 @@ describe('collection', function() {
       myCollection: collection,
       template: Handlebars.compile('{{collection myCollection tag="ul" item-view=itemView}}')
     });
-
     view.render();
     expect(renderCount).to.equal(1);
 

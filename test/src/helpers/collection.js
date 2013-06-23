@@ -5,6 +5,25 @@ describe('collection helper', function() {
     expect(Handlebars.VM.noop).to.exist;
   });
 
+  it('should allow use of expand-tokens', function() {
+    var view = new Thorax.View({
+      key: 'value',
+      template: Handlebars.compile('{{#collection class="{{key}}" expand-tokens=true}}{{/collection}}'),
+      collection: new Thorax.Collection([{a: 'a'}])
+    });
+    view.render();
+    expect(view.$('div.value').length).to.equal(1);
+  });
+
+  it('should allow arbitrary html attributes', function() {
+    var view = new Thorax.View({
+      template: Handlebars.compile('{{#collection random="value"}}{{/collection}}'),
+      collection: new Thorax.Collection([{a: 'a'}])
+    });
+    view.render();
+    expect(view.$('div[random="value"]').length).to.equal(1);
+  });
+
   it('should render block', function() {
     var view = new Thorax.View({
       template: Handlebars.compile('{{#collection tag="ul" empty-template="letter-empty"}}<li>{{letter}}</li>{{/collection}}')
@@ -106,6 +125,20 @@ describe('collection helper', function() {
     collection.add({letter: 'b'});
     expect(spy.callCount).to.equal(1);
     expect(view.$('li').length).to.equal(2);
+  });
+
+  it('should allow name attribute', function() {
+    var view = new Thorax.View({
+      template: Handlebars.compile('{{#collection tag="select" name="select" class="test-class"}}<option value="{{id}}">{{id}}</option>{{/collection}}'),
+      collection: new Thorax.Collection([{
+        id: 1
+      }, {
+        id: 2
+      }])
+    });
+    view.render();
+    expect(view.$('select').attr('name')).to.equal('select');
+    expect(view.$('select').attr('class')).to.equal('test-class');
   });
 
   it("events handled on parent when collection view renders", function() {
