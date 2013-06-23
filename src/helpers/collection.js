@@ -6,6 +6,13 @@ Thorax.CollectionHelperView = Thorax.CollectionView.extend({
     'rendered:empty': forwardRenderEvent('rendered:empty')
   },
 
+  // Thorax.CollectionView allows a collectionSelector
+  // to be specified, disallow in a collection helper
+  // as it will cause problems when neseted
+  getCollectionElement: function() {
+    return this.$el;
+  },
+
   constructor: function(options) {
     _.each(collectionOptionNames, function(viewAttributeName, helperOptionName) {
       if (options.options[helperOptionName]) {

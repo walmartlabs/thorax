@@ -602,6 +602,38 @@ describe('collection view', function() {
     expect(setCollection).to['throw'];
   });
 
+  it("getCollectionElement should still return the correct element with nested collection views", function() {
+    var parent = new Thorax.CollectionView({
+      collection: new Thorax.Collection([]),
+      template: Handlebars.compile('{{collection-element}}{{view child}}'),
+      itemTemplate: Handlebars.compile(''),
+      child: new Thorax.CollectionView({
+        collection: new Thorax.Collection([]),
+        template: Handlebars.compile(''),
+        itemTemplate: Handlebars.compile('')
+      })
+    });
+    parent.render();
+    expect(parent.getCollectionElement()[0]).to.equal(parent.$('div')[0]);
+    expect(parent.getCollectionElement()[0]).to.not.equal(parent.child.getCollectionElement()[0]);
+  
+    var parentWithCollectionHelper = new Thorax.View({
+      collection: new Thorax.Collection([{key: 'value'}]),
+      template: Handlebars.compile('{{#collection tag="ul"}}<li>{{key}}</li>{{/collection}}')
+    });
+    parentWithCollectionHelper.render();
+    var parentCollectionView = parentWithCollectionHelper.children[_.keys(parentWithCollectionHelper.children)[0]];
+    
+    var childWithCollectionHelper = new Thorax.View({
+      collection: new Thorax.Collection([{key: 'value'}]),
+      template: Handlebars.compile('{{#collection tag="ul" class="inner"}}<li>{{key}}</li>{{/collection}}')
+    });
+    childWithCollectionHelper.appendTo(parentWithCollectionHelper.$('li')[0]);
+    var childCollectionView = childWithCollectionHelper.children[_.keys(childWithCollectionHelper.children)[0]];
+
+    expect(parentCollectionView.getCollectionElement()[0]).to.not.equal(childCollectionView.getCollectionElement()[0]);
+  });
+
 });
 
 function runCollectionTests(view, indexMultiplier) {
