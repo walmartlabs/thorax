@@ -11,24 +11,15 @@ Handlebars.registerViewHelper('view', {
     // class or id is specified, will be preserved
     var viewOptions = _.clone(options.options);
     normalizeHTMLAttributeOptions(viewOptions);
-    var whiteListOptionKeys = _.keys(defaultViewOptionWhiteList)
+    var whiteListOptionKeys = _.keys(defaultViewOptionWhiteList);
     viewOptions = _.omit(htmlAttributes, whiteListOptionKeys);
-    htmlAttributes = _.pick(htmlAttributes, whiteListOptionKeys);
-    
-    // tagName is a special case
-    if (htmlAttributes.tagName) {
-      viewOptions.tagName = htmlAttributes.tagName;
-      delete htmlAttributes.tagName;
-    }
-    if (ViewClass && ViewClass.cid && ViewClass.$el) {
-      // unnormalize className for existing instance
-      var htmlAttributesForInstance = _.clone(htmlAttributes);
-      if (htmlAttributesForInstance.className) {
-        htmlAttributesForInstance['class'] = htmlAttributesForInstance.className;
-        delete htmlAttributesForInstance.className;
+    if (!Thorax.Util.isViewInstance(ViewClass)) {
+      htmlAttributes = _.pick(htmlAttributes, whiteListOptionKeys);
+      // tagName is a special case
+      if (htmlAttributes.tagName) {
+        viewOptions.tagName = htmlAttributes.tagName;
+        delete htmlAttributes.tagName;
       }
-      ViewClass.$el.attr(htmlAttributesForInstance);
-    } else {
       viewOptions.attributes = generateAttributesGenerator(ViewClass, htmlAttributes);
     }
     var instance = Thorax.Util.getViewInstance(ViewClass, viewOptions);

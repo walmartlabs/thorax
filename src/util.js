@@ -190,6 +190,10 @@ function normalizeHTMLAttributeOptions(options) {
 }
 
 Thorax.Util = {
+  isViewInstance: function(instance) {
+    return instance && instance.cid && instance.$el;
+  },
+
   getViewInstance: function(name, attributes) {
     var ViewClass = Thorax.Util.getViewClass(name);
     return ViewClass ? new ViewClass(attributes || {}) : name;

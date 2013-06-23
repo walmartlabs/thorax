@@ -43,30 +43,6 @@ describe('view helper', function() {
     expect(view.$('[random="value"]').length).to.equal(0);
   });
 
-  it("should allow use of class HTML attribute", function() {
-    var parent = new Thorax.View({
-      key: 'value',
-      template: Handlebars.compile('{{view child class="value"}}'),
-      child: new Thorax.View({
-        template: Handlebars.compile("hello world")
-      })
-    });
-    parent.render();
-    expect(parent.$('div.value').html()).to.equal('hello world');
-  });
-
-  it("should allow use of expand-tokens", function() {
-    var parent = new Thorax.View({
-      key: 'value',
-      template: Handlebars.compile('{{view child class="{{key}}" expand-tokens=true}}'),
-      child: new Thorax.View({
-        template: Handlebars.compile("hello world")
-      })
-    });
-    parent.render();
-    expect(parent.$('div.value').html()).to.equal('hello world');
-  });
-
   it("fail silently when no view initialized", function() {
     var parent = new Thorax.View({
       template: Handlebars.compile("{{view child}}")
