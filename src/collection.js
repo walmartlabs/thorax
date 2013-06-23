@@ -196,6 +196,11 @@ Thorax.CollectionView = Thorax.View.extend({
   },
   emptyClass: 'empty',
   renderEmpty: function() {
+    if (!this.emptyView) {
+      assignView.call(this, 'emptyView', {
+        extension: '-empty'
+      });
+    }
     if (!this.emptyTemplate && !this.emptyView) {
       assignTemplate.call(this, 'emptyTemplate', {
         extension: '-empty',
@@ -215,6 +220,12 @@ Thorax.CollectionView = Thorax.View.extend({
     }
   },
   renderItem: function(model, i) {
+    if (!this.itemView) {
+      assignView.call(this, 'itemView', {
+        extension: '-item',
+        required: false
+      });
+    }
     if (!this.itemTemplate && !this.itemView) {
       assignTemplate.call(this, 'itemTemplate', {
         extension: '-item',

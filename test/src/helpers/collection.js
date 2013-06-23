@@ -82,6 +82,37 @@ describe('collection helper', function() {
     expect(view.$('li').length).to.equal(0);
   });
 
+  it("should auto assign item-view and empty-view if available", function() {
+    Thorax.View.extend({
+      name: "auto-assign-item",
+      template: Handlebars.compile('<li>{{key}}</li>')
+    });
+    Thorax.View.extend({
+      name: "auto-assign-empty",
+      template: Handlebars.compile('<li>empty</li>')
+    });
+
+    var autoAssignView = new Thorax.CollectionView({
+      name: 'auto-assign',
+      tagName: 'ul',
+      collection: new Thorax.Collection([])
+    });
+    autoAssignView.render();
+    expect(autoAssignView.$('li').html()).to.equal('empty');
+    autoAssignView.collection.add({key: 'value'});
+    expect(autoAssignView.$('li').html()).to.equal('value');
+
+    var autoAssignViewWithHelper = new Thorax.View({
+      name: 'auto-assign',
+      template: Handlebars.compile('{{collection tag="ul"}}'),
+      collection: new Thorax.Collection([])
+    });
+    autoAssignViewWithHelper.render();
+    expect(autoAssignViewWithHelper.$('li').html()).to.equal('empty');
+    autoAssignViewWithHelper.collection.add({key: 'value'});
+    expect(autoAssignViewWithHelper.$('li').html()).to.equal('value');
+  });
+
   it("collection-element declared outside of CollectionView will raise", function() {
     var view = new Thorax.View({
       template: Handlebars.compile('{{collection-element}}')
