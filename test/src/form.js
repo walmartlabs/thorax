@@ -175,4 +175,22 @@ describe('form', function() {
     var view = new FormView({model: new Thorax.Model({test: 'test'})});
     expect(view.$('input[name="test"]')[0].value).to.equal('test');
   });
+
+  it("serialize input name=inputName[] works as expected", function() {
+    var viewWithOneInput = new Thorax.View({
+      template: Handlebars.compile('<input name="a[]" value="one">')
+    });
+    viewWithOneInput.render();
+    viewWithOneInput.serialize(function(attrs) {
+      expect(attrs.a).to.equal(['one']);
+    });
+
+    var viewWithTwoInputs = new Thorax.View({
+      template: Handlebars.compile('<input name="b[]" value="one"><input name="b[]" value="two">')
+    });
+    viewWithTwoInputs.render();
+    viewWithTwoInputs.serialize(function(attrs) {
+      expect(attrs.b).to.equal(['one', 'two']);
+    });
+  });
 });
