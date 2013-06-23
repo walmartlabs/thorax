@@ -142,6 +142,8 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
     htmlAttributes[viewPlaceholderAttributeName] = instance.cid;
 
     var expandTokens = htmlAttributes['expand-tokens'];
+    // Force tagName to match that of the instance
+    htmlAttributes.tagName = instance.el.tagName.toLowerCase();
     var output = new Handlebars.SafeString(Thorax.Util.tag(htmlAttributes, '', expandTokens ? this : null));
     return output;
   });
