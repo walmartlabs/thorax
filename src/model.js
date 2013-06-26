@@ -64,7 +64,8 @@ Thorax.View.on({
       this.trigger('error', resp, model);
     },
     change: function(model) {
-      onModelChange.call(this, model);
+      // Indirect refernece to allow for overrides
+      inheritVars.model.change.call(this, model);
     }
   }
 });
