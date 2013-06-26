@@ -1,12 +1,12 @@
 describe('form', function() {
-  it("serialize() / populate()", function() {
-    var FormView = Thorax.View.extend({
-      name: 'form',
-      template: function() {
-        return '<form><input name="one"/><select name="two"><option value="a">a</option><option value="b">b</option></select><input name="three[four]"/><input name="five" value="A" type="checkbox" /><input name="five" value="B" type="checkbox" checked /><input name="five" value="C" type="checkbox" checked /><input name="six" value="LOL" type="checkbox" checked /></form>';
-      }
-    });
+  var FormView = Thorax.View.extend({
+    name: 'form',
+    template: function() {
+      return '<form><input name="one"/><select name="two"><option value="a">a</option><option value="b">b</option></select><input name="three[four]"/><input name="five" value="A" type="checkbox" /><input name="five" value="B" type="checkbox" checked /><input name="five" value="C" type="checkbox" checked /><input name="six" value="LOL" type="checkbox" checked /></form>';
+    }
+  });
 
+  it("serialize() / populate()", function() {
     var model = new Thorax.Model({
       one: 'a',
       two: 'b',
@@ -147,6 +147,8 @@ describe('form', function() {
     expect(serializeSpy.callCount).to.equal(0);
 
     model.set('merge', 'test'); // Set model data in between to test the merge
+    expect(populateSpy.callCount).to.equal(2);
+
     view.$('input[name="test"]').val('test');
     view.$('input[name="nested[test]"]').val('test');
     view.render(); // Should trigger another data population with user data
@@ -157,7 +159,7 @@ describe('form', function() {
     expect(view.$('input[name="nested[test]"]')[0].value).to.equal('test');
 
     // Expect the events to not have fired
-    expect(populateSpy.callCount).to.equal(1);
+    expect(populateSpy.callCount).to.equal(2);
     expect(serializeSpy.callCount).to.equal(0);
   });
 
@@ -174,5 +176,17 @@ describe('form', function() {
     });
     var view = new FormView({model: new Thorax.Model({test: 'test'})});
     expect(view.$('input[name="test"]')[0].value).to.equal('test');
+  });
+
+  it('should populate on model change', function() {
+    var view = new FormView(),
+        model = new Thorax.Model();
+
+    view.setModel(model);
+    view.render();
+    expect(view.$('input[name="one"]')[0].value).to.equal('');
+
+    model.set('one', 'foo');
+    expect(view.$('input[name="one"]')[0].value).to.equal('foo');
   });
 });
