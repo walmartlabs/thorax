@@ -562,11 +562,19 @@ A view class to be initialized for each item. Can be used in conjunction with `i
 
 A function in the declaring view to specify the context for an `itemTemplate`, recieves model and index as arguments. `itemContext` will not be used if an `itemView` is specified as the `itemView`'s own `context` method will instead be used.
 
+A collection helper may specify a specific function to use as the `itemContext` if there are multiple collections in a view:
+
+    {{#collection todos item-context="todosItemContext"}}
+
 ### itemFilter *view.itemFilter(model, index)*
 
 A method, which if present will filter what items are rendered in a collection. Recieves `model` and `index` and must return boolean. The filter will be applied when models' fire a change event, or models are added and removed from the collection. To force a collection to re-filter, trigger a `filter` event on the collection.
 
 Items are hidden and shown with `$.hide` and `$.show` rather than being removed or appended. In performance critical views with large collections consider filtering the collection before it is passed to the view or on the server.
+
+A collection helper may specify a specific function to use as the `itemFilter` if there are multiple collections in a view:
+
+    {{#collection todos item-filter="todosItemFilter"}}
 
 ### emptyTemplate *view.emptyTemplate*
 
@@ -899,8 +907,10 @@ Options may contain `tag`, `class`, `id` and the following attributes which will
 - `item-view` &rarr; `itemView`
 - `empty-template` &rarr; `emptyTemplate`
 - `empty-view` &rarr; `emptyView`
-- `loading-template` &rarr; `loading-template`
+- `loading-template` &rarr; `loadingTemplate`
 - `loading-view` &rarr; `loadingView`
+- `item-context` &rarr; `itemContext`
+- `item-filter` &rarr; `itemFilter`
 
 Any of the options can be specified as variables in addition to strings:
 
