@@ -33,6 +33,46 @@ describe('collection helper', function() {
     runCollectionTests(view);
   });
 
+  it('shoud accept item-context as argument', function() {
+    var view = new Thorax.View({
+      a: new Thorax.Collection([{key: 'value'}]),
+      b: new Thorax.Collection([{key: 'value'}]),
+      itemContextA: function() {
+        return {
+          one: 'one' + this.exclamation
+        };
+      },
+      itemContextB: function() {
+        return {
+          two: 'two' + this.exclamation
+        };
+      },
+      // ensures is called with correct context
+      exclamation: '!',
+      template: Handlebars.compile('{{#collection a tag="ul" item-context="itemContextA"}}<li>{{one}}</li>{{/collection}}{{#collection b item-context=itemContextB tag="ul"}}<li>{{two}}</li>{{/collection}}')
+    });
+    view.render();
+    expect(view.$('ul:first-child li').html()).to.equal('one!');
+    expect(view.$('ul:last-child li').html()).to.equal('two!');
+  });
+
+  it('should accept item-filter as argument', function() {
+    var view = new Thorax.View({
+      a: new Thorax.Collection([{key: 'value'}]),
+      b: new Thorax.Collection([{key: 'value'}]),
+      itemFilterA: function() {
+        return true;
+      },
+      itemFilterB: function() {
+        return false;
+      },
+      template: Handlebars.compile('{{#collection a tag="ul" item-filter="itemFilterA"}}<li>{{one}}</li>{{/collection}}{{#collection b item-filter=itemFilterB tag="ul"}}<li>{{two}}</li>{{/collection}}')
+    });
+    view.render();
+    expect(view.$('ul:first-child li')[0].style.display).to.not.equal('none');
+    expect(view.$('ul:last-child li')[0].style.display).to.equal('none');
+  });
+
   it('should item-view and item-template', function() {
     var view = new Thorax.View({
       template: Handlebars.compile('{{collection tag="ul" empty-view="letter-empty" item-view="letter-item" item-template="letter-item"}}')

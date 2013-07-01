@@ -36,7 +36,23 @@ Thorax.CollectionHelperView = Thorax.CollectionView.extend({
       options.inverse = Handlebars.VM.noop;
     }
 
+    var shouldBindItemContext = _.isFunction(options.itemContext),
+        shouldBindItemFilter = _.isFunction(options.itemFilter);
+
     var response = Thorax.HelperView.call(this, options);
+    
+    if (shouldBindItemContext) {
+      this.itemContext = _.bind(this.itemContext, this.parent);
+    } else if (_.isString(this.itemContext)) {
+      this.itemContext = _.bind(this.parent[this.itemContext], this.parent);
+    }
+
+    if (shouldBindItemFilter) {
+      this.itemFilter = _.bind(this.itemFilter, this.parent);
+    } else if (_.isString(this.itemFilter)) {
+      this.itemFilter = _.bind(this.parent[this.itemFilter], this.parent);
+    }
+
     if (this.parent.name) {
       if (!this.emptyTemplate && !this.parent.renderEmpty) {
         this.emptyTemplate = Thorax.Util.getTemplate(this.parent.name + '-empty', true);
@@ -68,6 +84,8 @@ Thorax.CollectionHelperView = Thorax.CollectionView.extend({
 _.extend(Thorax.CollectionHelperView.prototype, helperViewPrototype);
 
 var collectionOptionNames = {
+  'item-context': 'itemContext',
+  'item-filter': 'itemFilter',
   'item-template': 'itemTemplate',
   'empty-template': 'emptyTemplate',
   'item-view': 'itemView',
