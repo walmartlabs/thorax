@@ -148,7 +148,9 @@ Thorax.View = Backbone.View.extend({
       throw new Error('nested-render');
     }
 
-    this._previousHelpers = _.filter(this.children, function(child) { return child._helperOptions; });
+    this._previousHelpers = _.filter(this.children, function(child) {
+      return child._helperOptions;
+    });
 
     var children = {};
     _.each(this.children, function(child, key) {
