@@ -18,6 +18,10 @@ function dataObject(type, spec) {
   };
 
   function setObject(dataObject, options) {
+    if (spec.cast) {
+      dataObject = spec.cast(dataObject);
+    }
+
     var old = this[type],
         $el = getValue(this, spec.$el);
 

@@ -241,6 +241,22 @@ describe('collection helper', function() {
     testNesting(view, 'nested inline');
   });
 
+  it('should create collection from vanilla array', function() {
+    var view = new Thorax.View({
+      collection: [{key: 'value'}],
+      template: Handlebars.compile('{{#collection tag="ul"}}<li>{{key}}</li>{{/collection}}')
+    });
+    view.render();
+    expect(view.$('ul li').html()).to.equal('value');
+
+    view = new Thorax.View({
+      list: [{key: 'value'}],
+      template: Handlebars.compile('{{#collection list tag="ul"}}<li>{{key}}</li>{{/collection}}')
+    });
+    view.render();
+    expect(view.$('ul li').html()).to.equal('value');
+  });
+
   describe('delgation', function() {
     var view,
         spy;
