@@ -72,7 +72,7 @@ Thorax.CollectionHelperView = Thorax.CollectionView.extend({
 
     var self = this;
     _.each(['itemFilter', 'itemContext', 'renderItem', 'renderEmpty'], function(propertyName) {
-      if (self.parent[propertyName] && !this[propertyName]) {
+      if (self.parent[propertyName]) {
         self[propertyName] = function() {
           return self.parent[propertyName].apply(self.parent, arguments);
         };
