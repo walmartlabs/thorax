@@ -26,12 +26,12 @@ describe('layout', function() {
 
     expect(layout.getView()).to.not.exist;
 
-    layout.setView(a, {destroy: true});
+    layout.setView(a);
     expect(layout.getView()).to.equal(a, 'layout sets view');
     expect(layout.$('[data-view-cid]').length).to.be.above(0, 'layout updates HTML');
 
     b.render();
-    layout.setView(b, {destroy: true});
+    layout.setView(b);
     expect(layout.getView()).to.equal(b, 'layout sets view');
 
     //lifecycle checks
@@ -90,6 +90,38 @@ describe('layout', function() {
     expect(callCounts.parent).to.equal(1);
     expect(callCounts.layout).to.equal(1);
     expect(callCounts.child).to.equal(1);
+  });
+
+  it("Layout will not destroy view if retained", function() {
+    var aSpy = this.spy(),
+        bSpy = this.spy();
+    var a = new Thorax.View({
+      name: 'a',
+      events: {
+        destroyed: aSpy
+      },
+      template: Handlebars.compile("")
+    });
+    var b = new Thorax.View({
+      name: 'b',
+      events: {
+        destroyed: bSpy
+      },
+      template: Handlebars.compile("")
+    });
+    var layout = new Thorax.LayoutView();
+    layout.setView(a);
+    b.retain();
+    layout.setView(b);
+    layout.setView(false);
+    expect(aSpy.callCount).to.equal(1);
+    expect(bSpy.callCount).to.equal(0);
+    expect(function() {
+      b.destroy();
+    }).to['throw'](Error);
+    b.release();
+    b.destroy();
+    expect(bSpy.callCount).to.equal(1);
   });
 
   it("Layout can set view el", function() {

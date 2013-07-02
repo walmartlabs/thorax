@@ -106,6 +106,9 @@ Thorax.View = Backbone.View.extend({
     options = _.defaults(options || {}, {
       children: true
     });
+    if (this._referenceCount !== 0) {
+      throw new Error('Attempted to destroy view ' + (this.name || this.cid) + ' when it was still retained.');
+    }
     _.each(this._boundDataObjectsByCid, this.unbindDataObject, this);
     this.trigger('destroyed');
     delete viewsIndexedByCid[this.cid];
@@ -267,10 +270,17 @@ Thorax.View = Backbone.View.extend({
 
   release: function() {
     --this._referenceCount;
+    if (this._referenceCount < 0) {
+      throw new Error('View ' + (this.name || this.cid) + ' released when reference count was zero.');
+    }
   },
 
   retain: function() {
     ++this._referenceCount;
+  },
+
+  getReferenceCount: function() {
+    return this._referenceCount;
   },
 
   _replaceHTML: function(html) {
