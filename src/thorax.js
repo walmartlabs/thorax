@@ -105,25 +105,19 @@ Thorax.View = Backbone.View.extend({
   },
 
   destroy: function(options) {
-    options = _.defaults(options || {}, {
-      children: true
-    });
     if (this._referenceCount !== 0) {
       throw new Error('Attempted to destroy view ' + (this.name || this.cid) + ' when it was still retained.');
     }
     _.each(this._boundDataObjectsByCid, this.unbindDataObject, this);
     this.trigger('destroyed');
     delete viewsIndexedByCid[this.cid];
+
     _.each(this.children, function(child) {
       this._removeChild(child);
-      if (options.children) {
+      if (child.getReferenceCount() === 0) {
         child.destroy();
       }
     }, this);
-
-    if (this.parent) {
-      this.parent._removeChild(this);
-    }
 
     if (this.el) {
       this.undelegateEvents();
@@ -177,6 +171,7 @@ Thorax.View = Backbone.View.extend({
 
       // Destroy any helpers that may be lingering
       _.each(this._previousHelpers, function(child) {
+        child.release();
         child.destroy();
         child.parent = undefined;
       });
