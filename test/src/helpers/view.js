@@ -254,13 +254,13 @@ describe('view helper', function() {
   });
 
   it('ensure manually initialized child view is not destroyed if it goes out of scope in template', function() {
-    // should only be destroyed if parent is destroyed
-    // views generated from view helpers will be automatically
-    // destroyed
+    var child = new Thorax.View({
+      template: Handlebars.compile('<span>content</span>')
+    });
+    child.retain();
+
     var parent = new Thorax.View({
-      child: new Thorax.View({
-        template: Handlebars.compile('<span>content</span>')
-      }),
+      child: child,
       showChild: true,
       template: Handlebars.compile('{{#showChild}}{{view child}}{{/showChild}}')
     });
