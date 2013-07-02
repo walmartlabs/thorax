@@ -98,9 +98,9 @@ Thorax.View = Backbone.View.extend({
   },
 
   _removeChild: function(view) {
-    view.release();
     delete this.children[view.cid];
     view.parent = null;
+    view.release();
     return view;
   },
 
@@ -114,9 +114,6 @@ Thorax.View = Backbone.View.extend({
 
     _.each(this.children, function(child) {
       this._removeChild(child);
-      if (child.getReferenceCount() === 0) {
-        child.destroy();
-      }
     }, this);
 
     if (this.el) {
@@ -171,10 +168,8 @@ Thorax.View = Backbone.View.extend({
 
       // Destroy any helpers that may be lingering
       _.each(this._previousHelpers, function(child) {
-        child.release();
-        child.destroy();
-        child.parent = undefined;
-      });
+        this._removeChild(child);
+      }, this);
       this._previousHelpers = undefined;
 
       //accept a view, string, Handlebars.SafeString or DOM element
@@ -271,6 +266,9 @@ Thorax.View = Backbone.View.extend({
     --this._referenceCount;
     if (this._referenceCount < 0) {
       throw new Error('View ' + (this.name || this.cid) + ' released when reference count was zero.');
+    }
+    if (this._referenceCount === 0) {
+      this.destroy();
     }
   },
 

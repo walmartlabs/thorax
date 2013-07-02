@@ -174,7 +174,6 @@ Thorax.CollectionView = Thorax.View.extend({
         child = this.children[viewCid];
     if (child) {
       this._removeChild(child);
-      child.destroy();
     }
     return true;
   },

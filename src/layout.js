@@ -29,12 +29,9 @@ Thorax.LayoutView = Thorax.View.extend({
 
     this.trigger('change:view:start', view, oldView, options);
     if (oldView) {
-      this._removeChild(oldView);
       oldView.$el.remove();
       triggerLifecycleEvent.call(oldView, 'deactivated', options);
-      if (oldView.getReferenceCount() === 0) {
-        oldView.destroy();
-      }
+      this._removeChild(oldView);
     }
 
     if (view) {

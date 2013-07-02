@@ -120,7 +120,6 @@ describe('layout', function() {
       b.destroy();
     }).to['throw'](Error);
     b.release();
-    b.destroy();
     expect(bSpy.callCount).to.equal(1);
   });
 
