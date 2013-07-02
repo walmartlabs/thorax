@@ -276,10 +276,6 @@ Thorax.View = Backbone.View.extend({
     ++this._referenceCount;
   },
 
-  getReferenceCount: function() {
-    return this._referenceCount;
-  },
-
   _replaceHTML: function(html) {
     this.el.innerHTML = "";
     return this.$el.append(html);
