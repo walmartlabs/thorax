@@ -83,7 +83,8 @@ Thorax.CollectionHelperView = Thorax.CollectionView.extend({
 
 _.extend(Thorax.CollectionHelperView.prototype, helperViewPrototype);
 
-var collectionOptionNames = {
+
+Thorax.CollectionHelperView.attributeWhiteList = {
   'item-context': 'itemContext',
   'item-filter': 'itemFilter',
   'item-template': 'itemTemplate',

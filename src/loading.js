@@ -448,8 +448,8 @@ inheritVars.collection.loading = function() {
   }
 };
 
-if (collectionOptionNames) {
-  _.extend(collectionOptionNames, {
+if (Thorax.CollectionHelperView) {
+  _.extend(Thorax.CollectionHelperView.attributeWhiteList, {
     'loading-template': 'loadingTemplate',
     'loading-view': 'loadingView',
     'loading-placement': 'loadingPlacement'
