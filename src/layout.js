@@ -3,13 +3,6 @@ var layoutCidAttributeName = 'data-layout-cid';
 
 Thorax.LayoutView = Thorax.View.extend({
   _defaultTemplate: Handlebars.VM.noop,
-  destroy: function() {
-    var view = this.getView();
-    if (view) {
-      view.release();
-    }
-    return Thorax.View.prototype.destroy.apply(this, arguments);
-  },
   render: function() {
     var response = Thorax.View.prototype.render.apply(this, arguments);
     if (this.template === Handlebars.VM.noop) {
@@ -33,16 +26,12 @@ Thorax.LayoutView = Thorax.View.extend({
     if (view === oldView) {
       return false;
     }
-    if (view) {
-      view.retain();
-    }
 
     this.trigger('change:view:start', view, oldView, options);
     if (oldView) {
       this._removeChild(oldView);
       oldView.$el.remove();
       triggerLifecycleEvent.call(oldView, 'deactivated', options);
-      oldView.release();
       if (oldView.getReferenceCount() === 0) {
         oldView.destroy();
       }

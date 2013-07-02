@@ -88,6 +88,7 @@ Thorax.View = Backbone.View.extend({
   },
 
   _addChild: function(view) {
+    view.retain();
     this.children[view.cid] = view;
     if (!view.parent) {
       view.parent = this;
@@ -97,6 +98,7 @@ Thorax.View = Backbone.View.extend({
   },
 
   _removeChild: function(view) {
+    view.release();
     delete this.children[view.cid];
     view.parent = null;
     return view;
