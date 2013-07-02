@@ -50,6 +50,8 @@ Thorax.View = Backbone.View.extend({
   _configure: function(options) {
     var self = this;
 
+    this._referenceCount = 0;
+
     this._objectOptionsByCid = {};
     this._boundDataObjectsByCid = {};
 
@@ -261,6 +263,14 @@ Thorax.View = Backbone.View.extend({
       this.trigger('append');
       return element;
     }
+  },
+
+  release: function() {
+    --this._referenceCount;
+  },
+
+  retain: function() {
+    ++this._referenceCount;
   },
 
   _replaceHTML: function(html) {
