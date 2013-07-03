@@ -88,11 +88,15 @@ Thorax.View = Backbone.View.extend({
   },
 
   _addChild: function(view) {
+    if (this.children[view.cid]) {
+      return;
+    }
     view.retain();
     this.children[view.cid] = view;
-    if (!view.parent) {
-      view.parent = this;
+    if (view.parent && view.parent !== this && !view._helperOptions) {
+      view.parent._removeChild(view);
     }
+    view.parent = this;
     this.trigger('child', view);
     return view;
   },
