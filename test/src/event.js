@@ -332,7 +332,7 @@ describe('event', function() {
       view.trigger('foo');
       expect(spy).to.have.been.calledOnce;
     });
-    it('should cleanup backbone events on destroy', function() {
+    it('should cleanup backbone events on release', function() {
       var spy = this.spy(),
           view = new Thorax.View({
             events: {
@@ -348,12 +348,12 @@ describe('event', function() {
       model.trigger('foo');
       expect(spy).to.have.been.calledOnce;
 
-      view.destroy();
+      view.release();
 
       model.trigger('foo');
       expect(spy).to.have.been.calledOnce;
     });
-    it('should cleanup DOM events on destroy', function() {
+    it('should cleanup DOM events on release', function() {
       var spy = this.spy(),
           view = new Thorax.View({
             events: {
@@ -369,7 +369,7 @@ describe('event', function() {
       $el.find('a').trigger('mousedown');
       expect(spy).to.have.been.calledTwice;
 
-      view.destroy();
+      view.release();
 
       $el.find('a').trigger('mousedown');
       expect(spy).to.have.been.calledTwice;

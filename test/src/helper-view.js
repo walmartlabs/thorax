@@ -98,7 +98,7 @@ describe('helper-view', function() {
       expect(_.keys(view.children).length).to.equal(5);
     });
 
-    it('should destroy old children on re-render', function() {
+    it('should release old children on re-render', function() {
       view = new Thorax.View({
         template: Handlebars.compile('{{#test key}}{{/test}}'),
         key: 1
@@ -107,12 +107,12 @@ describe('helper-view', function() {
       expect(spy.callCount).to.equal(1);
       expect(_.keys(view.children).length).to.equal(1);
       var child = _.first(_.values(view.children));
-      this.spy(child, 'destroy');
+      this.spy(child, '_destroy');
 
       view.key = 2;
       view.render();
       expect(spy.callCount).to.equal(2);
-      expect(child.destroy.callCount).to.equal(1);
+      expect(child._destroy.callCount).to.equal(1);
     });
 
     it('id, class and tag passed to helper view', function() {

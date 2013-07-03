@@ -71,14 +71,14 @@ describe('loading', function() {
 
       expect($(view.el).hasClass('loading')).to.be['true'];
     });
-    it('views should not see load start after destroy', function() {
+    it('views should not see load start after release', function() {
       var spy = this.spy(),
           model = new Thorax.Model({url: 'foo'}),
           view = new Thorax.View({name: 'food', render: function() {}, model: model});
       view.on('load:start', spy);
 
       expect($(view.el).hasClass('loading')).to.be['false'];
-      view.destroy();
+      view.release();
 
       model.loadStart();
 
@@ -120,7 +120,7 @@ describe('loading', function() {
       expect(spy).to.have.been.calledOnce;
       expect($(view.el).hasClass('loading')).to.be['false'];
     });
-    it('views should see load end after destroy', function() {
+    it('views should see load end after release', function() {
       var spy = this.spy(),
           model = new Thorax.Model({url: 'foo'}),
           view = new Thorax.View({name: 'food', template: function() {}, model: model}),
@@ -132,7 +132,7 @@ describe('loading', function() {
       this.clock.tick(1000);
 
       expect($(view.el).hasClass('loading')).to.be['true'];
-      view.destroy();
+      view.release();
 
       model.loadEnd();
       this.clock.tick(1000);
@@ -195,11 +195,11 @@ describe('loading', function() {
 
       expect(this.endSpy).to.have.been.calledOnce;
     });
-    it('root should see load end after destroy', function() {
+    it('root should see load end after release', function() {
       this.model.loadStart();
       this.clock.tick(1000);
 
-      this.view.destroy();
+      this.view.release();
 
       this.model.loadEnd();
       this.clock.tick(1000);

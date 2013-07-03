@@ -86,7 +86,7 @@ describe('layout', function() {
         }
       }
     }));
-    parent.destroy();
+    parent.release();
     expect(callCounts.parent).to.equal(1);
     expect(callCounts.layout).to.equal(1);
     expect(callCounts.child).to.equal(1);
@@ -116,9 +116,6 @@ describe('layout', function() {
     layout.setView(false);
     expect(aSpy.callCount).to.equal(1);
     expect(bSpy.callCount).to.equal(0);
-    expect(function() {
-      b.destroy();
-    }).to['throw'](Error);
     b.release();
     expect(bSpy.callCount).to.equal(1);
   });
