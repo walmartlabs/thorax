@@ -334,11 +334,26 @@ A hash of child view's indexed by `cid`. Child views may become attached to the 
 
 If a view was embedded inside another with the `view` helper, or a generated `HelperView` (for instance the `collection` or `empty` helpers) it will have a `parent` view attribute. In the case of `HelperView`s, the `parent` will be the view that declared the helper in its template.
 
-### destroy *view.destroy([options])*
+### retain **view.retain()**
 
-Calls `remove` (and therefore `$el.remove` and `stopListening`) on your view, unbinds any model or collection bound with `setCollection` or `setModel`, calls `destroy` on all children, then triggers a `destroyed` event which can be used to implement specific cleanup behaviors in your views.
+Prevents a view from being destroyed if it would otherwise be. If a parent is destroyed all it's children will be destroyed, or if it was previously passed to `setView`
 
-`destroy` will also be called on a view if it was previously passed to the `setView` method on a `LayoutView`, and then another view is passed to `setView`.
+Given the code below:
+
+    a.retain();
+    Application.setView(a);
+    Application.setView(b);
+    Application.setView(c);
+
+`b` will be destroyed, and `a` will not be.
+
+### release **view.release()**
+
+Release a view that was previously retained. If `release` is called and the view has a reference count of zero it will be destroyed, which will release all children, remove all events, unbind all models and collections, call `remove` and trigger the `destroyed` event.
+
+`release` is usally called automatically if a view was attached to a `LayoutView` with the `setView` method, and another view is then passed to `setView`.
+
+Generally this method is not needed unless you are `retain`ing views.
 
 ### setModel *view.setModel(model [,options])*
 
@@ -1028,7 +1043,7 @@ Triggered on a view when it was previously passed to the `setView` method on a `
 
 ### destroyed *destroyed ()*
 
-Triggered on a view when the `destroy` method is called. Useful for implementing custom view cleanup behaviors. `destroy` will be also be called if it was previously passed to the `setView` method on a `LayoutView`, and then another view is passed to `setView`.
+Triggered on a view when the `release` method is called and the reference count is zero. Useful for implementing custom view cleanup behaviors. `release` will be also be called if it was previously passed to the `setView` method on a `LayoutView`, and then another view is passed to `setView`.
 
 ### change:view:start *change:view:start (newView [,oldView] ,options)*
 
