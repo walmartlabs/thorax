@@ -1,4 +1,4 @@
-/*global getOptionsData, htmlAttributesToCopy, normalizeHTMLAttributeOptions, viewHelperAttributeName */
+/*global getOptionsData, normalizeHTMLAttributeOptions, viewHelperAttributeName */
 var viewPlaceholderAttributeName = 'data-view-tmp',
     viewTemplateOverrides = {};
 
@@ -35,10 +35,21 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
       ViewClass = Thorax.HelperView;
     }
   }
+
+  var viewOptionWhiteList = ViewClass.attributeWhiteList;
+
   Handlebars.registerHelper(name, function() {
     var args = _.toArray(arguments),
         options = args.pop(),
-        declaringView = getOptionsData(options).view;
+        declaringView = getOptionsData(options).view,
+        expandTokens = options.hash['expand-tokens'];
+
+    if (expandTokens) {
+      delete options.hash['expand-tokens'];
+      _.each(options.hash, function(value, key) {
+        options.hash[key] = Thorax.Util.expandToken(value, this);
+      }, this);
+    }
 
     var viewOptions = {
       inverse: options.inverse,
@@ -52,6 +63,34 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
       }
     };
 
+
+    normalizeHTMLAttributeOptions(options.hash);
+    var htmlAttributes = _.clone(options.hash);
+    if (viewOptionWhiteList) {
+      _.each(viewOptionWhiteList, function(dest, source) {
+        delete htmlAttributes[source];
+        if (!_.isUndefined(options.hash[source])) {
+          viewOptions[dest] = options.hash[source];
+        }
+      });
+    }
+    if(htmlAttributes.tagName) {
+      viewOptions.tagName = htmlAttributes.tagName;
+    }
+    viewOptions.attributes = function() {
+      var attrs = (ViewClass.prototype && ViewClass.prototype.attributes) || {};
+      if (_.isFunction(attrs)) {
+        attrs = attrs.apply(this, arguments);
+      }
+      _.extend(attrs, _.omit(htmlAttributes, ['tagName']));
+      // backbone wants "class"
+      if (attrs.className) {
+        attrs['class'] = attrs.className;
+        delete attrs.className;
+      }
+      return attrs;
+    };
+
     if (options.fn) {
       // Only assign if present, allow helper view class to
       // declare template
@@ -61,9 +100,6 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
       // so need to do this check
       viewOptions.template = Handlebars.VM.noop;
     }
-
-    normalizeHTMLAttributeOptions(options.hash);
-    _.extend(viewOptions, _.pick(options.hash, htmlAttributesToCopy));
 
     // Check to see if we have an existing instance that we can reuse
     var instance = _.find(declaringView._previousHelpers, function(child) {
@@ -95,10 +131,8 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
       declaringView.children[instance.cid] = instance;
     }
 
-    var htmlAttributes = _.pick(options.hash, htmlAttributesToCopy);
     htmlAttributes[viewPlaceholderAttributeName] = instance.cid;
 
-    var expandTokens = options.hash['expand-tokens'];
     return new Handlebars.SafeString(Thorax.Util.tag(htmlAttributes, '', expandTokens ? this : null));
   });
   var helper = Handlebars.helpers[name];

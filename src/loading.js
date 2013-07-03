@@ -448,10 +448,12 @@ inheritVars.collection.loading = function() {
   }
 };
 
-if (collectionOptionNames) {
-  collectionOptionNames['loading-template'] = 'loadingTemplate';
-  collectionOptionNames['loading-view'] = 'loadingView';
-  collectionOptionNames['loading-placement'] = 'loadingPlacement';
+if (Thorax.CollectionHelperView) {
+  _.extend(Thorax.CollectionHelperView.attributeWhiteList, {
+    'loading-template': 'loadingTemplate',
+    'loading-view': 'loadingView',
+    'loading-placement': 'loadingPlacement'
+  });
 }
 
 Thorax.View.on({
