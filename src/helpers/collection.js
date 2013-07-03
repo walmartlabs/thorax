@@ -54,8 +54,14 @@ Thorax.CollectionHelperView = Thorax.CollectionView.extend({
     }
 
     if (this.parent.name) {
+      if (!this.emptyView && !this.parent.renderEmpty) {
+        this.emptyView = Thorax.Util.getViewClass(this.parent.name + '-empty', true);
+      }
       if (!this.emptyTemplate && !this.parent.renderEmpty) {
         this.emptyTemplate = Thorax.Util.getTemplate(this.parent.name + '-empty', true);
+      }
+      if (!this.itemView && !this.parent.renderItem) {
+        this.itemView = Thorax.Util.getViewClass(this.parent.name + '-item', true);
       }
       if (!this.itemTemplate && !this.parent.renderItem) {
         // item template must be present if an itemView is not
