@@ -191,10 +191,6 @@ function getOptionsData(options) {
   return options.data;
 }
 
-// These whitelisted attributes will be the only ones passed
-// from the options hash to Thorax.Util.tag
-var htmlAttributesToCopy = ['id', 'className', 'tagName'];
-
 // In helpers "tagName" or "tag" may be specified, as well
 // as "class" or "className". Normalize to "tagName" and
 // "className" to match the property names used by Backbone
