@@ -49,10 +49,10 @@ _.extend(Thorax.View.prototype, {
     //callback has context of element
     var view = this;
     var errors = [];
-    eachNamedInput.call(this, options, function() {
-      var value = view._getInputValue(this, options, errors);
+    eachNamedInput(this, options, function(element) {
+      var value = view._getInputValue(element, options, errors);
       if (!_.isUndefined(value)) {
-        objectAndKeyFromAttributesAndName.call(this, attributes, this.name, {mode: 'serialize'}, function(object, key) {
+        objectAndKeyFromAttributesAndName(attributes, element.name, {mode: 'serialize'}, function(object, key) {
           if (!object[key]) {
             object[key] = value;
           } else if (_.isArray(object[key])) {
@@ -118,18 +118,18 @@ _.extend(Thorax.View.prototype, {
         attributes = attributes || this._getContext();
 
     //callback has context of element
-    eachNamedInput.call(this, options, function() {
-      objectAndKeyFromAttributesAndName.call(this, attributes, this.name, {mode: 'populate'}, function(object, key) {
+    eachNamedInput(this, options, function(element) {
+      objectAndKeyFromAttributesAndName(attributes, element.name, {mode: 'populate'}, function(object, key) {
         value = object && object[key];
 
         if (!_.isUndefined(value)) {
           //will only execute if we have a name that matches the structure in attributes
-          if (this.type === 'checkbox' && _.isBoolean(value)) {
-            this.checked = value;
-          } else if (this.type === 'checkbox' || this.type === 'radio') {
-            this.checked = value == this.value;
+          if (element.type === 'checkbox' && _.isBoolean(value)) {
+            element.checked = value;
+          } else if (element.type === 'checkbox' || element.type === 'radio') {
+            element.checked = value == element.value;
           } else {
-            this.value = value;
+            element.value = value;
           }
         }
       });
@@ -223,18 +223,17 @@ function onErrorOrInvalidData () {
   }
 }
 
-function eachNamedInput(options, iterator, context) {
-  var i = 0,
-      self = this;
+function eachNamedInput(view, options, iterator) {
+  var i = 0;
 
-  this.$('select,input,textarea', options.root || this.el).each(function() {
+  view.$('select,input,textarea', options.root || view.el).each(function() {
     if (!options.children) {
-      if (self !== $(this).view({helper: false})) {
+      if (view !== $(this).view({helper: false})) {
         return;
       }
     }
     if (this.type !== 'button' && this.type !== 'cancel' && this.type !== 'submit' && this.name && this.name !== '') {
-      iterator.call(context || this, i, this);
+      iterator(this, i);
       ++i;
     }
   });
@@ -253,13 +252,13 @@ function objectAndKeyFromAttributesAndName(attributes, name, options, callback) 
       if (mode === 'serialize') {
         object[key] = {};
       } else {
-        return callback.call(this, false, key);
+        return callback(false, key);
       }
     }
     object = object[key];
   }
   key = keys[keys.length - 1].replace(']', '');
-  callback.call(this, object, key);
+  callback(object, key);
 }
 
 function resetSubmitState() {
