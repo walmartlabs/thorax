@@ -205,15 +205,6 @@ Thorax.View = Backbone.View.extend({
     };
   },
 
-  _getHelpers: function() {
-    if (this.helpers) {
-      return _.extend({}, Handlebars.helpers, this.helpers);
-    } else {
-      return Handlebars.helpers;
-    }
-
-  },
-
   renderTemplate: function(file, context, ignoreErrors) {
     var template;
     context = context || this._getContext();
@@ -226,7 +217,7 @@ Thorax.View = Backbone.View.extend({
       return '';
     } else {
       return template(context, {
-        helpers: this._getHelpers(),
+        helpers: this.helpers,
         data: this._getData(context)
       });
     }
