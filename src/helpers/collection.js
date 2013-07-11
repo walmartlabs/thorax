@@ -103,7 +103,7 @@ function forwardRenderEvent(eventName) {
     var args = _.toArray(arguments);
     args.unshift(eventName);
     this.parent.trigger.apply(this.parent, args);
-  }
+  };
 }
 
 var forwardableProperties = [

@@ -64,7 +64,9 @@ _.extend(Thorax.View.prototype, {
       }
     });
 
-    this._populating || this.trigger('serialize', attributes, options);
+    if (!this._populating) {
+      this.trigger('serialize', attributes, options);
+    }
 
     if (options.validate) {
       var validateInputErrors = this.validateInput(attributes);
@@ -136,7 +138,9 @@ _.extend(Thorax.View.prototype, {
     });
 
     ++this._populateCount;
-    this._populating || this.trigger('populate', attributes);
+    if (!this._populating) {
+      this.trigger('populate', attributes);
+    }
   },
 
   //perform form validation, implemented by child class
@@ -195,7 +199,9 @@ function filterObject(object, callback) {
     if (_.isObject(value)) {
       return filterObject(value, callback);
     }
-    callback(value, key, object) === false && delete object[key];
+    if (callback(value, key, object) === false) {
+      delete object[key];
+    }
   });
   return object;
 }
