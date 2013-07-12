@@ -1,4 +1,4 @@
-/*global createRegistryWrapper, dataObject, getValue */
+/*global createRegistryWrapper, dataObject, getValue, inheritVars */
 var modelCidAttributeName = 'data-model-cid';
 
 Thorax.Model = Backbone.Model.extend({
@@ -48,15 +48,15 @@ dataObject('model', {
 });
 
 function onModelChange(model) {
-  var modelOptions = model && this._objectOptionsByCid[model.cid];
+  var modelOptions = this.objectOptions(model) || {};
   // !modelOptions will be true when setModel(false) is called
-  this.conditionalRender(modelOptions && modelOptions.render);
+  this.conditionalRender(modelOptions.render);
 }
 
 Thorax.View.on({
   model: {
     invalid: function(model, errors) {
-      if (this._objectOptionsByCid[model.cid].invalid) {
+      if (this.objectOptions(model).invalid) {
         this.trigger('invalid', errors, model);
       }
     },

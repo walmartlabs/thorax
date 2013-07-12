@@ -5,13 +5,12 @@ inheritVars.model.defaultOptions.populate = true;
 var oldModelChange = inheritVars.model.change;
 inheritVars.model.change = function() {
   oldModelChange.apply(this, arguments);
-  // TODO : What can we do to remove this duplication?
-  var modelOptions = this.model && this._objectOptionsByCid[this.model.cid];
-  if (modelOptions && modelOptions.populate) {
-    this.populate(this.model.attributes, modelOptions.populate === true ? {} : modelOptions.populate);
+
+  var populate = populateOptions(this);
+  if (this._renderCount && populate) {
+    this.populate(this.model.attributes, populate);
   }
 };
-inheritVars.model.defaultOptions.populate = true;
 
 _.extend(Thorax.View.prototype, {
   //serializes a form present in the view, returning the serialized data
@@ -172,8 +171,8 @@ Thorax.View.on({
   'before:rendered': function() {
     if (!this._renderCount) { return; }
 
-    var modelOptions = this.model && this._objectOptionsByCid[this.model.cid];
     this._populating = true;
+    var modelOptions = this.objectOptions(this.model);
     // When we have previously populated and rendered the view, reuse the user data
     this.previousFormData = filterObject(
       this.serialize(_.extend({ set: false, validate: false }, modelOptions)),
@@ -181,9 +180,7 @@ Thorax.View.on({
     );
   },
   rendered: function() {
-    var modelOptions = this.model && this._objectOptionsByCid[this.model.cid],
-        populate = modelOptions && modelOptions.populate || null,
-        context;
+    var populate = populateOptions(this);
     if (this.previousFormData) {
       context = this._populateCount ? this._getContext() : {};
       // Using jQuery/Zepto to extend objects since we need deep extends
@@ -269,4 +266,9 @@ function objectAndKeyFromAttributesAndName(attributes, name, options, callback) 
 
 function resetSubmitState() {
   this.$('form').removeAttr('data-submit-wait');
+}
+
+function populateOptions(view) {
+  var modelOptions = this.objectOptions(this.model) || {};
+  return modelOptions.populate === true ? {} : modelOptions.populate;
 }
