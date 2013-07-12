@@ -272,6 +272,6 @@ function resetSubmitState() {
 }
 
 function populateOptions(view) {
-  var modelOptions = this.objectOptions(this.model) || {};
+  var modelOptions = view.objectOptions(view.model) || {};
   return modelOptions.populate === true ? {} : modelOptions.populate;
 }
