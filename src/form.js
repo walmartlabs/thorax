@@ -4,7 +4,9 @@ inheritVars.model.defaultOptions.populate = true;
 
 var oldModelChange = inheritVars.model.change;
 inheritVars.model.change = function() {
+  this._isChanging = true;
   oldModelChange.apply(this, arguments);
+  this._isChanging = false;
 
   var populate = populateOptions(this);
   if (this._renderCount && populate) {
@@ -63,7 +65,7 @@ _.extend(Thorax.View.prototype, {
       }
     });
 
-    if (!this._populating) {
+    if (!options._silent) {
       this.trigger('serialize', attributes, options);
     }
 
@@ -137,7 +139,7 @@ _.extend(Thorax.View.prototype, {
     });
 
     ++this._populateCount;
-    if (!this._populating) {
+    if (!options._silent) {
       this.trigger('populate', attributes);
     }
   },
@@ -171,22 +173,23 @@ Thorax.View.on({
   'before:rendered': function() {
     if (!this._renderCount) { return; }
 
-    this._populating = true;
     var modelOptions = this.objectOptions(this.model);
     // When we have previously populated and rendered the view, reuse the user data
     this.previousFormData = filterObject(
-      this.serialize(_.extend({ set: false, validate: false }, modelOptions)),
+      this.serialize(_.extend({ set: false, validate: false, _silent: true }, modelOptions)),
       function(value) { return value !== '' && value != null; }
     );
   },
   rendered: function() {
     var populate = populateOptions(this);
-    if (this.previousFormData) {
-      context = this._populateCount ? this._getContext() : {};
-      // Using jQuery/Zepto to extend objects since we need deep extends
-      this.populate($.extend(true, context, this.previousFormData), populate);
+
+    if (populate && !this._isChanging && !this._populateCount && this.model.attributes) {
+      this.populate(this.model.attributes, populate);
     }
-    this._populating = false;
+    if (this.previousFormData) {
+      this.populate(this.previousFormData, _.extend({_silent: true}, populate));
+    }
+
     this.previousFormData = null;
   }
 });
