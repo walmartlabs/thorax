@@ -115,6 +115,26 @@ describe('form', function() {
     }).childKey).to.equal('childValue');
   });
 
+  it('should populate on initial render', function() {
+    var attributes = {
+      one: 'a',
+      two: 'b',
+      three: {
+        four: 'c'
+      }
+    };
+    var model = new Thorax.Model(attributes);
+
+    var view = new FormView();
+    view.setModel(model);
+    expect(view._renderCount).to.equal(0);
+    expect(view._populateCount).to.equal(0);
+    expect(view.serialize()).to.eql({});
+
+    view.render();
+    expect(_.pick(view.serialize(), _.keys(attributes))).to.eql(attributes);
+  });
+
   it('keep state on rerender', function() {
     var FormView = Thorax.View.extend({
       name: 'form',

@@ -53,6 +53,10 @@ function dataObject(type, spec) {
 }
 
 _.extend(Thorax.View.prototype, {
+  getObjectOptions: function(dataObject) {
+    return dataObject && this._objectOptionsByCid[dataObject.cid];
+  },
+
   bindDataObject: function(type, dataObject, options) {
     if (this._boundDataObjectsByCid[dataObject.cid]) {
       return false;

@@ -1,3 +1,4 @@
+/*global _replaceHTML */
 var isIE = (/msie [\w.]+/).exec(navigator.userAgent.toLowerCase());
 
 if (isIE) {
@@ -23,7 +24,7 @@ if (isIE) {
   // main implementation except for ".clone(true, true)" which
   // will perform a deep clone with events and data
   Thorax.CollectionView.prototype._replaceHTML = function(html) {
-    if (this.collection && this._objectOptionsByCid[this.collection.cid] && this._renderCount) {
+    if (this.getObjectOptions(this.collection) && this._renderCount) {
       var element;
       var oldCollectionElement = this.getCollectionElement().clone(true, true);
       element = _replaceHTML.call(this, html);
