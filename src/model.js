@@ -48,7 +48,7 @@ dataObject('model', {
 });
 
 function onModelChange(model) {
-  var modelOptions = this.objectOptions(model) || {};
+  var modelOptions = this.getObjectOptions(model) || {};
   // !modelOptions will be true when setModel(false) is called
   this.conditionalRender(modelOptions.render);
 }
@@ -56,7 +56,7 @@ function onModelChange(model) {
 Thorax.View.on({
   model: {
     invalid: function(model, errors) {
-      if (this.objectOptions(model).invalid) {
+      if (this.getObjectOptions(model).invalid) {
         this.trigger('invalid', errors, model);
       }
     },

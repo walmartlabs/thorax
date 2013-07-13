@@ -173,7 +173,7 @@ Thorax.View.on({
   'before:rendered': function() {
     if (!this._renderCount) { return; }
 
-    var modelOptions = this.objectOptions(this.model);
+    var modelOptions = this.getObjectOptions(this.model);
     // When we have previously populated and rendered the view, reuse the user data
     this.previousFormData = filterObject(
       this.serialize(_.extend({ set: false, validate: false, _silent: true }, modelOptions)),
@@ -272,6 +272,6 @@ function resetSubmitState() {
 }
 
 function populateOptions(view) {
-  var modelOptions = view.objectOptions(view.model) || {};
+  var modelOptions = view.getObjectOptions(view.model) || {};
   return modelOptions.populate === true ? {} : modelOptions.populate;
 }

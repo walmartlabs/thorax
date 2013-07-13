@@ -813,7 +813,7 @@ describe('loading', function() {
       this.clock.tick(1000);
 
       var collectionView = _.values(view.children)[0],
-          options = collectionView.objectOptions(collectionView.collection);
+          options = collectionView.getObjectOptions(collectionView.collection);
       expect(options.ignoreErrors).to.equal(true);
       expect(options.background).to.equal(true);
       expect(view.$el.hasClass('loading')).to.be['true'];

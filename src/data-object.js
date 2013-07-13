@@ -53,7 +53,7 @@ function dataObject(type, spec) {
 }
 
 _.extend(Thorax.View.prototype, {
-  objectOptions: function(dataObject) {
+  getObjectOptions: function(dataObject) {
     return dataObject && this._objectOptionsByCid[dataObject.cid];
   },
 
