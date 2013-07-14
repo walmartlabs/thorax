@@ -10,7 +10,7 @@ inheritVars.model.change = function() {
 
   var populate = populateOptions(this);
   if (this._renderCount && populate) {
-    this.populate(this.model.attributes, populate);
+    this.populate(!populate.context && this.model.attributes, populate);
   }
 };
 
@@ -183,8 +183,8 @@ Thorax.View.on({
   rendered: function() {
     var populate = populateOptions(this);
 
-    if (populate && !this._isChanging && !this._populateCount && this.model.attributes) {
-      this.populate(this.model.attributes, populate);
+    if (populate && !this._isChanging && !this._populateCount) {
+      this.populate(!populate.context && this.model.attributes, populate);
     }
     if (this.previousFormData) {
       this.populate(this.previousFormData, _.extend({_silent: true}, populate));
