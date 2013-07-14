@@ -16,8 +16,7 @@ Thorax.LayoutView = Thorax.View.extend({
   },
   setView: function(view, options) {
     options = _.extend({
-      scroll: true,
-      destroy: true
+      scroll: true
     }, options || {});
     if (_.isString(view)) {
       view = new (Thorax.Util.registryGet(Thorax, 'Views', view, false))();
@@ -27,19 +26,12 @@ Thorax.LayoutView = Thorax.View.extend({
     if (view === oldView) {
       return false;
     }
-    if (options.destroy && view) {
-      view._shouldDestroyOnNextSetView = true;
-    }
 
     this.trigger('change:view:start', view, oldView, options);
-
     if (oldView) {
-      this._removeChild(oldView);
       oldView.$el.remove();
       triggerLifecycleEvent.call(oldView, 'deactivated', options);
-      if (oldView._shouldDestroyOnNextSetView) {
-        oldView.destroy();
-      }
+      this._removeChild(oldView);
     }
 
     if (view) {
