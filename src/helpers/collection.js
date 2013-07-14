@@ -14,15 +14,13 @@ Thorax.CollectionHelperView = Thorax.CollectionView.extend({
   },
 
   constructor: function(options) {
-    _.each(collectionOptionNames, function(viewAttributeName, helperOptionName) {
-      if (options.options[helperOptionName]) {
-        var value = options.options[helperOptionName];
-        if (viewAttributeName === 'itemTemplate' || viewAttributeName === 'emptyTemplate') {
-          value = Thorax.Util.getTemplate(value);
-        }
-        options[viewAttributeName] = value;
-      }
-    });
+    // need to fetch templates if template name was passed
+    if (options.options['item-template']) {
+      options.itemTemplate = Thorax.Util.getTemplate(options.options['item-template']);
+    }
+    if (options.options['empty-template']) {
+      options.emptyTemplate = Thorax.Util.getTemplate(options.options['empty-template']);
+    }
 
     // Handlebars.VM.noop is passed in the handlebars options object as
     // a default for fn and inverse, if a block was present. Need to
@@ -54,8 +52,14 @@ Thorax.CollectionHelperView = Thorax.CollectionView.extend({
     }
 
     if (this.parent.name) {
+      if (!this.emptyView && !this.parent.renderEmpty) {
+        this.emptyView = Thorax.Util.getViewClass(this.parent.name + '-empty', true);
+      }
       if (!this.emptyTemplate && !this.parent.renderEmpty) {
         this.emptyTemplate = Thorax.Util.getTemplate(this.parent.name + '-empty', true);
+      }
+      if (!this.itemView && !this.parent.renderItem) {
+        this.itemView = Thorax.Util.getViewClass(this.parent.name + '-item', true);
       }
       if (!this.itemTemplate && !this.parent.renderItem) {
         // item template must be present if an itemView is not
@@ -83,7 +87,8 @@ Thorax.CollectionHelperView = Thorax.CollectionView.extend({
 
 _.extend(Thorax.CollectionHelperView.prototype, helperViewPrototype);
 
-var collectionOptionNames = {
+
+Thorax.CollectionHelperView.attributeWhiteList = {
   'item-context': 'itemContext',
   'item-filter': 'itemFilter',
   'item-template': 'itemTemplate',
@@ -98,7 +103,7 @@ function forwardRenderEvent(eventName) {
     var args = _.toArray(arguments);
     args.unshift(eventName);
     this.parent.trigger.apply(this.parent, args);
-  }
+  };
 }
 
 var forwardableProperties = [

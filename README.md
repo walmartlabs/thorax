@@ -455,7 +455,7 @@ To prevent child views from having their inputs populated use:
 
 ### validateInput *view.validateInput(attributes)*
 
-Validate the attributes created by `serialize`, must return an array or nothing (if valid). It's recommended that the array contain hashes with `name` and `message` attributes, but arbitrary data or objects may be passed. If the array has a zero length the attributes are considered to be valid. Returning an array with any errors will trigger the `error` event.
+Validate the attributes created by `serialize`, must return an array or nothing (if valid). It's recommended that the array contain hashes with `name` and `message` attributes, but arbitrary data or objects may be passed. If the array has a zero length the attributes are considered to be valid. Returning an array with any errors will trigger the `invalid` event.
 
     validateInput: function(attributes) {
       var errors = [];
@@ -1058,13 +1058,13 @@ Triggered on a view when `serialize` is called, before `validateInput` is called
 
 ### validate *validate (attributes, errors)*
 
-Triggered on a view when `serialize` is called, passed an an attributes hash and errors array after `validateInput` is called. Use in combination with the `error` event to display and clear errors from your views.
+Triggered on a view when `serialize` is called, passed an an attributes hash and errors array after `validateInput` is called. Use in combination with the `invalid` event to display and clear errors from your views.
 
     Thorax.View.on({
       validate: function(attributes, errors) {
         //clear previous errors if present
       },
-      error: function(errors) {
+      invalid: function(errors) {
         errors.forEach(function(error) {
           //lookup input by error.name
           //display error from error.message
@@ -1072,7 +1072,7 @@ Triggered on a view when `serialize` is called, passed an an attributes hash and
       }
     });
 
-### error *error (errors)*
+### invalid *invalid (errors)*
 
 Triggered on a view when `serialize` is called, if validateInput returned an array with any errors.
 

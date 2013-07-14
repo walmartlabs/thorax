@@ -40,6 +40,17 @@ describe('view helper', function() {
     expect(parent.$el.html()).to.equal('');
   });
 
+  it("should not allow use of arbitrary HTML attributes", function() {
+    var view = new Thorax.View({
+      template: Handlebars.compile('{{view child random="value"}}'),
+      child: new Thorax.View({
+        template: Handlebars.compile("hello world")
+      })
+    });
+    view.render()
+    expect(view.$('[random="value"]').length).to.equal(0);
+  });
+
   it("child views", function() {
     var childRenderedCount = 0,
         parentRenderedCount = 0;

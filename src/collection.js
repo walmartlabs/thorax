@@ -1,4 +1,4 @@
-/*global createRegistryWrapper, dataObject, getEventCallback, getValue, modelCidAttributeName, viewCidAttributeName */
+/*global assignView, assignTemplate, createRegistryWrapper, dataObject, getEventCallback, getValue, modelCidAttributeName, viewCidAttributeName */
 var _fetch = Backbone.Collection.prototype.fetch,
     _reset = Backbone.Collection.prototype.reset,
     _replaceHTML = Thorax.View.prototype._replaceHTML,
@@ -64,7 +64,7 @@ Thorax.CollectionView = Thorax.View.extend({
 
   // preserve collection element if it was not created with {{collection}} helper
   _replaceHTML: function(html) {
-    if (this.collection && this._objectOptionsByCid[this.collection.cid] && this._renderCount) {
+    if (this.collection && this.getObjectOptions(this.collection) && this._renderCount) {
       var element;
       var oldCollectionElement = this.getCollectionElement();
       element = _replaceHTML.call(this, html);
@@ -196,6 +196,11 @@ Thorax.CollectionView = Thorax.View.extend({
   },
   emptyClass: 'empty',
   renderEmpty: function() {
+    if (!this.emptyView) {
+      assignView.call(this, 'emptyView', {
+        extension: '-empty'
+      });
+    }
     if (!this.emptyTemplate && !this.emptyView) {
       assignTemplate.call(this, 'emptyTemplate', {
         extension: '-empty',
@@ -215,6 +220,12 @@ Thorax.CollectionView = Thorax.View.extend({
     }
   },
   renderItem: function(model, i) {
+    if (!this.itemView) {
+      assignView.call(this, 'itemView', {
+        extension: '-item',
+        required: false
+      });
+    }
     if (!this.itemTemplate && !this.itemView) {
       assignTemplate.call(this, 'itemTemplate', {
         extension: '-item',
@@ -284,7 +295,7 @@ Thorax.CollectionView.on({
 Thorax.View.on({
   collection: {
     invalid: function(collection, message) {
-      if (this._objectOptionsByCid[collection.cid].invalid) {
+      if (this.getObjectOptions(collection).invalid) {
         this.trigger('invalid', message, collection);
       }
     },
@@ -296,7 +307,7 @@ Thorax.View.on({
 
 function onCollectionReset(collection) {
   // Undefined to force conditional render
-  var options = (collection && this._objectOptionsByCid[collection.cid]) || undefined;
+  var options = this.getObjectOptions(collection) || undefined;
   if (this.shouldRender(options && options.render)) {
     this.renderCollection && this.renderCollection();
   }
@@ -307,7 +318,7 @@ function onCollectionReset(collection) {
 // to a model
 function onSetCollection(collection) {
   // Undefined to force conditional render
-  var options = (collection && this._objectOptionsByCid[collection.cid]) || undefined;
+  var options = this.getObjectOptions(collection) || undefined;
   if (this.shouldRender(options && options.render)) {
     // Ensure that something is there if we are going to render the collection.
     this.ensureRendered();

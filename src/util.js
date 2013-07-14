@@ -28,6 +28,25 @@ function registryGet(object, type, name, ignoreErrors) {
   }
 }
 
+function assignView(attributeName, options) {
+  var ViewClass;
+  // if attribute is the name of view to fetch
+  if (_.isString(this[attributeName])) {
+    ViewClass = Thorax.Util.getViewClass(this[attributeName], true);
+  // else try and fetch the view based on the name
+  } else if (this.name && !_.isFunction(this[attributeName])) {
+    ViewClass = Thorax.Util.getViewClass(this.name + (options.extension || ''), true);
+  }
+  // if we found something, assign it
+  if (ViewClass && !_.isFunction(this[attributeName])) {
+    this[attributeName] = ViewClass;
+  }
+  // if nothing was found and it's required, throw
+  if (options.required && !_.isFunction(this[attributeName])) {
+    throw new Error('View ' + (this.name || this.cid) + ' requires: ' + attributeName);
+  }
+}
+
 function assignTemplate(attributeName, options) {
   var template;
   // if attribute is the name of template to fetch
@@ -172,10 +191,6 @@ function getOptionsData(options) {
   return options.data;
 }
 
-// These whitelisted attributes will be the only ones passed
-// from the options hash to Thorax.Util.tag
-var htmlAttributesToCopy = ['id', 'className', 'tagName'];
-
 // In helpers "tagName" or "tag" may be specified, as well
 // as "class" or "className". Normalize to "tagName" and
 // "className" to match the property names used by Backbone
@@ -195,14 +210,17 @@ function normalizeHTMLAttributeOptions(options) {
 
 Thorax.Util = {
   getViewInstance: function(name, attributes) {
-    attributes = attributes || {};
+    var ViewClass = Thorax.Util.getViewClass(name, true);
+    return ViewClass ? new ViewClass(attributes || {}) : name;
+  },
+
+  getViewClass: function(name, ignoreErrors) {
     if (_.isString(name)) {
-      var Klass = registryGet(Thorax, 'Views', name, false);
-      return Klass.cid ? _.extend(Klass, attributes || {}) : new Klass(attributes);
+      return registryGet(Thorax, 'Views', name, ignoreErrors);
     } else if (_.isFunction(name)) {
-      return new name(attributes);
-    } else {
       return name;
+    } else {
+      return false;
     }
   },
 
