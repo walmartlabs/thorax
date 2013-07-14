@@ -5,21 +5,35 @@ describe('view helper', function() {
     }).to['throw']();
   });
 
+  it("throws an error when any hash arguments are passed", function() {
+    var view = new Thorax.View({
+      instance: new Thorax.View({
+        template: Handlebars.compile('')
+      }),
+      template: Handlebars.compile('{{view instance tag="span" key="value"}}')
+    });
+    expect(function() {
+      view.render();
+    }).to['throw']();
+  });
+
   it('should use the registry to lookup view clases', function() {
     //test nested
     Thorax.Views.Outer = {
       Inner: Thorax.View.extend({
+        tagName: 'span',
         template: function() { return 'inner'; }
       }),
       More: {
         Nested: Thorax.View.extend({
+          tagName: 'span',
           template: function() { return 'nested'; }
         })
       }
     };
 
     var view = new Thorax.View({
-      template: Handlebars.compile('<p>{{view "Outer.Inner" tag="span"}}</p><div>{{view "Outer.More.Nested" tag="span"}}</div>')
+      template: Handlebars.compile('<p>{{view "Outer.Inner"}}</p><div>{{view "Outer.More.Nested"}}</div>')
     });
     view.render();
     expect(view.$('p > span').html()).to.equal('inner', 'test nested registryGet');
@@ -38,17 +52,6 @@ describe('view helper', function() {
     });
     parent.render();
     expect(parent.$el.html()).to.equal('');
-  });
-
-  it("should not allow use of arbitrary HTML attributes", function() {
-    var view = new Thorax.View({
-      template: Handlebars.compile('{{view child random="value"}}'),
-      child: new Thorax.View({
-        template: Handlebars.compile("hello world")
-      })
-    });
-    view.render()
-    expect(view.$('[random="value"]').length).to.equal(0);
   });
 
   it("child views", function() {

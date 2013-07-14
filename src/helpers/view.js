@@ -4,6 +4,9 @@ Handlebars.registerViewHelper('view', {
     var View = args.length >= 1 ? args[0] : Thorax.View;
     return Thorax.Util.getViewInstance(View, options.options);
   },
+  modifyHTMLAttributes: function(htmlAttributes, instance) {
+    htmlAttributes.tagName = instance.el.tagName.toLowerCase();
+  },
   callback: function() {
     var instance = arguments[arguments.length-1],
         options = instance._helperOptions.options,
