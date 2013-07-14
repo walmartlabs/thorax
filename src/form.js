@@ -3,10 +3,14 @@
 inheritVars.model.defaultOptions.populate = true;
 
 var oldModelChange = inheritVars.model.change;
-inheritVars.model.change = function() {
+inheritVars.model.change = function(model, options) {
   this._isChanging = true;
   oldModelChange.apply(this, arguments);
   this._isChanging = false;
+
+  if (options && options.serializing) {
+    return;
+  }
 
   var populate = populateOptions(this);
   if (this._renderCount && populate) {
@@ -82,7 +86,7 @@ _.extend(Thorax.View.prototype, {
     }
 
     if (options.set && this.model) {
-      if (!this.model.set(attributes, {silent: options.silent})) {
+      if (!this.model.set(attributes, {silent: options.silent, serializing: true})) {
         return false;
       }
     }
