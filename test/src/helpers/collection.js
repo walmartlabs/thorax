@@ -294,7 +294,14 @@ describe('collection helper', function() {
       template: Handlebars.compile('{{#collection comments}}<p>{{comment}}</p>{{#collection authors}}<span>{{author}}</span>{{/collection}}{{/collection}}')
     });
     var view = new Thorax.View({
-      template: Handlebars.compile('{{#empty posts}}empty{{else}}{{#collection posts name="outer"}}<h2>{{title}}</h2>{{view "comments" comments=comments}}</div>{{/collection}}{{/empty}}')
+      postsContext: function(model) {
+        return _.extend({}, model.attributes, {
+          comments: new Thorax.Views['comments']({
+            comments: model.get('comments')
+          })
+        });
+      },
+      template: Handlebars.compile('{{#empty posts}}empty{{else}}{{#collection posts name="outer" item-context="postsContext"}}<h2>{{title}}</h2>{{view comments}}</div>{{/collection}}{{/empty}}')
     });
     testNesting(view, 'nested view');
 
