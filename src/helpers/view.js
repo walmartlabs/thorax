@@ -1,4 +1,4 @@
-/*global viewTemplateOverrides */
+/*global viewTemplateOverrides, createErrorMessage */
 Handlebars.registerViewHelper('view', {
   factory: function(args, options) {
     var View = args.length >= 1 ? args[0] : Thorax.View;
@@ -14,7 +14,7 @@ Handlebars.registerViewHelper('view', {
         options = instance._helperOptions.options,
         placeholderId = instance.cid;
     if (options.hash && _.keys(options.hash).length > 0) {
-      throw new Error("Hash arguments are not allowed in the view helper as templates should not introduce side effects to view instances.");
+      throw new Error(createErrorMessage('view-helper-hash-args'));
     }
     if (options.fn) {
       viewTemplateOverrides[placeholderId] = options.fn;

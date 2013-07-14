@@ -1,4 +1,4 @@
-/*global getOptionsData, normalizeHTMLAttributeOptions*/
+/*global getOptionsData, normalizeHTMLAttributeOptions, createErrorMessage */
 var layoutCidAttributeName = 'data-layout-cid';
 
 Thorax.LayoutView = Thorax.View.extend({
@@ -57,7 +57,7 @@ Handlebars.registerHelper('layout-element', function(options) {
   var view = getOptionsData(options).view;
   // duck type check for LayoutView
   if (!view.getView) {
-    throw new Error('layout-element must be used within a LayoutView');
+    throw new Error(createErrorMessage('layout-element-helper'));
   }
   options.hash[layoutCidAttributeName] = view.cid;
   normalizeHTMLAttributeOptions(options.hash);

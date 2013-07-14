@@ -1,3 +1,5 @@
+/* global createErrorMessage */
+
 Handlebars.registerHelper('super', function(options) {
   var declaringView = getOptionsData(options).view,
       parent = declaringView.constructor && declaringView.constructor.__super__;
@@ -5,7 +7,7 @@ Handlebars.registerHelper('super', function(options) {
     var template = parent.template;
     if (!template) {
       if (!parent.name) {
-        throw new Error('Cannot use super helper when parent has no name or template.');
+        throw new Error(createErrorMessage('super-parent'));
       }
       template = parent.name;
     }
