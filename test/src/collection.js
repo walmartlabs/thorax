@@ -103,10 +103,14 @@ describe('collection', function() {
         name: 'sub-view-with-same-collection',
         template: Handlebars.compile('{{collection a tag="ul" item-template="letter-item"}}')
       });
+      var a = new Thorax.Collection(letterCollection.models);
       var view = new Thorax.View({
-        a: new Thorax.Collection(letterCollection.models),
+        a: a,
         b: new Thorax.Collection(letterCollection.models),
-        template: Handlebars.compile('{{collection a tag="ul" item-template="letter-item"}}{{view "sub-view-with-same-collection" a=a}}')
+        subViewWithSameCollection: new Thorax.Views['sub-view-with-same-collection']({
+          a: a
+        }),
+        template: Handlebars.compile('{{collection a tag="ul" item-template="letter-item"}}{{view subViewWithSameCollection}}')
       });
       view.render();
       expect(view.$('li').length).to.equal(letterCollection.models.length * 2);

@@ -132,7 +132,9 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
     }
 
     htmlAttributes[viewPlaceholderAttributeName] = instance.cid;
-
+    if (ViewClass.modifyHTMLAttributes) {
+      ViewClass.modifyHTMLAttributes(htmlAttributes, instance);
+    }
     return new Handlebars.SafeString(Thorax.Util.tag(htmlAttributes, '', expandTokens ? this : null));
   });
   var helper = Handlebars.helpers[name];
