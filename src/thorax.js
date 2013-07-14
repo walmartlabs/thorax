@@ -93,6 +93,15 @@ Thorax.View = Backbone.View.extend({
     }
     view.retain();
     this.children[view.cid] = view;
+    // _helperOptions is used to detect if is HelperView
+    // we do not want to remove child in this case as
+    // we are adding the HelperView to the declaring view
+    // (whatever view used the view helper in it's template)
+    // but it's parent will not equal the declaring view
+    // in the case of a nested helper, which will cause an error.
+    // In either case it's not necessary to ever call
+    // _removeChild on a HelperView as _addChild should only
+    // be called when a HelperView is created.  
     if (view.parent && view.parent !== this && !view._helperOptions) {
       view.parent._removeChild(view);
     }
