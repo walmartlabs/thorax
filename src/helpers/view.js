@@ -4,6 +4,8 @@ Handlebars.registerViewHelper('view', {
     var View = args.length >= 1 ? args[0] : Thorax.View;
     return Thorax.Util.getViewInstance(View, options.options);
   },
+  // ensure generated placeholder tag in template
+  // will match tag of view instance
   modifyHTMLAttributes: function(htmlAttributes, instance) {
     htmlAttributes.tagName = instance.el.tagName.toLowerCase();
   },
