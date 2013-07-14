@@ -45,8 +45,7 @@ _.extend(Thorax.View.prototype, {
     options = _.extend({
       set: true,
       validate: true,
-      children: true,
-      silent: true
+      children: true
     }, options || {});
 
     var attributes = options.attributes || {};
