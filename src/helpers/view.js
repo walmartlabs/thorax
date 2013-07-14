@@ -8,7 +8,9 @@ Handlebars.registerViewHelper('view', {
     var instance = arguments[arguments.length-1],
         options = instance._helperOptions.options,
         placeholderId = instance.cid;
-
+    if (options.hash && _.keys(options.hash).length > 0) {
+      throw new Error("Hash arguments are not allowed in the view helper as templates should not introduce side effects to view instances.");
+    }
     if (options.fn) {
       viewTemplateOverrides[placeholderId] = options.fn;
     }
