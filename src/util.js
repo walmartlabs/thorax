@@ -1,4 +1,8 @@
 /*global createRegistryWrapper:true, cloneEvents: true */
+function createErrorMessage(code) {
+  return 'Error "' + code + '". For more information visit http://thoraxjs.org/error-codes' + '#' + code;
+}
+
 function createRegistryWrapper(klass, hash) {
   var $super = klass.extend;
   klass.extend = function() {
@@ -186,7 +190,7 @@ function addEvents(target, source, context, listenToObject) {
 
 function getOptionsData(options) {
   if (!options || !options.data) {
-    throw new Error('Handlebars template compiled without data, use: Handlebars.compile(template, {data: true})');
+    throw new Error(createErrorMessage('handlebars-no-data'));
   }
   return options.data;
 }

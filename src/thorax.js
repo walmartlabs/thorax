@@ -1,4 +1,4 @@
-/*global cloneInheritVars, createInheritVars, resetInheritVars, createRegistryWrapper, getValue, inheritVars */
+/*global cloneInheritVars, createInheritVars, resetInheritVars, createRegistryWrapper, getValue, inheritVars, createErrorMessage */
 
 //support zepto.forEach on jQuery
 if (!$.fn.forEach) {
@@ -146,7 +146,7 @@ Thorax.View = Backbone.View.extend({
       // execution. If in a situation where you need to rerender in response to an event that is
       // triggered sync in the rendering lifecycle it's recommended to defer the subsequent render
       // or refactor so that all preconditions are known prior to exec.
-      throw new Error('nested-render');
+      throw new Error(createErrorMessage('nested-render'));
     }
 
     this._previousHelpers = _.filter(this.children, function(child) {
