@@ -238,7 +238,7 @@ function eachNamedInput(view, options, iterator) {
         return;
       }
     }
-    if (this.type !== 'button' && this.type !== 'cancel' && this.type !== 'submit' && this.name && this.name !== '') {
+    if (this.type !== 'button' && this.type !== 'cancel' && this.type !== 'submit' && this.name) {
       iterator(this, i);
       ++i;
     }
