@@ -258,7 +258,7 @@ function objectAndKeyFromAttributesAndName(attributes, name, options, callback) 
       if (mode === 'serialize') {
         object[key] = {};
       } else {
-        return callback(false, key);
+        return callback(undefined, key);
       }
     }
     object = object[key];
