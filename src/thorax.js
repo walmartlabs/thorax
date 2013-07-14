@@ -50,6 +50,8 @@ Thorax.View = Backbone.View.extend({
   _configure: function(options) {
     var self = this;
 
+    this._referenceCount = 0;
+
     this._objectOptionsByCid = {};
     this._boundDataObjectsByCid = {};
 
@@ -86,10 +88,24 @@ Thorax.View = Backbone.View.extend({
   },
 
   _addChild: function(view) {
-    this.children[view.cid] = view;
-    if (!view.parent) {
-      view.parent = this;
+    if (this.children[view.cid]) {
+      return;
     }
+    view.retain();
+    this.children[view.cid] = view;
+    // _helperOptions is used to detect if is HelperView
+    // we do not want to remove child in this case as
+    // we are adding the HelperView to the declaring view
+    // (whatever view used the view helper in it's template)
+    // but it's parent will not equal the declaring view
+    // in the case of a nested helper, which will cause an error.
+    // In either case it's not necessary to ever call
+    // _removeChild on a HelperView as _addChild should only
+    // be called when a HelperView is created.  
+    if (view.parent && view.parent !== this && !view._helperOptions) {
+      view.parent._removeChild(view);
+    }
+    view.parent = this;
     this.trigger('child', view);
     return view;
   },
@@ -97,26 +113,18 @@ Thorax.View = Backbone.View.extend({
   _removeChild: function(view) {
     delete this.children[view.cid];
     view.parent = null;
+    view.release();
     return view;
   },
 
-  destroy: function(options) {
-    options = _.defaults(options || {}, {
-      children: true
-    });
+  _destroy: function(options) {
     _.each(this._boundDataObjectsByCid, this.unbindDataObject, this);
     this.trigger('destroyed');
     delete viewsIndexedByCid[this.cid];
+
     _.each(this.children, function(child) {
       this._removeChild(child);
-      if (options.children) {
-        child.destroy();
-      }
     }, this);
-
-    if (this.parent) {
-      this.parent._removeChild(this);
-    }
 
     if (this.el) {
       this.undelegateEvents();
@@ -141,7 +149,9 @@ Thorax.View = Backbone.View.extend({
       throw new Error('nested-render');
     }
 
-    this._previousHelpers = _.filter(this.children, function(child) { return child._helperOptions; });
+    this._previousHelpers = _.filter(this.children, function(child) {
+      return child._helperOptions;
+    });
 
     var children = {};
     _.each(this.children, function(child, key) {
@@ -168,9 +178,8 @@ Thorax.View = Backbone.View.extend({
 
       // Destroy any helpers that may be lingering
       _.each(this._previousHelpers, function(child) {
-        child.destroy();
-        child.parent = undefined;
-      });
+        this._removeChild(child);
+      }, this);
       this._previousHelpers = undefined;
 
       //accept a view, string, Handlebars.SafeString or DOM element
@@ -252,6 +261,17 @@ Thorax.View = Backbone.View.extend({
       this.trigger('append');
       return element;
     }
+  },
+
+  release: function() {
+    --this._referenceCount;
+    if (this._referenceCount <= 0) {
+      this._destroy();
+    }
+  },
+
+  retain: function() {
+    ++this._referenceCount;
   },
 
   _replaceHTML: function(html) {

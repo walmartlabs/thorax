@@ -389,9 +389,9 @@ describe('collection helper', function() {
           .to.have.been.calledOnce
           .to.have.been.calledOn(view);
     });
-    it('should not destroy views rendered with renderItem on change', function() {
+    it('should not release views rendered with renderItem on change', function() {
       var child = new (Thorax.View.extend({
-        destroy: function() { throw new Error('Destroy'); },
+        release: function() { throw new Error('Release'); },
 
         template: function() { return '<div>foo</div>'; }
       }))();
