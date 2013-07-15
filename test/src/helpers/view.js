@@ -5,7 +5,7 @@ describe('view helper', function() {
     }).to['throw']();
   });
 
-  it("throws an error when any hash arguments are passed", function() {
+  it("throws an error when any hash arguments are passed on an instance", function() {
     var view = new Thorax.View({
       instance: new Thorax.View({
         template: Handlebars.compile('')
@@ -15,6 +15,19 @@ describe('view helper', function() {
     expect(function() {
       view.render();
     }).to['throw']();
+  });
+
+  it("should allow hash arguments when a view class name is passed", function() {
+    Thorax.View.extend({
+      tagName: 'p',
+      name: 'HashArgsClassTest',
+      template: Handlebars.compile('<span>{{key}}</span>')
+    });
+    var view = new Thorax.View({
+      template: Handlebars.compile('<div>{{view "HashArgsClassTest" key="value"}}</div>')
+    });
+    view.render();
+    expect(view.$('span').html()).to.equal('value');
   });
 
   it('should use the registry to lookup view clases', function() {
