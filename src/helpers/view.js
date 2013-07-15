@@ -9,11 +9,15 @@ Handlebars.registerViewHelper('view', {
   modifyHTMLAttributes: function(htmlAttributes, instance) {
     htmlAttributes.tagName = instance.el.tagName.toLowerCase();
   },
-  callback: function() {
+  callback: function(view) {
     var instance = arguments[arguments.length-1],
         options = instance._helperOptions.options,
         placeholderId = instance.cid;
-    if (options.hash && _.keys(options.hash).length > 0) {
+    // view will be the argument passed to the helper, if it was
+    // a string, a new instance was created on the fly, ok to pass
+    // hash arguments, otherwise need to throw as templates should
+    // not introduce side effects to existing view instances
+    if (!_.isString(view) && options.hash && _.keys(options.hash).length > 0) {
       throw new Error(createErrorMessage('view-helper-hash-args'));
     }
     if (options.fn) {
