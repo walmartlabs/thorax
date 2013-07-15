@@ -2,6 +2,8 @@ var fs = require('fs'),
     path = require('path'),
     exec = require('child_process').exec,
     uglify = require('uglify-js'),
+    semver = require('semver'),
+    async = require('async'),
     targetDir = '../build/release';
 
 try {
@@ -36,8 +38,48 @@ function minify(code) {
   return pro.gen_code(ast);
 }
 
+function modifyBowerJSON(bowerJSONPath, callback) {
+  var bowerJSON = JSON.parse(fs.readFileSync(bowerJSONPath).toString());
+  callback(bowerJSON);
+  fs.writeFileSync(bowerJSONPath, JSON.stringify(bowerJSON, null, 2));
+}
+
+function generateExec(string) {
+  return function(callback) {
+    exec(string, callback);
+  }
+}
+
 module.exports = function(grunt) {
-  grunt.registerTask('thorax:release', function() {
+  var repoRoot = path.join(__dirname, '..'),
+      tmpRepoRoot = path.join(repoRoot, 'tmp-component-repo');
+  grunt.registerTask('thorax:bower-release', function(type) {
+    modifyBowerJSON(path.join(__dirname, '..', 'bower.json'), function(bowerJSON) {
+      bowerJSON.version = semver.inc(bowerJSON.version, type);
+      console.log('bower version now at ' + bowerJSON.version);
+      async.series([
+        generateExec('git add ' + path.join(repoRoot, 'bower.json') + '; git commit -m "Update bower version to ' + bowerJSON.version + '";'),
+        generateExec('git clone git@github.com:components/thorax.git ' + tmpRepoRoot);
+        generateExec('cp ' + path.join(repoRoot, 'build/dev/thorax.js') + ' ' + path.join(tmpRepoRoot, 'thorax.js')),
+        generateExec('cp ' + path.join(repoRoot, 'build/dev/thorax-mobile.js') + ' ' + path.join(tmpRepoRoot, 'thorax-mobile.js')),
+        function(callback) {
+          modifyBowerJSON(path.join(tmpRepoRoot, 'bower.json'), function(bowerJSON) {
+            bowerJSON.version = semver.inc(bowerJSON.version, type);
+            callback();
+          });
+        },
+        generateExec('git add ' + path.join(tmpRepoRoot, 'bower.json')),
+        generateExec('cd ' + tmpRepoRoot + '; git commit -m "Update to ' + bowerJSON.version + '"'),
+        generateExec('cd ' + tmpRepoRoot + '; git push origin master'),
+        generateExec('cd ' + tmpRepoRoot + '; git push origin master'),
+        generateExec('cd ' + tmpRepoRoot + '; git tag ' + bowerJSON.version + ' -m "release ' + bowerJSON.version + '"'),
+        generateExec('cd ' + tmpRepoRoot + '; git push --tags'),
+        generateExec('rm -rf ' + tmpRepoRoot)
+      ]);
+    });
+  });
+
+  grunt.registerTask('thorax:build', function(type) {
     var done = this.async();
     exec('jake lumbar', function(error, stdout, stderr) {
       error && process.stdout.write(error.toString());
