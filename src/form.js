@@ -3,14 +3,18 @@
 inheritVars.model.defaultOptions.populate = true;
 
 var oldModelChange = inheritVars.model.change;
-inheritVars.model.change = function() {
+inheritVars.model.change = function(model, options) {
   this._isChanging = true;
   oldModelChange.apply(this, arguments);
   this._isChanging = false;
 
+  if (options && options.serializing) {
+    return;
+  }
+
   var populate = populateOptions(this);
   if (this._renderCount && populate) {
-    this.populate(this.model.attributes, populate);
+    this.populate(!populate.context && this.model.attributes, populate);
   }
 };
 
@@ -41,8 +45,7 @@ _.extend(Thorax.View.prototype, {
     options = _.extend({
       set: true,
       validate: true,
-      children: true,
-      silent: true
+      children: true
     }, options || {});
 
     var attributes = options.attributes || {};
@@ -82,7 +85,7 @@ _.extend(Thorax.View.prototype, {
     }
 
     if (options.set && this.model) {
-      if (!this.model.set(attributes, {silent: options.silent})) {
+      if (!this.model.set(attributes, {silent: options.silent, serializing: true})) {
         return false;
       }
     }
@@ -183,8 +186,8 @@ Thorax.View.on({
   rendered: function() {
     var populate = populateOptions(this);
 
-    if (populate && !this._isChanging && !this._populateCount && this.model.attributes) {
-      this.populate(this.model.attributes, populate);
+    if (populate && !this._isChanging && !this._populateCount) {
+      this.populate(!populate.context && this.model.attributes, populate);
     }
     if (this.previousFormData) {
       this.populate(this.previousFormData, _.extend({_silent: true}, populate));
@@ -238,7 +241,7 @@ function eachNamedInput(view, options, iterator) {
         return;
       }
     }
-    if (this.type !== 'button' && this.type !== 'cancel' && this.type !== 'submit' && this.name && this.name !== '') {
+    if (this.type !== 'button' && this.type !== 'cancel' && this.type !== 'submit' && this.name) {
       iterator(this, i);
       ++i;
     }
@@ -258,7 +261,7 @@ function objectAndKeyFromAttributesAndName(attributes, name, options, callback) 
       if (mode === 'serialize') {
         object[key] = {};
       } else {
-        return callback(false, key);
+        return callback(undefined, key);
       }
     }
     object = object[key];

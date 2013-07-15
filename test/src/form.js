@@ -183,6 +183,24 @@ describe('form', function() {
     expect(serializeSpy.callCount).to.equal(0);
   });
 
+  it('should not populate missing fields', function() {
+    var FormView = Thorax.View.extend({
+      name: 'form',
+      template: function() {
+        return '<form><input name="test"><input name="nested[test]"><input name="merge"></form>';
+      }
+    });
+
+    var model = new Thorax.Model({});
+
+    var view = new FormView();
+    view.setModel(model);
+    view.render();
+
+    // Expect the user input to persist
+    expect(view.$('input[name="nested[test]"]')[0].value).to.equal('');
+  });
+
   it('works when calling render before binding the model', function() {
     var FormView = Thorax.View.extend({
       name: 'form',

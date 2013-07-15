@@ -47,7 +47,11 @@ dataObject('model', {
   cidAttrName: modelCidAttributeName
 });
 
-function onModelChange(model) {
+function onModelChange(model, options) {
+  if (options && options.serializing) {
+    return;
+  }
+
   var modelOptions = this.getObjectOptions(model) || {};
   // !modelOptions will be true when setModel(false) is called
   this.conditionalRender(modelOptions.render);
@@ -63,9 +67,9 @@ Thorax.View.on({
     error: function(model, resp, options) {
       this.trigger('error', resp, model);
     },
-    change: function(model) {
+    change: function(model, options) {
       // Indirect refernece to allow for overrides
-      inheritVars.model.change.call(this, model);
+      inheritVars.model.change.call(this, model, options);
     }
   }
 });
