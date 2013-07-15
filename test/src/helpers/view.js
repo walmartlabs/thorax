@@ -19,14 +19,15 @@ describe('view helper', function() {
 
   it("should allow hash arguments when a view class name is passed", function() {
     Thorax.View.extend({
-      name: 'hash-args-class-test',
-      template: Handlebars.compile('{{key}}')
+      tagName: 'p',
+      name: 'HashArgsClassTest',
+      template: Handlebars.compile('<span>{{key}}</span>')
     });
     var view = new Thorax.View({
-      template: Handlebars.compile('{{view "hash-args-class-test" key="value"}}')
+      template: Handlebars.compile('<div>{{view "HashArgsClassTest" key="value"}}</div>')
     });
     view.render();
-    expect(view.$('> div').html()).to.equal('value');
+    expect(view.$('span').html()).to.equal('value');
   });
 
   it('should use the registry to lookup view clases', function() {
