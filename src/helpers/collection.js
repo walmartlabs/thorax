@@ -1,3 +1,5 @@
+/* global createErrorMessage */
+
 Thorax.CollectionHelperView = Thorax.CollectionView.extend({
   // Forward render events to the parent
   events: {
@@ -143,7 +145,7 @@ Handlebars.registerViewHelper('collection', Thorax.CollectionHelperView, functio
 
 Handlebars.registerHelper('collection-element', function(options) {
   if (!getOptionsData(options).view.renderCollection) {
-    throw new Error("collection-element helper must be declared inside of a CollectionView");
+    throw new Error(createErrorMessage('collection-element-helper'));
   }
   var hash = options.hash;
   normalizeHTMLAttributeOptions(hash);

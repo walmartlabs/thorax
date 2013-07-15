@@ -1,4 +1,4 @@
-/*global collectionOptionNames, inheritVars */
+/*global collectionOptionNames, inheritVars, createErrorMessage */
 
 var loadStart = 'load:start',
     loadEnd = 'load:end',
@@ -301,7 +301,7 @@ function fetchQueue(options, $super) {
     var reset = (this.fetchQueue[0] || {}).reset;
     if (reset !== options.reset) {
       // fetch with concurrent set & reset not allowed
-      throw new Error('mixed-fetch');
+      throw new Error(createErrorMessage('mixed-fetch'));
     }
   }
 
