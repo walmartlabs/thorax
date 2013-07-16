@@ -130,9 +130,10 @@ _.extend(Thorax.View.prototype, {
 
         if (!_.isUndefined(value)) {
           //will only execute if we have a name that matches the structure in attributes
-          if (element.type === 'checkbox' && _.isBoolean(value)) {
+          var isBinary = element.type === 'checkbox' || element.type === 'radio';
+          if (isBinary && _.isBoolean(value)) {
             element.checked = value;
-          } else if (element.type === 'checkbox' || element.type === 'radio') {
+          } else if (isBinary) {
             element.checked = value == element.value;
           } else {
             element.value = value;
