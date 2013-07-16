@@ -2,8 +2,6 @@ var fs = require('fs'),
     path = require('path'),
     exec = require('child_process').exec,
     uglify = require('uglify-js'),
-    semver = require('semver'),
-    async = require('async'),
     targetDir = '../build/release';
 
 try {
