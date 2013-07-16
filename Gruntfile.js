@@ -1,6 +1,5 @@
 module.exports = function(grunt) {
   grunt.loadTasks('tasks');
-  grunt.loadNpmTasks('grunt-release');
   grunt.loadNpmTasks('grunt-release-component');
   grunt.initConfig({
     'release-component': {
@@ -20,7 +19,7 @@ module.exports = function(grunt) {
     }
   });
 
-  ['major', 'minor', 'patch', 'prerelease'].forEach(function(type) {
+  ['major', 'minor', 'patch'].forEach(function(type) {
     grunt.registerTask('thorax:release:' + type, ['thorax:build', 'release-component:' + type]);
   });
 };
