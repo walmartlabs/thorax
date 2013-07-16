@@ -37,7 +37,7 @@ function minify(code) {
 }
 
 module.exports = function(grunt) {
-  grunt.registerTask('thorax:release', function() {
+  grunt.registerTask('thorax:build', function() {
     var done = this.async();
     exec('jake lumbar', function(error, stdout, stderr) {
       error && process.stdout.write(error.toString());
