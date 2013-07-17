@@ -112,6 +112,8 @@ _.extend(Thorax.View.prototype, {
   }
 });
 
+Thorax.View.prototype.bind = Thorax.View.prototype.on;
+
 // When view is ready trigger ready event on all
 // children that are present, then register an
 // event that will trigger ready on new children
