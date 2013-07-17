@@ -248,6 +248,30 @@ describe('event', function() {
     expect(spy.callCount).to.equal(1);
   });
 
+  it("on works after _ensureElement but before delegateEvents (basically initialize)", function() {
+    // this is useful for mixins for example
+    var spy = this.spy();
+    var TestView = Thorax.View.extend({
+      initialize: function() {
+        this.on({
+          'click button': spy
+        });
+      },
+      template: function() {
+        return '<button>foo</button>';
+      }
+    });
+
+    var view = new TestView();
+    view.render();
+    var el = view.$('button');
+    expect(el.length).to.equal(1);
+    $(document.body).append(view.$el);
+    el.trigger('click');
+    view.$el.remove();
+    expect(spy.callCount).to.equal(1);
+  });
+
   it('should trigger ready event on layout view', function() {
     var spy = this.spy(),
         layoutView = new Thorax.LayoutView(),
