@@ -60,7 +60,7 @@ _.extend(Thorax.View.prototype, {
       //accept on("click a", callback, context)
       _.each((_.isArray(callback) ? callback : [callback]), function(callback) {
         var params = eventParamsFromEventItem.call(this, eventName, callback, context || this);
-        if (params.type === 'DOM' && !this.$el) {
+        if (params.type === 'DOM' && !this._eventsDelegated) {
           //will call _addEvent during delegateEvents()
           if (!this._eventsToDelegate) {
             this._eventsToDelegate = [];
@@ -83,6 +83,7 @@ _.extend(Thorax.View.prototype, {
       this.on(events);
     }
     this._eventsToDelegate && _.each(this._eventsToDelegate, this._addEvent, this);
+    this._eventsDelegated = true;
   },
   //params may contain:
   //- name
