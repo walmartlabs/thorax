@@ -334,7 +334,7 @@ A hash of child view's indexed by `cid`. Child views may become attached to the 
 
 If a view was embedded inside another with the `view` helper, or a generated `HelperView` (for instance the `collection` or `empty` helpers) it will have a `parent` view attribute. In the case of `HelperView`s, the `parent` will be the view that declared the helper in its template.
 
-### retain *view.retain()*
+### retain *view.retain([owner])*
 
 Prevents a view from being destroyed if it would otherwise be. If a parent is destroyed all it's children will be destroyed, or if it was previously passed to `setView`
 
@@ -346,6 +346,8 @@ Given the code below:
     Application.setView(c);
 
 `b` will be destroyed, and `a` will not be.
+
+When the optional `owner` parameter is passed, the retain reference count will automatically be reduced when the owner view is destroyed.
 
 ### release *view.release()*
 
