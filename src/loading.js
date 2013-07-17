@@ -28,8 +28,13 @@ Thorax.loadHandler = function(start, end, context) {
         self._loadingTimeoutDuration : Thorax.View.prototype._loadingTimeoutDuration;
       loadInfo.timeout = setTimeout(function() {
           try {
-            loadInfo.run = true;
-            start.call(self, loadInfo.message, loadInfo.background, loadInfo);
+            // We have a slight race condtion in here where the end event may have occurred
+            // but the end timeout has not executed. Rather than killing a cumulative timeout
+            // immediately we'll protect from that case here
+            if (loadInfo.events.length) {
+              loadInfo.run = true;
+              start.call(self, loadInfo.message, loadInfo.background, loadInfo);
+            }
           } catch (e) {
             Thorax.onException('loadStart', e);
           }
