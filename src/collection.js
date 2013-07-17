@@ -121,11 +121,14 @@ Thorax.CollectionView = Thorax.View.extend({
       if (_.isString(itemView) && !itemView.match(/^\s*</m)) {
         itemView = '<div>' + itemView + '</div>';
       }
-      var itemElement = itemView.$el ? itemView.$el : _.filter($($.trim(itemView)), function(node) {
+      var itemElement = itemView.$el || $($.trim(itemView)).filter(function() {
         //filter out top level whitespace nodes
-        return node.nodeType === ELEMENT_NODE_TYPE;
+        return this.nodeType === ELEMENT_NODE_TYPE;
       });
-      model && $(itemElement).attr(modelCidAttributeName, model.cid);
+
+      if (model) {
+        itemElement.attr(modelCidAttributeName, model.cid);
+      }
       var previousModel = index > 0 ? this.collection.at(index - 1) : false;
       if (!previousModel) {
         $el.prepend(itemElement);
@@ -139,8 +142,12 @@ Thorax.CollectionView = Thorax.View.extend({
         el.setAttribute(modelCidAttributeName, model.cid);
       });
 
-      !options.silent && this.trigger('rendered:item', this, this.collection, model, itemElement, index);
-      options.filter && applyItemVisiblityFilter.call(this, model);
+      if (!options.silent) {
+        this.trigger('rendered:item', this, this.collection, model, itemElement, index);
+      }
+      if (options.filter) {
+        applyItemVisiblityFilter.call(this, model);
+      }
     }
     return itemView;
   },
