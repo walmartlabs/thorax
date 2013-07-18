@@ -398,6 +398,45 @@ describe('event', function() {
       $el.find('a').trigger('mousedown');
       expect(spy).to.have.been.calledTwice;
     });
+    it('should cleanup listening view events on release', function() {
+      var spy = this.spy(),
+          View = Thorax.View.extend({
+            template: function() {}
+          }),
+          view = new View(),
+          other = new View();
+
+      other.on('foo', spy, view);
+      other.trigger('foo');
+
+      expect(spy)
+          .to.have.been.calledOnce
+          .to.have.been.calledOn(view);
+
+      view.release();
+
+      other.trigger('foo');
+      expect(spy).to.have.been.calledOnce;
+    });
+    it('should cleanup own view events on release', function() {
+      var spy = this.spy(),
+          View = Thorax.View.extend({
+            template: function() {}
+          }),
+          view = new View();
+
+      view.on('foo', spy);
+      view.trigger('foo');
+
+      expect(spy)
+          .to.have.been.calledOnce
+          .to.have.been.calledOn(view);
+
+      view.release();
+
+      view.trigger('foo');
+      expect(spy).to.have.been.calledOnce;
+    });
   });
 
   describe('context', function() {
