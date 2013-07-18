@@ -172,7 +172,7 @@ view.key === <span class="string">"value"</span></code></pre>
 <p>If a view was embedded inside another with the <code>view</code> helper, or a generated <code>HelperView</code> (for instance the <code>collection</code> or <code>empty</code> helpers) it will have a <code>parent</code> view attribute. In the case of <code>HelperView</code>s, the <code>parent</code> will be the view that declared the helper in its template.
 
 </p>
-<h3 id="retain">retain <em>view.retain()</em></h3>
+<h3 id="retain">retain <em>view.retain([owner])</em></h3>
 <p>Prevents a view from being destroyed if it would otherwise be. If a parent is destroyed all it&#39;s children will be destroyed, or if it was previously passed to <code>setView</code>
 
 </p>
@@ -184,6 +184,9 @@ Application.setView(a);
 Application.setView(b);
 Application.setView(c);</code></pre>
 <p><code>b</code> will be destroyed, and <code>a</code> will not be.
+
+</p>
+<p>When the optional <code>owner</code> parameter is passed, the retain reference count will automatically be reduced when the owner view is destroyed.
 
 </p>
 <h3 id="release">release <em>view.release()</em></h3>
