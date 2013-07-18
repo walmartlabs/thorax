@@ -1,4 +1,4 @@
-/*global createInheritVars, inheritVars, objectEvents, walkInheritTree */
+/*global createInheritVars, inheritVars, listenTo, objectEvents, walkInheritTree */
 // Save a copy of the _on method to call as a $super method
 var _on = Thorax.View.prototype.on;
 
@@ -92,13 +92,22 @@ _.extend(Thorax.View.prototype, {
   //- type "view" || "DOM"
   //- handler
   _addEvent: function(params) {
+    // If this is recursvie due to listenTo delegate below then pass through to super class
+    if (params.handler._thoraxBind) {
+      return _on.call(this, params.name, params.handler, params.context || this);
+    }
+
+    var boundHandler = bindEventHandler.call(this, params.type + '-event:', params);
+
     if (params.type === 'view') {
-      _.each(params.name.split(/\s+/), function(name) {
-        // Must pass context here so stopListening will clean up our junk
-        _on.call(this, name, bindEventHandler.call(this, 'view-event:', params), params.context || this);
-      }, this);
+      // If we have our context set to an outside view then listen rather than directly bind so
+      // we can cleanup properly.
+      if (params.context && params.context !== this && params.context instanceof Thorax.View) {
+        listenTo(params.context, this, params.name, boundHandler, params.context);
+      } else {
+        _on.call(this, params.name, boundHandler, params.context || this);
+      }
     } else {
-      var boundHandler = bindEventHandler.call(this, 'dom-event:', params);
       if (!params.nested) {
         boundHandler = containHandlerToCurentView(boundHandler, this.cid);
       }
@@ -177,6 +186,7 @@ function bindEventHandler(eventName, params) {
   // Backbone will delegate to _callback in off calls so we should still be able to support
   // calling off on specific handlers.
   ret._callback = method;
+  ret._thoraxBind = true;
   return ret;
 }
 

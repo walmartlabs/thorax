@@ -164,7 +164,8 @@ function listenTo(object, target, eventName, callback, context) {
       destroyedCount++;
     }
   }
-  eventHandler._callback = callbackMethod;
+  eventHandler._callback = callbackMethod._callback || callbackMethod;
+  eventHandler._thoraxBind = true;
   object.listenTo(target, eventName, eventHandler);
 }
 
