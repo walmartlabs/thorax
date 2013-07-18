@@ -1,6 +1,6 @@
 /*global createRegistryWrapper:true, cloneEvents: true */
 function createErrorMessage(code) {
-  return 'Error "' + code + '". For more information visit http://thoraxjs.org/error-codes' + '#' + code;
+  return 'Error "start' + code + '". For more information visit http://thoraxjs.org/error-codes.html' + '#' + code;
 }
 
 function createRegistryWrapper(klass, hash) {
