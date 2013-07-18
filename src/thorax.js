@@ -269,8 +269,12 @@ Thorax.View = Backbone.View.extend({
     }
   },
 
-  retain: function() {
+  retain: function(owner) {
     ++this._referenceCount;
+    if (owner) {
+      // Not using listenTo helper as we want to run once the owner is destroyed
+      this.listenTo(owner, 'destroyed', owner.release);
+    }
   },
 
   _replaceHTML: function(html) {

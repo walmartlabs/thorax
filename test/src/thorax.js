@@ -167,6 +167,24 @@ describe('core', function() {
     view.$el.remove();
   });
 
+  it('should destroy scoped retain on owner destroy', function() {
+    var owner = new Thorax.View(),
+        view = new Thorax.View(),
+        ownerDestroy = this.spy(),
+        viewDestroy = this.spy();
+
+    owner.on('destroyed', ownerDestroy);
+    view.on('destroyed', viewDestroy);
+
+    view.retain(owner);
+    expect(view._referenceCount).to.equal(1);
+
+    owner.release();
+    expect(ownerDestroy).to.have.been.calledOnce;
+    expect(viewDestroy).to.have.been.calledOnce;
+    expect(view._referenceCount).to.equal(0);
+  });
+
   describe('context', function() {
     it("may be an object", function() {
       var view = new (Thorax.View.extend({
