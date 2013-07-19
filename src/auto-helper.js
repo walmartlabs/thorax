@@ -21,7 +21,7 @@ function getHelpers(context) {
 
 AutoHelpers.view = function(context, helpers) {
   _.each(context, function(value, key) {
-    if (!helpers[key] && value instanceof Backbone.View) {
+    if (!Handlebars.helpers[key] && !helpers[key] && value instanceof Backbone.View) {
       helpers[key] = curry(Handlebars.helpers.view, value);
     }
   });
@@ -29,7 +29,7 @@ AutoHelpers.view = function(context, helpers) {
 
 AutoHelpers.collection = function(context, helpers) {
   _.each(context, function(value, key) {
-    if (!helpers[key] && value instanceof Backbone.Collection) {
+    if (!Handlebars.helpers[key] && !helpers[key] && value instanceof Backbone.Collection) {
       helpers[key] = curry(Handlebars.helpers.collection, value);
     }
   });
@@ -37,7 +37,7 @@ AutoHelpers.collection = function(context, helpers) {
 
 AutoHelpers.model = function(context, helpers) {
   _.each(context, function(value, key) {
-    if (!helpers[key] && value instanceof Backbone.Model) {
+    if (!Handlebars.helpers[key] && !helpers[key] && value instanceof Backbone.Model) {
       helpers[key] = curry(Handlebars.helpers['with'], value.attributes);
     }
   });
