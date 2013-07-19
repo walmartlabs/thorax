@@ -226,7 +226,7 @@ Thorax.View = Backbone.View.extend({
       return '';
     } else {
       return template(context, {
-        helpers: this.helpers,
+        helpers: getHelpers.call(this, context),
         data: this._getData(context)
       });
     }
