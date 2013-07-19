@@ -7,6 +7,11 @@ describe('layout', function() {
     });
     var aEventCounter = {};
     a.bind('all', function(eventName) {
+      // For activated, ensure that we actually have DOM content
+      if (eventName === 'activated') {
+        expect(this.el.innerHTML.length).to.be.greaterThan(0);
+      }
+
       aEventCounter[eventName] || (aEventCounter[eventName] = 0);
       ++aEventCounter[eventName];
     });

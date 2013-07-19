@@ -35,6 +35,8 @@ Thorax.LayoutView = Thorax.View.extend({
     }
 
     if (view) {
+      view.ensureRendered();
+
       triggerLifecycleEvent.call(this, 'activated', options);
       view.trigger('activated', options);
       this._view = view;
