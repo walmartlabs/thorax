@@ -318,6 +318,7 @@ When `flag` is `undefined` this is effectively the opposite behavior of `ensureR
 Returns `true` if the view should be rendered based on `flag` and the current rendered state.
 
 `flag` may be:
+
 - `true` : Always render
 - `false` : Never render
 - `undefined` : Render only if the view has been rendered previously
