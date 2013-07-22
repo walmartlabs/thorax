@@ -8,7 +8,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <title>Thorax: Backbone + Handlebars</title>
   <meta name="description" content="">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=1000">
   <link rel="canonical" href="http://thoraxjs.org/api.html"/>
   <script type="text/javascript" src="//use.typekit.net/vyf6wqz.js"></script>
   <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
@@ -18,23 +18,18 @@
   <script>
     var autoCompleteData = {"Registry":"registry","name ":"name","templates ":"templates","Thorax.View":"thorax.view","template ":"template","render ":"render","context ":"context","appendTo ":"append-to","renderTemplate ":"render-template","ensureRendered ":"ensure-rendered","conditionalRender ":"conditional-render","shouldRender ":"should-render","html ":"html","children ":"children","parent ":"parent","retain ":"retain","release ":"release","setModel ":"set-model","setCollection ":"set-collection","serialize ":"serialize","populate ":"populate","validateInput ":"validate-input","Thorax.HelperView":"thorax.helper-view","registerViewHelper ":"register-view-helper","Thorax.LayoutView":"thorax.layout-view","setView ":"set-view","getView ":"get-view","Thorax.Model":"thorax.model","isEmpty ":"is-empty","isPopulated ":"is-populated","Thorax.Collection":"thorax.collection","Thorax.CollectionView":"thorax.collection-view","itemTemplate ":"item-template","itemView ":"item-view","itemContext ":"item-context","itemFilter ":"item-filter","emptyTemplate ":"empty-template","emptyView ":"empty-view","loadingTemplate ":"loading-template","loadingView ":"loading-view","loadingPlacement ":"loading-placement","appendItem ":"append-item","removeItem ":"remove-item","updateItem ":"update-item","Thorax.Util":"thorax.util","tag ":"tag","$":"$","$.view ":"$.view","$.model ":"$.model","$.collection ":"$.collection","Event Enhancements":"event-enhancements","Inheritable Events ":"inheritable-events","Model Events":"model-events","Collection Events":"collection-events","View Events ":"view-events","DOM Events ":"dom-events","_addEvent ":"_add-event","Data Loading":"data-loading","Queuing":"queuing","bindToRoute ":"bind-to-route","load ":"load","setRootObject ":"set-root-object","loadHandler ":"load-handler","_loadingClassName ":"_loading-class-name","_loadingTimeoutDuration ":"_loading-timeout-duration","_loadingTimeoutEndDuration ":"_loading-timeout-end-duration","Template Helpers":"template-helpers","super ":"super","view ":"view","element ":"element","button ":"button","url ":"url","link ":"link","collection ":"collection","empty ":"empty","collection-element ":"collection-element","layout-element ":"layout-element","loading ":"loading","Catalog of Built-in Events":"catalog-of-built-in-events","rendered ":"rendered","child ":"child","ready ":"ready","activated ":"activated","deactivated ":"deactivated","destroyed ":"destroyed","change:view:start ":"change:view:start","change:view:end ":"change:view:end","helper ":"helper","helper:name ":"helper:name","validate ":"validate","invalid ":"invalid","load:start ":"load:start","load:end ":"load:end","rendered:collection ":"rendered:collection","rendered:item ":"rendered:item","rendered:empty ":"rendered:empty","HTML Attributes":"html-attributes","Error Handling":"error-handling","onException ":"on-exception"};
   </script>
-
-  <!--[if (lt IE 9) & (!IEMobile)]>
-  <script>yepnope('css/ie.css')</script>
-  <![endif]-->
 </head>
 <body class="docs">
-<a class="github-banner" href="https://github.com/walmartlabs/thorax">
-  <img src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub">
-</a>
+
 <header id="top" class="header clearfix">
   <div class="l-constrained">
-    <h1 class="logo"><a href=".">Thor<span>a</span>x</a></h1>
+    <h1 class="logo"><a href=".">Thorax</a></h1>
 
     <nav class="nav">
       <ul>
         <li><a href="start.html">Getting Started</a></li>
         <li><a href="api.html">API Reference</a></li>
+        <li><a href="https://github.com/walmartlabs/thorax">GitHub Repo</a></li>
       </ul>
     </nav>
   </div>
@@ -44,7 +39,7 @@
     <div class="search-container">
       <label class="visuallyhidden" for="search">API Search</label>
       <input type="search" placeholder="API Search" id="search" name="search">
-      <button type="reset" id="search-reset" name="search-reset">Reset</button>
+      <button type="reset" id="search-reset" name="search-reset" title="Reset">&times;</button>
     </div>
     <ul class="sidebar-primary"><li><a href="#registry">Registry</a><ul class="sidebar-secondary"><li><a href="#name">name </a><li><a href="#templates">templates </a></ul></li><li><a href="#thorax.view">Thorax.View</a><ul class="sidebar-secondary"><li><a href="#template">template </a><li><a href="#render">render </a><li><a href="#context">context </a><li><a href="#append-to">appendTo </a><li><a href="#render-template">renderTemplate </a><li><a href="#ensure-rendered">ensureRendered </a><li><a href="#conditional-render">conditionalRender </a><li><a href="#should-render">shouldRender </a><li><a href="#html">html </a><li><a href="#children">children </a><li><a href="#parent">parent </a><li><a href="#retain">retain </a><li><a href="#release">release </a><li><a href="#set-model">setModel </a><li><a href="#set-collection">setCollection </a><li><a href="#serialize">serialize </a><li><a href="#populate">populate </a><li><a href="#validate-input">validateInput </a></ul></li><li><a href="#thorax.helper-view">Thorax.HelperView</a><ul class="sidebar-secondary"><li><a href="#register-view-helper">registerViewHelper </a></ul></li><li><a href="#thorax.layout-view">Thorax.LayoutView</a><ul class="sidebar-secondary"><li><a href="#set-view">setView </a><li><a href="#get-view">getView </a></ul></li><li><a href="#thorax.model">Thorax.Model</a><ul class="sidebar-secondary"><li><a href="#is-empty">isEmpty </a><li><a href="#is-populated">isPopulated </a></ul></li><li><a href="#thorax.collection">Thorax.Collection</a><ul class="sidebar-secondary"><li><a href="#is-empty">isEmpty </a><li><a href="#is-populated">isPopulated </a></ul></li><li><a href="#thorax.collection-view">Thorax.CollectionView</a><ul class="sidebar-secondary"><li><a href="#item-template">itemTemplate </a><li><a href="#item-view">itemView </a><li><a href="#item-context">itemContext </a><li><a href="#item-filter">itemFilter </a><li><a href="#empty-template">emptyTemplate </a><li><a href="#empty-view">emptyView </a><li><a href="#loading-template">loadingTemplate </a><li><a href="#loading-view">loadingView </a><li><a href="#loading-placement">loadingPlacement </a><li><a href="#append-item">appendItem </a><li><a href="#remove-item">removeItem </a><li><a href="#update-item">updateItem </a></ul></li><li><a href="#thorax.util">Thorax.Util</a><ul class="sidebar-secondary"><li><a href="#tag">tag </a></ul></li><li><a href="#$">$</a><ul class="sidebar-secondary"><li><a href="#$.view">$.view </a><li><a href="#$.model">$.model </a><li><a href="#$.collection">$.collection </a></ul></li><li><a href="#event-enhancements">Event Enhancements</a><ul class="sidebar-secondary"><li><a href="#inheritable-events">Inheritable Events </a><li><a href="#model-events">Model Events</a><li><a href="#collection-events">Collection Events</a><li><a href="#view-events">View Events </a><li><a href="#dom-events">DOM Events </a><li><a href="#_add-event">_addEvent </a></ul></li><li><a href="#data-loading">Data Loading</a><ul class="sidebar-secondary"><li><a href="#queuing">Queuing</a><li><a href="#bind-to-route">bindToRoute </a><li><a href="#load">load </a><li><a href="#set-root-object">setRootObject </a><li><a href="#load-handler">loadHandler </a><li><a href="#_loading-class-name">_loadingClassName </a><li><a href="#_loading-timeout-duration">_loadingTimeoutDuration </a><li><a href="#_loading-timeout-end-duration">_loadingTimeoutEndDuration </a></ul></li><li><a href="#template-helpers">Template Helpers</a><ul class="sidebar-secondary"><li><a href="#template">template </a><li><a href="#super">super </a><li><a href="#view">view </a><li><a href="#element">element </a><li><a href="#button">button </a><li><a href="#url">url </a><li><a href="#link">link </a><li><a href="#collection">collection </a><li><a href="#empty">empty </a><li><a href="#collection-element">collection-element </a><li><a href="#layout-element">layout-element </a><li><a href="#loading">loading </a></ul></li><li><a href="#catalog-of-built-in-events">Catalog of Built-in Events</a><ul class="sidebar-secondary"><li><a href="#rendered">rendered </a><li><a href="#child">child </a><li><a href="#ready">ready </a><li><a href="#activated">activated </a><li><a href="#deactivated">deactivated </a><li><a href="#destroyed">destroyed </a><li><a href="#change:view:start">change:view:start </a><li><a href="#change:view:end">change:view:end </a><li><a href="#helper">helper </a><li><a href="#helper:name">helper:name </a><li><a href="#serialize">serialize </a><li><a href="#validate">validate </a><li><a href="#invalid">invalid </a><li><a href="#populate">populate </a><li><a href="#load:start">load:start </a><li><a href="#load:end">load:end </a><li><a href="#rendered:collection">rendered:collection </a><li><a href="#rendered:item">rendered:item </a><li><a href="#rendered:empty">rendered:empty </a></ul></li><li><a href="#html-attributes">HTML Attributes</a></li><li><a href="#error-handling">Error Handling</a><ul class="sidebar-secondary"><li><a href="#on-exception">onException </a></ul></li></ul>
     <a class="top" href="#top"><span>&#x25B2;</span> Back to Top</a>
@@ -988,7 +983,7 @@ view.on(&#39;helper:collection&#39;, function(collection, collectionView) {
 
 </p>
 <pre><code>[data-view-name=<span class="string">"my-view-name"</span>] {
-  border: <span class="number">1</span>px solid #ccc;
+  border: <span class="number">1</span>px solid #ddd;
 }</code></pre>
 <h2 id="error-handling">Error Handling</h2>
 <h3 id="on-exception">onException <em>Thorax.onException(name, error)</em></h3>
@@ -1001,11 +996,11 @@ view.on(&#39;helper:collection&#39;, function(collection, collectionView) {
 <p>Override this function with your own logging / debugging handler. <code>name</code> will be the event name where the error was thrown.
 </p>
       </div>
-      <footer class="footer">
-        <p><small>Copyright 2013 <a href="http://walmartlabs.com">@WalmartLabs</a></small></p>
-      </footer>
-
     </div>
+
+    <footer class="footer">
+      <p class="l-constrained">Copyright 2013 <a href="http://walmartlabs.com">@WalmartLabs</a></p>
+    </footer>
     
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
     <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.8.2.min.js"><\/script>')</script>
