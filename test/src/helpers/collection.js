@@ -5,6 +5,19 @@ describe('collection helper', function() {
     expect(Handlebars.VM.noop).to.exist;
   });
 
+  it('should obey collection:refresh event', function() {
+    var view = new Thorax.View({
+      key: 'value',
+      template: Handlebars.compile('{{#collection class="{{key}}" expand-tokens=true}}{{/collection}}'),
+      collection: new Thorax.Collection([{a: 'a'}])
+    });
+    view.render();
+    var spy = this.spy();
+    view.on('rendered:collection', spy);
+    view.trigger('collection:refresh');
+    expect(spy).to.have.been.calledOnce;
+  });
+
   it('should allow use of expand-tokens', function() {
     var view = new Thorax.View({
       key: 'value',
@@ -14,7 +27,7 @@ describe('collection helper', function() {
     view.render();
     expect(view.$('div.value').length).to.equal(1);
   });
-  
+
   it('should allow arbitrary html attributes', function() {
     var view = new Thorax.View({
       template: Handlebars.compile('{{#collection random="value"}}{{/collection}}'),

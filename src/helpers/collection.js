@@ -139,6 +139,9 @@ Handlebars.registerViewHelper('collection', Thorax.CollectionHelperView, functio
         view.setCollection(dataObject);
       }
     });
+    view.parent.on('collection:refresh', function() {
+      view.renderCollection();
+    })
   }
   collection && view.setCollection(collection);
 });
