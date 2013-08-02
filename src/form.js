@@ -236,7 +236,7 @@ function onErrorOrInvalidData () {
 function eachNamedInput(view, options, iterator) {
   var i = 0;
 
-  view.$('select,input,textarea', options.root || view.el).each(function() {
+  $('select,input,textarea', options.root || view.el).each(function() {
     if (!options.children) {
       if (view !== $(this).view({helper: false})) {
         return;
