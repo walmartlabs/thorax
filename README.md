@@ -337,7 +337,7 @@ If a view was embedded inside another with the `view` helper, or a generated `He
 
 ### retain *view.retain([owner])*
 
-Prevents a view from being destroyed if it would otherwise be. If a parent is destroyed all it's children will be destroyed, or if it was previously passed to `setView`
+Prevents a view from being destroyed if it would otherwise be. If a parent is destroyed all its children will be destroyed, or if it was previously passed to `setView`
 
 Given the code below:
 
