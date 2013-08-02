@@ -360,7 +360,7 @@ Generally this method is not needed unless you are `retain`ing views.
 
 ### setModel *view.setModel(model [,options])*
 
-Setting `model` in the construtor will automatically call `setModel`, so the following are equivelent:
+Setting `model` in the constructor will automatically call `setModel`, so the following are equivelent:
 
     var view = new Thorax.View({
       model: myModel
