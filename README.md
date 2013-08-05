@@ -952,7 +952,7 @@ When rendering `this.collection` many properties will be forwarded from the view
 - `loadingView`
 - `loadingPlacement`
 
-As a result the following two views are equivelenet:
+As a result the following two views are equivalent:
 
     // render with collection helper, collection
     // properties are forwarded
