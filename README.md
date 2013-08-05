@@ -441,7 +441,7 @@ Each form input in your application should contain a corresponding label. Since 
 
 - `serialize` - called before validation with serialized attributes
 - `validate` - with an attributes hash and errors array after `validateInput` is called
-- `invalid` - with an errors array, if validateInput returned an array with any errors
+- `invalid` - with an errors array, if `validateInput` returned an array with any errors
 - `root` - the root element to serialize within, defaults to `this.$el`
 
 If your view uses inputs with non standard names (or no names, multiple inputs with the same name, etc), use the `serialize` event:
@@ -1034,7 +1034,7 @@ Triggered on a view every time a child view is appended into the view with the `
 
 ### ready *ready (options)*
 
-Triggered when a view is append to the DOM with `appendTo` or when a view is appeneded to a `LayoutView` via `setView`. Setting focus and other behaviors that depend on the view being present in the DOM should be handled in this event.
+Triggered when a view is appended to the DOM with `appendTo` or when a view is appeneded to a `LayoutView` via `setView`. Setting focus and other behaviors that depend on the view being present in the DOM should be handled in this event.
 
 This event propagates to all children, including children that will be bound after the view is created. `options` will contain a `target` view, which is the view that triggered the event.
 
@@ -1094,7 +1094,7 @@ Triggered on a view when `serialize` is called, passed an an attributes hash and
 
 ### invalid *invalid (errors)*
 
-Triggered on a view when `serialize` is called, if validateInput returned an array with any errors.
+Triggered on a view when `serialize` is called, if `validateInput` returned an array with any errors.
 
 ### populate *populate (attributes)*
 
