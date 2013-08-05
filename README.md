@@ -628,7 +628,7 @@ Remove an item from the view.
 
 ### updateItem *view.updateItem(model)*
 
-Equivelent to calling `removeItem` then `appendItem`. Note that this is mainly meant to cover edge cases, by default changing a model will update the needed item (whether using `itemTemplate` or `itemView`).
+Equivalent to calling `removeItem` then `appendItem`. Note that this is mainly meant to cover edge cases, by default changing a model will update the needed item (whether using `itemTemplate` or `itemView`).
 
 ## Thorax.Util
 
