@@ -1030,7 +1030,7 @@ Triggered on a view when the `rendered` method is called.
 
 ### child *child (instance)*
 
-Triggered on a view every time a child view is appened into the view with the `view` helper.
+Triggered on a view every time a child view is appended into the view with the `view` helper.
 
 ### ready *ready (options)*
 
