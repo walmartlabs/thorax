@@ -905,7 +905,7 @@ To call a method from an `a` tag use the `button` helper:
 
     {{#button "methodName" tag="a"}}My Link{{/button}}
 
-Like the `button` helper, a `trigger` attribute may be specified that will trigger an event on the delcaring view in addition to navigating to the specified url:
+Like the `button` helper, a `trigger` attribute may be specified that will trigger an event on the declaring view in addition to navigating to the specified url:
 
     {{#link "articles" id trigger="customEvent"}}Link Text{{/link}}
 
