@@ -29,7 +29,14 @@ Thorax.LayoutView = Thorax.View.extend({
 
     this.trigger('change:view:start', view, oldView, options);
     if (oldView) {
-      oldView.$el.remove();
+      var remove = function() {
+        oldView.$el.remove();
+      };
+      if (options.remove) {
+        options.remove(view, oldView, remove);
+      } else {
+        remove();
+      }
       triggerLifecycleEvent.call(oldView, 'deactivated', options);
       this._removeChild(oldView);
     }
@@ -40,7 +47,15 @@ Thorax.LayoutView = Thorax.View.extend({
       triggerLifecycleEvent.call(this, 'activated', options);
       view.trigger('activated', options);
       this._view = view;
-      this._view.appendTo(getLayoutViewsTargetElement.call(this));
+      var targetElement = getLayoutViewsTargetElement.call(this),
+          append = _.bind(function() {
+            this._view.appendTo(targetElement);
+          }, this);
+      if (options.append) {
+        options.append(view, oldView, append);
+      } else {
+        append();
+      }
       this._addChild(view);
     } else {
       this._view = undefined;
