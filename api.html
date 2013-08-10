@@ -1,31 +1,32 @@
 <!DOCTYPE html>
-<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
-<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
-<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if IE 8]>         <html class="lt-ie9 no-js"> <![endif]-->
 <!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <title>Thorax: Backbone + Handlebars</title>
   <meta name="description" content="">
-  <meta name="viewport" content="width=1000">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="canonical" href="http://thoraxjs.org/api.html"/>
+  <link rel="stylesheet" href="css/main.css">
   <script type="text/javascript" src="//use.typekit.net/vyf6wqz.js"></script>
   <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
-  <link rel="stylesheet" href="css/main.css">
 
-  <script src="js/vendor/modernizr-2.6.2.min.js"></script>
   <script>
     var autoCompleteData = {"Registry":"registry","name ":"name","templates ":"templates","Thorax.View":"thorax.view","template ":"template","render ":"render","context ":"context","appendTo ":"append-to","renderTemplate ":"render-template","ensureRendered ":"ensure-rendered","conditionalRender ":"conditional-render","shouldRender ":"should-render","html ":"html","children ":"children","parent ":"parent","retain ":"retain","release ":"release","setModel ":"set-model","setCollection ":"set-collection","serialize ":"serialize","populate ":"populate","validateInput ":"validate-input","Thorax.HelperView":"thorax.helper-view","registerViewHelper ":"register-view-helper","Thorax.LayoutView":"thorax.layout-view","setView ":"set-view","getView ":"get-view","Thorax.Model":"thorax.model","isEmpty ":"is-empty","isPopulated ":"is-populated","Thorax.Collection":"thorax.collection","Thorax.CollectionView":"thorax.collection-view","itemTemplate ":"item-template","itemView ":"item-view","itemContext ":"item-context","itemFilter ":"item-filter","emptyTemplate ":"empty-template","emptyView ":"empty-view","loadingTemplate ":"loading-template","loadingView ":"loading-view","loadingPlacement ":"loading-placement","appendItem ":"append-item","removeItem ":"remove-item","updateItem ":"update-item","Thorax.Util":"thorax.util","tag ":"tag","$":"$","$.view ":"$.view","$.model ":"$.model","$.collection ":"$.collection","Event Enhancements":"event-enhancements","Inheritable Events ":"inheritable-events","Model Events":"model-events","Collection Events":"collection-events","View Events ":"view-events","DOM Events ":"dom-events","_addEvent ":"_add-event","Data Loading":"data-loading","Queuing":"queuing","bindToRoute ":"bind-to-route","load ":"load","setRootObject ":"set-root-object","loadHandler ":"load-handler","_loadingClassName ":"_loading-class-name","_loadingTimeoutDuration ":"_loading-timeout-duration","_loadingTimeoutEndDuration ":"_loading-timeout-end-duration","Template Helpers":"template-helpers","super ":"super","view ":"view","element ":"element","button ":"button","url ":"url","link ":"link","collection ":"collection","empty ":"empty","collection-element ":"collection-element","layout-element ":"layout-element","loading ":"loading","Catalog of Built-in Events":"catalog-of-built-in-events","rendered ":"rendered","child ":"child","ready ":"ready","activated ":"activated","deactivated ":"deactivated","destroyed ":"destroyed","change:view:start ":"change:view:start","change:view:end ":"change:view:end","helper ":"helper","helper:name ":"helper:name","validate ":"validate","invalid ":"invalid","load:start ":"load:start","load:end ":"load:end","rendered:collection ":"rendered:collection","rendered:item ":"rendered:item","rendered:empty ":"rendered:empty","HTML Attributes":"html-attributes","Error Handling":"error-handling","onException ":"on-exception"};
   </script>
+
+  <!--[if IE 8]><script src="js/ie.min.js"></script><!--> 
 </head>
-<body class="docs">
+<body>
 
-<header id="top" class="header clearfix">
-  <div class="l-constrained">
-    <h1 class="logo"><a href=".">Thorax</a></h1>
+<header id="top" class="header">
+  <div class="constrained">
+    <h1 class="logo"><a class="ir" href=".">Thorax</a></h1>
 
-    <nav class="nav">
+    <button class="js-toggle nav-toggle menu-btn icon-reorder" data-menu=".nav" type="button"><span class="visuallyhidden">Menu</span></button>
+
+    <nav class="nav js-menu" data-control=".nav-toggle">
       <ul>
         <li><a href="start.html">Getting Started</a></li>
         <li><a href="api.html">API Reference</a></li>
@@ -34,23 +35,26 @@
     </nav>
   </div>
 </header>
-<div class="l-constrained">
-  <nav class="sidebar">
-    <div class="search-container">
-      <label class="visuallyhidden" for="search">API Search</label>
-      <input type="search" placeholder="API Search" id="search" name="search">
-      <button type="reset" id="search-reset" name="search-reset" title="Reset">&times;</button>
+<div class="docs constrained">
+  <div class="grid">
+    <div class="sidebar-container">
+      <nav class="sidebar">
+        <div class="search-container">
+          <label class="visuallyhidden" for="search">API Search</label>
+          <input type="search" placeholder="API Search" id="search" name="search">
+          <button type="reset" id="search-reset" class="ir" name="search-reset">Reset Search</button>
+        </div>
+        <ul class="sidebar-primary"><li><a href="#registry">Registry</a><ul class="sidebar-secondary"><li><a href="#name">name </a><li><a href="#templates">templates </a></ul></li><li><a href="#thorax.view">Thorax.View</a><ul class="sidebar-secondary"><li><a href="#template">template </a><li><a href="#render">render </a><li><a href="#context">context </a><li><a href="#append-to">appendTo </a><li><a href="#render-template">renderTemplate </a><li><a href="#ensure-rendered">ensureRendered </a><li><a href="#conditional-render">conditionalRender </a><li><a href="#should-render">shouldRender </a><li><a href="#html">html </a><li><a href="#children">children </a><li><a href="#parent">parent </a><li><a href="#retain">retain </a><li><a href="#release">release </a><li><a href="#set-model">setModel </a><li><a href="#set-collection">setCollection </a><li><a href="#serialize">serialize </a><li><a href="#populate">populate </a><li><a href="#validate-input">validateInput </a></ul></li><li><a href="#thorax.helper-view">Thorax.HelperView</a><ul class="sidebar-secondary"><li><a href="#register-view-helper">registerViewHelper </a></ul></li><li><a href="#thorax.layout-view">Thorax.LayoutView</a><ul class="sidebar-secondary"><li><a href="#set-view">setView </a><li><a href="#get-view">getView </a></ul></li><li><a href="#thorax.model">Thorax.Model</a><ul class="sidebar-secondary"><li><a href="#is-empty">isEmpty </a><li><a href="#is-populated">isPopulated </a></ul></li><li><a href="#thorax.collection">Thorax.Collection</a><ul class="sidebar-secondary"><li><a href="#is-empty">isEmpty </a><li><a href="#is-populated">isPopulated </a></ul></li><li><a href="#thorax.collection-view">Thorax.CollectionView</a><ul class="sidebar-secondary"><li><a href="#item-template">itemTemplate </a><li><a href="#item-view">itemView </a><li><a href="#item-context">itemContext </a><li><a href="#item-filter">itemFilter </a><li><a href="#empty-template">emptyTemplate </a><li><a href="#empty-view">emptyView </a><li><a href="#loading-template">loadingTemplate </a><li><a href="#loading-view">loadingView </a><li><a href="#loading-placement">loadingPlacement </a><li><a href="#append-item">appendItem </a><li><a href="#remove-item">removeItem </a><li><a href="#update-item">updateItem </a></ul></li><li><a href="#thorax.util">Thorax.Util</a><ul class="sidebar-secondary"><li><a href="#tag">tag </a></ul></li><li><a href="#$">$</a><ul class="sidebar-secondary"><li><a href="#$.view">$.view </a><li><a href="#$.model">$.model </a><li><a href="#$.collection">$.collection </a></ul></li><li><a href="#event-enhancements">Event Enhancements</a><ul class="sidebar-secondary"><li><a href="#inheritable-events">Inheritable Events </a><li><a href="#model-events">Model Events</a><li><a href="#collection-events">Collection Events</a><li><a href="#view-events">View Events </a><li><a href="#dom-events">DOM Events </a><li><a href="#_add-event">_addEvent </a></ul></li><li><a href="#data-loading">Data Loading</a><ul class="sidebar-secondary"><li><a href="#queuing">Queuing</a><li><a href="#bind-to-route">bindToRoute </a><li><a href="#load">load </a><li><a href="#set-root-object">setRootObject </a><li><a href="#load-handler">loadHandler </a><li><a href="#_loading-class-name">_loadingClassName </a><li><a href="#_loading-timeout-duration">_loadingTimeoutDuration </a><li><a href="#_loading-timeout-end-duration">_loadingTimeoutEndDuration </a></ul></li><li><a href="#template-helpers">Template Helpers</a><ul class="sidebar-secondary"><li><a href="#template">template </a><li><a href="#super">super </a><li><a href="#view">view </a><li><a href="#element">element </a><li><a href="#button">button </a><li><a href="#url">url </a><li><a href="#link">link </a><li><a href="#collection">collection </a><li><a href="#empty">empty </a><li><a href="#collection-element">collection-element </a><li><a href="#layout-element">layout-element </a><li><a href="#loading">loading </a></ul></li><li><a href="#catalog-of-built-in-events">Catalog of Built-in Events</a><ul class="sidebar-secondary"><li><a href="#rendered">rendered </a><li><a href="#child">child </a><li><a href="#ready">ready </a><li><a href="#activated">activated </a><li><a href="#deactivated">deactivated </a><li><a href="#destroyed">destroyed </a><li><a href="#change:view:start">change:view:start </a><li><a href="#change:view:end">change:view:end </a><li><a href="#helper">helper </a><li><a href="#helper:name">helper:name </a><li><a href="#serialize">serialize </a><li><a href="#validate">validate </a><li><a href="#invalid">invalid </a><li><a href="#populate">populate </a><li><a href="#load:start">load:start </a><li><a href="#load:end">load:end </a><li><a href="#rendered:collection">rendered:collection </a><li><a href="#rendered:item">rendered:item </a><li><a href="#rendered:empty">rendered:empty </a></ul></li><li><a href="#html-attributes">HTML Attributes</a></li><li><a href="#error-handling">Error Handling</a><ul class="sidebar-secondary"><li><a href="#on-exception">onException </a></ul></li></ul>
+        <a class="top" href="#top"><span>&#x25B2;</span> Back to Top</a>
+      </nav>
     </div>
-    <ul class="sidebar-primary"><li><a href="#registry">Registry</a><ul class="sidebar-secondary"><li><a href="#name">name </a><li><a href="#templates">templates </a></ul></li><li><a href="#thorax.view">Thorax.View</a><ul class="sidebar-secondary"><li><a href="#template">template </a><li><a href="#render">render </a><li><a href="#context">context </a><li><a href="#append-to">appendTo </a><li><a href="#render-template">renderTemplate </a><li><a href="#ensure-rendered">ensureRendered </a><li><a href="#conditional-render">conditionalRender </a><li><a href="#should-render">shouldRender </a><li><a href="#html">html </a><li><a href="#children">children </a><li><a href="#parent">parent </a><li><a href="#retain">retain </a><li><a href="#release">release </a><li><a href="#set-model">setModel </a><li><a href="#set-collection">setCollection </a><li><a href="#serialize">serialize </a><li><a href="#populate">populate </a><li><a href="#validate-input">validateInput </a></ul></li><li><a href="#thorax.helper-view">Thorax.HelperView</a><ul class="sidebar-secondary"><li><a href="#register-view-helper">registerViewHelper </a></ul></li><li><a href="#thorax.layout-view">Thorax.LayoutView</a><ul class="sidebar-secondary"><li><a href="#set-view">setView </a><li><a href="#get-view">getView </a></ul></li><li><a href="#thorax.model">Thorax.Model</a><ul class="sidebar-secondary"><li><a href="#is-empty">isEmpty </a><li><a href="#is-populated">isPopulated </a></ul></li><li><a href="#thorax.collection">Thorax.Collection</a><ul class="sidebar-secondary"><li><a href="#is-empty">isEmpty </a><li><a href="#is-populated">isPopulated </a></ul></li><li><a href="#thorax.collection-view">Thorax.CollectionView</a><ul class="sidebar-secondary"><li><a href="#item-template">itemTemplate </a><li><a href="#item-view">itemView </a><li><a href="#item-context">itemContext </a><li><a href="#item-filter">itemFilter </a><li><a href="#empty-template">emptyTemplate </a><li><a href="#empty-view">emptyView </a><li><a href="#loading-template">loadingTemplate </a><li><a href="#loading-view">loadingView </a><li><a href="#loading-placement">loadingPlacement </a><li><a href="#append-item">appendItem </a><li><a href="#remove-item">removeItem </a><li><a href="#update-item">updateItem </a></ul></li><li><a href="#thorax.util">Thorax.Util</a><ul class="sidebar-secondary"><li><a href="#tag">tag </a></ul></li><li><a href="#$">$</a><ul class="sidebar-secondary"><li><a href="#$.view">$.view </a><li><a href="#$.model">$.model </a><li><a href="#$.collection">$.collection </a></ul></li><li><a href="#event-enhancements">Event Enhancements</a><ul class="sidebar-secondary"><li><a href="#inheritable-events">Inheritable Events </a><li><a href="#model-events">Model Events</a><li><a href="#collection-events">Collection Events</a><li><a href="#view-events">View Events </a><li><a href="#dom-events">DOM Events </a><li><a href="#_add-event">_addEvent </a></ul></li><li><a href="#data-loading">Data Loading</a><ul class="sidebar-secondary"><li><a href="#queuing">Queuing</a><li><a href="#bind-to-route">bindToRoute </a><li><a href="#load">load </a><li><a href="#set-root-object">setRootObject </a><li><a href="#load-handler">loadHandler </a><li><a href="#_loading-class-name">_loadingClassName </a><li><a href="#_loading-timeout-duration">_loadingTimeoutDuration </a><li><a href="#_loading-timeout-end-duration">_loadingTimeoutEndDuration </a></ul></li><li><a href="#template-helpers">Template Helpers</a><ul class="sidebar-secondary"><li><a href="#template">template </a><li><a href="#super">super </a><li><a href="#view">view </a><li><a href="#element">element </a><li><a href="#button">button </a><li><a href="#url">url </a><li><a href="#link">link </a><li><a href="#collection">collection </a><li><a href="#empty">empty </a><li><a href="#collection-element">collection-element </a><li><a href="#layout-element">layout-element </a><li><a href="#loading">loading </a></ul></li><li><a href="#catalog-of-built-in-events">Catalog of Built-in Events</a><ul class="sidebar-secondary"><li><a href="#rendered">rendered </a><li><a href="#child">child </a><li><a href="#ready">ready </a><li><a href="#activated">activated </a><li><a href="#deactivated">deactivated </a><li><a href="#destroyed">destroyed </a><li><a href="#change:view:start">change:view:start </a><li><a href="#change:view:end">change:view:end </a><li><a href="#helper">helper </a><li><a href="#helper:name">helper:name </a><li><a href="#serialize">serialize </a><li><a href="#validate">validate </a><li><a href="#invalid">invalid </a><li><a href="#populate">populate </a><li><a href="#load:start">load:start </a><li><a href="#load:end">load:end </a><li><a href="#rendered:collection">rendered:collection </a><li><a href="#rendered:item">rendered:item </a><li><a href="#rendered:empty">rendered:empty </a></ul></li><li><a href="#html-attributes">HTML Attributes</a></li><li><a href="#error-handling">Error Handling</a><ul class="sidebar-secondary"><li><a href="#on-exception">onException </a></ul></li></ul>
-    <a class="top" href="#top"><span>&#x25B2;</span> Back to Top</a>
-  </nav>
 
-  <div class="l-main">
+    <div class="api">
 
 
 <h1 id="api-reference">API Reference</h1>
 <h2 id="registry">Registry</h2>
-<p>Thorax creates a special hash for each type of class to store all subclasses in your application. The use of <code>Thorax.Views</code> and <code>Handlebars.templates</code> (usually defined by Handlebars) is required to allow the <code>view</code>, <code>template</code> and other helper methods to operate, but the use of <code>Thorax.Models</code> and <code>Thorax.Collections</code> are optional and provided for consitency.
+<p>Thorax creates a special hash for each type of class to store all subclasses in your application. The use of <code>Thorax.Views</code> and <code>Handlebars.templates</code> (usually defined by Handlebars) is required to allow the <code>view</code>, <code>template</code> and other helper methods to operate, but the use of <code>Thorax.Models</code> and <code>Thorax.Collections</code> are optional and provided for consistency.
 
 </p>
 <table cellpadding="0" cellspacing="0" border="0" width="100%">
@@ -150,11 +154,13 @@ view.key === <span class="string">"value"</span></code></pre>
 
 </p>
 <p><code>flag</code> may be:
-- <code>true</code> : Always render
-- <code>false</code> : Never render
-- <code>undefined</code> : Render only if the view has been rendered previously
 
 </p>
+<ul>
+<li><code>true</code> : Always render</li>
+<li><code>false</code> : Never render</li>
+<li><code>undefined</code> : Render only if the view has been rendered previously</li>
+</ul>
 <h3 id="html">html <em>view.html([content])</em></h3>
 <p>Get or set the <code>innerHTML</code> of the view, without triggering the <code>rendered</code> event.
 
@@ -168,7 +174,7 @@ view.key === <span class="string">"value"</span></code></pre>
 
 </p>
 <h3 id="retain">retain <em>view.retain([owner])</em></h3>
-<p>Prevents a view from being destroyed if it would otherwise be. If a parent is destroyed all it&#39;s children will be destroyed, or if it was previously passed to <code>setView</code>
+<p>Prevents a view from being destroyed if it would otherwise be. If a parent is destroyed all its children will be destroyed, or if it was previously passed to <code>setView</code>
 
 </p>
 <p>Given the code below:
@@ -195,7 +201,7 @@ Application.setView(c);</code></pre>
 
 </p>
 <h3 id="set-model">setModel <em>view.setModel(model [,options])</em></h3>
-<p>Setting <code>model</code> in the construtor will automatically call <code>setModel</code>, so the following are equivelent:
+<p>Setting <code>model</code> in the constructor will automatically call <code>setModel</code>, so the following are equivelent:
 
 </p>
 <pre><code><span class="keyword">var</span> view = <span class="keyword">new</span> Thorax.View({
@@ -250,6 +256,7 @@ view.setCollection(myCollection);</code></pre>
 <li><strong>fetch</strong> - Whether or not to try to call <code>fetch</code> on the collection if <code>shouldFetch</code> returns true</li>
 <li><strong>success</strong> - Callback on fetch success, defaults to noop</li>
 <li><strong>errors</strong> - Whether or not to trigger an <code>error</code> event on the view when an <code>error</code> event is triggered on the collection</li>
+<li><strong>change</strong> - Wether or not to call <code>updateItem</code> when a model&#39;s <code>change</code> event fires. Defaults to true.</li>
 </ul>
 <p>Note that while any view may bind a collection only a <code>CollectionView</code> will actually render a collection. A regular <code>Thorax.View</code> may declare a <code>collection</code> helper which in turn will generate and embed a <code>CollectionView</code>.
 
@@ -291,7 +298,7 @@ new Thorax.View({
 <ul>
 <li><code>serialize</code> - called before validation with serialized attributes</li>
 <li><code>validate</code> - with an attributes hash and errors array after <code>validateInput</code> is called</li>
-<li><code>error</code> - with an errors array, if validateInput returned an array with any errors</li>
+<li><code>invalid</code> - with an errors array, if <code>validateInput</code> returned an array with any errors</li>
 <li><code>root</code> - the root element to serialize within, defaults to <code>this.$el</code></li>
 </ul>
 <p>If your view uses inputs with non standard names (or no names, multiple inputs with the same name, etc), use the <code>serialize</code> event:
@@ -477,7 +484,7 @@ new Thorax.View({
 
 </p>
 <h3 id="update-item">updateItem <em>view.updateItem(model)</em></h3>
-<p>Equivelent to calling <code>removeItem</code> then <code>appendItem</code>. Note that this is mainly meant to cover edge cases, by default changing a model will update the needed item (whether using <code>itemTemplate</code> or <code>itemView</code>).
+<p>Equivalent to calling <code>removeItem</code> then <code>appendItem</code>. Note that this is mainly meant to cover edge cases, by default changing a model will update the needed item (whether using <code>itemTemplate</code> or <code>itemView</code>).
 
 </p>
 <h2 id="thorax.util">Thorax.Util</h2>
@@ -740,7 +747,7 @@ view.on(<span class="string">'click a'</span>, <span class="keyword">function</s
 
 </p>
 <pre><code>{{#button <span class="string">"methodName"</span> tag=<span class="string">"a"</span>}}My Link{{<span class="regexp">/button}}</span></code></pre>
-<p>Like the <code>button</code> helper, a <code>trigger</code> attribute may be specified that will trigger an event on the delcaring view in addition to navigating to the specified url:
+<p>Like the <code>button</code> helper, a <code>trigger</code> attribute may be specified that will trigger an event on the declaring view in addition to navigating to the specified url:
 
 </p>
 <pre><code>{{#link <span class="string">"articles"</span> id trigger=<span class="string">"customEvent"</span>}}Link Text{{<span class="regexp">/link}}</span></code></pre>
@@ -790,7 +797,7 @@ view.on(<span class="string">'click a'</span>, <span class="keyword">function</s
 <li><code>loadingView</code></li>
 <li><code>loadingPlacement</code></li>
 </ul>
-<p>As a result the following two views are equivelenet:
+<p>As a result the following two views are equivalent:
 
 </p>
 <pre><code><span class="comment">// render with collection helper, collection</span>
@@ -862,11 +869,11 @@ view.on(<span class="string">'click a'</span>, <span class="keyword">function</s
 
 </p>
 <h3 id="child">child <em>child (instance)</em></h3>
-<p>Triggered on a view every time a child view is appened into the view with the <code>view</code> helper.
+<p>Triggered on a view every time a child view is appended into the view with the <code>view</code> helper.
 
 </p>
 <h3 id="ready">ready <em>ready (options)</em></h3>
-<p>Triggered when a view is append to the DOM with <code>appendTo</code> or when a view is appeneded to a <code>LayoutView</code> via <code>setView</code>. Setting focus and other behaviors that depend on the view being present in the DOM should be handled in this event.
+<p>Triggered when a view is appended to the DOM with <code>appendTo</code> or when a view is appeneded to a <code>LayoutView</code> via <code>setView</code>. Setting focus and other behaviors that depend on the view being present in the DOM should be handled in this event.
 
 </p>
 <p>This event propagates to all children, including children that will be bound after the view is created. <code>options</code> will contain a <code>target</code> view, which is the view that triggered the event.
@@ -925,7 +932,7 @@ view.on(&#39;helper:collection&#39;, function(collection, collectionView) {
   }
 });</code></pre>
 <h3 id="invalid">invalid <em>invalid (errors)</em></h3>
-<p>Triggered on a view when <code>serialize</code> is called, if validateInput returned an array with any errors.
+<p>Triggered on a view when <code>serialize</code> is called, if <code>validateInput</code> returned an array with any errors.
 
 </p>
 <h3 id="populate">populate <em>populate (attributes)</em></h3>
@@ -995,29 +1002,27 @@ view.on(&#39;helper:collection&#39;, function(collection, collectionView) {
 };</code></pre>
 <p>Override this function with your own logging / debugging handler. <code>name</code> will be the event name where the error was thrown.
 </p>
+        </div>
       </div>
     </div>
 
     <footer class="footer">
-      <p class="l-constrained">Copyright 2013 <a href="http://walmartlabs.com">@WalmartLabs</a></p>
+      <p class="constrained">Copyright 2013 <a href="http://walmartlabs.com">@WalmartLabs</a></p>
     </footer>
-    
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
-    <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.8.2.min.js"><\/script>')</script>
 
-    <script src="js/compiled/site.js"></script>
+    <script src="js/site.min.js"></script>
+
     <script type="text/javascript">
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-39030674-1']);
+      _gaq.push(['_trackPageview']);
 
-  var _gaq = _gaq || [];
-  _gaq.push(['_setAccount', 'UA-39030674-1']);
-  _gaq.push(['_trackPageview']);
-
-  (function() {
-    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-  })();
-
-</script>
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+    </script>
+  
   </body>
 </html>

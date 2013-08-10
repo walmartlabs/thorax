@@ -1,28 +1,28 @@
 <!DOCTYPE html>
-<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
-<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
-<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if IE 8]>         <html class="lt-ie9 no-js"> <![endif]-->
 <!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <title>Thorax: Backbone + Handlebars</title>
   <meta name="description" content="">
-  <meta name="viewport" content="width=1000">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="canonical" href="http://thoraxjs.org/"/>
+  <link rel="stylesheet" href="css/main.css">
   <script type="text/javascript" src="//use.typekit.net/vyf6wqz.js"></script>
   <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
-  <link rel="stylesheet" href="css/main.css">
 
-  <script src="js/vendor/modernizr-2.6.2.min.js"></script>
+  <!--[if IE 8]><script src="js/ie.min.js"></script><!--> 
 </head>
-<body class="content">
+<body>
 
-<header class="header clearfix">
-  <div class="l-constrained">
-    <h1 class="logo"><a href=".">Thorax</a></h1>
+<header class="header">
+  <div class="constrained">
+    <h1 class="logo"><a class="ir" href=".">Thorax</a></h1>
 
-    <nav class="nav">
+    <button class="js-toggle nav-toggle menu-btn icon-reorder" data-menu=".nav" type="button"><span class="visuallyhidden">Menu</span></button>
+
+    <nav class="nav js-menu" data-control=".nav-toggle">
       <ul>
         <li><a href="start.html">Getting Started</a></li>
         <li><a href="api.html">API Reference</a></li>
@@ -33,29 +33,29 @@
 </header>
 
 
-<div class="hero clearfix">
-  <div class="hero-content l-constrained">
+<div class="hero">
+  <div class="hero-content constrained">
     <h2 class="tagline">An opinionated, battle-tested <a href="http://backbonejs.org/">Backbone</a> + <a href="http://handlebarsjs.com">Handlebars</a><br> framework to build large scale web applications.</h2>
 
     <a class="btn btn-primary btn-large" href="https://github.com/walmartlabs/thorax-seed">Clone Seed Project</a>
 
     <ul class="resources">
-        <li><a class="btn icon icon-play js-screencast" href="http://vimeo.com/60230630">Screencast</a></li>
-        <li><a class="btn icon icon-book" href="start.html">Getting Started</a></li>
-        <li><a class="btn icon icon-list" href="api.html">API Reference</a></li>
-      </ul>
+      <li><a class="btn js-screencast" href="http://vimeo.com/60230630"><i class="icon-play-circle"></i> Screencast</a></li>
+      <li><a class="btn" href="start.html"><i class="icon-book"></i> Getting Started</a></li>
+      <li><a class="btn" href="api.html"><i class="icon-list"></i> API Reference</a></li>
+    </ul>
   </div>
-  <div class="video">
-    <div class="l-constrained">
-      <button class="close-btn js-screencast">Close Video</button>
-      <!-- Vimeo Embed src must include &amp;api=1 at the end -->
-      <div class="video-container"><iframe src="http://player.vimeo.com/video/60230630?title=0&amp;byline=0&amp;portrait=0&amp;badge=0&amp;api=1" width="853" height="480" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe></div>
+  <div class="video-container">
+    <div class="video">
+      <button class="close-btn js-screencast"><span class="visuallyhidden">Close Video</span></button>
+
+      <div class="iframe-container"></div>
     </div>
   </div>
 </div>
 
 <div class="used-by">
-  <div class="l-constrained">
+  <div class="constrained">
     <h3 class="used-by-caption">Used By</h3>
     <ul class="used-by-list">
       <li><a class="ir used-by-walmart" href="http://walmart.com">Walmart</a></li>
@@ -65,12 +65,16 @@
   </div>
 </div>
 
-<div class="l-constrained">
-  <div class="home-content l-row clearfix">
-    <div class="l-col3">
+<div class="home-primary constrained">
+  <div class="grid">
+    <div class="features">
       <h2>Features</h2>
-      <div class="features-content l-col2 l-alpha clearfix">
-        <h2 id="hello-world">Hello World</h2>
+      <button class="js-toggle features-nav-toggle menu-btn icon-reorder" data-menu=".features-nav" type="button">
+        <span class="visuallyhidden">Menu</span>
+      </button>
+      <div class="grid">
+        <div class="features-content clearfix">
+          <h2 id="hello-world">Hello World</h2>
 <p>Thorax is used to build some of the biggest Backbone applications in the world but it&#39;s easy to get started.
 
 </p>
@@ -204,9 +208,8 @@ layout.appendTo(<span class="string">'body'</span>);
 })
 layout.setView(view);</code></pre>
 
-      </div>
-      <div class="l-col1 features">
-        <ul class="examples">
+        </div>
+        <ul class="features-nav js-menu" data-control=".features-nav-toggle">
           
             <li><a href="#hello-world">Hello World</a></li>
           
@@ -229,7 +232,7 @@ layout.setView(view);</code></pre>
         </ul>
       </div>
     </div>
-    <div class="l-col1 quick-start">
+    <div class="quick-start">
       <h1 id="quick-start">Quick Start</h1>
 <ul>
 <li>Clone the <a href="http://github.com/walmartlabs/thorax-seed">Seed Project</a> and start building your own application.</li>
@@ -242,30 +245,25 @@ layout.setView(view);</code></pre>
   </div>
 </div>
 
-
-
 </div>
 
-<footer class="footer">
-  <p class="l-constrained">Copyright 2013 <a href="http://walmartlabs.com">@WalmartLabs</a></p>
-</footer>
+    <footer class="footer">
+      <p class="constrained">Copyright 2013 <a href="http://walmartlabs.com">@WalmartLabs</a></p>
+    </footer>
 
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
-<script>window.jQuery || document.write('<script src="js/vendor/jquery-1.8.2.min.js"><\/script>')</script>
+    <script src="js/site.min.js"></script>
 
-<script src="js/compiled/site.js"></script>
-<script type="text/javascript">
+    <script type="text/javascript">
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-39030674-1']);
+      _gaq.push(['_trackPageview']);
 
-  var _gaq = _gaq || [];
-  _gaq.push(['_setAccount', 'UA-39030674-1']);
-  _gaq.push(['_trackPageview']);
-
-  (function() {
-    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-  })();
-
-</script>
-</body>
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+    </script>
+  
+  </body>
 </html>
