@@ -22,46 +22,47 @@ Thorax.LayoutView = Thorax.View.extend({
       view = new (Thorax.Util.registryGet(Thorax, 'Views', view, false))();
     }
     this.ensureRendered();
-    var oldView = this._view;
+    var oldView = this._view, append, remove;
     if (view === oldView) {
       return false;
     }
-
     this.trigger('change:view:start', view, oldView, options);
-    if (oldView) {
-      var remove = function() {
+    
+    remove = _.bind(function() {
+      if (oldView) {
         oldView.$el.remove();
-      };
-      if (options.remove) {
-        options.remove(view, oldView, remove);
-      } else {
-        remove();
+        triggerLifecycleEvent.call(oldView, 'deactivated', options);
+        this._removeChild(oldView);
       }
-      triggerLifecycleEvent.call(oldView, 'deactivated', options);
-      this._removeChild(oldView);
+    }, this);
+
+    if (!options.transition) {
+      remove();
     }
 
-    if (view) {
-      view.ensureRendered();
-
-      triggerLifecycleEvent.call(this, 'activated', options);
-      view.trigger('activated', options);
-      this._view = view;
-      var targetElement = getLayoutViewsTargetElement.call(this),
-          append = _.bind(function() {
-            this._view.appendTo(targetElement);
-          }, this);
-      if (options.append) {
-        options.append(view, oldView, append);
+    append = _.bind(function() {
+      if (view) {
+        view.ensureRendered();
+        triggerLifecycleEvent.call(this, 'activated', options);
+        view.trigger('activated', options);
+        this._view = view;
+        var targetElement = getLayoutViewsTargetElement.call(this);
+        this._view.appendTo(targetElement);
+        this._addChild(view);
       } else {
-        append();
+        this._view = undefined;
       }
-      this._addChild(view);
-    } else {
-      this._view = undefined;
+      this.trigger('change:view:end', view, oldView, options);
+    }, this);
+
+    if (!options.transition) {
+      append();
     }
 
-    this.trigger('change:view:end', view, oldView, options);
+    if (options.transition) {
+      options.transition(view, oldView, append, remove);
+    }
+
     return view;
   },
 

@@ -536,6 +536,17 @@ A view to contain a single other view which will change over time, (multi-pane s
 
 Set the current view on the `LayoutView`, triggering `activated`, `ready` and `deactivated` events on the current and previous view during the lifecycle. `ensureRendered` is called on views passed to `setView`. By default `destroy` is called on the previous view when the new view is set.
 
+To implement animations using `setView` pass a `transition` callback to `setView` which will recieve the new view being set, the old view (if present) and append and remove functions which will execute the needed DOM and view operations.
+
+    layout.setView(newView, {
+      transition: function(newView, oldView, append, remove) {
+        append();
+        // fade in newView.$el
+        // fade out oldView.$el
+        remove();
+      }
+    });
+
 ### getView *view.getView()*
 
 Get the current view that was previously set with `setView`.

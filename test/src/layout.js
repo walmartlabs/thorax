@@ -163,7 +163,7 @@ describe('layout', function() {
     expect(view.render).to['throw']();
   });
 
-  it("append and remove options can be passed to setView", function() {
+  it("transition option can be passed to setView", function() {
     var layout = new Thorax.LayoutView();
     var a = new Thorax.View({
       template: function() {
@@ -176,19 +176,15 @@ describe('layout', function() {
       }
     });
     layout.setView(a, {
-      append: function(newView, oldView, append) {
+      transition: function(newView, oldView, append, remove) {
         append();
-      },
-      remove: function(newView, oldView, remove) {
         remove();
       }
     });
     expect(layout.$('span').html()).to.equal('a');
     layout.setView(b, {
-      append: function(newView, oldView, append) {
+      transition: function(newView, oldView, append, remove) {
         append();
-      },
-      remove: function(newView, oldView, remove) {
         remove();
       }
     });
