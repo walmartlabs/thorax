@@ -638,6 +638,21 @@ describe('collection view', function() {
     expect(parentCollectionView.getCollectionElement()[0]).to.not.equal(childCollectionView.getCollectionElement()[0]);
   });
 
+  it("should accept a change option", function() {
+    var model = new Thorax.Model({key: 'a'});
+    var view = new Thorax.CollectionView({
+      tagName: 'ul',
+      itemTemplate: Handlebars.compile('<li>{{key}}</li>')
+    });
+    view.setCollection(new Thorax.Collection([model]), {
+      change: false
+    });
+    view.ensureRendered();
+    expect(view.$('li').html()).to.equal('a');
+    model.set({key: 'b'});
+    expect(view.$('li').html()).to.equal('a');
+  });
+
 });
 
 function runCollectionTests(view, indexMultiplier) {

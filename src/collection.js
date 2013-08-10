@@ -51,7 +51,8 @@ dataObject('collection', {
     render: undefined,    // Default to deferred rendering
     fetch: true,
     success: false,
-    invalid: true
+    invalid: true,
+    change: true          // Wether or not to re-render on model:change
   },
   change: onCollectionReset,
   $el: 'getCollectionElement',
@@ -279,7 +280,10 @@ Thorax.CollectionView.on({
       applyVisibilityFilter.call(this);
     },
     change: function(model) {
-      this.updateItem(model);
+      var options = this.getObjectOptions(this.collection) || undefined;
+      if (options && options.change) {
+        this.updateItem(model);
+      }
       applyItemVisiblityFilter.call(this, model);
     },
     add: function(model) {

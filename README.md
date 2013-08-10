@@ -404,6 +404,7 @@ Accepts any of the following options:
 - **fetch** - Whether or not to try to call `fetch` on the collection if `shouldFetch` returns true
 - **success** - Callback on fetch success, defaults to noop
 - **errors** - Whether or not to trigger an `error` event on the view when an `error` event is triggered on the collection
+- **change** - Wether or not to call `updateItem` when a model's `change` event fires. Defaults to true.
 
 Note that while any view may bind a collection only a `CollectionView` will actually render a collection. A regular `Thorax.View` may declare a `collection` helper which in turn will generate and embed a `CollectionView`.
 
