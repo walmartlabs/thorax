@@ -180,7 +180,7 @@ describe('collection', function() {
       });
       view.setModel(new Thorax.Model(), {render: true});
     }
-    expect(doNestedRender).to.throw(Error);
+    expect(doNestedRender).to['throw'](Error);
   });
 
   it("filter what items are rendered in a collection", function() {
