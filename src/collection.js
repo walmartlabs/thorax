@@ -1,6 +1,6 @@
 /*global assignView, assignTemplate, createRegistryWrapper, dataObject, getEventCallback, getValue, modelCidAttributeName, viewCidAttributeName */
 var _fetch = Backbone.Collection.prototype.fetch,
-    _reset = Backbone.Collection.prototype.reset,
+    _set = Backbone.Collection.prototype.set,
     _replaceHTML = Thorax.View.prototype._replaceHTML,
     collectionCidAttributeName = 'data-collection-cid',
     collectionEmptyAttributeName = 'data-collection-empty',
@@ -35,9 +35,9 @@ Thorax.Collection = Backbone.Collection.extend({
     };
     return _fetch.apply(this, arguments);
   },
-  reset: function(models, options) {
+  set: function(models, options) {
     this._fetched = !!models;
-    return _reset.call(this, models, options);
+    return _set.call(this, models, options);
   }
 });
 
