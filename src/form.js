@@ -154,7 +154,7 @@ _.extend(Thorax.View.prototype, {
   _getInputValue: function(input /* , options, errors */) {
     if (input.type === 'checkbox' || input.type === 'radio') {
       if (input.checked) {
-        return input.value;
+        return input.getAttribute('value') || true;
       }
     } else if (input.multiple === true) {
       var values = [];
