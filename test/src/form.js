@@ -2,7 +2,15 @@ describe('form', function() {
   var FormView = Thorax.View.extend({
     name: 'form',
     template: function() {
-      return '<form><input name="one"/><select name="two"><option value="a">a</option><option value="b">b</option></select><input name="three[four]"/><input name="five" value="A" type="checkbox" /><input name="five" value="B" type="checkbox" checked /><input name="five" value="C" type="checkbox" checked /><input name="six" value="LOL" type="checkbox" checked /></form>';
+      return '<form>'
+          + '<input name="one"/>'
+          + '<select name="two"><option value="a">a</option><option value="b">b</option></select>'
+          + '<input name="three[four]">'
+          + '<input name="five" value="A" type="checkbox">'
+          + '<input name="five" value="B" type="checkbox" checked>'
+          + '<input name="five" value="C" type="checkbox" checked>'
+          + '<input name="six" value="LOL" type="checkbox" checked>'
+        + '</form>';
     }
   });
 
@@ -226,5 +234,25 @@ describe('form', function() {
 
     model.set('one', 'foo');
     expect(view.$('input[name="one"]')[0].value).to.equal('foo');
+  });
+
+  it('should serialize checkboxes without values', function() {
+    var view = new FormView({
+      template: function() {
+        return '<input type="checkbox" name="foo">';
+      }
+    });
+
+    var model = new Thorax.Model({});
+    view.setModel(model);
+    view.render();
+
+    expect(view.serialize()).to.eql({});
+
+    model.set('foo', true);
+    expect(view.serialize()).to.eql({foo: true});
+
+    view.render();
+    expect(view.serialize()).to.eql({foo: true});
   });
 });
