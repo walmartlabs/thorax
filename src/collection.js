@@ -280,7 +280,7 @@ Thorax.CollectionView.on({
       applyVisibilityFilter.call(this);
     },
     change: function(model) {
-      var options = this.getObjectOptions(this.collection) || undefined;
+      var options = this.getObjectOptions(this.collection);
       if (options && options.change) {
         this.updateItem(model);
       }
