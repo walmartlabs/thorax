@@ -286,13 +286,17 @@ describe('collection', function() {
       });
 
       view.render();
-      expect(_.map(view.$('div'), function(el) { return $(el).css('display'); })).to.eql(['none', 'block']);
+      expect(_.map(view.$('div'), function(el) {
+        return $(el).css('display') || 'block';
+      })).to.eql(['none', 'block']);
 
       view.itemFilter = function() {
         return true;
       };
       view.updateFilter();
-      expect(_.map(view.$('div'), function(el) { return $(el).css('display'); })).to.eql(['block', 'block']);
+      expect(_.map(view.$('div'), function(el) {
+        return $(el).css('display') || 'block';
+      })).to.eql(['block', 'block']);
     });
   });
 
