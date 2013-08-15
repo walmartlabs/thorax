@@ -196,7 +196,7 @@ Thorax.mixinLoadableEvents = function(target, useParent) {
       that.trigger(loadStart, message, background, that);
     },
     loadEnd: function() {
-      this._loadCount--
+      this._loadCount--;
 
       var that = useParent ? this.parent : this;
       that.trigger(loadEnd, that);
