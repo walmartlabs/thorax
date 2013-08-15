@@ -41,6 +41,21 @@ Thorax.Collection = Backbone.Collection.extend({
   }
 });
 
+_.extend(Thorax.View.prototype, {
+  getCollectionViews: function(collection) {
+    return _.filter(this.children, function(child) {
+      if (!(child instanceof Thorax.CollectionView)) {
+        return false;
+      }
+
+      return !collection || (child.collection === collection);
+    });
+  },
+  updateFilter: function(collection) {
+    _.invoke(this.getCollectionViews(collection), 'updateFilter');
+  }
+});
+
 Thorax.Collections = {};
 createRegistryWrapper(Thorax.Collection, Thorax.Collections);
 
@@ -269,6 +284,10 @@ Thorax.CollectionView = Thorax.View.extend({
   getCollectionElement: function() {
     var element = this.$(this._collectionSelector);
     return element.length === 0 ? this.$el : element;
+  },
+
+  updateFilter: function() {
+    applyVisibilityFilter.call(this);
   }
 });
 
@@ -276,9 +295,6 @@ Thorax.CollectionView.on({
   collection: {
     reset: onCollectionReset,
     sort: onCollectionReset,
-    filter: function() {
-      applyVisibilityFilter.call(this);
-    },
     change: function(model) {
       var options = this.getObjectOptions(this.collection);
       if (options && options.change) {
