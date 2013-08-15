@@ -548,6 +548,34 @@ describe('collection', function() {
       expect(view.$('[data-collection-empty]').length).to.equal(0);
     });
   });
+
+  describe('view delegation', function() {
+    describe('#getCollectionViews', function() {
+      var view,
+          collection1,
+          collection2;
+
+      beforeEach(function() {
+        collection1 = new Thorax.Collection();
+        collection2 = new Thorax.Collection();
+
+        view = new Thorax.View({
+          template: Handlebars.compile('{{#collection tag="ul"}}<li>{{key}}</li>{{/collection}}{{#collection collection2}}foo{{/collection}}'),
+          collection: collection1,
+          collection2: collection2
+        });
+        view.render();
+      });
+      it('will find specific collection views', function() {
+        var collectionView = _.values(view.children)[0];
+
+        expect(view.getCollectionViews(collectionView.collection)).to.eql([collectionView]);
+      });
+      it('will find all collection views', function() {
+        expect(view.getCollectionViews()).to.eql(_.values(view.children));
+      });
+    });
+  });
 });
 
 describe('collection view', function() {

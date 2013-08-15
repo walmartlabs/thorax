@@ -41,6 +41,17 @@ Thorax.Collection = Backbone.Collection.extend({
   }
 });
 
+_.extend(Thorax.View.prototype, {
+  getCollectionViews: function(collection) {
+    return _.filter(this.children, function(child) {
+      if (!(child instanceof Thorax.CollectionView)) {
+        return false;
+      }
+
+      return !collection || (child.collection === collection);
+    });
+});
+
 Thorax.Collections = {};
 createRegistryWrapper(Thorax.Collection, Thorax.Collections);
 
