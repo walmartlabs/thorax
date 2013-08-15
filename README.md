@@ -609,6 +609,10 @@ A collection helper may specify a specific function to use as the `itemFilter` i
 
     {{#collection todos item-filter="todosItemFilter"}}
 
+### updateFilter *view.updateFilter()*
+
+If using `itemFilter`, call this method to force the collection view to re-filter.
+
 ### emptyTemplate *view.emptyTemplate*
 
 A template name or template function to display when the collection is empty. If used in a `collection` helper the inverse block will become the `emptyTemplate`. Defaults to `view.name + '-empty'`
