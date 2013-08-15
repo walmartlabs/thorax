@@ -50,6 +50,10 @@ _.extend(Thorax.View.prototype, {
 
       return !collection || (child.collection === collection);
     });
+  },
+  updateFilter: function(collection) {
+    _.invoke(this.getCollectionViews(collection), 'updateFilter');
+  }
 });
 
 Thorax.Collections = {};
@@ -280,6 +284,10 @@ Thorax.CollectionView = Thorax.View.extend({
   getCollectionElement: function() {
     var element = this.$(this._collectionSelector);
     return element.length === 0 ? this.$el : element;
+  },
+
+  updateFilter: function() {
+    applyVisibilityFilter.call(this);
   }
 });
 
