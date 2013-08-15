@@ -270,6 +270,34 @@ describe('collection', function() {
       expect(view.$('li').eq(0).css('display')).to.equal('none');
       expect(view.$('li').eq(1).css('display')).to.not.equal('none');
     });
+
+    it('will re-render on updateFilter call', function() {
+      var view = new Thorax.CollectionView({
+        collection: new Thorax.Collection([
+          {letter: 'a'},
+          {letter: 'b'}
+        ]),
+        renderItem: function() {
+          return '<div>foo</div>';
+        },
+        itemFilter: function(model) {
+          return model.get('letter') !== 'a';
+        }
+      });
+
+      view.render();
+      expect(_.map(view.$('div'), function(el) {
+        return $(el).css('display') || 'block';
+      })).to.eql(['none', 'block']);
+
+      view.itemFilter = function() {
+        return true;
+      };
+      view.updateFilter();
+      expect(_.map(view.$('div'), function(el) {
+        return $(el).css('display') || 'block';
+      })).to.eql(['block', 'block']);
+    });
   });
 
   it("collection-element helper", function() {
@@ -546,6 +574,46 @@ describe('collection', function() {
       view.letters.reset(letterCollection.models);
       expect(view.$('div[data-collection-cid] div').html()).to.equal('a');
       expect(view.$('[data-collection-empty]').length).to.equal(0);
+    });
+  });
+
+  describe('view delegation', function() {
+    describe('#getCollectionViews', function() {
+      var view,
+          collection1,
+          collection2;
+
+      beforeEach(function() {
+        collection1 = new Thorax.Collection();
+        collection2 = new Thorax.Collection();
+
+        view = new Thorax.View({
+          template: Handlebars.compile('{{#collection tag="ul"}}<li>{{key}}</li>{{/collection}}{{#collection collection2}}foo{{/collection}}'),
+          collection: collection1,
+          collection2: collection2
+        });
+        view.render();
+      });
+      it('will find specific collection views', function() {
+        var collectionView = _.values(view.children)[0];
+
+        expect(view.getCollectionViews(collectionView.collection)).to.eql([collectionView]);
+      });
+      it('will find all collection views', function() {
+        expect(view.getCollectionViews()).to.eql(_.values(view.children));
+      });
+    });
+
+    it('will delegate to children on updateFilter call', function() {
+      var collectionView = {
+        updateFilter: this.spy()
+      };
+      var view = new Thorax.View({
+        getCollectionViews: function() { return [collectionView]; }
+      });
+
+      view.updateFilter();
+      expect(collectionView.updateFilter).to.have.been.calledOnce;
     });
   });
 });
