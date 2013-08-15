@@ -77,6 +77,43 @@ describe('collection', function() {
     expect(view.$('li').length).to.equal(3);
   });
 
+  it("should re-render when sort is triggered", function() {
+    var collection = new Thorax.Collection(letterCollection.models);
+    var view = new Thorax.View({
+      collection: collection,
+      template: Handlebars.compile('{{#collection tag="ul"}}<li>{{letter}}</li>{{/collection}}')
+    });
+    view.render();
+    expect(view.$('li').length).to.equal(collection.length);
+    expect(view.$('li').eq(0).html()).to.equal('a');
+    // reverse alphabetical sort
+    collection.comparator = function(letter) {
+      return _.map(letter.get('letter').toLowerCase().split(''), function(l) {
+        return String.fromCharCode(-(l.charCodeAt(0)));
+      });
+    };
+    collection.sort();
+    expect(view.$('li').eq(0).html()).to.equal('d');
+  });
+
+  it("nested render should throw", function() {
+    //this causes recursion
+    function doNestedRender() {
+      var view = new Thorax.View({
+        template: Handlebars.compile('{{key}}{{#collection col}}{{key}}{{/collection}}'),
+        context: function() {
+          this.model.set({key: 'value'});
+          return {
+            key: 'value',
+            col: new Thorax.Collection([{key: 'value'}])
+          };
+        }
+      });
+      view.setModel(new Thorax.Model(), {render: true});
+    }
+    expect(doNestedRender).to['throw'](Error);
+  });
+
   describe('multiple collections', function() {
     it('should render separate collections', function() {
       var view = new Thorax.View({
@@ -127,152 +164,145 @@ describe('collection', function() {
     });
   });
 
-  it("inverse block in collection helper", function() {
-    var emptyCollectionView = new Thorax.View({
-      template: Handlebars.compile('{{#collection}}<div>{{letter}}</div>{{else}}<div>empty</div>{{/collection}}'),
-      collection: new Thorax.Collection()
-    });
-    emptyCollectionView.render();
-    expect(emptyCollectionView.$('[data-collection-cid]').html()).to.equal('<div>empty</div>');
-  });
-
-  it("empty template defaults to parent scope", function() {
-    var view = new Thorax.View({
-      parentKey: 'value',
-      collection: new (Thorax.Collection.extend({url: false}))(),
-      template: Handlebars.compile('{{#collection}}item{{else}}{{parentKey}}{{/collection}}')
-    });
-    view.render();
-    expect(view.$('[data-collection-empty] div').html()).to.equal('value');
-  });
-
-  it("should re-render when sort is triggered", function() {
-    var collection = new Thorax.Collection(letterCollection.models);
-    var view = new Thorax.View({
-      collection: collection,
-      template: Handlebars.compile('{{#collection tag="ul"}}<li>{{letter}}</li>{{/collection}}')
-    });
-    view.render();
-    expect(view.$('li').length).to.equal(collection.length);
-    expect(view.$('li').eq(0).html()).to.equal('a');
-    // reverse alphabetical sort
-    collection.comparator = function(letter) {
-      return _.map(letter.get('letter').toLowerCase().split(''), function(l) {
-        return String.fromCharCode(-(l.charCodeAt(0)));
+  describe('empty rendering', function() {
+    it("inverse block in collection helper", function() {
+      var emptyCollectionView = new Thorax.View({
+        template: Handlebars.compile('{{#collection}}<div>{{letter}}</div>{{else}}<div>empty</div>{{/collection}}'),
+        collection: new Thorax.Collection()
       });
-    };
-    collection.sort();
-    expect(view.$('li').eq(0).html()).to.equal('d');
+      emptyCollectionView.render();
+      expect(emptyCollectionView.$('[data-collection-cid]').html()).to.equal('<div>empty</div>');
+    });
+
+    it("empty template defaults to parent scope", function() {
+      var view = new Thorax.View({
+        parentKey: 'value',
+        collection: new (Thorax.Collection.extend({url: false}))(),
+        template: Handlebars.compile('{{#collection}}item{{else}}{{parentKey}}{{/collection}}')
+      });
+      view.render();
+      expect(view.$('[data-collection-empty] div').html()).to.equal('value');
+    });
+
+    it("empty-class option", function() {
+      var view = new Thorax.View({
+        template: Handlebars.compile("{{#collection empty-class=\"a\" tag=\"ul\"}}{{/collection}}"),
+        collection: new (Thorax.Collection.extend({url: false}))()
+      });
+      view.render();
+      expect(view.$('ul').hasClass('a')).to.be['true'];
+      var model = new Thorax.Model({key: 'value'});
+      view.collection.add(model);
+      expect(view.$('ul').hasClass('a')).to.be['false'];
+      view.collection.remove(model);
+      expect(view.$('ul').hasClass('a')).to.be['true'];
+
+      //with default arg
+      view = new Thorax.View({
+        template: Handlebars.compile("{{#collection tag=\"ul\"}}{{/collection}}"),
+        collection: new (Thorax.Collection.extend({url: false}))()
+      });
+      view.render();
+      expect(view.$('ul').hasClass('empty')).to.be['true'];
+      var model = new Thorax.Model({key: 'value'});
+      view.collection.add(model);
+      expect(view.$('ul').hasClass('empty')).to.be['false'];
+      view.collection.remove(model);
+      expect(view.$('ul').hasClass('empty')).to.be['true'];
+    });
   });
 
-  it("nested render should throw", function() {
-    //this causes recursion
-    function doNestedRender() {
+  describe('filter', function() {
+    it("filter what items are rendered in a collection", function() {
+      //zepto does not support the :visible selector, so emulate
+      function isVisible(elem) {
+        elem = $(elem);
+        return !!(elem.width() || elem.height()) && elem.css("display") !== "none";
+      }
+
+      function filterVisible(arr) {
+        return _.select(arr, function(el) {
+          return isVisible(el);
+        });
+      }
+
       var view = new Thorax.View({
-        template: Handlebars.compile('{{key}}{{#collection col}}{{key}}{{/collection}}'),
-        context: function() {
-          this.model.set({key: 'value'});
-          return {
-            key: 'value',
-            col: new Thorax.Collection([{key: 'value'}])
-          };
+        template: Handlebars.compile('{{#collection tag="ul"}}<li>{{key}}</li>{{/collection}}'),
+        collection: new Thorax.Collection(),
+        itemFilter: function(model) {
+          return model.attributes.key === 'a' || model.attributes.key === 'b';
         }
       });
-      view.setModel(new Thorax.Model(), {render: true});
-    }
-    expect(doNestedRender).to['throw'](Error);
-  });
+      view.render();
+      document.body.appendChild(view.el);
+      expect(filterVisible(view.$('li')).length).to.equal(0);
+      var a = new Thorax.Model({key: 'a'});
+      view.collection.reset([a]);
+      expect(filterVisible(view.$('li')).length).to.equal(1);
+      expect(filterVisible(view.$('li'))[0].innerHTML).to.equal('a');
+      var b = new Thorax.Model({key: 'b'});
+      view.collection.add(b);
+      expect(filterVisible(view.$('li')).length).to.equal(2);
+      expect(filterVisible(view.$('li'))[1].innerHTML).to.equal('b');
+      var c = new Thorax.Model({key: 'c'});
+      view.collection.add(c);
+      expect(filterVisible(view.$('li')).length).to.equal(2, 'add item that should not be included');
+      expect(filterVisible(view.$('li'))[1].innerHTML).to.equal('b', 'add item that should not be included');
+      c.set({key: 'b'});
+      expect(filterVisible(view.$('li')).length).to.equal(3, 'set item not included to be included');
+      expect(filterVisible(view.$('li'))[1].innerHTML).to.equal('b', 'set item not included to be included');
+      expect(filterVisible(view.$('li'))[2].innerHTML).to.equal('b', 'set item not included to be included');
+      c.set({key: 'c'});
+      expect(filterVisible(view.$('li')).length).to.equal(2, 'set item that is included to not be included');
+      expect(filterVisible(view.$('li'))[1].innerHTML).to.equal('b', 'set item that is included to not be included');
+      a.set({key: 'x'});
+      expect(filterVisible(view.$('li')).length).to.equal(1, 'set first included item to not be included');
+      expect(filterVisible(view.$('li'))[0].innerHTML).to.equal('b', 'set first included item to not be included');
+      a.set({key: 'a'});
+      expect(filterVisible(view.$('li')).length).to.equal(2);
+      expect(filterVisible(view.$('li'))[0].innerHTML).to.equal('a', 'set first item not included to be included');
+      expect(filterVisible(view.$('li'))[1].innerHTML).to.equal('b', 'set first item not included to be included');
+      a.set({key: 'a'});
+      expect(filterVisible(view.$('li'))[0].innerHTML).to.equal('a', 'items maintain order when updated when filter is present');
+      expect(filterVisible(view.$('li'))[1].innerHTML).to.equal('b', 'items maintain order when updated when filter is present');
+      b.set({key: 'b'});
+      expect(filterVisible(view.$('li'))[0].innerHTML).to.equal('a', 'items maintain order when updated when filter is present');
+      expect(filterVisible(view.$('li'))[1].innerHTML).to.equal('b', 'items maintain order when updated when filter is present');
+      view.$el.remove();
+    });
 
-  it("filter what items are rendered in a collection", function() {
-    //zepto does not support the :visible selector, so emulate
-    function isVisible(elem) {
-      elem = $(elem);
-      return !!(elem.width() || elem.height()) && elem.css("display") !== "none";
-    }
-
-    function filterVisible(arr) {
-      return _.select(arr, function(el) {
-        return isVisible(el);
+    it("itemFilter should not be passed null items when appending empty", function() {
+      var view = new Thorax.View({
+        template: Handlebars.compile('{{#collection tag="ul"}}<li>{{key}}</li>{{/collection}}'),
+        collection: new Thorax.Collection(),
+        itemFilter: function(model) {
+          return model.attributes.key === 'a' || model.attributes.key === 'b';
+        },
+        emptyTemplate: function(){ return '<li>empty</li>'; }
       });
-    }
-
-    var view = new Thorax.View({
-      template: Handlebars.compile('{{#collection tag="ul"}}<li>{{key}}</li>{{/collection}}'),
-      collection: new Thorax.Collection(),
-      itemFilter: function(model) {
-        return model.attributes.key === 'a' || model.attributes.key === 'b';
-      }
+      view.render();
+      expect(view.$('ul li').html()).to.equal('empty');
+      var a = new Thorax.Model({key: 'a'});
+      view.collection.reset([a]);
+      expect(view.$('li').length).to.equal(1);
     });
-    view.render();
-    document.body.appendChild(view.el);
-    expect(filterVisible(view.$('li')).length).to.equal(0);
-    var a = new Thorax.Model({key: 'a'});
-    view.collection.reset([a]);
-    expect(filterVisible(view.$('li')).length).to.equal(1);
-    expect(filterVisible(view.$('li'))[0].innerHTML).to.equal('a');
-    var b = new Thorax.Model({key: 'b'});
-    view.collection.add(b);
-    expect(filterVisible(view.$('li')).length).to.equal(2);
-    expect(filterVisible(view.$('li'))[1].innerHTML).to.equal('b');
-    var c = new Thorax.Model({key: 'c'});
-    view.collection.add(c);
-    expect(filterVisible(view.$('li')).length).to.equal(2, 'add item that should not be included');
-    expect(filterVisible(view.$('li'))[1].innerHTML).to.equal('b', 'add item that should not be included');
-    c.set({key: 'b'});
-    expect(filterVisible(view.$('li')).length).to.equal(3, 'set item not included to be included');
-    expect(filterVisible(view.$('li'))[1].innerHTML).to.equal('b', 'set item not included to be included');
-    expect(filterVisible(view.$('li'))[2].innerHTML).to.equal('b', 'set item not included to be included');
-    c.set({key: 'c'});
-    expect(filterVisible(view.$('li')).length).to.equal(2, 'set item that is included to not be included');
-    expect(filterVisible(view.$('li'))[1].innerHTML).to.equal('b', 'set item that is included to not be included');
-    a.set({key: 'x'});
-    expect(filterVisible(view.$('li')).length).to.equal(1, 'set first included item to not be included');
-    expect(filterVisible(view.$('li'))[0].innerHTML).to.equal('b', 'set first included item to not be included');
-    a.set({key: 'a'});
-    expect(filterVisible(view.$('li')).length).to.equal(2);
-    expect(filterVisible(view.$('li'))[0].innerHTML).to.equal('a', 'set first item not included to be included');
-    expect(filterVisible(view.$('li'))[1].innerHTML).to.equal('b', 'set first item not included to be included');
-    a.set({key: 'a'});
-    expect(filterVisible(view.$('li'))[0].innerHTML).to.equal('a', 'items maintain order when updated when filter is present');
-    expect(filterVisible(view.$('li'))[1].innerHTML).to.equal('b', 'items maintain order when updated when filter is present');
-    b.set({key: 'b'});
-    expect(filterVisible(view.$('li'))[0].innerHTML).to.equal('a', 'items maintain order when updated when filter is present');
-    expect(filterVisible(view.$('li'))[1].innerHTML).to.equal('b', 'items maintain order when updated when filter is present');
-    view.$el.remove();
 
-  });
+    it("itemFilter will work in nested view helpers", function() {
+      var view = new Thorax.View({
+        collection: new Thorax.Collection([
+          {letter: 'a'},
+          {letter: 'b'}
+        ]),
+        template: Handlebars.compile('{{^empty collection}}{{#collection tag="ul"}}<li>{{letter}}</li>{{/collection}}{{/empty}}'),
+        itemFilter: function(model) {
+          return model.get('letter') !== 'a';
+        }
+      });
+      view.render();
 
-  it("itemFilter should not be passed null items when appending empty", function() {
-    var view = new Thorax.View({
-      template: Handlebars.compile('{{#collection tag="ul"}}<li>{{key}}</li>{{/collection}}'),
-      collection: new Thorax.Collection(),
-      itemFilter: function(model) {
-        return model.attributes.key === 'a' || model.attributes.key === 'b';
-      },
-      emptyTemplate: function(){ return '<li>empty</li>'; }
+      expect(view.$('li').eq(0).css('display')).to.equal('none');
+      expect(view.$('li').eq(1).css('display')).to.not.equal('none');
     });
-    view.render();
-    expect(view.$('ul li').html()).to.equal('empty');
-    var a = new Thorax.Model({key: 'a'});
-    view.collection.reset([a]);
-    expect(view.$('li').length).to.equal(1);
-  });
-
-  it("itemFilter will work in nested view helpers", function() {
-    var view = new Thorax.View({
-      collection: new Thorax.Collection([
-        {letter: 'a'},
-        {letter: 'b'}
-      ]),
-      template: Handlebars.compile('{{^empty collection}}{{#collection tag="ul"}}<li>{{letter}}</li>{{/collection}}{{/empty}}'),
-      itemFilter: function(model) {
-        return model.get('letter') !== 'a';
-      }
-    });
-    view.render();
-
-    expect(view.$('li').eq(0).css('display')).to.equal('none');
-    expect(view.$('li').eq(1).css('display')).to.not.equal('none');
   });
 
   it("collection model updates will update item", function() {
@@ -401,33 +431,6 @@ describe('collection', function() {
     view.letters.reset(letterCollection.models);
     expect(view.$('div[data-collection-cid] div').html()).to.equal('a');
     expect(view.$('[data-collection-empty]').length).to.equal(0);
-  });
-
-  it("empty-class option", function() {
-    var view = new Thorax.View({
-      template: Handlebars.compile("{{#collection empty-class=\"a\" tag=\"ul\"}}{{/collection}}"),
-      collection: new (Thorax.Collection.extend({url: false}))()
-    });
-    view.render();
-    expect(view.$('ul').hasClass('a')).to.be['true'];
-    var model = new Thorax.Model({key: 'value'});
-    view.collection.add(model);
-    expect(view.$('ul').hasClass('a')).to.be['false'];
-    view.collection.remove(model);
-    expect(view.$('ul').hasClass('a')).to.be['true'];
-
-    //with default arg
-    view = new Thorax.View({
-      template: Handlebars.compile("{{#collection tag=\"ul\"}}{{/collection}}"),
-      collection: new (Thorax.Collection.extend({url: false}))()
-    });
-    view.render();
-    expect(view.$('ul').hasClass('empty')).to.be['true'];
-    var model = new Thorax.Model({key: 'value'});
-    view.collection.add(model);
-    expect(view.$('ul').hasClass('empty')).to.be['false'];
-    view.collection.remove(model);
-    expect(view.$('ul').hasClass('empty')).to.be['true'];
   });
 
   it("$.fn.collection", function() {
