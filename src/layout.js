@@ -22,31 +22,46 @@ Thorax.LayoutView = Thorax.View.extend({
       view = new (Thorax.Util.registryGet(Thorax, 'Views', view, false))();
     }
     this.ensureRendered();
-    var oldView = this._view;
+    var oldView = this._view, append, remove, complete;
     if (view === oldView) {
       return false;
     }
-
     this.trigger('change:view:start', view, oldView, options);
-    if (oldView) {
-      oldView.$el.remove();
-      triggerLifecycleEvent.call(oldView, 'deactivated', options);
-      this._removeChild(oldView);
-    }
+    
+    remove = _.bind(function() {
+      if (oldView) {
+        oldView.$el.remove();
+        triggerLifecycleEvent.call(oldView, 'deactivated', options);
+        this._removeChild(oldView);
+      }
+    }, this);
 
-    if (view) {
-      view.ensureRendered();
+    append = _.bind(function() {
+      if (view) {
+        view.ensureRendered();
+        triggerLifecycleEvent.call(this, 'activated', options);
+        view.trigger('activated', options);
+        this._view = view;
+        var targetElement = getLayoutViewsTargetElement.call(this);
+        this._view.appendTo(targetElement);
+        this._addChild(view);
+      } else {
+        this._view = undefined;
+      }
+    }, this);
 
-      triggerLifecycleEvent.call(this, 'activated', options);
-      view.trigger('activated', options);
-      this._view = view;
-      this._view.appendTo(getLayoutViewsTargetElement.call(this));
-      this._addChild(view);
+    complete = _.bind(function() {
+      this.trigger('change:view:end', view, oldView, options);
+    }, this);
+
+    if (!options.transition) {
+      remove();
+      append();
+      complete();
     } else {
-      this._view = undefined;
+      options.transition(view, oldView, append, remove, complete);
     }
 
-    this.trigger('change:view:end', view, oldView, options);
     return view;
   },
 
