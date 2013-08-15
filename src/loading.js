@@ -196,7 +196,7 @@ Thorax.mixinLoadableEvents = function(target, useParent) {
       that.trigger(loadStart, message, background, that);
     },
     loadEnd: function() {
-      this._loadCount--
+      this._loadCount--;
 
       var that = useParent ? this.parent : this;
       that.trigger(loadEnd, that);
@@ -369,14 +369,22 @@ _.each(klasses, function(DataClass) {
         }
       }
 
-      var self = this,
-          complete = options.complete;
+      if (!options.loadTriggered) {
+        var self = this;
 
-      options.complete = function() {
-        complete && complete.apply(this, arguments);
-        self.loadEnd();
-      };
-      self.loadStart(undefined, options.background);
+        function endWrapper(method) {
+          var $super = options[method];
+          options[method] = function() {
+            self.loadEnd();
+            $super && $super.apply(this, arguments);
+          };
+        }
+
+        endWrapper('success');
+        endWrapper('error');
+        self.loadStart(undefined, options.background);
+      }
+
       return fetchQueue.call(this, options || {}, $fetch);
     },
 
