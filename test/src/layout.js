@@ -163,4 +163,32 @@ describe('layout', function() {
     expect(view.render).to['throw']();
   });
 
+  it("transition option can be passed to setView", function() {
+    var layout = new Thorax.LayoutView();
+    var a = new Thorax.View({
+      template: function() {
+        return '<span>a</span>';
+      }
+    });
+    var b = new Thorax.View({
+      template: function() {
+        return '<span>b</span>';
+      }
+    });
+    layout.setView(a, {
+      transition: function(newView, oldView, append, remove) {
+        append();
+        remove();
+      }
+    });
+    expect(layout.$('span').html()).to.equal('a');
+    layout.setView(b, {
+      transition: function(newView, oldView, append, remove) {
+        append();
+        remove();
+      }
+    });
+    expect(layout.$('span').html()).to.equal('b');
+  });
+
 });
