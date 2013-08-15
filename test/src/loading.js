@@ -9,7 +9,7 @@ describe('loading', function() {
 
   Thorax.setRootObject(Application);
 
-  describe('fetch set/reset test', function() {
+  describe('fetch', function() {
     var colData = [{id: 1, name: "foo"}, {id: 2, name: "bar"}],
         C = Thorax.Collection.extend({
           url: 'foo'
@@ -35,6 +35,32 @@ describe('loading', function() {
         exc = e;
       }
       expect(exc).to.not.eql(undefined);
+    });
+    it('views should emit load events', function() {
+      var startSpy = this.spy(),
+          endSpy = this.spy();
+
+      c.on('load:start', startSpy);
+      c.on('load:end', endSpy);
+
+      c.fetch();
+      this.requests[0].respond(200, {}, '[]');
+
+      expect(startSpy).to.have.been.calledOnce;
+      expect(endSpy).to.have.been.calledOnce;
+    });
+    it('views should not emit load events if triggered flag is set', function() {
+      var startSpy = this.spy(),
+          endSpy = this.spy();
+
+      c.on('load:start', startSpy);
+      c.on('load:end', endSpy);
+
+      c.fetch({loadTriggered: true});
+      this.requests[0].respond(200, {}, '[]');
+
+      expect(startSpy).to.not.have.been.called;
+      expect(endSpy).to.not.have.been.called;
     });
   });
 
