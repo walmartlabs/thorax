@@ -68,17 +68,17 @@ SECTION NARRATIVE: Backbone's models and collections are nearly unchanged. Thora
 
 ### *model.isEmpty()* *collection.isEmpty()*
 
-NARRATIVE REFERENCE (big picture): You will likely not need to call this method directly. It will normally be called by the template helper `{{#empty modelOrCollection}}` or `CollectionView`. 
+NARRATIVE: You will likely not need to call this method directly. It will normally be called by the template helper `{{#empty modelOrCollection}}` or `CollectionView`. 
 
-API (details): In a collection the implementations of `isEmpty` and `isPopulated` differ, but in a model `isEmpty` is an alias for `!isPopulated`. For collections, `isEmpty()` is used by the `empty` helper and the `emptyTemplate` and `emptyItem` options of a `CollectionView` to check whether a collection is empty. A collection is only treated as empty if it `isPopulated` and zero length. <-- this last sentence seems wonky...
+API: In a collection the implementations of `isEmpty` and `isPopulated` differ, but in a model `isEmpty` is an alias for `!isPopulated`. For collections, `isEmpty()` is used by the `empty` helper and the `emptyTemplate` and `emptyItem` options of a `CollectionView` to check whether a collection is empty. A collection is only treated as empty if it `isPopulated` and zero length. <-- this last sentence seems wonky...
 
 <a class="jsbin-embed" href="http://jsbin.com/afejoq/3/embed?live">JS Bin</a><script src="http://static.jsbin.com/js/embed.js"></script>
 
 ### *model.isPopulated()* *collection.isPopulated()*
 
-NARRATIVE REFERENCE (big picture): When you add a model attribute to a view, `setModel` is going to be called on that view for you automatically by Thorax. `view.setModel()` and `view.setCollection()` use this to determine whether or not to fetch the collection.
+NARRATIVE: When you add a model attribute to a view, `setModel` is going to be called on that view for you automatically by Thorax. `view.setModel()` and `view.setCollection()` use this to determine whether or not to fetch the collection.
 
-API (details): The default implementation checks to see if any keys that are not `id` and are not default values have been set.
+API: The default implementation checks to see if any keys that are not `id` and are not default values have been set.
 
 <a class="jsbin-embed" href="http://jsbin.com/afejoq/3/embed?live">JS Bin</a><script src="http://static.jsbin.com/js/embed.js"></script>
 
@@ -175,7 +175,7 @@ or may be automatically attached `HelperView` instances created by helpers creat
 
 ### parent *view.parent*
 
-If a view was embedded inside another with the `view` helper, or a generated `HelperView` (for instance the `collection` or `empty` helpers) it will have a `parent` view attribute. In the case of `HelperView`s, the `parent` will be the view that declared the helper in its template.
+NARRATIVE: If a view was embedded inside another with the `{{view fooView}}` Handlebars helper, or a generated `HelperView` (for instance the `collection` or `empty` helpers) it will have a `parent` view attribute. In the case of `HelperView`s, the `parent` will be the view that declared the helper in its template.
 
 ### retain *view.retain([owner])*
 
@@ -194,11 +194,13 @@ When the optional `owner` parameter is passed, the retain reference count will a
 
 ### release *view.release()*
 
-Release a view that was previously retained. If `release` is called and the view has a reference count of zero it will be destroyed, which will release all children, remove all events, unbind all models and collections, call `remove` and trigger the `destroyed` event.
+Narrative: Release a view that was previously retained. Generally, this method is not needed unless you are `retain`ing views. `release` is usally called automatically if a view was attached to a `LayoutView` with the `setView` method, and another view is then passed to `setView`.
 
-`release` is usally called automatically if a view was attached to a `LayoutView` with the `setView` method, and another view is then passed to `setView`.
+API: If `release` is called and the view has a reference count of zero it will be destroyed, which will release all children, remove all events, unbind all models and collections, call `remove` and trigger the `destroyed` event.
 
-Generally this method is not needed unless you are `retain`ing views.
+
+
+
 
 
 
@@ -261,9 +263,9 @@ Note that while any view may bind a collection only a `CollectionView` will actu
 
 ### $.view *$(event.target).view([options])*
 
-NARRATIVE***: When a user clicks on an element in the dom, data... element.closest - traverses to find the closest view or element that has data-view and then looks for the model on that. 
+NARRATIVE: Get a reference to the nearest parent view. 
 
-API: Get a reference to the nearest parent view. Pass `helper: false` to options to exclude `HelperView`s from the lookup. Useful when registering DOM event handlers:
+API: Pass `helper: false` to options to exclude `HelperView`s from the lookup. Useful when registering DOM event handlers:
 
     $(event.target).view();
 
