@@ -14,31 +14,33 @@ An opinionated, battle tested [Backbone](http://backbonejs.org/) + [Handlebars](
 
 ### 2
 
-Open the directory in your favorite editor - these examples will all use sublime text. Things you should know up front: 
+Open the seed project in your favorite text editor. Things to know before we get started: 
 
-- you must use the seed project to build with thorax
-- most of this directory structure, and the dependencies, are dev happiness and build related. this is a mobile framework - as little as possible goes over the wire. only the public folder.
+* You must use the seed project to build with thorax
+* Most of the dependencies are build related. This is a mobile framework: very little goes over the wire.
 
-Here's what you should know about:
+## picture of directory structure
 
-- components, here live bower files?
-- js, most of your work done here, notice init.js in particular besides the folders, note the assignment of things to hte application object though that's probably going away... 
-- node modules should be self explanatory
-- public is what's going over the wire, notice in particular that the index file is super lightweight, here's what should be in it... 
-- stylesheets is pretty simple
-- tasks is grunt
-- templates is wehre all your goods go, not in index
-- application.handlebars is a special beast with headers and footers and layout objects
-- no lumbar.json anymore but the other json should be self explanatory
-- AN IMAGE OR SERIES OF SNIPPETS OF IMAGES WILL GO HERE TO SHOW THE DIRECTORY STRUCTURE. THIS SECTION IS AN ANNOTATED IMAGE OF A DIRECTORY STRUCTURE. we will have to make it pretty and navigable though it will be a shitload of information, while still having the call to actions clear at the bottom.
+* *components*, are front end packages managed by [bower](http://bower.io/), see *bower.json*
+* *js*, is where you'll spend most your development time - your models, collections, views and routers live here.
+* *node modules* are dependencies managed by [npm](https://npmjs.org/)
+* *public* is the folder the project files are copied into during the build process - all that goes over the wire. Notice in particular that there is hardly anything in the index file - it should stay like this except for script tags you'll need to put into the head (like a script tag from [typekit](http://help.typekit.com/customer/portal/articles/649336-embed-code), for instance, or other packages you're grabbing from a [cdn](http://cdnjs.com)). 
+* you can have as many different *.css* files in the *stylesheets* folder as you want, and 
+* *tasks* is grunt
+* *templates* contains all of your *.handlebars* files. Your HTML and handlebars logic will live here, not in your index.html file.
+  * *application.handlebars* will contain headers and footers, as well as [layout elements]
+* *.json* files are config for build & dependencies 
 
 ### 3
 
-Here are three tutorials of increasing complexity. 
+Here are three tutorials of increasing complexity that have been designed to help you learn to build single page applications with Thorax. 
 
-- the first one is a very small contact list tutorial that shows the interaction of the major concepts in building a thorax app: models, collections, routers, views and templates, and shows the interaction between all of them. CRUD. Localstorage...
-- the second one shows more complex views, ui patterns, all the bootstrap api implemented with thorax.. ie., pagination with collection rendering, showing child views inside of tabs, etc., also done with local storage
-- the third one is networked with the rails backend and is the 10-4 app! yay! so much to talk about here. this will be less step by step, at this point, since they should be able to read a directory structure now, and more about application architecture. 
+1. A very small contact list tutorial. [demo](). The goal: 
+  * demonstrate the major concepts in building a thorax app: models, collections, routers, views and templates. Demonstrate how they interact
+  * implement CRUD via backbone.localStorage
+2. Alex Osterwalder's Business Model Canvas implemented in Thorax. [demo]() The goal: 
+  * demonstrate more complex views, ui patterns, Twitter Bootstrap (ie., pagination with collection rendering, showing child views inside of tabs, etc.) also done with local storage
+3. A fully featured Thorax application called 10-4, with a Ruby on Rails backend. Developed internally for employee monitoring & feedback at Walmart and subsequently open sourced. This tutorial is heavier on discussions of application architecture and lighter on step by step instructions.
 
 
 ### [go to api call to action](api.html)
@@ -57,12 +59,12 @@ Here are three tutorials of increasing complexity.
 
 ## REQUIRE JS
 
-Modules! Hit them from the router which is really just backbone.router.extend!
+SECTION NARRATIVE: Modules! Hit them from the router which is really just backbone.router.extend!
 
 
 ## MODELS & COLLECTIONS
 
-SECTION NARRATIVE: Both models and collections are relatively untouched... Enhances `Backbone.Model` and `Backbone.Collection` with the concept of whether or not the model is populated and whether or not it should be automatically fetched. Note that when passing a model or collection to `view.setModel` or `view.setCollection` it must be an instance of `Thorax.Model` or `Thorax.Collection` and not `Backbone.Model` or `Backbone.Collection`, respectively.
+SECTION NARRATIVE: Backbone's models and collections are nearly unchanged. Thorax enhances `Backbone.Model` and `Backbone.Collection` with the concept of whether or not the model or collection is populated and whether or not it should be automatically fetched. Note that when passing a model or collection to `view.setModel` or `view.setCollection` it must be an instance of `Thorax.Model` or `Thorax.Collection` and not `Backbone.Model` or `Backbone.Collection`, respectively.
 
 ### *model.isEmpty()* *collection.isEmpty()*
 
@@ -74,7 +76,7 @@ API (details): In a collection the implementations of `isEmpty` and `isPopulated
 
 ### *model.isPopulated()* *collection.isPopulated()*
 
-NARRATIVE REFERENCE (big picture): When you add a model attribute to a view (CHANGE, LUMBAR), `setModel` is going to be called on that view for you automatically by Thorax. `view.setModel()` and `view.setCollection()` use this to determine whether or not to fetch the collection.
+NARRATIVE REFERENCE (big picture): When you add a model attribute to a view, `setModel` is going to be called on that view for you automatically by Thorax. `view.setModel()` and `view.setCollection()` use this to determine whether or not to fetch the collection.
 
 API (details): The default implementation checks to see if any keys that are not `id` and are not default values have been set.
 
@@ -87,14 +89,12 @@ API (details): The default implementation checks to see if any keys that are not
 
 
 
-
-
-
 ## Thorax.View
 
-### A NARRATIVE WILL GO HERE CONCERNING VIEWS IN THORAX, SUPER IMPORTANT CONTEXT
+SECTION NARRATIVE: Backbone doesn't give you much in the way of collection rendering. By associating a model or collection with a view instance and associating a template with the view, you gain access to the properties of the models within the collection in the template. This is the core of the functionality Thorax offers, and some of the hairiest stuff to write yourself.
 
-`Thorax.View` provides additive functionality over `Backbone.View` but breaks compatibility in one imporant way in that it does not use an `options` object. All properties passed to the constructor become available on the instance:
+
+SECTION API (details): `Thorax.View` provides additive functionality over `Backbone.View` but breaks compatibility in one imporant way in that it does not use an `options` object. All properties passed to the constructor become available on the instance:
 
     var view = new Thorax.View({
       key: "value"
@@ -106,15 +106,32 @@ By default all instance properties are available in the template context. So whe
 
 ### template *view.template*
 
-Assign a template to a view. This may be a string or a function which recieves a single `context` argument and returns a string. If the view has a `name` and a template of the same `name` is available the `template` will be auto-assigned.
+NARRATIVE: Assign a template to a view. Usually, you won't do this manually. If the view has a `name` and a template of the same `name` is available the `template` will be auto-assigned. For instance:
+
+    Thorax.View.extend({
+      name: "fooView"
+    })
+
+will automatically use fooView.handlebars as its template.
+
+API: If you do need to set it manually, you can assign the template property a string, or assign it a function which recieves a reference to a property of the model in the current `context`. 
 
     new Thorax.View({
       template: Handlebars.compile("{{key}}")
     });
 
+
 ### context *view.context()*
 
-Used by `render` to determine what attributes are available in the view's `template`. The default context function returns `this` + `this.model.attributes` if a `model` is present on the view. The `context` method may be overriden to provide a custom context:
+NARRATIVE: `view.context` can be used to manually set the context for the current view. Usually, you won't do this manually - `view.context()` is used by `render` to determine what attributes are available in the view's `template`. `render` is in turn usually called by `Application.setView()`, which is in turn called in the `router` when the user hits a new route.[Handlebars requires a 'context object'](http://handlebarsjs.com/execution.html), a JavaScript object passed into a handlebars function. Handlebars then gives you access to the properties on this object in your template. By default, the context function returns `this` + `this.model.attributes` if a `model` is present on the view, for instance:
+
+    var fooView1 = new Thorax.View({
+      model: fooModel1
+    })
+
+ In other words, Thorax usually handles context for you. It gives you access to the properties of the view's model (or when you use the `{{#collection}} block helper, the properties of all the models in a view's collection) just by assigning a model (or collection) to the view. Nice.
+
+API: The `context` method may be overriden to provide a custom context:
 
     new Thorax.View({
       template: Handlebars.compile('{{key}}'),
@@ -125,13 +142,36 @@ Used by `render` to determine what attributes are available in the view's `templ
       }
     });
 
+
+### render *view.render([content])*
+
+NARRATIVE: Renders the view's `template` updating the view's `el` with the result, triggering the `rendered` event.
+
+    view.render();
+
+Usually, you will not call this manually but will call Application.setView(fooViewInstance) in the router, passing in a view instance. 
+
+API: `render` can also accept a content argument that may be an element, string or a template function:
+
+    view.render('custom html');
+
+
+### ensureRendered *view.ensureRendered()*
+
+Ensure that the view has been rendered at least once.
+
+
 ### appendTo *view.appendTo(element)*
 
 Appends the view to a given `element` which may be a CSS selector or DOM element. `ensureRendered` will be called and a `ready` event will be triggered. This is the preferred way to append your outer most view onto a page.
 
 ### children *view.children*
 
-A hash of child view's indexed by `cid`. Child views may become attached to the parent with the `view` helper or may be automatically attached `HelperView` instances created by helpers created with `regsterViewHelper` (such as the `collection` and `empty` helpers).
+NARRATIVE: An array of child views indexed by [`cid`](http://backbonejs.org/#Model-cid). Child views may become attached to the parent with the `view` helper:
+
+    {{view fooView}}
+
+or may be automatically attached `HelperView` instances created by helpers created with `regsterViewHelper` (such as the `collection` and `empty` helpers).
 
 ### parent *view.parent*
 
@@ -160,9 +200,14 @@ Release a view that was previously retained. If `release` is called and the view
 
 Generally this method is not needed unless you are `retain`ing views.
 
+
+
+
+
+
 ### setModel *view.setModel(model [,options])*
 
-Setting `model` in the construtor will automatically call `setModel`, so the following are equivelent:
+NARRATIVE: Setting `model` in the constructor will automatically call `setModel`, so the following are equivelent:
 
     var view = new Thorax.View({
       model: myModel
@@ -170,7 +215,7 @@ Setting `model` in the construtor will automatically call `setModel`, so the fol
     // identical functionality as above
     view.setModel(myModel);
 
-Sets the `model` attribute of a view then attempts to fetch the model if it has not yet been populated. Once set the default `context` implementation will merge the model's `attributes` into the context, so any model attributes will automatically become available in a template. In addition any events declared via `view.on({model: events})` will be bound to the model with `listenTo`.
+API: Sets the `model` attribute of a view then attempts to fetch the model if it has not yet been populated. Once set the default `context` implementation will merge the model's `attributes` into the context, so any model attributes will automatically become available in a template. In addition any events declared via `view.on({model: events})` will be bound to the model with `listenTo`.
 
 Accepts any of the following options:
 
@@ -185,9 +230,14 @@ Accepts any of the following options:
   - Pass `populate: {context: true}` to populate using using the view's context rather than directly populating from the model's attributes.
 - **errors** - When the model triggers an `error` event, trigger the event on the view? Defaults to true
 
+
+
+
+
+
 ### setCollection *view.setCollection(collection [,options])*
 
-Setting `collection` in the construtor will automatically call `setCollection`, so the following are equivelent:
+NARRATIVE: Setting `collection` in the construtor will automatically call `setCollection`, so the following are equivelent:
 
     var view = new Thorax.View({
       collection: myCollection
@@ -195,7 +245,7 @@ Setting `collection` in the construtor will automatically call `setCollection`, 
     // identical functionality as above
     view.setCollection(myCollection);
 
-Sets the `collection` attribute of a view then attempts to fetch the collection if it has not yet been populated. In addition any events declared via `view.on({collection: events})` will be bound to the collection with `listenTo`.
+API: Sets the `collection` attribute of a view then attempts to fetch the collection if it has not yet been populated. In addition any events declared via `view.on({collection: events})` will be bound to the collection with `listenTo`.
 
 Accepts any of the following options:
 
@@ -211,26 +261,21 @@ Note that while any view may bind a collection only a `CollectionView` will actu
 
 ### $.view *$(event.target).view([options])*
 
-Get a reference to the nearest parent view. Pass `helper: false` to options to exclude `HelperView`s from the lookup. Useful when registering DOM event handlers:
+NARRATIVE***: When a user clicks on an element in the dom, data... element.closest - traverses to find the closest view or element that has data-view and then looks for the model on that. 
+
+API: Get a reference to the nearest parent view. Pass `helper: false` to options to exclude `HelperView`s from the lookup. Useful when registering DOM event handlers:
 
     $(event.target).view();
 
 ### $.model *$(event.target).model([view])*
 
-Get a reference to the nearest bound model. Can be used with any `$` object but most useful in event handlers.
+NARRATIVE: Only for things in a {{#collection}} block helper. Only works if setModel has been called... 
+
+Get a reference to the nearest bound model. Can be used with any `$` object but most useful in event handlers. IN a collcetion helper you have a model... this.model in a view, but in a collection helper you want to know what model was clicked on.
 
     $(event.target).model();
 
 A `view` may be optionally passed to limit the lookup to a specific view.
-
-### $.collection *$(event.target).collection([view])*
-
-Get a reference to the nearest bound collection. Can be used with any `$` object but most useful in event handlers.
-
-    $(event.target).collection();
-
-A `view` may be optionally passed to limit the lookup to a specific view.
-
 
 
 
@@ -241,7 +286,21 @@ A `view` may be optionally passed to limit the lookup to a specific view.
 ## TEMPLATES
 
 ### Templating in a Thorax App: Handlebars
-Templating definition. Why it's used, what it does, why handlebars and other options like underscore templates that were not chosen. Role of templating in JS one page apps. Diagram. Remember... templates, application.handlebars... also, model attribute access inside of templates, and inside of the collection helper listed below. Awesome selling point!
+
+Templating is the process by which data recieved from the server makes it onto the screen for users to see. While Backbone uses Underscore's built in templates, Thorax uses [Handlebars](http://handlebarsjs.com/). The client makes a request to a url (Backbone uses `$.ajax()`) and (should) receive JSON in the response. This JSON populates a model, which is associated with a view (because `model` or `collection` is specified on the view). The view is in turn associated with a template. The beautiful part is that Thorax gives you access to model properties inside of your template automatically:
+
+    Hello {{name}}!
+    Your trial will expire in {{daysLeft}} days.
+
+...where `{{name}}` and `{{daysLeft}}` is a property of a `model` that is associated with the template's `view`. 
+
+Besides this base templating functionality, custom Handlebars templates allow you to seamlessly embed views inside of one another (`{{view}}`) or allow you to trigger a method or event on the corresponding view when clicked (`{{#button}}`).
+
+
+
+
+
+why handlebars and other options like underscore templates that were not chosen. Role of templating in JS one page apps. Diagram. Remember... templates, application.handlebars... also, model attribute access inside of templates, and inside of the collection helper listed below. Awesome selling point!
 
 ### view *{{view name [options]}}*
 
@@ -396,7 +455,7 @@ If a block is used, the template will have a variable named `@yield` available t
 This is useful when a child template will be called from multiple different parents.
 
 
-# ROLL YOUR OWN! i think this is the best place to have helperview anyway... we get done with templates and then point to how you could write your own handlebars helper.
+## ROLL YOUR OWN! i think this is the best place to have helperview anyway... we get done with templates and then point to how you could write your own handlebars helper.
 
 
 
@@ -540,20 +599,9 @@ Get the current view that was previously set with `setView`.
 
 when you aren't using a layout view, you'll want to make sure you haven't rendered too many times. if you are using a layout view, render is called for you. you will almost always just call setView and have render called for you, but if you need fine grained control here it is: 
 
-### render *view.render([content])*
-
-Renders the view's `template` updating the view's `el` with the result, triggering the `rendered` event.
-
-    view.render();
-
-`render` can also accept a content argument that may be an element, string or a template function:
-
-    view.render('custom html');
 
 
-### ensureRendered *view.ensureRendered()*
 
-Ensure that the view has been rendered at least once.
 
 
 
