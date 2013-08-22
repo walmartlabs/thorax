@@ -94,7 +94,7 @@ API: The default implementation checks to see if any keys that are not `id` and 
 SECTION NARRATIVE: Backbone doesn't give you much in the way of collection rendering. By associating a model or collection with a view instance and associating a template with the view, you gain access to the properties of the models within the collection in the template. This is the core of the functionality Thorax offers, and some of the hairiest stuff to write yourself.
 
 
-SECTION API (details): `Thorax.View` provides additive functionality over `Backbone.View` but breaks compatibility in one imporant way in that it does not use an `options` object. All properties passed to the constructor become available on the instance:
+SECTION API (details): `Thorax.View` provides additive functionality over `Backbone.View` but breaks compatibility in one imporant way in that it does not use an `options` object. All properties passed to the view when it is instantiated become available on the view instance:
 
     var view = new Thorax.View({
       key: "value"
@@ -129,7 +129,7 @@ NARRATIVE: `view.context` can be used to manually set the context for the curren
       model: fooModel1
     })
 
- In other words, Thorax usually handles context for you. It gives you access to the properties of the view's model (or when you use the `{{#collection}} block helper, the properties of all the models in a view's collection) just by assigning a model (or collection) to the view. Nice.
+In other words, Thorax usually handles context for you. It gives you access to the properties of the view's model (or when you use the `{{#collection}} block helper, the properties of all the models in a view's collection) just by assigning a model (or collection) to the view. Nice.
 
 API: The `context` method may be overriden to provide a custom context:
 
@@ -158,12 +158,12 @@ API: `render` can also accept a content argument that may be an element, string 
 
 ### ensureRendered *view.ensureRendered()*
 
-Ensure that the view has been rendered at least once.
+NARRATIVE: Ensure that the view has been rendered at least once. Used when calling render manually.
 
 
 ### appendTo *view.appendTo(element)*
 
-Appends the view to a given `element` which may be a CSS selector or DOM element. `ensureRendered` will be called and a `ready` event will be triggered. This is the preferred way to append your outer most view onto a page.
+NARRATIVE: Appends the view to a given `element` which may be a CSS selector or DOM element. `ensureRendered` will be called and a `ready` event will be triggered. This is the preferred way to append your outer most view onto a page.
 
 ### children *view.children*
 
@@ -201,15 +201,9 @@ API: If `release` is called and the view has a reference count of zero it will b
 
 
 
-
-
-
-
-
-
 ### setModel *view.setModel(model [,options])*
 
-NARRATIVE: Setting `model` in the constructor will automatically call `setModel`, so the following are equivelent:
+NARRATIVE: Setting `model` as an option when the view is instantiated will automatically call `setModel`, so the following are equivelent:
 
     var view = new Thorax.View({
       model: myModel
@@ -271,13 +265,13 @@ API: Pass `helper: false` to options to exclude `HelperView`s from the lookup. U
 
 ### $.model *$(event.target).model([view])*
 
-NARRATIVE: Only for things in a {{#collection}} block helper. Only works if setModel has been called... 
+NARRATIVE: Get a reference to the nearest bound model. `$.model` is very helpful if you need to get a reference to the model associated with a DOM element rendered by a `{{collection}}` helper. Maybe you've rendered a list of 15 items and a user clicked on the third one. Grab that model! If the model is set directly as a property on the view when it is instantied (rather than in the context of a collection), use `this.model` to get a reference to it. 
 
-Get a reference to the nearest bound model. Can be used with any `$` object but most useful in event handlers. IN a collcetion helper you have a model... this.model in a view, but in a collection helper you want to know what model was clicked on.
+API: Can be used with any `$` object but most useful in event handlers:
 
     $(event.target).model();
 
-A `view` may be optionally passed to limit the lookup to a specific view.
+A `view` may be optionally passed to limit the lookup to a specific view. Returns the entire model object, so all properties are available.
 
 
 
@@ -287,26 +281,21 @@ A `view` may be optionally passed to limit the lookup to a specific view.
 
 ## TEMPLATES
 
-### Templating in a Thorax App: Handlebars
-
-Templating is the process by which data recieved from the server makes it onto the screen for users to see. While Backbone uses Underscore's built in templates, Thorax uses [Handlebars](http://handlebarsjs.com/). The client makes a request to a url (Backbone uses `$.ajax()`) and (should) receive JSON in the response. This JSON populates a model, which is associated with a view (because `model` or `collection` is specified on the view). The view is in turn associated with a template. The beautiful part is that Thorax gives you access to model properties inside of your template automatically:
+In templating, data recieved by the client from the server makes it into the DOM. While Backbone uses Underscore's built in templates, Thorax uses [Handlebars](http://handlebarsjs.com/). The client makes a request to a url (Backbone uses `$.ajax()`) and (should) receive JSON in the response. This JSON populates a model, which is associated with a view (because `model` or `collection` is specified on the view instance). The view is in turn associated with a template. The beautiful part is that Thorax gives you access to model properties inside of your template automatically:
 
     Hello {{name}}!
     Your trial will expire in {{daysLeft}} days.
 
 ...where `{{name}}` and `{{daysLeft}}` is a property of a `model` that is associated with the template's `view`. 
 
-Besides this base templating functionality, custom Handlebars templates allow you to seamlessly embed views inside of one another (`{{view}}`) or allow you to trigger a method or event on the corresponding view when clicked (`{{#button}}`).
+Additionally, custom Handlebars templates allow you to seamlessly embed views inside of one another with `{{view}}`, trigger a method or event on the corresponding view when a button is clicked with `{{#button}}`, render a collection with `{{#collection}}` and trigger a REST route when a link is clicked on with `{{link}}`.
 
-
-
-
-
-why handlebars and other options like underscore templates that were not chosen. Role of templating in JS one page apps. Diagram. Remember... templates, application.handlebars... also, model attribute access inside of templates, and inside of the collection helper listed below. Awesome selling point!
 
 ### view *{{view name [options]}}*
 
-Embed one view in another. The first argument may be the name of a new view to initialize or a reference to a view that has already been initialized.
+NARRATIVE: Embed one view in another. If you don't put the argument `{{view fooArgument}}` in quotes, Thorax will look for an instance of this view on the view responsible for the current template's view. If you do put `{{view "fooArgument"}}` in quotes, Thorax will look for a class with name `fooArgument` and instantiate it.
+
+API: The first argument may be the name of a new view to initialize or a reference to a view that has already been initialized.
 
     {{view "path/to/view" key="value"}}
     {{view viewInstance}}
@@ -320,7 +309,9 @@ If a block is specified it will be assigned as the `template` to the view instan
 
 ### collection *{{collection [collection] [options...]}}*
 
-Creates and embeds a `CollectionView` instance, updating when items are added, removed or changed in the collection. If a block is passed it will be used as the `item-template`, which will be called with a context of the `model.attributes` for each model in the collection.
+NARRATIVE: Creates and embeds a `CollectionView` instance, updating when items are added, removed or changed in the collection. 
+
+API: If a block is passed it will be used as the `item-template`, which will be called with a context of the `model.attributes` for each model in the collection.
 
     {{#collection tag="ul"}}
       <li>{{modelAttr}}</li>
@@ -385,11 +376,21 @@ As a result the following two views are equivelenet:
 
 ### button *{{#button methodName [htmlAttributes...]}}*
 
-Creates a `button` tag that will call the specified methodName on the view when clicked. Arbitrary HTML attributes can also be specified.
+NARRATIVE: Creates a `button` tag that will call the specified methodName on the view when clicked. Arbitrary HTML attributes can also be specified.
 
-    {{#button "methodName" class="btn"}}Click Me{{/button}}
+    {{#button "fooMethodName" class="btn" type="button"}}Click Me{{/button}}
 
-The tag name may also be specified:
+And in the template's view class: 
+
+    Thorax.View.extend({
+      ...
+      fooMethodName: function(){
+        console.log('You just clicked a button that triggered a method on a view :)')
+      }
+      ...
+    })
+
+API: The tag name may also be specified:
 
     {{#button "methodName" tag="a" class="btn"}}A Link{{/button}}
 
@@ -407,7 +408,9 @@ The method may also be specified as a `method` attribute:
 
 ### link *{{#link url [htmlAttributes...]}}*
 
-Creates an `a` tag that will call `Backbone.history.navigate()` with the given url when clicked. Passes the `url` parameter to the `url` helper with the current context. Do not use this method for creating external links. Like the `url` helper, multiple arguments may be passed as well as an `expand-tokens` option.
+NARRATIVE: Creates an `a` tag that will call `Backbone.history.navigate()` with the given url when clicked. Passes the `url` parameter to the `url` helper with the current context. Do not use this method for creating links that navigate outside of the single page application - only those that hit routes that call methods on the router. 
+
+API: Like the `url` helper, multiple arguments may be passed as well as an `expand-tokens` option.
 
     {{#link "articles/{{id}}" expand-tokens=true class="article-link"}}Link Text{{/link}}
 
@@ -425,7 +428,9 @@ The href attribute is required but may also be specified as an attribute:
 
 ### empty *{{#empty [modelOrCollection]}}*
 
-A conditional helper much like `if` that calls `isEmpty` on the specified object. In addition it will bind events to re-render the view should the object's state change from empty to not empty, or visa versa.
+NARRATIVE: A conditional helper much like `if` that calls `isEmpty` on the specified object. 
+
+API: `{{empty}}` will bind events to re-render the view should the object's state change from empty to not empty, or visa versa.
 
     {{#empty collection}}
       So empty!
@@ -443,7 +448,9 @@ To embed a row within a `collection` helper if it the collection is empty, speci
 
 ### template *{{template name [options]}}*
 
-Embed a template inside of another, as a string. An associated view (if any) will not be initialized. By default the template will be called with the current context but extra options may be passed which will be added to the context.
+Narrative: Embed a template inside of another, as a string. An associated view (if any) will not be initialized. 
+
+API: By default the template will be called with the current context but extra options may be passed which will be added to the context.
 
     {{template "path/to/template" key="value"}}
 
@@ -457,17 +464,23 @@ If a block is used, the template will have a variable named `@yield` available t
 This is useful when a child template will be called from multiple different parents.
 
 
-## ROLL YOUR OWN! i think this is the best place to have helperview anyway... we get done with templates and then point to how you could write your own handlebars helper.
-
 
 
 ## Thorax.HelperView
 
+SECTION NARRATIVE: All of the above template helpers (refered to in the docs as `HelperView`s) were written using (`Handlebars.registerHelper`)[http://handlebarsjs.com/#helpers] . You can create your own as well.
+
 ### registerViewHelper *Handlebars.registerViewHelper(name [,viewClass] ,callback)*
 
-Note that this differs from `Handlebars.registerHelper`. Registers a helper that will create and append a new `HelperView` instance, with its `template` attribute set to the value of the captured block. `callback` will recieve any arguments passed to the helper followed by a `HelperView` instance. Named arguments to the helper will be present on `options` attribute of the `HelperView` instance.
+NARRATIVE: `Handlebars.registerViewHelper()` registers a helper templates that will create and append a new `HelperView` instance, with its `template` attribute set to the value of the code within the template block. A `HelperView` instance differs from a regular view instance in that it has a `parent` attribute which is always set to the declaring view, and a `context` which always returns the value of the `parent`'s context method. The `collection`, `empty` and other built in block view helpers are created with `registerViewHelper`. Note that this differs from `Handlebars.registerHelper`.
 
-A `HelperView` instance differs from a regular view instance in that it has a `parent` attribute which is always set to the declaring view, and a `context` which always returns the value of the `parent`'s context method. The `collection`, `empty` and other built in block view helpers are created with `registerViewHelper`.
+    {{#aBeautifulHelperView arg1 arg2}}
+
+      <p> I'm text captured in the block and set as the template attribute on the associated helper view, you'll find that my ..aaaagghhhh... </p>
+
+    {{/aBeautifulHelperView}}
+
+API: `callback` will recieve any arguments - arg1 & arg2 above - passed to the helper followed by a `HelperView` instance. Named arguments to the helper will be present on `options` attribute of the `HelperView` instance.
 
 A helper that re-rendered a `HelperView` every time an event was triggered on the declaring view could be implemented as:
 
@@ -512,21 +525,20 @@ In addition, if a view class is specified as the second argument to `registerVie
 
 ## Thorax.CollectionView
 
-NARRATIVE HERE... Most of the time, `Thorax.Collectionview` will be called for you when you do {{#collection theNameOfACollection}} but sometimes you want manual control... IN OUR NOTES we talked about the alex wishlist example?? and mentioned that this would be done in the view instance like var view new application.views collection:
+NARRATIVE: Usually, `Thorax.Collectionview` will be called for you when you use the Handlebars collection block helper: {{#collection theNameOfACollection}}. If you need manual control, use these view methods.
 
-here begins this is the old api...
-
-A class that renders an `itemTemplate` or `itemView` for each item in a `collection` passed to it in its constructor, or via `setCollection`. The view will automatically update when items are added, removed or changed.
-
-The `collection` helper will automatically create and embed a `CollectionView` instance for you. If programatic access to the view's methods are needed (for instance calling `appendItem` or specifying an `itemFilter`) it's best to create a `CollectionView` directly and embed it with the `view` helper as you would any other view.
-
-### itemTemplate *view.itemTemplate*
-
-A template name or template function to use when rendering each model. If using the `collection` helper the passed block will become the `itemTemplate`. Defaults to `view.name + '-item'`
+API: `Thorax.CollectionView` is a class that renders an `itemTemplate` or `itemView` for each item in a `collection` passed to it when it is instantiated, or via `setCollection`. The view will automatically update when items are added, removed or changed. The `collection` helper will automatically create and embed a `CollectionView` instance for you. If programatic access to the view's methods are needed (for instance calling `appendItem` or specifying an `itemFilter`) it's best to create a `CollectionView` directly and embed it with the `view` helper as you would any other view.
 
 ### itemView *view.itemView*
 
-A view class to be initialized for each item. Can be used in conjunction with `itemTemplate`.
+NARRATIVE: A view class to be initialized for each item in a collection. When rendering collection views in either straight Backbone or Thorax, you'll need to create a view for each model in the collection: there is a one to one correspondence between views and models. There is also, in Thorax, the need to create a template for each view, thus `itemView` can be used in conjunction with `itemTemplate`.
+
+### itemTemplate *view.itemTemplate*
+
+NARRATIVE: A template name or template function to use when rendering each model. 
+
+API: If using the `collection` helper the passed block will become the `itemTemplate`. Defaults to `view.name + '-item'`
+
 
 ### itemContext *view.itemContext(model, index)*
 
@@ -815,7 +827,7 @@ All Thorax classes have an `on` method to observe events on all instances of the
 
 ### Model Events
 
-When a model is bound to a view with `setModel` (automatically called by passing a `model` option in the constructor) any events on the model can be observed by the view in this way. For instance to observe any model `change` event when it is bound to any view:
+When a model is bound to a view with `setModel` (automatically called by passing a `model` option when the view is instantiated) any events on the model can be observed by the view in this way. For instance to observe any model `change` event when it is bound to any view:
 
     Thorax.View.on({
       model: {
@@ -827,7 +839,7 @@ When a model is bound to a view with `setModel` (automatically called by passing
 
 ### Collection Events
 
-When a collection is bound to a view with `setCollection` (automatically called by passing a `collection` option in the constructor) any events on the collection can be observed by the view in this way. For instance to observe any collection `reset` event when it is bound to any view:
+When a collection is bound to a view with `setCollection` (automatically called by passing a `collection` option when the view is instantiated) any events on the collection can be observed by the view in this way. For instance to observe any collection `reset` event when it is bound to any view:
 
     Thorax.View.on({
       collection: {
