@@ -525,9 +525,9 @@ In addition, if a view class is specified as the second argument to `registerVie
 
 ## Thorax.CollectionView
 
-NARRATIVE: Usually, `Thorax.Collectionview` will be called for you when you use the Handlebars collection block helper: {{#collection theNameOfACollection}}. If you need manual control, use these view methods.
+SECTION NARRATIVE: Usually, `Thorax.Collectionview` will be called for you when you use the Handlebars collection block helper: {{#collection theNameOfACollection}}. If you need manual control, use these view methods.
 
-API: `Thorax.CollectionView` is a class that renders an `itemTemplate` or `itemView` for each item in a `collection` passed to it when it is instantiated, or via `setCollection`. The view will automatically update when items are added, removed or changed. The `collection` helper will automatically create and embed a `CollectionView` instance for you. If programatic access to the view's methods are needed (for instance calling `appendItem` or specifying an `itemFilter`) it's best to create a `CollectionView` directly and embed it with the `view` helper as you would any other view.
+`Thorax.CollectionView` is a class that renders an `itemTemplate` or `itemView` for each item in a `collection` passed to it when it is instantiated, or via `setCollection`. The view will automatically update when items are added, removed or changed. The `collection` helper will automatically create and embed a `CollectionView` instance for you. If programatic access to the view's methods are needed (for instance calling `appendItem` or specifying an `itemFilter`) it's best to create a `CollectionView` directly and embed it with the `view` helper as you would any other view.
 
 ### itemView *view.itemView*
 
@@ -615,29 +615,19 @@ API: Equivelent to calling `removeItem` then `appendItem`.
 
 ## Page Layout in Thorax
 
-In any given single page application, you may have different persistent content areas that will update and change independently - think of a sidebar and a main area (the persistent header and footer are typically taken care of in the application.handlebars file). There are a number of important things to understand about layouts. The first is that there's a default. By default, in application.handlebars, there is a single {{layout-element}} that will be nuked each time you call setView from your router, and the view's associated template will be put in its place. 
+SECTION NARRATIVE: Single page applications often contain different persistent content areas that will update and change independently. An example is a sidebar and a main area (the persistent header and footer are  taken care of in the application.handlebars file by putting arbitrary HTML above and below the `{{layout-element}}`). In Thorax, the seed project contains a default layout - a single `{{layout-element}}` that will be clobbered every time Application.setView(fooViewInstance) is called, replacing the view & template that was there with a new view and template, handling garbage collection in the process. 
 
-If you want manual control, you ... INSERT NARRATIVE HERE.
-
-
-## Thorax.LayoutView
-
-A view to contain a single other view which will change over time, (multi-pane single page applications for instance), triggering a series of events . By default this class has no template. If one is specified use the `layout` helper to determine where `setView` will place a view. A `Thorax.LayoutView` is a subclass of `Thorax.View` and may be treated as a view in every regard (i.e. embed multiple `LayoutView` instances in a parent view with the `view` helper).
+If you want manual control, you'll need to use `Thorax.LayoutView`, of which the default `{{layout-view}}` is an instance. `LayoutView` is a view to contain a single other view which will change over time - such as a multi-pane single page applications - and triggers a series of events. By default this class has no template. If one is specified, use the `layout` helper to determine where `setView` will place a view. A `Thorax.LayoutView` is a subclass of `Thorax.View` and may be treated as a view in every regard (i.e. embed multiple `LayoutView` instances in a parent view with the `{{view}}` template helper).
 
 ### setView *view.setView(view [,options])*
 
-Set the current view on the `LayoutView`, triggering `activated`, `ready` and `deactivated` events on the current and previous view during the lifecycle. `ensureRendered` is called on views passed to `setView`. By default `destroy` is called on the previous view when the new view is set.
+NARRATIVE: Set the current view on the `LayoutView`. 
+
+`setview` triggers `activated`, `ready` and `deactivated` events on the current and previous view during the lifecycle. `ensureRendered` is called on views passed to `setView`. By default `destroy` is called on the previous view when the new view is set.
 
 ### getView *view.getView()*
 
-Get the current view that was previously set with `setView`.
-
-
-## Working with a layout element
-
-when you aren't using a layout view, you'll want to make sure you haven't rendered too many times. if you are using a layout view, render is called for you. you will almost always just call setView and have render called for you, but if you need fine grained control here it is: 
-
-
+NARRATIVE: Get the current view that was previously set with `setView`.
 
 
 
@@ -645,20 +635,14 @@ when you aren't using a layout view, you'll want to make sure you haven't render
 
 ## Form handling in Thorax
 
-Narrative narrative narrative narrative narrative narrative narrative narrative narrative narrative narrative narrative narrative narrative narrative narrative narrative narrative narrative narrative narrative narrative narrative narrative narrative narrative.
-
+SECTION NARRATIVE: Thorax provides three methods to help with handling form data: `serialize`, `populate` and `validateInput`. `serialize` transforms form inputs into JSON. `populate` fills in a form's inputs with attributes from a model. `validateInput` performs client side form validation.
 
 
 ### serialize *view.serialize([event], callback [,options])*
 
-Serializes a form. `callback` will receive the attributes from the form, followed by a `release` method which must be called before the form can be submitted again. `callback` will only be called if `validateInput` returns nothing or an empty array. `options` may contain:
+NARRATIVE: Serializes a form to JSON, using the name attribute of the input as the key and the text the user typed as the value. 
 
-- `set` - defaults to true, whether or not to set the attributes if valid on a model if one was set with `setModel`
-- `validate - defaults to true, whether or not to call `validateInput` during serialization
-- `children` - defaults to true, whether or not to serialize inputs in child views
-- `silent` - defaults to true, whether or not to pass `silent: true` to `model.set`
-
-Each form input in your application should contain a corresponding label. Since you may want to re-use the same form multiple times in the same view a `@cid` attribute with a unique value is provided to each render call of each template:
+API: Each form input in your application should contain a corresponding label. Since you may want to re-use the same form multiple times in the same view a `@cid` attribute with a unique value is provided to each render call of each template:
 
     <label for="{{@cid}}-last-name"/>
     <input name="last-name" id="{{@cid}}-last-name" value="Beastridge"/>
