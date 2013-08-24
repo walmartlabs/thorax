@@ -730,14 +730,11 @@ API: If the array has a zero length the attributes are considered to be valid. R
 
 
 
-
-
-
-## APPENDIX 
-
-
-
 ## Catalog of Built-in Thorax Events
+
+The layout for this section will be: 
+EVENT      ARGS       DESCRIPTION 
+
 
 ### *rendered ()*
 
