@@ -542,7 +542,9 @@ API: If using the `collection` helper the passed block will become the `itemTemp
 
 ### itemContext *view.itemContext(model, index)*
 
-A function in the declaring view to specify the context for an `itemTemplate`, recieves model and index as arguments. `itemContext` will not be used if an `itemView` is specified as the `itemView`'s own `context` method will instead be used.
+NARRATIVE: A function in the declaring view to specify the context for an `itemTemplate`. 
+
+API: `itemContext` recieves model and index as arguments. `itemContext` will not be used if an `itemView` is specified as the `itemView`'s own `context` method will instead be used.
 
 A collection helper may specify a specific function to use as the `itemContext` if there are multiple collections in a view:
 
@@ -550,7 +552,23 @@ A collection helper may specify a specific function to use as the `itemContext` 
 
 ### itemFilter *view.itemFilter(model, index)*
 
-A method, which if present will filter what items are rendered in a collection. Recieves `model` and `index` and must return boolean. The filter will be applied when models' fire a change event, or models are added and removed from the collection. To force a collection to re-filter, trigger a `filter` event on the collection.
+NARRATIVE: Filtering is a common user interface pattern in single page applications. In Thorax, use `itemFilter` as a method on the view: 
+
+    Thorax.View.extend({
+      name: "baz",
+      initialize: function(){
+        ...
+      },
+      itemFilter: function(model, index) {
+        if (model.foo === "bar") { return false; }
+        else if (...) { return false; }
+        else { return true; }
+      }
+    })
+
+When the `{{#collection}}` block helper is called in the template and iterates over the models to render them, each of the models will be evaluated and rendered only if it returns `true`.
+
+API: Recieves `model` and `index` and must return boolean. The filter will be applied when models' fire a change event, or models are added and removed from the collection. To force a collection to re-filter, trigger a `filter` event on the collection.
 
 Items are hidden and shown with `$.hide` and `$.show` rather than being removed or appended. In performance critical views with large collections consider filtering the collection before it is passed to the view or on the server.
 
@@ -560,25 +578,31 @@ A collection helper may specify a specific function to use as the `itemFilter` i
 
 ### emptyTemplate *view.emptyTemplate*
 
-A template name or template function to display when the collection is empty. If used in a `collection` helper the inverse block will become the `emptyTemplate`. Defaults to `view.name + '-empty'`
+NARRATIVE: A template name or template function to display when the collection is empty. 
+
+API: If used in a `collection` helper the inverse block will become the `emptyTemplate`. Defaults to `view.name + '-empty'`
 
 ### emptyView *view.emptyView*
 
-A view class to create an instance of when the collection is empty. Can be used in conjunction with `emptyTemplate`. Empty view exists because empty templates can be complex - for instance, an ampty car t may have a collection of suggested products in it. 
+NARRATIVE: A view class to create an instance of when the collection is empty. Can be used in conjunction with `emptyTemplate`. Empty view exists because empty templates can be complex - for instance, an empty cart may have a collection of suggested products in it. 
 
 ### appendItem *view.appendItem(modelOrView [,index] [,options])*
 
-Append a model (which will used to generate a new `itemView` or render an `itemTemplate`) or a view at a given index in the `CollectionView`. If passing a view as the first argument `index` may be a model which will be used to look up the index.
+NARRATIVE: Append a model (which will used to generate a new `itemView` or render an `itemTemplate`) or a view at a given index in the `CollectionView`. 
+
+API: If passing a view as the first argument `index` may be a model which will be used to look up the index.
 
 By default this will trigger a `rendered:item` event, `silent: true` may be passed in the options hash to prevent this. To also prevent the appeneded item from being filtered if an `itemFilter` is present pass `filter: false` in the options hash.
 
 ### removeItem *view.removeItem(model)*
 
-Remove an item from the view.
+NARRATIVE: Remove an item from the view.
 
 ### updateItem *view.updateItem(model)*
 
-Equivelent to calling `removeItem` then `appendItem`. Note that this is mainly meant to cover edge cases, by default changing a model will update the needed item (whether using `itemTemplate` or `itemView`).
+NARRATIVE: Meant to cover edge cases, by default changing a model will update the needed item (whether using `itemTemplate` or `itemView`).
+
+API: Equivelent to calling `removeItem` then `appendItem`. 
 
 
 
