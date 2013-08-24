@@ -733,50 +733,51 @@ API: If the array has a zero length the attributes are considered to be valid. R
 
 
 
-## APPENDIX APPENDIX APPENDIX APPENDIX have some visual reference that this is different, and organize it as such. not such big fonts and weights, much more reference-y
+## APPENDIX 
+
 
 
 ## Catalog of Built-in Thorax Events
 
-### rendered *rendered ()*
+### *rendered ()*
 
 Triggered on a view when the `rendered` method is called.
 
-### child *child (instance)*
+### *child (instance)*
 
 Triggered on a view every time a child view is appened into the view with the `view` helper.
 
-### ready *ready (options)*
+### *ready (options)*
 
 Triggered when a view is append to the DOM with `appendTo` or when a view is appeneded to a `LayoutView` via `setView`. Setting focus and other behaviors that depend on the view being present in the DOM should be handled in this event.
 
 This event propagates to all children, including children that will be bound after the view is created. `options` will contain a `target` view, which is the view that triggered the event.
 
-### activated *activated (options)*
+### *activated (options)*
 
 Triggered on a view immediately after it was passed to a `LayoutView`'s `setView` method. Like `ready` this event propagates to children and the `options` hash will contain a `target` view.
 
-### deactivated *deactivated (options)*
+### *deactivated (options)*
 
 Triggered on a view when it was previously passed to the `setView` method on a `LayoutView`, and then another view is passed to `setView`. Triggered when the current view's `el` is still attached to the parent. Like `ready` this event propagates to children and the `options` hash will contain a `target` view.
 
-### destroyed *destroyed ()*
+### *destroyed ()*
 
 Triggered on a view when the `release` method is called and the reference count is zero. Useful for implementing custom view cleanup behaviors. `release` will be also be called if it was previously passed to the `setView` method on a `LayoutView`, and then another view is passed to `setView`.
 
-### change:view:start *change:view:start (newView [,oldView] ,options)*
+### *change:view:start (newView [,oldView] ,options)*
 
 Trigged on a `Thorax.LayoutView` immediately after `setView` is called.
 
-### change:view:end *change:view:end (newView [,oldView] ,options)*
+### *change:view:end (newView [,oldView] ,options)*
 
 Trigged on a `Thorax.LayoutView` after `setView` is called, the old view has been destroyed (if present) and the new view has been attached to the DOM and had its `ready` event triggered.
 
-### helper *helper (name [,args...] ,helperView)*
+### *helper (name [,args...] ,helperView)*
 
 Triggered on a view when a view helper (such as `collection`, `empty`, etc) create a new `HelperView` instance.
 
-### helper:name *helper:name ([,args...] ,helperView)*
+### *helper:name ([,args...] ,helperView)*
 
 Triggered on a view when a given view helper creates a new `HelperView` instance.
 
@@ -786,11 +787,11 @@ Triggered on a view when a given view helper creates a new `HelperView` instance
 
     });
 
-### serialize *serialize (attributes)*
+### *serialize (attributes)*
 
 Triggered on a view when `serialize` is called, before `validateInput` is called with the serialized attributes.
 
-### validate *validate (attributes, errors)*
+### *validate (attributes, errors)*
 
 Triggered on a view when `serialize` is called, passed an an attributes hash and errors array after `validateInput` is called. Use in combination with the `invalid` event to display and clear errors from your views.
 
@@ -806,27 +807,25 @@ Triggered on a view when `serialize` is called, passed an an attributes hash and
       }
     });
 
-### invalid *invalid (errors)*
+### *invalid (errors)*
 
 Triggered on a view when `serialize` is called, if validateInput returned an array with any errors.
 
-### populate *populate (attributes)*
+### *populate (attributes)*
 
 Triggered on a view when `populate` is called. Passed a hash containing the attributes that the view will be populated with.
 
-### rendered:collection *rendred:collection (collectionView, collection)*
+### *rendered:collection (collectionView, collection)*
 
 Triggered on a `CollectionView` or a the view calling the `collection` helper every time `render` is called on the `CollectionView`.
 
-### rendered:item *rendered:item (collectionView, collection, model, itemElement, index)*
+### *rendered:item (collectionView, collection, model, itemElement, index)*
 
 Triggered on a `CollectionView` or a the view calling the `collection` helper every time an item is rendered in the `CollectionView`.
 
-### rendered:empty *rendered:empty (collectionView, collection)*
+### *rendered:empty (collectionView, collection)*
 
 Triggered on a `CollectionView` or a the view calling the `collection` helper every time the `emptyView` or `emptyTemplate` is rendered in the `CollectionView`.
-
-
 
 
 
