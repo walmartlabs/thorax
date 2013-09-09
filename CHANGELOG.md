@@ -2,7 +2,16 @@
 
 ## Development
 
-[Commits](https://github.com/walmartlabs/thorax/compare/v2.0.0...master)
+[Commits](https://github.com/walmartlabs/thorax/compare/v2.0.1...master)
+
+## v2.0.1 - September 9th, 2013
+
+- [#248](https://github.com/walmartlabs/thorax/pull/248) - load bug fix with forwardLoadEvents while already loading ([@jhudson8](https://api.github.com/users/jhudson8)
+- [#239](https://github.com/walmartlabs/thorax/issues/239) - bower: dependencies -> 'latest'
+
+- Update release notes format - a43e1b0
+
+[Commits](https://github.com/walmartlabs/thorax/compare/v2.0.0...v2.0.1)
 
 ## 2.0.0rc1
 
