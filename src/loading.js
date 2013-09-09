@@ -398,7 +398,12 @@ _.each(klasses, function(DataClass) {
       if (!options.background && !this.isPopulated() && rootObject) {
         // Make sure that the global scope sees the proper load events here
         // if we are loading in standalone mode
-        Thorax.forwardLoadEvents(this, rootObject, true);
+        if (this.isLoading()) {
+          // trigger directly because load:start has already been triggered
+          rootObject.trigger(loadStart, options.message, options.background, this);
+        } else {
+          Thorax.forwardLoadEvents(this, rootObject, true);
+        }
       }
 
       loadData.call(this, callback, failback, options);
