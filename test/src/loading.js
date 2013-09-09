@@ -275,6 +275,30 @@ describe('loading', function() {
 
       expect(this.endSpy).to.have.been.calledOnce;
     });
+    it('load should forward load events even if object is currently loading joe', function() {
+      var callback = this.spy(),
+          appLoadingStart = this.spy(),
+          loadingStart = this.spy(),
+          loadingEnd = this.spy(),
+          Model = Thorax.Model.extend({url: 'foo'}),
+          model = new Model();
+
+      Thorax.setRootObject(Application);
+      Application.on('load:start', Thorax.loadHandler(loadingStart, loadingEnd));
+      Application.on('load:start', appLoadingStart);
+
+      // simulate loading
+      model.fetch();
+      expect(model.isLoading()).to.eql(true);
+      model.load(callback);
+      this.clock.tick(1000);
+      expect(appLoadingStart).to.have.been.calledOnce;
+      expect(loadingStart).to.have.been.calledOnce;
+      this.requests[0].respond(200, {}, '{}');
+      expect(callback).to.have.been.calledOnce;
+      this.clock.tick(1000);
+      expect(loadingEnd).to.have.been.calledOnce;
+    });
   });
 
   describe('event throttle', function() {
