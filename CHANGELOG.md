@@ -1,5 +1,9 @@
 # Change Log
 
+## Development
+
+[Commits](https://github.com/walmartlabs/thorax/compare/v2.0.0...master)
+
 ## 2.0.0rc1
 
 - Numerous performance and bug fixes
