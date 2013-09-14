@@ -60,6 +60,28 @@ describe('collection', function() {
       }))();
       runCollectionTests(view, 2);
     });
+
+    it("If overriding renderItem, some items can be returned falsy", function() {
+      var view = new Thorax.CollectionView({
+        collection: new Thorax.Collection([
+          {key: 'one'},
+          {key: 'two'},
+          {key: 'three'},
+          {key: 'four'}
+        ]),
+        tag: 'ul',
+        itemTemplate: Handlebars.compile('<li>{{key}}</li>'),
+        renderItem: function(model, i) {
+          if (i % 2 === 0) {
+            return Thorax.CollectionView.prototype.renderItem.apply(this, arguments);
+          } else {
+            return false;
+          }
+        }
+      });
+      view.render();
+      expect(view.$('li').length).to.equal(2);
+    });
   });
 
   it("should re-render when sort is triggered", function() {

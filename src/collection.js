@@ -105,6 +105,7 @@ Thorax.CollectionView = Thorax.View.extend({
   //appendItem(html_string, index)
   //appendItem(view, index)
   appendItem: function(model, index, options) {
+    console.log('appendItem',model,index);
     //empty item
     if (!model) {
       return;
@@ -149,8 +150,7 @@ Thorax.CollectionView = Thorax.View.extend({
       if (!previousModel) {
         $el.prepend(itemElement);
       } else {
-        //use last() as appendItem can accept multiple nodes from a template
-        var last = $el.children('[' + modelCidAttributeName + '="' + previousModel.cid + '"]').last();
+        var last = $el.children().last();
         last.after(itemElement);
       }
 
