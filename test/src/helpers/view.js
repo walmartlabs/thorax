@@ -129,8 +129,30 @@ describe('view helper', function() {
       ]
     });
     parent.render();
-    expect(parent.$('div').get(0).innerHTML).to.equal('a');
-    expect(parent.$('div').get(1).innerHTML).to.equal('b');
+    expect(parent.el.innerText).to.equal('ab');
+  });
+
+  it('child views within #each with mutation', function() {
+    var parent = new Thorax.View({
+      template: Handlebars.compile('{{#each views}}{{view this}}{{/each}}'),
+      views: [
+        new Thorax.View({
+          template: Handlebars.compile('a')
+        }),
+        new Thorax.View({
+          template: Handlebars.compile('b')
+        }),
+        new Thorax.View({
+          template: Handlebars.compile('c')
+        })
+      ]
+    });
+    parent.render();
+    expect(parent.el.innerText).to.equal('abc');
+
+    parent.views.splice(1, 1);
+    parent.render();
+    expect(parent.el.innerText).to.equal('ac');
   });
 
   it("template passed to constructor and view block", function() {
