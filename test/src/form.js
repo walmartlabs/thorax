@@ -191,6 +191,45 @@ describe('form', function() {
     expect(serializeSpy.callCount).to.equal(0);
   });
 
+  it('discard previous state on model change', function() {
+    var FormView = Thorax.View.extend({
+      name: 'form',
+      template: function() {
+        return '<form><input name="test"><input name="nested[test]"><input name="merge"></form>';
+      }
+    });
+
+    var model = new Thorax.Model({
+      merge: 'test-merge',
+      test: 'fail',
+      nested: {
+        test: 'fail'
+      }
+    });
+
+    var view = new FormView();
+    view.render();
+    view.setModel(model); // Triggers first data population
+
+    model.set('merge', 'test-merge'); // Set model data in between to test the merge
+    view.$('input[name="test"]').val('test');
+    view.$('input[name="nested[test]"]').val('test-nested');
+    view.render();
+
+    model = new Thorax.Model({
+      test: 'win',
+      nested: {
+        test: 'win'
+      }
+    });
+    view.setModel(model); // Should trigger another data population with user data
+
+    // Expect the user input to persist
+    expect(view.$('input[name="merge"]')[0].value).to.equal('');
+    expect(view.$('input[name="test"]')[0].value).to.equal('win');
+    expect(view.$('input[name="nested[test]"]')[0].value).to.equal('win');
+  });
+
   it('should not populate missing fields', function() {
     var FormView = Thorax.View.extend({
       name: 'form',
