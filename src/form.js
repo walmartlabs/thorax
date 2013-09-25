@@ -175,7 +175,9 @@ _.extend(Thorax.View.prototype, {
 // Keeping state in the views
 Thorax.View.on({
   'before:rendered': function() {
-    if (!this._renderCount) { return; }
+    // Do not store previous options if we have not rendered or if we have changed the associated
+    // model since the last render
+    if (!this._renderCount || (this.model && this.model.cid) !== this._formModelCid) { return; }
 
     var modelOptions = this.getObjectOptions(this.model);
     // When we have previously populated and rendered the view, reuse the user data
@@ -194,6 +196,7 @@ Thorax.View.on({
       this.populate(this.previousFormData, _.extend({_silent: true}, populate));
     }
 
+    this._formModelCid = this.model && this.model.cid;
     this.previousFormData = null;
   }
 });
