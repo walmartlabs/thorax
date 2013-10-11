@@ -160,7 +160,7 @@ describe('layout', function() {
     var view = new Thorax.View({
       template: Handlebars.compile('{{layout-element}}')
     });
-    expect(view.render).to['throw']();
+    expect(_.bind(view.render, view)).to['throw']();
   });
 
   it("transition option can be passed to setView", function() {
