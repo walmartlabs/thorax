@@ -27,10 +27,10 @@ Thorax.LayoutView = Thorax.View.extend({
       return false;
     }
     this.trigger('change:view:start', view, oldView, options);
-    
+
     remove = _.bind(function() {
       if (oldView) {
-        oldView.$el.remove();
+        oldView.$el && oldView.$el.remove();
         triggerLifecycleEvent.call(oldView, 'deactivated', options);
         this._removeChild(oldView);
       }

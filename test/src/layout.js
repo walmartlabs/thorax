@@ -191,4 +191,23 @@ describe('layout', function() {
     expect(layout.$('span').html()).to.equal('b');
   });
 
+  it('setView should not throw even if old view is destroyed', function() {
+    var layout = new Thorax.LayoutView();
+    var a = new Thorax.View({
+      template: function() {
+        return '<span>a</span>';
+      }
+    });
+    var b = new Thorax.View({
+      template: function() {
+        return '<span>b</span>';
+      }
+    });
+    layout.setView(a);
+    expect(layout.$('span').html()).to.equal('a');
+    a.release();
+    layout.setView(b);
+    expect(layout.$('span').html()).to.equal('b');
+  });
+
 });
