@@ -177,7 +177,9 @@ Thorax.View.on({
   'before:rendered': function() {
     // Do not store previous options if we have not rendered or if we have changed the associated
     // model since the last render
-    if (!this._renderCount || (this.model && this.model.cid) !== this._formModelCid) { return; }
+    if (!this._renderCount || (this.model && this.model.cid) !== this._formModelCid) {
+      return;
+    }
 
     var modelOptions = this.getObjectOptions(this.model);
     // When we have previously populated and rendered the view, reuse the user data
