@@ -100,7 +100,7 @@ Thorax.View = Backbone.View.extend({
     // in the case of a nested helper, which will cause an error.
     // In either case it's not necessary to ever call
     // _removeChild on a HelperView as _addChild should only
-    // be called when a HelperView is created.  
+    // be called when a HelperView is created.
     if (view.parent && view.parent !== this && !view._helperOptions) {
       view.parent._removeChild(view);
     }
@@ -140,6 +140,11 @@ Thorax.View = Backbone.View.extend({
   },
 
   render: function(output) {
+    // NOP for destroyed views
+    if (!this.el) {
+      return;
+    }
+
     if (this._rendering) {
       // Nested rendering of the same view instances can lead to some very nasty issues with
       // the root render process overwriting any updated data that may have been output in the child

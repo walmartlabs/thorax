@@ -14,7 +14,7 @@ describe('collection helper', function() {
     view.render();
     expect(view.$('div.value').length).to.equal(1);
   });
-  
+
   it('should allow arbitrary html attributes', function() {
     var view = new Thorax.View({
       template: Handlebars.compile('{{#collection random="value"}}{{/collection}}'),
@@ -37,7 +37,7 @@ describe('collection helper', function() {
     expect(view.$('select').attr('name')).to.equal('select');
     expect(view.$('select').attr('class')).to.equal('test-class');
   });
-  
+
   it('should render block', function() {
     var view = new Thorax.View({
       template: Handlebars.compile('{{#collection tag="ul" empty-template="letter-empty"}}<li>{{letter}}</li>{{/collection}}')
@@ -190,7 +190,7 @@ describe('collection helper', function() {
     var view = new Thorax.View({
       template: Handlebars.compile('{{collection-element}}')
     });
-    expect(view.render).to['throw']();
+    expect(_.bind(view.render, view)).to['throw']();
   });
 
   it("collection helper won't re-render parent on add", function() {

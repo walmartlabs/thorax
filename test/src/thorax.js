@@ -39,6 +39,22 @@ describe('core', function() {
     $('#test-target-container').remove();
   });
 
+  it("should not attempt to render destroyed views", function() {
+    $('body').append('<div id="test-target-container"><div id="test-target"></div></div>');
+    var view = new Thorax.View({
+      template: function() { return 'testing123'; },
+      el: $('#test-target')[0]
+    });
+    view.render();
+    expect($('#test-target-container > #test-target')[0].innerHTML).to.equal('testing123');
+    expect(view.el.parentNode).to.equal($('#test-target-container')[0]);
+    view.release();
+    expect($('#test-target-container > #test-target')[0]).to.be['undefined'];
+    view.render();
+    expect($('#test-target-container > #test-target')[0]).to.be['undefined'];
+    $('#test-target-container').remove();
+  });
+
   it("should allow local helpers to be declared", function() {
     // register a global helper to ensure that it isn't overwritten
     Handlebars.registerHelper('globalHelper', function() {
