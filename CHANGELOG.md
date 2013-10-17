@@ -2,7 +2,16 @@
 
 ## Development
 
-[Commits](https://github.com/walmartlabs/thorax/compare/v2.0.1...master)
+[Commits](https://github.com/walmartlabs/thorax/compare/v2.0.2...master)
+
+## v2.0.2 - October 17th, 2013
+
+- [#255](https://github.com/walmartlabs/thorax/pull/255) - View helper fails when run via mutating array ([@kpdecker](https://api.github.com/users/kpdecker))
+- [#263](https://github.com/walmartlabs/thorax/pull/263) - Make setView not throw even if old view is destroyed ([@Candid](https://api.github.com/users/Candid))
+- [#264](https://github.com/walmartlabs/thorax/pull/264) - Make `render` not render destroyed views ([@Candid](https://api.github.com/users/Candid))
+
+
+[Commits](https://github.com/walmartlabs/thorax/compare/v2.0.1...v2.0.2)
 
 ## v2.0.1 - September 9th, 2013
 
