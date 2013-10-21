@@ -2,7 +2,13 @@
 
 ## Development
 
-[Commits](https://github.com/walmartlabs/thorax/compare/v2.0.2...master)
+[Commits](https://github.com/walmartlabs/thorax/compare/v2.0.3...master)
+
+## v2.0.3 - October 21st, 2013
+
+- [#267](https://github.com/walmartlabs/thorax/pull/267) - Return view in existing case from _addChild. ([@ryan-roemer](https://api.github.com/users/ryan-roemer))
+
+[Commits](https://github.com/walmartlabs/thorax/compare/v2.0.2...v2.0.3)
 
 ## v2.0.2 - October 17th, 2013
 
