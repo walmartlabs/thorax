@@ -88,7 +88,7 @@ Thorax.View = Backbone.View.extend({
 
   _addChild: function(view) {
     if (this.children[view.cid]) {
-      return;
+      return view;
     }
     view.retain();
     this.children[view.cid] = view;
