@@ -327,6 +327,14 @@ Returns `true` if the view should be rendered based on `flag` and the current re
 
 Get or set the `innerHTML` of the view, without triggering the `rendered` event.
 
+### _addChild *view.addChild(child)*
+
+Register a view as being a child of the parent. This will `release` the child view when the parent is released.
+
+    this.childView = this._addChild(new ChildView);
+
+If you are embedding a child view with the `view` helper this is automatically done for you. Use this when there are cases where the child would not be embedded, either due to the parent not rendering or the view helper being inside of a conditional.
+
 ### children *view.children*
 
 A hash of child view's indexed by `cid`. Child views may become attached to the parent with the `view` helper or may be automatically attached `HelperView` instances created by helpers created with `regsterViewHelper` (such as the `collection` and `empty` helpers).
