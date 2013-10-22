@@ -188,6 +188,18 @@ Cloning a seed is the easiest way to get started building your own project.
 
 Thorax is available as a [Bower](http://bower.io/) component. Just run `bower install thorax` in your project.
 
+Thorax is tested against these dependencies (you can paste this in your `bower.json`:
+
+    "dependencies": {
+      "jquery": "1.9.0",
+      "underscore": "1.4.4",
+      "zepto": "1.0.0",
+      "handlebars": "1.0.0",
+      "backbone": "1.0.0"
+    }
+
+Note that either jQuery or Zepto is required, but not both.
+
 ### cdnjs
 
 Thorax is available on [cdnjs](http://cdnjs.com/), each build includes jQuery 1.9.0 (or Zepto 1.0.0rc1 on mobile), Backbone 0.9.9, Underscore 1.4.2 and Handlebars 1.0.0rc6.
