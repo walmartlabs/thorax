@@ -198,6 +198,8 @@ Thorax is tested against these dependencies (you can paste this in your `bower.j
       "backbone": "1.0.0"
     }
 
+Note that either jQuery or Zepto is required, but not both.
+
 ### cdnjs
 
 Thorax is available on [cdnjs](http://cdnjs.com/), each build includes jQuery 1.9.0 (or Zepto 1.0.0rc1 on mobile), Backbone 0.9.9, Underscore 1.4.2 and Handlebars 1.0.0rc6.
