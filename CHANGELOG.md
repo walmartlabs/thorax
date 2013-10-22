@@ -2,7 +2,27 @@
 
 ## Development
 
-[Commits](https://github.com/walmartlabs/thorax/compare/v2.0.3...master)
+[Commits](https://github.com/walmartlabs/thorax/compare/v2.1.0...master)
+
+## v2.1.0 - October 21st, 2013
+
+- [#268](https://github.com/walmartlabs/thorax/pull/268) - Remove dependencies from bower.json ([@eastridge](https://api.github.com/users/eastridge))
+
+Compatibility notes:
+
+You will now need to add your own Underscore, Handlebars, Backbone and jQuery or Zepto dependencies in projects that consume Thorax. Thorax is tested with the following Bower config:
+
+    "devDependencies": {
+      "jquery": "1.9.0",
+      "underscore": "1.4.4",
+      "zepto": "1.0.0",
+      "handlebars": "1.0.0",
+      "backbone": "1.0.0"
+    }
+
+Note that you should pick jQuery **or** Zepto for your project but not both.
+
+[Commits](https://github.com/walmartlabs/thorax/compare/v2.0.3...v2.1.0)
 
 ## v2.0.3 - October 21st, 2013
 
