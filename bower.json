@@ -1,11 +1,4 @@
 {
   "name": "thorax",
-  "version": "2.0.3",
-  "dependencies": {
-    "jquery": "1.9.0",
-    "underscore": "1.4.4",
-    "zepto": "1.0.0",
-    "handlebars": "1.0.0",
-    "backbone": "1.0.0"
-  }
+  "version": "2.0.3"
 }
