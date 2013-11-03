@@ -1,3 +1,5 @@
+**The [Thorax Yeoman generator](https://github.com/walmartlabs/generator-thorax) is presently under active development and is the best way to get started with Thorax. The docs here will be updated shortly to reflect this.**
+
 # Thorax
 
 An opinionated, battle tested [Backbone](http://backbonejs.org/) + [Handlebars](http://handlebarsjs.com/) framework to build large scale web applications.
