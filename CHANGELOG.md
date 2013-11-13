@@ -2,7 +2,13 @@
 
 ## Development
 
-[Commits](https://github.com/walmartlabs/thorax/compare/v2.1.0...master)
+[Commits](https://github.com/walmartlabs/thorax/compare/v2.1.1...master)
+
+## v2.1.1 - November 12th, 2013
+
+- Handle destroyed helper view insert explicitly - c70d4dc
+
+[Commits](https://github.com/walmartlabs/thorax/compare/v2.1.0...v2.1.1)
 
 ## v2.1.0 - October 21st, 2013
 
