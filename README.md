@@ -1240,4 +1240,8 @@ Both `set` and `reset` were passed to `fetch`, must use one or the other.
 
 ## handlebars-no-data
 
-Handlebars template compiled without data, use: Handlebars.compile(template, {data: true})
+Handlebars template compiled without data, use: `Handlebars.compile(template, {data: true})`
+
+## insert-destroyed
+
+A helper view that has been destroyed was inserted into the view.
