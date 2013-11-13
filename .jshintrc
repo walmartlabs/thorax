@@ -1,7 +1,6 @@
 /*dotfiles browser, thorax, mocha, chai*/
 {
   "node": false,
-  "es5": true,
   "esnext": false,
   "browser": true,
   "bitwise": true,
