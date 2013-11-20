@@ -435,7 +435,7 @@ Note that while any view may bind a collection only a `CollectionView` will actu
 Serializes a form. `callback` will receive the attributes from the form, followed by a `release` method which must be called before the form can be submitted again. `callback` will only be called if `validateInput` returns nothing or an empty array. `options` may contain:
 
 - `set` - defaults to true, whether or not to set the attributes if valid on a model if one was set with `setModel`
-- `validate - defaults to true, whether or not to call `validateInput` during serialization
+- `validate` - defaults to true, whether or not to call `validateInput` during serialization
 - `children` - defaults to true, whether or not to serialize inputs in child views
 - `silent` - defaults to true, whether or not to pass `silent: true` to `model.set`
 
