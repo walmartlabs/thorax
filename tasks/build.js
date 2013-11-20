@@ -73,6 +73,8 @@ module.exports = function(grunt) {
         stderr && process.stdout.write(stderr);
         fs.writeFileSync(thoraxDest.replace(/\.js$/, '.min.js'), minify(fs.readFileSync(thoraxDest).toString()));
         fs.writeFileSync(thoraxMobileDest.replace(/\.js$/, '.min.js'), minify(fs.readFileSync(thoraxMobileDest).toString()));
+        console.log("Wrote: " + thoraxDest + '.map');
+        console.log("Wrote: " + thoraxMobileDest + '.map');
         console.log("Wrote: " + thoraxDest);
         console.log("Wrote: " + thoraxMobileDest);
         console.log("Wrote: " + thoraxDest.replace(/\.js$/, '.min.js'));
