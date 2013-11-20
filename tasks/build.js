@@ -63,6 +63,8 @@ module.exports = function(grunt) {
           thoraxDest = path.join(__dirname, targetDir, 'thorax.js'),
           thoraxMobileDest = path.join(__dirname, targetDir, 'thorax-mobile.js');
       var copyCommand = 
+        'cp ' + thoraxSrc + '.map ' + thoraxDest + '.map;' +
+        'cp ' + thoraxMobileSrc + '.map ' + thoraxMobileDest + '.map;' +
         'cp ' + thoraxSrc + ' ' + thoraxDest + ';' +
         'cp ' + thoraxMobileSrc + ' ' + thoraxMobileDest + ';';
       exec(copyCommand, function(error, stdout, stderr) {
