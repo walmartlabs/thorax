@@ -376,7 +376,7 @@ When the optional `owner` parameter is passed, the retain reference count will a
 
 Release a view that was previously retained. If `release` is called and the view has a reference count of zero it will be destroyed, which will release all children, remove all events, unbind all models and collections, call `remove` and trigger the `destroyed` event.
 
-`release` is usally called automatically if a view was attached to a `LayoutView` with the `setView` method, and another view is then passed to `setView`.
+`release` is usually called automatically if a view was attached to a `LayoutView` with the `setView` method, and another view is then passed to `setView`.
 
 Generally this method is not needed unless you are `retain`ing views.
 
