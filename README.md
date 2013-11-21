@@ -382,7 +382,7 @@ Generally this method is not needed unless you are `retain`ing views.
 
 ### setModel *view.setModel(model [,options])*
 
-Setting `model` in the constructor will automatically call `setModel`, so the following are equivelent:
+Setting `model` in the constructor will automatically call `setModel`, so the following are equivalent:
 
     var view = new Thorax.View({
       model: myModel
@@ -407,7 +407,7 @@ Accepts any of the following options:
 
 ### setCollection *view.setCollection(collection [,options])*
 
-Setting `collection` in the construtor will automatically call `setCollection`, so the following are equivelent:
+Setting `collection` in the constructor will automatically call `setCollection`, so the following are equivalent:
 
     var view = new Thorax.View({
       collection: myCollection
