@@ -540,15 +540,15 @@ describe('collection', function() {
       // use the same node, but don't want to do browser conditional
       // unit tests
       var oldUlHTML = view.$('ul')[0].innerHTML;
-      expect(spy.callCount).to.equal(2, 'without colletion helper before render');
-      expect(view.$('ul').length).to.equal(1, 'without colletion helper before render');
-      expect(view.$('li').length).to.equal(2, 'without colletion helper before render');
+      expect(spy.callCount).to.equal(2, 'without collection helper before render');
+      expect(view.$('ul').length).to.equal(1, 'without collection helper before render');
+      expect(view.$('li').length).to.equal(2, 'without collection helper before render');
 
       view.render();
-      expect(spy.callCount).to.equal(2, 'without colletion helper after render');
-      expect(oldUlHTML).to.equal(view.$('ul')[0].innerHTML, 'without colletion helper after render');
-      expect(view.$('ul').length).to.equal(1, 'without colletion helper after render');
-      expect(view.$('li').length).to.equal(2, 'without colletion helper after render');
+      expect(spy.callCount).to.equal(2, 'without collection helper after render');
+      expect(oldUlHTML).to.equal(view.$('ul')[0].innerHTML, 'without collection helper after render');
+      expect(view.$('ul').length).to.equal(1, 'without collection helper after render');
+      expect(view.$('li').length).to.equal(2, 'without collection helper after render');
       spy.callCount = 0;
 
       // Alternate way of testing
