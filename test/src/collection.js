@@ -691,14 +691,14 @@ describe('collection view', function() {
     parent.render();
     expect(parent.getCollectionElement()[0]).to.equal(parent.$('div')[0]);
     expect(parent.getCollectionElement()[0]).to.not.equal(parent.child.getCollectionElement()[0]);
-  
+
     var parentWithCollectionHelper = new Thorax.View({
       collection: new Thorax.Collection([{key: 'value'}]),
       template: Handlebars.compile('{{#collection tag="ul"}}<li>{{key}}</li>{{/collection}}')
     });
     parentWithCollectionHelper.render();
     var parentCollectionView = parentWithCollectionHelper.children[_.keys(parentWithCollectionHelper.children)[0]];
-    
+
     var childWithCollectionHelper = new Thorax.View({
       collection: new Thorax.Collection([{key: 'value'}]),
       template: Handlebars.compile('{{#collection tag="ul" class="inner"}}<li>{{key}}</li>{{/collection}}')
@@ -726,10 +726,15 @@ describe('collection view', function() {
 
   it('should not leak views created within the item template', function() {
     var collection = new Thorax.Collection([{letter: 'foo'}, {letter: 'bar'}]);
+    Thorax.View.extend({
+      name: 'foo-view',
+      template: Handlebars.compile('fubar')
+    });
+
     var view = new Thorax.View({
       collection: collection,
       template: Handlebars.compile('{{collection tag="ul"}}'),
-      itemTemplate: Handlebars.compile('<li>{{view innerView}}</li>'),
+      itemTemplate: Handlebars.compile('<li>{{view innerView}}<br>{{view "foo-view"}}</li>'),
       itemContext: function(item) {
         return _.defaults({
           innerView: new Thorax.View({
@@ -746,7 +751,7 @@ describe('collection view', function() {
 
     collection.at(0).set({letter: 'baz'});
 
-    expect(_.keys(children).length).to.equal(2);
+    expect(_.keys(children).length).to.equal(4);
   });
 
 });
