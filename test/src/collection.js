@@ -724,6 +724,31 @@ describe('collection view', function() {
     expect(view.$('li').html()).to.equal('a');
   });
 
+  it('should not leak views created within the item template', function() {
+    var collection = new Thorax.Collection([{letter: 'foo'}, {letter: 'bar'}]);
+    var view = new Thorax.View({
+      collection: collection,
+      template: Handlebars.compile('{{collection tag="ul"}}'),
+      itemTemplate: Handlebars.compile('<li>{{view innerView}}</li>'),
+      itemContext: function(item) {
+        return _.defaults({
+          innerView: new Thorax.View({
+            model: item,
+            template: Handlebars.compile('{{letter}}')
+          })
+        }, item.attributes);
+      }
+    });
+    view.render();
+
+    var viewName = _.keys(view.children)[0],
+        children = view.children[viewName].children;
+
+    collection.at(0).set({letter: 'baz'});
+
+    expect(_.keys(children).length).to.equal(2);
+  });
+
 });
 
 function runCollectionTests(view, indexMultiplier) {
