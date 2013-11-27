@@ -192,12 +192,21 @@ Thorax.CollectionView = Thorax.View.extend({
     if (!viewEl.length) {
       return false;
     }
+
+    var viewCids = viewEl.find('[' + viewCidAttributeName + ']').map(function(i, el) {
+      return $(el).attr(viewCidAttributeName);
+    });
+
     viewEl.remove();
-    var viewCid = viewEl.attr(viewCidAttributeName),
-        child = this.children[viewCid];
-    if (child) {
-      this._removeChild(child);
-    }
+
+    viewCids.push(viewEl.attr(viewCidAttributeName));
+    _.each(viewCids, function(cid) {
+      var child = this.children[cid];
+      if (child) {
+        this._removeChild(child);
+      }
+    }, this);
+
     return true;
   },
 
