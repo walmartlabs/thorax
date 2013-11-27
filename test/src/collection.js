@@ -725,10 +725,13 @@ describe('collection view', function() {
   });
 
   it('should not leak views created within the item template', function() {
-    var collection = new Thorax.Collection([{letter: 'foo'}, {letter: 'bar'}]);
+    var collection = new Thorax.Collection([{letter: 'foo'}, {letter: 'bar'}]),
+        releaseSpy = this.spy();
+
     Thorax.View.extend({
       name: 'foo-view',
-      template: Handlebars.compile('fubar')
+      template: Handlebars.compile('fubar'),
+      release: releaseSpy
     });
 
     var view = new Thorax.View({
@@ -739,19 +742,22 @@ describe('collection view', function() {
         return _.defaults({
           innerView: new Thorax.View({
             model: item,
-            template: Handlebars.compile('{{letter}}')
+            template: Handlebars.compile('{{letter}}'),
+            release: releaseSpy
           })
         }, item.attributes);
       }
     });
     view.render();
 
-    var viewName = _.keys(view.children)[0],
-        children = view.children[viewName].children;
+    var collectionViewName = _.keys(view.children)[0],
+        children = view.children[collectionViewName].children;
 
     collection.at(0).set({letter: 'baz'});
 
+    // The expected number of children of the collection view is 4 (2 items in collection, 2 views per item)
     expect(_.keys(children).length).to.equal(4);
+    expect(releaseSpy).to.have.been.calledTwice;
   });
 
 });
