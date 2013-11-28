@@ -16,5 +16,5 @@ Replace `patch` with `major` or `minor` as needed.
 5) `yo release:release patch`
 6) `npm publish`
 7) `grunt thorax:component-version --cdnjs=../local/cdnjs --component=../local/components/thorax`
-8) `yo release:publish cdnjs --name=thorax --buildDir=../local/cdnjs`
-9) `yo release:publish components --name=thorax --buildDir=../local/components/thorax`
+8) `yo release:publish cdnjs thorax build/release`
+9) `yo release:publish components thorax build/release`

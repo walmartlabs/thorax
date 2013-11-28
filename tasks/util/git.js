@@ -58,8 +58,9 @@ module.exports = {
     });
   },
 
-  add: function(path, callback) {
-    childProcess.exec('git add -f ' + path, {}, function(err, stdout) {
+  add: function(path, callback, cwd) {
+    console.log({cwd: cwd});
+    childProcess.exec('git add -f ' + path, {cwd: cwd}, function(err, stdout) {
       if (err) {
         throw new Error('git.add: ' + err.message);
       }
