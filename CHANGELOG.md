@@ -2,7 +2,18 @@
 
 ## Development
 
-[Commits](https://github.com/walmartlabs/thorax/compare/v2.1.1...master)
+[Commits](https://github.com/walmartlabs/thorax/compare/v2.1.3...master)
+
+## v2.1.3 - November 28th, 2013
+
+- [#275](https://github.com/walmartlabs/thorax/issues/275) - HelperView in {{layout-element}} error
+
+- Replace release-component with component-version (courtesy kpdecker) - e51ebf3
+- Update collection.js - 5c69497
+- Update README.md - 255a604, 76b1d39, b3a12ae, 7a7e5d2
+- Add log messages for writing source maps - e049613
+
+[Commits](https://github.com/walmartlabs/thorax/compare/v2.1.1...v2.1.3)
 
 ## v2.1.1 - November 12th, 2013
 
