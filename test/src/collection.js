@@ -691,14 +691,14 @@ describe('collection view', function() {
     parent.render();
     expect(parent.getCollectionElement()[0]).to.equal(parent.$('div')[0]);
     expect(parent.getCollectionElement()[0]).to.not.equal(parent.child.getCollectionElement()[0]);
-  
+
     var parentWithCollectionHelper = new Thorax.View({
       collection: new Thorax.Collection([{key: 'value'}]),
       template: Handlebars.compile('{{#collection tag="ul"}}<li>{{key}}</li>{{/collection}}')
     });
     parentWithCollectionHelper.render();
     var parentCollectionView = parentWithCollectionHelper.children[_.keys(parentWithCollectionHelper.children)[0]];
-    
+
     var childWithCollectionHelper = new Thorax.View({
       collection: new Thorax.Collection([{key: 'value'}]),
       template: Handlebars.compile('{{#collection tag="ul" class="inner"}}<li>{{key}}</li>{{/collection}}')
@@ -723,7 +723,27 @@ describe('collection view', function() {
     model.set({key: 'b'});
     expect(view.$('li').html()).to.equal('a');
   });
+});
 
+describe("fetch", function() {
+  it("returns a promise", function() {
+    var server = sinon.fakeServer.create();
+    var collection = new (Thorax.Collection.extend({
+      url: '/test'
+    }))();
+
+    server.requests[0].respond(
+      200,
+      { "Content-Type": "application/json" },
+      JSON.stringify([{id: 1, text: "test"}])
+    );
+
+    collection.fetch().done(function() {
+      expect(collection.count()).to.equal(1);
+    });
+
+
+  });
 });
 
 function runCollectionTests(view, indexMultiplier) {
