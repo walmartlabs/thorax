@@ -4,8 +4,8 @@ Replace `patch` with `major` or `minor` as needed.
 
 ## Setup
 
-1) `npm install -g yo generator-release`
-2) Clone `components/thorax` and `cdnjs/cdnjs`
+1. `npm install -g yo generator-release`
+2. Clone `components/thorax` and `cdnjs/cdnjs`
 
 ## Release
 
