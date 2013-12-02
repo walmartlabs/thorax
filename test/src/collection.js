@@ -691,14 +691,14 @@ describe('collection view', function() {
     parent.render();
     expect(parent.getCollectionElement()[0]).to.equal(parent.$('div')[0]);
     expect(parent.getCollectionElement()[0]).to.not.equal(parent.child.getCollectionElement()[0]);
-  
+
     var parentWithCollectionHelper = new Thorax.View({
       collection: new Thorax.Collection([{key: 'value'}]),
       template: Handlebars.compile('{{#collection tag="ul"}}<li>{{key}}</li>{{/collection}}')
     });
     parentWithCollectionHelper.render();
     var parentCollectionView = parentWithCollectionHelper.children[_.keys(parentWithCollectionHelper.children)[0]];
-    
+
     var childWithCollectionHelper = new Thorax.View({
       collection: new Thorax.Collection([{key: 'value'}]),
       template: Handlebars.compile('{{#collection tag="ul" class="inner"}}<li>{{key}}</li>{{/collection}}')
@@ -722,6 +722,42 @@ describe('collection view', function() {
     expect(view.$('li').html()).to.equal('a');
     model.set({key: 'b'});
     expect(view.$('li').html()).to.equal('a');
+  });
+
+  it('should not leak views created within the item template', function() {
+    var collection = new Thorax.Collection([{letter: 'foo'}, {letter: 'bar'}]),
+        releaseSpy = this.spy();
+
+    Thorax.View.extend({
+      name: 'foo-view',
+      template: Handlebars.compile('fubar'),
+      release: releaseSpy
+    });
+
+    var view = new Thorax.View({
+      collection: collection,
+      template: Handlebars.compile('{{collection tag="ul"}}'),
+      itemTemplate: Handlebars.compile('<li>{{view innerView}}<br>{{view "foo-view"}}</li>'),
+      itemContext: function(item) {
+        return _.defaults({
+          innerView: new Thorax.View({
+            model: item,
+            template: Handlebars.compile('{{letter}}'),
+            release: releaseSpy
+          })
+        }, item.attributes);
+      }
+    });
+    view.render();
+
+    var collectionViewName = _.keys(view.children)[0],
+        children = view.children[collectionViewName].children;
+
+    collection.at(0).set({letter: 'baz'});
+
+    // The expected number of children of the collection view is 4 (2 items in collection, 2 views per item)
+    expect(_.keys(children).length).to.equal(4);
+    expect(releaseSpy).to.have.been.calledTwice;
   });
 
 });
