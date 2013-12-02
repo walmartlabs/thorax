@@ -79,6 +79,10 @@ Thorax.View = Backbone.View.extend({
     this.trigger('configure');
   },
 
+  toString: function() {
+    return '[object View.' + this.name + ']';
+  },
+
   setElement : function() {
     var response = Backbone.View.prototype.setElement.apply(this, arguments);
     this.name && this.$el.attr(viewNameAttributeName, this.name);
