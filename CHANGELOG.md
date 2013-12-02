@@ -2,7 +2,15 @@
 
 ## Development
 
-[Commits](https://github.com/walmartlabs/thorax/compare/v2.1.3...master)
+[Commits](https://github.com/walmartlabs/thorax/compare/v2.1.4...master)
+
+## v2.1.4 - December 2nd, 2013
+
+- [#276](https://github.com/walmartlabs/thorax/pull/276) - Leaking views ([@dr-nafanya](https://api.github.com/users/dr-nafanya))
+
+- Add view toString method - c096927
+
+[Commits](https://github.com/walmartlabs/thorax/compare/v2.1.3...v2.1.4)
 
 ## v2.1.3 - November 28th, 2013
 
