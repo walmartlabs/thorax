@@ -161,7 +161,7 @@ function containHandlerToCurentView(handler, cid) {
     var view = $(event.target).view({helper: false});
     if (view && view.cid === cid) {
       event.originalContext = this;
-      handler(event);
+      return handler(event);
     }
   };
 }
@@ -178,7 +178,7 @@ function bindEventHandler(eventName, params) {
   var context = params.context || this;
   function ret() {
     try {
-      method.apply(context, arguments);
+      return method.apply(context, arguments);
     } catch (e) {
       Thorax.onException('thorax-exception: ' + (context.name || context.cid) + ':' + eventName, e);
     }
