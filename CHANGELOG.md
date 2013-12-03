@@ -2,7 +2,13 @@
 
 ## Development
 
-[Commits](https://github.com/walmartlabs/thorax/compare/v2.1.4...master)
+[Commits](https://github.com/walmartlabs/thorax/compare/v2.1.5...master)
+
+## v2.1.5 - December 2nd, 2013
+
+- [#282](https://github.com/walmartlabs/thorax/pull/282) - Return event handler value from wrappers ([@kpdecker](https://api.github.com/users/kpdecker))
+
+[Commits](https://github.com/walmartlabs/thorax/compare/v2.1.4...v2.1.5)
 
 ## v2.1.4 - December 2nd, 2013
 
