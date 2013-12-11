@@ -269,7 +269,7 @@ If a `View` has the same `name` as a template in the `templates` hash, its `temp
 
 ## Thorax.View
 
-`Thorax.View` provides additive functionality over `Backbone.View` but breaks compatibility in one imporant way in that it does not use an `options` object. All properties passed to the constructor become available on the instance:
+`Thorax.View` provides additive functionality over `Backbone.View` but breaks compatibility in one important way in that it does not use an `options` object. All properties passed to the constructor become available on the instance:
 
     var view = new Thorax.View({
       key: "value"
@@ -280,7 +280,7 @@ By default all instance properties are available in the template context. So whe
 
 ### template *view.template*
 
-Assign a template to a view. This may be a string or a function which recieves a single `context` argument and returns a string. If the view has a `name` and a template of the same `name` is available the `template` will be auto-assigned.
+Assign a template to a view. This may be a string or a function which receives a single `context` argument and returns a string. If the view has a `name` and a template of the same `name` is available the `template` will be auto-assigned.
 
     new Thorax.View({
       template: Handlebars.compile("{{key}}")
@@ -298,7 +298,7 @@ Renders the view's `template` updating the view's `el` with the result, triggeri
 
 ### context *view.context()*
 
-Used by `render` to determine what attributes are available in the view's `template`. The default context function returns `this` + `this.model.attributes` if a `model` is present on the view. The `context` method may be overriden to provide a custom context:
+Used by `render` to determine what attributes are available in the view's `template`. The default context function returns `this` + `this.model.attributes` if a `model` is present on the view. The `context` method may be overridden to provide a custom context:
 
     new Thorax.View({
       template: Handlebars.compile('{{key}}'),
@@ -513,7 +513,7 @@ Validate the attributes created by `serialize`, must return an array or nothing 
 
 ### registerViewHelper *Handlebars.registerViewHelper(name [,viewClass] ,callback)*
 
-Note that this differs from `Handlebars.registerHelper`. Registers a helper that will create and append a new `HelperView` instance, with its `template` attribute set to the value of the captured block. `callback` will recieve any arguments passed to the helper followed by a `HelperView` instance. Named arguments to the helper will be present on `options` attribute of the `HelperView` instance.
+Note that this differs from `Handlebars.registerHelper`. Registers a helper that will create and append a new `HelperView` instance, with its `template` attribute set to the value of the captured block. `callback` will receive any arguments passed to the helper followed by a `HelperView` instance. Named arguments to the helper will be present on `options` attribute of the `HelperView` instance.
 
 A `HelperView` instance differs from a regular view instance in that it has a `parent` attribute which is always set to the declaring view, and a `context` which always returns the value of the `parent`'s context method. The `collection`, `empty` and other built in block view helpers are created with `registerViewHelper`.
 
@@ -559,7 +559,7 @@ A view to contain a single other view which will change over time, (multi-pane s
 
 Set the current view on the `LayoutView`, triggering `activated`, `ready` and `deactivated` events on the current and previous view during the lifecycle. `ensureRendered` is called on views passed to `setView`. By default `destroy` is called on the previous view when the new view is set.
 
-To implement animations using `setView` pass a `transition` callback to `setView` which will recieve the new view being set, the old view (if present), append, remove and complete functions which will execute the needed DOM and view operations.
+To implement animations using `setView` pass a `transition` callback to `setView` which will receive the new view being set, the old view (if present), append, remove and complete functions which will execute the needed DOM and view operations.
 
     layout.setView(newView, {
       transition: function(newView, oldView, append, remove, complete) {
@@ -603,7 +603,7 @@ Used by `setCollection` to determine whether or not to fetch the collection.
 
 A class that renders an `itemTemplate` or `itemView` for each item in a `collection` passed to it in its constructor, or via `setCollection`. The view will automatically update when items are added, removed or changed.
 
-The `collection` helper will automatically create and embed a `CollectionView` instance for you. If programatic access to the view's methods are needed (for instance calling `appendItem` or specifying an `itemFilter`) it's best to create a `CollectionView` directly and embed it with the `view` helper as you would any other view.
+The `collection` helper will automatically create and embed a `CollectionView` instance for you. If programmatic access to the view's methods are needed (for instance calling `appendItem` or specifying an `itemFilter`) it's best to create a `CollectionView` directly and embed it with the `view` helper as you would any other view.
 
 ### itemTemplate *view.itemTemplate*
 
@@ -615,7 +615,7 @@ A view class to be initialized for each item. Can be used in conjunction with `i
 
 ### itemContext *view.itemContext(model, index)*
 
-A function in the declaring view to specify the context for an `itemTemplate`, recieves model and index as arguments. `itemContext` will not be used if an `itemView` is specified as the `itemView`'s own `context` method will instead be used.
+A function in the declaring view to specify the context for an `itemTemplate`, receives model and index as arguments. `itemContext` will not be used if an `itemView` is specified as the `itemView`'s own `context` method will instead be used.
 
 A collection helper may specify a specific function to use as the `itemContext` if there are multiple collections in a view:
 
@@ -623,7 +623,7 @@ A collection helper may specify a specific function to use as the `itemContext` 
 
 ### itemFilter *view.itemFilter(model, index)*
 
-A method, which if present will filter what items are rendered in a collection. Recieves `model` and `index` and must return boolean. The filter will be applied when models' fire a change event, or models are added and removed from the collection. To force a collection to re-filter, call `updateFilter` on the view or collection view.
+A method, which if present will filter what items are rendered in a collection. Receives `model` and `index` and must return boolean. The filter will be applied when models' fire a change event, or models are added and removed from the collection. To force a collection to re-filter, call `updateFilter` on the view or collection view.
 
 Items are hidden and shown with `$.hide` and `$.show` rather than being removed or appended. In performance critical views with large collections consider filtering the collection before it is passed to the view or on the server.
 
@@ -659,7 +659,7 @@ An index to place the `loadingView` or `loadingTemplate` at. Defaults to `this.c
 
 Append a model (which will used to generate a new `itemView` or render an `itemTemplate`) or a view at a given index in the `CollectionView`. If passing a view as the first argument `index` may be a model which will be used to look up the index.
 
-By default this will trigger a `rendered:item` event, `silent: true` may be passed in the options hash to prevent this. To also prevent the appeneded item from being filtered if an `itemFilter` is present pass `filter: false` in the options hash.
+By default this will trigger a `rendered:item` event, `silent: true` may be passed in the options hash to prevent this. To also prevent the appended item from being filtered if an `itemFilter` is present pass `filter: false` in the options hash.
 
 ### removeItem *view.removeItem(model)*
 
@@ -792,7 +792,7 @@ All of the behavior described in this section is implemented via this method, so
 
 ### Queuing
 
-Thorax wraps `fetch` (and therefore `load`) on models and collections with a queuing mechansim to ensure that multiple `sync` calls for the same url will not trigger multiple HTTP requests. To force a `fetch` or `load` call to create a new HTTP request regardless of whether an identical request is in the queue use the `resetQueue` option:
+Thorax wraps `fetch` (and therefore `load`) on models and collections with a queuing mechanism to ensure that multiple `sync` calls for the same url will not trigger multiple HTTP requests. To force a `fetch` or `load` call to create a new HTTP request regardless of whether an identical request is in the queue use the `resetQueue` option:
 
     model.fetch({
       resetQueue: true
@@ -833,11 +833,11 @@ By default the events will propagate to a root object set with `setRootObject`. 
 
 ### setRootObject *Thorax.setRootObject(obj)*
 
-Set the root object that will recieve `load:start` and `load:end` events if the `load:start` was not a `background` event. This is useful to implement a global loading indicator.
+Set the root object that will receive `load:start` and `load:end` events if the `load:start` was not a `background` event. This is useful to implement a global loading indicator.
 
 ### loadHandler *Thorax.loadHandler(startCallback, endCallback)*
 
-Generates an `load:start` event handler that when triggered will then monitor the associated object for a `load:end` event. If the duration between the start and and the end events exceed `_loadingTimeoutDuration` then the `start` and `end` callbacks will be triggered at the appropriate times to allow the display of a loading UI.
+Generates an `load:start` event handler that when triggered will then monitor the associated object for a `load:end` event. If the duration between the start and the end events exceed `_loadingTimeoutDuration` then the `start` and `end` callbacks will be triggered at the appropriate times to allow the display of a loading UI.
 
     view.on("load:start", Thorax.loadHandler(
       function(message, background, object) {
@@ -1037,7 +1037,7 @@ To embed a row within a `collection` helper if it the collection is empty, speci
 
 ### collection-element *{{collection-element [htmlAttributes...]}}*
 
-By default `Thorax.CollectionView` instances have no template. Items will be appended to and removed from the view's `el`. Alternatively a template can be specified and `collection-element` used to specify where the individal items in a collection will be rendered.
+By default `Thorax.CollectionView` instances have no template. Items will be appended to and removed from the view's `el`. Alternatively a template can be specified and `collection-element` used to specify where the individual items in a collection will be rendered.
 
     <div>
       {{collection-element tag="ul" class="my-list"}}
@@ -1053,7 +1053,7 @@ By default `Thorax.LayoutView` instances have no template, `setView` will append
 
 ### loading *{{#loading}}*
 
-A block helper to use when the view is loading. For collection specific loading the a `CollectionView` accepts `loadingView` and `loadingTemplate` options to append an item in a collection when it is loading.
+A block helper to use when the view is loading. For collection specific loading the `CollectionView` accepts `loadingView` and `loadingTemplate` options to append an item in a collection when it is loading.
 
     {{#loading}}
       View is loading a model or collection.
@@ -1073,7 +1073,7 @@ Triggered on a view every time a child view is appended into the view with the `
 
 ### ready *ready (options)*
 
-Triggered when a view is appended to the DOM with `appendTo` or when a view is appeneded to a `LayoutView` via `setView`. Setting focus and other behaviors that depend on the view being present in the DOM should be handled in this event.
+Triggered when a view is appended to the DOM with `appendTo` or when a view is appended to a `LayoutView` via `setView`. Setting focus and other behaviors that depend on the view being present in the DOM should be handled in this event.
 
 This event propagates to all children, including children that will be bound after the view is created. `options` will contain a `target` view, which is the view that triggered the event.
 
@@ -1117,7 +1117,7 @@ Triggered on a view when `serialize` is called, before `validateInput` is called
 
 ### validate *validate (attributes, errors)*
 
-Triggered on a view when `serialize` is called, passed an an attributes hash and errors array after `validateInput` is called. Use in combination with the `invalid` event to display and clear errors from your views.
+Triggered on a view when `serialize` is called, passed an attributes hash and errors array after `validateInput` is called. Use in combination with the `invalid` event to display and clear errors from your views.
 
     Thorax.View.on({
       validate: function(attributes, errors) {
@@ -1149,15 +1149,15 @@ Triggered on a model or collection by `fetch` or `load` and on a view if it has 
 
 ### rendered:collection *rendred:collection (collectionView, collection)*
 
-Triggered on a `CollectionView` or a the view calling the `collection` helper every time `render` is called on the `CollectionView`.
+Triggered on a `CollectionView` or the view calling the `collection` helper every time `render` is called on the `CollectionView`.
 
 ### rendered:item *rendered:item (collectionView, collection, model, itemElement, index)*
 
-Triggered on a `CollectionView` or a the view calling the `collection` helper every time an item is rendered in the `CollectionView`.
+Triggered on a `CollectionView` or the view calling the `collection` helper every time an item is rendered in the `CollectionView`.
 
 ### rendered:empty *rendered:empty (collectionView, collection)*
 
-Triggered on a `CollectionView` or a the view calling the `collection` helper every time the `emptyView` or `emptyTemplate` is rendered in the `CollectionView`.
+Triggered on a `CollectionView` or the view calling the `collection` helper every time the `emptyView` or `emptyTemplate` is rendered in the `CollectionView`.
 
 ## HTML Attributes
 
