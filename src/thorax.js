@@ -329,10 +329,10 @@ function configureView () {
 }
 
 if (Backbone.View.prototype._configure) {
-  // < Backbone 1.1
+  // For Backbone 1.0 or earlier
   Thorax.View.prototype._configure = configureView;
 } else {
-  // >= Backbone 1.1
+  // For Backbone 1.1 or greater
   Thorax.View.prototype._ensureElement = function() {
     configureView.call(this);
     return Backbone.View.prototype._ensureElement.call(this);
