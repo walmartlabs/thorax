@@ -1,5 +1,6 @@
 {
   "modules": {
+
     "jquery": {
       "mixins": [
         {"name": "thorax-dep-jquery", "ignoreWarnings": true}
@@ -8,6 +9,19 @@
     "zepto": {
       "mixins": [
         {"name": "thorax-dep-zepto", "ignoreWarnings": true}
+      ],
+      "scripts": [
+        {"src": "components/handlebars/handlebars.js", "ignoreWarnings": true, "global": true}
+      ]
+    },
+    "jquery-backbone-1-0": {
+      "mixins": [
+        {"name": "thorax-dep-jquery-backbone-1-0", "ignoreWarnings": true}
+      ]
+    },
+    "zepto-backbone-1-0": {
+      "mixins": [
+        {"name": "thorax-dep-zepto-backbone-1-0", "ignoreWarnings": true}
       ],
       "scripts": [
         {"src": "components/handlebars/handlebars.js", "ignoreWarnings": true, "global": true}
@@ -47,7 +61,9 @@
       ],
       "static": [
         {"src": "test/jquery.html", "dest": "jquery/test.html"},
-        {"src": "test/zepto.html", "dest": "zepto/test.html"}
+        {"src": "test/zepto.html", "dest": "zepto/test.html"},
+        {"src": "test/jquery-backbone-1-0.html", "dest": "jquery-backbone-1-0/test.html"},
+        {"src": "test/zepto-backbone-1-0.html", "dest": "zepto-backbone-1-0/test.html"}
       ]
     }
   },

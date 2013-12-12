@@ -5,5 +5,7 @@ build.projectDir = __dirname;
 build.mochaTests = true;
 build.testPlatforms = [
   {platform: 'jquery'},
-  {platform: 'zepto'}
+  {platform: 'zepto'},
+  {platform: 'jquery-backbone-1-0'},
+  {platform: 'zepto-backbone-1-0'}
 ];
