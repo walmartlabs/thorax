@@ -2,22 +2,6 @@
   "name": "thorax",
 
   "mixins": {
-    "thorax-dep-jquery-backbone-1-0": {
-      "scripts": [
-        {"src": "jquery.js", "bower": "jquery", "global": true, "ignoreWarnings": true},
-        {"src": "underscore.js", "bower": "underscore", "global": true, "ignoreWarnings": true},
-        {"src": "handlebars.js", "bower": "handlebars", "global": true, "ignoreWarnings": true},
-        {"src": "test/src/backbone-1-0.js", "global": true, "ignoreWarnings": true}
-      ]
-    },
-    "thorax-dep-zepto-backbone-1-0": {
-      "scripts": [
-        {"src": "zepto.js", "bower": "zepto", "global": true, "ignoreWarnings": true},
-        {"src": "underscore.js", "bower": "underscore", "global": true, "ignoreWarnings": true},
-        {"src": "handlebars.js", "bower": "handlebars", "global": true, "ignoreWarnings": true},
-        {"src": "test/src/backbone-1-0.js", "global": true, "ignoreWarnings": true}
-      ]
-    },
     "thorax-dep-jquery": {
       "scripts": [
         {"src": "jquery.js", "bower": "jquery", "global": true, "ignoreWarnings": true},

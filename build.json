@@ -16,12 +16,12 @@
     },
     "jquery-backbone-1-0": {
       "mixins": [
-        {"name": "thorax-dep-jquery-backbone-1-0", "ignoreWarnings": true}
+        {"name": "thorax-dep-jquery", "ignoreWarnings": true, "overrides": {"backbone.js": "test/lib/backbone-1-0.js"}}
       ]
     },
     "zepto-backbone-1-0": {
       "mixins": [
-        {"name": "thorax-dep-zepto-backbone-1-0", "ignoreWarnings": true}
+        {"name": "thorax-dep-zepto", "ignoreWarnings": true, "overrides": {"backbone.js": "test/lib/backbone-1-0.js"}}
       ],
       "scripts": [
         {"src": "components/handlebars/handlebars.js", "ignoreWarnings": true, "global": true}
