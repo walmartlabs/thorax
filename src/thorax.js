@@ -38,7 +38,10 @@ var Thorax = this.Thorax = {
 
 Thorax.View = Backbone.View.extend({
   constructor: function() {
+    // store first argument for configureView()
+    this._constructorArg = arguments[0];
     var response = Backbone.View.apply(this, arguments);
+    delete this._constructorArg;
     _.each(inheritVars, function(obj) {
       if (obj.ctor) {
         obj.ctor.call(this, response);
@@ -46,37 +49,14 @@ Thorax.View = Backbone.View.extend({
     }, this);
     return response;
   },
-  _configure: function(options) {
-    var self = this;
 
-    this._referenceCount = 0;
-
-    this._objectOptionsByCid = {};
-    this._boundDataObjectsByCid = {};
-
-    // Setup object event tracking
-    _.each(inheritVars, function(obj) {
-      self[obj.name] = [];
-    });
-
-    viewsIndexedByCid[this.cid] = this;
-    this.children = {};
-    this._renderCount = 0;
-
-    //this.options is removed in Thorax.View, we merge passed
-    //properties directly with the view and template context
-    _.extend(this, options || {});
-
-    // Setup helpers
-    bindHelpers.call(this);
-
-    _.each(inheritVars, function(obj) {
-      if (obj.configure) {
-        obj.configure.call(this);
-      }
-    }, this);
-
-    this.trigger('configure');
+  // View configuration, _configure was removed
+  // in Backbone 1.1, define _configure as a noop
+  // for Backwards compatibility with 1.0 and earlier
+  _configure: function() {},
+  _ensureElement: function () {
+    configureView.call(this);
+    return Backbone.View.prototype._ensureElement.call(this);
   },
 
   toString: function() {
@@ -318,6 +298,40 @@ Thorax.View.extend = function() {
 };
 
 createRegistryWrapper(Thorax.View, Thorax.Views);
+
+function configureView () {
+  var options = this._constructorArg;
+  var self = this;
+
+  this._referenceCount = 0;
+
+  this._objectOptionsByCid = {};
+  this._boundDataObjectsByCid = {};
+
+  // Setup object event tracking
+  _.each(inheritVars, function(obj) {
+    self[obj.name] = [];
+  });
+
+  viewsIndexedByCid[this.cid] = this;
+  this.children = {};
+  this._renderCount = 0;
+
+  //this.options is removed in Thorax.View, we merge passed
+  //properties directly with the view and template context
+  _.extend(this, options || {});
+
+  // Setup helpers
+  bindHelpers.call(this);
+
+  _.each(inheritVars, function(obj) {
+    if (obj.configure) {
+      obj.configure.call(this);
+    }
+  }, this);
+
+  this.trigger('configure');
+}
 
 function bindHelpers() {
   if (this.helpers) {
