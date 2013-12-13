@@ -50,6 +50,15 @@ Thorax.View = Backbone.View.extend({
     return response;
   },
 
+  // View configuration, _configure was removed
+  // in Backbone 1.1, define _configure as a noop
+  // for Backwards compatibility with 1.0 and earlier
+  _configure: function() {},
+  _ensureElement: function () {
+    configureView.call(this);
+    return Backbone.View.prototype._ensureElement.call(this);
+  },
+
   toString: function() {
     return '[object View.' + this.name + ']';
   },
@@ -290,10 +299,6 @@ Thorax.View.extend = function() {
 
 createRegistryWrapper(Thorax.View, Thorax.Views);
 
-// View configuration, _configure was removed
-// in Backbone 1.1, written for Backwards
-// compatibility
-
 function configureView () {
   var options = this._constructorArg;
   var self = this;
@@ -326,17 +331,6 @@ function configureView () {
   }, this);
 
   this.trigger('configure');
-}
-
-if (Backbone.View.prototype._configure) {
-  // For Backbone 1.0 or earlier
-  Thorax.View.prototype._configure = configureView;
-} else {
-  // For Backbone 1.1 or greater
-  Thorax.View.prototype._ensureElement = function() {
-    configureView.call(this);
-    return Backbone.View.prototype._ensureElement.call(this);
-  }
 }
 
 function bindHelpers() {
