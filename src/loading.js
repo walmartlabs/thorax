@@ -322,12 +322,15 @@ function fetchQueue(options, $super) {
     // Handle callers that do not pass in a super class and wish to implement their own
     // fetch behavior
     if ($super) {
-      $super.call(this, options);
+      this._lastPromise = $super.call(this, options);
+      return this._lastPromise;
+    } else {
+      return options;
     }
-    return options;
   } else {
     // Currently fetching. Queue and process once complete
     this.fetchQueue.push(options);
+    return this._lastPromise;
   }
 }
 
