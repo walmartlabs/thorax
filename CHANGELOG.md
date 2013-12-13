@@ -2,7 +2,14 @@
 
 ## Development
 
-[Commits](https://github.com/walmartlabs/thorax/compare/v2.1.5...master)
+[Commits](https://github.com/walmartlabs/thorax/compare/v2.2.0...master)
+
+## v2.2.0 - December 13th, 2013
+
+- [#286](https://github.com/walmartlabs/thorax/pull/286) - Update Thorax for Backbone 1.1 ([@eastridge](https://api.github.com/users/eastridge))
+- [#285](https://github.com/walmartlabs/thorax/pull/285) - Spelling fixes in the README. ([@carsonmcdonald](https://api.github.com/users/carsonmcdonald))
+- [#261](https://github.com/walmartlabs/thorax/issues/261) - Investigate Backbone 1.1 impact
+- [#274](https://github.com/walmartlabs/thorax/issues/274) - Docs on helpers incomplete
 
 ## v2.1.5 - December 2nd, 2013
 
