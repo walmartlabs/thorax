@@ -37,7 +37,7 @@ function dataObject(type, spec) {
 
       this.bindDataObject(type, dataObject, _.extend({}, this.options, options));
       $el && $el.attr(spec.cidAttrName, dataObject.cid);
-      dataObject.trigger('set', dataObject, old);
+      // dataObject.trigger('set', dataObject, old);
     } else {
       this[type] = false;
       if (spec.change) {
