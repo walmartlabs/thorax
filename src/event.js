@@ -152,7 +152,7 @@ pushDomEvents([
   'touchstart', 'touchend', 'touchmove',
   'click', 'dblclick',
   'keyup', 'keydown', 'keypress',
-  'submit', 'change',
+  'submit', 'change', 'input',
   'focus', 'blur'
 ]);
 
