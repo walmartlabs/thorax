@@ -63,32 +63,35 @@ describe('loading', function() {
       expect(endSpy).to.not.have.been.called;
     });
 
-    it("returns a promise", function() {
-      var server = sinon.fakeServer.create();
-      var collection = new (Thorax.Collection.extend({
-        url: '/test'
-      }))();
+    // for jQuery or Zepto when built with Deferred
+    if ($.when) {
+      it("returns a promise", function() {
+        var server = sinon.fakeServer.create();
+        var collection = new (Thorax.Collection.extend({
+          url: '/test'
+        }))();
+      
+        var doneCallback = this.spy(function() {
+          expect(collection.length).to.equal(1);
+        });
     
-      var doneCallback = this.spy(function() {
-        expect(collection.length).to.equal(1);
+        collection.fetch().done(doneCallback);
+        collection.fetch().done(doneCallback);
+  
+        expect(server.requests.length).to.equal(1);
+  
+        server.requests[0].respond(200, {
+          "Content-Type": "application/json"
+        }, JSON.stringify([{
+          id: 1,
+          text: "test"
+        }]));
+  
+        expect(doneCallback.callCount).to.equal(2);
+  
+        server.restore();
       });
-
-      collection.fetch().done(doneCallback);
-      collection.fetch().done(doneCallback);
-
-      expect(server.requests.length).to.equal(1);
-
-      server.requests[0].respond(200, {
-        "Content-Type": "application/json"
-      }, JSON.stringify([{
-        id: 1,
-        text: "test"
-      }]));
-
-      expect(doneCallback.callCount).to.equal(2);
-
-      server.restore();
-    });
+    }
   });
 
   describe('load events', function() {
