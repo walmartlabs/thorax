@@ -6,7 +6,7 @@ Handlebars.registerHelper('url', function(url) {
     var options = arguments[1],
         hash = (options && options.hash) || options;
     if (hash && hash['expand-tokens']) {
-      fragment = Thorax.Util.expandToken(url, this);
+      fragment = Thorax.Util.expandToken(url, this, true);
     } else {
       fragment = url;
     }

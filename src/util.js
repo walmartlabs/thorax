@@ -257,7 +257,7 @@ Thorax.Util = {
   is$: function(obj) {
     return _.isObject(obj) && ('length' in obj);
   },
-  expandToken: function(input, scope) {
+  expandToken: function(input, scope, encode) {
     if (input && input.indexOf && input.indexOf('{{') >= 0) {
       var re = /(?:\{?[^{]+)|(?:\{\{([^}]+)\}\})/g,
           match,
@@ -273,7 +273,11 @@ Thorax.Util = {
             scope = scope[segments[i]];
           }
         }
-        return scope;
+        if (encode && _.isString(scope)) {
+          return encodeURIComponent(scope);
+        } else {
+          return scope;
+        }
       }
       while (match = re.exec(input)) {
         if (match[1]) {
