@@ -13,5 +13,7 @@ From the project root:
 Then open:
 
     http://localhost:8080/jquery/test.html
+    http://localhost:8080/jquery-backbone-1-0/test.html
     http://localhost:8080/zepto/test.html
+    http://localhost:8080/zepto-backbone-1-0/test.html
     
