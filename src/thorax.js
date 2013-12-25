@@ -24,14 +24,31 @@ var Thorax = this.Thorax = {
   templatePathPrefix: '',
   //view classes
   Views: {},
-  //certain error prone pieces of code (on Android only it seems)
-  //are wrapped in a try catch block, then trigger this handler in
-  //the catch, with the name of the function or event that was
-  //trying to be executed. Override this with a custom handler
-  //to debug / log / etc
+
+  // Allows tagging of sections of code with a name for debugging purposes.
+  // This or onException should be overriden to allow for reporting exceptions to analytics servers
+  // or integration with libraries such as Costanza.
+  bindSection: function(name, info, callback) {
+    if (!callback) {
+      callback = info;
+      info = undefined;
+    }
+    return function() {
+      try {
+        return callback.apply(this, arguments);
+      } catch (err) {
+        Thorax.onException(name, err, info);
+      }
+    };
+  },
+  runSection: function(name, info, callback) {
+    return Thorax.bindSection(name, info, callback)();
+  },
+
   onException: function(name, err) {
     throw err;
   },
+
   //deprecated, here to ensure existing projects aren't mucked with
   templates: Handlebars.templates
 };
