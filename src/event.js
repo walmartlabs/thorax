@@ -175,14 +175,12 @@ function bindEventHandler(eventName, params) {
     throw new Error('Event "' + callback + '" does not exist ' + (this.name || this.cid) + ':' + eventName);
   }
 
-  var context = params.context || this;
-  function ret() {
-    try {
-      return method.apply(context, arguments);
-    } catch (e) {
-      Thorax.onException('thorax-exception: ' + (context.name || context.cid) + ':' + eventName, e);
-    }
-  }
+  var context = params.context || this,
+      ret = Thorax.bindSection(
+        'thorax-event',
+        {view: context.name || context.cid, eventName: eventName},
+        _.bind(method, context));
+
   // Backbone will delegate to _callback in off calls so we should still be able to support
   // calling off on specific handlers.
   ret._callback = method;

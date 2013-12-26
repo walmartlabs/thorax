@@ -159,6 +159,7 @@ describe('core', function() {
   it("onException", function() {
     var oldOnException = Thorax.onException;
     var view = new Thorax.View({
+      name: 'foo view',
       events: {
         test: function () {
           throw new Error('view error');
@@ -171,12 +172,16 @@ describe('core', function() {
     });
     view.render();
     document.body.appendChild(view.el);
-    Thorax.onException = function(errorName) {
-      expect(errorName.match(/click/)).to.exist;
+    Thorax.onException = function(errorName, err, info) {
+      expect(errorName).to.equal('thorax-event');
+      expect(info.view).to.equal('foo view');
+      expect(info.eventName.match(/click/)).to.exist;
     };
     view.$('div').trigger('click');
-    Thorax.onException = function(errorName) {
-      expect(errorName.match(/test/)).to.exist;
+    Thorax.onException = function(errorName, err, info) {
+      expect(errorName).to.equal('thorax-event');
+      expect(info.view).to.equal('foo view');
+      expect(info.eventName.match(/test/)).to.exist;
     };
     view.trigger('test');
     Thorax.onException = oldOnException;
