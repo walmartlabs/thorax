@@ -45,7 +45,7 @@ var Thorax = this.Thorax = {
     return Thorax.bindSection(name, info, callback)();
   },
 
-  onException: function(name, err) {
+  onException: function(name, err /* , info */) {
     throw err;
   },
 
