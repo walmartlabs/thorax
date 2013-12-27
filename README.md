@@ -1194,15 +1194,27 @@ When creating CSS selectors it's recommended to use the generated attributes (es
 
 ## Error Handling
 
-### onException *Thorax.onException(name, error)*
+Certain critical code paths are executed using the `bindSection` and `runSection` APIs. Should code executed on these paths throw, additional information regarding the code location, etc may be logged and used for debugging.
 
-Bound DOM event handlers in Thorax are wrapped with a try / catch block, calling this function if an error is caught. This hook is provided primarily to allow for easier debugging in Android environments where it is difficult to determine the source of the error. The default error handler is simply:
+Override these APIs with your own logging / debugging handler or utilize [Costanza](https://github.com/walmartlabs/costanza) for an enhanced error tracking.
 
-    Thorax.onException = function(name, error) {
+### onException *Thorax.onException(name, error, info)*
+
+Logs exceptions when they occur. Passed to the function are a unique identifier, `name`, the thrown exception, `error`, and an object containing any additional information, `info`. The default implementation simply rethrows the error.
+
+    Throax.onException = function(name, error) {
       throw error;
     };
 
-Override this function with your own logging / debugging handler. `name` will be the event name where the error was thrown.
+### bindSection *Thorax.bindSection(name, info, callback)*
+
+Wraps a `callback` in an error wrapper. Included with the `callback` is an identifying `name` value and any relevant information, `info` that may help debugging the exception.
+
+By default this calls `Thorax.onException` when an exception is thrown but implementors may override this method to provide additional error handling before exceptions occur.
+
+### runSection *Thorax.runSection(name, info, callback)*
+
+Immediately executed version of `bindSection`. The default implementation delegates to `bindSection`.
 
 # Error Codes
 
