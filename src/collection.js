@@ -110,7 +110,8 @@ Thorax.CollectionView = Thorax.View.extend({
       return;
     }
     var itemView,
-        $el = this.getCollectionElement();
+        $el = this.getCollectionElement(),
+        collection = this.collection;
     options = _.defaults(options || {}, {
       filter: true
     });
@@ -121,7 +122,7 @@ Thorax.CollectionView = Thorax.View.extend({
       itemView = model;
       model = false;
     } else {
-      index = index || this.collection.indexOf(model) || 0;
+      index = index || collection.indexOf(model) || 0;
       itemView = this.renderItem(model, index);
     }
 
@@ -145,7 +146,7 @@ Thorax.CollectionView = Thorax.View.extend({
       if (model) {
         itemElement.attr(modelCidAttributeName, model.cid);
       }
-      var previousModel = index > 0 ? this.collection.at(index - 1) : false;
+      var previousModel = index > 0 ? collection.at(index - 1) : false;
       if (!previousModel) {
         $el.prepend(itemElement);
       } else {
@@ -159,7 +160,7 @@ Thorax.CollectionView = Thorax.View.extend({
       });
 
       if (!options.silent) {
-        this.trigger('rendered:item', this, this.collection, model, itemElement, index);
+        this.trigger('rendered:item', this, collection, model, itemElement, index);
       }
       if (options.filter) {
         applyItemVisiblityFilter.call(this, model);
