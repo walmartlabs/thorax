@@ -314,8 +314,11 @@ Thorax.CollectionView.on({
     },
     add: function(model) {
       var $el = this.getCollectionElement();
-      this.collection.length === 1 && $el.length && handleChangeFromEmptyToNotEmpty.call(this);
       if ($el.length) {
+        if (this.collection.length === 1) {
+          handleChangeFromEmptyToNotEmpty.call(this);
+        }
+
         var index = this.collection.indexOf(model);
         this.appendItem(model, index);
       }
