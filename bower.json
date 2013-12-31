@@ -1,6 +1,6 @@
 {
   "name": "thorax",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "devDependencies": {
     "jquery": "1.9.0",
     "underscore": "1.4.4",
