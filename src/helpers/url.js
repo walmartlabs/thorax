@@ -1,4 +1,6 @@
 Handlebars.registerHelper('url', function(url) {
+  url = url || '';
+
   var fragment;
   if (arguments.length > 2) {
     fragment = _.map(_.head(arguments, arguments.length - 1), encodeURIComponent).join('/');

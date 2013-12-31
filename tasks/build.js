@@ -2,7 +2,8 @@ var fs = require('fs'),
     path = require('path'),
     exec = require('child_process').exec,
     uglify = require('uglify-js'),
-    targetDir = '../build/release';
+    targetDir = '../build/release',
+    relativeTargetDir = 'build/release'; //for command line
 
 try {
   fs.mkdirSync(path.join(__dirname, targetDir));
@@ -36,6 +37,10 @@ function minify(code) {
   return pro.gen_code(ast);
 }
 
+function removeSourceMapUrl(source) {
+  return source.replace(/\/\/@ sourceMappingURL\=thorax(\-mobile)?\.js\.map/, '');
+}
+
 module.exports = function(grunt) {
   grunt.registerTask('thorax:build', function() {
     var done = this.async();
@@ -62,26 +67,32 @@ module.exports = function(grunt) {
           thoraxMobileSrc = path.join(__dirname, '../build/dev/thorax-mobile.js'),
           thoraxDest = path.join(__dirname, targetDir, 'thorax.js'),
           thoraxMobileDest = path.join(__dirname, targetDir, 'thorax-mobile.js'),
-          packageSrc = path.join(),
-          packageDest = path.join(),
-          composerSrc = path.join(),
-          composerDest = path.join(),
-          bowerSrc = path.join(),
-          bowerDest = path.join();
+          packageSrc = path.join(__dirname, '../package.json'),
+          packageDest = path.join(relativeTargetDir, 'package.json'),
+          composerSrc = path.join(__dirname, '../composer.json'),
+          composerDest = path.join(relativeTargetDir, 'composer.json'),
+          bowerSrc = path.join(__dirname, '../bower.json'),
+          bowerDest = path.join(relativeTargetDir, 'bower.json');
+      
       var copyCommand = 
         'cp ' + packageSrc + ' ' + packageDest + ';' +
         'cp ' + composerSrc + ' ' + composerDest + ';' +
-        'cp ' + bowerSrc + ' ' + bowerDest + ';' +
-        'cp ' + thoraxSrc + '.map ' + thoraxDest + '.map;' +
-        'cp ' + thoraxMobileSrc + '.map ' + thoraxMobileDest + '.map;' +
-        'cp ' + thoraxSrc + ' ' + thoraxDest + ';' +
-        'cp ' + thoraxMobileSrc + ' ' + thoraxMobileDest + ';';
+        'cp ' + bowerSrc + ' ' + bowerDest + ';';
+
       exec(copyCommand, function(error, stdout, stderr) {
         error && process.stdout.write(error.toString());
         stdout && process.stdout.write(stdout);
         stderr && process.stdout.write(stderr);
+
+        fs.writeFileSync(thoraxDest + '.map', fs.readFileSync(thoraxSrc + '.map').toString());
+        fs.writeFileSync(thoraxMobileDest + '.map', fs.readFileSync(thoraxMobileSrc + '.map').toString());
+        
+        fs.writeFileSync(thoraxDest, removeSourceMapUrl(fs.readFileSync(thoraxSrc).toString()));
+        fs.writeFileSync(thoraxMobileDest, removeSourceMapUrl(fs.readFileSync(thoraxMobileSrc).toString()));
+
         fs.writeFileSync(thoraxDest.replace(/\.js$/, '.min.js'), minify(fs.readFileSync(thoraxDest).toString()));
         fs.writeFileSync(thoraxMobileDest.replace(/\.js$/, '.min.js'), minify(fs.readFileSync(thoraxMobileDest).toString()));
+        
         console.log("Wrote: " + thoraxDest + '.map');
         console.log("Wrote: " + thoraxMobileDest + '.map');
         console.log("Wrote: " + thoraxDest);

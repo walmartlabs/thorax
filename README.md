@@ -1245,3 +1245,7 @@ Handlebars template compiled without data, use: `Handlebars.compile(template, {d
 ## insert-destroyed
 
 A helper view that has been destroyed was inserted into the view.
+
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/walmartlabs/thorax/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+

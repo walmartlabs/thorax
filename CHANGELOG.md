@@ -2,7 +2,21 @@
 
 ## Development
 
-[Commits](https://github.com/walmartlabs/thorax/compare/v2.2.0...master)
+[Commits](https://github.com/walmartlabs/thorax/compare/v2.2.1...master)
+
+## v2.2.1 - December 30th, 2013
+- [#292](https://github.com/walmartlabs/thorax/pull/292) - Add a Bitdeli Badge to README ([@bitdeli-chef](https://api.github.com/users/bitdeli-chef))
+- [#291](https://github.com/walmartlabs/thorax/pull/291) - Add support for input event ([@Candid](https://api.github.com/users/Candid))
+- [#227](https://github.com/walmartlabs/thorax/issues/227) - support backbone's idAttribute
+- Update build task to remove source maps (for components repo only) - e467408
+- Simplify conditional - 0a68c99
+- Save off collection reference - 03f1703
+- Failover url to empty string - 2427b8a
+
+Compatibility notes:
+- TODO : What might have broken?
+
+[Commits](https://github.com/walmartlabs/thorax/compare/v2.2.0...v2.2.1)
 
 ## v2.2.0 - December 13th, 2013
 
