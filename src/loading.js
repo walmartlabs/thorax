@@ -26,8 +26,8 @@ Thorax.loadHandler = function(start, end, context) {
 
       var loadingTimeout = self._loadingTimeoutDuration !== undefined ?
         self._loadingTimeoutDuration : Thorax.View.prototype._loadingTimeoutDuration;
-      loadInfo.timeout = setTimeout(function() {
-          try {
+      loadInfo.timeout = setTimeout(
+          Thorax.bindSection('load-start', function() {
             // We have a slight race condtion in here where the end event may have occurred
             // but the end timeout has not executed. Rather than killing a cumulative timeout
             // immediately we'll protect from that case here
@@ -35,10 +35,8 @@ Thorax.loadHandler = function(start, end, context) {
               loadInfo.run = true;
               start.call(self, loadInfo.message, loadInfo.background, loadInfo);
             }
-          } catch (e) {
-            Thorax.onException('loadStart', e);
-          }
-        }, loadingTimeout * 1000);
+          }),
+        loadingTimeout * 1000);
     }
 
     if (!loadInfo) {
@@ -92,8 +90,8 @@ Thorax.loadHandler = function(start, end, context) {
 
       if (!events.length) {
         clearTimeout(loadInfo.endTimeout);
-        loadInfo.endTimeout = setTimeout(function() {
-          try {
+        loadInfo.endTimeout = setTimeout(
+          Thorax.bindSection('load-end', function() {
             if (!events.length) {
               if (loadInfo.run) {
                 // Emit the end behavior, but only if there is a paired start
@@ -105,10 +103,8 @@ Thorax.loadHandler = function(start, end, context) {
               clearTimeout(loadInfo.timeout);
               loadInfo = self._loadInfo[loadCounter] = undefined;
             }
-          } catch (e) {
-            Thorax.onException('loadEnd', e);
-          }
-        }, loadingEndTimeout * 1000);
+          }),
+        loadingEndTimeout * 1000);
       }
     });
   };

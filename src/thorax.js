@@ -24,14 +24,31 @@ var Thorax = this.Thorax = {
   templatePathPrefix: '',
   //view classes
   Views: {},
-  //certain error prone pieces of code (on Android only it seems)
-  //are wrapped in a try catch block, then trigger this handler in
-  //the catch, with the name of the function or event that was
-  //trying to be executed. Override this with a custom handler
-  //to debug / log / etc
-  onException: function(name, err) {
+
+  // Allows tagging of sections of code with a name for debugging purposes.
+  // This or onException should be overriden to allow for reporting exceptions to analytics servers
+  // or integration with libraries such as Costanza.
+  bindSection: function(name, info, callback) {
+    if (!callback) {
+      callback = info;
+      info = undefined;
+    }
+    return function() {
+      try {
+        return callback.apply(this, arguments);
+      } catch (err) {
+        Thorax.onException(name, err, info);
+      }
+    };
+  },
+  runSection: function(name, info, callback) {
+    return Thorax.bindSection(name, info, callback)();
+  },
+
+  onException: function(name, err /* , info */) {
     throw err;
   },
+
   //deprecated, here to ensure existing projects aren't mucked with
   templates: Handlebars.templates
 };
@@ -124,62 +141,64 @@ Thorax.View = Backbone.View.extend({
   },
 
   render: function(output) {
+    var self = this;
     // NOP for destroyed views
-    if (!this.el) {
+    if (!self.el) {
       return;
     }
 
-    if (this._rendering) {
-      // Nested rendering of the same view instances can lead to some very nasty issues with
-      // the root render process overwriting any updated data that may have been output in the child
-      // execution. If in a situation where you need to rerender in response to an event that is
-      // triggered sync in the rendering lifecycle it's recommended to defer the subsequent render
-      // or refactor so that all preconditions are known prior to exec.
-      throw new Error(createErrorMessage('nested-render'));
-    }
-
-    this._previousHelpers = _.filter(this.children, function(child) {
-      return child._helperOptions;
-    });
-
-    var children = {};
-    _.each(this.children, function(child, key) {
-      if (!child._helperOptions) {
-        children[key] = child;
-      }
-    });
-    this.children = children;
-
-    this.trigger('before:rendered');
-    this._rendering = true;
-
-    try {
-      if (_.isUndefined(output) || (!_.isElement(output) && !Thorax.Util.is$(output) && !(output && output.el) && !_.isString(output) && !_.isFunction(output))) {
-        // try one more time to assign the template, if we don't
-        // yet have one we must raise
-        assignTemplate.call(this, 'template', {
-          required: true
-        });
-        output = this.renderTemplate(this.template);
-      } else if (_.isFunction(output)) {
-        output = this.renderTemplate(output);
+    Thorax.runSection('thorax-render', {name: self.name}, function() {
+      if (self._rendering) {
+        // Nested rendering of the same view instances can lead to some very nasty issues with
+        // the root render process overwriting any updated data that may have been output in the child
+        // execution. If in a situation where you need to rerender in response to an event that is
+        // triggered sync in the rendering lifecycle it's recommended to defer the subsequent render
+        // or refactor so that all preconditions are known prior to exec.
+        throw new Error(createErrorMessage('nested-render'));
       }
 
-      // Destroy any helpers that may be lingering
-      _.each(this._previousHelpers, function(child) {
-        this._removeChild(child);
-      }, this);
-      this._previousHelpers = undefined;
+      self._previousHelpers = _.filter(self.children, function(child) {
+        return child._helperOptions;
+      });
 
-      //accept a view, string, Handlebars.SafeString or DOM element
-      this.html((output && output.el) || (output && output.string) || output);
+      var children = {};
+      _.each(self.children, function(child, key) {
+        if (!child._helperOptions) {
+          children[key] = child;
+        }
+      });
+      self.children = children;
 
-      ++this._renderCount;
-      this.trigger('rendered');
-    } finally {
-      this._rendering = false;
-    }
+      self.trigger('before:rendered');
+      self._rendering = true;
 
+      try {
+        if (_.isUndefined(output) || (!_.isElement(output) && !Thorax.Util.is$(output) && !(output && output.el) && !_.isString(output) && !_.isFunction(output))) {
+          // try one more time to assign the template, if we don't
+          // yet have one we must raise
+          assignTemplate.call(self, 'template', {
+            required: true
+          });
+          output = self.renderTemplate(self.template);
+        } else if (_.isFunction(output)) {
+          output = self.renderTemplate(output);
+        }
+
+        // Destroy any helpers that may be lingering
+        _.each(self._previousHelpers, function(child) {
+          self._removeChild(child);
+        }, self);
+        self._previousHelpers = undefined;
+
+        //accept a view, string, Handlebars.SafeString or DOM element
+        self.html((output && output.el) || (output && output.string) || output);
+
+        ++self._renderCount;
+        self.trigger('rendered');
+      } finally {
+        self._rendering = false;
+      }
+    });
     return output;
   },
 
