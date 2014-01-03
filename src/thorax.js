@@ -67,6 +67,10 @@ Thorax.View = Backbone.View.extend({
     return response;
   },
 
+  toString: function() {
+    return '[object View.' + this.name + ']';
+  },
+
   // View configuration, _configure was removed
   // in Backbone 1.1, define _configure as a noop
   // for Backwards compatibility with 1.0 and earlier
@@ -76,9 +80,6 @@ Thorax.View = Backbone.View.extend({
     return Backbone.View.prototype._ensureElement.call(this);
   },
 
-  toString: function() {
-    return '[object View.' + this.name + ']';
-  },
 
   setElement : function() {
     var response = Backbone.View.prototype.setElement.apply(this, arguments);
