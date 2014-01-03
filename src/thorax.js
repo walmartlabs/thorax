@@ -1,8 +1,14 @@
 /*global
     Thorax:true,
+    $serverSide,
     assignTemplate, createErrorMessage, createInheritVars, createRegistryWrapper, getValue,
     inheritVars, resetInheritVars
 */
+
+// Provide default behavior for client-failover
+if (typeof $serverSide === 'undefined') {
+  window.$serverSide = false;
+}
 
 //support zepto.forEach on jQuery
 if (!$.fn.forEach) {
