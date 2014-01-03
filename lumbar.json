@@ -4,7 +4,7 @@
   "mixins": {
     "thorax-dep-jquery": {
       "scripts": [
-        {"src": "jquery.js", "bower": "jquery", "global": true, "ignoreWarnings": true},
+        {"src": "jquery.js", "bower": "jquery", "global": true, "ignoreWarnings": true, "server": false},
         {"src": "underscore.js", "bower": "underscore", "global": true, "ignoreWarnings": true},
         {"src": "backbone.js", "bower": "backbone", "global": true, "ignoreWarnings": true},
         {"src": "handlebars.js", "bower": "handlebars", "global": true, "ignoreWarnings": true},
@@ -12,7 +12,7 @@
     },
     "thorax-dep-zepto": {
       "scripts": [
-        {"src": "zepto.js", "bower": "zepto", "global": true, "ignoreWarnings": true},
+        {"src": "zepto.js", "bower": "zepto", "global": true, "ignoreWarnings": true, "server": false},
         {"src": "underscore.js", "bower": "underscore", "global": true, "ignoreWarnings": true},
         {"src": "backbone.js", "bower": "backbone", "global": true, "ignoreWarnings": true},
         {"src": "handlebars.runtime.js", "bower": "handlebars", "global": true, "ignoreWarnings": true},
@@ -57,8 +57,8 @@
 
     "thorax-mobile": {
       "scripts": [
-        {"src": "src/mobile.js"},
-        {"src": "src/mobile/tap-highlight.js"}
+        {"src": "src/mobile.js", "server": false},
+        {"src": "src/mobile/tap-highlight.js", "server": false}
       ]
     }
   },
