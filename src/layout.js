@@ -1,4 +1,4 @@
-/*global getOptionsData, normalizeHTMLAttributeOptions, createErrorMessage */
+/*global $serverSide, emit, getOptionsData, normalizeHTMLAttributeOptions, createErrorMessage */
 var layoutCidAttributeName = 'data-layout-cid';
 
 Thorax.LayoutView = Thorax.View.extend({
@@ -18,6 +18,7 @@ Thorax.LayoutView = Thorax.View.extend({
     options = _.extend({
       scroll: true
     }, options || {});
+
     if (_.isString(view)) {
       view = new (Thorax.Util.registryGet(Thorax, 'Views', view, false))();
     }
@@ -37,7 +38,16 @@ Thorax.LayoutView = Thorax.View.extend({
     }, this);
 
     append = _.bind(function() {
-      if (view) {
+      if (!view) {
+        this._view = undefined;
+      } else if ($serverSide && !options.serverRender && !view.serverRender) {
+        // Emit only data for non-server rendered views
+        // But we do want to put ourselves into the queue for cleanup on future exec
+        this._view = view;
+        this._addChild(view);
+
+        emit();
+      } else {
         view.ensureRendered();
         options.activating = view;
 
@@ -47,8 +57,6 @@ Thorax.LayoutView = Thorax.View.extend({
         var targetElement = this._layoutViewEl;
         this._view.appendTo(targetElement);
         this._addChild(view);
-      } else {
-        this._view = undefined;
       }
     }, this);
 
