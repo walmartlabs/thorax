@@ -1,3 +1,4 @@
+/*global $serverSide */
 describe('event', function() {
   it("don't break existing event hash", function() {
     var spy = this.spy();
@@ -186,55 +187,85 @@ describe('event', function() {
     expect(spy.calledOnce).to.be(true);
   });
 
-  it("bindToView", function() {
-    var childClickedCount = 0,
-        parentClickedCount = 0;
+  describe('dom events', function() {
+    if ($serverSide) {
+      return;
+    }
 
-    var Child = Thorax.View.extend({
-      template: Handlebars.templates.child,
-      events: {
-        'click div': function() {
-          ++childClickedCount;
+    it("bindToView", function() {
+      var childClickedCount = 0,
+          parentClickedCount = 0;
+
+      var Child = Thorax.View.extend({
+        template: Handlebars.templates.child,
+        events: {
+          'click div': function() {
+            ++childClickedCount;
+          }
         }
-      }
+      });
+
+      var Parent = Thorax.View.extend({
+        template: Handlebars.templates.parent,
+        events: {
+          'click div': function() {
+            ++parentClickedCount;
+          }
+        },
+        initialize: function() {
+          this.child = new Child({
+            value: 'a'
+          });
+        }
+      });
+
+      var parent = new Parent();
+      $('body').append(parent.el);
+      parent.render();
+      $(parent.$('div')[0]).trigger('click');
+      expect(parentClickedCount).to.equal(1);
+      expect(childClickedCount).to.equal(0);
+      parent.child.$('div').trigger('click');
+      expect(parentClickedCount).to.equal(1);
+      expect(childClickedCount).to.equal(1);
+      parent.$el.remove();
     });
 
-    var Parent = Thorax.View.extend({
-      template: Handlebars.templates.parent,
-      events: {
-        'click div': function() {
-          ++parentClickedCount;
-        }
-      },
-      initialize: function() {
-        this.child = new Child({
-          value: 'a'
-        });
-      }
+    it("on works after el is created", function() {
+      var spy = this.spy();
+      var view = new Thorax.View();
+      view.on('click', spy);
+      $('body').append(view.el);
+
+      view.$el.trigger('click');
+      expect(spy.callCount).to.equal(1);
+
+      view.$el.remove();
     });
 
-    var parent = new Parent();
-    $('body').append(parent.el);
-    parent.render();
-    $(parent.$('div')[0]).trigger('click');
-    expect(parentClickedCount).to.equal(1);
-    expect(childClickedCount).to.equal(0);
-    parent.child.$('div').trigger('click');
-    expect(parentClickedCount).to.equal(1);
-    expect(childClickedCount).to.equal(1);
-    parent.$el.remove();
-  });
+    it("on works after _ensureElement but before delegateEvents (basically initialize)", function() {
+      // this is useful for mixins for example
+      var spy = this.spy();
+      var TestView = Thorax.View.extend({
+        initialize: function() {
+          this.on({
+            'click button': spy
+          });
+        },
+        template: function() {
+          return '<button>foo</button>';
+        }
+      });
 
-  it("on works after el is created", function() {
-    var spy = this.spy();
-    var view = new Thorax.View();
-    view.on('click', spy);
-    $('body').append(view.el);
-
-    view.$el.trigger('click');
-    expect(spy.callCount).to.equal(1);
-
-    view.$el.remove();
+      var view = new TestView();
+      view.render();
+      var el = view.$('button');
+      expect(el.length).to.equal(1);
+      $(document.body).append(view.$el);
+      el.trigger('click');
+      view.$el.remove();
+      expect(spy.callCount).to.equal(1);
+    });
   });
 
   it("on works after data object is set", function() {
@@ -247,30 +278,6 @@ describe('event', function() {
     });
     view.on({model: {event: spy}});
     view.model.trigger('event');
-    expect(spy.callCount).to.equal(1);
-  });
-
-  it("on works after _ensureElement but before delegateEvents (basically initialize)", function() {
-    // this is useful for mixins for example
-    var spy = this.spy();
-    var TestView = Thorax.View.extend({
-      initialize: function() {
-        this.on({
-          'click button': spy
-        });
-      },
-      template: function() {
-        return '<button>foo</button>';
-      }
-    });
-
-    var view = new TestView();
-    view.render();
-    var el = view.$('button');
-    expect(el.length).to.equal(1);
-    $(document.body).append(view.$el);
-    el.trigger('click');
-    view.$el.remove();
     expect(spy.callCount).to.equal(1);
   });
 
@@ -380,6 +387,10 @@ describe('event', function() {
       expect(spy.calledOnce).to.be(true);
     });
     it('should cleanup DOM events on release', function() {
+      if ($serverSide) {
+        return;
+      }
+
       var spy = this.spy(),
           view = new Thorax.View({
             events: {
@@ -495,24 +506,21 @@ describe('event', function() {
       });
     });
     describe('dom events', function() {
-      beforeEach(function() {
-        this.stub(view.$el, 'on', function(event, selector, callback) {
-          if (selector === 'foo') {
-            callback($.Event('click'));
-          }
-        });
-        this.stub($.fn, 'view', function() { return view; });
-      });
+      if ($serverSide) {
+        return;
+      }
 
       it('should use view', function() {
-        view.on('click foo', spy);
+        view.on('click', spy);
         view.delegateEvents();
+        view.$el.trigger('click');
         expect(spy.calledOnce).to.be(true);
         expect(spy.alwaysCalledOn(view)).to.be(true);
       });
       it('should pass context', function() {
-        view.on('click foo', spy, context);
+        view.on('click', spy, context);
         view.delegateEvents();
+        view.$el.trigger('click');
         expect(spy.calledOnce).to.be(true);
         expect(spy.alwaysCalledOn(context)).to.be(true);
       });
