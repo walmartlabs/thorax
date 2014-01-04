@@ -25,7 +25,8 @@ if (!$.fn.forEach) {
 
 var viewNameAttributeName = 'data-view-name',
     viewCidAttributeName = 'data-view-cid',
-    viewHelperAttributeName = 'data-view-helper';
+    viewHelperAttributeName = 'data-view-helper',
+    viewServerAttribute = 'data-view-server';
 
 //view instances
 var viewsIndexedByCid = {};
@@ -91,6 +92,14 @@ Thorax.View = Backbone.View.extend({
   _configure: function() {},
   _ensureElement: function () {
     configureView.call(this);
+
+    if (!$serverSide && this.el) {
+      var $el = $(_.result(this, 'el'));
+      if ($el.length) {
+        return this.restore($el);
+      }
+    }
+
     return Backbone.View.prototype._ensureElement.call(this);
   },
 
@@ -157,6 +166,18 @@ Thorax.View = Backbone.View.extend({
     this._helperOptions = undefined;
   },
 
+  restore: function(element) {
+    this.setElement(element);
+    if (!$serverSide && $(element).attr(viewServerAttribute)) {
+      this._renderCount = 1;
+      this.trigger('restore');
+
+      return true;
+    } else {
+      this.render();
+    }
+  },
+
   render: function(output) {
     var self = this;
     // NOP for destroyed views
@@ -209,6 +230,13 @@ Thorax.View = Backbone.View.extend({
           }
         }, self);
         self._previousHelpers = undefined;
+
+
+        if ($serverSide) {
+          self.$el.attr(viewServerAttribute, $serverSide);
+        } else {
+          self.$el.removeAttr(viewServerAttribute);
+        }
 
         //accept a view, string, Handlebars.SafeString or DOM element
         self.html((output && output.el) || (output && output.string) || output);
