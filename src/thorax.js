@@ -287,7 +287,9 @@ Thorax.View = Backbone.View.extend({
   },
 
   _replaceHTML: function(html) {
-    this.el.innerHTML = "";
+    while (this.el.hasChildNodes()) {
+      this.el.removeChild(this.el.childNodes[0]);
+    }
     return this.$el.append(html);
   },
 
