@@ -167,8 +167,13 @@ Thorax.View = Backbone.View.extend({
   },
 
   restore: function(element) {
+    if (this._renderCount) {
+      $(element).replaceWith(this.$el);
+      return;
+    }
+
     this.setElement(element);
-    if (!$serverSide && $(element).attr(viewServerAttribute)) {
+    if (!$serverSide && $(element).attr(viewServerAttribute) === 'true') {
       this._renderCount = 1;
       this.trigger('restore');
 
@@ -233,7 +238,9 @@ Thorax.View = Backbone.View.extend({
 
 
         if ($serverSide) {
-          self.$el.attr(viewServerAttribute, $serverSide);
+          if (self.$el.attr(viewServerAttribute) !== 'false') {
+            self.$el.attr(viewServerAttribute, $serverSide);
+          }
         } else {
           self.$el.removeAttr(viewServerAttribute);
         }
