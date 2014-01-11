@@ -383,5 +383,9 @@ $.fn.view = function(options) {
     selector += ':not([' + viewHelperAttributeName + '])';
   }
   var el = $(this).closest(selector);
-  return (el && viewsIndexedByCid[el.attr(viewCidAttributeName)]) || false;
+  if (el) {
+    return options.el ? el : viewsIndexedByCid[el.attr(viewCidAttributeName)];
+  } else {
+    return false;
+  }
 };
