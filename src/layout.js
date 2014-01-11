@@ -1,4 +1,8 @@
-/*global $serverSide, emit, getOptionsData, normalizeHTMLAttributeOptions, createErrorMessage */
+/*global
+    $serverSide,
+    createErrorMessage, emit, getLayoutViewsTargetElement, getOptionsData,
+    normalizeHTMLAttributeOptions, viewNameAttributeName
+*/
 var layoutCidAttributeName = 'data-layout-cid';
 
 Thorax.LayoutView = Thorax.View.extend({
@@ -22,7 +26,19 @@ Thorax.LayoutView = Thorax.View.extend({
     if (_.isString(view)) {
       view = new (Thorax.Util.registryGet(Thorax, 'Views', view, false))();
     }
+
+    if (!$serverSide && !this.hasBeenSet) {
+      var existing = this.$('[' + viewNameAttributeName + '="' + view.name + '"]')[0],
+          used;
+      if (existing) {
+        used = view.restore(existing);
+      }
+      if (!used) {
+        $(this._layoutViewEl).empty();
+      }
+    }
     this.ensureRendered();
+
     var oldView = this._view, append, remove, complete;
     if (view === oldView) {
       return false;
@@ -61,6 +77,7 @@ Thorax.LayoutView = Thorax.View.extend({
     }, this);
 
     complete = _.bind(function() {
+      this.hasBeenSet = true;
       this.trigger('change:view:end', view, oldView, options);
     }, this);
 
@@ -79,6 +96,8 @@ Thorax.LayoutView = Thorax.View.extend({
     return this._view;
   }
 });
+
+Thorax.LayoutView.on('restore', ensureLayoutViewsTargetElement);
 
 Handlebars.registerHelper('layout-element', function(options) {
   var view = getOptionsData(options).view;
