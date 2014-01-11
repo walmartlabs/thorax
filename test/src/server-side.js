@@ -19,5 +19,27 @@ describe('serverSide', function() {
 
       view.release();
     });
+    it('should NOP loading in server mode', function() {
+      var start = this.spy(),
+          end = this.spy(),
+          context = {};
+
+      var handler = Thorax.loadHandler(start, end, context);
+      handler();
+      this.clock.tick(2000);
+      expect(start.called).to.be(false);
+      expect(end.called).to.be(false);
+    });
+    it('should NOP loading in server mode', function() {
+      var start = this.spy(),
+          end = this.spy(),
+          context = {};
+
+      var handler = Thorax.loadHandler(start, end, context);
+      handler();
+      this.clock.tick(2000);
+      expect(start.called).to.be(false);
+      expect(end.called).to.be(false);
+    });
   });
 });

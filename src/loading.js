@@ -1,4 +1,4 @@
-/*global createErrorMessage, inheritVars */
+/*global $serverSide, createErrorMessage, inheritVars */
 
 var loadStart = 'load:start',
     loadEnd = 'load:end',
@@ -11,6 +11,10 @@ Thorax.setRootObject = function(obj) {
 Thorax.loadHandler = function(start, end, context) {
   var loadCounter = _.uniqueId('load');
   return function(message, background, object) {
+    if ($serverSide) {
+      return;
+    }
+
     var self = context || this;
     self._loadInfo = self._loadInfo || {};
     var loadInfo = self._loadInfo[loadCounter];
