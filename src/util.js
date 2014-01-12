@@ -71,7 +71,13 @@ function assignTemplate(attributeName, options) {
   }
   // if nothing was found and it's required, throw
   if (options.required && !_.isFunction(this[attributeName])) {
-    throw new Error('View ' + (this.name || this.cid) + ' requires: ' + attributeName);
+    var err = new Error('view-requires: ' + attributeName);
+    err.info = {
+      name: this.name || this.cid,
+      parent: this.parent && (this.parent.name || this.parent.cid),
+      helperName: this._helperName
+    };
+    throw err;
   }
 }
 

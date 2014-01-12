@@ -123,7 +123,10 @@ Thorax.CollectionView = Thorax.View.extend({
       model = false;
     } else {
       index = index || collection.indexOf(model) || 0;
-      itemView = this.renderItem(model, index);
+      // Using call here to avoid v8 prototype inline optimization bug that helper views
+      // expose under Android 4.3 (at minimum)
+      // https://twitter.com/kpdecker/status/422149634929082370
+      itemView = this.renderItem.call(this, model, index);
     }
 
     if (itemView) {
@@ -275,7 +278,10 @@ Thorax.CollectionView = Thorax.View.extend({
       }
       return Thorax.Util.getViewInstance(this.itemView, viewOptions);
     } else {
-      return this.renderTemplate(this.itemTemplate, this.itemContext(model, i));
+      // Using call here to avoid v8 prototype inline optimization bug that helper views
+      // expose under Android 4.3 (at minimum)
+      // https://twitter.com/kpdecker/status/422149634929082370
+      return this.renderTemplate(this.itemTemplate, this.itemContext.call(this, model, i));
     }
   },
   itemContext: function(model /*, i */) {
@@ -284,7 +290,11 @@ Thorax.CollectionView = Thorax.View.extend({
   appendEmpty: function() {
     var $el = this.getCollectionElement();
     $el.empty();
-    var emptyContent = this.renderEmpty();
+
+    // Using call here to avoid v8 prototype inline optimization bug that helper views
+    // expose under Android 4.3 (at minimum)
+    // https://twitter.com/kpdecker/status/422149634929082370
+    var emptyContent = this.renderEmpty.call(this);
     emptyContent && this.appendItem(emptyContent, 0, {
       silent: true,
       filter: false
@@ -376,7 +386,10 @@ function applyItemVisiblityFilter(model) {
 }
 
 function itemShouldBeVisible(model) {
-  return this.itemFilter(model, this.collection.indexOf(model));
+  // Using call here to avoid v8 prototype inline optimization bug that helper views
+  // expose under Android 4.3 (at minimum)
+  // https://twitter.com/kpdecker/status/422149634929082370
+  return this.itemFilter.call(this, model, this.collection.indexOf(model));
 }
 
 function handleChangeFromEmptyToNotEmpty() {
