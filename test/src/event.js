@@ -229,9 +229,11 @@ describe('event', function() {
     var spy = this.spy();
     var view = new Thorax.View();
     view.on('click', spy);
+    $('body').append(view.el);
+
     view.$el.trigger('click');
     expect(spy.callCount).to.equal(1);
-    $('body').append(view.el);
+
     view.$el.remove();
   });
 
