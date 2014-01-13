@@ -321,6 +321,8 @@ function fetchQueue(options, $super) {
       var promise = $super.call(this, options);
       if (this.fetchQueue) {
         // ensure the fetchQueue has not been cleared out - https://github.com/walmartlabs/thorax/issues/304
+        // This can occur in some environments if the request fails sync to this call, causing the 
+        // error handler to clear out the fetchQueue before we get to this point.
         this.fetchQueue._promise = promise;
       }
       return promise;
