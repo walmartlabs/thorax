@@ -2,7 +2,12 @@
 
 ## Development
 
-[Commits](https://github.com/walmartlabs/thorax/compare/v2.3.0...master)
+[Commits](https://github.com/walmartlabs/thorax/compare/v2.3.1...master)
+
+## v2.3.1 - January 13th, 2014
+- [#304](https://github.com/walmartlabs/thorax/issues/304) - fetchQueue._promise can be referenced when fetchQueue has become undefined ([@jhudson8](https://api.github.com/users/jhudson8))
+
+[Commits](https://github.com/walmartlabs/thorax/compare/v2.3.0...v2.3.1)
 
 ## v2.3.0 - January 12th, 2014
 - [#298](https://github.com/walmartlabs/thorax/issues/298) - IE11 fails 2 view helper tests ([@solidgoldpig](https://api.github.com/users/solidgoldpig))
