@@ -318,8 +318,9 @@ function fetchQueue(options, $super) {
     // Handle callers that do not pass in a super class and wish to implement their own
     // fetch behavior
     if ($super) {
-      this.fetchQueue._promise = $super.call(this, options);
-      return this.fetchQueue._promise;
+      var promise = $super.call(this, options);
+      this.fetchQueue && this.fetchQueue._promise = promise;
+      return promise;
     } else {
       return options;
     }
