@@ -319,7 +319,10 @@ function fetchQueue(options, $super) {
     // fetch behavior
     if ($super) {
       var promise = $super.call(this, options);
-      this.fetchQueue && this.fetchQueue._promise = promise;
+      if (this.fetchQueue) {
+        // ensure the fetchQueue has not been cleared out - https://github.com/walmartlabs/thorax/issues/304
+        this.fetchQueue._promise = promise;
+      }
       return promise;
     } else {
       return options;
