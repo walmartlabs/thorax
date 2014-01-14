@@ -40,7 +40,7 @@ if (isIE || isIE11) {
   };
 
   // IEs 9, 10 and 11 will lose references to nested views if view.el.innerHTML = '';
-  // Fixes issue #296  
+  // Fixes issue #296 - see https://github.com/walmartlabs/thorax/issues/296 
   Thorax.View.prototype._replaceHTML = function(html) {
     while (this.el.hasChildNodes()) {
       this.el.removeChild(this.el.childNodes[0]);
