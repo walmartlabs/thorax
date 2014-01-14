@@ -1258,6 +1258,10 @@ Handlebars template compiled without data, use: `Handlebars.compile(template, {d
 
 A helper view that has been destroyed was inserted into the view.
 
+## void-tag-content
+
+A void tag such as `img` was rendered with `content` in `Thorax.Util.tag`.
+
 
 [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/walmartlabs/thorax/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
 

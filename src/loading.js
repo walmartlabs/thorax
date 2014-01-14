@@ -318,8 +318,14 @@ function fetchQueue(options, $super) {
     // Handle callers that do not pass in a super class and wish to implement their own
     // fetch behavior
     if ($super) {
-      this.fetchQueue._promise = $super.call(this, options);
-      return this.fetchQueue._promise;
+      var promise = $super.call(this, options);
+      if (this.fetchQueue) {
+        // ensure the fetchQueue has not been cleared out - https://github.com/walmartlabs/thorax/issues/304
+        // This can occur in some environments if the request fails sync to this call, causing the 
+        // error handler to clear out the fetchQueue before we get to this point.
+        this.fetchQueue._promise = promise;
+      }
+      return promise;
     } else {
       return options;
     }

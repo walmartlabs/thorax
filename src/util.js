@@ -71,7 +71,13 @@ function assignTemplate(attributeName, options) {
   }
   // if nothing was found and it's required, throw
   if (options.required && !_.isFunction(this[attributeName])) {
-    throw new Error('View ' + (this.name || this.cid) + ' requires: ' + attributeName);
+    var err = new Error('view-requires: ' + attributeName);
+    err.info = {
+      name: this.name || this.cid,
+      parent: this.parent && (this.parent.name || this.parent.cid),
+      helperName: this._helperName
+    };
+    throw err;
   }
 }
 
@@ -213,6 +219,21 @@ function normalizeHTMLAttributeOptions(options) {
   }
 }
 
+var voidTags;
+function isVoidTag(tag) {
+  if (!voidTags) {
+    // http://www.w3.org/html/wg/drafts/html/master/syntax.html#void-elements
+    var tags = 'area,base,br,col,embed,hr,img,input,keygen,link,menuitem,meta,param,source,track,wbr';
+
+    voidTags = {};
+    _.each(tags.split(','), function(tag) {
+      voidTags[tag] = true;
+    });
+  }
+
+  return voidTags[tag];
+};
+
 Thorax.Util = {
   getViewInstance: function(name, attributes) {
     var ViewClass = Thorax.Util.getViewClass(name, true);
@@ -304,8 +325,14 @@ Thorax.Util = {
   },
   tag: function(attributes, content, scope) {
     var htmlAttributes = _.omit(attributes, 'tagName'),
-        tag = attributes.tagName || 'div';
-    return '<' + tag + ' ' + _.map(htmlAttributes, function(value, key) {
+        tag = attributes.tagName || 'div',
+        noClose = isVoidTag(tag);
+
+    if (noClose && content) {
+      throw new Error(createErrorMessage('void-tag-content'));
+    }
+
+    var openingTag = '<' + tag + ' ' + _.map(htmlAttributes, function(value, key) {
       if (_.isUndefined(value) || key === 'expand-tokens') {
         return '';
       }
@@ -314,6 +341,12 @@ Thorax.Util = {
         formattedValue = Thorax.Util.expandToken(value, scope);
       }
       return (key === 'className' ? 'class' : key) + '="' + Handlebars.Utils.escapeExpression(formattedValue) + '"';
-    }).join(' ') + '>' + (_.isUndefined(content) ? '' : content) + '</' + tag + '>';
+    }).join(' ') + '>';
+
+    if (noClose) {
+      return openingTag;
+    } else {
+      return openingTag + (_.isUndefined(content) ? '' : content) + '</' + tag + '>';
+    }
   }
 };

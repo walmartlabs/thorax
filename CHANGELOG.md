@@ -2,7 +2,23 @@
 
 ## Development
 
-[Commits](https://github.com/walmartlabs/thorax/compare/v2.2.1...master)
+[Commits](https://github.com/walmartlabs/thorax/compare/v2.3.1...master)
+
+## v2.3.1 - January 13th, 2014
+- [#304](https://github.com/walmartlabs/thorax/issues/304) - fetchQueue._promise can be referenced when fetchQueue has become undefined ([@jhudson8](https://api.github.com/users/jhudson8))
+
+[Commits](https://github.com/walmartlabs/thorax/compare/v2.3.0...v2.3.1)
+
+## v2.3.0 - January 12th, 2014
+- [#298](https://github.com/walmartlabs/thorax/issues/298) - IE11 fails 2 view helper tests ([@solidgoldpig](https://api.github.com/users/solidgoldpig))
+- [#299](https://github.com/walmartlabs/thorax/issues/299) - IE11 - on test fails for Zepto version ([@solidgoldpig](https://api.github.com/users/solidgoldpig))
+- [#303](https://github.com/walmartlabs/thorax/pull/303) - Hack around JIT error in collection view ([@kpdecker](https://api.github.com/users/kpdecker))
+- [#295](https://github.com/walmartlabs/thorax/pull/295) - Error Handler Section APIs ([@kpdecker](https://api.github.com/users/kpdecker))
+- [#288](https://github.com/walmartlabs/thorax/pull/288) - encode output of url helper when using expand-tokens=true ([@trombom](https://api.github.com/users/trombom))
+- Handle void tags properly in Thorax.Util.tag - 344e5d5
+- Add support for promises - cab2eb0
+
+[Commits](https://github.com/walmartlabs/thorax/compare/v2.2.1...v2.3.0)
 
 ## v2.2.1 - December 30th, 2013
 - [#292](https://github.com/walmartlabs/thorax/pull/292) - Add a Bitdeli Badge to README ([@bitdeli-chef](https://api.github.com/users/bitdeli-chef))
