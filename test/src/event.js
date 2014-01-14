@@ -242,7 +242,7 @@ describe('event', function() {
     var view = new Thorax.View({
       template: function() {return '';},
       model: new Thorax.Model({
-        key: 'value',
+        key: 'value'
       })
     });
     view.on({model: {event: spy}});
