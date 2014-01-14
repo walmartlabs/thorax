@@ -10,7 +10,7 @@ describe('util', function() {
     it('should throw on void tag with content', function() {
       expect(function() {
         Thorax.Util.tag({tagName: 'hr'}, 'something');
-      }).to.throw(/void-tag-content/);
+      }).to['throw'](/void-tag-content/);
     });
   });
 });
