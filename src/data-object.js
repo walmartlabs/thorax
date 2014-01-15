@@ -1,4 +1,4 @@
-/*global getValue, inheritVars, listenTo, walkInheritTree */
+/*global $serverSide, getValue, inheritVars, listenTo, walkInheritTree */
 
 function dataObject(type, spec) {
   spec = inheritVars[type] = _.defaults({
@@ -36,7 +36,14 @@ function dataObject(type, spec) {
       }
 
       this.bindDataObject(type, dataObject, _.extend({}, this.options, options));
-      $el && $el.attr(spec.cidAttrName, dataObject.cid);
+      if ($el) {
+        var attr = {};
+        if ($serverSide && spec.idAttrName) {
+          attr[spec.idAttrName] = dataObject.id;
+        }
+        attr[spec.cidAttrName] = dataObject.cid;
+        $el.attr(attr);
+      }
       dataObject.trigger('set', dataObject, old);
     } else {
       this[type] = false;

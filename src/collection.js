@@ -1,4 +1,8 @@
-/*global assignView, assignTemplate, createRegistryWrapper, dataObject, getValue, modelCidAttributeName, viewCidAttributeName */
+/*global
+    $serverSide,
+    assignView, assignTemplate, createRegistryWrapper, dataObject, getValue,
+    modelCidAttributeName, modelIdAttributeName, viewCidAttributeName
+*/
 var _fetch = Backbone.Collection.prototype.fetch,
     _set = Backbone.Collection.prototype.set,
     _replaceHTML = Thorax.View.prototype._replaceHTML,
@@ -154,6 +158,9 @@ Thorax.CollectionView = Thorax.View.extend({
       });
 
       if (model) {
+        if ($serverSide) {
+          itemElement.attr(modelIdAttributeName, model.id);
+        }
         itemElement.attr(modelCidAttributeName, model.cid);
       }
       var previousModel = index > 0 ? collection.at(index - 1) : false;
@@ -166,7 +173,10 @@ Thorax.CollectionView = Thorax.View.extend({
       }
 
       this.trigger('append', null, function($el) {
-        $el.attr(modelCidAttributeName, model.cid);
+        $el.attr({
+          'data-model-cid': model.cid,
+          'data-model-id': model.id,
+        });
       });
 
       if (!options || !options.silent) {
