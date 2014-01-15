@@ -554,7 +554,7 @@ describe('collection', function() {
       // Alternate way of testing
       var parent = $('<div></div>');
       view = new Thorax.View({
-        template: Handlebars.compile('{{#collection}}{{/collection}}'),
+        template: Handlebars.compile('{{#collection}}{{/collection}}')
       });
       view.setCollection(new Thorax.Collection());
       parent.append(view.$el);

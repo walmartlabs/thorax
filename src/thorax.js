@@ -1,4 +1,4 @@
-/*global cloneInheritVars, createInheritVars, resetInheritVars, createRegistryWrapper, getValue, inheritVars, createErrorMessage */
+/*global cloneInheritVars, createInheritVars, resetInheritVars, createRegistryWrapper, getValue, inheritVars, createErrorMessage, assignTemplate */
 
 //support zepto.forEach on jQuery
 if (!$.fn.forEach) {
@@ -287,7 +287,7 @@ Thorax.View = Backbone.View.extend({
   },
 
   _replaceHTML: function(html) {
-    this.el.innerHTML = "";
+    this.el.innerHTML = '';
     return this.$el.append(html);
   },
 

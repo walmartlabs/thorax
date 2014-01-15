@@ -1,5 +1,6 @@
 /*global _replaceHTML */
 var isIE = (/msie [\w.]+/).exec(navigator.userAgent.toLowerCase());
+var isIE11 = !!navigator.userAgent.match(/Trident\/7\./);
 
 if (isIE) {
   // IE will lose a reference to the elements if view.el.innerHTML = '';
@@ -18,7 +19,9 @@ if (isIE) {
       });
     }
   });
+}
 
+if (isIE || isIE11) {
   // Once nodes are detached their innerHTML gets nuked in IE
   // so create a deep clone. This method is identical to the
   // main implementation except for ".clone(true, true)" which
@@ -34,5 +37,14 @@ if (isIE) {
     } else {
       return _replaceHTML.call(this, html);
     }
+  };
+
+  // IEs 9, 10 and 11 will lose references to nested views if view.el.innerHTML = '';
+  // Fixes issue #296 - see https://github.com/walmartlabs/thorax/issues/296 
+  Thorax.View.prototype._replaceHTML = function(html) {
+    while (this.el.hasChildNodes()) {
+      this.el.removeChild(this.el.childNodes[0]);
+    }
+    return this.$el.append(html);
   };
 }
