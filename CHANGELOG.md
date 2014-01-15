@@ -2,7 +2,12 @@
 
 ## Development
 
-[Commits](https://github.com/walmartlabs/thorax/compare/v2.3.1...master)
+[Commits](https://github.com/walmartlabs/thorax/compare/v2.3.2...master)
+
+## v2.3.2 - January 14th, 2014
+- [#297](https://github.com/walmartlabs/thorax/pull/297) - Fix for issue #296 ([@solidgoldpig](https://api.github.com/users/solidgoldpig))
+
+[Commits](https://github.com/walmartlabs/thorax/compare/v2.3.1...v2.3.2)
 
 ## v2.3.1 - January 13th, 2014
 - [#304](https://github.com/walmartlabs/thorax/issues/304) - fetchQueue._promise can be referenced when fetchQueue has become undefined ([@jhudson8](https://api.github.com/users/jhudson8))
