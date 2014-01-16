@@ -26,6 +26,16 @@ function getParent(parent) {
   return parent;
 }
 
+function expandHash(context, hash) {
+  if (hash['expand-tokens']) {
+    delete hash['expand-tokens'];
+    _.each(hash, function(value, key) {
+      hash[key] = Thorax.Util.expandToken(value, context);
+    });
+    return true;
+  }
+}
+
 Handlebars.registerViewHelper = function(name, ViewClass, callback) {
   if (arguments.length === 2) {
     if (ViewClass.factory) {
@@ -41,15 +51,10 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
   Handlebars.registerHelper(name, function() {
     var args = _.toArray(arguments),
         options = args.pop(),
-        declaringView = getOptionsData(options).view,
-        expandTokens = options.hash['expand-tokens'];
-
-    if (expandTokens) {
-      delete options.hash['expand-tokens'];
-      _.each(options.hash, function(value, key) {
-        options.hash[key] = Thorax.Util.expandToken(value, this);
-      }, this);
-    }
+        declaringView = getOptionsData(options).view;
+ 
+    // Evaluate any nested parameters that we may have to content with
+    var expandTokens = expandHash(this, options.hash);
 
     var viewOptions = {
       inverse: options.inverse,
@@ -63,20 +68,20 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
       }
     };
 
-
     normalizeHTMLAttributeOptions(options.hash);
     var htmlAttributes = _.clone(options.hash);
-    if (viewOptionWhiteList) {
-      _.each(viewOptionWhiteList, function(dest, source) {
-        delete htmlAttributes[source];
-        if (!_.isUndefined(options.hash[source])) {
-          viewOptions[dest] = options.hash[source];
-        }
-      });
-    }
+
+    // Remap any view options per the whitelist and remove the source form the HTML
+    _.each(viewOptionWhiteList, function(dest, source) {
+      delete htmlAttributes[source];
+      if (!_.isUndefined(options.hash[source])) {
+        viewOptions[dest] = options.hash[source];
+      }
+    });
     if(htmlAttributes.tagName) {
       viewOptions.tagName = htmlAttributes.tagName;
     }
+
     viewOptions.attributes = function() {
       var attrs = (ViewClass.prototype && ViewClass.prototype.attributes) || {};
       if (_.isFunction(attrs)) {
