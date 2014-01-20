@@ -2,9 +2,12 @@
 var _thoraxServerData = _thoraxServerData || [];
 
 var ServerMarshal = Thorax.ServerMarshal = {
-  store: function($el, name, attributes, attributeIds) {
+  store: function($el, name, attributes, attributeIds, options) {
     if ($serverSide) {
       attributeIds = attributeIds || {};
+      options = options || {};
+
+      var contextPath = options.data && options.data.contextPath;
 
       var elementCacheId = parseInt($el.attr('data-server-data'), 0);
       if (isNaN(elementCacheId)) {
@@ -21,8 +24,10 @@ var ServerMarshal = Thorax.ServerMarshal = {
         var lutKey = attributeIds[key];
         if (_.isString(value) || _.isNumber(value) || _.isNull(value) || _.isBoolean(value)) {
           return value;
-        } else if (attributeIds[key]) {
-          return {$lut: attributeIds[key]};
+        } else if (lutKey != null && lutKey !== true && !/^\.\.\//.test(lutKey)) {
+          return {
+            $lut: Handlebars.Utils.appendContextPath(contextPath, lutKey)
+          };
         } else {
           throw createError('server-marshall-object');
         }
@@ -56,13 +61,13 @@ var ServerMarshal = Thorax.ServerMarshal = {
     }
 
     function resolve(value) {
-      return (value && value.$lut) ? lookupField(parentView, context, value.$lut) : value;
+      return (value && value.$lut != null) ? lookupField(parentView, context, value.$lut) : value;
     }
 
     cache = cache[name];
     if (_.isArray(cache)) {
       return _.map(cache, resolve);
-    } else if (!_.isFunction(cache) && _.isObject(cache) && !cache.$lut) {
+    } else if (!_.isFunction(cache) && _.isObject(cache) && cache.$lut == null) {
       var ret = {};
       _.each(cache, function(value, key) {
         ret[key] = resolve(value);

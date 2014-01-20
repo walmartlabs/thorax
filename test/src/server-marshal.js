@@ -110,6 +110,38 @@ describe('server-marshall', function() {
           Thorax.ServerMarshal.store($el, 'obj', {'foo': context.aField}, {});
         }).to['throw'](/server-marshall-object/);
       });
+      it('should throw on complex values with depthed path', function() {
+        var context = {
+          aField: {aField: true}
+        };
+
+        expect(function() {
+          Thorax.ServerMarshal.store($el, 'obj', {'foo': context.aField}, {'foo': '../foo'});
+        }).to['throw'](/server-marshall-object/);
+      });
+      it('should throw on complex values from subexpressions', function() {
+        var context = {
+          aField: {aField: true}
+        };
+
+        expect(function() {
+          Thorax.ServerMarshal.store($el, 'obj', {'foo': context.aField}, {'foo': true});
+        }).to['throw'](/server-marshall-object/);
+      });
+
+      it('should track with contextPath', function() {
+        var context = {
+          aField: {aField: true}
+        };
+        var options = {
+          data: {
+            contextPath: 'foo.bar'
+          }
+        };
+
+        Thorax.ServerMarshal.store($el, 'obj', {foo: context.aField}, {foo: 'aField'}, options);
+        expect(Thorax.ServerMarshal.load($el[0], 'obj', {foo: {bar: context}})).to.eql({foo: context.aField});
+      });
     });
   });
 
