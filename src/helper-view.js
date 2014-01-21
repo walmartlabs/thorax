@@ -1,4 +1,4 @@
-/*global getOptionsData, normalizeHTMLAttributeOptions, viewHelperAttributeName */
+/*global ServerMarshal, $serverSide, getOptionsData, normalizeHTMLAttributeOptions, viewHelperAttributeName */
 var viewPlaceholderAttributeName = 'data-view-tmp',
     viewTemplateOverrides = {};
 
@@ -127,6 +127,23 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
       if (!instance.el) {
         // ViewClass.factory may return existing objects which may have been destroyed
         throw new Error('insert-destroyed-factory');
+      }
+
+      instance.$el.attr('data-view-helper-restore', name);
+
+      if ($serverSide) {
+        try {
+          ServerMarshal.store(instance.$el, 'args', args, options.ids, options);
+          ServerMarshal.store(instance.$el, 'attrs', options.hash, options.hashIds, options);
+          if (options.fn && options.fn !== Handlebars.VM.noop) {
+            ServerMarshal.store(instance.$el, 'fn', options.fn.program);
+          }
+          if (options.inverse && options.inverse !== Handlebars.VM.noop) {
+            ServerMarshal.store(instance.$el, 'inverse', options.inverse.program);
+          }
+        } catch (err) {
+          instance.$el.attr('data-view-server', 'false');
+        }
       }
 
       args.push(instance);
