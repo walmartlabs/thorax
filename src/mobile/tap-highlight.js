@@ -21,6 +21,10 @@ $.fn.tapHoldAndEnd = function(selector, callbackStart, callbackEnd) {
     }
 
     $(this).on('touchstart', selector, function(event) {
+        if ($(event.currentTarget).attr('data-no-tap-highlight')) {
+          return;
+        }
+
         clearTapTimer();
 
         target = event.currentTarget;
