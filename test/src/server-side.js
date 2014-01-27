@@ -104,6 +104,7 @@ describe('serverSide', function() {
           }
         }),
         SomethingElse = Thorax.View.extend({
+          _name: 'somethingelse',
           template: function() { return 'somethingelse'; }
         }),
         render,
@@ -112,8 +113,8 @@ describe('serverSide', function() {
         view;
 
     function cleanIds(view) {
-      view.$('[data-view-cid]').each(function() {
-        $(this).removeAttr('data-view-cid');
+      view.$('[data-model-cid]').each(function() {
+        $(this).removeAttr('data-model-cid');
       });
       view.$('[data-view-server]').each(function() {
         $(this).removeAttr('data-view-server');
@@ -508,12 +509,43 @@ describe('serverSide', function() {
         expect(server.child.$el.html()).to.equal('something');
         expect(view.child.$el.html()).to.equal('something');
         expect(view._renderCount).to.equal(1);
+      });
+      it('should restore block view helper with depth', function() {
+        var View = Thorax.View.extend({
+          template: Handlebars.compile('{{#view child}}{{../root}}{{/view}}', {trackIds: true}),
+          root: 1
+        });
 
-        /*
-        TODO: This case might be a framework bug. Find out.
-        view.child.render();
-        expect(view.child.$el.html()).to.equal('something');
-        */
+        server = new View({
+          child: new Counter()
+        });
+        view = new View({
+          child: new SomethingElse()
+        });
+        restoreView();
+
+        expect(_.keys(view.children).length).to.equal(1);
+        expect(_.values(view.children)[0]).to.equal(view.child);
+        expect(server.child.$el.html()).to.equal('1');
+        expect(view.child.$el.html()).to.equal('1');
+        expect(view._renderCount).to.equal(1);
+      });
+      it('should restore block view helper with data', function() {
+        var View = Thorax.View.extend({
+          template: Handlebars.compile('{{#view child}}{{@cid}}{{/view}}', {trackIds: true})
+        });
+
+        server = new View({
+          child: new Counter()
+        });
+        view = new View({
+          child: new SomethingElse()
+        });
+        restoreView();
+
+        expect(_.keys(view.children).length).to.equal(1);
+        expect(_.values(view.children)[0]).to.equal(view.child);
+        expect(view._renderCount).to.equal(1);
       });
 
       it('should handle partial restore', function() {
@@ -585,12 +617,310 @@ describe('serverSide', function() {
         expect(view.child.$el.html()).to.equal('somethingelse');
         expect(view._renderCount).to.equal(2);
       });
+
+      it('should rerender lookup templates if lacking trackId', function() {
+        var View = Thorax.View.extend({
+          template: Handlebars.compile('{{view child}}')
+        });
+        var child = new SomethingElse();
+
+        server = new View({
+          context: function() {
+            return {
+              child: new Counter()
+            };
+          }
+        });
+        view = new View({
+          context: function() {
+            return {
+              child: child
+            };
+          }
+        });
+        restoreView(true);
+
+        expect(_.keys(view.children).length).to.equal(1);
+        expect(_.values(view.children)[0]).to.equal(child);
+      });
     });
     describe('collection views', function() {
-      it('should restore inline views');
-      it('should restore referenced views');
-      it('should restore renderItem views');
-      it('should restore over non-default collection name');
+      var collection1, collection2;
+      beforeEach(function() {
+        window.$serverSide = true;
+        count = 0;
+
+        collection1 = new Thorax.Collection([{id: 1}, {id: 2}, {id: 3}, {id: 4}]);
+        collection2 = new Thorax.Collection([{id: 1}, {id: 2}, {id: 3}, {id: 4}]);
+      });
+
+      it('should restore inline views', function() {
+        server = new Thorax.View({
+          template: Handlebars.compile('{{#collection}}something{{/collection}}', {trackIds: true}),
+          collection: collection1
+        });
+        view = new Thorax.View({
+          template: Handlebars.compile('{{#collection}}somethingelse{{/collection}}', {trackIds: true}),
+          collection: collection2
+        });
+        restoreView();
+        expect(_.keys(view.children).length).to.equal(1);
+
+        var collectionView = _.values(view.children)[0];
+        expect(collectionView.collection).to.equal(collection2);
+        expect(_.keys(collectionView.children).length).to.equal(0);
+        expect(collectionView.itemTemplate()).to.equal('somethingelse');
+
+        var viewCids = _.map(collectionView.$('[data-model-cid]'), function(el) {
+          return el.getAttribute('data-model-cid');
+        });
+        expect(viewCids).to.eql(collection2.map(function(model) { return model.cid; }));
+        expect(view.$el.children().text()).to.equal('somethingsomethingsomethingsomething');
+        compareViews();
+      });
+      it('should restore referenced templates', function() {
+        var View = Thorax.View.extend({
+          template: Handlebars.compile('{{collection tag="ul" empty-template="letter-empty" item-template="letter-item"}}')
+        });
+        server = new View({collection: collection1});
+        view = new View({collection: collection2});
+        restoreView();
+
+        expect(_.keys(view.children).length).to.equal(1);
+
+        var collectionView = _.values(view.children)[0];
+        expect(collectionView.collection).to.equal(collection2);
+        expect(collectionView.itemTemplate).to.equal(Thorax.Util.getTemplate('letter-item'));
+        expect(collectionView.emptyTemplate).to.equal(Thorax.Util.getTemplate('letter-empty'));
+
+        expect(_.keys(collectionView.children).length).to.equal(0);
+
+        var viewCids = _.map(collectionView.$('[data-model-cid]'), function(el) {
+          return el.getAttribute('data-model-cid');
+        });
+        expect(viewCids).to.eql(collection2.map(function(model) { return model.cid; }));
+        compareViews();
+      });
+      it('should restore referenced item-view', function() {
+        var View = Thorax.View.extend({
+          template: Handlebars.compile('{{collection tag="ul" empty-view="letter-empty" item-view=ChildView}}', {trackIds: true}),
+          ChildView: Thorax.Util.getViewClass('letter-item')
+        });
+        server = new View({collection: collection1});
+        view = new View({collection: collection2});
+        restoreView();
+
+        expect(_.keys(view.children).length).to.equal(1);
+
+        var collectionView = _.values(view.children)[0];
+        expect(collectionView.itemView).to.equal(view.ChildView);
+        expect(collectionView.emptyView).to.equal('letter-empty');
+
+        expect(_.keys(collectionView.children).length).to.equal(4);
+
+        var viewCids = _.map(collectionView.$('[data-model-cid]'), function(el) {
+          return el.getAttribute('data-model-cid');
+        });
+        expect(viewCids).to.eql(collection2.map(function(model) { return model.cid; }));
+        compareViews();
+      });
+      it('should restore registry item-view', function() {
+        var View = Thorax.View.extend({
+          template: Handlebars.compile('{{collection tag="ul" empty-view="letter-empty" item-view="letter-item"}}')
+        });
+        server = new View({collection: collection1});
+        view = new View({collection: collection2});
+        restoreView();
+
+        expect(_.keys(view.children).length).to.equal(1);
+
+        var collectionView = _.values(view.children)[0];
+        expect(collectionView.itemView).to.equal('letter-item');
+        expect(collectionView.emptyView).to.equal('letter-empty');
+
+        expect(_.keys(collectionView.children).length).to.equal(4);
+
+        var viewCids = _.map(collectionView.$('[data-model-cid]'), function(el) {
+          return el.getAttribute('data-model-cid');
+        });
+        expect(viewCids).to.eql(collection2.map(function(model) { return model.cid; }));
+        compareViews();
+      });
+      it('should restore renderItem views', function() {
+        var View = Thorax.View.extend({
+          template: Handlebars.compile('{{collection}}')
+        });
+        server = new View({
+          collection: collection1,
+          renderItem: function() {
+            return new Counter();
+          }
+        });
+        view = new View({
+          collection: collection2,
+          renderItem: function() {
+            return new SomethingElse();
+          }
+        });
+        restoreView();
+
+        expect(_.keys(view.children).length).to.equal(1);
+
+        var collectionView = _.values(view.children)[0];
+        expect(_.keys(collectionView.children).length).to.equal(4);
+        expect(_.every(collectionView.children, function(value) {
+          return value._name === 'somethingelse';
+        })).to.be['true'];
+
+        var viewCids = _.map(collectionView.$('[data-model-cid]'), function(el) {
+          return el.getAttribute('data-model-cid');
+        });
+        expect(viewCids).to.eql(collection2.map(function(model) { return model.cid; }));
+        compareViews();
+      });
+      it('should restore empty-template', function() {
+        var View = Thorax.View.extend({
+          template: Handlebars.compile('{{collection tag="ul" empty-template="letter-empty" item-template="letter-item"}}')
+        });
+        server = new View({collection: new Thorax.Collection()});
+        view = new View({collection: new Thorax.Collection()});
+        restoreView();
+
+        expect(_.keys(view.children).length).to.equal(1);
+
+        var collectionView = _.values(view.children)[0];
+        expect(collectionView.collection).to.equal(view.collection);
+        expect(collectionView.itemTemplate).to.equal(Thorax.Util.getTemplate('letter-item'));
+        expect(collectionView.emptyTemplate).to.equal(Thorax.Util.getTemplate('letter-empty'));
+
+        expect(_.keys(collectionView.children).length).to.equal(0);
+
+        compareViews();
+      });
+      it('should restore empty-view', function() {
+        var View = Thorax.View.extend({
+          template: Handlebars.compile('{{collection tag="ul" empty-view="letter-empty" item-template="letter-item"}}')
+        });
+        server = new View({collection: new Thorax.Collection()});
+        view = new View({collection: new Thorax.Collection()});
+        restoreView();
+
+        expect(_.keys(view.children).length).to.equal(1);
+
+        var collectionView = _.values(view.children)[0];
+        expect(collectionView.collection).to.equal(view.collection);
+        expect(collectionView.itemTemplate).to.equal(Thorax.Util.getTemplate('letter-item'));
+        expect(collectionView.emptyView).to.equal('letter-empty');
+
+        expect(_.keys(collectionView.children).length).to.equal(1);
+
+        compareViews();
+      });
+      it('should restore over non-default collection name', function() {
+        var View = Thorax.View.extend({
+          template: Handlebars.compile('{{collection foo tag="ul" empty-view="letter-empty" item-view="letter-item"}}', {trackIds: true})
+        });
+        server = new View({foo: collection1});
+        view = new View({foo: collection2});
+        restoreView();
+
+        expect(_.keys(view.children).length).to.equal(1);
+
+        var collectionView = _.values(view.children)[0];
+        expect(collectionView.itemView).to.equal('letter-item');
+        expect(collectionView.emptyView).to.equal('letter-empty');
+
+        expect(_.keys(collectionView.children).length).to.equal(4);
+
+        var viewCids = _.map(collectionView.$('[data-model-cid]'), function(el) {
+          return el.getAttribute('data-model-cid');
+        });
+        expect(viewCids).to.eql(collection2.map(function(model) { return model.cid; }));
+        compareViews();
+      });
+
+      it('should rerender items for inline view helper with depth', function() {
+        server = new Thorax.View({
+          template: Handlebars.compile('<div>this</div>{{#collection}}{{../foo}}something{{/collection}}', {trackIds: true}),
+          collection: collection1
+        });
+        view = new Thorax.View({
+          template: Handlebars.compile('<div>that</div>{{#collection}}{{../foo}}somethingelse{{/collection}}', {trackIds: true}),
+          collection: collection2
+        });
+        restoreView(true);
+
+        expect(view.$el.children().length).to.equal(2);
+        expect(view.$el.children().eq(0).text()).to.equal('that');
+
+        expect(_.keys(view.children).length).to.equal(1);
+
+        var collectionView = _.values(view.children)[0];
+        expect(collectionView.collection).to.equal(collection2);
+        expect(_.keys(collectionView.children).length).to.equal(0);
+        expect(collectionView.itemTemplate()).to.equal('somethingelse');
+
+        var viewCids = _.map(collectionView.$('[data-model-cid]'), function(el) {
+          return el.getAttribute('data-model-cid');
+        });
+        expect(viewCids).to.eql(collection2.map(function(model) { return model.cid; }));
+
+        expect(view.$el.text()).to.equal('thatsomethingelsesomethingelsesomethingelsesomethingelse');
+      });
+      it.skip('should rerender block view helper with data', function() {
+        server = new Thorax.View({
+          template: Handlebars.compile('<div>this</div>{{#collection}}{{@foo}}something{{/collection}}', {trackIds: true}),
+          collection: collection1
+        });
+        view = new Thorax.View({
+          template: Handlebars.compile('<div>that</div>{{#collection}}{{@foo}}somethingelse{{/collection}}', {trackIds: true}),
+          collection: collection2
+        });
+        restoreView(true);
+
+        expect(view.$el.children().length).to.equal(2);
+        expect(view.$el.children().eq(0).text()).to.equal('that');
+
+        expect(_.keys(view.children).length).to.equal(1);
+
+        var collectionView = _.values(view.children)[0];
+        expect(collectionView.collection).to.equal(collection2);
+        expect(_.keys(collectionView.children).length).to.equal(0);
+        expect(collectionView.itemTemplate()).to.equal('somethingelse');
+
+        var viewCids = _.map(collectionView.$('[data-model-cid]'), function(el) {
+          return el.getAttribute('data-model-cid');
+        });
+        expect(viewCids).to.eql(collection2.map(function(model) { return model.cid; }));
+
+        expect(view.$el.text()).to.equal('thatsomethingelsesomethingelsesomethingelsesomethingelse');
+      });
+
+      it('should rerender collections where elements are missing ids', function() {
+        collection2 = new Thorax.Collection([{id: 1}, {id: 6}, {id: 3}, {id: 4}]);
+
+        server = new Thorax.View({
+          template: Handlebars.compile('{{#collection}}{{id}}. something{{/collection}}', {trackIds: true}),
+          collection: collection1
+        });
+        view = new Thorax.View({
+          template: Handlebars.compile('{{#collection}}somethingelse{{/collection}}', {trackIds: true}),
+          collection: collection2
+        });
+        restoreView();
+        expect(_.keys(view.children).length).to.equal(1);
+
+        var collectionView = _.values(view.children)[0];
+        expect(collectionView.collection).to.equal(collection2);
+        expect(_.keys(collectionView.children).length).to.equal(0);
+        expect(collectionView.itemTemplate()).to.equal('somethingelse');
+
+        var viewCids = _.map(collectionView.$('[data-model-cid]'), function(el) {
+          return el.getAttribute('data-model-cid');
+        });
+        expect(viewCids).to.eql(collection2.map(function(model) { return model.cid; }));
+        expect(view.$el.children().text()).to.equal('1. somethingsomethingelse3. something4. something');
+      });
     });
 
     it('should cooperate with custom restore events');
