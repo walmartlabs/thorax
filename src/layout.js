@@ -44,7 +44,7 @@ Thorax.LayoutView = Thorax.View.extend({
         triggerLifecycleEvent.call(this, 'activated', options);
         view.trigger('activated', options);
         this._view = view;
-        var targetElement = getLayoutViewsTargetElement.call(this);
+        var targetElement = this._layoutViewEl;
         this._view.appendTo(targetElement);
         this._addChild(view);
       } else {
@@ -93,17 +93,18 @@ function triggerLifecycleEvent(eventName, options) {
 }
 
 function ensureLayoutCid() {
-  ++this._renderCount;
   //set the layoutCidAttributeName on this.$el if there was no template
   this.$el.attr(layoutCidAttributeName, this.cid);
+  this._layoutViewEl = this.el;
 }
 
 function ensureLayoutViewsTargetElement() {
-  if (!this.$('[' + layoutCidAttributeName + '="' + this.cid + '"]')[0]) {
+  var el = this.$('[' + layoutCidAttributeName + '="' + this.cid + '"]')[0];
+  if (!el && this.$el.attr(layoutCidAttributeName)) {
+    el = this.el;
+  }
+  if (!el) {
     throw new Error('No layout element found in ' + (this.name || this.cid));
   }
-}
-
-function getLayoutViewsTargetElement() {
-  return this.$('[' + layoutCidAttributeName + '="' + this.cid + '"]')[0] || this.el[0] || this.el;
+  this._layoutViewEl = el;
 }
