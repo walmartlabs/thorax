@@ -185,7 +185,7 @@ Thorax.View.on('append', function(scope, callback) {
  */
 function cloneHelperOptions(options) {
   var ret = _.pick(options, 'fn', 'inverse', 'hash', 'data');
-  ret.data = _.omit(options.data, 'cid', 'view', 'yield');
+  ret.data = _.omit(options.data, 'cid', 'view', 'yield', 'root', '_parent');
   return ret;
 }
 
