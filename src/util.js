@@ -85,12 +85,12 @@ function assignTemplate(attributeName, options) {
 // need an extra scope parameter, and will minify
 // better than _.result
 function getValue(object, prop, scope) {
-  if (!(object && object[prop])) {
+  prop = object && object[prop];
+
+  if (!prop) {
     return null;
   }
-  return _.isFunction(object[prop])
-    ? object[prop].call(scope || object)
-    : object[prop];
+  return prop.call ? prop.call(scope || object) : prop;
 }
 
 var inheritVars = {};
