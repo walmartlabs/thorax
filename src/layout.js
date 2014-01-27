@@ -39,6 +39,8 @@ Thorax.LayoutView = Thorax.View.extend({
     append = _.bind(function() {
       if (view) {
         view.ensureRendered();
+        options.activating = view;
+
         triggerLifecycleEvent.call(this, 'activated', options);
         view.trigger('activated', options);
         this._view = view;
