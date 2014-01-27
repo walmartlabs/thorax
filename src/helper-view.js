@@ -149,6 +149,7 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
       declaringView.children[instance.cid] = instance;
     }
 
+    declaringView._expectTemp = true;
     htmlAttributes[viewPlaceholderAttributeName] = instance.cid;
     if (ViewClass.modifyHTMLAttributes) {
       ViewClass.modifyHTMLAttributes(htmlAttributes, instance);
@@ -160,6 +161,12 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
 };
 
 Thorax.View.on('append', function(scope, callback) {
+  if (!this._expectTemp) {
+    return;
+  }
+
+  this._expectTemp = undefined;
+
   (scope || this.$el).find('[' + viewPlaceholderAttributeName + ']').forEach(function(el) {
     var placeholderId = el.getAttribute(viewPlaceholderAttributeName),
         view = this.children[placeholderId];
