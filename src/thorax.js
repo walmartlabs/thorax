@@ -144,7 +144,7 @@ Thorax.View = Backbone.View.extend({
     var self = this;
     // NOP for destroyed views
     if (!self.el) {
-      return;
+      return self;
     }
 
     Thorax.runSection('thorax-render', {name: self.name}, function() {
@@ -199,7 +199,7 @@ Thorax.View = Backbone.View.extend({
         self._rendering = false;
       }
     });
-    return output;
+    return self;
   },
 
   context: function() {
