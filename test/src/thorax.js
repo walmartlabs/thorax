@@ -123,7 +123,7 @@ describe('core', function() {
     expect(view.render()).to.equal(view);
 
     $('#test-target-container').remove();
-  })
+  });
 
   it("render() subclassing", function() {
     var result;
