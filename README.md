@@ -351,7 +351,7 @@ If you are embedding a child view with the `view` helper this is automatically d
 
 ### children *view.children*
 
-A hash of child view's indexed by `cid`. Child views may become attached to the parent with the `view` helper or may be automatically attached `HelperView` instances created by helpers created with `regsterViewHelper` (such as the `collection` and `empty` helpers).
+A hash of child view's indexed by `cid`. Child views may become attached to the parent with the `view` helper or may be automatically attached `HelperView` instances created by helpers created with `registerViewHelper` (such as the `collection` and `empty` helpers).
 
 ### parent *view.parent*
 
