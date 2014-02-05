@@ -109,42 +109,63 @@ describe('core', function() {
     }).to['throw']();
   });
 
+  it("returns context on render()", function () {
+    $('body').append('<div id="test-target-container"><div id="test-target"></div></div>');
+
+    view = new Thorax.View({
+      template: function() { return 'testing123'; },
+      el: $('#test-target')[0]
+    });
+    expect(view.render()).to.equal(view);
+
+    // Nuke the view and test again.
+    view.release();
+    expect(view.render()).to.equal(view);
+
+    $('#test-target-container').remove();
+  });
+
   it("render() subclassing", function() {
+    var result;
     var a = new Thorax.View({
       render: function() {
-        Thorax.View.prototype.render.call(this, '<p>a</p>');
+        return Thorax.View.prototype.render.call(this, '<p>a</p>');
       }
     });
-    a.render();
+    result = a.render();
+    expect(result).to.equal(a);
 
     var b = new Thorax.View({
       render: function() {
-        Thorax.View.prototype.render.call(this, $('<p>b</p>'));
+        return Thorax.View.prototype.render.call(this, $('<p>b</p>'));
       }
     });
-    b.render();
+    result = b.render();
+    expect(result).to.equal(b);
 
     var c = new Thorax.View({
       render: function() {
         var el = document.createElement('p');
         el.innerHTML = 'c';
-        Thorax.View.prototype.render.call(this, el);
+        return Thorax.View.prototype.render.call(this, el);
       }
     });
-    c.render();
+    result = c.render();
+    expect(result).to.equal(c);
 
     var d = new Thorax.View({
       render: function() {
         var view = new Thorax.View({
           render: function() {
-            Thorax.View.prototype.render.call(this, '<p>d</p>');
+            return Thorax.View.prototype.render.call(this, '<p>d</p>');
           }
         });
         view.render();
-        Thorax.View.prototype.render.call(this, view);
+        return Thorax.View.prototype.render.call(this, view);
       }
     });
-    d.render();
+    result = d.render();
+    expect(result).to.equal(d);
 
     expect(a._renderCount).to.equal(1, '_renderCount incrimented');
     expect(b._renderCount).to.equal(1, '_renderCount incrimented');
