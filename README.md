@@ -402,7 +402,7 @@ Accepts any of the following options:
   - `undefined` : Rerender if we have already been rendered
 - **populate** - Call `populate` with the model's attributes when it is set? Defaults to true.
   - Pass `populate: {children: false}` to prevent child views from having their inputs populated.
-  - Pass `populate: {context: true}` to populate using using the view's context rather than directly populating from the model's attributes.
+  - Pass `populate: {context: true}` to populate using the view's context rather than directly populating from the model's attributes.
 - **errors** - When the model triggers an `error` event, trigger the event on the view? Defaults to true
 
 ### setCollection *view.setCollection(collection [,options])*
