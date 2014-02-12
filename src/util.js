@@ -86,11 +86,7 @@ function assignTemplate(attributeName, options) {
 // better than _.result
 function getValue(object, prop, scope) {
   prop = object && object[prop];
-
-  if (!prop) {
-    return null;
-  }
-  return prop.call ? prop.call(scope || object) : prop;
+  return prop && prop.call ? prop.call(scope || object) : prop;
 }
 
 var inheritVars = {};
@@ -122,7 +118,9 @@ function walkInheritTree(source, fieldName, isStatic, callback) {
     }
   } else {
     iterate = iterate.constructor;
-    while (iterate) {
+
+    // Iterate over all prototypes exclusive of the backbone view prototype
+    while (iterate && iterate.__super__) {
       if (iterate.prototype && _.has(iterate.prototype, fieldName)) {
         tree.push(iterate.prototype);
       }
