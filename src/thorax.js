@@ -169,6 +169,7 @@ Thorax.View = Backbone.View.extend({
         }
       });
       self.children = children;
+      self._previousHelpers = previous;
 
       self.trigger('before:rendered');
       self._rendering = true;
@@ -187,10 +188,11 @@ Thorax.View = Backbone.View.extend({
 
         // Destroy any helpers that may be lingering
         _.each(previous, function(child) {
-          if (previous._cull) {
+          if (child._cull) {
             self._removeChild(child);
           }
         }, self);
+        self._previousHelpers = undefined;
 
         //accept a view, string, Handlebars.SafeString or DOM element
         self.html((output && output.el) || (output && output.string) || output);

@@ -108,7 +108,7 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
 
     // Check to see if we have an existing instance that we can reuse
     var instance = _.find(declaringView._previousHelpers, function(child) {
-      return compareHelperOptions(viewOptions, child);
+      return child._cull && compareHelperOptions(viewOptions, child);
     });
 
     // Create the instance if we don't already have one
