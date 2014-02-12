@@ -149,7 +149,11 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
       declaringView.children[instance.cid] = instance;
     }
 
-    declaringView._expectTemp = true;
+    if (!declaringView._expectTemp) {
+      declaringView._expectTemp = true;
+      declaringView.once('append', helperAppend);
+    }
+
     htmlAttributes[viewPlaceholderAttributeName] = instance.cid;
     if (ViewClass.modifyHTMLAttributes) {
       ViewClass.modifyHTMLAttributes(htmlAttributes, instance);
@@ -160,10 +164,7 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
   return helper;
 };
 
-Thorax.View.on('append', function(scope, callback) {
-  if (!this._expectTemp) {
-    return;
-  }
+function helperAppend(scope, callback) {
 
   this._expectTemp = undefined;
 
@@ -183,8 +184,8 @@ Thorax.View.on('append', function(scope, callback) {
       callback && callback(view.el);
     }
   }, this);
-});
 
+}
 
 /**
  * Clones the helper options, dropping items that are known to change
