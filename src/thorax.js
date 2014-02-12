@@ -225,15 +225,16 @@ Thorax.View = Backbone.View.extend({
 
   renderTemplate: function(file, context, ignoreErrors) {
     var template;
-    context = context || this._getContext();
     if (_.isFunction(file)) {
       template = file;
     } else {
       template = Thorax.Util.getTemplate(file, ignoreErrors);
     }
-    if (!template) {
+    if (!template || template === Handlebars.VM.noop) {
       return '';
     } else {
+      context = context || this._getContext();
+
       return template(context, {
         helpers: this.helpers,
         data: this._getData(context)
