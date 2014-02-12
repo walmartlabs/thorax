@@ -158,14 +158,14 @@ Thorax.View = Backbone.View.extend({
         throw new Error(createErrorMessage('nested-render'));
       }
 
-      self._previousHelpers = _.filter(self.children, function(child) {
-        return child._helperOptions;
-      });
-
-      var children = {};
+      var children = {},
+          previous = [];
       _.each(self.children, function(child, key) {
         if (!child._helperOptions) {
           children[key] = child;
+        } else {
+          child._cull = true;
+          previous.push(child);
         }
       });
       self.children = children;
@@ -186,10 +186,11 @@ Thorax.View = Backbone.View.extend({
         }
 
         // Destroy any helpers that may be lingering
-        _.each(self._previousHelpers, function(child) {
-          self._removeChild(child);
+        _.each(previous, function(child) {
+          if (previous._cull) {
+            self._removeChild(child);
+          }
         }, self);
-        self._previousHelpers = undefined;
 
         //accept a view, string, Handlebars.SafeString or DOM element
         self.html((output && output.el) || (output && output.string) || output);

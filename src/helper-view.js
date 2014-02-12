@@ -129,11 +129,6 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
         throw new Error('insert-destroyed-factory');
       }
 
-      // Remove any possible entry in previous helpers in case this is a cached value returned from
-      // slightly different data that does not qualify for the previous helpers direct reuse.
-      // (i.e. when using an array that is modified between renders)
-      declaringView._previousHelpers = _.without(declaringView._previousHelpers, instance);
-
       args.push(instance);
       declaringView._addChild(instance);
       declaringView.trigger.apply(declaringView, ['helper', name].concat(args));
@@ -145,9 +140,13 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
         throw new Error('insert-destroyed');
       }
 
-      declaringView._previousHelpers = _.without(declaringView._previousHelpers, instance);
       declaringView.children[instance.cid] = instance;
     }
+
+    // Remove any possible entry in previous helpers in case this is a cached value returned from
+    // slightly different data that does not qualify for the previous helpers direct reuse.
+    // (i.e. when using an array that is modified between renders)
+    instance._cull = false;
 
     if (!declaringView._expectTemp) {
       declaringView._expectTemp = true;
