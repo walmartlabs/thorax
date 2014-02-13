@@ -2,7 +2,21 @@
 
 ## Development
 
-[Commits](https://github.com/walmartlabs/thorax/compare/v2.3.2...master)
+[Commits](https://github.com/walmartlabs/thorax/compare/v2.3.3...master)
+
+## v2.3.3 - February 13th, 2014
+- [#318](https://github.com/walmartlabs/thorax/pull/318) - remove extra word under setModel section ([@joeyyang](https://api.github.com/users/joeyyang))
+- [#313](https://github.com/walmartlabs/thorax/pull/313) - Correct spelling mistake ([@Maciek416](https://api.github.com/users/Maciek416))
+- [#312](https://github.com/walmartlabs/thorax/pull/312) - Always return 'this' from Thorax.View.render(). ([@ryan-roemer](https://api.github.com/users/ryan-roemer))
+- [#308](https://github.com/walmartlabs/thorax/pull/308) - Add support for data-no-tap-highlight attribute ([@Candid](https://api.github.com/users/Candid))
+- Update build stack to latest - cffbddc
+- Ignore new handlebars data fields for comparison - 34fa9d7
+- Slight refactor of helper view init - 9f23d56
+
+Compatibility notes:
+- This version is required in order to work with the Handlebars 2.x series. In particular 34fa9d7 is needed to prevent infinite rerender loops under certain cases.
+
+[Commits](https://github.com/walmartlabs/thorax/compare/v2.3.2...v2.3.3)
 
 ## v2.3.2 - January 14th, 2014
 - [#297](https://github.com/walmartlabs/thorax/pull/297) - Fix for issue #296 ([@solidgoldpig](https://api.github.com/users/solidgoldpig))
