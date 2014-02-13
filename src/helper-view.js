@@ -148,8 +148,9 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
     // (i.e. when using an array that is modified between renders)
     instance._cull = false;
 
-    if (!declaringView._expectTemp) {
-      declaringView._expectTemp = true;
+    // Register the append helper if not already done
+    if (!declaringView._pendingAppend) {
+      declaringView._pendingAppend = true;
       declaringView.once('append', helperAppend);
     }
 
@@ -164,8 +165,7 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
 };
 
 function helperAppend(scope, callback) {
-
-  this._expectTemp = undefined;
+  this._pendingAppend = undefined;
 
   (scope || this.$el).find('[' + viewPlaceholderAttributeName + ']').forEach(function(el) {
     var placeholderId = el.getAttribute(viewPlaceholderAttributeName),
@@ -183,7 +183,6 @@ function helperAppend(scope, callback) {
       callback && callback(view.el);
     }
   }, this);
-
 }
 
 /**
