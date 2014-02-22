@@ -278,6 +278,7 @@ function objectAndKeyFromAttributesAndName(attributes, name, options, callback) 
 
 function resetSubmitState() {
   this.$('form').removeAttr('data-submit-wait');
+  this.$el.removeAttr('data-submit-wait');
 }
 
 function populateOptions(view) {
