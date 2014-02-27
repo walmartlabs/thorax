@@ -82,13 +82,19 @@ Thorax.CollectionView = Thorax.View.extend({
   _replaceHTML: function(html) {
     if (this.collection && this.getObjectOptions(this.collection) && this._renderCount) {
       var element;
-      var oldCollectionElement = this.getCollectionElement();
+      var oldCollectionElement = this._collectionElement;
       element = _replaceHTML.call(this, html);
+
+      this._lookupCollectionElement();
+
       if (!oldCollectionElement.attr('data-view-cid')) {
-        this.getCollectionElement().replaceWith(oldCollectionElement);
+        this._collectionElement.replaceWith(oldCollectionElement);
       }
     } else {
-      return _replaceHTML.call(this, html);
+      var ret = _replaceHTML.call(this, html);
+      this._lookupCollectionElement();
+
+      return ret;
     }
   },
 
@@ -110,7 +116,7 @@ Thorax.CollectionView = Thorax.View.extend({
       return;
     }
     var itemView,
-        $el = this.getCollectionElement(),
+        $el = this._collectionElement,
         collection = this.collection;
     options = _.defaults(options || {}, {
       filter: true
@@ -175,7 +181,7 @@ Thorax.CollectionView = Thorax.View.extend({
   // updateItem only useful if there is no item view, otherwise
   // itemView.render() provides the same functionality
   updateItem: function(model) {
-    var $el = this.getCollectionElement(),
+    var $el = this._collectionElement,
         viewEl = $el.find('[' + modelCidAttributeName + '="' + model.cid + '"]');
 
     // NOP For views
@@ -190,7 +196,7 @@ Thorax.CollectionView = Thorax.View.extend({
   removeItem: function(model) {
     var viewEl = model;
     if (model.cid) {
-      var $el = this.getCollectionElement();
+      var $el = this._collectionElement;
       viewEl = $el.find('[' + modelCidAttributeName + '="' + model.cid + '"]');
     }
     if (!viewEl.length) {
@@ -288,7 +294,7 @@ Thorax.CollectionView = Thorax.View.extend({
     return model.attributes;
   },
   appendEmpty: function() {
-    var $el = this.getCollectionElement();
+    var $el = this._collectionElement;
     $el.empty();
 
     // Using call here to avoid v8 prototype inline optimization bug that helper views
@@ -302,8 +308,11 @@ Thorax.CollectionView = Thorax.View.extend({
     this.trigger('rendered:empty', this, this.collection);
   },
   getCollectionElement: function() {
-    var element = this.$(this._collectionSelector);
-    return element.length === 0 ? this.$el : element;
+    return this._collectionElement;
+  },
+  _lookupCollectionElement: function() {
+    var $collectionElement = this.$(this._collectionSelector);
+    this._collectionElement = $collectionElement.length ? $collectionElement : this.$el;
   },
 
   updateFilter: function() {
@@ -323,7 +332,7 @@ Thorax.CollectionView.on({
       applyItemVisiblityFilter.call(this, model);
     },
     add: function(model) {
-      var $el = this.getCollectionElement();
+      var $el = this._collectionElement;
       if ($el.length) {
         if (this.collection.length === 1) {
           handleChangeFromEmptyToNotEmpty.call(this);
@@ -334,7 +343,7 @@ Thorax.CollectionView.on({
       }
     },
     remove: function(model) {
-      var $el = this.getCollectionElement();
+      var $el = this._collectionElement;
       this.removeItem(model);
       this.collection.length === 0 && $el.length && handleChangeFromNotEmptyToEmpty.call(this);
     }
@@ -381,7 +390,7 @@ function applyVisibilityFilter() {
 }
 
 function applyItemVisiblityFilter(model) {
-  var $el = this.getCollectionElement();
+  var $el = this._collectionElement;
   this.itemFilter && $el.find('[' + modelCidAttributeName + '="' + model.cid + '"]')[itemShouldBeVisible.call(this, model) ? 'show' : 'hide']();
 }
 
@@ -393,14 +402,14 @@ function itemShouldBeVisible(model) {
 }
 
 function handleChangeFromEmptyToNotEmpty() {
-  var $el = this.getCollectionElement();
+  var $el = this._collectionElement;
   this.emptyClass && $el.removeClass(this.emptyClass);
   $el.removeAttr(collectionEmptyAttributeName);
   $el.empty();
 }
 
 function handleChangeFromNotEmptyToEmpty() {
-  var $el = this.getCollectionElement();
+  var $el = this._collectionElement;
   this.emptyClass && $el.addClass(this.emptyClass);
   $el.attr(collectionEmptyAttributeName, true);
   this.appendEmpty();

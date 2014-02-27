@@ -108,7 +108,7 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
 
     // Check to see if we have an existing instance that we can reuse
     var instance = _.find(declaringView._previousHelpers, function(child) {
-      return compareHelperOptions(viewOptions, child);
+      return child._cull && compareHelperOptions(viewOptions, child);
     });
 
     // Create the instance if we don't already have one
@@ -129,11 +129,6 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
         throw new Error('insert-destroyed-factory');
       }
 
-      // Remove any possible entry in previous helpers in case this is a cached value returned from
-      // slightly different data that does not qualify for the previous helpers direct reuse.
-      // (i.e. when using an array that is modified between renders)
-      declaringView._previousHelpers = _.without(declaringView._previousHelpers, instance);
-
       args.push(instance);
       declaringView._addChild(instance);
       declaringView.trigger.apply(declaringView, ['helper', name].concat(args));
@@ -145,8 +140,18 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
         throw new Error('insert-destroyed');
       }
 
-      declaringView._previousHelpers = _.without(declaringView._previousHelpers, instance);
       declaringView.children[instance.cid] = instance;
+    }
+
+    // Remove any possible entry in previous helpers in case this is a cached value returned from
+    // slightly different data that does not qualify for the previous helpers direct reuse.
+    // (i.e. when using an array that is modified between renders)
+    instance._cull = false;
+
+    // Register the append helper if not already done
+    if (!declaringView._pendingAppend) {
+      declaringView._pendingAppend = true;
+      declaringView.once('append', helperAppend);
     }
 
     htmlAttributes[viewPlaceholderAttributeName] = instance.cid;
@@ -159,7 +164,9 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
   return helper;
 };
 
-Thorax.View.on('append', function(scope, callback) {
+function helperAppend(scope, callback) {
+  this._pendingAppend = undefined;
+
   (scope || this.$el).find('[' + viewPlaceholderAttributeName + ']').forEach(function(el) {
     var placeholderId = el.getAttribute(viewPlaceholderAttributeName),
         view = this.children[placeholderId];
@@ -176,8 +183,7 @@ Thorax.View.on('append', function(scope, callback) {
       callback && callback(view.el);
     }
   }, this);
-});
-
+}
 
 /**
  * Clones the helper options, dropping items that are known to change
