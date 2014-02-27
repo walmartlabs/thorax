@@ -2,7 +2,15 @@
 
 ## Development
 
-[Commits](https://github.com/walmartlabs/thorax/compare/v2.3.3...master)
+[Commits](https://github.com/walmartlabs/thorax/compare/v2.3.4...master)
+
+## v2.3.4 - February 27th, 2014
+- [#319](https://github.com/walmartlabs/thorax/pull/319) - Performance tweaks ([@kpdecker](https://api.github.com/users/kpdecker))
+
+Compatibility notes:
+- Layout and collection elements are now cached locally. Nonstandard rendering behaviors may break due to this.
+
+[Commits](https://github.com/walmartlabs/thorax/compare/v2.3.3...v2.3.4)
 
 ## v2.3.3 - February 13th, 2014
 - [#318](https://github.com/walmartlabs/thorax/pull/318) - remove extra word under setModel section ([@joeyyang](https://api.github.com/users/joeyyang))
