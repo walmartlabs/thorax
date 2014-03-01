@@ -1,4 +1,4 @@
-/*global inheritVars */
+/*global $serverSide, inheritVars */
 
 inheritVars.model.defaultOptions.populate = true;
 
@@ -211,15 +211,17 @@ function filterObject(object, callback) {
   return object;
 }
 
-Thorax.View.on({
-  invalid: onErrorOrInvalidData,
-  error: onErrorOrInvalidData,
-  deactivated: function() {
-    if (this.$el) {
-      resetSubmitState.call(this);
+if (!$serverSide) {
+  Thorax.View.on({
+    invalid: onErrorOrInvalidData,
+    error: onErrorOrInvalidData,
+    deactivated: function() {
+      if (this.$el) {
+        resetSubmitState.call(this);
+      }
     }
-  }
-});
+  });
+}
 
 function onErrorOrInvalidData () {
   resetSubmitState.call(this);
