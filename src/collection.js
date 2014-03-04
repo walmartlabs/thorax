@@ -1,4 +1,4 @@
-/*global assignView, assignTemplate, createRegistryWrapper, dataObject, getEventCallback, getValue, modelCidAttributeName, viewCidAttributeName */
+/*global assignView, assignTemplate, createRegistryWrapper, dataObject, getValue, modelCidAttributeName, viewCidAttributeName */
 var _fetch = Backbone.Collection.prototype.fetch,
     _set = Backbone.Collection.prototype.set,
     _replaceHTML = Thorax.View.prototype._replaceHTML,
@@ -357,7 +357,7 @@ Thorax.View.on({
         this.trigger('invalid', message, collection);
       }
     },
-    error: function(collection, resp, options) {
+    error: function(collection, resp /*, options */) {
       this.trigger('error', resp, collection);
     }
   }

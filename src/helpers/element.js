@@ -1,3 +1,4 @@
+/*global getOptionsData, normalizeHTMLAttributeOptions */
 var elementPlaceholderAttributeName = 'data-element-tmp';
 
 Handlebars.registerHelper('element', function(element, options) {

@@ -1,4 +1,5 @@
-/*global createRegistryWrapper:true, cloneEvents: true */
+/*global createRegistryWrapper:true, getEventCallback */
+
 function createErrorMessage(code) {
   return 'Error "' + code + '". For more information visit http://thoraxjs.org/error-codes.html' + '#' + code;
 }
@@ -105,6 +106,7 @@ function resetInheritVars(self) {
   });
 }
 function walkInheritTree(source, fieldName, isStatic, callback) {
+  /*jshint boss:true */
   var tree = [];
   if (_.has(source, fieldName)) {
     tree.push(source);
@@ -230,7 +232,7 @@ function isVoidTag(tag) {
   }
 
   return voidTags[tag];
-};
+}
 
 Thorax.Util = {
   getViewInstance: function(name, attributes) {
@@ -277,6 +279,7 @@ Thorax.Util = {
     return _.isObject(obj) && ('length' in obj);
   },
   expandToken: function(input, scope, encode) {
+    /*jshint boss:true */
     if (input && input.indexOf && input.indexOf('{{') >= 0) {
       var re = /(?:\{?[^{]+)|(?:\{\{([^}]+)\}\})/g,
           match,

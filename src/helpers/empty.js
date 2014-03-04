@@ -1,3 +1,4 @@
+/*global getOptionsData */
 Handlebars.registerHelper('empty', function(dataObject, options) {
   if (arguments.length === 1) {
     options = dataObject;

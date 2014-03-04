@@ -1,3 +1,4 @@
+/*global getOptionsData */
 Handlebars.registerHelper('loading', function(options) {
   var view = getOptionsData(options).view;
   view.off('change:load-state', onLoadStateChange, view);

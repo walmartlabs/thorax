@@ -1,4 +1,4 @@
-/* global createErrorMessage */
+/* global createErrorMessage, getOptionsData */
 
 Handlebars.registerHelper('super', function(options) {
   var declaringView = getOptionsData(options).view,

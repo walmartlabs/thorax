@@ -1,4 +1,4 @@
-/* global createErrorMessage */
+/* global createErrorMessage, normalizeHTMLAttributeOptions */
 
 var callMethodAttributeName = 'data-call-method',
     triggerEventAttributeName = 'data-trigger-event';

@@ -1,4 +1,7 @@
-/* global createErrorMessage */
+/* global
+    collectionElementAttributeName, createErrorMessage, getOptionsData, getParent,
+    helperViewPrototype, normalizeHTMLAttributeOptions
+*/
 
 Thorax.CollectionHelperView = Thorax.CollectionView.extend({
   // Forward render events to the parent

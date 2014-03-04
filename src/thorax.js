@@ -1,4 +1,8 @@
-/*global cloneInheritVars, createInheritVars, resetInheritVars, createRegistryWrapper, getValue, inheritVars, createErrorMessage, assignTemplate */
+/*global
+    Thorax:true,
+    assignTemplate, createErrorMessage, createInheritVars, createRegistryWrapper, getValue,
+    inheritVars, resetInheritVars
+*/
 
 //support zepto.forEach on jQuery
 if (!$.fn.forEach) {
@@ -118,7 +122,7 @@ Thorax.View = Backbone.View.extend({
     return view;
   },
 
-  _destroy: function(options) {
+  _destroy: function() {
     _.each(this._boundDataObjectsByCid, this.unbindDataObject, this);
     this.trigger('destroyed');
     delete viewsIndexedByCid[this.cid];

@@ -1,4 +1,4 @@
-/*global collectionOptionNames, inheritVars, createErrorMessage */
+/*global createErrorMessage, inheritVars */
 
 var loadStart = 'load:start',
     loadEnd = 'load:end',

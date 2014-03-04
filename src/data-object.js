@@ -1,4 +1,4 @@
-/*global getValue, inheritVars, walkInheritTree */
+/*global getValue, inheritVars, listenTo, walkInheritTree */
 
 function dataObject(type, spec) {
   spec = inheritVars[type] = _.defaults({

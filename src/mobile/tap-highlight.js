@@ -9,7 +9,7 @@ $.fn.tapHoldAndEnd = function(selector, callbackStart, callbackEnd) {
         timer,
         target;
 
-    function clearTapTimer(event) {
+    function clearTapTimer() {
       clearTimeout(timer);
 
       if (tapHoldStart && target) {

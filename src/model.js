@@ -6,6 +6,8 @@ Thorax.Model = Backbone.Model.extend({
     return !this.isPopulated();
   },
   isPopulated: function() {
+    /*jshint -W089 */
+
     // We are populated if we have attributes set
     var attributes = _.clone(this.attributes),
         defaults = getValue(this, 'defaults') || {};
@@ -64,7 +66,7 @@ Thorax.View.on({
         this.trigger('invalid', errors, model);
       }
     },
-    error: function(model, resp, options) {
+    error: function(model, resp /*, options */) {
       this.trigger('error', resp, model);
     },
     change: function(model, options) {
