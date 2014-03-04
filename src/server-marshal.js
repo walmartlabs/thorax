@@ -17,11 +17,12 @@ var ServerMarshal = Thorax.ServerMarshal = {
 
       var contextPath = options.data && options.data.contextPath;
 
-      var elementCacheId = parseInt($el.attr('data-server-data'), 0);
+      var elementCacheId = $el._serverData || parseInt($el.attr('data-server-data'), 0);
       if (isNaN(elementCacheId)) {
         elementCacheId = _thoraxServerData.length;
         _thoraxServerData[elementCacheId] = {};
 
+        $el._serverData = elementCacheId;
         $el.attr('data-server-data', elementCacheId);
       }
 
