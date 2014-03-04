@@ -106,9 +106,22 @@ Thorax.View = Backbone.View.extend({
 
   setElement : function() {
     var response = Backbone.View.prototype.setElement.apply(this, arguments);
-    this.name && this.$el.attr(viewNameAttributeName, this.name);
-    this.$el.attr(viewCidAttributeName, this.cid);
+
+    // Use a hash here to avoid multiple DOM operations
+    var attr = {'data-view-cid': this.cid};
+    if (this.name) {
+      attr[viewNameAttributeName] = this.name;
+    }
+    this.$el.attr(attr);
+
     return response;
+  },
+  _assignCid: function(cid) {
+    if (this.cid) {
+      delete viewsIndexedByCid[this.cid];
+    }
+    this.cid = cid;
+    viewsIndexedByCid[cid] = this;
   },
 
   _addChild: function(view) {
@@ -168,12 +181,24 @@ Thorax.View = Backbone.View.extend({
 
   restore: function(element) {
     if (this._renderCount) {
+      // Ensure that we are registered to the right cid (this could have been reset previously)
+      var oldCid = this.$el.attr('data-view-cid');
+      if (this.cid !== oldCid) {
+        this._assignCid(oldCid);
+      }
+
       $(element).replaceWith(this.$el);
       return;
     }
 
+    var $element = $(element),
+        existingCid = $element.attr('data-view-cid');
+    if (existingCid) {
+      this._assignCid(existingCid);
+    }
     this.setElement(element);
-    if (!$serverSide && $(element).attr(viewServerAttribute) === 'true') {
+
+    if (!$serverSide && $element.attr(viewServerAttribute) === 'true') {
       this._renderCount = 1;
       this.trigger('restore');
 
