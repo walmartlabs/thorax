@@ -31,16 +31,22 @@ if (isIE || isIE11) {
       var element;
       var oldCollectionElement = this.getCollectionElement().clone(true, true);
       element = _replaceHTML.call(this, html);
+
+      this._lookupCollectionElement();
+
       if (!oldCollectionElement.attr('data-view-cid')) {
         this.getCollectionElement().replaceWith(oldCollectionElement);
       }
     } else {
-      return _replaceHTML.call(this, html);
+      var ret = _replaceHTML.call(this, html);
+      this._lookupCollectionElement();
+
+      return ret;
     }
   };
 
   // IEs 9, 10 and 11 will lose references to nested views if view.el.innerHTML = '';
-  // Fixes issue #296 - see https://github.com/walmartlabs/thorax/issues/296 
+  // Fixes issue #296 - see https://github.com/walmartlabs/thorax/issues/296
   Thorax.View.prototype._replaceHTML = function(html) {
     while (this.el.hasChildNodes()) {
       this.el.removeChild(this.el.childNodes[0]);
