@@ -2,7 +2,14 @@
 
 ## Development
 
-[Commits](https://github.com/walmartlabs/thorax/compare/v2.3.4...master)
+[Commits](https://github.com/walmartlabs/thorax/compare/v2.3.5...master)
+
+## v2.3.5 - March 4th, 2014
+- [#326](https://github.com/walmartlabs/thorax/pull/326) - Fix IE version of CollectionView._replaceHTML ([@Candid](https://api.github.com/users/Candid))
+- [#324](https://github.com/walmartlabs/thorax/pull/324) - Add view({el}) lookup option ([@kpdecker](https://api.github.com/users/kpdecker))
+- [#323](https://github.com/walmartlabs/thorax/pull/323) - Remove `data-submit-wait` attr from view el when resetting submit state ([@jasonwebster](https://api.github.com/users/jasonwebster))
+
+[Commits](https://github.com/walmartlabs/thorax/compare/v2.3.4...v2.3.5)
 
 ## v2.3.4 - February 27th, 2014
 - [#319](https://github.com/walmartlabs/thorax/pull/319) - Performance tweaks ([@kpdecker](https://api.github.com/users/kpdecker))
