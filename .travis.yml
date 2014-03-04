@@ -8,3 +8,10 @@ before_script:
   - "export DISPLAY=:99.0" 
   - "sh -e /etc/init.d/xvfb start"
   - sleep 5
+
+notifications:
+  webhooks:
+    urls:
+      secure: "RaVEv4a1Dk75pN5R+0/gfdZleNvw++ojCkwxS1Nrm6hCWLAdfRpDL5QPq/a6iKYu6+HFEt5b37YUIx14Q12L7BhVBtLQhbxEwRV0gD00CcfuxqHENv52vNIVXH0MkENFwW0hE9HaMVXkFho0IvHmSBYNXSQywyP6LhL3fP+Ia+Y="
+    on_success: change
+    on_failure: always
