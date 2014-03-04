@@ -1,5 +1,5 @@
 /*global $serverSide, createError */
-var _thoraxServerData = _thoraxServerData || [];
+var _thoraxServerData = window._thoraxServerData || [];
 
 var ServerMarshal = Thorax.ServerMarshal = {
   store: function($el, name, attributes, attributeIds, options) {
@@ -80,7 +80,7 @@ var ServerMarshal = Thorax.ServerMarshal = {
 
   serialize: function() {
     if ($serverSide) {
-      return '_thoraxServerData = ' + JSON.stringify(_thoraxServerData) + ';';
+      return JSON.stringify(_thoraxServerData);
     }
   },
 
@@ -89,6 +89,12 @@ var ServerMarshal = Thorax.ServerMarshal = {
     _thoraxServerData = [];
   }
 };
+
+if ($serverSide) {
+  onEmit(function() {
+    $('body').append('<script>var _thoraxServerData = ' + ServerMarshal.serialize() + ';</script>');
+  });
+}
 
 function lookupField(parent, context, fieldName) {
   function lookup(context) {

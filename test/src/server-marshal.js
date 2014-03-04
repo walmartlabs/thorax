@@ -154,7 +154,7 @@ describe('server-marshall', function() {
 
         Thorax.ServerMarshal.store($el, 'obj', {foo: context.aField}, {foo: 'aField'});
 
-        expect(Thorax.ServerMarshal.serialize()).to.match(/"\$lut":"aField"/);
+        expect(Thorax.ServerMarshal.serialize()).to.match(/"\$lut":\s*"aField"/);
     });
   });
 });
