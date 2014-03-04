@@ -113,6 +113,9 @@ module.exports = function(grunt) {
 
   grunt.loadTasks('tasks');
 
-  grunt.registerTask('test', ['clean', 'connect', 'jshint', 'phoenix-build', 'mocha_phantomjs', 'saucelabs-mocha']);
+
+  grunt.registerTask('sauce', process.env.SAUCE_USERNAME ? ['saucelabs-mocha:zepto', 'saucelabs-mocha:jquery'] : []);
+
+  grunt.registerTask('test', ['clean', 'connect', 'jshint', 'phoenix-build', 'mocha_phantomjs', 'sauce']);
   grunt.registerTask('dev', ['clean', 'connect', 'watch']);
 };
