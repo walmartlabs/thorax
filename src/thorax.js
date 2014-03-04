@@ -343,7 +343,9 @@ function configureView () {
 
   //this.options is removed in Thorax.View, we merge passed
   //properties directly with the view and template context
-  _.extend(this, options || {});
+  if (options) {
+    _.extend(this, options);
+  }
 
   // Setup helpers
   bindHelpers.call(this);
