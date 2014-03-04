@@ -157,7 +157,7 @@ Thorax.mixinLoadable = function(target, useParent) {
         rootObject.trigger(loadStart, message, background, object);
       }
       that._isLoading = true;
-      $(that.el).addClass(that._loadingClassName);
+      that.$el.addClass(that._loadingClassName);
       // used by loading helpers
       that.trigger('change:load-state', 'start', background);
     },
@@ -170,7 +170,7 @@ Thorax.mixinLoadable = function(target, useParent) {
       }
 
       that._isLoading = false;
-      $(that.el).removeClass(that._loadingClassName);
+      that.$el.removeClass(that._loadingClassName);
       // used by loading helper
       that.trigger('change:load-state', 'end');
     }
