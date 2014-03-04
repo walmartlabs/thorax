@@ -185,8 +185,10 @@ function helperAppend(scope, callback) {
   this._pendingAppend = undefined;
 
   (scope || this.$el).find('[' + viewPlaceholderAttributeName + ']').forEach(function(el) {
-    var placeholderId = el.getAttribute(viewPlaceholderAttributeName),
+    var $el = $(el),
+        placeholderId = $el.attr(viewPlaceholderAttributeName),
         view = this.children[placeholderId];
+
     if (view) {
       //see if the view helper declared an override for the view
       //if not, ensure the view has been rendered at least once
@@ -196,7 +198,7 @@ function helperAppend(scope, callback) {
       } else {
         view.ensureRendered();
       }
-      $(el).replaceWith(view.el);
+      $el.replaceWith(view.el);
       callback && callback(view.el);
     }
   }, this);
