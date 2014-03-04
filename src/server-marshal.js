@@ -1,6 +1,14 @@
 /*global $serverSide, createError */
 var _thoraxServerData = window._thoraxServerData || [];
 
+/*
+ * Allows for complex data to be communicated between the server and client
+ * contexts for an arbitrary element.
+ *
+ * This is primarily intended for resolving template associated data on the client
+ * but any data can be expressed via simple paths from a known root object, such
+ * as a view instance or it's rendering context, may be marshaled.
+ */
 var ServerMarshal = Thorax.ServerMarshal = {
   store: function($el, name, attributes, attributeIds, options) {
     if ($serverSide) {
@@ -25,10 +33,14 @@ var ServerMarshal = Thorax.ServerMarshal = {
         if (_.isString(value) || _.isNumber(value) || _.isNull(value) || _.isBoolean(value)) {
           return value;
         } else if (lutKey != null && lutKey !== true && !/^\.\.\//.test(lutKey)) {
+          // This is an object what has a path associated with it so we should hopefully
+          // be able to resolve it on the client.
           return {
             $lut: Handlebars.Utils.appendContextPath(contextPath, lutKey)
           };
         } else {
+          // This is some sort of unsuppored object type or a depthed reference (../foo)
+          // which is not supported.
           throw createError('server-marshall-object');
         }
       }
@@ -105,12 +117,19 @@ var ServerMarshal = Thorax.ServerMarshal = {
   }
 };
 
+// Register a callback to output our content from the server implementation.
 if ($serverSide) {
   onEmit(function() {
     $('body').append('<script>var _thoraxServerData = ' + ServerMarshal.serialize() + ';</script>');
   });
 }
 
+/*
+ * Walks a given parent or context scope, attempting to resolve a dot
+ * separated path.
+ *
+ * The parent context is given priority.
+ */
 function lookupField(parent, context, fieldName) {
   function lookup(context) {
     for (var i = 0; context && i < components.length; i++) {
