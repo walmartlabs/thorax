@@ -50,6 +50,47 @@ module.exports = function(grunt) {
       }
     },
 
+    'saucelabs-mocha': {
+      options: {
+        testname: 'thorax',
+        build: process.env.TRAVIS_JOB_ID,
+        detailedError: true,
+        concurrency: 4
+      },
+      jquery: {
+        options: {
+          tags: ['jquery'],
+          urls: [
+            'http://localhost:9999/jquery/test.html',
+            'http://localhost:9999/jquery-backbone-1-0/test.html'
+          ],
+          browsers: [
+            {browserName: 'chrome'},
+            {browserName: 'firefox'},
+            {browserName: 'safari', version: 7, platform: 'OS X 10.9'},
+            {browserName: 'internet explorer', version: 11, platform: 'Windows 8.1'},
+            {browserName: 'internet explorer', version: 8, platform: 'XP'}
+          ]
+        }
+      },
+      zepto: {
+        options: {
+          tags: ['zepto'],
+          urls: [
+            'http://localhost:9999/zepto/test.html',
+            'http://localhost:9999/zepto-backbone-1-0/test.html'
+          ],
+          browsers: [
+            {browserName: 'chrome'},
+            {browserName: 'firefox'},
+            {browserName: 'safari', version: 7, platform: 'OS X 10.9'},
+            {browserName: 'internet explorer', version: 11, platform: 'Windows 8.1'},
+            {browserName: 'internet explorer', version: 10, platform: 'Windows 8'},
+          ]
+        }
+      }
+    },
+
     watch: {
       scripts: {
         options: {
@@ -67,10 +108,11 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-mocha-phantomjs');
+  grunt.loadNpmTasks('grunt-saucelabs');
   grunt.loadNpmTasks('phoenix-build');
 
   grunt.loadTasks('tasks');
 
-  grunt.registerTask('test', ['clean', 'connect', 'jshint', 'phoenix-build', 'mocha_phantomjs']);
+  grunt.registerTask('test', ['clean', 'connect', 'jshint', 'phoenix-build', 'mocha_phantomjs', 'saucelabs-mocha']);
   grunt.registerTask('dev', ['clean', 'connect', 'watch']);
 };
