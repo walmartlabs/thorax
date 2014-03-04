@@ -84,6 +84,21 @@ var ServerMarshal = Thorax.ServerMarshal = {
     }
   },
 
+  destroy: function($el) {
+    var elementCacheId = parseInt($el.attr('data-server-data'), 0);
+    if (!isNaN(elementCacheId)) {
+      _thoraxServerData[elementCacheId] = undefined;
+
+      // Reclaim whatever slots that we can. This ensures a smaller output structure while avoiding
+      // conflicts that may occur when operating in a shared environment.
+      var len = _thoraxServerData.length;
+      while (len-- && !_thoraxServerData[len]) { /* NOP */ }
+      if (len < _thoraxServerData.length - 1) {
+        _thoraxServerData.length = len + 1;
+      }
+    }
+  },
+
   _reset: function() {
     // Intended for tests only
     _thoraxServerData = [];

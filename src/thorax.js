@@ -141,6 +141,8 @@ Thorax.View = Backbone.View.extend({
       this.undelegateEvents();
       this.remove();  // Will call stopListening()
       this.off();     // Kills off remaining events
+
+      ServerMarshal.destroy(this.$el);
     }
 
     // Absolute worst case scenario, kill off some known fields to minimize the impact
