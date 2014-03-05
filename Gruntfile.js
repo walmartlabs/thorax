@@ -32,6 +32,9 @@ module.exports = function(grunt) {
     },
 
     'mocha_phantomjs': {
+      options: {
+        reporter: 'dot'
+      },
       quick: {
         options: {
           urls: [
