@@ -17,6 +17,7 @@ var ServerMarshal = Thorax.ServerMarshal = {
 
       var contextPath = options.data && options.data.contextPath;
 
+      // Find or create the lookup table element
       var elementCacheId = $el._serverData || parseInt($el.attr('data-server-data'), 10);
       if (isNaN(elementCacheId)) {
         elementCacheId = _thoraxServerData.length;
@@ -29,40 +30,26 @@ var ServerMarshal = Thorax.ServerMarshal = {
       var cache = _thoraxServerData[elementCacheId];
       cache[name] = undefined;
 
-      function lut(value, key) {
-        var lutKey = attributeIds[key];
-        if (_.isString(value) || _.isNumber(value) || _.isNull(value) || _.isBoolean(value)) {
-          return value;
-        } else if (lutKey != null && lutKey !== true && !/^\.\.\//.test(lutKey)) {
-          // This is an object what has a path associated with it so we should hopefully
-          // be able to resolve it on the client.
-          return {
-            $lut: Handlebars.Utils.appendContextPath(contextPath, lutKey)
-          };
-        } else {
-          // This is some sort of unsuppored object type or a depthed reference (../foo)
-          // which is not supported.
-          throw createError('server-marshall-object');
-        }
-      }
-
+      // Store whatever data that we have
       if (_.isArray(attributes) && !_.isString(attributeIds) && !attributes.toJSON) {
         if (attributes.length) {
-          cache[name] = _.map(attributes, lut);
+          cache[name] = _.map(attributes, function(value, key) {
+            return lookupValue(value, attributeIds[key], contextPath);
+          });
         }
       } else if (_.isObject(attributes) && !_.isString(attributeIds) && !attributes.toJSON) {
         var stored = {},
             valueSet;
         _.each(attributes, function(value, key) {
-          stored[key] = lut(value, key);
+          stored[key] = lookupValue(value, attributeIds[key], contextPath);
           valueSet = true;
         });
         if (valueSet) {
           cache[name] = stored;
         }
       } else {
-        attributeIds = {field: attributeIds};
-        cache[name] = lut(attributes, 'field');
+        // We were passed a singular value (attributeId is a simple id value)
+        cache[name] = lookupValue(attributes, attributeIds, contextPath);
       }
     }
   },
@@ -144,4 +131,23 @@ function lookupField(parent, context, fieldName) {
 
   var components = fieldName.split('.');
   return lookup(context) || lookup(parent);
+}
+
+/*
+ * Determines the value to be saved in the lookup table to be restored on the client.
+ */
+function lookupValue(value, lutKey, contextPath) {
+  if (_.isString(value) || _.isNumber(value) || _.isNull(value) || _.isBoolean(value)) {
+    return value;
+  } else if (lutKey != null && lutKey !== true && !/^\.\.\//.test(lutKey)) {
+    // This is an object what has a path associated with it so we should hopefully
+    // be able to resolve it on the client.
+    return {
+      $lut: Handlebars.Utils.appendContextPath(contextPath, lutKey)
+    };
+  } else {
+    // This is some sort of unsuppored object type or a depthed reference (../foo)
+    // which is not supported.
+    throw createError('server-marshall-object');
+  }
 }
