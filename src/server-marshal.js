@@ -17,7 +17,7 @@ var ServerMarshal = Thorax.ServerMarshal = {
 
       var contextPath = options.data && options.data.contextPath;
 
-      var elementCacheId = $el._serverData || parseInt($el.attr('data-server-data'), 0);
+      var elementCacheId = $el._serverData || parseInt($el.attr('data-server-data'), 10);
       if (isNaN(elementCacheId)) {
         elementCacheId = _thoraxServerData.length;
         _thoraxServerData[elementCacheId] = {};
@@ -98,7 +98,7 @@ var ServerMarshal = Thorax.ServerMarshal = {
   },
 
   destroy: function($el) {
-    var elementCacheId = parseInt($el.attr('data-server-data'), 0);
+    var elementCacheId = parseInt($el.attr('data-server-data'), 10);
     if (!isNaN(elementCacheId)) {
       _thoraxServerData[elementCacheId] = undefined;
 
