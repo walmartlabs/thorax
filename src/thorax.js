@@ -2,7 +2,8 @@
     Thorax:true,
     $serverSide,
     assignTemplate, createErrorMessage, createInheritVars, createRegistryWrapper, getValue,
-    inheritVars, resetInheritVars
+    inheritVars, resetInheritVars,
+    ServerMarshal
 */
 
 // Provide default behavior for client-failover

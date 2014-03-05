@@ -1,4 +1,4 @@
-/*global $serverSide, createError */
+/*global $serverSide, createError, onEmit */
 var _thoraxServerData = window._thoraxServerData || [];
 
 /*
@@ -98,6 +98,7 @@ var ServerMarshal = Thorax.ServerMarshal = {
   },
 
   destroy: function($el) {
+    /*jshint -W035 */
     var elementCacheId = parseInt($el.attr('data-server-data'), 10);
     if (!isNaN(elementCacheId)) {
       _thoraxServerData[elementCacheId] = undefined;
