@@ -11,46 +11,48 @@ var _thoraxServerData = window._thoraxServerData || [];
  */
 var ServerMarshal = Thorax.ServerMarshal = {
   store: function($el, name, attributes, attributeIds, options) {
-    if ($serverSide) {
-      attributeIds = attributeIds || {};
-      options = options || {};
+    if (!$serverSide) {
+      return;
+    }
 
-      var contextPath = options.data && options.data.contextPath;
+    attributeIds = attributeIds || {};
+    options = options || {};
 
-      // Find or create the lookup table element
-      var elementCacheId = $el._serverData || parseInt($el.attr('data-server-data'), 10);
-      if (isNaN(elementCacheId)) {
-        elementCacheId = _thoraxServerData.length;
-        _thoraxServerData[elementCacheId] = {};
+    var contextPath = options.data && options.data.contextPath;
 
-        $el._serverData = elementCacheId;
-        $el.attr('data-server-data', elementCacheId);
-      }
+    // Find or create the lookup table element
+    var elementCacheId = $el._serverData || parseInt($el.attr('data-server-data'), 10);
+    if (isNaN(elementCacheId)) {
+      elementCacheId = _thoraxServerData.length;
+      _thoraxServerData[elementCacheId] = {};
 
-      var cache = _thoraxServerData[elementCacheId];
-      cache[name] = undefined;
+      $el._serverData = elementCacheId;
+      $el.attr('data-server-data', elementCacheId);
+    }
 
-      // Store whatever data that we have
-      if (_.isArray(attributes) && !_.isString(attributeIds) && !attributes.toJSON) {
-        if (attributes.length) {
-          cache[name] = _.map(attributes, function(value, key) {
-            return lookupValue(value, attributeIds[key], contextPath);
-          });
-        }
-      } else if (_.isObject(attributes) && !_.isString(attributeIds) && !attributes.toJSON) {
-        var stored = {},
-            valueSet;
-        _.each(attributes, function(value, key) {
-          stored[key] = lookupValue(value, attributeIds[key], contextPath);
-          valueSet = true;
+    var cache = _thoraxServerData[elementCacheId];
+    cache[name] = undefined;
+
+    // Store whatever data that we have
+    if (_.isArray(attributes) && !_.isString(attributeIds) && !attributes.toJSON) {
+      if (attributes.length) {
+        cache[name] = _.map(attributes, function(value, key) {
+          return lookupValue(value, attributeIds[key], contextPath);
         });
-        if (valueSet) {
-          cache[name] = stored;
-        }
-      } else {
-        // We were passed a singular value (attributeId is a simple id value)
-        cache[name] = lookupValue(attributes, attributeIds, contextPath);
       }
+    } else if (_.isObject(attributes) && !_.isString(attributeIds) && !attributes.toJSON) {
+      var stored = {},
+          valueSet;
+      _.each(attributes, function(value, key) {
+        stored[key] = lookupValue(value, attributeIds[key], contextPath);
+        valueSet = true;
+      });
+      if (valueSet) {
+        cache[name] = stored;
+      }
+    } else {
+      // We were passed a singular value (attributeId is a simple id value)
+      cache[name] = lookupValue(attributes, attributeIds, contextPath);
     }
   },
   load: function(el, name, parentView, context) {
