@@ -2,6 +2,8 @@
 
 # Thorax
 
+[![Selenium Test Status](https://saucelabs.com/buildstatus/thorax)](https://saucelabs.com/u/thorax)
+
 An opinionated, battle tested [Backbone](http://backbonejs.org/) + [Handlebars](http://handlebarsjs.com/) framework to build large scale web applications.
 
 # Quick Start
