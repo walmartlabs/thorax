@@ -11,6 +11,9 @@ if (typeof $serverSide === 'undefined') {
   window.$serverSide = false;
 }
 
+var isIE11 = !!navigator.userAgent.match(/Trident\/7\./);
+var isIE = isIE11 || (/msie [\w.]+/).exec(navigator.userAgent.toLowerCase());
+
 //support zepto.forEach on jQuery
 if (!$.fn.forEach) {
   $.fn.forEach = function(iterator, context) {
@@ -279,9 +282,8 @@ Thorax.View = Backbone.View.extend({
 
   html: function(html) {
     if (_.isUndefined(html)) {
-      return this.el.innerHTML;
+      return this.$el.html();
     } else {
-      // Event for IE element fixes
       this.trigger('before:append');
       var element = this._replaceHTML(html);
       this.trigger('append');
@@ -305,7 +307,17 @@ Thorax.View = Backbone.View.extend({
   },
 
   _replaceHTML: function(html) {
-    this.el.innerHTML = '';
+    // We want to pull our elements out of the tree if we are under jQuery
+    // or IE as both have the tendancy to mangle the elements we want to reuse
+    // on cleanup. This could leak event binds if users are performing custom binds
+    // but this generally not recommended.
+    if (this._renderCount && (isIE || !$.fn.jquery)) {
+      while (this.el.hasChildNodes()) {
+        this.el.removeChild(this.el.childNodes[0]);
+      }
+    }
+
+    this.$el.empty();
     return this.$el.append(html);
   },
 

@@ -177,6 +177,27 @@ describe('core', function() {
     expect(d.$('p').html()).to.equal('d', 'parent render accepts view');
   });
 
+  it('should not puke on rendering of rows', function() {
+    var count = 0;
+    var view = new Thorax.View({
+      tagName: 'tr',
+      template: function() {
+        return '<td>' + (++count) + '</td>';
+      }
+    });
+
+    // Under IE assigning to innerHTML for a TR that is embedded in a table will fail (and only
+    // if it's embedded in a table element)
+    var table = document.createElement('table');
+    table.appendChild(view.el);
+
+    view.render();
+    expect(view.$el.text()).to.equal('1');
+
+    view.render();
+    expect(view.$el.text()).to.equal('2');
+  });
+
   it("onException", function() {
     var oldOnException = Thorax.onException;
     var view = new Thorax.View({
