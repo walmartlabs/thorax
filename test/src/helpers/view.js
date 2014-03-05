@@ -129,7 +129,7 @@ describe('view helper', function() {
       ]
     });
     parent.render();
-    expect(parent.el.innerText.replace(/\r\n/g, '')).to.equal('ab');
+    expect(parent.$el.text().replace(/\r\n/g, '')).to.equal('ab');
   });
 
   it('child views within #each with mutation', function() {
@@ -148,11 +148,11 @@ describe('view helper', function() {
       ]
     });
     parent.render();
-    expect(parent.el.innerText.replace(/\r\n/g, '')).to.equal('abc');
+    expect(parent.$el.text().replace(/\r\n/g, '')).to.equal('abc');
 
     parent.views.splice(1, 1);
     parent.render();
-    expect(parent.el.innerText.replace(/\r\n/g, '')).to.equal('ac');
+    expect(parent.$el.text().replace(/\r\n/g, '')).to.equal('ac');
   });
 
   it("template passed to constructor and view block", function() {
