@@ -139,7 +139,7 @@ describe('collection', function() {
         collection: new Thorax.Collection()
       });
       emptyCollectionView.render();
-      expect(emptyCollectionView.$('[data-collection-cid]').html()).to.equal('<div>empty</div>');
+      expect(emptyCollectionView.$('[data-collection-cid]').html().toLowerCase()).to.equal('<div>empty</div>');
     });
 
     it("empty template defaults to parent scope", function() {
@@ -389,7 +389,7 @@ describe('collection', function() {
         });
         view.setModel(new Thorax.Model(), {render: true});
       }
-      expect(doNestedRender).to.throwError(Error);
+      expect(doNestedRender).to.throwError();
     });
     it("collection model updates will update item", function() {
       var collection = new Thorax.Collection([{name: 'a'}], {
