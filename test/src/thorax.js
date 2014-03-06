@@ -106,7 +106,7 @@ describe('core', function() {
     var view = new Thorax.View();
     expect(function() {
       view.render();
-    }).to['throw']();
+    }).to.throwError();
   });
 
   it("returns context on render()", function () {
@@ -222,8 +222,8 @@ describe('core', function() {
     expect(view._referenceCount).to.equal(1);
 
     owner.release();
-    expect(ownerDestroy).to.have.been.calledOnce;
-    expect(viewDestroy).to.have.been.calledOnce;
+    expect(ownerDestroy.callCount).to.equal(1);
+    expect(viewDestroy.callCount).to.equal(1);
     expect(view._referenceCount).to.equal(0);
   });
 

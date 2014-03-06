@@ -2,7 +2,7 @@ describe('view helper', function() {
   it("throws an error when template compiled without data", function() {
     expect(function() {
       Handlebars.helpers.view({}, {});
-    }).to['throw']();
+    }).to.throwError();
   });
 
   it("throws an error when any hash arguments are passed on an instance", function() {
@@ -14,7 +14,7 @@ describe('view helper', function() {
     });
     expect(function() {
       view.render();
-    }).to['throw']();
+    }).to.throwError();
   });
 
   it("should allow hash arguments when a view class name is passed", function() {

@@ -190,7 +190,7 @@ describe('collection helper', function() {
     var view = new Thorax.View({
       template: Handlebars.compile('{{collection-element}}')
     });
-    expect(_.bind(view.render, view)).to['throw']();
+    expect(_.bind(view.render, view)).to.throwError();
   });
 
   it("collection helper won't re-render parent on add", function() {
@@ -334,9 +334,8 @@ describe('collection helper', function() {
       });
       view.setCollection(new Thorax.Collection([{id: 1}]));
 
-      expect(view.itemContext)
-          .to.have.been.calledOnce
-          .to.have.been.calledOn(view);
+      expect(view.itemContext.calledOnce).to.be(true);
+      expect(view.itemContext.calledOn(view)).to.be(true);
       expect(view.$('span').length).to.equal(1);
       expect(view.$('span')[0].innerHTML).to.equal('testing');
     });
@@ -347,9 +346,8 @@ describe('collection helper', function() {
       });
       view.setCollection(new Thorax.Collection([{id: 1}]));
 
-      expect(view.itemFilter)
-          .to.have.been.calledOnce
-          .to.have.been.calledOn(view);
+      expect(view.itemFilter.calledOnce).to.be(true);
+      expect(view.itemFilter.calledOn(view)).to.be(true);
       expect(view.$('span').length).to.equal(1);
       expect(view.$('span')[0].style.display).to.equal('none');
     });
@@ -358,19 +356,17 @@ describe('collection helper', function() {
       view.on('rendered:item', spy);
       view.setCollection(new Thorax.Collection([{id: 1}]));
 
-      expect(spy)
-          .to.have.been.calledOnce
-          .to.have.been.calledOn(view)
-          .to.have.been.calledWith(_.values(view.children)[0], view.collection, view.collection.models[0]);
+      expect(spy.calledOnce).to.be(true);
+      expect(spy.calledOn(view)).to.be(true);
+      expect(spy.calledWith(_.values(view.children)[0], view.collection, view.collection.models[0])).to.be(true);
     });
     it('should delegate to #renderItem', function() {
       view.renderItem = spy;
       view.setCollection(new Thorax.Collection([{id: 1}]));
 
-      expect(view.renderItem)
-          .to.have.been.calledOnce
-          .to.have.been.calledOn(view)
-          .to.have.been.calledWith(view.collection.models[0]);
+      expect(view.renderItem.calledOnce).to.be(true);
+      expect(view.renderItem.calledOn(view)).to.be(true);
+      expect(view.renderItem.calledWith(view.collection.models[0])).to.be(true);
     });
     it('should delegate to #renderItem with a named parent and no inline template', function() {
       view.name = 'foo';
@@ -379,10 +375,9 @@ describe('collection helper', function() {
       view.renderItem = spy;
       view.setCollection(new Thorax.Collection([{id: 1}]));
 
-      expect(view.renderItem)
-          .to.have.been.calledOnce
-          .to.have.been.calledOn(view)
-          .to.have.been.calledWith(view.collection.models[0]);
+      expect(view.renderItem.calledOnce).to.be(true);
+      expect(view.renderItem.calledOn(view)).to.be(true);
+      expect(view.renderItem.calledWith(view.collection.models[0])).to.be(true);
     });
     it('should delegate to #renderEmpty with a named parent and no inline template', function() {
       view.name = 'foo';
@@ -392,9 +387,8 @@ describe('collection helper', function() {
       view.renderEmpty = spy;
       view.setCollection(new Thorax.Collection([]));
 
-      expect(view.renderEmpty)
-          .to.have.been.calledOnce
-          .to.have.been.calledOn(view);
+      expect(view.renderEmpty.calledOnce).to.be(true);
+      expect(view.renderEmpty.calledOn(view)).to.be(true);
     });
     it('should not release views rendered with renderItem on change', function() {
       var child = new (Thorax.View.extend({
@@ -411,24 +405,22 @@ describe('collection helper', function() {
       view.setCollection(new Thorax.Collection([{id: 1}]));
       view.collection.at(0).set('foo', 'bar');
 
-      expect(view.renderItem).to.have.been.calledOnce;
+      expect(view.renderItem.calledOnce).to.be(true);
     });
 
     it('should forward rendered:empty', function() {
       view.on('rendered:empty', spy);
       view.setCollection(new Thorax.Collection([]));
 
-      expect(spy)
-          .to.have.been.calledOnce
-          .to.have.been.calledOn(view);
+      expect(spy.calledOnce).to.be(true);
+      expect(spy.calledOn(view)).to.be(true);
     });
     it('should delegate to #renderEmpty', function() {
       view.renderEmpty = spy;
       view.setCollection(new Thorax.Collection([]));
 
-      expect(view.renderEmpty)
-          .to.have.been.calledOnce
-          .to.have.been.calledOn(view);
+      expect(view.renderEmpty.calledOnce).to.be(true);
+      expect(view.renderEmpty.calledOn(view)).to.be(true);
     });
   });
 });

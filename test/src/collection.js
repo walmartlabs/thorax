@@ -5,11 +5,12 @@ describe('collection', function() {
   Handlebars.templates['letter-multiple-item'] = Handlebars.compile('<li>{{letter}}</li><li>{{letter}}</li>');
 
   var LetterModel = Thorax.Model.extend({});
+  var items = _.map(['a', 'b', 'c', 'd'], function(letter) {
+    return {letter: letter};
+  });
   var letterCollection = new (Thorax.Collection.extend({
     model: LetterModel
-  }))(['a', 'b', 'c', 'd'].map(function(letter) {
-    return {letter: letter};
-  }));
+  }))(items);
   var LetterCollectionView = Thorax.View.extend({name: 'letter'});
   var LetterItemView = Thorax.View.extend({name: 'letter-item'});
   Thorax.View.extend({name: 'letter-empty'});
@@ -388,7 +389,7 @@ describe('collection', function() {
         });
         view.setModel(new Thorax.Model(), {render: true});
       }
-      expect(doNestedRender).to['throw'](Error);
+      expect(doNestedRender).to.throwError(Error);
     });
     it("collection model updates will update item", function() {
       var collection = new Thorax.Collection([{name: 'a'}], {
@@ -517,9 +518,9 @@ describe('collection', function() {
         itemTemplate: function() { return '<div class="item">' + this.id + '</div>'; },
         collection: new Thorax.Collection([{id:1},{id:2}])
       });
-      expect(spy).to.not.have.been.called;
+      expect(spy.callCount).to.equal(0);
       view.render();
-      expect(spy).to.have.been.calledThrice;
+      expect(spy.callCount).to.equal(3);
       expect(view.$('.item').length).to.equal(2);
     });
 
@@ -613,7 +614,7 @@ describe('collection', function() {
       });
 
       view.updateFilter();
-      expect(collectionView.updateFilter).to.have.been.calledOnce;
+      expect(collectionView.updateFilter.callCount).to.equal(1);
     });
   });
 });
@@ -670,11 +671,12 @@ describe('collection view', function() {
     var view = new Thorax.View({
       template: Handlebars.compile('{{collection}}')
     });
-    var collection = new Thorax.Collection([]);
+    var collection = new Thorax.Collection([{id: 1}]);
     function setCollection() {
       view.setCollection(collection);
+      view.render();
     }
-    expect(setCollection).to['throw'];
+    expect(setCollection).to.throwError();
   });
 
   it("getCollectionElement should still return the correct element with nested collection views", function() {
@@ -757,7 +759,7 @@ describe('collection view', function() {
 
     // The expected number of children of the collection view is 4 (2 items in collection, 2 views per item)
     expect(_.keys(children).length).to.equal(4);
-    expect(releaseSpy).to.have.been.calledTwice;
+    expect(releaseSpy.callCount).to.equal(2);
   });
 
 });
@@ -773,11 +775,13 @@ function runCollectionTests(view, indexMultiplier) {
   expect(view.el.firstChild).to.not.exist;
 
   var LetterModel = Thorax.Model.extend({});
+  var items = _.map(['a', 'b', 'c', 'd'], function(letter) {
+    return {letter: letter};
+  });
+
   var letterCollection = new (Thorax.Collection.extend({
         model: LetterModel
-      }))(['a', 'b', 'c', 'd'].map(function(letter) {
-        return {letter: letter};
-      })),
+      }))(items),
       renderedItemCount = 0,
       renderedCollectionCount = 0,
       renderedEmptyCount = 0,

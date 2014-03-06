@@ -54,10 +54,18 @@
 
     "test": {
       "mixins": [
-        "test",
+        {
+          "name": "test",
+          "overrides": {
+            "test/lib/chai.js": "test/lib/expect.js",
+            "test/lib/sinon-chai.js": false
+          }
+        },
         "loaded-test-runner"
       ],
       "scripts": [
+        // IE I hate you
+        {"src": "test/lib/json2.js", "global": true},
         "test/src/"
       ],
       "static": [

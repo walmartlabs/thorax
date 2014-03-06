@@ -4,7 +4,7 @@ describe('empty helper', function() {
   beforeEach(function() {
     letterCollection = new (Thorax.Collection.extend({
       model: Thorax.Model.extend({})
-    }))(['a', 'b', 'c', 'd'].map(function(letter) {
+    }))(_.map(['a', 'b', 'c', 'd'], function(letter) {
       return {letter: letter};
     }));
   });

@@ -183,7 +183,7 @@ describe('event', function() {
         spy = this.spy();
     view.on('change:view:end', spy);
     view.trigger('change:view:end');
-    expect(spy).to.have.been.calledOnce;
+    expect(spy.calledOnce).to.be(true);
   });
 
   it("bindToView", function() {
@@ -351,12 +351,12 @@ describe('event', function() {
       view.on('foo', spy);
 
       view.trigger('foo');
-      expect(spy).to.have.been.calledOnce;
+      expect(spy.calledOnce).to.be(true);
 
       view.off('foo', spy);
 
       view.trigger('foo');
-      expect(spy).to.have.been.calledOnce;
+      expect(spy.calledOnce).to.be(true);
     });
     it('should cleanup backbone events on release', function() {
       var spy = this.spy(),
@@ -372,12 +372,12 @@ describe('event', function() {
           model = view.model;
 
       model.trigger('foo');
-      expect(spy).to.have.been.calledOnce;
+      expect(spy.calledOnce).to.be(true);
 
       view.release();
 
       model.trigger('foo');
-      expect(spy).to.have.been.calledOnce;
+      expect(spy.calledOnce).to.be(true);
     });
     it('should cleanup DOM events on release', function() {
       var spy = this.spy(),
@@ -393,12 +393,12 @@ describe('event', function() {
       document.body.appendChild(view.el);
 
       $el.find('a').trigger('mousedown');
-      expect(spy).to.have.been.calledTwice;
+      expect(spy.calledTwice).to.be(true);
 
       view.release();
 
       $el.find('a').trigger('mousedown');
-      expect(spy).to.have.been.calledTwice;
+      expect(spy.calledTwice).to.be(true);
     });
     it('should cleanup listening view events on release', function() {
       var spy = this.spy(),
@@ -411,14 +411,13 @@ describe('event', function() {
       other.on('foo', spy, view);
       other.trigger('foo');
 
-      expect(spy)
-          .to.have.been.calledOnce
-          .to.have.been.calledOn(view);
+      expect(spy.calledOnce).to.be(true);
+      expect(spy.calledOn(view)).to.be(true);
 
       view.release();
 
       other.trigger('foo');
-      expect(spy).to.have.been.calledOnce;
+      expect(spy.calledOnce).to.be(true);
     });
     it('should cleanup own view events on release', function() {
       var spy = this.spy(),
@@ -430,14 +429,13 @@ describe('event', function() {
       view.on('foo', spy);
       view.trigger('foo');
 
-      expect(spy)
-          .to.have.been.calledOnce
-          .to.have.been.calledOn(view);
+      expect(spy.calledOnce).to.be(true);
+      expect(spy.calledOn(view)).to.be(true);
 
       view.release();
 
       view.trigger('foo');
-      expect(spy).to.have.been.calledOnce;
+      expect(spy.calledOnce).to.be(true);
     });
   });
 
@@ -453,14 +451,14 @@ describe('event', function() {
       it('should use view', function() {
         view.on('foo', spy);
         view.trigger('foo');
-        expect(spy).to.have.been.calledOnce
-            .to.be.always.calledOn(view);
+        expect(spy.calledOnce).to.be(true);
+        expect(spy.alwaysCalledOn(view)).to.be(true);
       });
       it('should pass context', function() {
         view.on('foo', spy, context);
         view.trigger('foo');
-        expect(spy).to.have.been.calledOnce
-            .to.be.always.calledOn(context);
+        expect(spy.calledOnce).to.be(true);
+        expect(spy.alwaysCalledOn(context)).to.be(true);
       });
     });
 
@@ -468,14 +466,14 @@ describe('event', function() {
       it('should use view', function() {
         view.on({foo: spy});
         view.trigger('foo');
-        expect(spy).to.have.been.calledOnce
-            .to.be.always.calledOn(view);
+        expect(spy.calledOnce).to.be(true);
+        expect(spy.alwaysCalledOn(view)).to.be(true);
       });
       it('should pass context', function() {
         view.on({foo: spy}, context);
         view.trigger('foo');
-        expect(spy).to.have.been.calledOnce
-            .to.be.always.calledOn(context);
+        expect(spy.calledOnce).to.be(true);
+        expect(spy.alwaysCalledOn(context)).to.be(true);
       });
     });
     describe('data object events', function() {
@@ -484,16 +482,16 @@ describe('event', function() {
         view.on({model: {foo: spy}});
         view.setModel(model, {render: false, fetch: false});
         model.trigger('foo');
-        expect(spy).to.have.been.calledOnce
-            .to.be.always.calledOn(view);
+        expect(spy.calledOnce).to.be(true);
+        expect(spy.alwaysCalledOn(view)).to.be(true);
       });
       it('should pass context', function() {
         var model = new Thorax.Model();
         view.on({model: {foo: spy}}, context);
         view.setModel(model, {render: false, fetch: false});
         model.trigger('foo');
-        expect(spy).to.have.been.calledOnce
-            .to.be.always.calledOn(context);
+        expect(spy.calledOnce).to.be(true);
+        expect(spy.alwaysCalledOn(context)).to.be(true);
       });
     });
     describe('dom events', function() {
@@ -509,14 +507,14 @@ describe('event', function() {
       it('should use view', function() {
         view.on('click foo', spy);
         view.delegateEvents();
-        expect(spy).to.have.been.calledOnce
-            .to.be.always.calledOn(view);
+        expect(spy.calledOnce).to.be(true);
+        expect(spy.alwaysCalledOn(view)).to.be(true);
       });
       it('should pass context', function() {
         view.on('click foo', spy, context);
         view.delegateEvents();
-        expect(spy).to.have.been.calledOnce
-            .to.be.always.calledOn(context);
+        expect(spy.calledOnce).to.be(true);
+        expect(spy.alwaysCalledOn(context)).to.be(true);
       });
     });
   });

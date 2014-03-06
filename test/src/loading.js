@@ -46,8 +46,8 @@ describe('loading', function() {
       c.fetch();
       this.requests[0].respond(200, {}, '[]');
 
-      expect(startSpy).to.have.been.calledOnce;
-      expect(endSpy).to.have.been.calledOnce;
+      expect(startSpy.callCount).to.equal(1);
+      expect(endSpy.callCount).to.equal(1);
     });
     it('views should not emit load events if triggered flag is set', function() {
       var startSpy = this.spy(),
@@ -59,8 +59,8 @@ describe('loading', function() {
       c.fetch({loadTriggered: true});
       this.requests[0].respond(200, {}, '[]');
 
-      expect(startSpy).to.not.have.been.called;
-      expect(endSpy).to.not.have.been.called;
+      expect(startSpy.callCount).to.equal(0);
+      expect(endSpy.callCount).to.equal(0);
     });
 
     // for jQuery or Zepto when built with Deferred
@@ -105,7 +105,7 @@ describe('loading', function() {
       model.loadStart();
 
       this.clock.tick(1000);
-      expect(spy).to.have.been.calledOnce;
+      expect(spy.callCount).to.equal(1);
       expect($(view.el).hasClass('loading')).to.be['true'];
     });
     it('views should see load start from collection', function() {
@@ -123,7 +123,7 @@ describe('loading', function() {
       collection.loadStart();
 
       this.clock.tick(1000);
-      expect(spy).to.have.been.calledOnce;
+      expect(spy.callCount).to.equal(1);
 
       expect($(view.el).hasClass('loading')).to.be['true'];
     });
@@ -139,7 +139,7 @@ describe('loading', function() {
       model.loadStart();
 
       this.clock.tick(1000);
-      expect(spy).to.not.have.been.called;
+      expect(spy.callCount).to.equal(0);
       expect($(view.el).hasClass('loading')).to.be['false'];
     });
 
@@ -154,7 +154,7 @@ describe('loading', function() {
       model.loadEnd();
       this.clock.tick(1000);
 
-      expect(spy).to.have.been.calledOnce;
+      expect(spy.callCount).to.equal(1);
       expect($(view.el).hasClass('loading')).to.be['false'];
     });
     it('views should see load end from collection', function() {
@@ -173,7 +173,7 @@ describe('loading', function() {
       collection.loadEnd();
       this.clock.tick(1000);
 
-      expect(spy).to.have.been.calledOnce;
+      expect(spy.callCount).to.equal(1);
       expect($(view.el).hasClass('loading')).to.be['false'];
     });
     it('views should see load end after release', function() {
@@ -194,8 +194,8 @@ describe('loading', function() {
       this.clock.tick(1000);
 
       this.clock.tick(1000);
-      expect(spy).to.have.been.calledOnce;
-      expect(endSpy).to.have.been.calledOnce;
+      expect(spy.callCount).to.equal(1);
+      expect(endSpy.callCount).to.equal(1);
       expect($(view.el).hasClass('loading')).to.be['false'];
     });
   });
@@ -219,27 +219,27 @@ describe('loading', function() {
     it('root should see load start from view', function() {
       this.model.loadStart();
       this.clock.tick(1000);
-      expect(this.startSpy).to.have.been.calledOnce;
+      expect(this.startSpy.callCount).to.equal(1);
     });
     it('root should not see background load start', function() {
       this.model.loadStart(undefined, true);
       this.clock.tick(1000);
-      expect(this.startSpy).to.not.have.been.called;
+      expect(this.startSpy.callCount).to.equal(0);
     });
     it('root should not see load start from nonBlocking view', function() {
       this.view.nonBlockingLoad = true;
       this.model.loadStart();
       this.clock.tick(1000);
-      expect(this.startSpy).to.not.have.been.called;
+      expect(this.startSpy.callCount).to.equal(0);
     });
     it('root should see load start for queued non background', function() {
       this.model.loadStart(undefined, true);
       this.clock.tick(1000);
-      expect(this.startSpy).to.not.have.been.called;
+      expect(this.startSpy.callCount).to.equal(0);
 
       this.model.loadStart();
       this.clock.tick(1000);
-      expect(this.startSpy).to.have.been.calledOnce;
+      expect(this.startSpy.callCount).to.equal(1);
     });
 
     it('root should see load end from view', function() {
@@ -249,7 +249,7 @@ describe('loading', function() {
       this.model.loadEnd();
       this.clock.tick(1000);
 
-      expect(this.endSpy).to.have.been.calledOnce;
+      expect(this.endSpy.callCount).to.equal(1);
     });
     it('root should see load end after release', function() {
       this.model.loadStart();
@@ -260,7 +260,7 @@ describe('loading', function() {
       this.model.loadEnd();
       this.clock.tick(1000);
 
-      expect(this.endSpy).to.have.been.calledOnce;
+      expect(this.endSpy.callCount).to.equal(1);
     });
     it('root should not see background load end', function() {
       this.model.loadStart(undefined, true);
@@ -269,7 +269,7 @@ describe('loading', function() {
       this.model.loadEnd();
       this.clock.tick(1000);
 
-      expect(this.endSpy).to.not.have.been.called;
+      expect(this.endSpy.callCount).to.equal(0);
     });
     it('root should not see load end from nonBlocking view', function() {
       this.view.nonBlockingLoad = true;
@@ -279,7 +279,7 @@ describe('loading', function() {
       this.model.loadEnd();
       this.clock.tick(1000);
 
-      expect(this.endSpy).to.not.have.been.called;
+      expect(this.endSpy.callCount).to.equal(0);
     });
     it('root should see load end for queued non background', function() {
       this.model.loadStart(undefined, true);
@@ -298,12 +298,12 @@ describe('loading', function() {
       this.model.loadEnd();
       this.model.loadEnd();
       this.clock.tick(1000);
-      expect(this.endSpy).to.not.have.been.called;
+      expect(this.endSpy.callCount).to.equal(0);
 
       this.model.loadEnd();
       this.clock.tick(1000);
 
-      expect(this.endSpy).to.have.been.calledOnce;
+      expect(this.endSpy.callCount).to.equal(1);
     });
     it('load should forward load events even if object is currently loading joe', function() {
       var callback = this.spy(),
@@ -322,12 +322,12 @@ describe('loading', function() {
       expect(model.isLoading()).to.eql(true);
       model.load(callback);
       this.clock.tick(1000);
-      expect(appLoadingStart).to.have.been.calledOnce;
-      expect(loadingStart).to.have.been.calledOnce;
+      expect(appLoadingStart.callCount).to.equal(1);
+      expect(loadingStart.callCount).to.equal(1);
       this.requests[0].respond(200, {}, '{}');
-      expect(callback).to.have.been.calledOnce;
+      expect(callback.callCount).to.equal(1);
       this.clock.tick(1000);
-      expect(loadingEnd).to.have.been.calledOnce;
+      expect(loadingEnd.callCount).to.equal(1);
     });
   });
 
@@ -477,36 +477,36 @@ describe('loading', function() {
 
       expect(this.loads.length).to.equal(0);
       expect(this.ends.length).to.equal(0);
-      expect(startSpy).to.not.have.been.called;
-      expect(endSpy).to.not.have.been.called;
+      expect(startSpy.callCount).to.equal(0);
+      expect(endSpy.callCount).to.equal(0);
 
       this.clock.tick(200);
 
       expect(this.loads.length).to.equal(0);
       expect(this.ends.length).to.equal(0);
-      expect(startSpy).to.not.have.been.called;
-      expect(endSpy).to.not.have.been.called;
+      expect(startSpy.callCount).to.equal(0);
+      expect(endSpy.callCount).to.equal(0);
 
       this.clock.tick(1000);
 
       expect(this.loads.length).to.equal(1);
       expect(this.ends.length).to.equal(0);
-      expect(startSpy).to.have.been.calledOnce;
-      expect(endSpy).to.not.have.been.called;
+      expect(startSpy.callCount).to.equal(1);
+      expect(endSpy.callCount).to.equal(0);
 
       this.object.loadEnd();
 
       expect(this.loads.length).to.equal(1);
       expect(this.ends.length).to.equal(0);
-      expect(startSpy).to.have.been.calledOnce;
-      expect(endSpy).to.not.have.been.called;
+      expect(startSpy.callCount).to.equal(1);
+      expect(endSpy.callCount).to.equal(0);
 
       this.clock.tick(1000);
 
       expect(this.loads.length).to.equal(1);
       expect(this.ends.length).to.equal(1);
-      expect(startSpy).to.have.been.calledOnce;
-      expect(endSpy).to.have.been.calledOnce;
+      expect(startSpy.callCount).to.equal(1);
+      expect(endSpy.callCount).to.equal(1);
 
     });
   });
@@ -526,29 +526,29 @@ describe('loading', function() {
       Thorax.forwardLoadEvents(this.src, this.dest);
 
       this.src.loadStart();
-      expect(this.startSpy).to.have.been.calledOnce;
+      expect(this.startSpy.callCount).to.equal(1);
 
       this.src.loadStart();
-      expect(this.startSpy).to.have.been.calledTwice;
+      expect(this.startSpy.callCount).to.equal(2);
     });
     it('load event is forwarded once', function() {
       Thorax.forwardLoadEvents(this.src, this.dest, true);
 
       this.src.loadStart();
-      expect(this.startSpy).to.have.been.calledOnce;
+      expect(this.startSpy.callCount).to.equal(1);
 
       this.src.loadStart();
-      expect(this.startSpy).to.have.been.calledOnce;
+      expect(this.startSpy.callCount).to.equal(1);
     });
     it('off clears on', function() {
       var forward = Thorax.forwardLoadEvents(this.src, this.dest);
 
       this.src.loadStart();
-      expect(this.startSpy).to.have.been.calledOnce;
+      expect(this.startSpy.callCount).to.equal(1);
 
       forward.off();
       this.src.loadStart();
-      expect(this.startSpy).to.have.been.calledOnce;
+      expect(this.startSpy.callCount).to.equal(1);
     });
   });
 
@@ -568,10 +568,10 @@ describe('loading', function() {
       this.model.load(success, failback);
       this.requests[0].respond(200, {}, '{}');
 
-      expect(success).to.have.been.calledOnce;
-      expect(failback).to.not.have.been.called;
-      expect(this.startSpy).to.have.been.calledOnce;
-      expect(this.endSpy).to.have.been.calledOnce;
+      expect(success.callCount).to.equal(1);
+      expect(failback.callCount).to.equal(0);
+      expect(this.startSpy.callCount).to.equal(1);
+      expect(this.endSpy.callCount).to.equal(1);
     });
     it('data load on abort sends load events', function() {
       var success = this.spy(),
@@ -579,12 +579,12 @@ describe('loading', function() {
       this.model.load(success, failback);
       this.requests[0].abort();
 
-      expect(success).to.not.have.been.called;
-      expect(failback).to.have.been.calledOnce;
-      expect(failback).to.have.been.calledWith(true);
+      expect(success.callCount).to.equal(0);
+      expect(failback.callCount).to.equal(1);
+      expect(failback.calledWith(true)).to.equal(true);
       expect(this.model.fetchQueue).to.not.exist;
-      expect(this.startSpy).to.have.been.calledOnce;
-      expect(this.endSpy).to.have.been.calledOnce;
+      expect(this.startSpy.callCount).to.equal(1);
+      expect(this.endSpy.callCount).to.equal(1);
     });
     it('data load on error sends load events', function() {
       var success = this.spy(),
@@ -593,11 +593,11 @@ describe('loading', function() {
       this.model.load(success, failback);
       this.requests[0].respond(0, {}, '');
 
-      expect(success).to.not.have.been.called;
-      expect(failback).to.have.been.calledOnce;
-      expect(failback).to.have.been.calledWith(true);
-      expect(this.startSpy).to.have.been.calledOnce;
-      expect(this.endSpy).to.have.been.calledOnce;
+      expect(success.callCount).to.equal(0);
+      expect(failback.callCount).to.equal(1);
+      expect(failback.calledWith(true)).to.equal(true);
+      expect(this.startSpy.callCount).to.equal(1);
+      expect(this.endSpy.callCount).to.equal(1);
     });
     it('data load on error calls failback once', function() {
       var success = this.spy(),
@@ -607,11 +607,11 @@ describe('loading', function() {
       this.requests[0].respond(0, {}, '');
 
       Backbone.history.trigger('route');
-      expect(success).to.not.have.been.called;
-      expect(failback).to.have.been.calledOnce;
-      expect(failback).to.have.been.calledWith(true);
-      expect(this.startSpy).to.have.been.calledOnce;
-      expect(this.endSpy).to.have.been.calledOnce;
+      expect(success.callCount).to.equal(0);
+      expect(failback.callCount).to.equal(1);
+      expect(failback.calledWith(true)).to.equal(true);
+      expect(this.startSpy.callCount).to.equal(1);
+      expect(this.endSpy.callCount).to.equal(1);
     });
 
     it('failback does not get called twice if it triggers route event', function() {
@@ -627,11 +627,11 @@ describe('loading', function() {
       this.model.load(success, failback);
       this.requests[0].respond(0, {}, '');
 
-      expect(success).to.not.have.been.called;
-      expect(failback).to.have.been.calledOnce;
-      expect(failback).to.have.been.calledWith(true);
-      expect(this.startSpy).to.have.been.calledOnce;
-      expect(this.endSpy).to.have.been.calledOnce;
+      expect(success.callCount).to.equal(0);
+      expect(failback.callCount).to.equal(1);
+      expect(failback.calledWith(true)).to.equal(true);
+      expect(this.startSpy.callCount).to.equal(1);
+      expect(this.endSpy.callCount).to.equal(1);
     });
 
     it('data load on route change sends load events', function() {
@@ -644,14 +644,14 @@ describe('loading', function() {
 
       fragment = 'data-foo';
       Backbone.history.trigger('route');
-      expect(this.endSpy).to.have.been.calledOnce;
+      expect(this.endSpy.callCount).to.equal(1);
 
       this.requests[0].respond(200, {}, '{}');
 
-      expect(success).to.not.have.been.called;
-      expect(failback).to.have.been.calledOnce;
-      expect(failback).to.have.been.calledWith(false);
-      expect(this.startSpy).to.have.been.calledOnce;
+      expect(success.callCount).to.equal(0);
+      expect(failback.callCount).to.equal(1);
+      expect(failback.calledWith(false)).to.equal(true);
+      expect(this.startSpy.callCount).to.equal(1);
     });
     it('data load sent for background and foreground requests', function() {
       var success = this.spy(),
@@ -664,7 +664,7 @@ describe('loading', function() {
       this.requests[0].respond(200, {}, '{}');
 
       expect(success.callCount).to.equal(4);
-      expect(failback).to.not.have.been.called;
+      expect(failback.callCount).to.equal(0);
       expect(this.startSpy.callCount).to.equal(4);
       expect(this.endSpy.callCount).to.equal(4);
     });
@@ -678,11 +678,11 @@ describe('loading', function() {
       this.model.load(success, failback);
       this.requests[0].respond(200, {}, '{}');
 
-      expect(success).to.have.been.calledOnce;
-      expect(failback).to.not.have.been.called;
-      expect(rootStart).to.have.been.calledOnce;
-      expect(this.startSpy).to.have.been.calledOnce;
-      expect(this.endSpy).to.have.been.calledOnce;
+      expect(success.callCount).to.equal(1);
+      expect(failback.callCount).to.equal(0);
+      expect(rootStart.callCount).to.equal(1);
+      expect(this.startSpy.callCount).to.equal(1);
+      expect(this.endSpy.callCount).to.equal(1);
 
       exports.off('load:start', rootStart);
     });
@@ -706,12 +706,12 @@ describe('loading', function() {
       this.clock.tick(1000);
 
       expect(success.callCount).to.equal(4);
-      expect(failback).to.not.have.been.called;
-      expect(rootStart).to.have.been.calledTwice;
-      expect(rootStart).to.have.been.calledWith(undefined, false);
-      expect(rootStart).to.have.been.calledWith(undefined, true);
-      expect(rootEnd).to.have.been.calledOnce;
-      expect(rootEnd).to.have.been.calledWith(false);
+      expect(failback.callCount).to.equal(0);
+      expect(rootStart.callCount).to.equal(2);
+      expect(rootStart.calledWith(undefined, false)).to.equal(true);
+      expect(rootStart.calledWith(undefined, true)).to.equal(true);
+      expect(rootEnd.callCount).to.equal(1);
+      expect(rootEnd.calledWith(false)).to.equal(true);
       expect(this.startSpy.callCount).to.equal(4);
       expect(this.endSpy.callCount).to.equal(4);
     });
@@ -729,11 +729,11 @@ describe('loading', function() {
       this.clock.tick(10);
 
       expect(this.requests).to.be.empty;
-      expect(success).to.have.been.calledOnce;
-      expect(failback).to.not.have.been.called;
-      expect(rootStart).to.not.have.been.called;
-      expect(this.startSpy).to.not.have.been.called;
-      expect(this.endSpy).to.not.have.been.called;
+      expect(success.callCount).to.equal(1);
+      expect(failback.callCount).to.equal(0);
+      expect(rootStart.callCount).to.equal(0);
+      expect(this.startSpy.callCount).to.equal(0);
+      expect(this.endSpy.callCount).to.equal(0);
 
       exports.off('load:start', rootStart);
     });
@@ -759,38 +759,38 @@ describe('loading', function() {
 
       var func = reset();
       Backbone.history.trigger('route');
-      expect(callback).to.not.have.been.called;
-      expect(failback).to.not.have.been.called;
+      expect(callback.callCount).to.equal(0);
+      expect(failback.callCount).to.equal(0);
 
       // test new route before load complete
       fragment = "bar";
       Backbone.history.trigger('route');
-      expect(callback).to.not.have.been.called;
-      expect(failback).to.have.been.calledOnce;
+      expect(callback.callCount).to.equal(0);
+      expect(failback.callCount).to.equal(1);
 
       // make sure callback doesn't work after route has changed
       func();
-      expect(callback).to.not.have.been.called;
-      expect(failback).to.have.been.calledOnce;
+      expect(callback.callCount).to.equal(0);
+      expect(failback.callCount).to.equal(1);
 
       // make sure callback works without initial route trigger
       func = reset();
       func();
-      expect(callback).to.have.been.calledOnce;
-      expect(failback).to.not.have.been.called;
+      expect(callback.callCount).to.equal(1);
+      expect(failback.callCount).to.equal(0);
 
       // make sure callback works with initial route trigger
       func = reset();
       Backbone.history.trigger('route');
       func();
-      expect(callback).to.have.been.calledOnce;
-      expect(failback).to.not.have.been.called;
+      expect(callback.callCount).to.equal(1);
+      expect(failback.callCount).to.equal(0);
 
       // now make sure no execution happens after route change
       fragment = "bar";
       Backbone.history.trigger('route');
-      expect(callback).to.have.been.calledOnce;
-      expect(failback).to.not.have.been.called;
+      expect(callback.callCount).to.equal(1);
+      expect(failback.callCount).to.equal(0);
 
       Backbone.history.getFragment = _getFragment;
     });
@@ -903,7 +903,7 @@ describe('loading', function() {
       var server = sinon.fakeServer.create();
       var collection = new (Thorax.Collection.extend({
         url: '/test'
-      }));
+      }))();
       var spy = this.spy(function() {
         expect(arguments[0]).to.equal(collection);
       });

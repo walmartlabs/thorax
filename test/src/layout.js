@@ -153,14 +153,14 @@ describe('layout', function() {
       layoutWithTemplateWithoutLayoutTag.setView(new Thorax.View({
         template: Handlebars.compile('<div class="inner"></div>')
       }));
-    }).to['throw']();
+    }).to.throwError();
   });
 
   it("layout-element used outside of a LayoutView with throw", function() {
     var view = new Thorax.View({
       template: Handlebars.compile('{{layout-element}}')
     });
-    expect(_.bind(view.render, view)).to['throw']();
+    expect(_.bind(view.render, view)).to.throwError();
   });
 
   it("transition option can be passed to setView", function() {
