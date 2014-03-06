@@ -154,7 +154,10 @@ _.extend(Thorax.View.prototype, {
   _getInputValue: function(input /* , options, errors */) {
     if (input.type === 'checkbox' || input.type === 'radio') {
       if (input.checked) {
-        return input.getAttribute('value') || true;
+        // Under older versions of IE we see 'on' when no value is set so we want to cast this
+        // to true.
+        var value = input.getAttribute('value');
+        return (value === 'on') || value || true;
       }
     } else if (input.multiple === true) {
       var values = [];
