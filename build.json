@@ -74,6 +74,13 @@
         {"src": "test/jquery-backbone-1-0.html", "dest": "jquery-backbone-1-0/test.html"},
         {"src": "test/zepto-backbone-1-0.html", "dest": "zepto-backbone-1-0/test.html"}
       ]
+    },
+    "test-ie": {
+      "scripts": [
+        // Must be defined in distinct file from the test declaration that loads sinon itself
+        // otherwise hoisting will break the hack. Seemingly only applies to IE8 and below
+        {"src": "test/lib/sinon-ie.js", "global": true}
+      ]
     }
   },
   "mixins": [
