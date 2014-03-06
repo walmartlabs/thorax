@@ -1,4 +1,4 @@
-describe('server-marshall', function() {
+describe('server-marshal', function() {
   var $el;
 
   beforeEach(function() {
@@ -64,10 +64,10 @@ describe('server-marshall', function() {
 
         expect(function() {
           Thorax.ServerMarshal.store($el, 'array', ['foo', context.aField], [null, null]);
-        }).to['throw'](/server-marshall-object/);
+        }).to.throwError(/server-marshall-object/);
         expect(function() {
           Thorax.ServerMarshal.store($el, 'array', ['foo', context.aField]);
-        }).to['throw'](/server-marshall-object/);
+        }).to.throwError(/server-marshall-object/);
       });
     });
     describe('objects', function() {
@@ -108,7 +108,7 @@ describe('server-marshall', function() {
 
         expect(function() {
           Thorax.ServerMarshal.store($el, 'obj', {'foo': context.aField}, {});
-        }).to['throw'](/server-marshall-object/);
+        }).to.throwError(/server-marshall-object/);
       });
       it('should throw on complex values with depthed path', function() {
         var context = {
@@ -117,7 +117,7 @@ describe('server-marshall', function() {
 
         expect(function() {
           Thorax.ServerMarshal.store($el, 'obj', {'foo': context.aField}, {'foo': '../foo'});
-        }).to['throw'](/server-marshall-object/);
+        }).to.throwError(/server-marshall-object/);
       });
       it('should throw on complex values from subexpressions', function() {
         var context = {
@@ -126,7 +126,7 @@ describe('server-marshall', function() {
 
         expect(function() {
           Thorax.ServerMarshal.store($el, 'obj', {'foo': context.aField}, {'foo': true});
-        }).to['throw'](/server-marshall-object/);
+        }).to.throwError(/server-marshall-object/);
       });
 
       it('should track with contextPath', function() {
