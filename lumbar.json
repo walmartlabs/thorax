@@ -23,6 +23,7 @@
       "scripts": [
         {"src": "src/thorax.js"},
         {"src": "src/util.js"},
+        {"src": "src/server-marshal.js"},
         {"src": "src/mixin.js"},
         {"src": "src/event.js"},
         {"src": "src/helper-view.js"},

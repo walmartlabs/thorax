@@ -1,8 +1,15 @@
 /*global
     Thorax:true,
+    $serverSide,
     assignTemplate, createErrorMessage, createInheritVars, createRegistryWrapper, getValue,
-    inheritVars, resetInheritVars
+    inheritVars, resetInheritVars,
+    ServerMarshal
 */
+
+// Provide default behavior for client-failover
+if (typeof $serverSide === 'undefined') {
+  window.$serverSide = false;
+}
 
 //support zepto.forEach on jQuery
 if (!$.fn.forEach) {
@@ -135,6 +142,8 @@ Thorax.View = Backbone.View.extend({
       this.undelegateEvents();
       this.remove();  // Will call stopListening()
       this.off();     // Kills off remaining events
+
+      ServerMarshal.destroy(this.$el);
     }
 
     // Absolute worst case scenario, kill off some known fields to minimize the impact
