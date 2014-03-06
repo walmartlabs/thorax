@@ -70,7 +70,9 @@ Thorax.loadHandler = function(start, end, context) {
 
     loadInfo.events.push(object);
 
-    object.on(loadEnd, function endCallback() {
+    // Must be defined as a variable rather than a named function as a parameter as oldIE
+    // isn't able to properly remove the callback when using that syntax
+    var endCallback = function() {
       var loadingEndTimeout = self._loadingTimeoutEndDuration;
       if (loadingEndTimeout === void 0) {
         // If we are running on a non-view object pull the default timeout
@@ -106,7 +108,8 @@ Thorax.loadHandler = function(start, end, context) {
           }),
         loadingEndTimeout * 1000);
       }
-    });
+    };
+    object.on(loadEnd, endCallback);
   };
 };
 
