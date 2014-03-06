@@ -301,13 +301,13 @@ describe('collection helper', function() {
           })
         });
       },
-      template: Handlebars.compile('{{#empty posts}}empty{{else}}{{#collection posts name="outer" item-context="postsContext"}}<h2>{{title}}</h2>{{view comments}}</div>{{/collection}}{{/empty}}')
+      template: Handlebars.compile('{{#empty posts}}empty{{else}}{{#collection posts name="outer" item-context="postsContext"}}<h2>{{title}}</h2>{{view comments}}{{/collection}}{{/empty}}')
     });
     testNesting(view, 'nested view');
 
     //test with multiple inline nesting
     view = new Thorax.View({
-      template: Handlebars.compile('{{#empty posts}}empty{{else}}{{#collection posts name="outer"}}<h2>{{title}}</h2>{{#collection comments}}<p>{{comment}}</p>{{#collection authors}}<span>{{author}}</span>{{/collection}}{{/collection}}</div>{{/collection}}{{/empty}}')
+      template: Handlebars.compile('{{#empty posts}}empty{{else}}{{#collection posts name="outer"}}<h2>{{title}}</h2>{{#collection comments}}<p>{{comment}}</p>{{#collection authors}}<span>{{author}}</span>{{/collection}}{{/collection}}{{/collection}}{{/empty}}')
     });
     testNesting(view, 'nested inline');
   });
