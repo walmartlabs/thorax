@@ -311,7 +311,7 @@ Thorax.View = Backbone.View.extend({
     // or IE as both have the tendancy to mangle the elements we want to reuse
     // on cleanup. This could leak event binds if users are performing custom binds
     // but this generally not recommended.
-    if (this._renderCount && (isIE || !$.fn.jquery)) {
+    if (this._renderCount && (isIE || $.fn.jquery)) {
       while (this.el.hasChildNodes()) {
         this.el.removeChild(this.el.childNodes[0]);
       }
