@@ -157,4 +157,34 @@ describe('server-marshal', function() {
         expect(Thorax.ServerMarshal.serialize()).to.match(/"\$lut":\s*"aField"/);
     });
   });
+
+  describe('destroy', function() {
+    it('should cleanup lut', function() {
+      var $el1 = $('<div>'),
+          $el2 = $('<div>'),
+          $el3 = $('<div>');
+
+      Thorax.ServerMarshal.store($el1, 'foo', 'bar1');
+      Thorax.ServerMarshal.store($el2, 'foo', 'bar2');
+      Thorax.ServerMarshal.store($el3, 'foo', 'bar3');
+
+      expect(JSON.parse(Thorax.ServerMarshal.serialize())).to.eql([
+        {"foo": 'bar1'},
+        {"foo": 'bar2'},
+        {"foo": 'bar3'}
+      ]);
+
+      Thorax.ServerMarshal.destroy($el2);
+      expect(JSON.parse(Thorax.ServerMarshal.serialize())).to.eql([
+        {foo: 'bar1'},
+        null,
+        {foo: 'bar3'}
+      ]);
+
+      Thorax.ServerMarshal.destroy($el3);
+      expect(JSON.parse(Thorax.ServerMarshal.serialize())).to.eql([
+        {foo: 'bar1'}
+      ]);
+    });
+  });
 });
