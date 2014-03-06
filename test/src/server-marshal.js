@@ -27,7 +27,7 @@ describe('server-marshal', function() {
 
     describe('primitive values', function() {
       it('should store constants', function() {
-        ['foo', 1234, true, false, 0, '', null].forEach(function(value) {
+        _.each(['foo', 1234, true, false, 0, '', null], function(value) {
           Thorax.ServerMarshal.store($el, 'value', value);
           expect(Thorax.ServerMarshal.load($el[0], 'value')).to.eql(value);
         });
