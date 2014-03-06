@@ -40,12 +40,6 @@
       ]
     },
 
-    "thorax-ie": {
-      "scripts": [
-        {"src": "src/ie.js"}
-      ]
-    },
-
     "thorax-helper-tags": {
       "scripts": [
         {"src": "src/helpers/button-link.js"},
