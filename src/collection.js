@@ -148,8 +148,8 @@ Thorax.CollectionView = Thorax.View.extend({
         itemView = '<div>' + itemView + '</div>';
       }
       var itemElement = itemView.$el || $($.trim(itemView)).filter(function() {
-        //filter out top level whitespace nodes
-        return this.nodeType === ELEMENT_NODE_TYPE;
+        // Only output nodes. DOM || Fruit Loops
+        return this.nodeType === ELEMENT_NODE_TYPE || this.type === 'tag';
       });
 
       if (model) {
