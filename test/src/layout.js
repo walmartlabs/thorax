@@ -29,7 +29,7 @@ describe('layout', function() {
 
     var layout = new Thorax.LayoutView();
 
-    expect(layout.getView()).to.not.exist;
+    expect(layout.getView()).to.not.be.ok();
 
     layout.setView(a);
     expect(layout.getView()).to.equal(a, 'layout sets view');
@@ -49,11 +49,11 @@ describe('layout', function() {
     expect(bEventCounter.rendered).to.equal(1, 'lifecycle event: rendered');
     expect(bEventCounter.activated).to.equal(1, 'lifecycle event: activated');
     expect(bEventCounter.ready).to.equal(1, 'lifecycle event: ready');
-    expect(bEventCounter.deactivated).to.not.be.ok;
-    expect(bEventCounter.destroyed).to.not.be.ok;
+    expect(bEventCounter.deactivated).to.not.be.ok();
+    expect(bEventCounter.destroyed).to.not.be.ok();
 
     layout.setView(false);
-    expect(layout.getView()).to.not.exist;
+    expect(layout.getView()).to.not.be.ok();
     expect(bEventCounter.rendered).to.equal(1, 'lifecycle event: rendered');
     expect(bEventCounter.activated).to.equal(1, 'lifecycle event: activated');
     expect(bEventCounter.ready).to.equal(1, 'lifecycle event: ready');
@@ -142,7 +142,7 @@ describe('layout', function() {
     layoutWithTemplate.setView(new Thorax.View({
       template: Handlebars.compile('<div class="inner"></div>')
     }));
-    expect($(layoutWithTemplate.el).attr('data-layout-cid')).to.not.exist;
+    expect($(layoutWithTemplate.el).attr('data-layout-cid')).to.not.be.ok();
     expect(layoutWithTemplate.$('[data-layout-cid]').length).to.equal(1);
     expect(layoutWithTemplate.$('.outer').length).to.equal(1);
     expect(layoutWithTemplate.$('.inner').length).to.equal(1);

@@ -2,7 +2,7 @@
 describe('collection helper', function() {
   it('should have access to handlebars noop', function() {
     // Explicit verification that Handlebars is exposing this field.
-    expect(Handlebars.VM.noop).to.exist;
+    expect(Handlebars.VM.noop).to.be.ok();
   });
 
   it('should allow use of expand-tokens', function() {

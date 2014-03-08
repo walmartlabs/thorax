@@ -101,12 +101,12 @@ describe('loading', function() {
           view = new Thorax.View({name: 'food', render: function() {}, model: model});
       view.on('load:start', spy);
 
-      expect($(view.el).hasClass('loading')).to.be['false'];
+      expect($(view.el).hasClass('loading')).to.be(false);
       model.loadStart();
 
       this.clock.tick(1000);
       expect(spy.callCount).to.equal(1);
-      expect($(view.el).hasClass('loading')).to.be['true'];
+      expect($(view.el).hasClass('loading')).to.be(true);
     });
     it('views should see load start from collection', function() {
       var spy = this.spy(),
@@ -119,13 +119,13 @@ describe('loading', function() {
       view.bindDataObject('collection', view.myCollection);
       view.on('load:start', spy);
       view.render();
-      expect($(view.el).hasClass('loading')).to.be['false'];
+      expect($(view.el).hasClass('loading')).to.be(false);
       collection.loadStart();
 
       this.clock.tick(1000);
       expect(spy.callCount).to.equal(1);
 
-      expect($(view.el).hasClass('loading')).to.be['true'];
+      expect($(view.el).hasClass('loading')).to.be(true);
     });
     it('views should not see load start after release', function() {
       var spy = this.spy(),
@@ -133,14 +133,14 @@ describe('loading', function() {
           view = new Thorax.View({name: 'food', render: function() {}, model: model});
       view.on('load:start', spy);
 
-      expect($(view.el).hasClass('loading')).to.be['false'];
+      expect($(view.el).hasClass('loading')).to.be(false);
       view.release();
 
       model.loadStart();
 
       this.clock.tick(1000);
       expect(spy.callCount).to.equal(0);
-      expect($(view.el).hasClass('loading')).to.be['false'];
+      expect($(view.el).hasClass('loading')).to.be(false);
     });
 
     it('views should see load end from model', function() {
@@ -155,7 +155,7 @@ describe('loading', function() {
       this.clock.tick(1000);
 
       expect(spy.callCount).to.equal(1);
-      expect($(view.el).hasClass('loading')).to.be['false'];
+      expect($(view.el).hasClass('loading')).to.be(false);
     });
     it('views should see load end from collection', function() {
       var collection = new Thorax.Collection({url: 'foo'});
@@ -174,7 +174,7 @@ describe('loading', function() {
       this.clock.tick(1000);
 
       expect(spy.callCount).to.equal(1);
-      expect($(view.el).hasClass('loading')).to.be['false'];
+      expect($(view.el).hasClass('loading')).to.be(false);
     });
     it('views should see load end after release', function() {
       var spy = this.spy(),
@@ -183,11 +183,11 @@ describe('loading', function() {
           endSpy = this.spy(view, 'onLoadEnd');
       view.on('load:start', spy);
 
-      expect($(view.el).hasClass('loading')).to.be['false'];
+      expect($(view.el).hasClass('loading')).to.be(false);
       model.loadStart();
       this.clock.tick(1000);
 
-      expect($(view.el).hasClass('loading')).to.be['true'];
+      expect($(view.el).hasClass('loading')).to.be(true);
       view.release();
 
       model.loadEnd();
@@ -196,7 +196,7 @@ describe('loading', function() {
       this.clock.tick(1000);
       expect(spy.callCount).to.equal(1);
       expect(endSpy.callCount).to.equal(1);
-      expect($(view.el).hasClass('loading')).to.be['false'];
+      expect($(view.el).hasClass('loading')).to.be(false);
     });
   });
 
@@ -582,7 +582,7 @@ describe('loading', function() {
       expect(success.callCount).to.equal(0);
       expect(failback.callCount).to.equal(1);
       expect(failback.calledWith(true)).to.equal(true);
-      expect(this.model.fetchQueue).to.not.exist;
+      expect(this.model.fetchQueue).to.not.be.ok();
       expect(this.startSpy.callCount).to.equal(1);
       expect(this.endSpy.callCount).to.equal(1);
     });
@@ -728,7 +728,7 @@ describe('loading', function() {
 
       this.clock.tick(10);
 
-      expect(this.requests).to.be.empty;
+      expect(this.requests).to.be.empty();
       expect(success.callCount).to.equal(1);
       expect(failback.callCount).to.equal(0);
       expect(rootStart.callCount).to.equal(0);
@@ -871,7 +871,7 @@ describe('loading', function() {
       expect(collectionLoadingTemplateView.$('li').length).to.equal(3);
       expect(collectionLoadingTemplateView.$('li.empty-item').length).to.equal(0);
       expect(collectionLoadingTemplateView.$('li.loading-item').length).to.equal(1);
-      expect($(collectionLoadingTemplateView.$('li')[2]).hasClass('loading-item')).to.be['true'];
+      expect($(collectionLoadingTemplateView.$('li')[2]).hasClass('loading-item')).to.be(true);
       collectionLoadingTemplateView.myCollection.add([{"number": "three"}, {"number": "four"}]);
       collectionLoadingTemplateView.myCollection.loadEnd();
       this.clock.tick(loadEndTimeout);
@@ -896,7 +896,7 @@ describe('loading', function() {
           options = collectionView.getObjectOptions(collectionView.collection);
       expect(options.ignoreErrors).to.equal(true);
       expect(options.background).to.equal(true);
-      expect(view.$el.hasClass('loading')).to.be['true'];
+      expect(view.$el.hasClass('loading')).to.be(true);
     });
 
     it("load callback should be called with collection and not array", function() {

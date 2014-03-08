@@ -2,30 +2,30 @@ describe('model', function() {
   it("shouldFetch", function() {
     var options = {fetch: true};
     var a = new (Thorax.Model.extend())();
-    expect(a.shouldFetch(options)).to.not.be.ok;
+    expect(a.shouldFetch(options)).to.not.be.ok();
 
     var b = new (Thorax.Model.extend({urlRoot: '/'}))();
-    expect(b.shouldFetch(options)).to.be['true'];
+    expect(b.shouldFetch(options)).to.be(true);
 
     var c = new (Thorax.Model.extend({urlRoot: '/'}))();
     c.set({key: 'value'});
-    expect(c.shouldFetch(options)).to.not.be.ok;
+    expect(c.shouldFetch(options)).to.not.be.ok();
 
     var d = new (Thorax.Collection.extend())();
-    expect(d.shouldFetch(options)).to.not.be.ok;
+    expect(d.shouldFetch(options)).to.not.be.ok();
 
     var e = new (Thorax.Collection.extend({url: '/'}))();
-    expect(e.shouldFetch(options)).to.be['true'];
+    expect(e.shouldFetch(options)).to.be(true);
 
     var f = new (Thorax.Collection.extend({url: '/'}))();
-    expect(e.shouldFetch({fetch: false})).to.be['false'];
+    expect(e.shouldFetch({fetch: false})).to.be(false);
   });
 
   it("allow model url to be a string", function() {
     var model = new (Thorax.Model.extend({
       url: '/test'
     }));
-    expect(model.shouldFetch({fetch: true})).to.be['true'];
+    expect(model.shouldFetch({fetch: true})).to.be(true);
   });
 
   describe('model view binding', function() {
@@ -87,17 +87,17 @@ describe('model', function() {
         template: template,
         model: new Thorax.Model({letter: 'foo-gazi'})
       });
-      expect(a.el.firstChild).to.not.exist;
+      expect(a.$el.children()).to.be.empty();
       a.setModel(model);
-      expect(a.el.firstChild).to.not.exist;
+      expect(a.$el.children()).to.be.empty();
       a.render();
       expect(a.el.firstChild.innerHTML).to.equal('a', 'set via constructor');
     });
   });
 
   it("isPopulated", function() {
-    expect((new Thorax.Model()).isPopulated()).to.be['false'];
-    expect((new Thorax.Model({key: 'value'})).isPopulated()).to.be['true'];
+    expect((new Thorax.Model()).isPopulated()).to.be(false);
+    expect((new Thorax.Model({key: 'value'})).isPopulated()).to.be(true);
   });
 
   it("$.fn.model", function() {

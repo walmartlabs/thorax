@@ -49,9 +49,9 @@ describe('core', function() {
     expect($('#test-target-container > #test-target')[0].innerHTML).to.equal('testing123');
     expect(view.el.parentNode).to.equal($('#test-target-container')[0]);
     view.release();
-    expect($('#test-target-container > #test-target')[0]).to.be['undefined'];
+    expect($('#test-target')).to.be.empty();
     view.render();
-    expect($('#test-target-container > #test-target')[0]).to.be['undefined'];
+    expect($('#test-target')).to.be.empty();
     $('#test-target-container').remove();
   });
 
@@ -112,7 +112,7 @@ describe('core', function() {
   it("returns context on render()", function () {
     $('body').append('<div id="test-target-container"><div id="test-target"></div></div>');
 
-    view = new Thorax.View({
+    var view = new Thorax.View({
       template: function() { return 'testing123'; },
       el: $('#test-target')[0]
     });
@@ -303,8 +303,8 @@ describe('core', function() {
         template: Handlebars.compile('{{modifyObject a}}{{modifyObject b}}')
       });
       view.render();
-      expect(view.a.mutated).to.be['undefined'];
-      expect(view.model.attributes.b.mutated).to.be['undefined'];
+      expect(view.a.mutated).to.be(undefined);
+      expect(view.model.attributes.b.mutated).to.be(undefined);
       expect(view.html()).to.equal('ab');
     });
 

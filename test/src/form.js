@@ -56,7 +56,7 @@ describe('form', function() {
     view.on('invalid', function() {
       ++invalidCallbackCallCount;
     });
-    expect(view.serialize()).to.be.undefined;
+    expect(view.serialize()).to.be(undefined);
     expect(invalidCallbackCallCount).to.equal(1, 'invalid event triggered when validateInput returned errors');
   });
 

@@ -16,8 +16,8 @@ describe('collection', function() {
   Thorax.View.extend({name: 'letter-empty'});
 
   it("should implement isPopulated", function() {
-    expect(letterCollection.isPopulated()).to.be['true'];
-    expect(letterCollection.at(0).isPopulated()).to.be['true'];
+    expect(letterCollection.isPopulated()).to.be(true);
+    expect(letterCollection.at(0).isPopulated()).to.be(true);
   });
 
   describe('collection view binding', function() {
@@ -158,12 +158,12 @@ describe('collection', function() {
         collection: new (Thorax.Collection.extend({url: false}))()
       });
       view.render();
-      expect(view.$('ul').hasClass('a')).to.be['true'];
+      expect(view.$('ul').hasClass('a')).to.be(true);
       var model = new Thorax.Model({key: 'value'});
       view.collection.add(model);
-      expect(view.$('ul').hasClass('a')).to.be['false'];
+      expect(view.$('ul').hasClass('a')).to.be(false);
       view.collection.remove(model);
-      expect(view.$('ul').hasClass('a')).to.be['true'];
+      expect(view.$('ul').hasClass('a')).to.be(true);
 
       //with default arg
       view = new Thorax.View({
@@ -171,12 +171,12 @@ describe('collection', function() {
         collection: new (Thorax.Collection.extend({url: false}))()
       });
       view.render();
-      expect(view.$('ul').hasClass('empty')).to.be['true'];
+      expect(view.$('ul').hasClass('empty')).to.be(true);
       var model = new Thorax.Model({key: 'value'});
       view.collection.add(model);
-      expect(view.$('ul').hasClass('empty')).to.be['false'];
+      expect(view.$('ul').hasClass('empty')).to.be(false);
       view.collection.remove(model);
-      expect(view.$('ul').hasClass('empty')).to.be['true'];
+      expect(view.$('ul').hasClass('empty')).to.be(true);
     });
   });
 
@@ -772,7 +772,7 @@ function runCollectionTests(view, indexMultiplier) {
       expect(view.$('[data-model-cid="' + model.cid + '"]').length).to.equal(1 * indexMultiplier, 'match CIDs');
     });
   }
-  expect(view.el.firstChild).to.not.exist;
+  expect(view.el.firstChild).to.not.be.ok();
 
   var LetterModel = Thorax.Model.extend({});
   var items = _.map(['a', 'b', 'c', 'd'], function(letter) {
