@@ -1,6 +1,9 @@
 describe('core', function() {
   Backbone.history || (Backbone.history = new Backbone.History());
-  Backbone.history.start();
+  Backbone.history.options = {
+    root: '/'
+  };
+  Backbone.history.root = '/';
 
   Handlebars.templates.parent = Handlebars.compile('<div>{{view child}}</div>');
   Handlebars.templates.child = Handlebars.compile('<div>{{value}}</div>');
