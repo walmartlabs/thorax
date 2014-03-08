@@ -164,8 +164,8 @@ Thorax.CollectionView = Thorax.View.extend({
         last.after(itemElement);
       }
 
-      this.trigger('append', null, function(el) {
-        el.setAttribute(modelCidAttributeName, model.cid);
+      this.trigger('append', null, function($el) {
+        $el.attr(modelCidAttributeName, model.cid);
       });
 
       if (!options.silent) {

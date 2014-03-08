@@ -199,7 +199,7 @@ function helperAppend(scope, callback) {
         view.ensureRendered();
       }
       $el.replaceWith(view.el);
-      callback && callback(view.el);
+      callback && callback(view.$el);
     }
   }, this);
 }
