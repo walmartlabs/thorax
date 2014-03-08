@@ -42,7 +42,7 @@ describe('model', function() {
         model: model
       });
       a.render();
-      expect(a.el.firstChild.innerHTML).to.equal('a', 'set via constructor');
+      expect(a.$el.children().eq(0).html()).to.equal('a', 'set via constructor');
     });
     it('should update on setModel', function() {
       var b = new Thorax.View({
@@ -50,14 +50,14 @@ describe('model', function() {
       });
       b.render();
       b.setModel(model);
-      expect(b.el.firstChild.innerHTML).to.equal('a', 'set via setModel');
+      expect(b.$el.children().eq(0).html()).to.equal('a', 'set via setModel');
     });
     it('should update on setModel', function() {
       var b = new Thorax.View({
         template: template
       });
       b.setModel(model, {render: true});
-      expect(b.el.firstChild.innerHTML).to.equal('a', 'set via setModel');
+      expect(b.$el.children().eq(0).html()).to.equal('a', 'set via setModel');
     });
 
     it('should update on change', function() {
@@ -67,7 +67,7 @@ describe('model', function() {
       });
       a.render();
       model.set({letter: 'B'});
-      expect(a.el.firstChild.innerHTML).to.equal('B', 'update attribute triggers render');
+      expect(a.$el.children().eq(0).html()).to.equal('B', 'update attribute triggers render');
     });
 
     it('should defer existing render', function() {
@@ -78,9 +78,9 @@ describe('model', function() {
       c.setModel(model, {
         render: false
       });
-      expect(c.el.firstChild.innerHTML).to.equal('');
+      expect(c.$el.children().eq(0).html()).to.equal('');
       c.render();
-      expect(c.el.firstChild.innerHTML).to.equal('a', 'manual render');
+      expect(c.$el.children().eq(0).html()).to.equal('a', 'manual render');
     });
     it('should defer new render', function() {
       var a = new Thorax.View({
@@ -91,7 +91,7 @@ describe('model', function() {
       a.setModel(model);
       expect(a.$el.children()).to.be.empty();
       a.render();
-      expect(a.el.firstChild.innerHTML).to.equal('a', 'set via constructor');
+      expect(a.$el.children().eq(0).html()).to.equal('a', 'set via constructor');
     });
   });
 

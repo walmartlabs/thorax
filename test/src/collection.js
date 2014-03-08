@@ -185,13 +185,13 @@ describe('collection', function() {
       //zepto does not support the :visible selector, so emulate
       function isVisible(elem) {
         elem = $(elem);
-        return !!(elem.width() || elem.height()) && elem.css("display") !== "none";
+        return !!($serverSide || elem.width() || elem.height()) && elem.css("display") !== "none";
       }
 
       function filterVisible(arr) {
-        return _.select(arr, function(el) {
+        return $(_.select(arr, function(el) {
           return isVisible(el);
-        });
+        }));
       }
 
       var view = new Thorax.View({
@@ -202,40 +202,40 @@ describe('collection', function() {
         }
       });
       view.render();
-      document.body.appendChild(view.el);
+      $('body').append(view.el);
       expect(filterVisible(view.$('li')).length).to.equal(0);
       var a = new Thorax.Model({key: 'a'});
       view.collection.reset([a]);
       expect(filterVisible(view.$('li')).length).to.equal(1);
-      expect(filterVisible(view.$('li'))[0].innerHTML).to.equal('a');
+      expect(filterVisible(view.$('li')).eq(0).html()).to.equal('a');
       var b = new Thorax.Model({key: 'b'});
       view.collection.add(b);
       expect(filterVisible(view.$('li')).length).to.equal(2);
-      expect(filterVisible(view.$('li'))[1].innerHTML).to.equal('b');
+      expect(filterVisible(view.$('li')).eq(1).html()).to.equal('b');
       var c = new Thorax.Model({key: 'c'});
       view.collection.add(c);
       expect(filterVisible(view.$('li')).length).to.equal(2, 'add item that should not be included');
-      expect(filterVisible(view.$('li'))[1].innerHTML).to.equal('b', 'add item that should not be included');
+      expect(filterVisible(view.$('li')).eq(1).html()).to.equal('b', 'add item that should not be included');
       c.set({key: 'b'});
       expect(filterVisible(view.$('li')).length).to.equal(3, 'set item not included to be included');
-      expect(filterVisible(view.$('li'))[1].innerHTML).to.equal('b', 'set item not included to be included');
-      expect(filterVisible(view.$('li'))[2].innerHTML).to.equal('b', 'set item not included to be included');
+      expect(filterVisible(view.$('li')).eq(1).html()).to.equal('b', 'set item not included to be included');
+      expect(filterVisible(view.$('li')).eq(2).html()).to.equal('b', 'set item not included to be included');
       c.set({key: 'c'});
       expect(filterVisible(view.$('li')).length).to.equal(2, 'set item that is included to not be included');
-      expect(filterVisible(view.$('li'))[1].innerHTML).to.equal('b', 'set item that is included to not be included');
+      expect(filterVisible(view.$('li')).eq(1).html()).to.equal('b', 'set item that is included to not be included');
       a.set({key: 'x'});
       expect(filterVisible(view.$('li')).length).to.equal(1, 'set first included item to not be included');
-      expect(filterVisible(view.$('li'))[0].innerHTML).to.equal('b', 'set first included item to not be included');
+      expect(filterVisible(view.$('li')).eq(0).html()).to.equal('b', 'set first included item to not be included');
       a.set({key: 'a'});
       expect(filterVisible(view.$('li')).length).to.equal(2);
-      expect(filterVisible(view.$('li'))[0].innerHTML).to.equal('a', 'set first item not included to be included');
-      expect(filterVisible(view.$('li'))[1].innerHTML).to.equal('b', 'set first item not included to be included');
+      expect(filterVisible(view.$('li')).eq(0).html()).to.equal('a', 'set first item not included to be included');
+      expect(filterVisible(view.$('li')).eq(1).html()).to.equal('b', 'set first item not included to be included');
       a.set({key: 'a'});
-      expect(filterVisible(view.$('li'))[0].innerHTML).to.equal('a', 'items maintain order when updated when filter is present');
-      expect(filterVisible(view.$('li'))[1].innerHTML).to.equal('b', 'items maintain order when updated when filter is present');
+      expect(filterVisible(view.$('li')).eq(0).html()).to.equal('a', 'items maintain order when updated when filter is present');
+      expect(filterVisible(view.$('li')).eq(1).html()).to.equal('b', 'items maintain order when updated when filter is present');
       b.set({key: 'b'});
-      expect(filterVisible(view.$('li'))[0].innerHTML).to.equal('a', 'items maintain order when updated when filter is present');
-      expect(filterVisible(view.$('li'))[1].innerHTML).to.equal('b', 'items maintain order when updated when filter is present');
+      expect(filterVisible(view.$('li')).eq(0).html()).to.equal('a', 'items maintain order when updated when filter is present');
+      expect(filterVisible(view.$('li')).eq(1).html()).to.equal('b', 'items maintain order when updated when filter is present');
       view.$el.remove();
     });
 
@@ -540,14 +540,14 @@ describe('collection', function() {
       // as in IE only we will clone the node. In other browsers will
       // use the same node, but don't want to do browser conditional
       // unit tests
-      var oldUlHTML = view.$('ul')[0].innerHTML;
+      var oldUlHTML = view.$('ul').eq(0).html();
       expect(spy.callCount).to.equal(2, 'without collection helper before render');
       expect(view.$('ul').length).to.equal(1, 'without collection helper before render');
       expect(view.$('li').length).to.equal(2, 'without collection helper before render');
 
       view.render();
       expect(spy.callCount).to.equal(2, 'without collection helper after render');
-      expect(oldUlHTML).to.equal(view.$('ul')[0].innerHTML, 'without collection helper after render');
+      expect(oldUlHTML).to.equal(view.$('ul').eq(0).html(), 'without collection helper after render');
       expect(view.$('ul').length).to.equal(1, 'without collection helper after render');
       expect(view.$('li').length).to.equal(2, 'without collection helper after render');
       spy.callCount = 0;
@@ -803,7 +803,7 @@ function runCollectionTests(view, indexMultiplier) {
   view.collection = letterCollection;
   view.render();
   expect(view.$('li').length).to.equal(4 * indexMultiplier, 'rendered node length matches collection length');
-  expect(view.$('li')[0 * indexMultiplier].innerHTML + view.$('li')[3 * indexMultiplier].innerHTML).to.equal('ad', 'rendered nodes in correct order');
+  expect(view.$('li').eq(0 * indexMultiplier).html() + view.$('li').eq(3 * indexMultiplier).html()).to.equal('ad', 'rendered nodes in correct order');
   expect(renderedCount).to.equal(1, 'rendered event count');
   expect(renderedCollectionCount).to.equal(1, 'rendered:collection event count');
   expect(renderedItemCount).to.equal(4, 'rendered:item event count');
@@ -812,13 +812,13 @@ function runCollectionTests(view, indexMultiplier) {
 
   //reorder
   letterCollection.remove(letterCollection.at(0));
-  expect(view.$('li')[0 * indexMultiplier].innerHTML + view.$('li')[2 * indexMultiplier].innerHTML).to.equal('bd', 'rendered nodes in correct order');
+  expect(view.$('li').eq(0 * indexMultiplier).html() + view.$('li').eq(2 * indexMultiplier).html()).to.equal('bd', 'rendered nodes in correct order');
   letterCollection.remove(letterCollection.at(2));
-  expect(view.$('li')[0 * indexMultiplier].innerHTML + view.$('li')[1 * indexMultiplier].innerHTML).to.equal('bc', 'rendered nodes in correct order');
+  expect(view.$('li').eq(0 * indexMultiplier).html() + view.$('li').eq(1 * indexMultiplier).html()).to.equal('bc', 'rendered nodes in correct order');
   letterCollection.add(new LetterModel({letter: 'e'}));
-  expect(view.$('li')[2 * indexMultiplier].innerHTML).to.equal('e', 'collection and nodes maintain sort order');
+  expect(view.$('li').eq(2 * indexMultiplier).html()).to.equal('e', 'collection and nodes maintain sort order');
   letterCollection.add(new LetterModel({letter: 'a'}), {at: 0});
-  expect(view.$('li')[0 * indexMultiplier].innerHTML).to.equal('a', 'collection and nodes maintain sort order');
+  expect(view.$('li').eq(0 * indexMultiplier).html()).to.equal('a', 'collection and nodes maintain sort order');
   expect(renderedCount).to.equal(1, 'rendered event count');
   expect(renderedCollectionCount).to.equal(1, 'rendered:collection event count');
   expect(renderedItemCount).to.equal(6, 'rendered:item event count');
@@ -827,11 +827,11 @@ function runCollectionTests(view, indexMultiplier) {
 
   //empty
   letterCollection.remove(letterCollection.models);
-  expect(view.$('li')[0].innerHTML).to.equal('empty', 'empty collection renders empty');
+  expect(view.$('li').eq(0).html()).to.equal('empty', 'empty collection renders empty');
   letterCollection.add(new LetterModel({letter: 'a'}));
 
   expect(view.$('li').length).to.equal(1 * indexMultiplier, 'transition from empty to one item');
-  expect(view.$('li')[0 * indexMultiplier].innerHTML).to.equal('a', 'transition from empty to one item');
+  expect(view.$('li').eq(0 * indexMultiplier).html()).to.equal('a', 'transition from empty to one item');
   expect(renderedCount).to.equal(1, 'rendered event count');
   expect(renderedCollectionCount).to.equal(1, 'rendered:collection event count');
   expect(renderedItemCount).to.equal(7, 'rendered:item event count');
@@ -847,5 +847,5 @@ function runCollectionTests(view, indexMultiplier) {
 
   letterCollection.remove(letterCollection.models);
   expect(renderedEmptyCount).to.equal(1, 'rendered:empty event count');
-  expect(view.$('li')[0 * indexMultiplier].innerHTML).to.equal('a', 'transition from empty to one item after freeze');
+  expect(view.$('li').eq(0 * indexMultiplier).html()).to.equal('a', 'transition from empty to one item after freeze');
 }

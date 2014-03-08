@@ -9,7 +9,7 @@ describe('layout', function() {
     a.bind('all', function(eventName) {
       // For activated, ensure that we actually have DOM content
       if (eventName === 'activated') {
-        expect(this.el.innerHTML.length).to.be.greaterThan(0);
+        expect(this.html().length).to.be.greaterThan(0);
       }
 
       aEventCounter[eventName] || (aEventCounter[eventName] = 0);
@@ -131,7 +131,7 @@ describe('layout', function() {
       el: $('#test-target')[0]
     });
     view.render();
-    expect(view.el.parentNode).to.equal($('#test-target-container')[0]);
+    expect(view.$el.parent()[0]).to.equal($('#test-target-container')[0]);
     $('#test-target-container').remove();
   });
 

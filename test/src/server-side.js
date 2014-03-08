@@ -10,9 +10,14 @@ describe('serverSide', function() {
           return 'foo';
         }
       });
+      $('body').append(view.$el);
 
-      view.$el.trigger('click');
+      // Success under fruit-loops is not throwing above
+      // Under other environments, it's not triggering the handler
+      view.$el.trigger && view.$el.trigger('click');
       expect(spy.called).to.be(false);
+
+      view.release();
     });
   });
 });

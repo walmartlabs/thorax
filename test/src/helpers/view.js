@@ -220,13 +220,13 @@ describe('view helper', function() {
       template: Handlebars.compile("{{view child}}")
     });
     parent.render();
-    document.body.appendChild(parent.el);
+    $('body').append(parent.el);
     parent.child.$('.test').trigger('click');
     expect(callCount).to.equal(1);
     parent.render();
     parent.child.$('.test').trigger('click');
     expect(callCount).to.equal(2);
-    $(parent.el).remove();
+    parent.$el.remove();
   });
 
   it("$.fn.view", function() {

@@ -58,17 +58,17 @@ describe('empty helper', function() {
     expect(a.$('.empty').html()).to.equal('empty');
     a.letters.reset(_.clone(letterCollection.models));
     expect(a.$('.empty').length).to.equal(0);
-    expect(a.$('[data-collection-cid] div')[0].innerHTML).to.equal('a');
+    expect(a.$('[data-collection-cid] div').eq(0).html()).to.equal('a');
     var b = new Thorax.View({
       template: Handlebars.compile('{{#empty letters}}<div class="empty">empty a</div>{{/empty}}{{#collection letters}}{{letter}}{{else}}empty b{{/collection}}'),
       letters: new Thorax.Collection()
     });
     b.render();
     expect(b.$('.empty').html()).to.equal('empty a');
-    expect(b.$('[data-collection-cid] div')[0].innerHTML).to.equal('empty b');
+    expect(b.$('[data-collection-cid] div').eq(0).html()).to.equal('empty b');
     b.letters.reset(letterCollection.models);
     expect(b.$('.empty').length).to.equal(0);
-    expect(b.$('[data-collection-cid] div')[0].innerHTML).to.equal('a');
+    expect(b.$('[data-collection-cid] div').eq(0).html()).to.equal('a');
   });
 
   it("multiple empty helpers binding the same object will not cause multiple renders", function() {

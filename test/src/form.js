@@ -93,9 +93,9 @@ describe('form', function() {
         children: false
       }
     });
-    expect(view.$('input[name="parentKey"]')[0].value).to.equal('parentValue');
-    expect(view.$('input[name="childKey"]')[1].value).to.equal('childValue');
-    expect(view.$('input[name="childKey"]')[0].value).to.equal('');
+    expect(view.$('input[name="parentKey"]').eq(0).val()).to.equal('parentValue');
+    expect(view.$('input[name="childKey"]').eq(1).val()).to.equal('childValue');
+    expect(view.$('input[name="childKey"]').eq(0).val()).to.equal('');
 
     view.populate({
       parentKey: '',
@@ -104,18 +104,18 @@ describe('form', function() {
     view.populate(model.attributes, {
       children: false
     });
-    expect(view.$('input[name="parentKey"]')[0].value).to.equal('parentValue');
-    expect(view.$('input[name="childKey"]')[1].value).to.equal('childValue');
-    expect(view.$('input[name="childKey"]')[0].value).to.equal('');
+    expect(view.$('input[name="parentKey"]').eq(0).val()).to.equal('parentValue');
+    expect(view.$('input[name="childKey"]').eq(1).val()).to.equal('childValue');
+    expect(view.$('input[name="childKey"]').eq(0).val()).to.equal('');
 
-    view.$('input[name="childKey"]')[0].value = 'childValue';
+    view.$('input[name="childKey"]').eq(0).val('childValue');
 
     //multuple childKey inputs should be serialized so there should be an array
     expect(view.serialize({
       children: true
     }).childKey[0]).to.equal('childValue');
 
-    view.$('input[name="childKey"]')[0].value = '';
+    view.$('input[name="childKey"]').eq(0).val('');
 
     //no children so only one childKey
     expect(view.serialize({
@@ -182,9 +182,9 @@ describe('form', function() {
     view.render(); // Should trigger another data population with user data
 
     // Expect the user input to persist
-    expect(view.$('input[name="merge"]')[0].value).to.equal('test-merge');
-    expect(view.$('input[name="test"]')[0].value).to.equal('test');
-    expect(view.$('input[name="nested[test]"]')[0].value).to.equal('test-nested');
+    expect(view.$('input[name="merge"]').eq(0).val()).to.equal('test-merge');
+    expect(view.$('input[name="test"]').eq(0).val()).to.equal('test');
+    expect(view.$('input[name="nested[test]"]').eq(0).val()).to.equal('test-nested');
 
     // Expect the events to not have fired
     expect(populateSpy.callCount).to.equal(2);
@@ -225,9 +225,9 @@ describe('form', function() {
     view.setModel(model); // Should trigger another data population with user data
 
     // Expect the user input to persist
-    expect(view.$('input[name="merge"]')[0].value).to.equal('');
-    expect(view.$('input[name="test"]')[0].value).to.equal('win');
-    expect(view.$('input[name="nested[test]"]')[0].value).to.equal('win');
+    expect(view.$('input[name="merge"]').eq(0).val()).to.not.be.ok();
+    expect(view.$('input[name="test"]').eq(0).val()).to.equal('win');
+    expect(view.$('input[name="nested[test]"]').eq(0).val()).to.equal('win');
   });
 
   it('should not populate missing fields', function() {
@@ -245,7 +245,7 @@ describe('form', function() {
     view.render();
 
     // Expect the user input to persist
-    expect(view.$('input[name="nested[test]"]')[0].value).to.equal('');
+    expect(view.$('input[name="nested[test]"]').eq(0).val()).to.not.be.ok();
   });
 
   it('works when calling render before binding the model', function() {
@@ -260,7 +260,7 @@ describe('form', function() {
       }
     });
     var view = new FormView({model: new Thorax.Model({test: 'test'})});
-    expect(view.$('input[name="test"]')[0].value).to.equal('test');
+    expect(view.$('input[name="test"]').eq(0).val()).to.equal('test');
   });
 
   it('should populate on model change', function() {
@@ -269,10 +269,10 @@ describe('form', function() {
 
     view.setModel(model);
     view.render();
-    expect(view.$('input[name="one"]')[0].value).to.equal('');
+    expect(view.$('input[name="one"]').eq(0).val()).to.not.be.ok();
 
     model.set('one', 'foo');
-    expect(view.$('input[name="one"]')[0].value).to.equal('foo');
+    expect(view.$('input[name="one"]').eq(0).val()).to.equal('foo');
   });
 
   it('should serialize checkboxes without values', function() {
