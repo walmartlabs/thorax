@@ -76,6 +76,10 @@ describe('button-link helpers', function() {
   });
 
   it('nested prevent default', function (done) {
+    if ($serverSide) {
+      return done();
+    }
+
     var spy = this.spy(),
         view = new Thorax.View({
           template: Handlebars.compile('{{#link "test"}}<span>text</span>{{/link}}')

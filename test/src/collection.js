@@ -621,6 +621,11 @@ describe('collection', function() {
 
 describe('collection view', function() {
   it('collection loaded via load() will be rendered', function() {
+    if ($serverSide) {
+      // Not going to attempt to mock AJAX requests within fruit loops environments.
+      return;
+    }
+
     var spy = this.spy();
     var server = sinon.fakeServer.create();
     var collection = new (Thorax.Collection.extend({

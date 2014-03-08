@@ -26,6 +26,10 @@ describe('server-marshal', function() {
     });
 
     describe('primitive values', function() {
+      if ($serverSide) {
+        return;
+      }
+
       it('should store constants', function() {
         _.each(['foo', 1234, true, false, 0, '', null], function(value) {
           Thorax.ServerMarshal.store($el, 'value', value);
@@ -43,6 +47,10 @@ describe('server-marshal', function() {
       });
     });
     describe('arrays', function() {
+      if ($serverSide) {
+        return;
+      }
+
       it('should store constant children', function() {
         Thorax.ServerMarshal.store($el, 'array', ['foo', 1234, true, false, 0, '', null]);
         expect(Thorax.ServerMarshal.load($el[0], 'array')).to.eql(['foo', 1234, true, false, 0, '', null]);
@@ -71,6 +79,10 @@ describe('server-marshal', function() {
       });
     });
     describe('objects', function() {
+      if ($serverSide) {
+        return;
+      }
+
       it('should store constant children', function() {
         Thorax.ServerMarshal.store($el, 'obj', {
           thing1: 'foo',

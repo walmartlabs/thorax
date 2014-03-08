@@ -205,6 +205,10 @@ describe('view helper', function() {
   });
 
   it("child view re-render will keep dom events intact", function() {
+    if ($serverSide) {
+      return;
+    }
+
     var callCount = 0;
     var parent = new Thorax.View({
       name: 'parent-event-dom-test',
