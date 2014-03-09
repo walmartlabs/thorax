@@ -1,3 +1,5 @@
+/*global $serverSide */
+
 describe('model', function() {
   it("shouldFetch", function() {
     var options = {fetch: true};
@@ -24,7 +26,7 @@ describe('model', function() {
   it("allow model url to be a string", function() {
     var model = new (Thorax.Model.extend({
       url: '/test'
-    }));
+    }))();
     expect(model.shouldFetch({fetch: true})).to.be(true);
   });
 
@@ -149,6 +151,10 @@ describe('model', function() {
   // Not really a great idea, but support allow it to work
   // with some hacks to render if someone really wants it
   it("set collection as model", function() {
+    if ($serverSide) {
+      return;
+    }
+
     // example that will need to fetch / load
     var server = sinon.fakeServer.create();
     var spy = this.spy(function() {
@@ -156,7 +162,7 @@ describe('model', function() {
     });
     var collection = new (Thorax.Collection.extend({
       url: '/test'
-    }));
+    }))();
     collection.key = 'value';
     var view = new Thorax.View({
       events: {
