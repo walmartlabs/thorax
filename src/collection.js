@@ -117,12 +117,13 @@ Thorax.CollectionView = Thorax.View.extend({
     }
     var itemView,
         $el = this._collectionElement,
-        collection = this.collection;
-    options = _.defaults(options || {}, {
-      filter: true
-    });
+        collection = this.collection,
+
+        filter = !options || options.filter == null || options.filter;
+
     //if index argument is a view
     index && index.el && (index = $el.children().indexOf(index.el) + 1);
+
     //if argument is a view, or html string
     if (model.el || _.isString(model)) {
       itemView = model;
@@ -168,10 +169,10 @@ Thorax.CollectionView = Thorax.View.extend({
         $el.attr(modelCidAttributeName, model.cid);
       });
 
-      if (!options.silent) {
+      if (!options || !options.silent) {
         this.trigger('rendered:item', this, collection, model, itemElement, index);
       }
-      if (options.filter) {
+      if (filter) {
         applyItemVisiblityFilter.call(this, model);
       }
     }
