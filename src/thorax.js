@@ -324,6 +324,12 @@ Thorax.View = Backbone.View.extend({
   _anchorClick: function(event) {
     var target = $(event.currentTarget),
         href = target.attr('href');
+
+    // Don't push if meta or shift key are clicked
+    if (event.metaKey || event.shiftKey) {
+      return true;
+    }
+
     // Route anything that starts with # or / (excluding //domain urls)
     if (href && (href[0] === '#' || (href[0] === '/' && href[1] !== '/'))) {
       Backbone.history.navigate(href, {
