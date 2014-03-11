@@ -35,8 +35,12 @@ module.exports = function(grunt) {
       callback: function(err, data) {
         if (err) {
           throw err;
+        } else if (!page.window.mochaResults) {
+          throw new Error('Fruit Loops tests terminated early');
+        } else if (page.window.mochaResults.reports.length) {
+          throw new Error(page.window.mochaResults.reports.length + ' failed tests');
         } else {
-          process.exit(page.window.mochaResults.reports.length);
+          done();
         }
       }
     });
