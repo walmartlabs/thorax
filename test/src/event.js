@@ -455,7 +455,14 @@ describe('event', function() {
         context = {};
     beforeEach(function() {
       view = new Thorax.View();
+
+      // IE needs to have the element in the DOM for click handling
+      $('body').append(view.$el);
+
       spy = this.spy();
+    });
+    afterEach(function() {
+      view.release();
     });
 
     describe('view events', function() {
