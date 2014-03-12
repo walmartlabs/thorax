@@ -1,4 +1,8 @@
-/*global ServerMarshal, $serverSide, getOptionsData, normalizeHTMLAttributeOptions, viewHelperAttributeName */
+/*global
+    ServerMarshal,
+    $serverSide, createError, getOptionsData,
+    normalizeHTMLAttributeOptions, viewHelperAttributeName
+*/
 var viewPlaceholderAttributeName = 'data-view-tmp',
     viewTemplateOverrides = {};
 
@@ -56,17 +60,8 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
     // Evaluate any nested parameters that we may have to content with
     var expandTokens = expandHash(this, options.hash);
 
-    var viewOptions = {
-      inverse: options.inverse,
-      options: options.hash,
-      declaringView: declaringView,
-      parent: getParent(declaringView),
-      _helperName: name,
-      _helperOptions: {
-        options: cloneHelperOptions(options),
-        args: _.clone(args)
-      }
-    };
+    var viewOptions = createViewOptions(name, args, options, declaringView);
+    helperTemplate(viewOptions, options, ViewClass);
 
     normalizeHTMLAttributeOptions(options.hash);
     var htmlAttributes = _.clone(options.hash);
@@ -96,15 +91,6 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
       return attrs;
     };
 
-    if (options.fn) {
-      // Only assign if present, allow helper view class to
-      // declare template
-      viewOptions.template = options.fn;
-    } else if (ViewClass && ViewClass.prototype && !ViewClass.prototype.template) {
-      // ViewClass may also be an instance or object with factory method
-      // so need to do this check
-      viewOptions.template = Handlebars.VM.noop;
-    }
 
     // Check to see if we have an existing instance that we can reuse
     var instance = _.find(declaringView._previousHelpers, function(child) {
@@ -113,20 +99,9 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
 
     // Create the instance if we don't already have one
     if (!instance) {
-      if (ViewClass.factory) {
-        instance = ViewClass.factory(args, viewOptions);
-        if (!instance) {
-          return '';
-        }
-
-        instance._helperName = viewOptions._helperName;
-        instance._helperOptions = viewOptions._helperOptions;
-      } else {
-        instance = new ViewClass(viewOptions);
-      }
-      if (!instance.el) {
-        // ViewClass.factory may return existing objects which may have been destroyed
-        throw new Error('insert-destroyed-factory');
+      instance = helperInstance(args, viewOptions, ViewClass);
+      if (!instance) {
+        return '';
       }
 
       instance.$el.attr('data-view-helper-restore', name);
@@ -146,12 +121,7 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
         }
       }
 
-      args.push(instance);
-      declaringView._addChild(instance);
-      declaringView.trigger.apply(declaringView, ['helper', name].concat(args));
-      declaringView.trigger.apply(declaringView, ['helper:' + name].concat(args));
-
-      callback && callback.apply(this, args);
+      helperInit(args, instance, callback, viewOptions);
     } else {
       if (!instance.el) {
         throw new Error('insert-destroyed');
@@ -180,6 +150,65 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
   var helper = Handlebars.helpers[name];
   return helper;
 };
+
+function createViewOptions(name, args, options, declaringView) {
+  return {
+    inverse: options.inverse,
+    options: options.hash,
+    declaringView: declaringView,
+    parent: getParent(declaringView),
+    _helperName: name,
+    _helperOptions: {
+      options: cloneHelperOptions(options),
+      args: _.clone(args)
+    }
+  };
+}
+
+function helperTemplate(viewOptions, options, ViewClass) {
+  if (options.fn) {
+    // Only assign if present, allow helper view class to
+    // declare template
+    viewOptions.template = options.fn;
+  } else if (ViewClass && ViewClass.prototype && !ViewClass.prototype.template) {
+    // ViewClass may also be an instance or object with factory method
+    // so need to do this check
+    viewOptions.template = Handlebars.VM.noop;
+  }
+}
+
+function helperInstance(args, viewOptions, ViewClass) {
+  var instance;
+
+  if (ViewClass.factory) {
+    instance = ViewClass.factory(args, viewOptions);
+    if (!instance) {
+      return;
+    }
+
+    instance._helperName = viewOptions._helperName;
+    instance._helperOptions = viewOptions._helperOptions;
+  } else {
+    instance = new ViewClass(viewOptions);
+  }
+
+  if (!instance.el) {
+    // ViewClass.factory may return existing objects which may have been destroyed
+    throw createError('insert-destroyed-factory');
+  }
+  return instance;
+}
+function helperInit(args, instance, callback, viewOptions) {
+  var declaringView = viewOptions.declaringView,
+      name = viewOptions._helperName;
+
+  args.push(instance);
+  declaringView._addChild(instance);
+  declaringView.trigger.apply(declaringView, ['helper', name].concat(args));
+  declaringView.trigger.apply(declaringView, ['helper:' + name].concat(args));
+
+  callback && callback.apply(this, args);
+}
 
 function helperAppend(scope, callback) {
   this._pendingAppend = undefined;
