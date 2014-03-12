@@ -299,6 +299,8 @@ function helperAppend(scope, callback) {
 function cloneHelperOptions(options) {
   var ret = _.pick(options, 'fn', 'inverse', 'hash', 'data');
   ret.data = _.omit(options.data, 'cid', 'view', 'yield', 'root', '_parent');
+  ret.fn = ret.fn || undefined;
+  ret.inverse = ret.inverse || undefined;
   return ret;
 }
 
@@ -334,7 +336,7 @@ function compareHelperOptions(a, b) {
   // Implements a first level depth comparison
   return a.args.length === b.args.length
       && compareValues(a.args, b.args)
-      && _.isEqual(_.keys(a.options), _.keys(b.options))
+      && _.isEqual(_.keys(a.options).sort(), _.keys(b.options).sort())
       && _.every(a.options, function(value, key) {
           if (key === 'data' || key === 'hash') {
             return compareValues(a.options[key], b.options[key]);

@@ -924,5 +924,29 @@ describe('serverSide', function() {
     });
 
     it('should cooperate with custom restore events');
+    it('should recover views on client-side parent rerender', function() {
+      window.$serverSide = true;
+
+      server = new Thorax.View({
+        foo: {
+          yes: false
+        },
+        template: Handlebars.compile('{{view "registry" key=4 bar=foo}}', {trackIds: true})
+      });
+      view = new SomethingElse({
+        foo: {
+          yes: true
+        },
+        template: Handlebars.compile('{{view "registry" key=4 bar=foo}}', {trackIds: true})
+      });
+      restoreView();
+
+      var restored = _.values(view.children)[0];
+      expect(restored.key).to.equal(4);
+      expect(restored.bar).to.equal(view.foo);
+
+      view.render();
+      expect(_.values(view.children)).to.eql([restored]);
+    });
   });
 });
