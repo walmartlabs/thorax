@@ -106,7 +106,7 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
 
       instance.$el.attr('data-view-helper-restore', name);
 
-      if ($serverSide) {
+      if ($serverSide && instance.$el.attr('data-view-server') !== 'false') {
         try {
           ServerMarshal.store(instance.$el, 'args', args, options.ids, options);
           ServerMarshal.store(instance.$el, 'attrs', options.hash, options.hashIds, options);

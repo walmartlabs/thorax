@@ -19,6 +19,8 @@ Thorax.CollectionHelperView = Thorax.CollectionView.extend({
   },
 
   constructor: function(options) {
+    var restorable = true;
+
     // need to fetch templates if template name was passed
     if (options.options['item-template']) {
       options.itemTemplate = Thorax.Util.getTemplate(options.options['item-template']);
@@ -33,10 +35,18 @@ Thorax.CollectionHelperView = Thorax.CollectionView.extend({
     if (!options.itemTemplate && options.template && options.template !== Handlebars.VM.noop) {
       options.itemTemplate = options.template;
       options.template = Handlebars.VM.noop;
+
+      if (options.itemTemplate.depth) {
+        restorable = false;
+      }
     }
     if (!options.emptyTemplate && options.inverse && options.inverse !== Handlebars.VM.noop) {
       options.emptyTemplate = options.inverse;
       options.inverse = Handlebars.VM.noop;
+
+      if (options.emptyTemplate.depth) {
+        restorable = false;
+      }
     }
 
     var shouldBindItemContext = _.isFunction(options.itemContext),
@@ -70,6 +80,10 @@ Thorax.CollectionHelperView = Thorax.CollectionView.extend({
         // item template must be present if an itemView is not
         this.itemTemplate = Thorax.Util.getTemplate(this.parent.name + '-item', !!this.itemView);
       }
+    }
+
+    if (!restorable) {
+      this.$el.attr('data-view-server', 'false');
     }
 
     return response;

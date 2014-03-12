@@ -111,6 +111,51 @@ Thorax.CollectionView = Thorax.View.extend({
     }
   },
 
+  restore: function(el) {
+    var self = this,
+        children = this.$el.children(),
+        toRemove = [];
+
+    if (!Thorax.View.prototype.restore.call(this, el)) {
+      // If we had to rerender for other reasons then we don't need to do anything as it
+      // was already all blown away
+      return;
+    }
+
+    this._lookupCollectionElement();
+
+    // Find any items annotated with server info and restore. Else rerender
+    $('[' + modelIdAttributeName + ']', el).each(function() {
+      var id = this.getAttribute(modelIdAttributeName),
+          model = self.collection.get(id);
+      if (!model) {
+        toRemove.push(this);
+      } else {
+        self.restoreItem(model, children.index(this), this);
+      }
+    });
+    $('[data-view-empty]', el).each(function() {
+      self.restoreEmpty(this);
+    });
+
+    if (toRemove.length) {
+      // TODO : Is it better to just rerender the whole thing since we don't necessarily
+      // know what state the list is in at this point?
+      // Kill off any now invalid nodes
+      _.each(toRemove, function(el) {
+        el.parentNode.removeChild(el);
+      });
+
+      // Render anything that we might have locally but was missed
+      var $el = this._collectionElement;
+      this.collection.each(function(model) {
+        if (!$el.find('[' + modelCidAttributeName + '="' + model.cid + '"]').length) {
+          self.appendItem(model);
+        }
+      });
+    }
+  },
+
   //appendItem(model [,index])
   //appendItem(html_string, index)
   //appendItem(view, index)
@@ -158,10 +203,10 @@ Thorax.CollectionView = Thorax.View.extend({
       });
 
       if (model) {
-        if ($serverSide) {
-          itemElement.attr(modelIdAttributeName, model.id);
-        }
-        itemElement.attr(modelCidAttributeName, model.cid);
+        itemElement.attr({
+          'data-model-id': model.id,
+          'data-model-cid': model.cid
+        });
       }
       var previousModel = index > 0 ? collection.at(index - 1) : false;
       if (!previousModel) {
@@ -268,12 +313,20 @@ Thorax.CollectionView = Thorax.View.extend({
         viewOptions.template = this.emptyTemplate;
       }
       var view = Thorax.Util.getViewInstance(this.emptyView, viewOptions);
-      view.ensureRendered();
+      view.$el.attr('data-view-empty', 'true');
       return view;
     } else {
       return this.emptyTemplate && this.renderTemplate(this.emptyTemplate);
     }
   },
+  restoreEmpty: function(el) {
+    var child = this.renderEmpty();
+
+    child.restore(el);
+    this._addChild(child);
+    return child;
+  },
+
   renderItem: function(model, i) {
     if (!this.itemView) {
       assignView.call(this, 'itemView', {
@@ -302,6 +355,18 @@ Thorax.CollectionView = Thorax.View.extend({
       // expose under Android 4.3 (at minimum)
       // https://twitter.com/kpdecker/status/422149634929082370
       return this.renderTemplate(this.itemTemplate, this.itemContext.call(this, model, i));
+    }
+  },
+  restoreItem: function(model, i, el) {
+    if (this.itemView || this.renderItem !== Thorax.CollectionView.prototype.renderItem) {
+      var child = this.renderItem(model, i);
+      el.setAttribute(modelCidAttributeName, model.cid);
+
+      child.restore(el);
+      this._addChild(child);
+      return child;
+    } else {
+      el.setAttribute(modelCidAttributeName, model.cid);
     }
   },
   itemContext: function(model /*, i */) {
