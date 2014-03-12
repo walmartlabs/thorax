@@ -1,3 +1,5 @@
+/*global $serverSide */
+
 describe('model', function() {
   it("shouldFetch", function() {
     var options = {fetch: true};
@@ -24,7 +26,7 @@ describe('model', function() {
   it("allow model url to be a string", function() {
     var model = new (Thorax.Model.extend({
       url: '/test'
-    }));
+    }))();
     expect(model.shouldFetch({fetch: true})).to.be(true);
   });
 
@@ -42,7 +44,7 @@ describe('model', function() {
         model: model
       });
       a.render();
-      expect(a.el.firstChild.innerHTML).to.equal('a', 'set via constructor');
+      expect(a.$el.children().eq(0).html()).to.equal('a', 'set via constructor');
     });
     it('should update on setModel', function() {
       var b = new Thorax.View({
@@ -50,14 +52,14 @@ describe('model', function() {
       });
       b.render();
       b.setModel(model);
-      expect(b.el.firstChild.innerHTML).to.equal('a', 'set via setModel');
+      expect(b.$el.children().eq(0).html()).to.equal('a', 'set via setModel');
     });
     it('should update on setModel', function() {
       var b = new Thorax.View({
         template: template
       });
       b.setModel(model, {render: true});
-      expect(b.el.firstChild.innerHTML).to.equal('a', 'set via setModel');
+      expect(b.$el.children().eq(0).html()).to.equal('a', 'set via setModel');
     });
 
     it('should update on change', function() {
@@ -67,7 +69,7 @@ describe('model', function() {
       });
       a.render();
       model.set({letter: 'B'});
-      expect(a.el.firstChild.innerHTML).to.equal('B', 'update attribute triggers render');
+      expect(a.$el.children().eq(0).html()).to.equal('B', 'update attribute triggers render');
     });
 
     it('should defer existing render', function() {
@@ -78,9 +80,9 @@ describe('model', function() {
       c.setModel(model, {
         render: false
       });
-      expect(c.el.firstChild.innerHTML).to.equal('');
+      expect(c.$el.children().eq(0).html()).to.equal('');
       c.render();
-      expect(c.el.firstChild.innerHTML).to.equal('a', 'manual render');
+      expect(c.$el.children().eq(0).html()).to.equal('a', 'manual render');
     });
     it('should defer new render', function() {
       var a = new Thorax.View({
@@ -91,7 +93,7 @@ describe('model', function() {
       a.setModel(model);
       expect(a.$el.children()).to.be.empty();
       a.render();
-      expect(a.el.firstChild.innerHTML).to.equal('a', 'set via constructor');
+      expect(a.$el.children().eq(0).html()).to.equal('a', 'set via constructor');
     });
   });
 
@@ -149,6 +151,10 @@ describe('model', function() {
   // Not really a great idea, but support allow it to work
   // with some hacks to render if someone really wants it
   it("set collection as model", function() {
+    if ($serverSide) {
+      return;
+    }
+
     // example that will need to fetch / load
     var server = sinon.fakeServer.create();
     var spy = this.spy(function() {
@@ -156,7 +162,7 @@ describe('model', function() {
     });
     var collection = new (Thorax.Collection.extend({
       url: '/test'
-    }));
+    }))();
     collection.key = 'value';
     var view = new Thorax.View({
       events: {

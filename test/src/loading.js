@@ -1,4 +1,9 @@
 describe('loading', function() {
+  // NOP For server-side
+  if ($serverSide) {
+    return;
+  }
+
   var loadStart = 'load:start',
       loadEnd = 'load:end',
       loadStartTimeout = (Thorax.View.prototype._loadingTimeoutDuration * 1000) + 1,

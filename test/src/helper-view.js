@@ -19,7 +19,7 @@ describe('helper-view', function() {
       key: 'value'
     });
     view.render();
-    expect(view.$('[data-view-helper]')[2].innerHTML).to.equal('value');
+    expect(view.$('[data-view-helper]').eq(2).html()).to.equal('value');
   });
   it('should allow an empty template', function() {
     view = new Thorax.View({

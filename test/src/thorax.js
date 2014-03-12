@@ -1,6 +1,11 @@
+/*global $serverSide */
+
 describe('core', function() {
   Backbone.history || (Backbone.history = new Backbone.History());
-  Backbone.history.start();
+  Backbone.history.options = {
+    root: '/'
+  };
+  Backbone.history.root = '/';
 
   Handlebars.templates.parent = Handlebars.compile('<div>{{view child}}</div>');
   Handlebars.templates.child = Handlebars.compile('<div>{{value}}</div>');
@@ -31,11 +36,11 @@ describe('core', function() {
     $('body').append('<div id="test-target-container"><div id="test-target"></div></div>');
     var view = new Thorax.View({
       template: function() { return 'testing123'; },
-      el: $('#test-target')[0]
+      el: '#test-target'
     });
     view.render();
-    expect($('#test-target-container > #test-target')[0].innerHTML).to.equal('testing123');
-    expect(view.el.parentNode).to.equal($('#test-target-container')[0]);
+    expect($('#test-target').html()).to.equal('testing123');
+    expect(view.$el.parent()[0]).to.equal($('#test-target-container')[0]);
     $('#test-target-container').remove();
   });
 
@@ -43,11 +48,11 @@ describe('core', function() {
     $('body').append('<div id="test-target-container"><div id="test-target"></div></div>');
     var view = new Thorax.View({
       template: function() { return 'testing123'; },
-      el: $('#test-target')[0]
+      el: '#test-target'
     });
     view.render();
-    expect($('#test-target-container > #test-target')[0].innerHTML).to.equal('testing123');
-    expect(view.el.parentNode).to.equal($('#test-target-container')[0]);
+    expect($('#test-target').html()).to.equal('testing123');
+    expect(view.$el.parent()[0]).to.equal($('#test-target-container')[0]);
     view.release();
     expect($('#test-target')).to.be.empty();
     view.render();
@@ -145,8 +150,8 @@ describe('core', function() {
 
     var c = new Thorax.View({
       render: function() {
-        var el = document.createElement('p');
-        el.innerHTML = 'c';
+        var el = $('<p>');
+        el.html('c');
         return Thorax.View.prototype.render.call(this, el);
       }
     });
@@ -188,8 +193,8 @@ describe('core', function() {
 
     // Under IE assigning to innerHTML for a TR that is embedded in a table will fail (and only
     // if it's embedded in a table element)
-    var table = document.createElement('table');
-    table.appendChild(view.el);
+    var table = $('<table>');
+    table.append(view.$el);
 
     view.render();
     expect(view.$el.text()).to.equal('1');
@@ -198,36 +203,55 @@ describe('core', function() {
     expect(view.$el.text()).to.equal('2');
   });
 
-  it("onException", function() {
-    var oldOnException = Thorax.onException;
-    var view = new Thorax.View({
-      name: 'foo view',
-      events: {
-        test: function () {
-          throw new Error('view error');
+  describe('onException', function() {
+    it('should handle DOM exceptions', function() {
+      if ($serverSide) {
+        return;
+      }
+
+      var view = new Thorax.View({
+        name: 'foo view',
+        events: {
+          test: function () {
+            throw new Error('view error');
+          },
+          'click div': function() {
+            throw new Error('dom error');
+          }
         },
-        'click div': function() {
-          throw new Error('dom error');
-        }
-      },
-      template: Handlebars.compile('<div></div>')
+        template: Handlebars.compile('<div></div>')
+      });
+      view.render();
+      document.body.appendChild(view.el);
+      this.stub(Thorax, 'onException', function(errorName, err, info) {
+        expect(errorName).to.equal('thorax-event');
+        expect(info.view).to.equal('foo view');
+        expect(info.eventName).to.match(/click/);
+      });
+      view.$('div').trigger('click');
+      expect(Thorax.onException.calledOnce).to.be(true);
+      view.$el.remove();
     });
-    view.render();
-    document.body.appendChild(view.el);
-    Thorax.onException = function(errorName, err, info) {
-      expect(errorName).to.equal('thorax-event');
-      expect(info.view).to.equal('foo view');
-      expect(info.eventName.match(/click/)).to.exist;
-    };
-    view.$('div').trigger('click');
-    Thorax.onException = function(errorName, err, info) {
-      expect(errorName).to.equal('thorax-event');
-      expect(info.view).to.equal('foo view');
-      expect(info.eventName.match(/test/)).to.exist;
-    };
-    view.trigger('test');
-    Thorax.onException = oldOnException;
-    view.$el.remove();
+    it('should handle event exceptions', function() {
+      var view = new Thorax.View({
+        name: 'foo view',
+        events: {
+          test: function () {
+            throw new Error('view error');
+          },
+          'click div': function() {
+            throw new Error('dom error');
+          }
+        },
+        template: Handlebars.compile('<div></div>')
+      });
+      this.stub(Thorax, 'onException', function(errorName, err, info) {
+        expect(errorName).to.equal('thorax-event');
+        expect(info.view).to.equal('foo view');
+        expect(info.eventName).to.match(/test/);
+      });
+      view.trigger('test');
+    });
   });
 
   it('should destroy scoped retain on owner destroy', function() {

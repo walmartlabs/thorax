@@ -7,7 +7,8 @@ Handlebars.registerViewHelper('view', {
   // ensure generated placeholder tag in template
   // will match tag of view instance
   modifyHTMLAttributes: function(htmlAttributes, instance) {
-    htmlAttributes.tagName = instance.el.tagName.toLowerCase();
+    // Handle fruitloops tag name lookup via the .name case.
+    htmlAttributes.tagName = (instance.el.tagName || instance.el.name || '').toLowerCase();
   },
   callback: function(view) {
     var instance = arguments[arguments.length-1],

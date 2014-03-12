@@ -205,6 +205,10 @@ describe('view helper', function() {
   });
 
   it("child view re-render will keep dom events intact", function() {
+    if ($serverSide) {
+      return;
+    }
+
     var callCount = 0;
     var parent = new Thorax.View({
       name: 'parent-event-dom-test',
@@ -220,13 +224,13 @@ describe('view helper', function() {
       template: Handlebars.compile("{{view child}}")
     });
     parent.render();
-    document.body.appendChild(parent.el);
+    $('body').append(parent.el);
     parent.child.$('.test').trigger('click');
     expect(callCount).to.equal(1);
     parent.render();
     parent.child.$('.test').trigger('click');
     expect(callCount).to.equal(2);
-    $(parent.el).remove();
+    parent.$el.remove();
   });
 
   it("$.fn.view", function() {

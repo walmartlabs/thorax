@@ -117,12 +117,13 @@ Thorax.CollectionView = Thorax.View.extend({
     }
     var itemView,
         $el = this._collectionElement,
-        collection = this.collection;
-    options = _.defaults(options || {}, {
-      filter: true
-    });
+        collection = this.collection,
+
+        filter = !options || options.filter == null || options.filter;
+
     //if index argument is a view
     index && index.el && (index = $el.children().indexOf(index.el) + 1);
+
     //if argument is a view, or html string
     if (model.el || _.isString(model)) {
       itemView = model;
@@ -148,8 +149,8 @@ Thorax.CollectionView = Thorax.View.extend({
         itemView = '<div>' + itemView + '</div>';
       }
       var itemElement = itemView.$el || $($.trim(itemView)).filter(function() {
-        //filter out top level whitespace nodes
-        return this.nodeType === ELEMENT_NODE_TYPE;
+        // Only output nodes. DOM || Fruit Loops
+        return this.nodeType === ELEMENT_NODE_TYPE || this.type === 'tag';
       });
 
       if (model) {
@@ -164,14 +165,14 @@ Thorax.CollectionView = Thorax.View.extend({
         last.after(itemElement);
       }
 
-      this.trigger('append', null, function(el) {
-        el.setAttribute(modelCidAttributeName, model.cid);
+      this.trigger('append', null, function($el) {
+        $el.attr(modelCidAttributeName, model.cid);
       });
 
-      if (!options.silent) {
+      if (!options || !options.silent) {
         this.trigger('rendered:item', this, collection, model, itemElement, index);
       }
-      if (options.filter) {
+      if (filter) {
         applyItemVisiblityFilter.call(this, model);
       }
     }
@@ -194,28 +195,31 @@ Thorax.CollectionView = Thorax.View.extend({
   },
 
   removeItem: function(model) {
-    var viewEl = model;
+    var self = this,
+        $viewEl = model;
+
     if (model.cid) {
       var $el = this._collectionElement;
-      viewEl = $el.find('[' + modelCidAttributeName + '="' + model.cid + '"]');
+      $viewEl = $el.find('[' + modelCidAttributeName + '="' + model.cid + '"]');
     }
-    if (!viewEl.length) {
+    if (!$viewEl.length) {
       return false;
     }
 
-    var viewCids = viewEl.find('[' + viewCidAttributeName + ']').map(function(i, el) {
-      return $(el).attr(viewCidAttributeName);
-    });
-
-    viewEl.remove();
-
-    viewCids.push(viewEl.attr(viewCidAttributeName));
-    _.each(viewCids, function(cid) {
-      var child = this.children[cid];
+    function cleanCid($viewEl) {
+      var cid = $viewEl.attr(viewCidAttributeName),
+          child = self.children[cid];
       if (child) {
-        this._removeChild(child);
+        self._removeChild(child);
       }
-    }, this);
+    }
+
+    $viewEl.find('[' + viewCidAttributeName + ']').each(function(i, el) {
+      cleanCid($(el));
+    });
+    cleanCid($viewEl);
+
+    $viewEl.detach();
 
     return true;
   },

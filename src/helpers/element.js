@@ -21,6 +21,6 @@ Thorax.View.on('append', function(scope, callback) {
       element = element.call(this);
     }
     $el.replaceWith(element);
-    callback && callback(element);
+    callback && callback($(element));
   }, this);
 });

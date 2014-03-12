@@ -102,8 +102,8 @@ describe('collection helper', function() {
       template: Handlebars.compile('{{#collection a tag="ul" item-filter="itemFilterA"}}<li>{{one}}</li>{{/collection}}{{#collection b item-filter=itemFilterB tag="ul"}}<li>{{two}}</li>{{/collection}}')
     });
     view.render();
-    expect(view.$('ul:first-child li')[0].style.display).to.not.equal('none');
-    expect(view.$('ul:last-child li')[0].style.display).to.equal('none');
+    expect(view.$('ul:first-child li').css('display')).to.not.equal('none');
+    expect(view.$('ul:last-child li').css('display')).to.equal('none');
   });
 
   it('should item-view and item-template', function() {
@@ -269,23 +269,23 @@ describe('collection helper', function() {
         ])
       });
       expect(view.$('h2').length).to.equal(2, msg + ' : title length');
-      expect(view.$('h2')[0].innerHTML).to.equal('title one', msg + ' : title content');
-      expect(view.$('h2')[1].innerHTML).to.equal('title two', msg + ' : title content');
+      expect(view.$('h2').eq(0).html()).to.equal('title one', msg + ' : title content');
+      expect(view.$('h2').eq(1).html()).to.equal('title two', msg + ' : title content');
       expect(view.$('p').length).to.equal(4, msg + ' : comment length');
-      expect(view.$('p')[0].innerHTML).to.equal('comment one', msg + ' : comment content');
-      expect(view.$('p')[1].innerHTML).to.equal('comment two', msg + ' : comment content');
-      expect(view.$('p')[2].innerHTML).to.equal('comment three', msg + ' : comment content');
-      expect(view.$('p')[3].innerHTML).to.equal('comment four', msg + ' : comment content');
+      expect(view.$('p').eq(0).html()).to.equal('comment one', msg + ' : comment content');
+      expect(view.$('p').eq(1).html()).to.equal('comment two', msg + ' : comment content');
+      expect(view.$('p').eq(2).html()).to.equal('comment three', msg + ' : comment content');
+      expect(view.$('p').eq(3).html()).to.equal('comment four', msg + ' : comment content');
       expect(view.$('span').length).to.equal(8, msg + ' : author length');
 
       comments2.add(new Thorax.Model({comment: 'comment five'}));
-      expect(view.$('p')[4].innerHTML).to.equal('comment five', msg + ' : added comment content');
+      expect(view.$('p').eq(4).html()).to.equal('comment five', msg + ' : added comment content');
 
       blogModel.attributes.posts.add(new Thorax.Model({
         title: 'title three'
       }));
       expect(view.$('h2').length).to.equal(3, msg + ' : added title length');
-      expect(view.$('h2')[2].innerHTML).to.equal('title three', msg + ' : added title content');
+      expect(view.$('h2').eq(2).html()).to.equal('title three', msg + ' : added title content');
     }
 
     //test with embedded view
@@ -337,7 +337,7 @@ describe('collection helper', function() {
       expect(view.itemContext.calledOnce).to.be(true);
       expect(view.itemContext.calledOn(view)).to.be(true);
       expect(view.$('span').length).to.equal(1);
-      expect(view.$('span')[0].innerHTML).to.equal('testing');
+      expect(view.$('span').eq(0).html()).to.equal('testing');
     });
 
     it('should delegate to #itemFilter', function() {
@@ -349,7 +349,7 @@ describe('collection helper', function() {
       expect(view.itemFilter.calledOnce).to.be(true);
       expect(view.itemFilter.calledOn(view)).to.be(true);
       expect(view.$('span').length).to.equal(1);
-      expect(view.$('span')[0].style.display).to.equal('none');
+      expect(view.$('span').css('display')).to.equal('none');
     });
 
     it('should forward rendered:item', function() {

@@ -1,4 +1,7 @@
 module.exports = function(grunt) {
+  var grep = grunt.option('grep'),
+      mochaArgs = grep ? '?grep=' + grep : '';
+
   grunt.initConfig({
     jshint: {
       options: {
@@ -16,7 +19,8 @@ module.exports = function(grunt) {
         options: {
           lumbarFile: 'build.json',
           build: true,
-          output: 'build/dev'
+          output: 'build/dev',
+          sourceMap: true
         }
       }
     },
@@ -38,16 +42,16 @@ module.exports = function(grunt) {
       quick: {
         options: {
           urls: [
-            'http://localhost:9999/jquery/test.html',
-            'http://localhost:9999/zepto/test.html'
+            'http://localhost:9999/jquery/test.html' + mochaArgs,
+            'http://localhost:9999/zepto/test.html' + mochaArgs
           ]
         }
       },
       legacy: {
         options: {
           urls: [
-            'http://localhost:9999/jquery-backbone-1-0/test.html',
-            'http://localhost:9999/zepto-backbone-1-0/test.html'
+            'http://localhost:9999/jquery-backbone-1-0/test.html' + mochaArgs,
+            'http://localhost:9999/zepto-backbone-1-0/test.html' + mochaArgs
           ]
         }
       }
@@ -102,7 +106,7 @@ module.exports = function(grunt) {
         },
 
         files: ['src/**/*.js', 'test/**/*.js'],
-        tasks: ['jshint', 'phoenix-build:dev', 'mocha_phantomjs:quick']
+        tasks: ['jshint', 'phoenix-build:dev', 'mocha_phantomjs:quick', 'fruit-loops:test']
       }
     }
   });
@@ -120,6 +124,6 @@ module.exports = function(grunt) {
 
   grunt.registerTask('sauce', process.env.SAUCE_USERNAME ? ['saucelabs-mocha:zepto', 'saucelabs-mocha:jquery'] : []);
 
-  grunt.registerTask('test', ['clean', 'connect', 'jshint', 'phoenix-build', 'mocha_phantomjs', 'sauce']);
+  grunt.registerTask('test', ['clean', 'connect', 'jshint', 'phoenix-build', 'fruit-loops:test', 'mocha_phantomjs', 'sauce']);
   grunt.registerTask('dev', ['clean', 'connect', 'watch']);
 };

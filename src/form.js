@@ -1,4 +1,4 @@
-/*global inheritVars */
+/*global $serverSide, inheritVars */
 
 inheritVars.model.defaultOptions.populate = true;
 
@@ -53,10 +53,10 @@ _.extend(Thorax.View.prototype, {
     //callback has context of element
     var view = this;
     var errors = [];
-    eachNamedInput(this, options, function(element) {
-      var value = view._getInputValue(element, options, errors);
+    eachNamedInput(this, options, function($element, i, name, type) {
+      var value = view._getInputValue($element, type);
       if (!_.isUndefined(value)) {
-        objectAndKeyFromAttributesAndName(attributes, element.name, {mode: 'serialize'}, function(object, key) {
+        objectAndKeyFromAttributesAndName(attributes, name, {mode: 'serialize'}, function(object, key) {
           if (!object[key]) {
             object[key] = value;
           } else if (_.isArray(object[key])) {
@@ -124,19 +124,19 @@ _.extend(Thorax.View.prototype, {
         attributes = attributes || this._getContext();
 
     //callback has context of element
-    eachNamedInput(this, options, function(element) {
-      objectAndKeyFromAttributesAndName(attributes, element.name, {mode: 'populate'}, function(object, key) {
+    eachNamedInput(this, options, function($element, i, name, type) {
+      objectAndKeyFromAttributesAndName(attributes, name, {mode: 'populate'}, function(object, key) {
         value = object && object[key];
 
         if (!_.isUndefined(value)) {
           //will only execute if we have a name that matches the structure in attributes
-          var isBinary = element.type === 'checkbox' || element.type === 'radio';
+          var isBinary = type === 'checkbox' || type === 'radio';
           if (isBinary && _.isBoolean(value)) {
-            element.checked = value;
+            $element.attr('checked', value);
           } else if (isBinary) {
-            element.checked = value == element.value;
+            $element.attr('checked', value == $element.val());
           } else {
-            element.value = value;
+            $element.val(value);
           }
         }
       });
@@ -151,24 +151,17 @@ _.extend(Thorax.View.prototype, {
   //perform form validation, implemented by child class
   validateInput: function(/* attributes, options, errors */) {},
 
-  _getInputValue: function(input /* , options, errors */) {
-    if (input.type === 'checkbox' || input.type === 'radio') {
-      if (input.checked) {
+  _getInputValue: function($input, type) {
+    if (type === 'checkbox' || type === 'radio') {
+      var checked = $input.attr('checked');
+      if (checked || checked === '') {
         // Under older versions of IE we see 'on' when no value is set so we want to cast this
         // to true.
-        var value = input.getAttribute('value');
+        var value = $input.attr('value');
         return (value === 'on') || value || true;
       }
-    } else if (input.multiple === true) {
-      var values = [];
-      $('option', input).each(function() {
-        if (this.selected) {
-          values.push(this.value);
-        }
-      });
-      return values;
     } else {
-      return input.value;
+      return $input.val() || '';
     }
   },
 
@@ -218,15 +211,17 @@ function filterObject(object, callback) {
   return object;
 }
 
-Thorax.View.on({
-  invalid: onErrorOrInvalidData,
-  error: onErrorOrInvalidData,
-  deactivated: function() {
-    if (this.$el) {
-      resetSubmitState.call(this);
+if (!$serverSide) {
+  Thorax.View.on({
+    invalid: onErrorOrInvalidData,
+    error: onErrorOrInvalidData,
+    deactivated: function() {
+      if (this.$el) {
+        resetSubmitState.call(this);
+      }
     }
-  }
-});
+  });
+}
 
 function onErrorOrInvalidData () {
   resetSubmitState.call(this);
@@ -245,13 +240,18 @@ function eachNamedInput(view, options, iterator) {
   var i = 0;
 
   $('select,input,textarea', options.root || view.el).each(function() {
+    var $el = $(this);
+
     if (!options.children) {
-      if (view !== $(this).view({helper: false})) {
+      if (view !== $el.view({helper: false})) {
         return;
       }
     }
-    if (this.type !== 'button' && this.type !== 'cancel' && this.type !== 'submit' && this.name) {
-      iterator(this, i);
+
+    var type = $el.attr('type'),
+        name = $el.attr('name');
+    if (type !== 'button' && type !== 'cancel' && type !== 'submit' && name) {
+      iterator($el, i, name, type);
       ++i;
     }
   });
