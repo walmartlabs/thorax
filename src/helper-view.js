@@ -148,8 +148,67 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
     return new Handlebars.SafeString(Thorax.Util.tag(htmlAttributes, '', expandTokens ? this : null));
   });
   var helper = Handlebars.helpers[name];
+
+  helper.restore = function(declaringView, el) {
+    var context = declaringView.context(),
+        args = ServerMarshal.load(el, 'args', declaringView, context) || [],
+        attrs = ServerMarshal.load(el, 'attrs', declaringView, context) || {};
+
+    var options = {
+      hash: attrs,
+      fn: ServerMarshal.load(el, 'fn'),
+      inverse: ServerMarshal.load(el, 'inverse')
+    };
+    if (options.fn) {
+      options.fn = declaringView.template.child(options.fn);
+    }
+    if (options.inverse) {
+      options.inverse = declaringView.template.child(options.inverse);
+    }
+
+    var viewOptions = createViewOptions(name, args, options, declaringView);
+    helperTemplate(viewOptions, options, ViewClass);
+
+    if (viewOptionWhiteList) {
+      _.each(viewOptionWhiteList, function(dest, source) {
+        if (!_.isUndefined(attrs[source])) {
+          viewOptions[dest] = attrs[source];
+        }
+      });
+    }
+
+    var instance = helperInstance(args, viewOptions, ViewClass);
+    instance._assignCid(el.getAttribute('data-view-cid'));
+    helperInit(args, instance, callback, viewOptions);
+
+    instance.restore(el);
+
+    return instance;
+  };
+
   return helper;
 };
+
+Thorax.View.on('restore', function() {
+  var parent = this,
+      context;
+
+  function filterAncestors(parent, callback) {
+    return function() {
+      if ($(this).parent().view({el: true, helper: true})[0] === parent.el) {
+        return callback.call(this);
+      }
+    };
+   }
+
+  parent.$('[data-view-helper-restore]').each(filterAncestors(parent, function() {
+    if (this.getAttribute('data-view-server') === 'true') {
+      var helper = Handlebars.helpers[this.getAttribute('data-view-helper-restore')],
+          child = helper.restore(parent, this);
+      parent._addChild(child);
+    }
+  }));
+});
 
 function createViewOptions(name, args, options, declaringView) {
   return {
