@@ -281,8 +281,9 @@ describe('serverSide', function() {
         expect(view.$el.html()).to.equal('winning');
         expect(layout._view).to.equal(view);
         expect(layout.$el.children().length).to.equal(1);
+        expect(layout.$el.text()).to.equal('winning');
       });
-      it('should restore non-matching views', function() {
+      it('should rerender non-matching views', function() {
         var $el = $('<div data-view-name="non-winning" data-view-server="true">winning</div>');
         layout.$el.append($el);
 
@@ -290,8 +291,9 @@ describe('serverSide', function() {
         expect(view.$el.html()).to.equal('not winning');
         expect(layout._view).to.equal(view);
         expect(layout.$el.children().length).to.equal(1);
+        expect(layout.$el.text()).to.equal('not winning');
       });
-      it('should restore non-server views', function() {
+      it('should rerender non-server views', function() {
         var $el = $('<div data-view-name="winning" data-view-server="false">winning</div>');
         layout.$el.append($el);
 
@@ -299,6 +301,7 @@ describe('serverSide', function() {
         expect(view.$el.html()).to.equal('not winning');
         expect(layout._view).to.equal(view);
         expect(layout.$el.children().length).to.equal(1);
+        expect(layout.$el.text()).to.equal('not winning');
       });
     });
 

@@ -28,12 +28,10 @@ Thorax.LayoutView = Thorax.View.extend({
     }
 
     if (!$serverSide && !this.hasBeenSet) {
-      var existing = this.$('[' + viewNameAttributeName + '="' + view.name + '"]')[0],
-          used;
+      var existing = this.$('[' + viewNameAttributeName + '="' + view.name + '"]')[0];
       if (existing) {
-        used = view.restore(existing);
-      }
-      if (!used) {
+        view.restore(existing);
+      } else {
         $(this._layoutViewEl).empty();
       }
     }
