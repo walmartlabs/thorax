@@ -9,6 +9,9 @@ module.exports = function(grunt) {
   grunt.registerTask('fruit-loops:test', function() {
     var done = this.async();
 
+    var _error = console.error;
+    console.error = console.log;
+
     var page = FruitLoops.page({
       index: __dirname + '/../build/dev/fruit-loops/test.html',
       evil: true,
@@ -25,6 +28,9 @@ module.exports = function(grunt) {
         page.window.sinon = Sinon;
         page.window.expect = expect;
 
+        // NOP emit so tests of that functionality don't cause early termination
+        page.window.emit = function() {};
+
         var grep = grunt.option('grep');
         if (grep) {
           page.window.mocha.grep(grep);
@@ -33,12 +39,14 @@ module.exports = function(grunt) {
         next();
       },
       callback: function(err, data) {
+        console.error = _error;
+
         if (err) {
-          throw err;
+          done(err);
         } else if (!page.window.mochaResults) {
-          throw new Error('Fruit Loops tests terminated early');
+          done(new Error('Fruit Loops tests terminated early'));
         } else if (page.window.mochaResults.reports.length) {
-          throw new Error(page.window.mochaResults.reports.length + ' failed tests');
+          done(new Error(page.window.mochaResults.reports.length + ' failed tests'));
         } else {
           done();
         }
@@ -48,7 +56,8 @@ module.exports = function(grunt) {
 };
 
 function createMocha(global) {
-  var mocha = new Mocha({reporter: 'dot'});
+  var mocha = new Mocha({reporter: 'dot'}),
+      emit = global.emit;
 
   /**
    * Override ui to ensure that the ui functions are initialized.
@@ -83,7 +92,7 @@ function createMocha(global) {
     return Mocha.prototype.run.call(mocha, function() {
       // Have to manually emit as mocha will use the process async methods rather than the
       // window's so events emit will cause early termination.
-      global.emit();
+      emit.call(global);
 
       fn && fn();
     });
