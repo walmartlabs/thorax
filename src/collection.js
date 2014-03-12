@@ -196,30 +196,30 @@ Thorax.CollectionView = Thorax.View.extend({
 
   removeItem: function(model) {
     var self = this,
-        viewEl = model;
+        $viewEl = model;
 
     if (model.cid) {
       var $el = this._collectionElement;
-      viewEl = $el.find('[' + modelCidAttributeName + '="' + model.cid + '"]');
+      $viewEl = $el.find('[' + modelCidAttributeName + '="' + model.cid + '"]');
     }
-    if (!viewEl.length) {
+    if (!$viewEl.length) {
       return false;
     }
 
-    function cleanCid(viewEl) {
-      var cid = viewEl.attr(viewCidAttributeName),
+    function cleanCid($viewEl) {
+      var cid = $viewEl.attr(viewCidAttributeName),
           child = self.children[cid];
       if (child) {
         self._removeChild(child);
       }
     }
 
-    viewEl.find('[' + viewCidAttributeName + ']').each(function(i, el) {
+    $viewEl.find('[' + viewCidAttributeName + ']').each(function(i, el) {
       cleanCid($(el));
     });
-    cleanCid(viewEl);
+    cleanCid($viewEl);
 
-    viewEl.detach();
+    $viewEl.detach();
 
     return true;
   },
