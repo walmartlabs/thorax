@@ -926,7 +926,42 @@ describe('serverSide', function() {
       });
     });
 
-    it('should cooperate with custom restore events');
+    it('should cooperate with custom restore events', function() {
+      window.$serverSide = true;
+
+      var View = Thorax.View.extend({
+        template: Handlebars.compile('{{view child}}', {trackIds: true})
+      });
+      var child = new SomethingElse({
+        restore: function(el) {
+          this.setElement(el);
+
+          this.$el.text('winning!');
+          return true;
+        }
+      });
+
+      server = new View({
+        child: new Counter(),
+        context: function() {
+          return {
+            child: this.child
+          };
+        }
+      });
+      view = new View({
+        context: function() {
+          return {
+            child: child
+          };
+        }
+      });
+      restoreView();
+
+      expect(view.$el.text()).to.equal('winning!');
+      expect(child.$el.attr('data-view-cid')).to.equal(server.child.cid);
+    });
+
     it('should recover views on client-side parent rerender', function() {
       window.$serverSide = true;
 

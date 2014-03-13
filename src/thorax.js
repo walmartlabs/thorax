@@ -104,7 +104,13 @@ Thorax.View = Backbone.View.extend({
   },
 
 
-  setElement : function() {
+  setElement : function(element) {
+    var $element = $(element),
+        existingCid = $element.attr('data-view-cid');
+    if (existingCid) {
+      this._assignCid(existingCid);
+    }
+
     var response = Backbone.View.prototype.setElement.apply(this, arguments);
 
     // Use a hash here to avoid multiple DOM operations
@@ -191,13 +197,9 @@ Thorax.View = Backbone.View.extend({
       return;
     }
 
-    var $element = $(element),
-        existingCid = $element.attr('data-view-cid');
-    if (existingCid) {
-      this._assignCid(existingCid);
-    }
     this.setElement(element);
 
+    var $element = $(element);
     if (!$serverSide && $element.attr(viewServerAttribute) === 'true') {
       this._renderCount = 1;
       this.trigger('restore');
