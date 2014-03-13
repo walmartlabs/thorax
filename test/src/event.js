@@ -285,6 +285,7 @@ describe('event', function() {
     var spy = this.spy(),
         layoutView = new Thorax.LayoutView(),
         view = new Thorax.View({
+          serverRender: true,
           events: {
             ready: spy
           },
@@ -300,6 +301,7 @@ describe('event', function() {
     var spy = this.spy(),
         layoutView = new Thorax.LayoutView(),
         view = new Thorax.View({
+          serverRender: true,
           child: new Thorax.View({
             template: function() {},
             events: {

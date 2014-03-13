@@ -1,64 +1,143 @@
+/*global $serverSide:true */
+
 describe('layout', function() {
-  it("LayoutView", function() {
-    var a = new Thorax.View({
-      render: function() {
-        Thorax.View.prototype.render.call(this, 'a');
-      }
-    });
-    var aEventCounter = {};
-    a.bind('all', function(eventName) {
+  var _serverSide = window.$serverSide,
+      _emit = window.emit;
+  beforeEach(function() {
+    window.emit = this.spy();
+  });
+  afterEach(function() {
+    $serverSide = _serverSide;
+    window.emit = _emit;
+  });
+
+  function bindCounter(view) {
+    var counter = {};
+    view.bind('all', function(eventName) {
       // For activated, ensure that we actually have DOM content
       if (eventName === 'activated') {
         expect(this.html().length).to.be.greaterThan(0);
       }
 
-      aEventCounter[eventName] || (aEventCounter[eventName] = 0);
-      ++aEventCounter[eventName];
+      counter[eventName] = (counter[eventName] || 0) + 1;
+    });
+    return counter;
+  }
+
+  describe('view lifecycle', function() {
+    var a,
+        aEventCounter,
+        b,
+        bEventCounter,
+        layout;
+
+    beforeEach(function() {
+      layout = new Thorax.LayoutView();
+
+      a = new Thorax.View({
+        render: function() {
+          Thorax.View.prototype.render.call(this, 'a');
+        }
+      });
+      aEventCounter = bindCounter(a);
+
+      b = new Thorax.View({
+        render: function() {
+          Thorax.View.prototype.render.call(this, 'b');
+        }
+      });
+      bEventCounter = bindCounter(b);
     });
 
-    var b = new Thorax.View({
-      render: function() {
-        Thorax.View.prototype.render.call(this, 'b');
-      }
+    it('should process', function() {
+      $serverSide = false;
+      expect(layout.getView()).to.not.be.ok();
+
+      layout.setView(a);
+      expect(layout.getView()).to.equal(a, 'layout sets view');
+      expect(layout.$('[data-view-cid]').length).to.be.above(0, 'layout updates HTML');
+
+      b.render();
+      layout.setView(b);
+      expect(layout.getView()).to.equal(b, 'layout sets view');
+
+      //lifecycle checks
+      expect(aEventCounter).to.eql({
+        'before:rendered': 1,
+        rendered: 1,
+        'before:append': 1,
+        append: 1,
+        activated: 1,
+        ready: 1,
+        deactivated: 1,
+        destroyed: 1
+      });
+
+      expect(bEventCounter).to.eql({
+        'before:rendered': 1,
+        rendered: 1,
+        'before:append': 1,
+        append: 1,
+        activated: 1,
+        ready: 1
+      });
+
+      layout.setView(false);
+      expect(layout.getView()).to.not.be.ok();
+      expect(bEventCounter).to.eql({
+        'before:rendered': 1,
+        rendered: 1,
+        'before:append': 1,
+        append: 1,
+        activated: 1,
+        ready: 1,
+        deactivated: 1,
+        destroyed: 1
+      });
     });
-    var bEventCounter = {};
-    b.bind('all', function(eventName) {
-      bEventCounter[eventName] || (bEventCounter[eventName] = 0);
-      ++bEventCounter[eventName];
+
+    it('should process server-side', function() {
+      $serverSide = true;
+      expect(layout.getView()).to.not.be.ok();
+
+      layout.setView(a, {serverRender: true});
+      expect(layout.getView()).to.equal(a, 'layout sets view');
+      expect(layout.$('[data-view-cid]')).to.not.be.empty();
+      expect(aEventCounter).to.eql({
+        'before:rendered': 1,
+        rendered: 1,
+        'before:append': 1,
+        append: 1,
+        activated: 1,
+        ready: 1
+      });
+
+      layout.setView(b);
+      expect(layout.getView()).to.equal(b, 'layout sets view');
+      expect(layout.$('[data-view-cid]')).to.be.empty();
+      expect(window.emit.calledOnce).to.be.ok();
+
+      //lifecycle checks
+      expect(aEventCounter).to.eql({
+        'before:rendered': 1,
+        rendered: 1,
+        'before:append': 1,
+        append: 1,
+        activated: 1,
+        ready: 1,
+        deactivated: 1,
+        destroyed: 1
+      });
+
+      expect(bEventCounter).to.eql({});
+
+      layout.setView(false);
+      expect(layout.getView()).to.not.be.ok();
+      expect(bEventCounter).to.eql({
+        deactivated: 1,
+        destroyed: 1
+      });
     });
-
-    var layout = new Thorax.LayoutView();
-
-    expect(layout.getView()).to.not.be.ok();
-
-    layout.setView(a);
-    expect(layout.getView()).to.equal(a, 'layout sets view');
-    expect(layout.$('[data-view-cid]').length).to.be.above(0, 'layout updates HTML');
-
-    b.render();
-    layout.setView(b);
-    expect(layout.getView()).to.equal(b, 'layout sets view');
-
-    //lifecycle checks
-    expect(aEventCounter.rendered).to.equal(1, 'lifecycle event: rendered');
-    expect(aEventCounter.activated).to.equal(1, 'lifecycle event: activated');
-    expect(aEventCounter.ready).to.equal(1, 'lifecycle event: ready');
-    expect(aEventCounter.deactivated).to.equal(1, 'lifecycle event: deactivated');
-    expect(aEventCounter.destroyed).to.equal(1, 'lifecycle event: destroyed');
-
-    expect(bEventCounter.rendered).to.equal(1, 'lifecycle event: rendered');
-    expect(bEventCounter.activated).to.equal(1, 'lifecycle event: activated');
-    expect(bEventCounter.ready).to.equal(1, 'lifecycle event: ready');
-    expect(bEventCounter.deactivated).to.not.be.ok();
-    expect(bEventCounter.destroyed).to.not.be.ok();
-
-    layout.setView(false);
-    expect(layout.getView()).to.not.be.ok();
-    expect(bEventCounter.rendered).to.equal(1, 'lifecycle event: rendered');
-    expect(bEventCounter.activated).to.equal(1, 'lifecycle event: activated');
-    expect(bEventCounter.ready).to.equal(1, 'lifecycle event: ready');
-    expect(bEventCounter.deactivated).to.equal(1, 'lifecycle event: deactivated');
-    expect(bEventCounter.destroyed).to.equal(1, 'lifecycle event: destroyed');
   });
 
   it("LayoutView destroy will destroy child view", function() {
@@ -140,12 +219,16 @@ describe('layout', function() {
       template: Handlebars.compile('<div class="outer">{{layout-element}}</div>')
     });
     layoutWithTemplate.setView(new Thorax.View({
+      serverRender: true,
       template: Handlebars.compile('<div class="inner"></div>')
     }));
     expect($(layoutWithTemplate.el).attr('data-layout-cid')).to.not.be.ok();
     expect(layoutWithTemplate.$('[data-layout-cid]').length).to.equal(1);
     expect(layoutWithTemplate.$('.outer').length).to.equal(1);
     expect(layoutWithTemplate.$('.inner').length).to.equal(1);
+  });
+
+  it('should fail if missing layout-element', function() {
     var layoutWithTemplateWithoutLayoutTag = new Thorax.LayoutView({
       template: Handlebars.compile('<div class="outer"></div>')
     });
@@ -166,16 +249,19 @@ describe('layout', function() {
   it("transition option can be passed to setView", function() {
     var layout = new Thorax.LayoutView();
     var a = new Thorax.View({
+      serverRender: true,
       template: function() {
         return '<span>a</span>';
       }
     });
     var b = new Thorax.View({
+      serverRender: true,
       template: function() {
         return '<span>b</span>';
       }
     });
     layout.setView(a, {
+      serverRender: true,
       transition: function(newView, oldView, append, remove) {
         append();
         remove();
@@ -183,6 +269,7 @@ describe('layout', function() {
     });
     expect(layout.$('span').html()).to.equal('a');
     layout.setView(b, {
+      serverRender: true,
       transition: function(newView, oldView, append, remove) {
         append();
         remove();
@@ -194,11 +281,13 @@ describe('layout', function() {
   it('setView should not throw even if old view is destroyed', function() {
     var layout = new Thorax.LayoutView();
     var a = new Thorax.View({
+      serverRender: true,
       template: function() {
         return '<span>a</span>';
       }
     });
     var b = new Thorax.View({
+      serverRender: true,
       template: function() {
         return '<span>b</span>';
       }

@@ -1,4 +1,38 @@
 describe('serverSide', function() {
+  var _serverSide = window.$serverSide,
+      emit;
+  beforeEach(function() {
+    window.$serverSide = true;
+    window.emit = emit = this.spy();
+  });
+  afterEach(function() {
+    window.$serverSide = _serverSide;
+  });
+
+  describe('emit', function() {
+    it('should emit on setView for non-server views', function() {
+      var view = new Thorax.View(),
+          layout = new Thorax.LayoutView();
+
+      layout.setView(view);
+      expect(emit.calledOnce).to.be(true);
+    });
+    it('should defer emit for server-side views', function() {
+      var view = new Thorax.View({template: function() { return 'bar'; }}),
+          layout = new Thorax.LayoutView();
+
+      layout.setView(view, {serverRender: true});
+      expect(emit.called).to.be(false);
+
+      view = new Thorax.View({
+        serverRender: true,
+        template: function() { return 'bar'; }
+      });
+      layout.setView(view);
+      expect(emit.called).to.be(false);
+    });
+  });
+
   describe('events', function() {
     it('should NOP DOM events in server mode', function() {
       var spy = this.spy();
