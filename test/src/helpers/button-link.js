@@ -95,4 +95,20 @@ describe('button-link helpers', function() {
     view.$el.remove();
     $(document).off('click.test.prevent-default');
   });
+
+  it("does not invoke Backbone.Navigate if when shift or meta keys are pressed on {{#links}}", function() {
+    var spy = sinon.spy(Backbone.history, 'navigate');
+
+    var view = new Thorax.View({
+      template: Handlebars.compile("{{#link '#test'}}Link{{/link}}")
+    });
+    var el = view.$('a').get(0);
+
+    view._anchorClick({ metaKey: true,  currentTarget: el });
+    view._anchorClick({ shiftKey: true, currentTarget: el });
+
+    expect(spy.called).to.equal(false);
+
+    spy.restore();
+  });
 });
