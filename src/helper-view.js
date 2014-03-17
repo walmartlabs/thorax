@@ -61,7 +61,7 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
     var expandTokens = expandHash(this, options.hash);
 
     var viewOptions = createViewOptions(name, args, options, declaringView);
-    helperTemplate(viewOptions, options, ViewClass);
+    setHelperTemplate(viewOptions, options, ViewClass);
 
     normalizeHTMLAttributeOptions(options.hash);
     var htmlAttributes = _.clone(options.hash);
@@ -99,14 +99,14 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
 
     // Create the instance if we don't already have one
     if (!instance) {
-      instance = helperInstance(args, viewOptions, ViewClass);
+      instance = getHelperInstance(args, viewOptions, ViewClass);
       if (!instance) {
         return '';
       }
 
       instance.$el.attr('data-view-helper-restore', name);
 
-      if ($serverSide && instance.$el.attr('data-view-server') !== 'false') {
+      if ($serverSide && instance.$el.attr('data-view-restore') !== 'false') {
         try {
           ServerMarshal.store(instance.$el, 'args', args, options.ids, options);
           ServerMarshal.store(instance.$el, 'attrs', options.hash, options.hashIds, options);
@@ -117,7 +117,7 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
             ServerMarshal.store(instance.$el, 'inverse', options.inverse.program);
           }
         } catch (err) {
-          instance.$el.attr('data-view-server', 'false');
+          instance.$el.attr('data-view-restore', 'false');
         }
       }
 
@@ -167,7 +167,7 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
     }
 
     var viewOptions = createViewOptions(name, args, options, declaringView);
-    helperTemplate(viewOptions, options, ViewClass);
+    setHelperTemplate(viewOptions, options, ViewClass);
 
     if (viewOptionWhiteList) {
       _.each(viewOptionWhiteList, function(dest, source) {
@@ -177,7 +177,7 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
       });
     }
 
-    var instance = helperInstance(args, viewOptions, ViewClass);
+    var instance = getHelperInstance(args, viewOptions, ViewClass);
     instance._assignCid(el.getAttribute('data-view-cid'));
     helperInit(args, instance, callback, viewOptions);
 
@@ -202,7 +202,7 @@ Thorax.View.on('restore', function() {
    }
 
   parent.$('[data-view-helper-restore]').each(filterAncestors(parent, function() {
-    if (this.getAttribute('data-view-server') === 'true') {
+    if (this.getAttribute('data-view-restore') === 'true') {
       var helper = Handlebars.helpers[this.getAttribute('data-view-helper-restore')],
           child = helper.restore(parent, this);
       parent._addChild(child);
@@ -224,7 +224,7 @@ function createViewOptions(name, args, options, declaringView) {
   };
 }
 
-function helperTemplate(viewOptions, options, ViewClass) {
+function setHelperTemplate(viewOptions, options, ViewClass) {
   if (options.fn) {
     // Only assign if present, allow helper view class to
     // declare template
@@ -236,7 +236,7 @@ function helperTemplate(viewOptions, options, ViewClass) {
   }
 }
 
-function helperInstance(args, viewOptions, ViewClass) {
+function getHelperInstance(args, viewOptions, ViewClass) {
   var instance;
 
   if (ViewClass.factory) {
@@ -299,8 +299,12 @@ function helperAppend(scope, callback) {
 function cloneHelperOptions(options) {
   var ret = _.pick(options, 'fn', 'inverse', 'hash', 'data');
   ret.data = _.omit(options.data, 'cid', 'view', 'yield', 'root', '_parent');
+
+  // This is necessary to prevent failures when mixing restored and rendered data
+  // as it forces the keys object to be complete.
   ret.fn = ret.fn || undefined;
   ret.inverse = ret.inverse || undefined;
+
   return ret;
 }
 

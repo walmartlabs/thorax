@@ -83,12 +83,12 @@ describe('serverSide', function() {
     it('should track server-side rendering vs. not', function() {
       var view = new Thorax.View({template: function() { return 'foo'; }});
       view.render();
-      expect(view.$el.attr('data-view-server')).to.equal('true');
+      expect(view.$el.attr('data-view-restore')).to.equal('true');
 
       window.$serverSide = false;
       view = new Thorax.View({template: function() { return 'foo'; }});
       view.render();
-      expect(view.$el.attr('data-view-server')).to.not.exist;
+      expect(view.$el.attr('data-view-restore')).to.not.exist;
     });
   });
 
@@ -116,8 +116,8 @@ describe('serverSide', function() {
       view.$('[data-model-cid]').each(function() {
         $(this).removeAttr('data-model-cid');
       });
-      view.$('[data-view-server]').each(function() {
-        $(this).removeAttr('data-view-server');
+      view.$('[data-view-restore]').each(function() {
+        $(this).removeAttr('data-view-restore');
       });
       view.$('[data-server-data]').each(function() {
         $(this).removeAttr('data-server-data');
@@ -162,7 +162,7 @@ describe('serverSide', function() {
     });
 
     it('should restore views explicitly', function() {
-      var el = $('<div class="foo-view" data-view-server="true">bar</div>');
+      var el = $('<div class="foo-view" data-view-restore="true">bar</div>');
       fixture.append(el);
 
       var view = new Thorax.View({
@@ -173,7 +173,7 @@ describe('serverSide', function() {
       expect(el.html()).to.equal('bar');
       el.remove();
 
-      el = $('<div class="foo-view" data-view-server="true">bar</div>');
+      el = $('<div class="foo-view" data-view-restore="true">bar</div>');
       fixture.append(el);
       view = new Thorax.View({
         el: function() {
@@ -200,7 +200,7 @@ describe('serverSide', function() {
     });
 
     it('should restore views with a passed el', function() {
-      var el = $('<div class="foo-view" data-view-server="true">bar</div>');
+      var el = $('<div class="foo-view" data-view-restore="true">bar</div>');
       fixture.append(el);
 
       var view = new Thorax.View({});
@@ -212,7 +212,7 @@ describe('serverSide', function() {
     });
 
     it('should update view attributes on restore', function() {
-      var el = $('<div class="foo-view" data-view-cid="1234" data-view-server="true">bar</div>');
+      var el = $('<div class="foo-view" data-view-cid="1234" data-view-restore="true">bar</div>');
       fixture.append(el);
 
       var spy = this.spy();
@@ -228,7 +228,7 @@ describe('serverSide', function() {
 
     if (!$serverSide) {
       it('should restore DOM events', function() {
-        var el = $('<div class="foo-view" data-view-server="true">bar</div>');
+        var el = $('<div class="foo-view" data-view-restore="true">bar</div>');
         fixture.append(el);
 
         var spy = this.spy();
@@ -245,7 +245,7 @@ describe('serverSide', function() {
     }
 
     it('should replace restore of rendered view', function() {
-      var el = $('<div class="foo-view" data-view-server="true">bar</div>');
+      var el = $('<div class="foo-view" data-view-restore="true">bar</div>');
       fixture.append(el);
 
       var view = new Thorax.View({});
@@ -256,7 +256,7 @@ describe('serverSide', function() {
       expect(view.el).to.equal(el[0]);
       expect(view._renderCount).to.equal(1);
       expect(el.html()).to.equal('foo');
-      expect(view.$el.attr('data-view-server')).to.not.exist;
+      expect(view.$el.attr('data-view-restore')).to.not.exist;
     });
 
     describe('setView', function() {
@@ -274,7 +274,7 @@ describe('serverSide', function() {
         });
       });
       it('should restore matching views', function() {
-        var $el = $('<div data-view-name="winning" data-view-server="true">winning</div>');
+        var $el = $('<div data-view-name="winning" data-view-restore="true">winning</div>');
         layout.$el.append($el);
 
         layout.setView(view);
@@ -284,7 +284,7 @@ describe('serverSide', function() {
         expect(layout.$el.text()).to.equal('winning');
       });
       it('should rerender non-matching views', function() {
-        var $el = $('<div data-view-name="non-winning" data-view-server="true">winning</div>');
+        var $el = $('<div data-view-name="non-winning" data-view-restore="true">winning</div>');
         layout.$el.append($el);
 
         layout.setView(view);
@@ -294,7 +294,7 @@ describe('serverSide', function() {
         expect(layout.$el.text()).to.equal('not winning');
       });
       it('should rerender non-server views', function() {
-        var $el = $('<div data-view-name="winning" data-view-server="false">winning</div>');
+        var $el = $('<div data-view-name="winning" data-view-restore="false">winning</div>');
         layout.$el.append($el);
 
         layout.setView(view);

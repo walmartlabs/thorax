@@ -169,6 +169,8 @@ pushDomEvents([
 ]);
 
 function containHandlerToCurentView(handler, current) {
+  // Passing the current view rather than just a cid to allow for updates to the view's cid
+  // caused by the restore process.
   return function(event) {
     var view = $(event.target).view({helper: false});
     if (view && view.cid === current.cid) {

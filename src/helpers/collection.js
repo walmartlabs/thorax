@@ -1,6 +1,8 @@
 /* global
+    $serverSide,
     collectionElementAttributeName, createErrorMessage, getOptionsData, getParent,
-    helperViewPrototype, normalizeHTMLAttributeOptions
+    helperViewPrototype, normalizeHTMLAttributeOptions,
+    viewRestoreAttribute
 */
 
 Thorax.CollectionHelperView = Thorax.CollectionView.extend({
@@ -36,6 +38,8 @@ Thorax.CollectionHelperView = Thorax.CollectionView.extend({
       options.itemTemplate = options.template;
       options.template = Handlebars.VM.noop;
 
+      // We can not restore if the item has a depthed reference, ../foo, so we need to
+      // force a rerender on the client-side
       if (options.itemTemplate.depth) {
         restorable = false;
       }
@@ -82,8 +86,8 @@ Thorax.CollectionHelperView = Thorax.CollectionView.extend({
       }
     }
 
-    if (!restorable) {
-      this.$el.attr('data-view-server', 'false');
+    if ($serverSide && !restorable) {
+      this.$el.attr(viewRestoreAttribute, 'false');
     }
 
     return response;

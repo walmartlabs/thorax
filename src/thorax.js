@@ -26,7 +26,13 @@ if (!$.fn.forEach) {
 var viewNameAttributeName = 'data-view-name',
     viewCidAttributeName = 'data-view-cid',
     viewHelperAttributeName = 'data-view-helper',
-    viewServerAttribute = 'data-view-server';
+
+    // Used to identify views that can be restored vs. rerendered on the client side.
+    // Values are:
+    //  - true - Can be restored
+    //  - false - Must be rerendered
+    //  - Omitted - Normal HTML element without associated view
+    viewRestoreAttribute = 'data-view-restore';
 
 //view instances
 var viewsIndexedByCid = {};
@@ -200,11 +206,11 @@ Thorax.View = Backbone.View.extend({
     this.setElement(element);
 
     var $element = $(element);
-    if (!$serverSide && $element.attr(viewServerAttribute) === 'true') {
+    if (!$serverSide && $element.attr(viewRestoreAttribute) === 'true') {
       this._renderCount = 1;
       this.trigger('restore');
 
-      var remainingViews = this.$('[data-view-server=false]'),
+      var remainingViews = this.$('[data-view-restore=false]'),
           rerender = _.any(remainingViews, function(el) {
             return $(el).parent().view({el: true, helper: true})[0] === $element[0];
           });
@@ -273,11 +279,11 @@ Thorax.View = Backbone.View.extend({
 
 
         if ($serverSide) {
-          if (self.$el.attr(viewServerAttribute) !== 'false') {
-            self.$el.attr(viewServerAttribute, $serverSide);
+          if (self.$el.attr(viewRestoreAttribute) !== 'false') {
+            self.$el.attr(viewRestoreAttribute, $serverSide);
           }
         } else {
-          self.$el.removeAttr(viewServerAttribute);
+          self.$el.removeAttr(viewRestoreAttribute);
         }
 
         //accept a view, string, Handlebars.SafeString or DOM element
