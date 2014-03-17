@@ -358,15 +358,15 @@ Thorax.CollectionView = Thorax.View.extend({
     }
   },
   restoreItem: function(model, i, el) {
+    // Associate the element with the proper model.
+    el.setAttribute(modelCidAttributeName, model.cid);
+
+    // If we are dealing with something other than a template then reinstantiate the view.
     if (this.itemView || this.renderItem !== Thorax.CollectionView.prototype.renderItem) {
       var child = this.renderItem(model, i);
-      el.setAttribute(modelCidAttributeName, model.cid);
 
       child.restore(el);
       this._addChild(child);
-      return child;
-    } else {
-      el.setAttribute(modelCidAttributeName, model.cid);
     }
   },
   itemContext: function(model /*, i */) {
