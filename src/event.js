@@ -121,7 +121,7 @@ _.extend(Thorax.View.prototype, {
     } else if (!$serverSide) {
       // DOM Events
       if (!params.nested) {
-        boundHandler = containHandlerToCurentView(boundHandler, this.cid);
+        boundHandler = containHandlerToCurentView(boundHandler, this);
       }
 
       var name = params.name + '.delegateEvents' + this.cid;
@@ -168,10 +168,12 @@ pushDomEvents([
   'focus', 'blur'
 ]);
 
-function containHandlerToCurentView(handler, cid) {
+function containHandlerToCurentView(handler, current) {
+  // Passing the current view rather than just a cid to allow for updates to the view's cid
+  // caused by the restore process.
   return function(event) {
     var view = $(event.target).view({helper: false});
-    if (view && view.cid === cid) {
+    if (view && view.cid === current.cid) {
       event.originalContext = this;
       return handler(event);
     }

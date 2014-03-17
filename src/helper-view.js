@@ -1,4 +1,8 @@
-/*global ServerMarshal, $serverSide, getOptionsData, normalizeHTMLAttributeOptions, viewHelperAttributeName */
+/*global
+    ServerMarshal,
+    $serverSide, createError, getOptionsData,
+    normalizeHTMLAttributeOptions, viewHelperAttributeName
+*/
 var viewPlaceholderAttributeName = 'data-view-tmp',
     viewTemplateOverrides = {};
 
@@ -56,17 +60,8 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
     // Evaluate any nested parameters that we may have to content with
     var expandTokens = expandHash(this, options.hash);
 
-    var viewOptions = {
-      inverse: options.inverse,
-      options: options.hash,
-      declaringView: declaringView,
-      parent: getParent(declaringView),
-      _helperName: name,
-      _helperOptions: {
-        options: cloneHelperOptions(options),
-        args: _.clone(args)
-      }
-    };
+    var viewOptions = createViewOptions(name, args, options, declaringView);
+    setHelperTemplate(viewOptions, options, ViewClass);
 
     normalizeHTMLAttributeOptions(options.hash);
     var htmlAttributes = _.clone(options.hash);
@@ -96,15 +91,6 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
       return attrs;
     };
 
-    if (options.fn) {
-      // Only assign if present, allow helper view class to
-      // declare template
-      viewOptions.template = options.fn;
-    } else if (ViewClass && ViewClass.prototype && !ViewClass.prototype.template) {
-      // ViewClass may also be an instance or object with factory method
-      // so need to do this check
-      viewOptions.template = Handlebars.VM.noop;
-    }
 
     // Check to see if we have an existing instance that we can reuse
     var instance = _.find(declaringView._previousHelpers, function(child) {
@@ -113,25 +99,14 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
 
     // Create the instance if we don't already have one
     if (!instance) {
-      if (ViewClass.factory) {
-        instance = ViewClass.factory(args, viewOptions);
-        if (!instance) {
-          return '';
-        }
-
-        instance._helperName = viewOptions._helperName;
-        instance._helperOptions = viewOptions._helperOptions;
-      } else {
-        instance = new ViewClass(viewOptions);
-      }
-      if (!instance.el) {
-        // ViewClass.factory may return existing objects which may have been destroyed
-        throw new Error('insert-destroyed-factory');
+      instance = getHelperInstance(args, viewOptions, ViewClass);
+      if (!instance) {
+        return '';
       }
 
       instance.$el.attr('data-view-helper-restore', name);
 
-      if ($serverSide) {
+      if ($serverSide && instance.$el.attr('data-view-restore') !== 'false') {
         try {
           ServerMarshal.store(instance.$el, 'args', args, options.ids, options);
           ServerMarshal.store(instance.$el, 'attrs', options.hash, options.hashIds, options);
@@ -142,16 +117,11 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
             ServerMarshal.store(instance.$el, 'inverse', options.inverse.program);
           }
         } catch (err) {
-          instance.$el.attr('data-view-server', 'false');
+          instance.$el.attr('data-view-restore', 'false');
         }
       }
 
-      args.push(instance);
-      declaringView._addChild(instance);
-      declaringView.trigger.apply(declaringView, ['helper', name].concat(args));
-      declaringView.trigger.apply(declaringView, ['helper:' + name].concat(args));
-
-      callback && callback.apply(this, args);
+      helperInit(args, instance, callback, viewOptions);
     } else {
       if (!instance.el) {
         throw new Error('insert-destroyed');
@@ -178,8 +148,126 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
     return new Handlebars.SafeString(Thorax.Util.tag(htmlAttributes, '', expandTokens ? this : null));
   });
   var helper = Handlebars.helpers[name];
+
+  helper.restore = function(declaringView, el) {
+    var context = declaringView.context(),
+        args = ServerMarshal.load(el, 'args', declaringView, context) || [],
+        attrs = ServerMarshal.load(el, 'attrs', declaringView, context) || {};
+
+    var options = {
+      hash: attrs,
+      fn: ServerMarshal.load(el, 'fn'),
+      inverse: ServerMarshal.load(el, 'inverse')
+    };
+    if (options.fn) {
+      options.fn = declaringView.template.child(options.fn);
+    }
+    if (options.inverse) {
+      options.inverse = declaringView.template.child(options.inverse);
+    }
+
+    var viewOptions = createViewOptions(name, args, options, declaringView);
+    setHelperTemplate(viewOptions, options, ViewClass);
+
+    if (viewOptionWhiteList) {
+      _.each(viewOptionWhiteList, function(dest, source) {
+        if (!_.isUndefined(attrs[source])) {
+          viewOptions[dest] = attrs[source];
+        }
+      });
+    }
+
+    var instance = getHelperInstance(args, viewOptions, ViewClass);
+    instance._assignCid(el.getAttribute('data-view-cid'));
+    helperInit(args, instance, callback, viewOptions);
+
+    instance.restore(el);
+
+    return instance;
+  };
+
   return helper;
 };
+
+Thorax.View.on('restore', function() {
+  var parent = this,
+      context;
+
+  function filterAncestors(parent, callback) {
+    return function() {
+      if ($(this).parent().view({el: true, helper: true})[0] === parent.el) {
+        return callback.call(this);
+      }
+    };
+   }
+
+  parent.$('[data-view-helper-restore]').each(filterAncestors(parent, function() {
+    if (this.getAttribute('data-view-restore') === 'true') {
+      var helper = Handlebars.helpers[this.getAttribute('data-view-helper-restore')],
+          child = helper.restore(parent, this);
+      parent._addChild(child);
+    }
+  }));
+});
+
+function createViewOptions(name, args, options, declaringView) {
+  return {
+    inverse: options.inverse,
+    options: options.hash,
+    declaringView: declaringView,
+    parent: getParent(declaringView),
+    _helperName: name,
+    _helperOptions: {
+      options: cloneHelperOptions(options),
+      args: _.clone(args)
+    }
+  };
+}
+
+function setHelperTemplate(viewOptions, options, ViewClass) {
+  if (options.fn) {
+    // Only assign if present, allow helper view class to
+    // declare template
+    viewOptions.template = options.fn;
+  } else if (ViewClass && ViewClass.prototype && !ViewClass.prototype.template) {
+    // ViewClass may also be an instance or object with factory method
+    // so need to do this check
+    viewOptions.template = Handlebars.VM.noop;
+  }
+}
+
+function getHelperInstance(args, viewOptions, ViewClass) {
+  var instance;
+
+  if (ViewClass.factory) {
+    instance = ViewClass.factory(args, viewOptions);
+    if (!instance) {
+      return;
+    }
+
+    instance._helperName = viewOptions._helperName;
+    instance._helperOptions = viewOptions._helperOptions;
+  } else {
+    instance = new ViewClass(viewOptions);
+  }
+
+  if (!instance.el) {
+    // ViewClass.factory may return existing objects which may have been destroyed
+    throw createError('insert-destroyed-factory');
+  }
+  return instance;
+}
+function helperInit(args, instance, callback, viewOptions) {
+  var declaringView = viewOptions.declaringView,
+      name = viewOptions._helperName;
+
+  args.push(instance);
+  declaringView._addChild(instance);
+  declaringView.trigger.apply(declaringView, ['helper', name].concat(args));
+  declaringView.trigger.apply(declaringView, ['helper:' + name].concat(args));
+
+  callback && callback.apply(this, args);
+}
 
 function helperAppend(scope, callback) {
   this._pendingAppend = undefined;
@@ -211,6 +299,12 @@ function helperAppend(scope, callback) {
 function cloneHelperOptions(options) {
   var ret = _.pick(options, 'fn', 'inverse', 'hash', 'data');
   ret.data = _.omit(options.data, 'cid', 'view', 'yield', 'root', '_parent');
+
+  // This is necessary to prevent failures when mixing restored and rendered data
+  // as it forces the keys object to be complete.
+  ret.fn = ret.fn || undefined;
+  ret.inverse = ret.inverse || undefined;
+
   return ret;
 }
 
@@ -246,7 +340,7 @@ function compareHelperOptions(a, b) {
   // Implements a first level depth comparison
   return a.args.length === b.args.length
       && compareValues(a.args, b.args)
-      && _.isEqual(_.keys(a.options), _.keys(b.options))
+      && _.isEqual(_.keys(a.options).sort(), _.keys(b.options).sort())
       && _.every(a.options, function(value, key) {
           if (key === 'data' || key === 'hash') {
             return compareValues(a.options[key], b.options[key]);

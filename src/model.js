@@ -1,5 +1,6 @@
 /*global createRegistryWrapper, dataObject, getValue, inheritVars */
-var modelCidAttributeName = 'data-model-cid';
+var modelCidAttributeName = 'data-model-cid',
+    modelIdAttributeName = 'data-model-id';
 
 Thorax.Model = Backbone.Model.extend({
   isEmpty: function() {
@@ -46,6 +47,7 @@ dataObject('model', {
   },
   change: onModelChange,
   $el: '$el',
+  idAttrName: modelIdAttributeName,
   cidAttrName: modelCidAttributeName
 });
 

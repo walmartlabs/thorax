@@ -25,7 +25,14 @@ if (!$.fn.forEach) {
 
 var viewNameAttributeName = 'data-view-name',
     viewCidAttributeName = 'data-view-cid',
-    viewHelperAttributeName = 'data-view-helper';
+    viewHelperAttributeName = 'data-view-helper',
+
+    // Used to identify views that can be restored vs. rerendered on the client side.
+    // Values are:
+    //  - true - Can be restored
+    //  - false - Must be rerendered
+    //  - Omitted - Normal HTML element without associated view
+    viewRestoreAttribute = 'data-view-restore';
 
 //view instances
 var viewsIndexedByCid = {};
@@ -91,15 +98,42 @@ Thorax.View = Backbone.View.extend({
   _configure: function() {},
   _ensureElement: function () {
     configureView.call(this);
+
+    if (!$serverSide && this.el) {
+      var $el = $(_.result(this, 'el'));
+      if ($el.length) {
+        return this.restore($el);
+      }
+    }
+
     return Backbone.View.prototype._ensureElement.call(this);
   },
 
 
-  setElement : function() {
+  setElement : function(element) {
+    var $element = $(element),
+        existingCid = $element.attr('data-view-cid');
+    if (existingCid) {
+      this._assignCid(existingCid);
+    }
+
     var response = Backbone.View.prototype.setElement.apply(this, arguments);
-    this.name && this.$el.attr(viewNameAttributeName, this.name);
-    this.$el.attr(viewCidAttributeName, this.cid);
+
+    // Use a hash here to avoid multiple DOM operations
+    var attr = {'data-view-cid': this.cid};
+    if (this.name) {
+      attr[viewNameAttributeName] = this.name;
+    }
+    this.$el.attr(attr);
+
     return response;
+  },
+  _assignCid: function(cid) {
+    if (this.cid) {
+      delete viewsIndexedByCid[this.cid];
+    }
+    this.cid = cid;
+    viewsIndexedByCid[cid] = this;
   },
 
   _addChild: function(view) {
@@ -157,6 +191,39 @@ Thorax.View = Backbone.View.extend({
     this._helperOptions = undefined;
   },
 
+  restore: function(element) {
+    if (this._renderCount) {
+      // Ensure that we are registered to the right cid (this could have been reset previously)
+      var oldCid = this.$el.attr('data-view-cid');
+      if (this.cid !== oldCid) {
+        this._assignCid(oldCid);
+      }
+
+      $(element).replaceWith(this.$el);
+      return;
+    }
+
+    this.setElement(element);
+
+    var $element = $(element);
+    if (!$serverSide && $element.attr(viewRestoreAttribute) === 'true') {
+      this._renderCount = 1;
+      this.trigger('restore');
+
+      var remainingViews = this.$('[data-view-restore=false]'),
+          rerender = _.any(remainingViews, function(el) {
+            return $(el).parent().view({el: true, helper: true})[0] === $element[0];
+          });
+      if (rerender) {
+        this.render();
+      }
+
+      return true;
+    } else {
+      this.render();
+    }
+  },
+
   render: function(output) {
     var self = this;
     // NOP for destroyed views
@@ -209,6 +276,15 @@ Thorax.View = Backbone.View.extend({
           }
         }, self);
         self._previousHelpers = undefined;
+
+
+        if ($serverSide) {
+          if (self.$el.attr(viewRestoreAttribute) !== 'false') {
+            self.$el.attr(viewRestoreAttribute, $serverSide);
+          }
+        } else {
+          self.$el.removeAttr(viewRestoreAttribute);
+        }
 
         //accept a view, string, Handlebars.SafeString or DOM element
         self.html((output && output.el) || (output && output.string) || output);
