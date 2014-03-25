@@ -192,6 +192,9 @@ Thorax.View = Backbone.View.extend({
   },
 
   restore: function(element) {
+    // Extract from $ objects if passed
+    element = element[0] || element;
+
     if (this._renderCount) {
       // Ensure that we are registered to the right cid (this could have been reset previously)
       var oldCid = this.$el.attr('data-view-cid');
@@ -205,14 +208,16 @@ Thorax.View = Backbone.View.extend({
 
     this.setElement(element);
 
-    var $element = $(element);
-    if (!$serverSide && $element.attr(viewRestoreAttribute) === 'true') {
+    var restoreable = this.$el.attr(viewRestoreAttribute) === 'true';
+    this.$el.removeAttr('data-view-restore');
+
+    if (!$serverSide && restoreable) {
       this._renderCount = 1;
       this.trigger('restore');
 
       var remainingViews = this.$('[data-view-restore=false]'),
           rerender = _.any(remainingViews, function(el) {
-            return $(el).parent().view({el: true, helper: true})[0] === $element[0];
+            return $(el).parent().view({el: true, helper: true})[0] === element;
           });
       if (rerender) {
         this.render();
