@@ -212,6 +212,12 @@ Thorax.View = Backbone.View.extend({
     this.$el.removeAttr('data-view-restore');
 
     if (!$serverSide && restoreable) {
+      // Ensure that our associated template is wired up so that helpers who need to
+      // resolve template children are able to do so.
+      assignTemplate.call(this, 'template', {
+        required: false
+      });
+
       this._renderCount = 1;
       this.trigger('restore');
 
