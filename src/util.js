@@ -257,6 +257,10 @@ Thorax.Util = {
   },
 
   getTemplate: function(file, ignoreErrors) {
+    if (_.isFunction(file)) {
+      return file;
+    }
+
     //append the template path prefix if it is missing
     var pathPrefix = Thorax.templatePathPrefix,
         template;
