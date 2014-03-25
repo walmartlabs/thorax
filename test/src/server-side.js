@@ -585,7 +585,10 @@ describe('serverSide', function() {
         Thorax.Views.nested = Thorax.View.extend({
           name: 'nested',
           template: Handlebars.compile('{{view child}}', {trackIds: true}),
-          child: new Counter()
+
+          initialize: function() {
+            this.child = new Counter();
+          }
         });
 
         server = new View();
@@ -988,6 +991,7 @@ describe('serverSide', function() {
       var child = new SomethingElse({
         restore: function(el) {
           this.setElement(el);
+          this.$el.removeAttr('data-view-restore');
 
           this.$el.text('winning!');
           return true;

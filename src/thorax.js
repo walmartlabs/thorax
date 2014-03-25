@@ -221,7 +221,7 @@ Thorax.View = Backbone.View.extend({
       this._renderCount = 1;
       this.trigger('restore');
 
-      var remainingViews = this.$('[data-view-restore=false]'),
+      var remainingViews = this.$('[data-view-restore]'),
           rerender = _.any(remainingViews, function(el) {
             return $(el).parent().view({el: true, helper: true})[0] === element;
           });
