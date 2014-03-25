@@ -829,9 +829,37 @@ describe('serverSide', function() {
         expect(_.keys(collectionView.children).length).to.equal(4);
         expect(_.every(collectionView.children, function(value) {
           return value._name === 'somethingelse';
-        })).to.be['true'];
+        })).to.be(true);
 
         var viewCids = _.map(collectionView.$('[data-model-cid]'), function(el) {
+          return el.getAttribute('data-model-cid');
+        });
+        expect(viewCids).to.eql(collection2.map(function(model) { return model.cid; }));
+        compareViews();
+      });
+      it('should restore renderItem strings', function() {
+        var View = Thorax.View.extend({
+          template: Handlebars.compile('{{collection}}')
+        });
+        server = new View({
+          collection: collection1,
+          renderItem: function() {
+            return '<div>foo</div>';
+          }
+        });
+        view = new View({
+          collection: collection2,
+          renderItem: function() {
+            return '<div>bar</div>';
+          }
+        });
+        restoreView();
+
+        expect(_.keys(view.children).length).to.equal(1);
+
+        expect(view.$el.text()).to.equal('foofoofoofoo');
+
+        var viewCids = _.map(view.$('[data-model-cid]'), function(el) {
           return el.getAttribute('data-model-cid');
         });
         expect(viewCids).to.eql(collection2.map(function(model) { return model.cid; }));

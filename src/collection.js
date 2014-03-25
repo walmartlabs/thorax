@@ -361,8 +361,10 @@ Thorax.CollectionView = Thorax.View.extend({
     if (this.itemView || this.renderItem !== Thorax.CollectionView.prototype.renderItem) {
       var child = this.renderItem(model, i);
 
-      child.restore(el);
-      this._addChild(child);
+      if (!_.isString(child)) {
+        child.restore(el);
+        this._addChild(child);
+      }
     }
   },
   itemContext: function(model /*, i */) {
