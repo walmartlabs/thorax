@@ -111,21 +111,17 @@ Thorax.CollectionView = Thorax.View.extend({
     }
   },
 
-  restore: function(el) {
+  restoreCollection: function(el) {
+    // This is called as an event so we don't force render our content when there are nested
+    // child views.
     var self = this,
         children = this.$el.children(),
         toRemove = [];
 
-    if (!Thorax.View.prototype.restore.call(this, el)) {
-      // If we had to rerender for other reasons then we don't need to do anything as it
-      // was already all blown away
-      return;
-    }
-
     this._lookupCollectionElement();
 
     // Find any items annotated with server info and restore. Else rerender
-    $('[' + modelIdAttributeName + ']', el).each(function() {
+    this.$('[' + modelIdAttributeName + ']').each(function() {
       var id = this.getAttribute(modelIdAttributeName),
           model = self.collection.get(id);
       if (!model) {
@@ -400,6 +396,8 @@ Thorax.CollectionView = Thorax.View.extend({
 });
 
 Thorax.CollectionView.on({
+  restore: 'restoreCollection',
+
   collection: {
     reset: onCollectionReset,
     sort: onCollectionReset,
