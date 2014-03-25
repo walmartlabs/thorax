@@ -201,12 +201,10 @@ Thorax.View.on('restore', function() {
     };
    }
 
-  parent.$('[data-view-helper-restore]').each(filterAncestors(parent, function() {
-    if (this.getAttribute('data-view-restore') === 'true') {
-      var helper = Handlebars.helpers[this.getAttribute('data-view-helper-restore')],
-          child = helper.restore(parent, this);
-      parent._addChild(child);
-    }
+  parent.$('[data-view-helper-restore][data-view-restore=true]').each(filterAncestors(parent, function() {
+    var helper = Handlebars.helpers[this.getAttribute('data-view-helper-restore')],
+        child = helper.restore(parent, this);
+    parent._addChild(child);
   }));
 });
 
