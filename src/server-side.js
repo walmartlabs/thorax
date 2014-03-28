@@ -1,3 +1,4 @@
+/*global $serverSide, onEmit */
 
 // Override uniqueId to ensure uniqueness across both the server and client
 // rendering cycles
@@ -7,3 +8,9 @@ _.uniqueId = function(prefix) {
   var id = (window._reqId || '') + (++window._idCounter);
   return prefix ? prefix + id : id;
 };
+
+if ($serverSide) {
+  onEmit(function() {
+    $('body').append('<script>window._idCounter = ' + window._idCounter + ';</script>');
+  });
+}
