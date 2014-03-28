@@ -361,6 +361,8 @@ Thorax.CollectionView = Thorax.View.extend({
     if (this.itemView || this.renderItem !== Thorax.CollectionView.prototype.renderItem) {
       var child = this.renderItem(model, i);
 
+      // If we are passed a string assume that the upstream implementation has a consistent
+      // rendering.
       if (!_.isString(child)) {
         child.restore(el);
         this._addChild(child);
