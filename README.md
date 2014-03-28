@@ -706,6 +706,8 @@ Associates the given data with `$el` in the server marshal data store. May be re
 - `attributeIds` (optional) context paths associated with the data defined in `attributes`, if available.
 - `options` (optional) options object. Fields may include
   - `data` current handlebars data object exposing the current `contextPath` value
+  - `root` current handlebars root rendering context
+  - `view` current view being rendered
 
 Should `attributes` contain a complex value that can not be serialized and can not be resolved using the associated `attributeIds` value, then a `server-marshall-object` error is thrown.
 
