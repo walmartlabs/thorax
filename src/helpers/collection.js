@@ -91,6 +91,12 @@ Thorax.CollectionHelperView = Thorax.CollectionView.extend({
 
     if ($serverSide && !restorable) {
       this.$el.attr(viewRestoreAttribute, 'false');
+
+      this.trigger('restore:fail', {
+        type: 'serialize',
+        view: this,
+        err: 'collection-depthed-query'
+      });
     }
 
     return response;
