@@ -157,6 +157,13 @@ Then in your template:
     })
     layout.setView(view);
 
+## Server Side Render
+
+Thorax allows for rendering outside of the normal browser context using environments such as [Fruit Loops][fruit-loops] or [PhantomJS][phantomjs] to render content in the initial server response and then restore the view hierarchy on the client render. Rendering in such a manner allows for Thorax applications to expose their content for SEO purposes as well as speed up the perceived initial page load.
+
+The restore process is well suited for handling distinctions between user and public data, allowing for the server response to include only public, long cacheable, content. The client can then augment this data with any user specific data on restoration.
+
+
 # Getting Started
 
 ## Tutorials
@@ -297,6 +304,10 @@ Renders the view's `template` updating the view's `el` with the result, triggeri
 `render` can also accept a content argument that may be an element, string or a template function:
 
     view.render('custom html');
+
+### restore *view.restore(element)*
+
+Attempts to restore a given view with the passed `element`. Should this fail the view will be rerendered automatically. See [Server Rendering](#server-rendering) for further discussion.
 
 ### context *view.context()*
 
@@ -683,6 +694,40 @@ Generate an HTML string. All built in HTML generation uses this method. If `cont
       number: 3
     });
 
+## Thorax.ServerMarshal
+
+### store *Thorax.ServerMarshal.store($el, name, attributes[, attributeIds] [, options])*
+
+Associates the given data with `$el` in the server marshal data store. May be restored on the client side via the `Thorax.ServerMarshal.load` API.
+
+- `$el` the `$` instance associated with the given element
+- `name` the name of the data point to be saved
+- `attributes` data to be stored. May be an array, object, or primitive value. Complex values must contain only primitive values or have proper associated `attributeIds` element to allow for lookup on the client side.
+- `attributeIds` (optional) context paths associated with the data defined in `attributes`, if available.
+- `options` (optional) options object. Fields may include
+  - `data` current handlebars data object exposing the current `contextPath` value
+
+Should `attributes` contain a complex value that can not be serialized and can not be resolved using the associated `attributeIds` value, then a `server-marshall-object` error is thrown.
+
+### load *Thorax.ServerMarshal.load(el, name, parentView, context)*
+
+Loads the server data for a given element.
+
+- `el` element to load data for
+- `name` data item name
+- `parentView` the view instance that contains this particular element
+- `context` the rendering context
+
+For complex objects, `parentView` and `context` will be used to lookup any context path objects saved from the server side. `context` values take priority over `parentView` values to match the behavior of the rendering pipeline.
+
+### serialize *Thorax.ServerMarshal.serialize()*
+
+Retrieves the stringified representation of the marshal data set. Generally this does not need to be called explicitly as an `onEmit` handler will ensure that the data is output for the client exec.
+
+### destory *Thorax.ServerMarshal.destroy($el)*
+
+Removes any marshal data that may be associated with a given element.
+
 ## $
 
 ### $.view *$(event.target).view([options])*
@@ -777,6 +822,8 @@ Thorax will add an attribute to the event named `originalContext` that will be t
       // event.originalContext === what "this" would be in the
       // first handler
     });
+
+When doing a server render, all DOM event handlers are silently discarded, as the majority do not make sense and environments such as Fruit Loops do not support. Code that relies on DOM events such as `submit` will need to take this into account.
 
 ### _addEvent *view._addEvent(eventParams)*
 
@@ -1161,6 +1208,37 @@ Triggered on a `CollectionView` or the view calling the `collection` helper ever
 
 Triggered on a `CollectionView` or the view calling the `collection` helper every time the `emptyView` or `emptyTemplate` is rendered in the `CollectionView`.
 
+### restore *restore(element)*
+
+Triggered when the view is being restored to the current element. Listeners should be aware that it's possible for a rerender to occur while the restore event has triggered and should be able to handle this case gracefully.
+
+### restore:collection *restore:collection(collectionView, el)*
+
+Triggered on a `CollectionView` or a view calling the `collection` helper when the collection is restored.
+
+### restore:item *restore:item(collectionView, el)*
+
+Triggered on a `CollectionView` or a view calling the `collection` helper upon restoring an individual item element in the collection.
+
+### restore:empty *restore:empty(collectionView, el)*
+
+Triggered on a `CollectionView` or a view calling the `collection` helper when a restore operation includes an empty view or template.
+
+### restore:fail *restore:fail(info)*
+
+Triggered when a particular view can not be restored. `info` may be a free form object but generally it will have a `type` field, outlined below, and a `view` field listing the view instance that failed.
+
+Types:
+
+- `previously-rendered`: View has been rendered already
+- `remaining`: View has children that were not restored and must do a partial rerender
+- `not-restorable`: View was explicitly marked as not restorable
+- `serialize`: Unable to marshal one or more of the parameters passed to the helper
+- `collection-remove`: Item removed due to not being found in client-side collection
+- `collection-missing`: Item rendered due to not existing in server-side collection
+- `collection-depthed-query`: Attempted to use an inline collection item or empty template with `../` references.
+
+
 ## HTML Attributes
 
 Thorax and its view helpers generate a number of custom HTML attributes that may be useful in debugging or generating CSS selectors to be used as arguments to `$` or to create CSS. The `*-cid` attributes are generally used only internally. See `$.model`, `$.collection` and `$.view` to get a reference to objects directly from the DOM. The `*-name` attributes will only be present if the given objects have a `name` property.</p>
@@ -1198,7 +1276,15 @@ Thorax and its view helpers generate a number of custom HTML attributes that may
       <td>Set by the `collection-element`, determines where a collection in a `CollectionView` will be rendered.</td>
       </tr>
     <tr>
+      <td>`data-view-empty`</td>
+      <td>Collection view's empty element</td>
+    </tr>
+    <tr>
       <td>`data-model-cid`</td>
+      <td>A view's `el` if a model was bound to the view or each item element inside of elements generated by the collection helper</td>
+    </tr>
+    <tr>
+      <td>`data-model-id`</td>
       <td>A view's `el` if a model was bound to the view or each item element inside of elements generated by the collection helper</td>
     </tr>
     <tr>
@@ -1220,6 +1306,19 @@ Thorax and its view helpers generate a number of custom HTML attributes that may
     <tr>
       <td>`data-trigger-event`</td>
       <td>Elements generated by the `link` and `button` helpers</td>
+    </tr>
+
+    <tr>
+      <td>`data-view-restore`</td>
+      <td>View elements rendered on the server side. `true` signifies that restoring is possible. `false` that it's explicitly disallowed.</td>
+    </tr>
+    <tr>
+      <td>`data-view-helper-restore`</td>
+      <td>Helper View elements rendered on the server side. Provides the name of the helper view.</td>
+    </tr>
+    <tr>
+      <td>`data-server-data`</td>
+      <td>Elements with `ServerMarshal` data associated with them.</td>
     </tr>
   </tbody>
 </table>
@@ -1253,6 +1352,118 @@ By default this calls `Thorax.onException` when an exception is thrown but imple
 ### runSection *Thorax.runSection(name, info, callback)*
 
 Immediately executed version of `bindSection`. The default implementation delegates to `bindSection`.
+
+# Server Rendering
+
+Server side rendering relies can be performed in any environment that supports the `$` API as well as a few core APIs used to control the page life cycle.
+
+- `$serverSide` Boolean flag set to true when rendering server side content.
+- `emit()` Called when the page should be sent back to the client.
+- `onEmit(calback)` Registers a `callback` which will be called just prior to the emit operation.
+
+[Fruit Loops][fruit-loops] provides this functionality out of the box but this can be added to other environments with relative ease.
+
+## Restore Process
+
+The restore process involves walking the DOM hierarchy looking for nodes that are annotated with the `data-view-restore` attribute. When such a node is found Thorax will attempt to restore based on a variety of steps discussed in the [Restore Methods](#restore-methods) section below.
+
+This process is kicked off by either an explicit call to `View.restore` or by calling `LayoutView.setView` on a previously restored layout view.
+
+The application restore process might look something like:
+
+    var appEl = $('[data-view-name="application"]');
+    if (appEl.length) {
+      // Restore the application view explicitly
+      Application.restore(appEl);
+    } else {
+      $('body').append(Application.el);
+      Application.render();
+    }
+
+Followed by normal controller execution, ultimately culminating in `setView` call, which will restore the rendered child.
+
+## Restore Methods
+
+There is no definitive algorithm for restoring views, instead the following heuristics are used. In the event of a mismatch the `restore:fail` event will be emitted on the candidate view with additional debugging information regarding what portion of the heuristic failed.
+
+### General Rules
+
+If the candidate view instance has already been rendered then the previous element will be replaced with the existing view element. This case is tracked by `restore:fail` with a type field of `prev-render`.
+
+By default restore operations are depth first recursive. This allows for restore operations to partially rerender content for the minimal number of rerender operations.
+
+Any view that is explicitly marked with `data-view-restore=false` will be rerendered on the client. This shortcircuits the tree traversal and causes all children to be rerendered as well.
+
+### `setView` calls
+
+When `setView` is called an attempt will be made to restore the view to the layout view's child element if marked for restore. This assumes that the view is a named view. Should it not be a rerender will occur.
+
+### Helper Views
+
+Elements rendered via a helper view such as `view` or `collection` will automatically be restored. This is done by saving the parameters passed to the helper view on the initial render. On restore the helper view will be executed in a similar manner to the initial execution, with the distinction that the `restore` method will be called after the view has initialized.
+
+When using helper views the restore might be forced to rerender if utilizing helpers that do no properly set the `contextPath` or if passed a depthed parameter, i.e. `{{view ../foo}}` as these can not be safely resolved. This is tracked via the `restore:fail` event with type `serialize` and is determined on the server-side.
+
+The `contextPath` value is a data field tracked within Handlebars helpers. This is is the "path" from the root of the context that a particular handlebars lookup resolves to and is used to lookup the helper parameters at restore time. As a general rule if you are calling `fn` or `inverse` with a different context than you were called with then you will likely need to update the `contextPath` value. The `appendContextPath` helper is available for simple path updates:
+
+```javascript
+  data.contextPath = Handlebars.Utils.appendContextPath(data.contextPath, 'foo');
+```
+
+Additionally helpers that utilize subexpressions to resolve complex values are unable to be restured via path lookup and will force a rerender.
+
+### Collection Views
+
+Collection views follow the same restore rules as helper views but add the ability to restore nested child views.
+
+Rerender cases (additional to the helper cases):
+- Use of a block helper that has a `../` reference:
+```html
+  {{#collection}}{{../foo}}{{/collection}}
+```
+- Use of collections that do not have an `id` value.
+
+Note that overriding `renderItem` is allowed but discouraged as this has additional overhead vs. providing an `itemView` or `itemTemplate` value. This also applies to `renderEmpty`.
+
+
+## Best Practices
+
+In general there are a number of things that help avoid rerender cases.
+
+### Logging
+
+While in development mode tracking the number of times that a rerender case is triggered is vital for ensuring that the restore behavior is actually benefiting the site.
+
+This might be as simple as a global logger on the `restore:fail` event:
+
+```javascript
+View.on('restore:fail', function(info) {
+  console.log('restore:fail', info);
+});
+```
+
+### Custom Restore Logic
+
+It's recommended that views needing custom restore behavior do so by providing a `restore` event listener rather than overriding the `restore` method. This is due to the manner in which partial restores are implemented, delegating to the super class implementation may cause a rerender meaning any non-restored children are rerendered as well.
+
+Should a view absolutely need to prevent the default restore behavior it can override the `restore` method but it must manually remove the `data-view-restore` attribute and also perform any child traversal necessary.
+
+For most situations it should not be necessary to provide a custom restore implementation but cases that implement custom view insertion logic, i.e. calling DOM methods to insert the child view, will likely need to provide some level of custom restore logic. Ex:
+
+```javascript
+  CustomView.on('restore', function() {
+    var child = this.$('.child-view');
+    if (child.length) {
+      this.childView.restore(child);
+    }
+  });
+```
+
+### Data Loading
+
+Since pending fetch operations might rerender the content of a just restored view, it's recommended that the JSON content is cached in a manner that is accessible on the initial page load to avoid unnecessary rendering operations after restore. [Fruit Loops][fruit-loops] offers such a system via the `$serverCache` local variable. Should this not be possible, the thorax rendering pipeline will handle any the restore and subsequent rerender properly.
+
+Note that there are issues that might arise if a different model data source is used on the client vs. the server, a personalized vs public data source for example. When such data is loaded prior to the restore operation, it might be necessary to provide a custom restore step that checks if this data has changed and rerender as there is no clean way for Thorax to determine if a model's data has changed between the two states.
 
 # Error Codes
 
@@ -1300,6 +1511,12 @@ A helper view that has been destroyed was inserted into the view.
 
 A void tag such as `img` was rendered with `content` in `Thorax.Util.tag`.
 
+## server-marshal-object
+
+A complex object was serialized without a proper context path to lookup the object on the client side.
+
 
 [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/walmartlabs/thorax/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
 
+[fruit-loops]: https://github.com/walmartlabs/fruit-loops
+[phantomjs]: http://phantomjs.org/
