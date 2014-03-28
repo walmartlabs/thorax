@@ -150,6 +150,8 @@ Thorax.CollectionView = Thorax.View.extend({
         }
       });
     }
+
+    this.trigger('restore:collection', this, el);
   },
 
   //appendItem(model [,index])
@@ -320,6 +322,9 @@ Thorax.CollectionView = Thorax.View.extend({
 
     child.restore(el);
     this._addChild(child);
+
+    this.trigger('restore:empty', this, el);
+
     return child;
   },
 
@@ -368,6 +373,8 @@ Thorax.CollectionView = Thorax.View.extend({
         this._addChild(child);
       }
     }
+
+    this.trigger('restore:item', this, el);
   },
   itemContext: function(model /*, i */) {
     return model.attributes;

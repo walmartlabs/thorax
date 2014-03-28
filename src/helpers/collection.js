@@ -8,9 +8,12 @@
 Thorax.CollectionHelperView = Thorax.CollectionView.extend({
   // Forward render events to the parent
   events: {
-    'rendered:item': forwardRenderEvent('rendered:item'),
     'rendered:collection': forwardRenderEvent('rendered:collection'),
-    'rendered:empty': forwardRenderEvent('rendered:empty')
+    'rendered:item': forwardRenderEvent('rendered:item'),
+    'rendered:empty': forwardRenderEvent('rendered:empty'),
+    'restore:collection': forwardRenderEvent('restore:collection'),
+    'restore:item': forwardRenderEvent('restore:item'),
+    'restore:empty': forwardRenderEvent('restore:empty')
   },
 
   // Thorax.CollectionView allows a collectionSelector
