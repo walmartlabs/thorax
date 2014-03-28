@@ -16,9 +16,8 @@ var ServerMarshal = Thorax.ServerMarshal = {
     }
 
     attributeIds = attributeIds || {};
-    options = options || {};
 
-    var contextPath = options.data && options.data.contextPath;
+    var contextPath = options && options.data && options.data.contextPath;
 
     // Find or create the lookup table element
     var elementCacheId = $el._serverData || parseInt($el.attr('data-server-data'), 10);
