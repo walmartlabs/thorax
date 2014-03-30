@@ -283,10 +283,8 @@ Thorax.Util = {
     return template;
   },
 
-  //'selector' is not present in $('<p></p>')
-  //TODO: investigage a better detection method
   is$: function(obj) {
-    return _.isObject(obj) && ('length' in obj);
+    return obj instanceof jQuery;
   },
   expandToken: function(input, scope, encode) {
     /*jshint boss:true */
