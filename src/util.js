@@ -1,4 +1,4 @@
-/*global createRegistryWrapper:true, getEventCallback */
+/*global createRegistryWrapper:true, getEventCallback, jQuery */
 
 function createErrorMessage(code) {
   return 'Error "' + code + '". For more information visit http://thoraxjs.org/error-codes.html' + '#' + code;
