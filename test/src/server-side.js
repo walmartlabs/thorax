@@ -651,7 +651,11 @@ describe('serverSide', function() {
       });
     });
     describe('collection views', function() {
-      var collection1, collection2;
+      var collection1,
+          collection2,
+          collectionSpy,
+          itemSpy,
+          emptySpy;
       beforeEach(function() {
         window.$serverSide = true;
         count = 0;
@@ -659,6 +663,21 @@ describe('serverSide', function() {
         collection1 = new Thorax.Collection([{id: 1}, {id: 2}, {id: 3}, {id: 4}]);
         collection2 = new Thorax.Collection([{id: 1}, {id: 2}, {id: 3}, {id: 4}]);
       });
+
+      function registerEvents() {
+        collectionSpy = sinon.spy();
+        itemSpy = sinon.spy();
+        emptySpy = sinon.spy();
+
+        view.on('restore:collection', collectionSpy);
+        view.on('restore:item', itemSpy);
+        view.on('restore:empty', emptySpy);
+      }
+      function expectEvents(collection, item, empty) {
+        expect(collectionSpy.callCount).to.equal(collection);
+        expect(itemSpy.callCount).to.equal(item);
+        expect(emptySpy.callCount).to.equal(empty);
+      }
 
       it('should restore inline views', function() {
         server = new Thorax.View({
@@ -669,6 +688,8 @@ describe('serverSide', function() {
           template: Handlebars.compile('{{#collection}}somethingelse{{/collection}}', {trackIds: true}),
           collection: collection2
         });
+
+        registerEvents();
         restoreView();
         expect(_.keys(view.children).length).to.equal(1);
 
@@ -682,6 +703,7 @@ describe('serverSide', function() {
         });
         expect(viewCids).to.eql(collection2.map(function(model) { return model.cid; }));
         expect(view.$el.children().text()).to.equal('somethingsomethingsomethingsomething');
+        expectEvents(1, 4, 0);
         compareViews();
       });
       it('should restore referenced templates', function() {
@@ -690,6 +712,7 @@ describe('serverSide', function() {
         });
         server = new View({collection: collection1});
         view = new View({collection: collection2});
+        registerEvents();
         restoreView();
 
         expect(_.keys(view.children).length).to.equal(1);
@@ -705,6 +728,7 @@ describe('serverSide', function() {
           return el.getAttribute('data-model-cid');
         });
         expect(viewCids).to.eql(collection2.map(function(model) { return model.cid; }));
+        expectEvents(1, 4, 0);
         compareViews();
       });
       it('should restore implicit named templates', function() {
@@ -717,6 +741,7 @@ describe('serverSide', function() {
         });
         server = new View({collection: collection1});
         view = new View({collection: collection2});
+        registerEvents();
         restoreView();
 
         expect(_.keys(view.children).length).to.equal(1);
@@ -732,6 +757,7 @@ describe('serverSide', function() {
           return el.getAttribute('data-model-cid');
         });
         expect(viewCids).to.eql(collection2.map(function(model) { return model.cid; }));
+        expectEvents(1, 4, 0);
         compareViews();
 
         Thorax.Views['letter-item'] = _ItemView;
@@ -743,6 +769,7 @@ describe('serverSide', function() {
         });
         server = new View({collection: collection1});
         view = new View({collection: collection2});
+        registerEvents();
         restoreView();
 
         expect(_.keys(view.children).length).to.equal(1);
@@ -758,6 +785,7 @@ describe('serverSide', function() {
           return el.getAttribute('data-model-cid');
         });
         expect(viewCids).to.eql(collection2.map(function(model) { return model.cid; }));
+        expectEvents(1, 4, 0);
         compareViews();
       });
       it('should restore referenced item-view', function() {
@@ -767,6 +795,7 @@ describe('serverSide', function() {
         });
         server = new View({collection: collection1});
         view = new View({collection: collection2});
+        registerEvents();
         restoreView();
 
         expect(_.keys(view.children).length).to.equal(1);
@@ -781,6 +810,7 @@ describe('serverSide', function() {
           return el.getAttribute('data-model-cid');
         });
         expect(viewCids).to.eql(collection2.map(function(model) { return model.cid; }));
+        expectEvents(1, 4, 0);
         compareViews();
       });
       it('should restore registry item-view', function() {
@@ -789,6 +819,7 @@ describe('serverSide', function() {
         });
         server = new View({collection: collection1});
         view = new View({collection: collection2});
+        registerEvents();
         restoreView();
 
         expect(_.keys(view.children).length).to.equal(1);
@@ -803,6 +834,7 @@ describe('serverSide', function() {
           return el.getAttribute('data-model-cid');
         });
         expect(viewCids).to.eql(collection2.map(function(model) { return model.cid; }));
+        expectEvents(1, 4, 0);
         compareViews();
       });
       it('should restore renderItem views', function() {
@@ -821,6 +853,7 @@ describe('serverSide', function() {
             return new SomethingElse();
           }
         });
+        registerEvents();
         restoreView();
 
         expect(_.keys(view.children).length).to.equal(1);
@@ -835,6 +868,7 @@ describe('serverSide', function() {
           return el.getAttribute('data-model-cid');
         });
         expect(viewCids).to.eql(collection2.map(function(model) { return model.cid; }));
+        expectEvents(1, 4, 0);
         compareViews();
       });
       it('should restore renderItem strings', function() {
@@ -853,6 +887,7 @@ describe('serverSide', function() {
             return '<div>bar</div>';
           }
         });
+        registerEvents();
         restoreView();
 
         expect(_.keys(view.children).length).to.equal(1);
@@ -863,6 +898,7 @@ describe('serverSide', function() {
           return el.getAttribute('data-model-cid');
         });
         expect(viewCids).to.eql(collection2.map(function(model) { return model.cid; }));
+        expectEvents(1, 4, 0);
         compareViews();
       });
       it('should restore empty-template', function() {
@@ -870,7 +906,9 @@ describe('serverSide', function() {
           template: Handlebars.compile('{{collection tag="ul" empty-template="letter-empty" item-template="letter-item"}}')
         });
         server = new View({collection: new Thorax.Collection()});
+        server.render();
         view = new View({collection: new Thorax.Collection()});
+        registerEvents();
         restoreView();
 
         expect(_.keys(view.children).length).to.equal(1);
@@ -882,6 +920,7 @@ describe('serverSide', function() {
 
         expect(_.keys(collectionView.children).length).to.equal(0);
 
+        expectEvents(1, 0, 0);
         compareViews();
       });
       it('should restore empty-view', function() {
@@ -890,6 +929,7 @@ describe('serverSide', function() {
         });
         server = new View({collection: new Thorax.Collection()});
         view = new View({collection: new Thorax.Collection()});
+        registerEvents();
         restoreView();
 
         expect(_.keys(view.children).length).to.equal(1);
@@ -901,6 +941,7 @@ describe('serverSide', function() {
 
         expect(_.keys(collectionView.children).length).to.equal(1);
 
+        expectEvents(1, 0, 1);
         compareViews();
       });
       it('should restore over non-default collection name', function() {
@@ -909,6 +950,7 @@ describe('serverSide', function() {
         });
         server = new View({foo: collection1});
         view = new View({foo: collection2});
+        registerEvents();
         restoreView();
 
         expect(_.keys(view.children).length).to.equal(1);
@@ -923,6 +965,7 @@ describe('serverSide', function() {
           return el.getAttribute('data-model-cid');
         });
         expect(viewCids).to.eql(collection2.map(function(model) { return model.cid; }));
+        expectEvents(1, 4, 0);
         compareViews();
       });
 
@@ -953,6 +996,8 @@ describe('serverSide', function() {
         expect(viewCids).to.eql(collection2.map(function(model) { return model.cid; }));
 
         expect(view.$el.text()).to.equal('thatsomethingelsesomethingelsesomethingelsesomethingelse');
+
+        expectEvents(1, 4, 0);
       });
       it.skip('should rerender block view helper with data', function() {
         server = new Thorax.View({
@@ -981,6 +1026,8 @@ describe('serverSide', function() {
         expect(viewCids).to.eql(collection2.map(function(model) { return model.cid; }));
 
         expect(view.$el.text()).to.equal('thatsomethingelsesomethingelsesomethingelsesomethingelse');
+
+        expectEvents(1, 4, 0);
       });
 
       it('should rerender collections where elements are missing ids', function() {
@@ -994,6 +1041,7 @@ describe('serverSide', function() {
           template: Handlebars.compile('{{#collection}}somethingelse{{/collection}}', {trackIds: true}),
           collection: collection2
         });
+        registerEvents();
         restoreView();
         expect(_.keys(view.children).length).to.equal(1);
 
@@ -1007,6 +1055,8 @@ describe('serverSide', function() {
         });
         expect(viewCids).to.eql(collection2.map(function(model) { return model.cid; }));
         expect(view.$el.children().text()).to.equal('1. somethingsomethingelse3. something4. something');
+
+        expectEvents(1, 3, 0);
       });
     });
 
