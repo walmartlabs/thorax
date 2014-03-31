@@ -1412,7 +1412,7 @@ The `contextPath` value is a data field tracked within Handlebars helpers. This 
   data.contextPath = Handlebars.Utils.appendContextPath(data.contextPath, 'foo');
 ```
 
-Additionally helpers that utilize subexpressions to resolve complex values are unable to be restured via path lookup and will force a rerender.
+Additionally helpers that utilize subexpressions to resolve complex values are unable to be restored via path lookup and will force a rerender.
 
 ### Collection Views
 
