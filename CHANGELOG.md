@@ -2,7 +2,35 @@
 
 ## Development
 
-[Commits](https://github.com/walmartlabs/thorax/compare/v2.3.5...master)
+[Commits](https://github.com/walmartlabs/thorax/compare/v3.0.0-alpha.1...master)
+
+## v3.0.0-alpha.1 - April 1st, 2014
+- [#345](https://github.com/walmartlabs/thorax/pull/345) - Document server side functionality ([@kpdecker](https://api.github.com/users/kpdecker))
+- [#325](https://github.com/walmartlabs/thorax/pull/325) - Implement server -> client marshaling ([@kpdecker](https://api.github.com/users/kpdecker))
+- [#336](https://github.com/walmartlabs/thorax/pull/336) - Allow basic server side execution ([@kpdecker](https://api.github.com/users/kpdecker))
+- [#337](https://github.com/walmartlabs/thorax/pull/337) - Emit non-server views on setView ([@kpdecker](https://api.github.com/users/kpdecker))
+- [#338](https://github.com/walmartlabs/thorax/pull/338) - Client restore ([@kpdecker](https://api.github.com/users/kpdecker))
+- [#344](https://github.com/walmartlabs/thorax/pull/344) - Validate contextPath state on store ([@kpdecker](https://api.github.com/users/kpdecker))
+- [#346](https://github.com/walmartlabs/thorax/pull/346) - Add logging event for restore hueristics ([@kpdecker](https://api.github.com/users/kpdecker))
+- [#348](https://github.com/walmartlabs/thorax/pull/348) - Add restore collection events ([@kpdecker](https://api.github.com/users/kpdecker))
+- [#350](https://github.com/walmartlabs/thorax/pull/350) - Defer restore rerendering in collection if loading ([@kpdecker](https://api.github.com/users/kpdecker))
+
+- [#88](https://github.com/walmartlabs/thorax/issues/88) - Make unit tests run on IE8 ([@eastridge](https://api.github.com/users/eastridge))
+- [#293](https://github.com/walmartlabs/thorax/issues/293) - Implement sauce labs CI support ([@kpdecker](https://api.github.com/users/kpdecker))
+- [#331](https://github.com/walmartlabs/thorax/pull/331) - Use empty() and html() rather than innerHTML ([@kpdecker](https://api.github.com/users/kpdecker))
+- [#332](https://github.com/walmartlabs/thorax/issues/332) - LayoutView will unbind all DOM events when deactivating a retained view ([@jasonwebster](https://api.github.com/users/jasonwebster))
+- [#335](https://github.com/walmartlabs/thorax/pull/335) - Do not activate push state links if meta or shift are clicked. ([@nhunzaker](https://api.github.com/users/nhunzaker))
+- Fix loadHandler cleanup under oldIE - bd30512
+- Handle functions passed to getTemplate - 62c38a8
+- Handle oldIE default checkbox value - 04293ca
+
+Compatibility notes:
+- Service side rendering support has been implemented. This is generally isolated but does expose the `$serverSide` global field and a few additional data parameters, documented in the readme.
+- `append` event callbacks now recieve $ instances rather than direct DOM references
+- cid values on views may change now due to restore operations
+- thorax-ie mixin is removed
+
+[Commits](https://github.com/walmartlabs/thorax/compare/v2.3.5...v3.0.0-alpha.1)
 
 ## v2.3.5 - March 4th, 2014
 - [#326](https://github.com/walmartlabs/thorax/pull/326) - Fix IE version of CollectionView._replaceHTML ([@Candid](https://api.github.com/users/Candid))
