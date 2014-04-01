@@ -116,7 +116,8 @@ Thorax.CollectionView = Thorax.View.extend({
     // child views.
     var self = this,
         children = this.$el.children(),
-        toRemove = [];
+        toRemove = [],
+        restored = 0;
 
     this._lookupCollectionElement();
 
@@ -128,15 +129,15 @@ Thorax.CollectionView = Thorax.View.extend({
         toRemove.push(this);
       } else {
         self.restoreItem(model, children.index(this), this);
+        restored++;
       }
     });
     $('[data-view-empty]', el).each(function() {
       self.restoreEmpty(this);
     });
 
-    if (toRemove.length) {
-      // TODO : Is it better to just rerender the whole thing since we don't necessarily
-      // know what state the list is in at this point?
+    var needsRender = (restored !== this.collection.length) || toRemove.length;
+    if (needsRender && this.collection.isPopulated()) {
       // Kill off any now invalid nodes
       _.each(toRemove, function(el) {
         el.parentNode.removeChild(el);
@@ -159,6 +160,9 @@ Thorax.CollectionView = Thorax.View.extend({
           });
         }
       });
+    } else if (needsRender) {
+      this._pendingRestore = true;
+      return;
     }
 
     this.trigger('restore:collection', this, el);
@@ -291,6 +295,11 @@ Thorax.CollectionView = Thorax.View.extend({
     if (this.collection) {
       if (this.collection.isEmpty()) {
         handleChangeFromNotEmptyToEmpty.call(this);
+      } else if (this._pendingRestore) {
+        // If we had to delay the initial restore due to the local data set being loaded, then
+        // we want to resume that operation where it left off.
+        this._pendingRestore = false;
+        this.restoreCollection();
       } else {
         handleChangeFromEmptyToNotEmpty.call(this);
         this.collection.forEach(function(item, i) {
