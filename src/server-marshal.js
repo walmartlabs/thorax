@@ -17,7 +17,7 @@ var ServerMarshal = Thorax.ServerMarshal = {
 
     dataIds = dataIds || {};
 
-    var contextPath = options && options.data && options.data.contextPath;
+    options = (options && options.data) || options || {};
 
     // Find or create the lookup table element
     var elementCacheId = $el._serverData || parseInt($el.attr('data-server-data'), 10);
@@ -36,14 +36,14 @@ var ServerMarshal = Thorax.ServerMarshal = {
     if (_.isArray(data) && !_.isString(dataIds) && !data.toJSON) {
       if (data.length) {
         cache[name] = _.map(data, function(value, key) {
-          return lookupValue(value, dataIds[key], contextPath);
+          return lookupValue(value, dataIds[key], options);
         });
       }
     } else if (_.isObject(data) && !_.isString(dataIds) && !data.toJSON) {
       var stored = {},
           valueSet;
       _.each(data, function(value, key) {
-        stored[key] = lookupValue(value, dataIds[key], contextPath);
+        stored[key] = lookupValue(value, dataIds[key], options);
         valueSet = true;
       });
       if (valueSet) {
@@ -51,7 +51,7 @@ var ServerMarshal = Thorax.ServerMarshal = {
       }
     } else {
       // We were passed a singular value (attributeId is a simple id value)
-      cache[name] = lookupValue(data, dataIds, contextPath);
+      cache[name] = lookupValue(data, dataIds, options);
     }
   },
   load: function(el, name, parentView, context) {
@@ -137,18 +137,21 @@ function lookupField(parent, context, fieldName) {
 /*
  * Determines the value to be saved in the lookup table to be restored on the client.
  */
-function lookupValue(value, lutKey, contextPath) {
+function lookupValue(value, lutKey, data) {
   if (_.isString(value) || _.isNumber(value) || _.isNull(value) || _.isBoolean(value)) {
     return value;
   } else if (lutKey != null && lutKey !== true && !/^\.\.\//.test(lutKey)) {
     // This is an object what has a path associated with it so we should hopefully
     // be able to resolve it on the client.
-    return {
-      $lut: Handlebars.Utils.appendContextPath(contextPath, lutKey)
-    };
-  } else {
-    // This is some sort of unsuppored object type or a depthed reference (../foo)
-    // which is not supported.
-    throw createError('server-marshall-object');
+    var contextPath = Handlebars.Utils.appendContextPath(data.contextPath, lutKey);
+    if (lookupField(data.view, data.root, contextPath) === value) {
+      return {
+        $lut: contextPath
+      };
+    }
   }
+
+  // This is some sort of unsuppored object type or a depthed reference (../foo)
+  // which is not supported.
+  throw createError('server-marshall-object');
 }

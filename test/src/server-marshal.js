@@ -1,3 +1,4 @@
+/*global $serverSide */
 describe('server-marshal', function() {
   var $el;
 
@@ -41,7 +42,7 @@ describe('server-marshal', function() {
           aField: {aField: true}
         };
 
-        Thorax.ServerMarshal.store($el, 'value', context.aField, 'aField');
+        Thorax.ServerMarshal.store($el, 'value', context.aField, 'aField', {data: {root: context}});
         expect(Thorax.ServerMarshal.load($el[0], 'value', context)).to.eql(context.aField);
         expect(Thorax.ServerMarshal.load($el[0], 'value', undefined, context)).to.eql(context.aField);
       });
@@ -60,7 +61,7 @@ describe('server-marshal', function() {
           aField: {aField: true}
         };
 
-        Thorax.ServerMarshal.store($el, 'array', ['foo', context.aField], [null, 'aField']);
+        Thorax.ServerMarshal.store($el, 'array', ['foo', context.aField], [null, 'aField'], {data: {view: context}});
         expect(Thorax.ServerMarshal.load($el[0], 'array', context)).to.eql(['foo', context.aField]);
         expect(Thorax.ServerMarshal.load($el[0], 'array', undefined, context)).to.eql(['foo', context.aField]);
         expect(Thorax.ServerMarshal.load($el[0], 'array', {}, context)).to.eql(['foo', context.aField]);
@@ -108,7 +109,7 @@ describe('server-marshal', function() {
           aField: {aField: true}
         };
 
-        Thorax.ServerMarshal.store($el, 'obj', {foo: context.aField}, {foo: 'aField'});
+        Thorax.ServerMarshal.store($el, 'obj', {foo: context.aField}, {foo: 'aField'}, {data: {view: context}});
         expect(Thorax.ServerMarshal.load($el[0], 'obj', context)).to.eql({foo: context.aField});
         expect(Thorax.ServerMarshal.load($el[0], 'obj', undefined, context)).to.eql({foo: context.aField});
         expect(Thorax.ServerMarshal.load($el[0], 'obj', {}, context)).to.eql({foo: context.aField});
@@ -141,18 +142,62 @@ describe('server-marshal', function() {
         }).to.throwError(/server-marshall-object/);
       });
 
-      it('should track with contextPath', function() {
+      it('should track with contextPath on view', function() {
         var context = {
           aField: {aField: true}
         };
         var options = {
           data: {
+            view: {
+              foo: {
+                bar: context
+              }
+            },
             contextPath: 'foo.bar'
           }
         };
 
         Thorax.ServerMarshal.store($el, 'obj', {foo: context.aField}, {foo: 'aField'}, options);
         expect(Thorax.ServerMarshal.load($el[0], 'obj', {foo: {bar: context}})).to.eql({foo: context.aField});
+      });
+
+      it('should track with contextPath on context', function() {
+        var context = {
+          aField: {aField: true}
+        };
+        var options = {
+          data: {
+            root: {
+              foo: {
+                bar: context
+              }
+            },
+            contextPath: 'foo.bar'
+          }
+        };
+
+        Thorax.ServerMarshal.store($el, 'obj', {foo: context.aField}, {foo: 'aField'}, options);
+        expect(Thorax.ServerMarshal.load($el[0], 'obj', {foo: {bar: context}})).to.eql({foo: context.aField});
+      });
+
+      it('should throw with different value on contextPath', function() {
+        var context = {
+          aField: {aField: true}
+        };
+        var options = {
+          data: {
+            root: {
+              foo: {
+                bar: 'lets go fishing'
+              }
+            },
+            contextPath: 'foo.bar'
+          }
+        };
+
+        expect(function() {
+          Thorax.ServerMarshal.store($el, 'obj', {foo: context.aField}, {foo: 'aField'}, options);
+        }).to.throwError(/server-marshall-object/);
       });
     });
   });
@@ -164,7 +209,7 @@ describe('server-marshal', function() {
         };
         context.aField.aField = context.aField;
 
-        Thorax.ServerMarshal.store($el, 'obj', {foo: context.aField}, {foo: 'aField'});
+        Thorax.ServerMarshal.store($el, 'obj', {foo: context.aField}, {foo: 'aField'}, {data: {view: context}});
 
         expect(Thorax.ServerMarshal.serialize()).to.match(/"\$lut":\s*"aField"/);
     });
