@@ -696,24 +696,42 @@ Generate an HTML string. All built in HTML generation uses this method. If `cont
 
 ## Thorax.ServerMarshal
 
-### store *Thorax.ServerMarshal.store($el, name, attributes[, attributeIds] [, options])*
+The `ServerMarshal` provides a mechanism for sharing data between server rendered content and the views that restore upon the HTML on the client.
+
+When dealing with simple primitives that may be serialized via JSON the values are stored directly in the server marshal store JSON object. For more complex objects such as models, collections, and views, a path relative to the handlebars rendering context is saved as a reference that can be resolved against the client-side equivalents.
+
+### store *Thorax.ServerMarshal.store($el, name, data, dataIds, options)*
 
 Associates the given data with `$el` in the server marshal data store. May be restored on the client side via the `Thorax.ServerMarshal.load` API.
 
 - `$el` the `$` instance associated with the given element
 - `name` the name of the data point to be saved
-- `attributes` data to be stored. May be an array, object, or primitive value. Complex values must contain only primitive values or have proper associated `attributeIds` element to allow for lookup on the client side.
-- `attributeIds` (optional) context paths associated with the data defined in `attributes`, if available.
-- `options` (optional) options object. Fields may include
-  - `data` current handlebars data object exposing the current `contextPath` value
-  - `root` current handlebars root rendering context
-  - `view` current view being rendered
+- `data` data to be stored. May be an array, object, or primitive value. Complex values must contain only primitive values or have proper associated `dataIds` element to allow for lookup on the client side.
+- `dataIds` context paths associated with the data defined in `data`, if available.
+- `options` options object. This object generally mirrors the options object passed to handlebars helpers, which may be passed directly. Fields may include:
+  - `data` current handlebars data object
+    - `contextPath` current context path for execution scope
+    - `root` current handlebars root rendering context
+    - `view` current view being rendered
 
-Should `attributes` contain a complex value that can not be serialized and can not be resolved using the associated `attributeIds` value, then a `server-marshall-object` error is thrown.
+Data storage rules:
+- Numbers, Strings, Booleans, Nulls, and Objects with a `toJSON` implementation as all stringified
+- When `dataIds` is a string value, the context path is stored for the `data` field
+- When paired with a matching `dataId` structure, Arrays and objects are evaluated to one level deep.
+  - Primitive values fitting above are stringified
+  - All other objects are store the context path by combining `options.data.contextPath` and `dataIds[key]`
+- Otherwise a `server-marshal-object` error is thrown
+
+
+The `contextPath` value is a data field tracked within Handlebars helpers. This is is the "path" from the root of the context that a particular handlebars lookup resolves to and is used to lookup the helper parameters at restore time. As a general rule if you are calling `fn` or `inverse` with a different context than you were called with then you will likely need to update the `contextPath` value. The `appendContextPath` helper is available for simple path updates:
+
+```javascript
+  data.contextPath = Handlebars.Utils.appendContextPath(data.contextPath, 'foo');
+```
 
 ### load *Thorax.ServerMarshal.load(el, name, parentView, context)*
 
-Loads the server data for a given element.
+Returns the named server data for a given element.
 
 - `el` element to load data for
 - `name` data item name
@@ -1402,15 +1420,9 @@ When `setView` is called an attempt will be made to restore the view to the layo
 
 ### Helper Views
 
-Elements rendered via a helper view such as `view` or `collection` will automatically be restored. This is done by saving the parameters passed to the helper view on the initial render. On restore the helper view will be executed in a similar manner to the initial execution, with the distinction that the `restore` method will be called after the view has initialized.
+Elements rendered via a helper view such as `view` or `collection` will automatically be restored. This is done by saving the parameters passed to the helper view into the server marshal store. On restore the helper view will be executed in a similar manner to the initial execution, with the distinction that the `restore` method will be called after the view has initialized.
 
 When using helper views the restore might be forced to rerender if utilizing helpers that do no properly set the `contextPath` or if passed a depthed parameter, i.e. `{{view ../foo}}` as these can not be safely resolved. This is tracked via the `restore:fail` event with type `serialize` and is determined on the server-side.
-
-The `contextPath` value is a data field tracked within Handlebars helpers. This is is the "path" from the root of the context that a particular handlebars lookup resolves to and is used to lookup the helper parameters at restore time. As a general rule if you are calling `fn` or `inverse` with a different context than you were called with then you will likely need to update the `contextPath` value. The `appendContextPath` helper is available for simple path updates:
-
-```javascript
-  data.contextPath = Handlebars.Utils.appendContextPath(data.contextPath, 'foo');
-```
 
 Additionally helpers that utilize subexpressions to resolve complex values are unable to be restored via path lookup and will force a rerender.
 
@@ -1515,7 +1527,7 @@ A void tag such as `img` was rendered with `content` in `Thorax.Util.tag`.
 
 ## server-marshal-object
 
-A complex object was serialized without a proper context path to lookup the object on the client side.
+A complex object was serialized without a proper context path to lookup the object on the client side. See [Thorax.ServerMarshal](#thoraxservermarshal) for more discussion on context paths.
 
 
 [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/walmartlabs/thorax/trend.png)](https://bitdeli.com/free "Bitdeli Badge")

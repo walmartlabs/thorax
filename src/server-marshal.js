@@ -10,12 +10,12 @@ var _thoraxServerData = window._thoraxServerData || [];
  * as a view instance or it's rendering context, may be marshaled.
  */
 var ServerMarshal = Thorax.ServerMarshal = {
-  store: function($el, name, attributes, attributeIds, options) {
+  store: function($el, name, data, dataIds, options) {
     if (!$serverSide) {
       return;
     }
 
-    attributeIds = attributeIds || {};
+    dataIds = dataIds || {};
 
     var contextPath = options && options.data && options.data.contextPath;
 
@@ -33,17 +33,17 @@ var ServerMarshal = Thorax.ServerMarshal = {
     cache[name] = undefined;
 
     // Store whatever data that we have
-    if (_.isArray(attributes) && !_.isString(attributeIds) && !attributes.toJSON) {
-      if (attributes.length) {
-        cache[name] = _.map(attributes, function(value, key) {
-          return lookupValue(value, attributeIds[key], contextPath);
+    if (_.isArray(data) && !_.isString(dataIds) && !data.toJSON) {
+      if (data.length) {
+        cache[name] = _.map(data, function(value, key) {
+          return lookupValue(value, dataIds[key], contextPath);
         });
       }
-    } else if (_.isObject(attributes) && !_.isString(attributeIds) && !attributes.toJSON) {
+    } else if (_.isObject(data) && !_.isString(dataIds) && !data.toJSON) {
       var stored = {},
           valueSet;
-      _.each(attributes, function(value, key) {
-        stored[key] = lookupValue(value, attributeIds[key], contextPath);
+      _.each(data, function(value, key) {
+        stored[key] = lookupValue(value, dataIds[key], contextPath);
         valueSet = true;
       });
       if (valueSet) {
@@ -51,7 +51,7 @@ var ServerMarshal = Thorax.ServerMarshal = {
       }
     } else {
       // We were passed a singular value (attributeId is a simple id value)
-      cache[name] = lookupValue(attributes, attributeIds, contextPath);
+      cache[name] = lookupValue(data, dataIds, contextPath);
     }
   },
   load: function(el, name, parentView, context) {
