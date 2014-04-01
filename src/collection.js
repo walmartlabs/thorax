@@ -140,6 +140,11 @@ Thorax.CollectionView = Thorax.View.extend({
       // Kill off any now invalid nodes
       _.each(toRemove, function(el) {
         el.parentNode.removeChild(el);
+
+        self.trigger('restore:fail', {
+          type: 'collection-remove',
+          element: el
+        });
       });
 
       // Render anything that we might have locally but was missed
@@ -147,6 +152,11 @@ Thorax.CollectionView = Thorax.View.extend({
       this.collection.each(function(model) {
         if (!$el.find('[' + modelCidAttributeName + '="' + model.cid + '"]').length) {
           self.appendItem(model);
+
+          self.trigger('restore:fail', {
+            type: 'collection-missing',
+            model: model
+          });
         }
       });
     }

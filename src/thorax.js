@@ -203,6 +203,12 @@ Thorax.View = Backbone.View.extend({
       }
 
       $(element).replaceWith(this.$el);
+
+      this.trigger('restore:fail', {
+        type: 'previously-rendered',
+        view: this,
+        element: element
+      });
       return;
     }
 
@@ -222,15 +228,28 @@ Thorax.View = Backbone.View.extend({
       this.trigger('restore');
 
       var remainingViews = this.$('[data-view-restore]'),
-          rerender = _.any(remainingViews, function(el) {
+          rerender = _.filter(remainingViews, function(el) {
             return $(el).parent().view({el: true, helper: true})[0] === element;
           });
-      if (rerender) {
+      if (rerender.length) {
+        this.trigger('restore:fail', {
+          type: 'remaining',
+          view: this,
+          element: element,
+          rerendered: rerender
+        });
+
         this.render();
       }
 
       return true;
     } else {
+      this.trigger('restore:fail', {
+        type: 'not-restorable',
+        view: this,
+        element: element
+      });
+
       this.render();
     }
   },

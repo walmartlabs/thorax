@@ -118,6 +118,12 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
           }
         } catch (err) {
           instance.$el.attr('data-view-restore', 'false');
+
+          instance.trigger('restore:fail', {
+            type: 'serialize',
+            view: instance,
+            err: err
+          });
         }
       }
 
