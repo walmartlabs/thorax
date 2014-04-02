@@ -431,6 +431,7 @@ Thorax.CollectionView.on({
   collection: {
     reset: onCollectionReset,
     sort: onCollectionReset,
+    filter: applyVisibilityFilter,
     change: function(model) {
       var options = this.getObjectOptions(this.collection);
       if (options && options.change) {
