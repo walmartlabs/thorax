@@ -132,6 +132,11 @@ Thorax.View = Backbone.View.extend({
     if (this.cid) {
       delete viewsIndexedByCid[this.cid];
     }
+    if (this.parent) {
+      delete this.parent.children[this.cid];
+      this.parent.children[cid] = this;
+    }
+
     this.cid = cid;
     viewsIndexedByCid[cid] = this;
   },
