@@ -219,7 +219,7 @@ Thorax.View = Backbone.View.extend({
 
     this.setElement(element);
 
-    var restoreable = this.$el.attr(viewRestoreAttribute) === 'true';
+    var restoreable = this.$el.attr('data-view-restore') === 'true';
     this.$el.removeAttr('data-view-restore');
 
     if (!$serverSide && restoreable) {
@@ -234,7 +234,10 @@ Thorax.View = Backbone.View.extend({
 
       var remainingViews = this.$('[data-view-restore]'),
           rerender = _.filter(remainingViews, function(el) {
-            return $(el).parent().view({el: true, helper: true})[0] === element;
+            // Ignore views that are deeply nested or views that are under a layout element
+            // when checking to see if we need to rerender.
+            var parent = $(el).parent();
+            return !parent.attr('data-layout-cid') && (parent.view({el: true, helper: true})[0] === element);
           });
       if (rerender.length) {
         this.trigger('restore:fail', {
