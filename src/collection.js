@@ -33,9 +33,9 @@ Thorax.Collection = Backbone.Collection.extend({
   fetch: function(options) {
     options = options || {};
     var success = options.success;
-    options.success = function(collection, response) {
+    options.success = function(collection, response, options) {
       collection._fetched = true;
-      success && success(collection, response);
+      success && success(collection, response, options);
     };
     return _fetch.apply(this, arguments);
   },
