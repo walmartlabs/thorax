@@ -101,7 +101,7 @@ Thorax.View = Backbone.View.extend({
 
     if (!$serverSide && this.el) {
       var $el = $(_.result(this, 'el'));
-      if ($el.length) {
+      if ($el.length && ($el.attr('data-view-restore') === 'true')) {
         return this.restore($el);
       }
     }
