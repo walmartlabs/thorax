@@ -2,7 +2,14 @@
 
 ## Development
 
-[Commits](https://github.com/walmartlabs/thorax/compare/v3.0.0-alpha.1...master)
+[Commits](https://github.com/walmartlabs/thorax/compare/v3.0.0-alpha.2...master)
+
+## v3.0.0-alpha.2 - April 3rd, 2014
+- Prevent partial render due to layout children - 395cac9
+- Cleanup parent registry on view cid change - b468974
+- Only restore flagged el attribute lookups - e4440f0
+
+[Commits](https://github.com/walmartlabs/thorax/compare/v3.0.0-alpha.1...v3.0.0-alpha.2)
 
 ## v3.0.0-alpha.1 - April 1st, 2014
 - [#345](https://github.com/walmartlabs/thorax/pull/345) - Document server side functionality ([@kpdecker](https://api.github.com/users/kpdecker))
