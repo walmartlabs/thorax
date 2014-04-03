@@ -216,7 +216,7 @@ describe('serverSide', function() {
 
       expectShouldFail(false);
     });
-    it('should re-render non-server elements on restore', function() {
+    it('should not re-render non-server elements on restore', function() {
       var el = $('<div class="foo-view">bar</div>');
       fixture.append(el);
 
@@ -227,12 +227,8 @@ describe('serverSide', function() {
         }
       });
       expect(view.el).to.equal(el[0]);
-      expect(view._renderCount).to.equal(1);
-      expect(el.html()).to.equal('bat');
-      expectShouldFail({
-        type: 'not-restorable',
-        view: view
-      });
+      expect(view._renderCount).to.equal(0);
+      expect(el.html()).to.equal('bar');
     });
 
     it('should restore views with a passed el', function() {
@@ -448,16 +444,16 @@ describe('serverSide', function() {
       });
       it('should restore pathed named references', function() {
         var View = Thorax.View.extend({
-          template: Handlebars.compile('{{view parent.child}}', {trackIds: true})
+          template: Handlebars.compile('{{view parentObj.child}}', {trackIds: true})
         });
 
         server = new View({
-          parent: {
+          parentObj: {
             child: new Counter()
           }
         });
         view = new View({
-          parent: {
+          parentObj: {
             child: new SomethingElse()
           }
         });
@@ -465,7 +461,7 @@ describe('serverSide', function() {
 
         compareViews();
         expect(_.keys(view.children).length).to.equal(1);
-        expect(_.values(view.children)[0]).to.equal(view.parent.child);
+        expect(_.values(view.children)[0]).to.equal(view.parentObj.child);
       });
       it('should restore context responses', function() {
         var View = Thorax.View.extend({
@@ -495,16 +491,16 @@ describe('serverSide', function() {
       });
       it('should restore named references within iterators', function() {
         var View = Thorax.View.extend({
-          template: Handlebars.compile('{{#each parent}}{{view .}}{{/each}}', {trackIds: true})
+          template: Handlebars.compile('{{#each parentObj}}{{view .}}{{/each}}', {trackIds: true})
         });
 
         server = new View({
-          parent: {
+          parentObj: {
             child: new Counter()
           }
         });
         view = new View({
-          parent: {
+          parentObj: {
             child: new SomethingElse()
           }
         });
@@ -512,7 +508,7 @@ describe('serverSide', function() {
 
         compareViews();
         expect(_.keys(view.children).length).to.equal(1);
-        expect(_.values(view.children)[0]).to.equal(view.parent.child);
+        expect(_.values(view.children)[0]).to.equal(view.parentObj.child);
       });
       it('should rerender ../ depthed references', function() {
         var View = Thorax.View.extend({
