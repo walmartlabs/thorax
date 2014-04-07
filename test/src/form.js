@@ -294,4 +294,42 @@ describe('form', function() {
     view.render();
     expect(view.serialize()).to.eql({foo: true});
   });
+  
+  describe( "populate checked", function() {
+    it( "should populate input attribute 'checked' with value 'checked' if set", function() {
+      var view = new FormView({
+        template: function() {
+          return '<input type="radio" name="bat" value="man">';
+        }
+      });
+                
+      var attributes = {
+        bat: 'man'
+      };
+
+      var model = new Thorax.Model(attributes);
+      view.setModel(model);
+      view.render();
+
+      expect(view.$('input[name="bat"]').eq(0).attr('checked')).to.equal('checked');
+    });
+    
+    it( "should not populate input attribute 'checked' if not set", function() {
+      var view = new FormView({
+        template: function() {
+          return '<input type="radio" name="cat" value="woman">';
+        }
+      });
+      var attributes = {
+        cat: 'astrophe'
+      };
+
+      var model = new Thorax.Model(attributes);
+      view.setModel(model);
+      view.render();
+
+      // don't be the string 'false', instead be boolean false, since the attr is non-existent
+      expect(view.$('input[name="cat"]').eq(0).attr('checked')).to.not.equal('false').and.to.be['false'];
+    });
+  });
 });

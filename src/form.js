@@ -134,7 +134,7 @@ _.extend(Thorax.View.prototype, {
           if (isBinary && _.isBoolean(value)) {
             $element.attr('checked', value);
           } else if (isBinary) {
-            $element.attr('checked', value == $element.val());
+            $element[value === $element.val() ? 'attr' : 'removeAttr']('checked', 'checked');
           } else {
             $element.val(value);
           }
