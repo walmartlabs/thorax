@@ -296,40 +296,53 @@ describe('form', function() {
   });
   
   describe( "populate checked", function() {
-    it( "should populate input attribute 'checked' with value 'checked' if set", function() {
-      var view = new FormView({
-        template: function() {
-          return '<input type="radio" name="bat" value="man">';
-        }
-      });
-                
-      var attributes = {
-        bat: 'man'
-      };
-
-      var model = new Thorax.Model(attributes);
-      view.setModel(model);
-      view.render();
-
-      expect(view.$('input[name="bat"]').eq(0).attr('checked')).to.equal('checked');
-    });
+    var view;
     
-    it( "should not populate input attribute 'checked' if not set", function() {
-      var view = new FormView({
+    function renderedFormView(type, inputValue, attrValue) {
+      var newView = new FormView({
         template: function() {
-          return '<input type="radio" name="cat" value="woman">';
+          return '<input type="'+type+'" name="bat" value="'+inputValue+'">';
         }
       });
-      var attributes = {
-        cat: 'astrophe'
-      };
 
+      var attributes = { bat: attrValue };
       var model = new Thorax.Model(attributes);
-      view.setModel(model);
-      view.render();
+      newView.setModel(model);
+      newView.render();
+      return newView;
+    }
+    
+    function expectChecked() {
+      expect(view.$('input[name="bat"]').eq(0).attr('checked')).to.equal('checked');
+    }
 
+    function expectNotChecked() {
       // don't be the string 'false', instead be boolean false, since the attr is non-existent
       expect(view.$('input[name="cat"]').eq(0).attr('checked')).to.not.equal('false').and.to.be['false'];
+    }
+    
+    describe( "checkbox", function() {
+      it( "should populate input attribute 'checked' with value 'checked' if set", function() {
+        view = renderedFormView('checkbox', 'man', 'man');
+        expectChecked();
+      });
+
+      it( "should not populate input attribute 'checked' if not set", function() {
+        view = renderedFormView('checkbox', 'man', 'woman');
+        expectNotChecked();
+      });
+    });
+    
+    describe( "radio", function() {
+      it( "should populate input attribute 'checked' with value 'checked' if set", function() {
+        view = renderedFormView('radio', 'man', 'man');
+        expectChecked();
+      });
+
+      it( "should not populate input attribute 'checked' if not set", function() {
+        view = renderedFormView('radio', 'man', 'woman');
+        expectNotChecked();
+      });
     });
   });
 });
