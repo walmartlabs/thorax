@@ -294,4 +294,60 @@ describe('form', function() {
     view.render();
     expect(view.serialize()).to.eql({foo: true});
   });
+  
+  describe( "populate checked", function() {
+    var view;
+    
+    function renderedFormView(type, inputValue, attrValue) {
+      var newView = new FormView({
+        template: function() {
+          return '<input type="'+type+'" name="bat" value="'+inputValue+'">';
+        }
+      });
+
+      var attributes = { bat: attrValue };
+      var model = new Thorax.Model(attributes);
+      newView.setModel(model);
+      newView.render();
+      return newView;
+    }
+    
+    function viewCheckedAttr() {
+      return view.$('input[name="bat"]').eq(0).attr('checked');
+    }
+    
+    function expectChecked() {
+      expect(viewCheckedAttr()).to.equal('checked');
+    }
+
+    function expectNotChecked() {
+      // don't be the string 'false', instead be boolean false, since the attr is non-existent
+      expect(viewCheckedAttr()).to.not.equal('false').and.to.be['false'];
+    }
+    
+    describe( "checkbox", function() {
+      it( "should populate input attribute 'checked' with value 'checked' if set", function() {
+        view = renderedFormView('checkbox', 'man', 'man');
+        expectChecked();
+      });
+
+      it( "should not populate input attribute 'checked' if not set", function() {
+        view = renderedFormView('checkbox', 'man', 'woman');
+        expectNotChecked();
+      });
+    });
+    
+    describe( "radio", function() {
+      // this is currently broken on fruit-loops. see here: https://github.com/kpdecker/cheerio/blob/master/lib/api/attributes.js#L143
+      xit( "should populate input attribute 'checked' with value 'checked' if set", function() {
+        view = renderedFormView('radio', 'man', 'man');
+        expectChecked();
+      });
+
+      it( "should not populate input attribute 'checked' if not set", function() {
+        view = renderedFormView('radio', 'man', 'woman');
+        expectNotChecked();
+      });
+    });
+  });
 });
