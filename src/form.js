@@ -131,7 +131,7 @@ _.extend(Thorax.View.prototype, {
         if (!_.isUndefined(value)) {
           //will only execute if we have a name that matches the structure in attributes
           var isBinary = type === 'checkbox' || type === 'radio';
-          if (isBinary) { 
+          if (isBinary) {
             value = _.isBoolean(value) ? value : value === $element.val();
             $element[value ? 'attr' : 'removeAttr']('checked', 'checked');
           } else {
