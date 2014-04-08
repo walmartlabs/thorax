@@ -312,13 +312,17 @@ describe('form', function() {
       return newView;
     }
     
+    function viewCheckedAttr() {
+      return view.$('input[name="bat"]').eq(0).attr('checked');
+    }
+    
     function expectChecked() {
-      expect(view.$('input[name="bat"]').eq(0).attr('checked')).to.equal('checked');
+      expect(viewCheckedAttr()).to.equal('checked');
     }
 
     function expectNotChecked() {
       // don't be the string 'false', instead be boolean false, since the attr is non-existent
-      expect(view.$('input[name="bat"]').eq(0).attr('checked')).to.not.equal('false').and.to.be['false'];
+      expect(viewCheckedAttr()).to.not.equal('false').and.to.be['false'];
     }
     
     describe( "checkbox", function() {
