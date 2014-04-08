@@ -2,7 +2,12 @@
 
 ## Development
 
-[Commits](https://github.com/walmartlabs/thorax/compare/v3.0.0-alpha.2...master)
+[Commits](https://github.com/walmartlabs/thorax/compare/v3.0.0-alpha.3...master)
+
+## v3.0.0-alpha.3 - April 7th, 2014
+- [#354](https://github.com/walmartlabs/thorax/pull/354) - don't allow checked='false' on inputs ([@dguzzo](https://api.github.com/users/dguzzo))
+
+[Commits](https://github.com/walmartlabs/thorax/compare/v3.0.0-alpha.2...v3.0.0-alpha.3)
 
 ## v3.0.0-alpha.2 - April 3rd, 2014
 - Prevent partial render due to layout children - 395cac9
