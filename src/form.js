@@ -152,7 +152,9 @@ _.extend(Thorax.View.prototype, {
 
   _getInputValue: function($input, type) {
     if (type === 'checkbox' || type === 'radio') {
-      var checked = $input.attr('checked');
+      // `prop` doesn't exist in fruit-loops, but it updates after user input.
+      // whereas attr does not.
+      var checked = $input[$input.prop ? 'prop' : 'attr']('checked');
       if (checked || checked === '') {
         // Under older versions of IE we see 'on' when no value is set so we want to cast this
         // to true.
