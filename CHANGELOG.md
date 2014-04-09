@@ -2,7 +2,13 @@
 
 ## Development
 
-[Commits](https://github.com/walmartlabs/thorax/compare/v3.0.0-alpha.3...master)
+[Commits](https://github.com/walmartlabs/thorax/compare/v3.0.0-alpha.4...master)
+
+## v3.0.0-alpha.4 - April 8th, 2014
+- [#357](https://github.com/walmartlabs/thorax/pull/357) - use `prop` rather than `attr` to look up values, as it updates after user ([@patrickkettner](https://api.github.com/users/patrickkettner))
+- Update tests for the latest fruit-loops lib - 18333f1
+
+[Commits](https://github.com/walmartlabs/thorax/compare/v3.0.0-alpha.3...v3.0.0-alpha.4)
 
 ## v3.0.0-alpha.3 - April 7th, 2014
 - [#354](https://github.com/walmartlabs/thorax/pull/354) - don't allow checked='false' on inputs ([@dguzzo](https://api.github.com/users/dguzzo))
