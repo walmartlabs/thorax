@@ -199,8 +199,8 @@ Thorax.CollectionView = Thorax.View.extend({
 
     if (itemView) {
       if (itemView.cid) {
-        itemView.ensureRendered();
         this._addChild(itemView);
+        itemView.ensureRendered();
       }
 
       //if the renderer's output wasn't contained in a tag, wrap it in a div
