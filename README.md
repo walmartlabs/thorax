@@ -393,6 +393,13 @@ Release a view that was previously retained. If `release` is called and the view
 
 Generally this method is not needed unless you are `retain`ing views.
 
+### register *view.register()*
+
+Register a view as being a root-level view. This, along with an explicit `release`, is required when creating Thorax views that are not children of other Thorax views.
+
+This is done automatically for views that are connected to an existing element via the `el` attribute.
+
+
 ### setModel *view.setModel(model [,options])*
 
 Setting `model` in the constructor will automatically call `setModel`, so the following are equivalent:
@@ -1528,6 +1535,10 @@ A void tag such as `img` was rendered with `content` in `Thorax.Util.tag`.
 ## server-marshal-object
 
 A complex object was serialized without a proper context path to lookup the object on the client side. See [Thorax.ServerMarshal](#thoraxservermarshal) for more discussion on context paths.
+
+## fn-view-unregistered
+
+`$.view` found a view element that was inserted manually into the DOM and was not registered with `_addChild` or `register`. Call `parent._addChild(view)` or `view.register()` on view insertion or instantiation.
 
 
 [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/walmartlabs/thorax/trend.png)](https://bitdeli.com/free "Bitdeli Badge")

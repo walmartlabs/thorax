@@ -244,7 +244,7 @@ function eachNamedInput(view, options, iterator) {
     var $el = $(this);
 
     if (!options.children) {
-      if (view !== $el.view({helper: false})) {
+      if (view.el !== $el.view({el: true, helper: false})[0]) {
         return;
       }
     }
