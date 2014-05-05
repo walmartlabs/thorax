@@ -2,7 +2,16 @@
 
 ## Development
 
-[Commits](https://github.com/walmartlabs/thorax/compare/v3.0.0-alpha.4...master)
+[Commits](https://github.com/walmartlabs/thorax/compare/v3.0.0-alpha.5...master)
+
+## v3.0.0-alpha.5 - May 5th, 2014
+- [#358](https://github.com/walmartlabs/thorax/pull/358) - Add as a child before calling ensureRender in CollectionView#appendItem ([@jasonwebster](https://api.github.com/users/jasonwebster))
+- [#364](https://github.com/walmartlabs/thorax/pull/364) - Add view.register method ([@kpdecker](https://api.github.com/users/kpdecker))
+
+Compatibility notes:
+- Views that are inserted manually must call `retain` or `_addChild` if they are going to be referenced by `$.view`
+
+[Commits](https://github.com/walmartlabs/thorax/compare/v3.0.0-alpha.4...v3.0.0-alpha.5)
 
 ## v3.0.0-alpha.4 - April 8th, 2014
 - [#357](https://github.com/walmartlabs/thorax/pull/357) - use `prop` rather than `attr` to look up values, as it updates after user ([@patrickkettner](https://api.github.com/users/patrickkettner))
