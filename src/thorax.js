@@ -131,7 +131,7 @@ Thorax.View = Backbone.View.extend({
       // a children of any views. Assume that anyone doing this will manage the lifecycle
       // appropriately and destroy so we don't leak due to the `$.view` lookup that we are
       // registering here.
-      this.register();
+      this.retain();
     }
 
     return response;
@@ -150,17 +150,11 @@ Thorax.View = Backbone.View.extend({
     this.cid = cid;
   },
 
-  register: function() {
-    // Register with the `$.view` helper.
-    viewsIndexedByCid[this.cid] = this;
-  },
-
   _addChild: function(view) {
     if (this.children[view.cid]) {
       return view;
     }
 
-    view.register();
     view.retain();
     this.children[view.cid] = view;
     // _helperOptions is used to detect if is HelperView
@@ -429,6 +423,11 @@ Thorax.View = Backbone.View.extend({
   },
 
   retain: function(owner) {
+    if (!viewsIndexedByCid[this.cid]) {
+      // Register with the `$.view` helper.
+      viewsIndexedByCid[this.cid] = this;
+    }
+
     ++this._referenceCount;
     if (owner) {
       // Not using listenTo helper as we want to run once the owner is destroyed

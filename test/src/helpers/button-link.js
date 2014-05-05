@@ -91,7 +91,7 @@ describe('button-link helpers', function() {
     });
     // Append the view to the body for testing
     view.appendTo(document.body);
-    view.register();
+    view.retain();
     view.$('a span').trigger('click');
     view.$el.remove();
     $(document).off('click.test.prevent-default');

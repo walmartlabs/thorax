@@ -242,7 +242,7 @@ describe('view helper', function() {
       child: child
     });
     parent.render();
-    parent.register();
+    parent.retain();
 
     expect(child.$('div.child').view()).to.equal(child);
     expect(parent.$('div.parent').view()).to.equal(parent);

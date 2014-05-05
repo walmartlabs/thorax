@@ -111,7 +111,7 @@ describe('model', function() {
       template: Handlebars.compile('{{key}}')
     });
     view.render();
-    view.register();
+    view.retain();
     expect(view.html()).to.equal('value');
     expect(view.$el.model()).to.equal(model);
   });
