@@ -385,6 +385,10 @@ Given the code below:
 
 When the optional `owner` parameter is passed, the retain reference count will automatically be reduced when the owner view is destroyed.
 
+Views that have been retained must be released via `release` or they will leak.
+
+This is done automatically for views that are connected to an existing element via the `el` attribute.
+
 ### release *view.release()*
 
 Release a view that was previously retained. If `release` is called and the view has a reference count of zero it will be destroyed, which will release all children, remove all events, unbind all models and collections, call `remove` and trigger the `destroyed` event.
@@ -392,6 +396,7 @@ Release a view that was previously retained. If `release` is called and the view
 `release` is usually called automatically if a view was attached to a `LayoutView` with the `setView` method, and another view is then passed to `setView`.
 
 Generally this method is not needed unless you are `retain`ing views.
+
 
 ### setModel *view.setModel(model [,options])*
 
@@ -1528,6 +1533,10 @@ A void tag such as `img` was rendered with `content` in `Thorax.Util.tag`.
 ## server-marshal-object
 
 A complex object was serialized without a proper context path to lookup the object on the client side. See [Thorax.ServerMarshal](#thoraxservermarshal) for more discussion on context paths.
+
+## fn-view-unregistered
+
+`$.view` found a view element that was inserted manually into the DOM and was not registered with `_addChild` or `retain`. Call `parent._addChild(view)` or `view.retain()` on view insertion or instantiation.
 
 
 [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/walmartlabs/thorax/trend.png)](https://bitdeli.com/free "Bitdeli Badge")

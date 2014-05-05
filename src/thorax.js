@@ -1,7 +1,7 @@
 /*global
     Thorax:true,
     $serverSide,
-    assignTemplate, createErrorMessage, createInheritVars, createRegistryWrapper, getValue,
+    assignTemplate, createError, createInheritVars, createRegistryWrapper, getValue,
     inheritVars, resetInheritVars,
     ServerMarshal
 */
@@ -126,25 +126,35 @@ Thorax.View = Backbone.View.extend({
     }
     this.$el.attr(attr);
 
+    if (element.parentNode) {
+      // This is a view that is attaching to an existing node and is unlikely to be added as
+      // a children of any views. Assume that anyone doing this will manage the lifecycle
+      // appropriately and destroy so we don't leak due to the `$.view` lookup that we are
+      // registering here.
+      this.retain();
+    }
+
     return response;
   },
   _assignCid: function(cid) {
-    if (this.cid) {
+    if (this.cid && viewsIndexedByCid[this.cid]) {
       delete viewsIndexedByCid[this.cid];
+      viewsIndexedByCid[cid] = this;
     }
+
     if (this.parent) {
       delete this.parent.children[this.cid];
       this.parent.children[cid] = this;
     }
 
     this.cid = cid;
-    viewsIndexedByCid[cid] = this;
   },
 
   _addChild: function(view) {
     if (this.children[view.cid]) {
       return view;
     }
+
     view.retain();
     this.children[view.cid] = view;
     // _helperOptions is used to detect if is HelperView
@@ -276,7 +286,7 @@ Thorax.View = Backbone.View.extend({
         // execution. If in a situation where you need to rerender in response to an event that is
         // triggered sync in the rendering lifecycle it's recommended to defer the subsequent render
         // or refactor so that all preconditions are known prior to exec.
-        throw new Error(createErrorMessage('nested-render'));
+        throw createError('nested-render');
       }
 
       var children = {},
@@ -413,6 +423,11 @@ Thorax.View = Backbone.View.extend({
   },
 
   retain: function(owner) {
+    if (!viewsIndexedByCid[this.cid]) {
+      // Register with the `$.view` helper.
+      viewsIndexedByCid[this.cid] = this;
+    }
+
     ++this._referenceCount;
     if (owner) {
       // Not using listenTo helper as we want to run once the owner is destroyed
@@ -482,7 +497,6 @@ function configureView () {
     self[obj.name] = [];
   });
 
-  viewsIndexedByCid[this.cid] = this;
   this.children = {};
   this._renderCount = 0;
 
@@ -529,7 +543,16 @@ $.fn.view = function(options) {
   }
   var el = $(this).closest(selector);
   if (el) {
-    return options.el ? el : viewsIndexedByCid[el.attr(viewCidAttributeName)];
+    if (options.el) {
+      return el;
+    } else {
+      var cid = el.attr(viewCidAttributeName),
+          view = viewsIndexedByCid[cid];
+      if (!view) {
+        throw createError('fn-view-unregistered');
+      }
+      return view;
+    }
   } else {
     return false;
   }

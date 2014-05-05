@@ -237,13 +237,14 @@ describe('view helper', function() {
     var child = new Thorax.View({
       template: Handlebars.compile('<div class="child"></div>')
     });
-    child.render();
-    expect(child.$('div.child').view()).to.equal(child);
     var parent = new Thorax.View({
       template: Handlebars.compile('<div class="parent">{{view child}}</div>'),
       child: child
     });
     parent.render();
+    parent.retain();
+
+    expect(child.$('div.child').view()).to.equal(child);
     expect(parent.$('div.parent').view()).to.equal(parent);
     expect(parent.$('div.child').view()).to.equal(child);
   });
