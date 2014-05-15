@@ -762,11 +762,11 @@ describe('loading', function() {
         return Thorax.Util.bindToRoute(callback, failback);
       }
 
-      // It terminates after any route event
+      // It ignores the first route event if called while in navigating
       var func = reset();
       Backbone.history.trigger('route');
       expect(callback.callCount).to.equal(0);
-      expect(failback.callCount).to.equal(1);
+      expect(failback.callCount).to.equal(0);
 
       // test new route before load complete
       fragment = "bar";
@@ -780,23 +780,25 @@ describe('loading', function() {
       expect(failback.callCount).to.equal(1);
 
       // make sure callback works without initial route trigger
+      fragment += 1;
       func = reset();
       func();
       expect(callback.callCount).to.equal(1);
       expect(failback.callCount).to.equal(0);
 
       // now make sure no execution happens after route change
-      fragment = "bar";
+      fragment = "baz";
       Backbone.history.trigger('route');
       expect(callback.callCount).to.equal(1);
       expect(failback.callCount).to.equal(0);
 
       // make sure callback works with initial route trigger
+      fragment += 1;
       func = reset();
       Backbone.history.trigger('route');
       func();
-      expect(callback.callCount).to.equal(0);
-      expect(failback.callCount).to.equal(1);
+      expect(callback.callCount).to.equal(1);
+      expect(failback.callCount).to.equal(0);
 
       Backbone.history.getFragment = _getFragment;
     });

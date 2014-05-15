@@ -236,11 +236,36 @@ Thorax.sync = function(method, dataObj, options) {
   return this._request;
 };
 
+var triggeredRoute,
+    bindToRouteHelperBound = false;
+function initBindToRouteHelper() {
+  // Avoiding closure retain on the initial bindToRoute call
+  // so implementing out here
+  if (bindToRouteHelperBound) {
+    return;
+  }
+
+  bindToRouteHelperBound = true;
+  Backbone.history.on('route', function() {
+    triggeredRoute = Backbone.history.getFragment();
+  });
+}
+
 function bindToRoute(callback, failback) {
+  initBindToRouteHelper();
+
   var fragment = Backbone.history.getFragment(),
+      pendingRoute = triggeredRoute !== fragment,
       routeChanged = false;
 
   function routeHandler() {
+    if (pendingRoute && fragment === Backbone.history.getFragment()) {
+      // The bind to route occured in the handler and the route event
+      // was not yet triggered.
+      pendingRoute = false;
+      return;
+    }
+
     routeChanged = true;
     res.cancel();
     failback && failback();
