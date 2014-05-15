@@ -241,9 +241,6 @@ function bindToRoute(callback, failback) {
       routeChanged = false;
 
   function routeHandler() {
-    if (fragment === Backbone.history.getFragment()) {
-      return;
-    }
     routeChanged = true;
     res.cancel();
     failback && failback();
