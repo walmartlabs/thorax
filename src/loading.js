@@ -11,13 +11,23 @@ Thorax.setRootObject = function(obj) {
 Thorax.loadHandler = function(start, end, context) {
   var loadCounter = _.uniqueId('load');
   return function(message, background, object) {
+
+    var messageLog = [];
+
+    function log(message) {
+      messageLog.push(message);
+    }
+
     if ($serverSide) {
       return;
     }
 
     var self = context || this;
     self._loadInfo = self._loadInfo || {};
+
     var loadInfo = self._loadInfo[loadCounter];
+
+    log('LINE 28: set loadInfo to: ' + loadInfo);
 
     function startLoadTimeout() {
 
@@ -35,6 +45,12 @@ Thorax.loadHandler = function(start, end, context) {
             // We have a slight race condtion in here where the end event may have occurred
             // but the end timeout has not executed. Rather than killing a cumulative timeout
             // immediately we'll protect from that case here
+
+            if (!loadInfo) {
+              console.log(messageLog.join('\n'));
+              console.log('OOPS!')
+            }
+
             if (loadInfo.events.length) {
               loadInfo.run = true;
               start.call(self, loadInfo.message, loadInfo.background, loadInfo);
@@ -55,6 +71,9 @@ Thorax.loadHandler = function(start, end, context) {
         message: message,
         background: !!background
       }, Backbone.Events);
+
+      log('LINE 57: set loadInfo to: ' + loadInfo);
+
       startLoadTimeout();
     } else {
       clearTimeout(loadInfo.endTimeout);
@@ -108,6 +127,9 @@ Thorax.loadHandler = function(start, end, context) {
               // If stopping make sure we don't run a start
               clearTimeout(loadInfo.timeout);
               loadInfo = self._loadInfo[loadCounter] = undefined;
+
+              log('LINE 123: set loadInfo to: undefined');
+
             }
           }),
         loadingEndTimeout * 1000);
@@ -328,7 +350,7 @@ function fetchQueue(options, $super) {
       var promise = $super.call(this, options);
       if (this.fetchQueue) {
         // ensure the fetchQueue has not been cleared out - https://github.com/walmartlabs/thorax/issues/304
-        // This can occur in some environments if the request fails sync to this call, causing the 
+        // This can occur in some environments if the request fails sync to this call, causing the
         // error handler to clear out the fetchQueue before we get to this point.
         this.fetchQueue._promise = promise;
       }
