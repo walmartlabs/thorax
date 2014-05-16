@@ -261,11 +261,18 @@ function initBindToRouteHelper() {
 function bindToRoute(callback, failback) {
   initBindToRouteHelper();
 
-  var fragment = Backbone.history.getFragment(),
+  var started = Backbone.history.started,
+      fragment = started && Backbone.history.getFragment(),
       pendingRoute = triggeredRoute !== fragment,   // Has the `route` event triggered for this particular event?
       routeChanged = false;
 
   function routeHandler() {
+    if (!started) {
+      // If we were not started when this was initiated, reset ourselves to use the current route
+      // as we can not trust the route that was given prior to the history object being configured
+      fragment = Backbone.history.getFragment();
+      pendingRoute = started = true;
+    }
     if (pendingRoute && fragment === Backbone.history.getFragment()) {
       // The bind to route occured in the handler and the route event
       // was not yet triggered so we do not want to terminate the bind
