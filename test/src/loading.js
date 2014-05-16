@@ -779,6 +779,20 @@ describe('loading', function() {
       expect(callback.callCount).to.equal(0);
       expect(failback.callCount).to.equal(1);
 
+      // Terminates on duplicate routes
+      fragment += 1;
+      func = reset();
+      Backbone.history.trigger('route');
+      Backbone.history.trigger('route');
+      expect(callback.callCount).to.equal(0);
+      expect(failback.callCount).to.equal(1);
+
+      // Terminates on duplicate routes after route event
+      func = reset();
+      Backbone.history.trigger('route');
+      expect(callback.callCount).to.equal(0);
+      expect(failback.callCount).to.equal(1);
+
       // make sure callback works without initial route trigger
       fragment += 1;
       func = reset();
