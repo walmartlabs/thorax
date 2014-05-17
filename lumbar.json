@@ -21,7 +21,7 @@
 
     "thorax": {
       "scripts": [
-        {"src": "src/server-side.js", "server": true},
+        {"src": "src/server-side.js"},
         {"src": "src/thorax.js"},
         {"src": "src/util.js"},
         {"src": "src/server-marshal.js"},

@@ -9,7 +9,7 @@ _.uniqueId = function(prefix) {
   return prefix ? prefix + id : id;
 };
 
-if ($serverSide) {
+if (window.$serverSide) {
   onEmit(function() {
     $('body').append('<script>window._idCounter = ' + window._idCounter + ';</script>');
   });
