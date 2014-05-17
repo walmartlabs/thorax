@@ -236,14 +236,52 @@ Thorax.sync = function(method, dataObj, options) {
   return this._request;
 };
 
+// Tracks the last route that has been emitted.
+// This allows bindToRoute to differentiate between route events that are
+// associated with the current handler's execution (as the route event triggers after)
+// and with subsequent operations.
+//
+// This allows for bindToRoute to safely cleanup pending operations for the edge case
+// where callers are calling `loadUrl` directly on the same fragment repeatidly.
+var triggeredRoute,
+    bindToRouteHelperBound = false;
+function initBindToRouteHelper() {
+  // Avoiding closure retain on the initial bindToRoute call
+  // so implementing out here
+  if (bindToRouteHelperBound) {
+    return;
+  }
+
+  bindToRouteHelperBound = true;
+  Backbone.history.on('route', function() {
+    triggeredRoute = Backbone.history.getFragment();
+  });
+}
+
 function bindToRoute(callback, failback) {
-  var fragment = Backbone.history.getFragment(),
+  initBindToRouteHelper();
+
+  var started = Backbone.history.started,
+      fragment = started && Backbone.history.getFragment(),
+      pendingRoute = triggeredRoute !== fragment,   // Has the `route` event triggered for this particular event?
       routeChanged = false;
 
   function routeHandler() {
-    if (fragment === Backbone.history.getFragment()) {
+    if (!started) {
+      // If we were not started when this was initiated, reset ourselves to use the current route
+      // as we can not trust the route that was given prior to the history object being configured
+      fragment = Backbone.history.getFragment();
+      pendingRoute = started = true;
+    }
+    if (pendingRoute && fragment === Backbone.history.getFragment()) {
+      // The bind to route occured in the handler and the route event
+      // was not yet triggered so we do not want to terminate the bind
+      pendingRoute = false;
       return;
     }
+
+    // Otherwise the fragment has changed or the router was executed again on the same
+    // fragment, which we consider to be a distinct operation for these purposes.
     routeChanged = true;
     res.cancel();
     failback && failback();

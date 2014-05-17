@@ -558,13 +558,19 @@ describe('loading', function() {
   });
 
   describe('data.load', function() {
+    var started;
     beforeEach(function() {
+      started = Backbone.history.started;
+
       this.startSpy = this.spy();
       this.endSpy = this.spy();
 
       this.model = new (Thorax.Model.extend({url: 'foo'}))();
       this.model.on(loadStart, this.startSpy);
       this.model.on(loadEnd, this.endSpy);
+    });
+    afterEach(function() {
+      Backbone.history.started = started;
     });
 
     it('data load sends load events', function() {
@@ -640,8 +646,11 @@ describe('loading', function() {
     });
 
     it('data load on route change sends load events', function() {
-      var success = this.spy(),
+      var started = Backbone.history.started,
+          success = this.spy(),
           failback = this.spy();
+
+      Backbone.history.started = true;
 
       var fragment = 'data-bar';
       this.stub(Backbone.history, 'getFragment', function() { return fragment; });
@@ -657,6 +666,8 @@ describe('loading', function() {
       expect(failback.callCount).to.equal(1);
       expect(failback.calledWith(false)).to.equal(true);
       expect(this.startSpy.callCount).to.equal(1);
+
+      Backbone.history.started = started;
     });
     it('data load sent for background and foreground requests', function() {
       var success = this.spy(),
@@ -751,9 +762,6 @@ describe('loading', function() {
           _Router = Backbone.Router.extend({}),
           router = new _Router();
 
-      Backbone.history.getFragment = function() {
-        return fragment;
-      };
 
       var self = this;
       function reset() {
@@ -762,7 +770,37 @@ describe('loading', function() {
         return Thorax.Util.bindToRoute(callback, failback);
       }
 
+      Backbone.history.started = false;
+
+      // Throw as if not started
+      Backbone.history.getFragment = function() {
+        throw new Error('Borked');
+      };
+
+      // It handles started properly 
       var func = reset();
+
+      // Make getFragment safe again
+      Backbone.history.getFragment = function() {
+        return fragment;
+      };
+
+      Backbone.history.trigger('route');
+      expect(callback.callCount).to.equal(0);
+      expect(failback.callCount).to.equal(0);
+
+
+      // test new route before load complete
+      fragment = "bar";
+      Backbone.history.trigger('route');
+      expect(callback.callCount).to.equal(0);
+      expect(failback.callCount).to.equal(1);
+
+      Backbone.history.started = true;
+
+      // It ignores the first route event if called while in navigating
+      fragment += 1;
+      func = reset();
       Backbone.history.trigger('route');
       expect(callback.callCount).to.equal(0);
       expect(failback.callCount).to.equal(0);
@@ -778,22 +816,38 @@ describe('loading', function() {
       expect(callback.callCount).to.equal(0);
       expect(failback.callCount).to.equal(1);
 
-      // make sure callback works without initial route trigger
-      func = reset();
-      func();
-      expect(callback.callCount).to.equal(1);
-      expect(failback.callCount).to.equal(0);
-
-      // make sure callback works with initial route trigger
+      // Terminates on duplicate routes
+      fragment += 1;
       func = reset();
       Backbone.history.trigger('route');
+      Backbone.history.trigger('route');
+      expect(callback.callCount).to.equal(0);
+      expect(failback.callCount).to.equal(1);
+
+      // Terminates on duplicate routes after route event
+      func = reset();
+      Backbone.history.trigger('route');
+      expect(callback.callCount).to.equal(0);
+      expect(failback.callCount).to.equal(1);
+
+      // make sure callback works without initial route trigger
+      fragment += 1;
+      func = reset();
       func();
       expect(callback.callCount).to.equal(1);
       expect(failback.callCount).to.equal(0);
 
       // now make sure no execution happens after route change
-      fragment = "bar";
+      fragment = "baz";
       Backbone.history.trigger('route');
+      expect(callback.callCount).to.equal(1);
+      expect(failback.callCount).to.equal(0);
+
+      // make sure callback works with initial route trigger
+      fragment += 1;
+      func = reset();
+      Backbone.history.trigger('route');
+      func();
       expect(callback.callCount).to.equal(1);
       expect(failback.callCount).to.equal(0);
 
