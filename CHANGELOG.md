@@ -2,7 +2,14 @@
 
 ## Development
 
-[Commits](https://github.com/walmartlabs/thorax/compare/v3.0.0-alpha.5...master)
+[Commits](https://github.com/walmartlabs/thorax/compare/v3.0.0-alpha.6...master)
+
+## v3.0.0-alpha.6 - May 17th, 2014
+- [#311](https://github.com/walmartlabs/thorax/issues/311) - Loading module breaks module load if history not started ([@kpdecker](https://api.github.com/users/kpdecker))
+- [#370](https://github.com/walmartlabs/thorax/pull/370) - Always cleanup bindToRoute ([@kpdecker](https://api.github.com/users/kpdecker))
+- Fix server-side.js include for client overrides - 66a972b
+
+[Commits](https://github.com/walmartlabs/thorax/compare/v3.0.0-alpha.5...v3.0.0-alpha.6)
 
 ## v3.0.0-alpha.5 - May 5th, 2014
 - [#358](https://github.com/walmartlabs/thorax/pull/358) - Add as a child before calling ensureRender in CollectionView#appendItem ([@jasonwebster](https://api.github.com/users/jasonwebster))
