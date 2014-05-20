@@ -2,7 +2,12 @@
 
 ## Development
 
-[Commits](https://github.com/walmartlabs/thorax/compare/v3.0.0-alpha.6...master)
+[Commits](https://github.com/walmartlabs/thorax/compare/v3.0.0-alpha.7...master)
+
+## v3.0.0-alpha.7 - May 19th, 2014
+- Update for latest handlebars _child changes - 495e078
+
+[Commits](https://github.com/walmartlabs/thorax/compare/v3.0.0-alpha.6...v3.0.0-alpha.7)
 
 ## v3.0.0-alpha.6 - May 17th, 2014
 - [#311](https://github.com/walmartlabs/thorax/issues/311) - Loading module breaks module load if history not started ([@kpdecker](https://api.github.com/users/kpdecker))
