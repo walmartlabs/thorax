@@ -108,7 +108,7 @@ describe('serverSide', function() {
         }),
         SomethingElse = Thorax.View.extend({
           _name: 'somethingelse',
-          template: function() { return 'somethingelse'; }
+          template: Handlebars.compile('somethingelse')
         }),
         render,
         fixture,

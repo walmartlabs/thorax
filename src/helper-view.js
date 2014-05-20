@@ -165,11 +165,14 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
       fn: ServerMarshal.load(el, 'fn'),
       inverse: ServerMarshal.load(el, 'inverse')
     };
+
+    declaringView.template._setup({helpers: this.helpers});
+
     if (options.fn) {
-      options.fn = declaringView.template.child(options.fn);
+      options.fn = declaringView.template._child(options.fn);
     }
     if (options.inverse) {
-      options.inverse = declaringView.template.child(options.inverse);
+      options.inverse = declaringView.template._child(options.inverse);
     }
 
     var viewOptions = createViewOptions(name, args, options, declaringView);
