@@ -2,7 +2,12 @@
 
 ## Development
 
-[Commits](https://github.com/walmartlabs/thorax/compare/v3.0.0-alpha.7...master)
+[Commits](https://github.com/walmartlabs/thorax/compare/v3.0.0-alpha.8...master)
+
+## v3.0.0-alpha.8 - May 26th, 2014
+- Fix bindToRoute when running with lumbar loader - c1e534d
+
+[Commits](https://github.com/walmartlabs/thorax/compare/v3.0.0-alpha.7...v3.0.0-alpha.8)
 
 ## v3.0.0-alpha.7 - May 19th, 2014
 - Update for latest handlebars _child changes - 495e078
