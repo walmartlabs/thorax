@@ -560,7 +560,7 @@ describe('loading', function() {
   describe('data.load', function() {
     var started;
     beforeEach(function() {
-      started = Backbone.history.started;
+      started = Backbone.History.started;
 
       this.startSpy = this.spy();
       this.endSpy = this.spy();
@@ -570,7 +570,7 @@ describe('loading', function() {
       this.model.on(loadEnd, this.endSpy);
     });
     afterEach(function() {
-      Backbone.history.started = started;
+      Backbone.History.started = started;
     });
 
     it('data load sends load events', function() {
@@ -646,11 +646,11 @@ describe('loading', function() {
     });
 
     it('data load on route change sends load events', function() {
-      var started = Backbone.history.started,
+      var started = Backbone.History.started,
           success = this.spy(),
           failback = this.spy();
 
-      Backbone.history.started = true;
+      Backbone.History.started = true;
 
       var fragment = 'data-bar';
       this.stub(Backbone.history, 'getFragment', function() { return fragment; });
@@ -667,7 +667,7 @@ describe('loading', function() {
       expect(failback.calledWith(false)).to.equal(true);
       expect(this.startSpy.callCount).to.equal(1);
 
-      Backbone.history.started = started;
+      Backbone.History.started = started;
     });
     it('data load sent for background and foreground requests', function() {
       var success = this.spy(),
@@ -770,7 +770,7 @@ describe('loading', function() {
         return Thorax.Util.bindToRoute(callback, failback);
       }
 
-      Backbone.history.started = false;
+      Backbone.History.started = false;
 
       // Throw as if not started
       Backbone.history.getFragment = function() {
@@ -785,21 +785,23 @@ describe('loading', function() {
         return fragment;
       };
 
+      Backbone.history.loadUrl();
       Backbone.history.trigger('route');
       expect(callback.callCount).to.equal(0);
       expect(failback.callCount).to.equal(0);
 
+      Backbone.History.started = true;
 
       // test new route before load complete
       fragment = "bar";
+      Backbone.history.loadUrl();
       Backbone.history.trigger('route');
       expect(callback.callCount).to.equal(0);
       expect(failback.callCount).to.equal(1);
 
-      Backbone.history.started = true;
-
       // It ignores the first route event if called while in navigating
       fragment += 1;
+      Backbone.history.loadUrl();
       func = reset();
       Backbone.history.trigger('route');
       expect(callback.callCount).to.equal(0);
@@ -819,7 +821,11 @@ describe('loading', function() {
       // Terminates on duplicate routes
       fragment += 1;
       func = reset();
+      Backbone.history.loadUrl();
       Backbone.history.trigger('route');
+      expect(callback.callCount).to.equal(0);
+      expect(failback.callCount).to.equal(1);
+
       Backbone.history.trigger('route');
       expect(callback.callCount).to.equal(0);
       expect(failback.callCount).to.equal(1);

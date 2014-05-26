@@ -244,24 +244,18 @@ Thorax.sync = function(method, dataObj, options) {
 // This allows for bindToRoute to safely cleanup pending operations for the edge case
 // where callers are calling `loadUrl` directly on the same fragment repeatidly.
 var triggeredRoute,
-    bindToRouteHelperBound = false;
-function initBindToRouteHelper() {
-  // Avoiding closure retain on the initial bindToRoute call
-  // so implementing out here
-  if (bindToRouteHelperBound) {
-    return;
-  }
+    $loadUrl = Backbone.History.prototype.loadUrl;
 
-  bindToRouteHelperBound = true;
-  Backbone.history.on('route', function() {
+Backbone.History.prototype.loadUrl = function() {
+  Backbone.history.once('route', function() {
     triggeredRoute = Backbone.history.getFragment();
   });
-}
+  triggeredRoute = false;
+  return $loadUrl.apply(this, arguments);
+};
 
 function bindToRoute(callback, failback) {
-  initBindToRouteHelper();
-
-  var started = Backbone.history.started,
+  var started = Backbone.History.started,
       fragment = started && Backbone.history.getFragment(),
       pendingRoute = triggeredRoute !== fragment,   // Has the `route` event triggered for this particular event?
       routeChanged = false;
