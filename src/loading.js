@@ -257,8 +257,7 @@ Backbone.History.prototype.loadUrl = function() {
 function bindToRoute(callback, failback) {
   var started = Backbone.History.started,
       fragment = started && Backbone.history.getFragment(),
-      pendingRoute = triggeredRoute !== fragment,   // Has the `route` event triggered for this particular event?
-      routeChanged = false;
+      pendingRoute = triggeredRoute !== fragment;   // Has the `route` event triggered for this particular event?
 
   function routeHandler() {
     if (!started) {
@@ -276,7 +275,7 @@ function bindToRoute(callback, failback) {
 
     // Otherwise the fragment has changed or the router was executed again on the same
     // fragment, which we consider to be a distinct operation for these purposes.
-    routeChanged = true;
+    callback = undefined;
     res.cancel();
     failback && failback();
   }
@@ -285,7 +284,7 @@ function bindToRoute(callback, failback) {
 
   function finalizer() {
     Backbone.history.off('route', routeHandler);
-    if (!routeChanged) {
+    if (callback) {
       callback.apply(this, arguments);
     }
   }
