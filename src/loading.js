@@ -398,7 +398,7 @@ function fetchQueue(options, $super) {
     // Individual requests can only fail individually. Success willl always occur via the
     // normal xhr path
     aborted: function() {
-      var index = fetchQueue.indexOf(this);
+      var index = _.indexOf(fetchQueue, this);
       if (index >= 0) {
         fetchQueue.splice(index, 1);
       }
