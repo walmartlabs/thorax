@@ -312,12 +312,20 @@ function loadData(callback, failback, options) {
       routeChanged = false,
       successCallback = bindToRoute(_.bind(callback, self), function() {
         routeChanged = true;
-        if (self._request) {
+
+        // Manually abort this particular load cycle (and only this one)
+        queueEntry && queueEntry.aborted();
+
+        // Kill off the request if there isn't anyone remaining who may want to interact
+        // with it.
+        if (self._request && (!self.fetchQueue || !self.fetchQueue.length)) {
           self._aborted = true;
           self._request.abort();
         }
+
         failback && failback.call(self, false);
-      });
+      }),
+      queueEntry;
 
   this.fetch(_.defaults({
     success: successCallback,
@@ -328,6 +336,8 @@ function loadData(callback, failback, options) {
       }
     }
   }, options));
+
+  queueEntry = _.last(this.fetchQueue);
 }
 
 function fetchQueue(options, $super) {
@@ -337,7 +347,7 @@ function fetchQueue(options, $super) {
     this.fetchQueue = undefined;
   } else if (this.fetchQueue) {
     // concurrent set/reset fetch events are not advised
-    var reset = (this.fetchQueue[0] || {}).reset;
+    var reset = (this.fetchQueue[0].options || {}).reset;
     if (reset !== options.reset) {
       // fetch with concurrent set & reset not allowed
       throw new Error(createErrorMessage('mixed-fetch'));
@@ -346,8 +356,8 @@ function fetchQueue(options, $super) {
 
   if (!this.fetchQueue) {
     // Kick off the request
-    this.fetchQueue = [options];
-    options = _.defaults({
+    this.fetchQueue = [];
+    var requestOptions = _.defaults({
       success: flushQueue(this, this.fetchQueue, 'success'),
       error: flushQueue(this, this.fetchQueue, 'error'),
       complete: flushQueue(this, this.fetchQueue, 'complete')
@@ -356,22 +366,52 @@ function fetchQueue(options, $super) {
     // Handle callers that do not pass in a super class and wish to implement their own
     // fetch behavior
     if ($super) {
-      var promise = $super.call(this, options);
+      var promise = $super.call(this, requestOptions);
       if (this.fetchQueue) {
         // ensure the fetchQueue has not been cleared out - https://github.com/walmartlabs/thorax/issues/304
         // This can occur in some environments if the request fails sync to this call, causing the 
         // error handler to clear out the fetchQueue before we get to this point.
         this.fetchQueue._promise = promise;
+      } else {
+        return;
       }
-      return promise;
     } else {
-      return options;
+      return requestOptions;
     }
-  } else {
-    // Currently fetching. Queue and process once complete
-    this.fetchQueue.push(options);
-    return this.fetchQueue._promise;
   }
+
+  // Create a proxy promise for this specific load call. This allows us to abort specific
+  // callbacks when bindToRoute needs to kill off specific callback instances.
+  var deferred;
+  if ($.Deferred) {
+    deferred = $.Deferred();
+    this.fetchQueue._promise.then(function() {
+        deferred.resolve.apply(deferred, arguments);
+      },
+      function() {
+        deferred.reject.apply(deferred, arguments);
+      });
+  }
+
+  var fetchQueue = this.fetchQueue;
+  this.fetchQueue.push({
+    // Individual requests can only fail individually. Success willl always occur via the
+    // normal xhr path
+    aborted: function() {
+      var index = fetchQueue.indexOf(this);
+      if (index >= 0) {
+        fetchQueue.splice(index, 1);
+      }
+
+      var args = [fetchQueue._promise, 'abort'];
+      deferred && deferred.rejectWith(options.context, args);
+      options.error && options.error.apply(options.context, args);
+      options.complete && options.complete.apply(options.context, args);
+    },
+    options: options
+  });
+
+  return deferred && deferred.promise();
 }
 
 function flushQueue(self, fetchQueue, handler) {
@@ -380,7 +420,9 @@ function flushQueue(self, fetchQueue, handler) {
 
     // Flush the queue. Executes any callback handlers that
     // may have been passed in the fetch options.
-    _.each(fetchQueue, function(options) {
+    _.each(fetchQueue, function(queue) {
+      var options = queue.options;
+
       if (options[handler]) {
         options[handler].apply(this, args);
       }

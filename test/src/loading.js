@@ -658,6 +658,7 @@ describe('loading', function() {
 
       fragment = 'data-foo';
       Backbone.history.trigger('route');
+      expect(this.model._aborted).to.be['true'];
       expect(this.endSpy.callCount).to.equal(1);
 
       this.requests[0].respond(200, {}, '{}');
@@ -666,6 +667,33 @@ describe('loading', function() {
       expect(failback.callCount).to.equal(1);
       expect(failback.calledWith(false)).to.equal(true);
       expect(this.startSpy.callCount).to.equal(1);
+
+      Backbone.History.started = started;
+    });
+    it('not abort with multiple requests on route change', function() {
+      var started = Backbone.History.started,
+          success = this.spy(),
+          failback = this.spy();
+
+      Backbone.History.started = true;
+
+      var fragment = 'data-bar';
+      this.stub(Backbone.history, 'getFragment', function() { return fragment; });
+      this.model.fetch({success: success, error: failback});
+      this.model.load(success, failback);
+
+      fragment = 'data-foo';
+      Backbone.history.trigger('route');
+      expect(this.model._aborted).to.be['false'];
+      expect(this.endSpy.callCount).to.equal(1);
+
+      this.requests[0].respond(200, {}, '{}');
+
+      expect(success.callCount).to.equal(1);
+      expect(failback.callCount).to.equal(1);
+      expect(failback.calledWith(false)).to.equal(true);
+      expect(this.startSpy.callCount).to.equal(2);
+      expect(this.endSpy.callCount).to.equal(2);
 
       Backbone.History.started = started;
     });
