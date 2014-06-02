@@ -385,12 +385,9 @@ function fetchQueue(options, $super) {
   var deferred;
   if ($.Deferred) {
     deferred = $.Deferred();
-    this.fetchQueue._promise.then(function() {
-        deferred.resolve.apply(deferred, arguments);
-      },
-      function() {
-        deferred.reject.apply(deferred, arguments);
-      });
+    this.fetchQueue._promise.then(
+        _.bind(deferred.resolve, deferred),
+        _.bind(deferred.reject, deferred));
   }
 
   var fetchQueue = this.fetchQueue;

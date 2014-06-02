@@ -96,6 +96,39 @@ describe('loading', function() {
   
         server.restore();
       });
+
+      it("returns a promise and errors", function() {
+        var server = sinon.fakeServer.create();
+        var collection = new (Thorax.Collection.extend({
+          url: '/test'
+        }))();
+
+        function successHandler() {
+          throw new Error('Success called');
+        }
+        var errorSpy = this.spy();
+
+        var promise1 = collection.fetch();
+        promise1.then(successHandler, errorSpy);
+
+        var promise2 = collection.fetch();
+        promise2.then(successHandler, errorSpy);
+
+        expect(promise1).to.not.equal(promise2);
+        expect(server.requests.length).to.equal(1);
+
+        server.requests[0].respond(404, {
+          "Content-Type": "application/json"
+        }, JSON.stringify([{
+          id: 1,
+          text: "test"
+        }]));
+
+        expect(errorSpy.callCount).to.equal(2);
+        expect(errorSpy.args[0][1]).to.equal('error');
+  
+        server.restore();
+      });
     }
   });
 
