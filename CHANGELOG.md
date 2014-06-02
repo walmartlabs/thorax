@@ -2,7 +2,16 @@
 
 ## Development
 
-[Commits](https://github.com/walmartlabs/thorax/compare/v3.0.0-alpha.8...master)
+[Commits](https://github.com/walmartlabs/thorax/compare/v3.0.0-alpha.9...master)
+
+## v3.0.0-alpha.9 - June 2nd, 2014
+- [#372](https://github.com/walmartlabs/thorax/pull/372) - Isolate fetchQueue instances ([@kpdecker](https://api.github.com/users/kpdecker))
+- Use callbacks as exec flags in bindToRoute - 18f16de
+
+Compatibility notes:
+- Multiple calls to fetch and load are now treated as distinct request objects externally. This means that they may be independendently canceled by things such as bind to route, etc without impacting other external requests. Implementations may need to examine the cases where fetch vs. load is used concurrently on a given data object instance to see if their behavior still matches the desired behavior.
+
+[Commits](https://github.com/walmartlabs/thorax/compare/v3.0.0-alpha.8...v3.0.0-alpha.9)
 
 ## v3.0.0-alpha.8 - May 26th, 2014
 - Fix bindToRoute when running with lumbar loader - c1e534d
