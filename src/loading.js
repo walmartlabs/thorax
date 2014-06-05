@@ -383,14 +383,15 @@ function fetchQueue(options, $super) {
   // Create a proxy promise for this specific load call. This allows us to abort specific
   // callbacks when bindToRoute needs to kill off specific callback instances.
   var deferred;
-  if ($.Deferred) {
+  if ($.Deferred && this.fetchQueue._promise && this.fetchQueue._promise.then) {
     deferred = $.Deferred();
     this.fetchQueue._promise.then(
         _.bind(deferred.resolve, deferred),
         _.bind(deferred.reject, deferred));
   }
 
-  var fetchQueue = this.fetchQueue;
+  var self = this,
+      fetchQueue = this.fetchQueue;
   this.fetchQueue.push({
     // Individual requests can only fail individually. Success willl always occur via the
     // normal xhr path
@@ -398,6 +399,11 @@ function fetchQueue(options, $super) {
       var index = _.indexOf(fetchQueue, this);
       if (index >= 0) {
         fetchQueue.splice(index, 1);
+
+        // If we are the last of the fetchQueue entries, invalidate the queue.
+        if (!fetchQueue.length && fetchQueue === self.fetchQueue) {
+          self.fetchQueue = undefined;
+        }
       }
 
       var args = [fetchQueue._promise, 'abort'];
@@ -408,7 +414,7 @@ function fetchQueue(options, $super) {
     options: options
   });
 
-  return deferred && deferred.promise();
+  return deferred ? deferred.promise() : this.fetchQueue._promise;
 }
 
 function flushQueue(self, fetchQueue, handler) {

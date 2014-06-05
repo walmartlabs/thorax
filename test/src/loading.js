@@ -696,10 +696,43 @@ describe('loading', function() {
 
       this.requests[0].respond(200, {}, '{}');
 
+      expect(this.model._aborted).to.be['false'];
       expect(success.callCount).to.equal(0);
       expect(failback.callCount).to.equal(1);
       expect(failback.calledWith(false)).to.equal(true);
       expect(this.startSpy.callCount).to.equal(1);
+
+      Backbone.History.started = started;
+    });
+    it('preempted objects can still load on future requests', function() {
+      var started = Backbone.History.started,
+          success = this.spy(),
+          failback = this.spy();
+
+      Backbone.History.started = true;
+
+      var $sync = this.model.sync;
+      this.model.sync = function() {
+        /* NOP: We do not want to associate a request with this particular instance */
+      };
+
+      var fragment = 'data-bar';
+      this.stub(Backbone.history, 'getFragment', function() { return fragment; });
+      this.model.load(success, failback);
+
+      fragment = 'data-foo';
+      Backbone.history.trigger('route');
+      expect(this.model._aborted).to.be['true'];
+
+      success.reset();
+      failback.reset();
+
+      this.model.sync = $sync;
+      this.model.load(success, failback);
+      this.requests[0].respond(200, {}, '{}');
+
+      expect(success.callCount).to.equal(1);
+      expect(failback.callCount).to.equal(0);
 
       Backbone.History.started = started;
     });
