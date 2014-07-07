@@ -1,6 +1,6 @@
 {
   "name": "thorax",
-  "version": "3.0.0-alpha.9",
+  "version": "3.0.0-alpha.10",
   "repo": "components/thorax",
   "main": "thorax.js",
   "scripts": [
