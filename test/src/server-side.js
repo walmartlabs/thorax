@@ -1206,11 +1206,11 @@ describe('serverSide', function() {
       it('should handle nested collections', function() {
         var rootCollection1 = new Thorax.Collection([
           {id:'a', child: collection1},
-          {id:'b', child: collection1},
+          {id:'b', child: collection1}
         ]);
         var rootCollection2 = new Thorax.Collection([
           {id:'a', child: collection2},
-          {id:'b', child: collection2},
+          {id:'b', child: collection2}
         ]);
 
         var Child1 = Thorax.View.extend({
