@@ -358,6 +358,7 @@ Thorax.View = Backbone.View.extend({
   _getData: function(data) {
     return {
       view: this,
+      root: data,
       cid: _.uniqueId('t'),
       yield: function() {
         // fn is seeded by template helper passing context to data

@@ -1202,6 +1202,60 @@ describe('serverSide', function() {
           expect(view.$el.children().text()).to.equal('somethingelsesomethingelsesomethingelsesomethingelse');
         });
       });
+
+      it('should handle nested collections', function() {
+        var rootCollection1 = new Thorax.Collection([
+          {id:'a', child: collection1},
+          {id:'b', child: collection1},
+        ]);
+        var rootCollection2 = new Thorax.Collection([
+          {id:'a', child: collection2},
+          {id:'b', child: collection2},
+        ]);
+
+        var Child1 = Thorax.View.extend({
+          template: Handlebars.compile('{{#collection child}}something{{/collection}}', {trackIds: true})
+        });
+        var Child2 = Thorax.View.extend({
+          template: Handlebars.compile('{{#collection child}}somethingelse{{/collection}}', {trackIds: true})
+        });
+
+        server = new Thorax.View({
+          template: Handlebars.compile('{{collection}}', {trackIds: true}),
+          itemView: Child1,
+          collection: rootCollection2
+        });
+        view = new Thorax.View({
+          template: Handlebars.compile('{{collection}}', {trackIds: true}),
+          itemView: Child2,
+          collection: rootCollection2
+        });
+
+        registerEvents();
+        restoreView();
+        expect(_.keys(view.children).length).to.equal(1);
+
+        var collectionView = _.values(view.children)[0];
+        expect(collectionView.collection).to.equal(rootCollection2);
+        expect(_.keys(collectionView.children).length).to.equal(2);
+
+        var childView = _.values(collectionView.children)[0];
+        expect(childView.model.attributes.child).to.equal(collection2);
+        expect(_.keys(childView.children).length).to.equal(1);
+
+        var childCollectionView = _.values(childView.children)[0];
+        expect(childCollectionView.collection).to.equal(collection2);
+        expect(_.keys(childCollectionView.children).length).to.equal(0);
+        expect(childCollectionView.itemTemplate()).to.equal('somethingelse');
+
+        var viewCids = _.map(childCollectionView.$('[data-model-cid]'), function(el) {
+          return el.getAttribute('data-model-cid');
+        });
+        expect(viewCids).to.eql(collection2.map(function(model) { return model.cid; }));
+        expect(view.$el.children().text()).to.equal('somethingsomethingsomethingsomethingsomethingsomethingsomethingsomething');
+        expectEvents(1, 2, 0);
+        compareViews();
+      });
     });
 
     it('should cooperate with custom restore events', function() {

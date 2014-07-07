@@ -125,6 +125,13 @@ Thorax.CollectionView = Thorax.View.extend({
     this.$('[' + modelIdAttributeName + ']').each(function() {
       var id = this.getAttribute(modelIdAttributeName),
           model = self.collection.get(id);
+
+      // Ignore views that are deeply nested as those will be restored by their owners
+      var parent = $(this).parent();
+      if (parent.view({el: true, helper: true})[0] !== self.el) {
+        return;
+      }
+
       if (!model) {
         toRemove.push(this);
       } else {
