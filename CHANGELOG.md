@@ -2,7 +2,17 @@
 
 ## Development
 
-[Commits](https://github.com/walmartlabs/thorax/compare/v3.0.0-alpha.9...master)
+[Commits](https://github.com/walmartlabs/thorax/compare/v3.0.0-alpha.10...master)
+
+## v3.0.0-alpha.10 - July 7th, 2014
+- [#375](https://github.com/walmartlabs/thorax/pull/375) - collection.fetch success callback ([@DatenMetzgerX](https://api.github.com/users/DatenMetzgerX))
+- [#373](https://github.com/walmartlabs/thorax/pull/373) - Handle fetchQueue error for preempted requests ([@kpdecker](https://api.github.com/users/kpdecker))
+- Ensure proper restore for nested collections - 6799e57
+
+Compatibility notes:
+- `fetchQueue` promises are now proxies to the upstream XHR connection. The consequence of this is the fetch queue instance may be cancelled or otherwise errored while the upstream request continues independently.
+
+[Commits](https://github.com/walmartlabs/thorax/compare/v3.0.0-alpha.9...v3.0.0-alpha.10)
 
 ## v3.0.0-alpha.9 - June 2nd, 2014
 - [#372](https://github.com/walmartlabs/thorax/pull/372) - Isolate fetchQueue instances ([@kpdecker](https://api.github.com/users/kpdecker))
