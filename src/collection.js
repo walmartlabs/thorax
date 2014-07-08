@@ -418,7 +418,7 @@ Thorax.CollectionView = Thorax.View.extend({
     return this._collectionElement;
   },
   _lookupCollectionElement: function() {
-    var $collectionElement = this.$(this._collectionSelector);
+    var $collectionElement = this.$(this._collectionSelector).filter(filterAncestors(this, function() { return true; }));
     this._collectionElement = $collectionElement.length ? $collectionElement : this.$el;
   },
 
