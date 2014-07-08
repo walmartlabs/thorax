@@ -133,11 +133,17 @@ Thorax.CollectionView = Thorax.View.extend({
         restored++;
       }
     }));
+
+    var removeEmpty;
     this.$('[data-view-empty]').each(filterAncestors(self, function() {
-      self.restoreEmpty(this);
+      if (!self.collection.length) {
+        self.restoreEmpty(this);
+      } else {
+        removeEmpty = true;
+      }
     }));
 
-    var needsRender = (restored !== this.collection.length) || toRemove.length;
+    var needsRender = (restored !== this.collection.length) || toRemove.length || removeEmpty;
     if (needsRender && this.collection.isPopulated()) {
       // Kill off any now invalid nodes
       _.each(toRemove, function(el) {
@@ -149,18 +155,28 @@ Thorax.CollectionView = Thorax.View.extend({
         });
       });
 
-      // Render anything that we might have locally but was missed
-      var $el = this._collectionElement;
-      this.collection.each(function(model) {
-        if (!$el.find('[' + modelCidAttributeName + '="' + model.cid + '"]').length) {
-          self.appendItem(model);
+      if (removeEmpty || !this.collection.length) {
+        // Complete mismatch on expectations for empty state, etc. Rerender the entierty of the
+        // content to be safe.
+        this.renderCollection();
 
-          self.trigger('restore:fail', {
-            type: 'collection-missing',
-            model: model
-          });
-        }
-      });
+        self.trigger('restore:fail', {
+          type: removeEmpty ? 'collection-empty-found' : 'collection-empty-missing'
+        });
+      } else {
+        // Render anything that we might have locally but was missed
+        var $el = this._collectionElement;
+        this.collection.each(function(model) {
+          if (!$el.find('[' + modelCidAttributeName + '="' + model.cid + '"]').length) {
+            self.appendItem(model);
+
+            self.trigger('restore:fail', {
+              type: 'collection-missing',
+              model: model
+            });
+          }
+        });
+      }
     } else if (needsRender) {
       this._pendingRestore = true;
       return;
