@@ -240,6 +240,14 @@ function isVoidTag(tag) {
   return voidTags[tag];
 }
 
+function filterAncestors(parent, callback) {
+  return function() {
+    if ($(this).parent().view({el: true, helper: true})[0] === parent.el) {
+      return callback.call(this);
+    }
+  };
+}
+
 Thorax.Util = {
   getViewInstance: function(name, attributes) {
     var ViewClass = Thorax.Util.getViewClass(name, true);

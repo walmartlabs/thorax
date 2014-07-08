@@ -1,6 +1,6 @@
 /*global
     ServerMarshal,
-    $serverSide, createError, getOptionsData,
+    $serverSide, createError, filterAncestors, getOptionsData,
     normalizeHTMLAttributeOptions, viewHelperAttributeName
 */
 var viewPlaceholderAttributeName = 'data-view-tmp',
@@ -201,14 +201,6 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
 Thorax.View.on('restore', function() {
   var parent = this,
       context;
-
-  function filterAncestors(parent, callback) {
-    return function() {
-      if ($(this).parent().view({el: true, helper: true})[0] === parent.el) {
-        return callback.call(this);
-      }
-    };
-   }
 
   parent.$('[data-view-helper-restore][data-view-restore=true]').each(filterAncestors(parent, function() {
     var helper = Handlebars.helpers[this.getAttribute('data-view-helper-restore')],

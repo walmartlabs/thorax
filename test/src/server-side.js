@@ -1013,6 +1013,37 @@ describe('serverSide', function() {
         expectEvents(1, 0, 1);
         compareViews();
       });
+      it('should restore renderEmpty', function() {
+        var View = Thorax.View.extend({
+          template: Handlebars.compile('{{collection tag="ul" item-template="letter-item"}}')
+        });
+
+        server = new View({
+          collection: new Thorax.Collection(),
+          renderEmpty: function() {
+            return new Counter();
+          }
+        });
+        view = new View({
+          collection: new Thorax.Collection(),
+          renderEmpty: function() {
+            return new SomethingElse();
+          }
+        });
+        registerEvents();
+        restoreView();
+
+        expect(_.keys(view.children).length).to.equal(1);
+
+        var collectionView = _.values(view.children)[0];
+        expect(collectionView.collection).to.equal(view.collection);
+        expect(collectionView.itemTemplate).to.equal(Thorax.Util.getTemplate('letter-item'));
+
+        expect(_.keys(collectionView.children).length).to.equal(1);
+
+        expectEvents(1, 0, 1);
+        compareViews();
+      });
       it('should restore over non-default collection name', function() {
         var View = Thorax.View.extend({
           template: Handlebars.compile('{{collection foo tag="ul" empty-view="letter-empty" item-view="letter-item"}}', {trackIds: true})

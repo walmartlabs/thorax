@@ -1,6 +1,6 @@
 /*global
     $serverSide,
-    assignView, assignTemplate, createRegistryWrapper, dataObject, getValue,
+    assignView, assignTemplate, createRegistryWrapper, dataObject, filterAncestors, getValue,
     modelCidAttributeName, modelIdAttributeName, viewCidAttributeName
 */
 var _fetch = Backbone.Collection.prototype.fetch,
@@ -111,7 +111,7 @@ Thorax.CollectionView = Thorax.View.extend({
     }
   },
 
-  restoreCollection: function(el) {
+  restoreCollection: function() {
     // This is called as an event so we don't force render our content when there are nested
     // child views.
     var self = this,
@@ -122,15 +122,9 @@ Thorax.CollectionView = Thorax.View.extend({
     this._lookupCollectionElement();
 
     // Find any items annotated with server info and restore. Else rerender
-    this.$('[' + modelIdAttributeName + ']').each(function() {
+    this.$('[' + modelIdAttributeName + ']').each(filterAncestors(self, function() {
       var id = this.getAttribute(modelIdAttributeName),
           model = self.collection.get(id);
-
-      // Ignore views that are deeply nested as those will be restored by their owners
-      var parent = $(this).parent();
-      if (parent.view({el: true, helper: true})[0] !== self.el) {
-        return;
-      }
 
       if (!model) {
         toRemove.push(this);
@@ -138,10 +132,10 @@ Thorax.CollectionView = Thorax.View.extend({
         self.restoreItem(model, children.index(this), this);
         restored++;
       }
-    });
-    $('[data-view-empty]', el).each(function() {
+    }));
+    this.$('[data-view-empty]').each(filterAncestors(self, function() {
       self.restoreEmpty(this);
-    });
+    }));
 
     var needsRender = (restored !== this.collection.length) || toRemove.length;
     if (needsRender && this.collection.isPopulated()) {
@@ -172,7 +166,7 @@ Thorax.CollectionView = Thorax.View.extend({
       return;
     }
 
-    this.trigger('restore:collection', this, el);
+    this.trigger('restore:collection', this, this.el);
   },
 
   //appendItem(model [,index])
@@ -336,9 +330,7 @@ Thorax.CollectionView = Thorax.View.extend({
       if (this.emptyTemplate) {
         viewOptions.template = this.emptyTemplate;
       }
-      var view = Thorax.Util.getViewInstance(this.emptyView, viewOptions);
-      view.$el.attr('data-view-empty', 'true');
-      return view;
+      return Thorax.Util.getViewInstance(this.emptyView, viewOptions);
     } else {
       return this.emptyTemplate && this.renderTemplate(this.emptyTemplate);
     }
@@ -413,6 +405,9 @@ Thorax.CollectionView = Thorax.View.extend({
     // expose under Android 4.3 (at minimum)
     // https://twitter.com/kpdecker/status/422149634929082370
     var emptyContent = this.renderEmpty.call(this);
+    if (emptyContent && emptyContent.$el) {
+      emptyContent.$el.attr('data-view-empty', 'true');
+    }
     emptyContent && this.appendItem(emptyContent, 0, {
       silent: true,
       filter: false
