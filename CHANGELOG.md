@@ -2,7 +2,12 @@
 
 ## Development
 
-[Commits](https://github.com/walmartlabs/thorax/compare/v3.0.0-alpha.10...master)
+[Commits](https://github.com/walmartlabs/thorax/compare/v3.0.0-beta.1...master)
+
+## v3.0.0-beta.1 - July 7th, 2014
+- Fixup restore handling with custom renderEmpty - 630a098
+
+[Commits](https://github.com/walmartlabs/thorax/compare/v3.0.0-alpha.10...v3.0.0-beta.1)
 
 ## v3.0.0-alpha.10 - July 7th, 2014
 - [#375](https://github.com/walmartlabs/thorax/pull/375) - collection.fetch success callback ([@DatenMetzgerX](https://api.github.com/users/DatenMetzgerX))
