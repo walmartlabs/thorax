@@ -2,7 +2,12 @@
 
 ## Development
 
-[Commits](https://github.com/walmartlabs/thorax/compare/v3.0.0-beta.1...master)
+[Commits](https://github.com/walmartlabs/thorax/compare/v3.0.0-beta.2...master)
+
+## v3.0.0-beta.2 - July 8th, 2014
+- [#377](https://github.com/walmartlabs/thorax/pull/377) - Collection Restore Fixes ([@kpdecker](https://api.github.com/users/kpdecker))
+
+[Commits](https://github.com/walmartlabs/thorax/compare/v3.0.0-beta.1...v3.0.0-beta.2)
 
 ## v3.0.0-beta.1 - July 7th, 2014
 - Fixup restore handling with custom renderEmpty - 630a098
