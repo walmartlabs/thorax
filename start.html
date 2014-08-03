@@ -39,33 +39,72 @@
   <h1>Getting Started</h1>
   <div class="grid">
     <div class="getting-started-section">
-      <h2 id="hello-world">Hello World</h2>
-<p>Thorax is used to build some of the biggest Backbone applications in the world but it&#39;s easy to get started.
+      <h2 id="tutorials">Tutorials</h2>
+<h3><a href="https://github.com/walmartlabs/generator-thorax">Thorax Yeoman Generator</a></h3>
+<p>Using the Thorax Generator, you can generate a Todos example application. You can also generate a blank application and build it out to match the Todos example app. This is a great way to learn by doing.
 
 </p>
-<pre><code><span class="keyword">var</span> view = <span class="keyword">new</span> Thorax.View({
-  greeting: <span class="string">"Hello"</span>,
-  template: Handlebars.compile(<span class="string">"{{greeting}} world!"</span>)
-});
-view.appendTo(<span class="string">'body'</span>);</code></pre>
+<h3><a href="http://addyosmani.github.com/backbone-fundamentals/#thorax">Thorax in Backbone Fundamentals</a></h3>
+<p>Read an overview of the features of Thorax, as well as some of the theory behind some of the implementation details.
+
+</p>
+<h3><a href="http://addyosmani.github.com/backbone-fundamentals/#route-based-module-loading">Route Based Module Loading</a></h3>
+<p><a href="http://addyosmani.github.com/backbone-fundamentals/">Backbone Fundamentals</a> also covers <a href="http://walmartlabs.github.com/lumbar">Lumbar&#39;s</a> approach to modular application development and routing, which is used in all of the seed projects except the standalone and Rails seeds.
+
+</p>
+<h3 id="todo-mvc">TodoMVC</h3>
+<p>See the <a href="http://addyosmani.github.com/todomvc/labs/architecture-examples/thorax/">TodoMVC Thorax implementation</a> and its <a href="https://github.com/addyosmani/todomvc/tree/gh-pages/labs/architecture-examples/thorax">source code</a>. There is also a <a href="https://github.com/addyosmani/todomvc/tree/gh-pages/labs/dependency-examples/thorax_lumbar">Lumbar flavored version</a> of the implementation.
+</p>
 
     </div>
     <div class="getting-started-section">
-      <h2 id="easy-data-binding">Easy Data Binding</h2>
-<p>By default every property of your view is automatically available in the template. If a model is bound its attributes will also be made available.
+      <h2 id="resources">Resources</h2>
+<h3 id="thorax-yeoman-generator">Thorax Yeoman Generator</h3>
+<p>The <a href="https://github.com/walmartlabs/generator-thorax">Thorax Generator</a> will ask you questions before generating a new blank or predefined base project. This is the recommended way to get started.
 
 </p>
-<pre><code><span class="keyword">var</span> view = <span class="keyword">new</span> Thorax.View({
-  greeting: <span class="string">'Hello'</span>,
-  model: <span class="keyword">new</span> Thorax.Model({
-    location: <span class="string">'world!'</span>
-  }),
-  template: ...
-});</code></pre>
-<p>Then in your template:
+<p>The <a href="https://github.com/walmartlabs/generator-thorax">Thorax Generator</a> also provides it&#39;s own extensive documentation and aims to help you understand how to setup a full stack Thorax application, including a minimal node express server and deployment instructions.
 
 </p>
-<pre><code>{{greeting}} {{location}}</code></pre>
+<h3 id="bower-component">Bower component</h3>
+<p>Thorax is available as a <a href="http://bower.io/">Bower</a> component. Just run <code>bower install thorax</code> in your project.
+
+</p>
+<p>Thorax is tested against these dependencies (you can paste this in your <code>bower.json</code>:
+
+</p>
+<pre><code><span class="string">"dependencies"</span>: {
+  <span class="string">"jquery"</span>: <span class="string">"1.9.0"</span>,
+  <span class="string">"underscore"</span>: <span class="string">"1.4.4"</span>,
+  <span class="string">"zepto"</span>: <span class="string">"1.0.0"</span>,
+  <span class="string">"handlebars"</span>: <span class="string">"1.0.0"</span>,
+  <span class="string">"backbone"</span>: <span class="string">"1.0.0"</span>
+}</code></pre>
+<p>Note that either jQuery or Zepto is required, but not both.
+
+</p>
+<h3 id="cdnjs">cdnjs</h3>
+<p>Thorax is available on <a href="http://cdnjs.com/">cdnjs</a>, each build includes jQuery 1.9.0 (or Zepto 1.0.0rc1 on mobile), Backbone 0.9.9, Underscore 1.4.2 and Handlebars 1.0.0rc6.
+
+</p>
+<ul>
+<li><a href="http://cdnjs.cloudflare.com/ajax/libs/thorax/2.0.0rc6/thorax.js">Thorax</a></li>
+<li><a href="http://cdnjs.cloudflare.com/ajax/libs/thorax/2.0.0rc6/thorax.min.js">Thorax (compressed)</a></li>
+<li><a href="http://cdnjs.cloudflare.com/ajax/libs/thorax/2.0.0rc6/thorax-mobile.js">Thorax Mobile</a></li>
+<li><a href="http://cdnjs.cloudflare.com/ajax/libs/thorax/2.0.0rc6/thorax-mobile.min.js">Thorax Mobile (compressed)</a></li>
+</ul>
+<h3 id="playground">Playground</h3>
+<p>When combined with CoffeeScript small Thorax apps can be written in a single file. This is ideal for creating small test apps within <a href="http://jsfiddle.net/">JSFiddle</a>. Thorax can be selected as a framework (near the bottom of the list) in any fiddle, or you can try out any of the fiddles below:
+
+</p>
+<ul>
+<li><a href="http://jsfiddle.net/KRuPZ/">Hello World</a></li>
+<li><a href="http://jsfiddle.net/mZzhy/">Todos</a></li>
+<li><a href="http://jsfiddle.net/aveVu/">$</a></li>
+<li><a href="http://jsfiddle.net/NfkA5/">HelperView</a></li>
+<li><a href="http://jsfiddle.net/cR6D8/">LayoutView &amp; Lifecycle</a></li>
+<li><a href="http://jsfiddle.net/6sCgX/">Embedding</a></li>
+</ul>
 
     </div>
   </div>

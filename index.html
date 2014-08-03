@@ -65,26 +65,181 @@
       </button>
       <div class="grid">
         <div class="features-content clearfix">
-          <ul>
-<li>Clone the <a href="http://github.com/walmartlabs/thorax-seed">Seed Project</a> and start building your own application.</li>
-<li>Read about how Thorax works in the new <a href="http://addyosmani.github.com/backbone-fundamentals/#thorax">Backbone Fundamentals Book</a>.</li>
-<li>Install the <a href="https://chrome.google.com/webstore/detail/thorax-inspector/poioalbefcopgeaeaadelomciijaondk">Thorax Inspector</a> Chrome extension.</li>
-<li>Building something smaller? Just link the <a href="http://github.com/walmartlabs/thorax">core library</a> as a <a href="http://cdnjs.cloudflare.com/ajax/libs/thorax/2.0.0rc6/thorax.js">single file from cdnjs</a> compiled with all of its dependencies and use it anywhere or play with our <a href="http://jsfiddle.net/KRuPZ/">Hello World fiddle</a> or <a href="http://jsfiddle.net/mZzhy/">Todos fiddle</a>.</li>
-</ul>
+          <h2 id="hello-world">Hello World</h2>
+<p>Thorax is used to build some of the biggest Backbone applications in the world but it&#39;s easy to get started.
+
+</p>
+<pre><code><span class="keyword">var</span> view = <span class="keyword">new</span> Thorax.View({
+  greeting: <span class="string">"Hello"</span>,
+  template: Handlebars.compile(<span class="string">"{{greeting}} world!"</span>)
+});
+view.appendTo(<span class="string">'body'</span>);</code></pre>
+<h2 id="easy-data-binding">Easy Data Binding</h2>
+<p>By default every property of your view is automatically available in the template. If a model is bound its attributes will also be made available.
+
+</p>
+<pre><code><span class="keyword">var</span> view = <span class="keyword">new</span> Thorax.View({
+  greeting: <span class="string">'Hello'</span>,
+  model: <span class="keyword">new</span> Thorax.Model({
+    location: <span class="string">'world!'</span>
+  }),
+  template: ...
+});</code></pre>
+<p>Then in your template:
+
+</p>
+<pre><code>{{greeting}} {{location}}</code></pre>
+<h2 id="context-control">Context Control</h2>
+<p>Don&#39;t like every property in your view being available in your template, or need to modify some model attributes? Just specify a <code>context</code> method to control what your template sees:
+
+</p>
+<pre><code><span class="keyword">var</span> view = <span class="keyword">new</span> Thorax.View({
+  model: <span class="keyword">new</span> Thorax.Model({
+    greeting: <span class="string">'hello'</span>
+  }),
+  context: <span class="keyword">function</span>() {
+    <span class="keyword">return</span> {
+      greeting: <span class="keyword">this</span>.model.get(<span class="string">'greeting'</span>).toUpperCase()
+    };
+  },
+  template: ...
+});</code></pre>
+<p>Then in your template:
+
+</p>
+<pre><code>{{greeting}}</code></pre>
+<h2 id="collection-rendering">Collection Rendering</h2>
+<p>Easily render collections with the <code>collection</code> helper. Thorax will make sure that your view stays current as models in your collection are added, removed or updated.
+
+</p>
+<pre><code><span class="keyword">var</span> view = <span class="keyword">new</span> Thorax.View({
+  collection: <span class="keyword">new</span> Thorax.Collection([{
+    title: <span class="string">'Finish screencast'</span>,
+    done: <span class="literal">true</span>
+  }]),
+  template: ...
+});</code></pre>
+<p>Then in your template:
+
+</p>
+<pre><code>{{#collection tag=<span class="string">"ul"</span>}}
+  &lt;li&gt;
+    <span class="xml"><span class="tag">&lt;<span class="title">input</span> <span class="attribute">type</span>=<span class="value">"checkbox"</span> {{#<span class="attribute">done</span>}}<span class="attribute">checked</span>{{/<span class="attribute">done</span>}}
+    {{<span class="attribute">title</span>}}
+  &lt;/<span class="attribute">li</span>&gt;</span>
+{{else}}
+  <span class="tag">&lt;<span class="title">li</span>&gt;</span>No todos yet.<span class="tag">&lt;/<span class="title">li</span>&gt;</span>
+{{/collection}}</span></code></pre>
+<h2 id="j-query-and-zepto-integration">jQuery and Zepto Integration</h2>
+<p>Thorax extends the jQuery or Zepto <code>$</code> object to allow you to get a reference to the nearest bound <code>model</code>, <code>collection</code>, or <code>view</code>.
+
+</p>
+<pre><code><span class="keyword">var</span> view = <span class="keyword">new</span> Thorax.View({
+  events: {
+    <span class="string">'change input[type=checkbox]'</span>: <span class="keyword">function</span>(event) {
+      <span class="keyword">var</span> model = $(event.target).model();
+      model.set({done: event.target.checked});
+    }
+  }
+});</code></pre>
+<h2 id="event-enhancements">Event Enhancements</h2>
+<p>Thorax extends the events hash to let you listen to view events in addition to DOM events, and let&#39;s you pass a hash of <code>model</code> or <code>collection</code> events to <code>listenTo</code> when a model or collection is bound to your view.
+
+</p>
+<pre><code><span class="keyword">var</span> view = <span class="keyword">new</span> Thorax.View({
+  events: {
+    rendered: <span class="keyword">function</span>() {}
+    model: {
+      change: <span class="keyword">function</span>() {}
+    }
+  },
+  model: <span class="keyword">new</span> Thorax.Model()
+});</code></pre>
+<p>Thorax also adds inheritable events to view classes, just call <code>on</code> on any class to listen for a DOM, view, model or collection event on any view.
+
+</p>
+<pre><code>Thorax.View.on(<span class="string">'eventName'</span>, handler);</code></pre>
+<h2 id="form-handling">Form Handling</h2>
+<p>Easily capture entered form data with the <code>serialize</code> method which also provides event hooks for form validation. Models bound to the view will also automatically <code>populate</code> your forms.
+
+</p>
+<pre><code><span class="keyword">var</span> view = <span class="keyword">new</span> Thorax.View({
+  events: {
+    <span class="string">'submit form'</span>: <span class="keyword">function</span>(event) {
+      event.preventDefault();
+      <span class="keyword">var</span> attrs = <span class="keyword">this</span>.serialize();
+      <span class="keyword">this</span>.collection.add(attrs);
+    }
+  },
+  collection: <span class="keyword">new</span> Thorax.Collection()
+});</code></pre>
+<h2 id="embeddable-views">Embeddable Views</h2>
+<p>Easily embed one view within another with the <code>view</code> helper.
+
+</p>
+<pre><code><span class="keyword">var</span> view = <span class="keyword">new</span> Thorax.View({
+  child: <span class="keyword">new</span> Thorax.View(...),
+  template: ...
+});</code></pre>
+<p>Then in your template:
+
+</p>
+<pre><code>{{view child}}</code></pre>
+<h2 id="layouts-and-lifecycle">Layouts and Lifecycle</h2>
+<p><code>Thorax.LayoutView</code> provides a container to place your views, and triggers lifecycle events on views placed within them. Layouts can be embedded in other views as well.
+
+</p>
+<pre><code><span class="keyword">var</span> layout = <span class="keyword">new</span> Thorax.LayoutView();
+layout.appendTo(<span class="string">'body'</span>);
+<span class="keyword">var</span> view = <span class="keyword">new</span> Thorax.View({
+  events: {
+    ready: <span class="keyword">function</span>() {},
+    destroyed: <span class="keyword">function</span>() {}
+  }
+})
+layout.setView(view);</code></pre>
+<h2 id="server-side-rendering">Server Side Rendering</h2>
+<p>Thorax allows for rendering outside of the normal browser context using environments such as [Fruit Loops][fruit-loops] or [PhantomJS][phantomjs] to render content in the initial server response and then restore the view hierarchy on the client render. Rendering in such a manner allows for Thorax applications to expose their content for SEO purposes as well as speed up the perceived initial page load.
+
+</p>
+<p>The restore process is well suited for handling distinctions between user and public data, allowing for the server response to include only public, long cache-able, content. The client can then augment this data with any user specific data on restoration.
+
+</p>
 
         </div>
         <ul class="features-nav js-menu" data-control=".features-nav-toggle">
+          
+            <li><a href="#hello-world">Hello World</a></li>
+          
+            <li><a href="#easy-data-binding">Easy Data Binding</a></li>
+          
+            <li><a href="#context-control">Context Control</a></li>
+          
+            <li><a href="#collection-rendering">Collection Rendering</a></li>
+          
+            <li><a href="#j-query-and-zepto-integration">jQuery and Zepto Integration</a></li>
+          
+            <li><a href="#event-enhancements">Event Enhancements</a></li>
+          
+            <li><a href="#form-handling">Form Handling</a></li>
+          
+            <li><a href="#embeddable-views">Embeddable Views</a></li>
+          
+            <li><a href="#layouts-and-lifecycle">Layouts and Lifecycle</a></li>
+          
+            <li><a href="#server-side-rendering">Server Side Rendering</a></li>
           
         </ul>
       </div>
     </div>
     <div class="quick-start">
-      <h1 id="thorax">Thorax</h1>
-<p><a href="https://saucelabs.com/u/thorax"><img src="https://saucelabs.com/buildstatus/thorax" alt="Selenium Test Status"></a>
-
-</p>
-<p>An opinionated, battle tested <a href="http://backbonejs.org/">Backbone</a> + <a href="http://handlebarsjs.com/">Handlebars</a> framework to build large scale web applications.
-</p>
+      <h1 id="quick-start">Quick Start</h1>
+<ul>
+<li>Generate your application using the <a href="https://github.com/walmartlabs/generator-thorax">Thorax Yeoman Generator</a></li>
+<li>Read about how Thorax works in the new <a href="http://addyosmani.github.com/backbone-fundamentals/#thorax">Backbone Fundamentals Book</a>.</li>
+<li>Install the <a href="https://chrome.google.com/webstore/detail/thorax-inspector/poioalbefcopgeaeaadelomciijaondk">Thorax Inspector</a> Chrome extension.</li>
+<li>Building something smaller? Just link the <a href="http://github.com/walmartlabs/thorax">core library</a> as a <a href="http://cdnjs.cloudflare.com/ajax/libs/thorax/2.0.0rc6/thorax.js">single file from cdnjs</a> compiled with all of its dependencies and use it anywhere or play with our <a href="http://jsfiddle.net/KRuPZ/">Hello World fiddle</a> or <a href="http://jsfiddle.net/mZzhy/">Todos fiddle</a>.</li>
+</ul>
 
     </div>
   </div>
