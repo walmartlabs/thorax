@@ -34,41 +34,117 @@
 <div class="constrained">
 
 
-<h1 id="error-codes">Error Codes</h1>
-<h2 id="button-trigger">button-trigger</h2>
-<p><code>button</code> helper must have a method name as the first argument or a &#39;trigger&#39;, or a &#39;method&#39; attribute specified.
+<h1 id="server-rendering">Server Rendering</h1>
+<p>Server side rendering relies can be performed in any environment that supports the <code>$</code> API as well as a few core APIs used to control the page life cycle.
 
 </p>
-<h2 id="link-href">link-href</h2>
-<p><code>link</code> helper requires an href as the first argument or an <code>href</code> attribute.
+<ul>
+<li><code>$serverSide</code> Boolean flag set to true when rendering server side content.</li>
+<li><code>emit()</code> Called when the page should be sent back to the client.</li>
+<li><code>onEmit(calback)</code> Registers a <code>callback</code> which will be called just prior to the emit operation.</li>
+</ul>
+<p>[Fruit Loops][fruit-loops] provides this functionality out of the box but this can be added to other environments with relative ease.
 
 </p>
-<h2 id="collection-element-helper">collection-element-helper</h2>
-<p><code>collection-element</code> helper must be declared inside of a <code>CollectionView</code>
+<h2 id="restore-process">Restore Process</h2>
+<p>The restore process involves walking the DOM hierarchy looking for nodes that are annotated with the <code>data-view-restore</code> attribute. When such a node is found Thorax will attempt to restore based on a variety of steps discussed in the <a href="#restore-methods">Restore Methods</a> section below.
 
 </p>
-<h2 id="super-parent">super-parent</h2>
-<p>Cannot use <code>super</code> helper when parent has no name or template.
+<p>This process is kicked off by either an explicit call to <code>View.restore</code> or by calling <code>LayoutView.setView</code> on a previously restored layout view.
 
 </p>
-<h2 id="view-helper-hash-args">view-helper-hash-args</h2>
-<p>Hash arguments are not allowed in the <code>view</code> helper as templates should not introduce side effects to view instances.
+<p>The application restore process might look something like:
 
 </p>
-<h2 id="layout-element-helper">layout-element-helper</h2>
-<p><code>layout-element</code> helper must be used within a <code>LayoutView</code>.
+<pre><code><span class="keyword">var</span> appEl = $(<span class="string">'[data-view-name="application"]'</span>);
+<span class="keyword">if</span> (appEl.length) {
+  <span class="comment">// Restore the application view explicitly</span>
+  Application.restore(appEl);
+} <span class="keyword">else</span> {
+  $(<span class="string">'body'</span>).append(Application.el);
+  Application.render();
+}</code></pre>
+<p>Followed by normal controller execution, ultimately culminating in <code>setView</code> call, which will restore the rendered child.
 
 </p>
-<h2 id="mixed-fetch">mixed-fetch</h2>
-<p>Both <code>set</code> and <code>reset</code> were passed to <code>fetch</code>, must use one or the other.
+<h2 id="restore-methods">Restore Methods</h2>
+<p>There is no definitive algorithm for restoring views, instead the following heuristics are used. In the event of a mismatch the <code>restore:fail</code> event will be emitted on the candidate view with additional debugging information regarding what portion of the heuristic failed.
 
 </p>
-<h2 id="nested-render">nested-render</h2>
-<p><code>render</code> was called which triggered an event handler which in turn called <code>render</code>. Infinite recursion was halted.
+<h3 id="general-rules">General Rules</h3>
+<p>If the candidate view instance has already been rendered then the previous element will be replaced with the existing view element. This case is tracked by <code>restore:fail</code> with a type field of <code>prev-render</code>.
 
 </p>
-<h2 id="handlebars-no-data">handlebars-no-data</h2>
-<p>Handlebars template compiled without data, use: Handlebars.compile(template, {data: true})
+<p>By default restore operations are depth first recursive. This allows for restore operations to partially rerender content for the minimal number of rerender operations.
+
+</p>
+<p>Any view that is explicitly marked with <code>data-view-restore=false</code> will be rerendered on the client. This shortcircuits the tree traversal and causes all children to be rerendered as well.
+
+</p>
+<h3><code>setView</code> calls</h3>
+<p>When <code>setView</code> is called an attempt will be made to restore the view to the layout view&#39;s child element if marked for restore. This assumes that the view is a named view. Should it not be a rerender will occur.
+
+</p>
+<h3 id="helper-views">Helper Views</h3>
+<p>Elements rendered via a helper view such as <code>view</code> or <code>collection</code> will automatically be restored. This is done by saving the parameters passed to the helper view into the server marshal store. On restore the helper view will be executed in a similar manner to the initial execution, with the distinction that the <code>restore</code> method will be called after the view has initialized.
+
+</p>
+<p>When using helper views the restore might be forced to rerender if utilizing helpers that do no properly set the <code>contextPath</code> or if passed a depthed parameter, i.e. <code>{{view ../foo}}</code> as these can not be safely resolved. This is tracked via the <code>restore:fail</code> event with type <code>serialize</code> and is determined on the server-side.
+
+</p>
+<p>Additionally helpers that utilize subexpressions to resolve complex values are unable to be restored via path lookup and will force a rerender.
+
+</p>
+<h3 id="collection-views">Collection Views</h3>
+<p>Collection views follow the same restore rules as helper views but add the ability to restore nested child views.
+
+</p>
+<p>Rerender cases (additional to the helper cases):
+- Use of a block helper that has a <code>../</code> reference:
+</p>
+<pre><code class="lang-html">  {{#collection}}{{..<span class="regexp">/foo}}{{/</span>collection}}</code></pre>
+<ul>
+<li>Use of collections that do not have an <code>id</code> value.</li>
+</ul>
+<p>Note that overriding <code>renderItem</code> is allowed but discouraged as this has additional overhead vs. providing an <code>itemView</code> or <code>itemTemplate</code> value. This also applies to <code>renderEmpty</code>.
+
+
+</p>
+<h2 id="best-practices">Best Practices</h2>
+<p>In general there are a number of things that help avoid rerender cases.
+
+</p>
+<h3 id="logging">Logging</h3>
+<p>While in development mode tracking the number of times that a rerender case is triggered is vital for ensuring that the restore behavior is actually benefiting the site.
+
+</p>
+<p>This might be as simple as a global logger on the <code>restore:fail</code> event:
+
+</p>
+<pre><code class="lang-javascript">View.on(<span class="string">'restore:fail'</span>, <span class="keyword">function</span>(info) {
+  console.log(<span class="string">'restore:fail'</span>, info);
+});</code></pre>
+<h3 id="custom-restore-logic">Custom Restore Logic</h3>
+<p>It&#39;s recommended that views needing custom restore behavior do so by providing a <code>restore</code> event listener rather than overriding the <code>restore</code> method. This is due to the manner in which partial restores are implemented, delegating to the super class implementation may cause a rerender meaning any non-restored children are rerendered as well.
+
+</p>
+<p>Should a view absolutely need to prevent the default restore behavior it can override the <code>restore</code> method but it must manually remove the <code>data-view-restore</code> attribute and also perform any child traversal necessary.
+
+</p>
+<p>For most situations it should not be necessary to provide a custom restore implementation but cases that implement custom view insertion logic, i.e. calling DOM methods to insert the child view, will likely need to provide some level of custom restore logic. Ex:
+
+</p>
+<pre><code class="lang-javascript">  CustomView.on(<span class="string">'restore'</span>, <span class="keyword">function</span>() {
+    <span class="keyword">var</span> child = <span class="keyword">this</span>.$(<span class="string">'.child-view'</span>);
+    <span class="keyword">if</span> (child.length) {
+      <span class="keyword">this</span>.childView.restore(child);
+    }
+  });</code></pre>
+<h3 id="data-loading">Data Loading</h3>
+<p>Since pending fetch operations might rerender the content of a just restored view, it&#39;s recommended that the JSON content is cached in a manner that is accessible on the initial page load to avoid unnecessary rendering operations after restore. [Fruit Loops][fruit-loops] offers such a system via the <code>$serverCache</code> local variable. Should this not be possible, the thorax rendering pipeline will handle any the restore and subsequent rerender properly.
+
+</p>
+<p>Note that there are issues that might arise if a different model data source is used on the client vs. the server, a personalized vs public data source for example. When such data is loaded prior to the restore operation, it might be necessary to provide a custom restore step that checks if this data has changed and rerender as there is no clean way for Thorax to determine if a model&#39;s data has changed between the two states.
 </p>
 
     </div>
