@@ -160,14 +160,14 @@ function pushDomEvents(events) {
   domEventRegexp = new RegExp('^(nested\\s+)?(' + domEvents.join('|') + ')(?:\\s|$)');
 }
 pushDomEvents([
-    'touchstart', 'touchmove', 'touchend', 'touchcancel',
-    'mouseenter', 'mouseleave', 'mousemove', 'mousedown', 'mouseup', 'mouseover', 'mouseout',
-    'keydown', 'keyup', 'keypress',    
-    'contextmenu',
-    'click', 'dblclick',  
-    'focusin', 'focusout', 'focus', 'blur',
-    'submit', 'input', 'change',
-    'dragstart', 'drag', 'dragenter', 'dragleave', 'dragover', 'drop', 'dragend'
+  'touchstart', 'touchmove', 'touchend', 'touchcancel',
+  'mouseenter', 'mouseleave', 'mousemove', 'mousedown', 'mouseup', 'mouseover', 'mouseout',
+  'keydown', 'keyup', 'keypress',
+  'contextmenu',
+  'click', 'dblclick',
+  'focusin', 'focusout', 'focus', 'blur',
+  'submit', 'input', 'change',
+  'dragstart', 'drag', 'dragenter', 'dragleave', 'dragover', 'drop', 'dragend'
 ]);
 
 function containHandlerToCurentView(handler, current) {
