@@ -30,7 +30,7 @@
     "grunt-contrib-jshint": "~0.8.0",
     "grunt-contrib-watch": "~0.5.3",
     "grunt-mocha-phantomjs": "~0.4.3",
-    "grunt-saucelabs": "~5.0.1",
+    "grunt-saucelabs": "8.x",
     "mocha": "~1.17.1",
     "phoenix-build": "3.x",
     "semver": "~2.1.0",
