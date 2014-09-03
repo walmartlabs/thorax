@@ -1,4 +1,4 @@
-/*global $serverSide, onEmit */
+/*global $serverSide, FruitLoops */
 
 // Override uniqueId to ensure uniqueness across both the server and client
 // rendering cycles
@@ -10,7 +10,7 @@ _.uniqueId = function(prefix) {
 };
 
 if (window.$serverSide) {
-  onEmit(function() {
+  FruitLoops.onEmit(function() {
     $('body').append('<script>window._idCounter = ' + window._idCounter + ';</script>');
   });
 }

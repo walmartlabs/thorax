@@ -1,6 +1,6 @@
 /*global
-    $serverSide,
-    createErrorMessage, emit, getLayoutViewsTargetElement, getOptionsData,
+    $serverSide, FruitLoops,
+    createErrorMessage, getLayoutViewsTargetElement, getOptionsData,
     normalizeHTMLAttributeOptions, viewNameAttributeName
 */
 var layoutCidAttributeName = 'data-layout-cid';
@@ -60,7 +60,7 @@ Thorax.LayoutView = Thorax.View.extend({
         this._view = view;
         this._addChild(view);
 
-        emit();
+        FruitLoops.emit();
       } else {
         view.ensureRendered();
         options.activating = view;

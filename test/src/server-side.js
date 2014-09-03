@@ -5,7 +5,9 @@ describe('serverSide', function() {
       emit;
   beforeEach(function() {
     window.$serverSide = true;
-    window.emit = emit = this.spy();
+    window.FruitLoops = {
+      emit: emit = this.spy()
+    };
   });
   afterEach(function() {
     window.$serverSide = _serverSide;

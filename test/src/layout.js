@@ -2,13 +2,15 @@
 
 describe('layout', function() {
   var _serverSide = window.$serverSide,
-      _emit = window.emit;
+      _fruitLoops = window.FruitLoops;
   beforeEach(function() {
-    window.emit = this.spy();
+    window.FruitLoops = {
+      emit: this.spy()
+    };
   });
   afterEach(function() {
     $serverSide = _serverSide;
-    window.emit = _emit;
+    window.FruitLoops = _fruitLoops;
   });
 
   function bindCounter(view) {
@@ -115,7 +117,7 @@ describe('layout', function() {
       layout.setView(b);
       expect(layout.getView()).to.equal(b, 'layout sets view');
       expect(layout.$('[data-view-cid]')).to.be.empty();
-      expect(window.emit.calledOnce).to.be.ok();
+      expect(window.FruitLoops.emit.calledOnce).to.be.ok();
 
       //lifecycle checks
       expect(aEventCounter).to.eql({

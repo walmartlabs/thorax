@@ -1,4 +1,4 @@
-/*global $serverSide, createError, onEmit */
+/*global $serverSide, createError, FruitLoops */
 var _thoraxServerData = window._thoraxServerData || [];
 
 /*
@@ -109,7 +109,7 @@ var ServerMarshal = Thorax.ServerMarshal = {
 
 // Register a callback to output our content from the server implementation.
 if ($serverSide) {
-  onEmit(function() {
+  FruitLoops.onEmit(function() {
     $('body').append('<script>var _thoraxServerData = ' + ServerMarshal.serialize() + ';</script>');
   });
 }

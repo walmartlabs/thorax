@@ -29,7 +29,7 @@ module.exports = function(grunt) {
         page.window.expect = expect;
 
         // NOP emit so tests of that functionality don't cause early termination
-        page.window.emit = function() {};
+        page.window.FruitLoops.emit = function() {};
 
         var grep = grunt.option('grep');
         if (grep) {
@@ -57,7 +57,7 @@ module.exports = function(grunt) {
 
 function createMocha(global) {
   var mocha = new Mocha({reporter: 'dot'}),
-      emit = global.emit;
+      emit = global.FruitLoops.emit;
 
   /**
    * Override ui to ensure that the ui functions are initialized.
@@ -92,7 +92,7 @@ function createMocha(global) {
     return Mocha.prototype.run.call(mocha, function() {
       // Have to manually emit as mocha will use the process async methods rather than the
       // window's so events emit will cause early termination.
-      emit.call(global);
+      emit.call(FruitLoops);
 
       fn && fn();
     });

@@ -1370,13 +1370,11 @@ Immediately executed version of `bindSection`. The default implementation delega
 
 ## Server Rendering
 
-Server side rendering relies can be performed in any environment that supports the `$` API as well as a few core APIs used to control the page life cycle.
+Server side rendering is designed around [Fruit Loops][fruit-loops], but may be performed in any environment that supports the `$` API as well as a few core APIs used to control the page life cycle.
 
 - `$serverSide` Boolean flag set to true when rendering server side content.
-- `emit()` Called when the page should be sent back to the client.
-- `onEmit(calback)` Registers a `callback` which will be called just prior to the emit operation.
-
-[Fruit Loops][fruit-loops] provides this functionality out of the box but this can be added to other environments with relative ease.
+- `FruitLoops.emit()` Called when the page should be sent back to the client.
+- `FruitLoops.onEmit(calback)` Registers a `callback` which will be called just prior to the emit operation.
 
 ### Restore Process
 
