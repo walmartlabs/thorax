@@ -11,6 +11,7 @@
         {"name": "thorax-dep-zepto", "ignoreWarnings": true}
       ],
       "scripts": [
+        {"src": "test/lib/handlebars-reset.js", "global": true},
         {"src": "components/handlebars/handlebars.js", "ignoreWarnings": true, "global": true}
       ]
     },
@@ -31,6 +32,7 @@
         {"name": "thorax-dep-zepto", "ignoreWarnings": true, "overrides": {"backbone.js": "test/lib/backbone-1-0.js"}}
       ],
       "scripts": [
+        {"src": "test/lib/handlebars-reset.js", "global": true},
         {"src": "components/handlebars/handlebars.js", "ignoreWarnings": true, "global": true}
       ]
     },
