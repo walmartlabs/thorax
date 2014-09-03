@@ -559,7 +559,7 @@ describe('serverSide', function() {
         expect(view.child.$el.html()).to.equal('something');
         expect(view._renderCount).to.equal(1);
       });
-      it('should restore block view helper with depth', function() {
+      it('should rerender block view helper with depth', function() {
         var View = Thorax.View.extend({
           template: Handlebars.compile('{{#view child}}{{../root}}{{/view}}', {trackIds: true}),
           root: 1
@@ -569,15 +569,22 @@ describe('serverSide', function() {
           child: new Counter()
         });
         view = new View({
-          child: new SomethingElse()
+          child: new SomethingElse(),
+          root: 2
         });
-        restoreView();
+        restoreView(true, {
+          type: 'remaining',
+          view: view
+        }, {
+          type: 'serialize',
+          view: server.child
+        });
 
         expect(_.keys(view.children).length).to.equal(1);
         expect(_.values(view.children)[0]).to.equal(view.child);
         expect(server.child.$el.html()).to.equal('1');
-        expect(view.child.$el.html()).to.equal('1');
-        expect(view._renderCount).to.equal(1);
+        expect(view.child.$el.html()).to.equal('2');
+        expect(view._renderCount).to.equal(2);
       });
       it('should restore block view helper with data', function() {
         var View = Thorax.View.extend({
