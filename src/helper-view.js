@@ -195,6 +195,11 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
     }
 
     var instance = getHelperInstance(args, viewOptions, ViewClass);
+    if (!instance) {
+      // We can't do anything more, leave the element in
+      return;
+    }
+
     instance._assignCid(el.getAttribute('data-view-cid'));
     helperInit(args, instance, callback, viewOptions);
 
@@ -213,7 +218,9 @@ Thorax.View.on('restore', function() {
   parent.$('[data-view-helper-restore][data-view-restore=true]').each(filterAncestors(parent, function() {
     var helper = Handlebars.helpers[this.getAttribute('data-view-helper-restore')],
         child = helper.restore(parent, this);
-    parent._addChild(child);
+    if (child) {
+      parent._addChild(child);
+    }
   }));
 });
 
