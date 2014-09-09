@@ -111,6 +111,10 @@ Thorax.CollectionView = Thorax.View.extend({
     }
   },
 
+  restore: function(el, forceRerender) {
+    this._forceRerender = forceRerender;
+    Thorax.View.prototype.restore.call(this, el);
+  },
   restoreCollection: function() {
     // This is called as an event so we don't force render our content when there are nested
     // child views.
@@ -129,7 +133,7 @@ Thorax.CollectionView = Thorax.View.extend({
       if (!model) {
         toRemove.push(this);
       } else {
-        self.restoreItem(model, children.index(this), this);
+        self.restoreItem(model, children.index(this), this, self._forceRerender);
         restored++;
       }
     }));
@@ -137,7 +141,7 @@ Thorax.CollectionView = Thorax.View.extend({
     var removeEmpty;
     this.$('[data-view-empty]').each(filterAncestors(self, function() {
       if (!self.collection.length) {
-        self.restoreEmpty(this);
+        self.restoreEmpty(this, self._forceRerender);
       } else {
         removeEmpty = true;
       }
@@ -316,7 +320,7 @@ Thorax.CollectionView = Thorax.View.extend({
         // If we had to delay the initial restore due to the local data set being loaded, then
         // we want to resume that operation where it left off.
         this._pendingRestore = false;
-        this.restoreCollection();
+        this.restoreCollection(this._forceRerender);
       } else {
         handleChangeFromEmptyToNotEmpty.call(this);
         this.collection.forEach(function(item, i) {
@@ -351,10 +355,10 @@ Thorax.CollectionView = Thorax.View.extend({
       return this.emptyTemplate && this.renderTemplate(this.emptyTemplate);
     }
   },
-  restoreEmpty: function(el) {
+  restoreEmpty: function(el, forceRerender) {
     var child = this.renderEmpty();
 
-    child.restore(el);
+    child.restore(el, forceRerender);
     this._addChild(child);
 
     this.trigger('restore:empty', this, el);
@@ -392,7 +396,7 @@ Thorax.CollectionView = Thorax.View.extend({
       return this.renderTemplate(this.itemTemplate, this.itemContext.call(this, model, i));
     }
   },
-  restoreItem: function(model, i, el) {
+  restoreItem: function(model, i, el, forceRerender) {
     // Associate the element with the proper model.
     el.setAttribute(modelCidAttributeName, model.cid);
 
@@ -403,7 +407,7 @@ Thorax.CollectionView = Thorax.View.extend({
       // If we are passed a string assume that the upstream implementation has a consistent
       // rendering.
       if (!_.isString(child)) {
-        child.restore(el);
+        child.restore(el, forceRerender);
         this._addChild(child);
       }
     }

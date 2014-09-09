@@ -206,7 +206,7 @@ Thorax.View = Backbone.View.extend({
     this._helperOptions = undefined;
   },
 
-  restore: function(element) {
+  restore: function(element, forceRerender) {
     // Extract from $ objects if passed
     element = element[0] || element;
 
@@ -240,7 +240,7 @@ Thorax.View = Backbone.View.extend({
       });
 
       this._renderCount = 1;
-      this.trigger('restore');
+      this.trigger('restore', forceRerender);
 
       var remainingViews = this.$('[data-view-restore]'),
           rerender = _.filter(remainingViews, function(el) {
@@ -258,9 +258,12 @@ Thorax.View = Backbone.View.extend({
         });
 
         this.render();
+      } else if (forceRerender) {
+        // We have an explicit rerender that we wanted to defer until the end of the restore process
+        this.render();
       }
 
-      this.trigger('after-restore');
+      this.trigger('after-restore', forceRerender);
 
       return true;
     } else {
