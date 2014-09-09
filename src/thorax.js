@@ -260,6 +260,8 @@ Thorax.View = Backbone.View.extend({
         this.render();
       }
 
+      this.trigger('after-restore');
+
       return true;
     } else {
       this.trigger('restore:fail', {

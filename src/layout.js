@@ -95,7 +95,7 @@ Thorax.LayoutView = Thorax.View.extend({
   }
 });
 
-Thorax.LayoutView.on('restore', ensureLayoutViewsTargetElement);
+Thorax.LayoutView.on('after-restore', ensureLayoutViewsTargetElement);
 
 Handlebars.registerHelper('layout-element', function(options) {
   var view = getOptionsData(options).view;

@@ -129,6 +129,8 @@ describe('serverSide', function() {
       });
     }
     function restoreView(shouldRender, shouldFail, serverShouldFail) {
+      window.$serverSide = true;
+
       server.render();
       expectShouldFail(serverShouldFail);
       restoreFail.reset();
@@ -1358,6 +1360,66 @@ describe('serverSide', function() {
 
       view.render();
       expect(_.values(view.children)).to.eql([restored]);
+    });
+
+    describe('after-restore', function() {
+      it('should handle restore', function() {
+        var View = Thorax.View.extend({
+          template: Handlebars.compile('<div class="foo"></div>{{view child}}', {trackIds: true})
+        });
+
+        server = new View({
+          theGoodOne: new Counter(),
+          child: new Counter()
+        });
+        view = new View({
+          events: {
+            'after-restore': function() {
+              this.$('.foo').addClass('bar');
+            }
+          },
+          child: new SomethingElse()
+        });
+
+        restoreView();
+
+        expect(server.$('.foo.bar')).to.be.empty();
+        expect(view.$('.foo.bar')).to.not.be.empty();
+        expect(view._renderCount).to.equal(1);
+      });
+      it('should handle partial restore', function() {
+        var View = Thorax.View.extend({
+          template: Handlebars.compile('<div class="foo"></div>{{view (ambiguousResponse child)}}', {trackIds: true}),
+          ambiguousResponse: function(child) {
+            return child;
+          }
+        });
+
+        server = new View({
+          theGoodOne: new Counter(),
+          child: new Counter()
+        });
+        view = new View({
+          events: {
+            'after-restore': function() {
+              this.$('.foo').addClass('bar');
+            }
+          },
+          child: new SomethingElse()
+        });
+
+        restoreView(true, {
+          type: 'remaining',
+          view: view
+        }, {
+          type: 'serialize',
+          view: server.child
+        });
+
+        expect(server.$('.foo.bar')).to.be.empty();
+        expect(view.$('.foo.bar')).to.not.be.empty();
+        expect(view._renderCount).to.equal(2);
+      });
     });
   });
 });

@@ -1223,9 +1223,13 @@ Triggered on a `CollectionView` or the view calling the `collection` helper ever
 
 Triggered on a `CollectionView` or the view calling the `collection` helper every time the `emptyView` or `emptyTemplate` is rendered in the `CollectionView`.
 
-### restore *restore(element)*
+### restore *restore()*
 
-Triggered when the view is being restored to the current element. Listeners should be aware that it's possible for a rerender to occur while the restore event has triggered and should be able to handle this case gracefully.
+Triggered when the view is being restored to the current element. Listeners should be aware that it's possible for a rerender to occur while the restore event has triggered and should be able to handle this case gracefully. `after-restore` may provide a better option for cases that need to apply start after any potential render options.
+
+### after-restore *after-restore()*
+
+Triggered when the view has been restored and possibly rerendered to the current element.
 
 ### restore:collection *restore:collection(collectionView, el)*
 
