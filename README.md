@@ -295,9 +295,9 @@ Renders the view's `template` updating the view's `el` with the result, triggeri
 
     view.render('custom html');
 
-### restore *view.restore(element)*
+### restore *view.restore(element, forceRestore)*
 
-Attempts to restore a given view with the passed `element`. Should this fail the view will be rerendered automatically. See [Server Rendering](#server-rendering) for further discussion.
+Attempts to restore a given view with the passed `element`. Should this fail the view will be rerendered automatically. Rerendering may befored by setting the `forceRestore` parameter to truthy. See [Server Rendering](#server-rendering) for further discussion.
 
 ### context *view.context()*
 
