@@ -76,7 +76,6 @@ module.exports = function(grunt) {
             {browserName: 'firefox'},
             {browserName: 'safari', version: 7, platform: 'OS X 10.9'},
             {browserName: 'internet explorer', version: 11, platform: 'Windows 8.1'},
-            {browserName: 'internet explorer', version: 9, platform: 'Windows 7'},
             {browserName: 'internet explorer', version: 8, platform: 'XP'}
           ]
         }
@@ -85,15 +84,12 @@ module.exports = function(grunt) {
         options: {
           tags: ['zepto'],
           urls: [
-            'http://localhost:9998/zepto/test.html',
-            'http://localhost:9998/zepto-backbone-1-0/test.html'
+            'http://localhost:9998/zepto/test.html'
           ],
           browsers: [
             {browserName: 'chrome'},
             {browserName: 'firefox'},
-            {browserName: 'safari', version: 7, platform: 'OS X 10.9'},
-            {browserName: 'internet explorer', version: 11, platform: 'Windows 8.1'},
-            {browserName: 'internet explorer', version: 10, platform: 'Windows 8'},
+            {browserName: 'internet explorer', version: 11, platform: 'Windows 8.1'}
           ]
         }
       }
