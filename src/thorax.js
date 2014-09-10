@@ -242,25 +242,28 @@ Thorax.View = Backbone.View.extend({
       this._renderCount = 1;
       this.trigger('restore', forceRerender);
 
-      var remainingViews = forceRerender ? [] : this.$('[data-view-restore]'),
-          rerender = _.filter(remainingViews, function(el) {
-            // Ignore views that are deeply nested or views that are under a layout element
-            // when checking to see if we need to rerender.
-            var parent = $(el).parent();
-            return !parent.attr('data-layout-cid') && (parent.view({el: true, helper: true})[0] === element);
-          });
-      if (rerender.length) {
-        this.trigger('restore:fail', {
-          type: 'remaining',
-          view: this,
-          element: element,
-          rerendered: rerender
-        });
-
-        this.render();
-      } else if (forceRerender) {
+      if (forceRerender) {
         // We have an explicit rerender that we wanted to defer until the end of the restore process
         this.render();
+      } else {
+        // Check to see if we are in a partial restore situation
+        var remainingViews = this.$('[data-view-restore]'),
+            rerender = _.filter(remainingViews, function(el) {
+              // Ignore views that are deeply nested or views that are under a layout element
+              // when checking to see if we need to rerender.
+              var parent = $(el).parent();
+              return !parent.attr('data-layout-cid') && (parent.view({el: true, helper: true})[0] === element);
+            });
+        if (rerender.length) {
+          this.trigger('restore:fail', {
+            type: 'remaining',
+            view: this,
+            element: element,
+            rerendered: rerender
+          });
+
+          this.render();
+        }
       }
 
       this.trigger('after-restore', forceRerender);
