@@ -18,6 +18,12 @@ Thorax.LayoutView = Thorax.View.extend({
     }
     return response;
   },
+  restore: function(element, forceRerender) {
+    // Layout views don't have a traditional forced rerender cycle so we want to manage this
+    // ourselves.
+    this._forceRerender = forceRerender;
+    Thorax.View.prototype.restore.call(this, element);
+  },
   setView: function(view, options) {
     options = _.extend({
       scroll: true
@@ -30,7 +36,7 @@ Thorax.LayoutView = Thorax.View.extend({
     if (!$serverSide && !this.hasBeenSet) {
       var existing = this.$('[' + viewNameAttributeName + '="' + view.name + '"]')[0];
       if (existing) {
-        view.restore(existing);
+        view.restore(existing, this._forceRerender);
       } else {
         $(this._layoutViewEl).empty();
       }
@@ -95,7 +101,7 @@ Thorax.LayoutView = Thorax.View.extend({
   }
 });
 
-Thorax.LayoutView.on('restore', ensureLayoutViewsTargetElement);
+Thorax.LayoutView.on('after-restore', ensureLayoutViewsTargetElement);
 
 Handlebars.registerHelper('layout-element', function(options) {
   var view = getOptionsData(options).view;

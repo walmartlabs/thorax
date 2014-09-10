@@ -163,7 +163,7 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
   });
   var helper = Handlebars.helpers[name];
 
-  helper.restore = function(declaringView, el) {
+  helper.restore = function(declaringView, el, forceRerender) {
     var context = declaringView.context(),
         args = ServerMarshal.load(el, 'args', declaringView, context) || [],
         attrs = ServerMarshal.load(el, 'attrs', declaringView, context) || {};
@@ -203,7 +203,7 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
     instance._assignCid(el.getAttribute('data-view-cid'));
     helperInit(args, instance, callback, viewOptions);
 
-    instance.restore(el);
+    instance.restore(el, forceRerender);
 
     return instance;
   };
@@ -211,13 +211,13 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
   return helper;
 };
 
-Thorax.View.on('restore', function() {
+Thorax.View.on('restore', function(forceRerender) {
   var parent = this,
       context;
 
   parent.$('[data-view-helper-restore][data-view-restore=true]').each(filterAncestors(parent, function() {
     var helper = Handlebars.helpers[this.getAttribute('data-view-helper-restore')],
-        child = helper.restore(parent, this);
+        child = helper.restore(parent, this, forceRerender);
     if (child) {
       parent._addChild(child);
     }

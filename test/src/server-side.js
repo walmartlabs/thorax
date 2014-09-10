@@ -129,6 +129,8 @@ describe('serverSide', function() {
       });
     }
     function restoreView(shouldRender, shouldFail, serverShouldFail) {
+      window.$serverSide = true;
+
       server.render();
       expectShouldFail(serverShouldFail);
       restoreFail.reset();
@@ -139,7 +141,7 @@ describe('serverSide', function() {
       window.$serverSide = false;
 
       render.reset();
-      view.restore(el);
+      view.restore(el, shouldRender === 'forced');
       expect(render.called).to.equal(!!shouldRender);
       expectShouldFail(shouldFail);
     }
@@ -322,6 +324,17 @@ describe('serverSide', function() {
         expect(layout._view).to.equal(view);
         expect(layout.$el.children().length).to.equal(1);
         expect(layout.$el.text()).to.equal('winning');
+      });
+      it('should rerenderd matching views on forced', function() {
+        var $el = $('<div data-view-name="winning" data-view-restore="true">winning</div>');
+        layout.$el.append($el);
+        layout.restore(layout.el, true);
+
+        layout.setView(view);
+        expect(view.$el.html()).to.equal('not winning');
+        expect(layout._view).to.equal(view);
+        expect(layout.$el.children().length).to.equal(1);
+        expect(layout.$el.text()).to.equal('not winning');
       });
       it('should rerender non-matching views', function() {
         var $el = $('<div data-view-name="non-winning" data-view-restore="true">winning</div>');
@@ -949,6 +962,40 @@ describe('serverSide', function() {
         expectEvents(1, 4, 0);
         compareViews();
       });
+      it('should force restore renderItem views', function() {
+        var View = Thorax.View.extend({
+          template: Handlebars.compile('{{collection}}')
+        });
+        server = new View({
+          collection: collection1,
+          renderItem: function() {
+            return new Counter();
+          }
+        });
+        view = new View({
+          collection: collection2,
+          renderItem: function() {
+            return new SomethingElse();
+          }
+        });
+        registerEvents();
+        restoreView('forced');
+
+        expect(_.keys(view.children).length).to.equal(1);
+
+        var collectionView = _.values(view.children)[0];
+        expect(_.keys(collectionView.children).length).to.equal(4);
+        expect(_.every(collectionView.children, function(value) {
+          return value._name === 'somethingelse';
+        })).to.be(true);
+
+        var viewCids = _.map(collectionView.$('[data-model-cid]'), function(el) {
+          return el.getAttribute('data-model-cid');
+        });
+        expect(viewCids).to.eql(collection2.map(function(model) { return model.cid; }));
+        expectEvents(1, 4, 0);
+        expect(view.$el.text()).to.equal('somethingelsesomethingelsesomethingelsesomethingelse');
+      });
       it('should restore renderItem strings', function() {
         var View = Thorax.View.extend({
           template: Handlebars.compile('{{collection}}')
@@ -1358,6 +1405,94 @@ describe('serverSide', function() {
 
       view.render();
       expect(_.values(view.children)).to.eql([restored]);
+    });
+
+    it('should handle forced restore', function() {
+      var View = Thorax.View.extend({
+        template: Handlebars.compile('<div class="foo"></div>{{view child}}', {trackIds: true})
+      });
+
+      server = new View({
+        theGoodOne: new Counter(),
+        child: new Counter()
+      });
+      view = new View({
+        events: {
+          'after-restore': function() {
+            this.$('.foo').addClass('bar');
+          }
+        },
+        child: new SomethingElse()
+      });
+
+      restoreView('forced');
+
+      expect(server.$('.foo.bar')).to.be.empty();
+      expect(view.$('.foo.bar')).to.not.be.empty();
+
+      var restored = _.values(view.children)[0];
+      expect(restored.$el.html()).to.equal('somethingelse');
+      expect(view._renderCount).to.equal(2);
+    });
+
+    describe('after-restore', function() {
+      it('should handle restore', function() {
+        var View = Thorax.View.extend({
+          template: Handlebars.compile('<div class="foo"></div>{{view child}}', {trackIds: true})
+        });
+
+        server = new View({
+          theGoodOne: new Counter(),
+          child: new Counter()
+        });
+        view = new View({
+          events: {
+            'after-restore': function() {
+              this.$('.foo').addClass('bar');
+            }
+          },
+          child: new SomethingElse()
+        });
+
+        restoreView();
+
+        expect(server.$('.foo.bar')).to.be.empty();
+        expect(view.$('.foo.bar')).to.not.be.empty();
+        expect(view._renderCount).to.equal(1);
+      });
+      it('should handle partial restore', function() {
+        var View = Thorax.View.extend({
+          template: Handlebars.compile('<div class="foo"></div>{{view (ambiguousResponse child)}}', {trackIds: true}),
+          ambiguousResponse: function(child) {
+            return child;
+          }
+        });
+
+        server = new View({
+          theGoodOne: new Counter(),
+          child: new Counter()
+        });
+        view = new View({
+          events: {
+            'after-restore': function() {
+              this.$('.foo').addClass('bar');
+            }
+          },
+          child: new SomethingElse()
+        });
+
+        restoreView(true, {
+          type: 'remaining',
+          view: view
+        }, {
+          type: 'serialize',
+          view: server.child
+        });
+
+        expect(server.$('.foo.bar')).to.be.empty();
+        expect(view.$('.foo.bar')).to.not.be.empty();
+        expect(view._renderCount).to.equal(2);
+      });
     });
   });
 });
