@@ -242,7 +242,7 @@ Thorax.View = Backbone.View.extend({
       this._renderCount = 1;
       this.trigger('restore', forceRerender);
 
-      var remainingViews = this.$('[data-view-restore]'),
+      var remainingViews = forceRerender ? [] : this.$('[data-view-restore]'),
           rerender = _.filter(remainingViews, function(el) {
             // Ignore views that are deeply nested or views that are under a layout element
             // when checking to see if we need to rerender.
