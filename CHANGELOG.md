@@ -2,7 +2,15 @@
 
 ## Development
 
-[Commits](https://github.com/walmartlabs/thorax/compare/v3.0.0-beta.2...master)
+[Commits](https://github.com/walmartlabs/thorax/compare/v3.0.0-beta.3...master)
+
+## v3.0.0-beta.3 - September 10th, 2014
+- [#382](https://github.com/walmartlabs/thorax/pull/382) - Update DOM events ([@loun4](https://api.github.com/users/loun4))
+- [#383](https://github.com/walmartlabs/thorax/pull/383) - Allow forced render mode for restore operations ([@kpdecker](https://api.github.com/users/kpdecker))
+- Safely handle missing view helpers on restore - 2009cd2
+- Update to use FruitLoops API object - 5253fd1
+
+[Commits](https://github.com/walmartlabs/thorax/compare/v3.0.0-beta.2...v3.0.0-beta.3)
 
 ## v3.0.0-beta.2 - July 8th, 2014
 - [#377](https://github.com/walmartlabs/thorax/pull/377) - Collection Restore Fixes ([@kpdecker](https://api.github.com/users/kpdecker))
