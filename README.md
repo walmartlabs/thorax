@@ -295,9 +295,9 @@ Renders the view's `template` updating the view's `el` with the result, triggeri
 
     view.render('custom html');
 
-### restore *view.restore(element, forceRestore)*
+### restore *view.restore(element, forceRerender)*
 
-Attempts to restore a given view with the passed `element`. Should this fail the view will be rerendered automatically. Rerendering may befored by setting the `forceRestore` parameter to truthy. See [Server Rendering](#server-rendering) for further discussion.
+Attempts to restore a given view with the passed `element`. Should this fail the view will be rerendered automatically. Rerendering may be forced by setting the `forceRerender` parameter to truthy. See [Server Rendering](#server-rendering) for further discussion.
 
 ### context *view.context()*
 
@@ -1223,13 +1223,13 @@ Triggered on a `CollectionView` or the view calling the `collection` helper ever
 
 Triggered on a `CollectionView` or the view calling the `collection` helper every time the `emptyView` or `emptyTemplate` is rendered in the `CollectionView`.
 
-### restore *restore()*
+### restore *restore(forceRerender)*
 
-Triggered when the view is being restored to the current element. Listeners should be aware that it's possible for a rerender to occur while the restore event has triggered and should be able to handle this case gracefully. `after-restore` may provide a better option for cases that need to apply start after any potential render options.
+Triggered when the view is being restored to the current element. Listeners should be aware that it's possible for a rerender to occur while the restore event has triggered and should be able to handle this case gracefully. `after-restore` may provide a better option for cases that need to apply DOM changes after any potential render operations. If the current restore process will force a rerender then the `forceRerender` parameter will be truthy.
 
 ### after-restore *after-restore()*
 
-Triggered when the view has been restored and possibly rerendered to the current element.
+Triggered when the view has been restored and possibly rerendered to the current element. If the current restore process will force a rerender then the `forceRerender` parameter will be truthy.
 
 ### restore:collection *restore:collection(collectionView, el)*
 
