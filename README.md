@@ -621,6 +621,10 @@ A template name or template function to use when rendering each model. If using 
 
 A view class to be initialized for each item. Can be used in conjunction with `itemTemplate`.
 
+### itemAttributes *view.itemAttributes*
+
+Attributes that will be passed to the constructor of each item. Can be used in conjunction with `itemView`.
+
 ### itemContext *view.itemContext(model, index)*
 
 A function in the declaring view to specify the context for an `itemTemplate`, receives model and index as arguments. `itemContext` will not be used if an `itemView` is specified as the `itemView`'s own `context` method will instead be used.
@@ -1049,6 +1053,7 @@ When rendering `this.collection` many properties will be forwarded from the view
 - `itemView`
 - `itemContext`
 - `itemFilter`
+- `itemAttributes`
 - `emptyTemplate`
 - `emptyView`
 - `loadingTemplate`

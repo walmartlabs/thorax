@@ -388,7 +388,13 @@ Thorax.CollectionView = Thorax.View.extend({
       if (this.itemTemplate) {
         viewOptions.template = this.itemTemplate;
       }
-      return Thorax.Util.getViewInstance(this.itemView, viewOptions);
+      if (!this.itemAttributes) {
+          this.itemAttributes = {};
+      }
+      
+      var itemAttributes = _.defaults(this.itemAttributes, viewOptions);
+      
+      return Thorax.Util.getViewInstance(this.itemView, itemAttributes);
     } else {
       // Using call here to avoid v8 prototype inline optimization bug that helper views
       // expose under Android 4.3 (at minimum)
