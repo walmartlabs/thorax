@@ -392,7 +392,7 @@ Thorax.CollectionView = Thorax.View.extend({
           this.itemAttributes = {};
       }
       
-      var itemAttributes = _.defaults(this.itemAttributes, viewOptions);
+      var itemAttributes = _.extend(this.itemAttributes, viewOptions);
       
       return Thorax.Util.getViewInstance(this.itemView, itemAttributes);
     } else {
