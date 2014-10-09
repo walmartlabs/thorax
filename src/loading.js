@@ -297,10 +297,10 @@ function bindToRoute(callback, failback) {
   return res;
 }
 
-function loadData(callback, failback, options) {
-  if (this.isPopulated()) {
+function loadData(dataObj, callback, failback, options) {
+  if (dataObj.isPopulated()) {
     // Defer here to maintain async callback behavior for all loading cases
-    return _.defer(callback, this);
+    return _.defer(callback, dataObj);
   }
 
   if (arguments.length === 2 && !_.isFunction(failback) && _.isObject(failback)) {
@@ -308,7 +308,7 @@ function loadData(callback, failback, options) {
     failback = false;
   }
 
-  var self = this,
+  var self = dataObj,
       routeChanged = false,
       successCallback = bindToRoute(_.bind(callback, self), function() {
         routeChanged = true;
@@ -327,7 +327,7 @@ function loadData(callback, failback, options) {
       }),
       queueEntry;
 
-  this.fetch(_.defaults({
+  dataObj.fetch(_.defaults({
     success: successCallback,
     error: function() {
       successCallback.cancel();
@@ -337,41 +337,41 @@ function loadData(callback, failback, options) {
     }
   }, options));
 
-  queueEntry = _.last(this.fetchQueue);
+  queueEntry = _.last(dataObj.fetchQueue);
 }
 
-function fetchQueue(options, $super) {
+function fetchQueue(dataObj, options, $super) {
   if (options.resetQueue) {
     // WARN: Should ensure that loaders are protected from out of band data
     //    when using this option
-    this.fetchQueue = undefined;
-  } else if (this.fetchQueue) {
+    dataObj.fetchQueue = undefined;
+  } else if (dataObj.fetchQueue) {
     // concurrent set/reset fetch events are not advised
-    var reset = (this.fetchQueue[0].options || {}).reset;
+    var reset = (dataObj.fetchQueue[0].options || {}).reset;
     if (reset !== options.reset) {
       // fetch with concurrent set & reset not allowed
       throw new Error(createErrorMessage('mixed-fetch'));
     }
   }
 
-  if (!this.fetchQueue) {
+  if (!dataObj.fetchQueue) {
     // Kick off the request
-    this.fetchQueue = [];
+    dataObj.fetchQueue = [];
     var requestOptions = _.defaults({
-      success: flushQueue(this, this.fetchQueue, 'success'),
-      error: flushQueue(this, this.fetchQueue, 'error'),
-      complete: flushQueue(this, this.fetchQueue, 'complete')
+      success: flushQueue(dataObj, dataObj.fetchQueue, 'success'),
+      error: flushQueue(dataObj, dataObj.fetchQueue, 'error'),
+      complete: flushQueue(dataObj, dataObj.fetchQueue, 'complete')
     }, options);
 
     // Handle callers that do not pass in a super class and wish to implement their own
     // fetch behavior
     if ($super) {
-      var promise = $super.call(this, requestOptions);
-      if (this.fetchQueue) {
+      var promise = $super.call(dataObj, requestOptions);
+      if (dataObj.fetchQueue) {
         // ensure the fetchQueue has not been cleared out - https://github.com/walmartlabs/thorax/issues/304
         // This can occur in some environments if the request fails sync to this call, causing the 
         // error handler to clear out the fetchQueue before we get to this point.
-        this.fetchQueue._promise = promise;
+        dataObj.fetchQueue._promise = promise;
       } else {
         return;
       }
@@ -383,16 +383,15 @@ function fetchQueue(options, $super) {
   // Create a proxy promise for this specific load call. This allows us to abort specific
   // callbacks when bindToRoute needs to kill off specific callback instances.
   var deferred;
-  if ($.Deferred && this.fetchQueue._promise && this.fetchQueue._promise.then) {
+  if ($.Deferred && dataObj.fetchQueue._promise && dataObj.fetchQueue._promise.then) {
     deferred = $.Deferred();
-    this.fetchQueue._promise.then(
+    dataObj.fetchQueue._promise.then(
         _.bind(deferred.resolve, deferred),
         _.bind(deferred.reject, deferred));
   }
 
-  var self = this,
-      fetchQueue = this.fetchQueue;
-  this.fetchQueue.push({
+  var fetchQueue = dataObj.fetchQueue;
+  dataObj.fetchQueue.push({
     // Individual requests can only fail individually. Success willl always occur via the
     // normal xhr path
     aborted: function() {
@@ -401,8 +400,8 @@ function fetchQueue(options, $super) {
         fetchQueue.splice(index, 1);
 
         // If we are the last of the fetchQueue entries, invalidate the queue.
-        if (!fetchQueue.length && fetchQueue === self.fetchQueue) {
-          self.fetchQueue = undefined;
+        if (!fetchQueue.length && fetchQueue === dataObj.fetchQueue) {
+          dataObj.fetchQueue = undefined;
         }
       }
 
@@ -414,7 +413,7 @@ function fetchQueue(options, $super) {
     options: options
   });
 
-  return deferred ? deferred.promise() : this.fetchQueue._promise;
+  return deferred ? deferred.promise() : dataObj.fetchQueue._promise;
 }
 
 function flushQueue(self, fetchQueue, handler) {
@@ -473,7 +472,7 @@ _.each(klasses, function(DataClass) {
         self.loadStart(undefined, options.background);
       }
 
-      return fetchQueue.call(this, options || {}, $fetch);
+      return fetchQueue(this, options || {}, $fetch);
     },
 
     load: function(callback, failback, options) {
@@ -494,7 +493,7 @@ _.each(klasses, function(DataClass) {
         }
       }
 
-      loadData.call(this, callback, failback, options);
+      loadData(this, callback, failback, options);
     }
   });
 });
@@ -516,20 +515,20 @@ Thorax.HelperView.prototype._modifyDataObjectOptions = Thorax.CollectionHelperVi
   return options;
 };
 
-inheritVars.collection.loading = function() {
-  var loadingView = this.loadingView,
-      loadingTemplate = this.loadingTemplate,
-      loadingPlacement = this.loadingPlacement;
+inheritVars.collection.loading = function(view) {
+  var loadingView = view.loadingView,
+      loadingTemplate = view.loadingTemplate,
+      loadingPlacement = view.loadingPlacement;
   //add "loading-view" and "loading-template" options to collection helper
   if (loadingView || loadingTemplate) {
-    var callback = Thorax.loadHandler(_.bind(function() {
+    var callback = Thorax.loadHandler(function() {
       var item;
-      if (this.collection.length === 0) {
-        this.$el.empty();
+      if (view.collection.length === 0) {
+        view.$el.empty();
       }
       if (loadingView) {
         var instance = Thorax.Util.getViewInstance(loadingView);
-        this._addChild(instance);
+        view._addChild(instance);
         if (loadingTemplate) {
           instance.render(loadingTemplate);
         } else {
@@ -537,20 +536,20 @@ inheritVars.collection.loading = function() {
         }
         item = instance;
       } else {
-        item = this.renderTemplate(loadingTemplate);
+        item = view.renderTemplate(loadingTemplate);
       }
       var index = loadingPlacement
-        ? loadingPlacement.call(this)
-        : this.collection.length
+        ? loadingPlacement.call(view)
+        : view.collection.length
       ;
-      this.appendItem(item, index);
-      this.$el.children().eq(index).attr('data-loading-element', this.collection.cid);
-    }, this), _.bind(function() {
-      this.$el.find('[data-loading-element="' + this.collection.cid + '"]').remove();
-    }, this),
-    this.collection);
+      view.appendItem(item, index);
+      view.$el.children().eq(index).attr('data-loading-element', view.collection.cid);
+    }, function() {
+      view.$el.find('[data-loading-element="' + view.collection.cid + '"]').remove();
+    },
+    view.collection);
 
-    this.listenTo(this.collection, 'load:start', callback);
+    view.listenTo(view.collection, 'load:start', callback);
   }
 };
 

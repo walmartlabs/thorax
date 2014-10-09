@@ -5,12 +5,11 @@ var _on = Thorax.View.prototype.on;
 inheritVars.event = {
   name: '_events',
 
-  configure: function() {
-    var self = this;
-    walkInheritTree(this.constructor, '_events', true, function(event) {
-      self.on.apply(self, event);
+  configure: function(self) {
+    walkInheritTree(self.constructor, '_events', true, function(event) {
+      self.on.call(self, event[0], event[1]);
     });
-    walkInheritTree(this, 'events', false, function(handler, eventName) {
+    walkInheritTree(self, 'events', false, function(handler, eventName) {
       self.on(eventName, handler, self);
     });
   }
@@ -59,7 +58,7 @@ _.extend(Thorax.View.prototype, {
       //accept on("rendered", callback, context)
       //accept on("click a", callback, context)
       _.each((_.isArray(callback) ? callback : [callback]), function(callback) {
-        var params = eventParamsFromEventItem.call(this, eventName, callback, context || this);
+        var params = eventParamsFromEventItem(this, eventName, callback, context || this);
         if (params.type === 'DOM') {
           // Avoid overhead of handling DOM events on the server
           if ($serverSide) {
@@ -108,7 +107,7 @@ _.extend(Thorax.View.prototype, {
       return;
     }
 
-    var boundHandler = bindEventHandler.call(this, params.type + '-event:', params);
+    var boundHandler = bindEventHandler(this, params.type + '-event:', params);
 
     if (params.type === 'view') {
       // If we have our context set to an outside view then listen rather than directly bind so
@@ -182,16 +181,16 @@ function containHandlerToCurentView(handler, current) {
   };
 }
 
-function bindEventHandler(eventName, params) {
+function bindEventHandler(view, eventName, params) {
   eventName += params.originalName;
 
   var callback = params.handler,
-      method = _.isFunction(callback) ? callback : this[callback];
+      method = typeof callback == 'string' ? view[callback] : callback;
   if (!method) {
-    throw new Error('Event "' + callback + '" does not exist ' + (this.name || this.cid) + ':' + eventName);
+    throw new Error('Event "' + callback + '" does not exist ' + (view.name || view.cid) + ':' + eventName);
   }
 
-  var context = params.context || this,
+  var context = params.context || view,
       ret = Thorax.bindSection(
         'thorax-event',
         {view: context.name || context.cid, eventName: eventName},
@@ -204,10 +203,10 @@ function bindEventHandler(eventName, params) {
   return ret;
 }
 
-function eventParamsFromEventItem(name, handler, context) {
+function eventParamsFromEventItem(view, name, handler, context) {
   var params = {
     originalName: name,
-    handler: _.isString(handler) ? this[handler] : handler
+    handler: typeof handler == 'string' ? view[handler] : handler
   };
   if (name.match(domEventRegexp)) {
     var match = eventSplitter.exec(name);

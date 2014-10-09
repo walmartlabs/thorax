@@ -3,18 +3,18 @@
 inheritVars.model.defaultOptions.populate = true;
 
 var oldModelChange = inheritVars.model.change;
-inheritVars.model.change = function(model, options) {
-  this._isChanging = true;
-  oldModelChange.apply(this, arguments);
-  this._isChanging = false;
+inheritVars.model.change = function(view, model, options) {
+  view._isChanging = true;
+  oldModelChange.apply(view, arguments);
+  view._isChanging = false;
 
   if (options && options.serializing) {
     return;
   }
 
-  var populate = populateOptions(this);
-  if (this._renderCount && populate) {
-    this.populate(!populate.context && this.model.attributes, populate);
+  var populate = populateOptions(view);
+  if (view._renderCount && populate) {
+    view.populate(!populate.context && view.model.attributes, populate);
   }
 };
 
@@ -90,7 +90,10 @@ _.extend(Thorax.View.prototype, {
       }
     }
 
-    callback && callback.call(this, attributes, _.bind(resetSubmitState, this));
+    var self = this;
+    callback && callback.call(this, attributes, function() {
+      resetSubmitState(self);
+    });
     return attributes;
   },
 
@@ -218,14 +221,14 @@ if (!$serverSide) {
     error: onErrorOrInvalidData,
     deactivated: function() {
       if (this.$el) {
-        resetSubmitState.call(this);
+        resetSubmitState(this);
       }
     }
   });
 }
 
 function onErrorOrInvalidData () {
-  resetSubmitState.call(this);
+  resetSubmitState(this);
 
   // If we errored with a model we want to reset the content but leave the UI
   // intact. If the user updates the data and serializes any overwritten data
@@ -280,9 +283,9 @@ function objectAndKeyFromAttributesAndName(attributes, name, options, callback) 
   callback(object, key);
 }
 
-function resetSubmitState() {
-  this.$('form').removeAttr('data-submit-wait');
-  this.$el.removeAttr('data-submit-wait');
+function resetSubmitState(view) {
+  view.$('form').removeAttr('data-submit-wait');
+  view.$el.removeAttr('data-submit-wait');
 }
 
 function populateOptions(view) {

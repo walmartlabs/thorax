@@ -82,7 +82,7 @@ Thorax.View = Backbone.View.extend({
     delete this._constructorArg;
     _.each(inheritVars, function(obj) {
       if (obj.ctor) {
-        obj.ctor.call(this, response);
+        obj.ctor(this, response);
       }
     }, this);
     return response;
@@ -97,7 +97,7 @@ Thorax.View = Backbone.View.extend({
   // for Backwards compatibility with 1.0 and earlier
   _configure: function() {},
   _ensureElement: function () {
-    configureView.call(this);
+    configureView(this);
 
     if (!$serverSide && this.el) {
       var $el = $(_.result(this, 'el'));
@@ -110,14 +110,13 @@ Thorax.View = Backbone.View.extend({
   },
 
 
-  setElement : function(element) {
+  setElement : function(element, delegate) {
     var $element = $(element),
         existingCid = $element.attr('data-view-cid');
     if (existingCid) {
       this._assignCid(existingCid);
     }
-
-    var response = Backbone.View.prototype.setElement.apply(this, arguments);
+    var response = Backbone.View.prototype.setElement.call(this, $element, delegate);
 
     // Use a hash here to avoid multiple DOM operations
     var attr = {'data-view-cid': this.cid};
@@ -235,7 +234,7 @@ Thorax.View = Backbone.View.extend({
     if (!$serverSide && restoreable) {
       // Ensure that our associated template is wired up so that helpers who need to
       // resolve template children are able to do so.
-      assignTemplate.call(this, 'template', {
+      assignTemplate(this, 'template', {
         required: false
       });
 
@@ -317,7 +316,7 @@ Thorax.View = Backbone.View.extend({
         if (_.isUndefined(output) || (!_.isElement(output) && !Thorax.Util.is$(output) && !(output && output.el) && !_.isString(output) && !_.isFunction(output))) {
           // try one more time to assign the template, if we don't
           // yet have one we must raise
-          assignTemplate.call(self, 'template', {
+          assignTemplate(self, 'template', {
             required: true
           });
           output = self.renderTemplate(self.template);
@@ -492,52 +491,50 @@ Thorax.View.extend = function() {
 
 createRegistryWrapper(Thorax.View, Thorax.Views);
 
-function configureView () {
-  var options = this._constructorArg;
-  var self = this;
+function configureView(view) {
+  var options = view._constructorArg;
 
-  this._referenceCount = 0;
+  view._referenceCount = 0;
 
-  this._objectOptionsByCid = {};
-  this._boundDataObjectsByCid = {};
+  view._objectOptionsByCid = {};
+  view._boundDataObjectsByCid = {};
 
   // Setup object event tracking
   _.each(inheritVars, function(obj) {
-    self[obj.name] = [];
+    view[obj.name] = [];
   });
 
-  this.children = {};
-  this._renderCount = 0;
+  view.children = {};
+  view._renderCount = 0;
 
   //this.options is removed in Thorax.View, we merge passed
   //properties directly with the view and template context
   if (options) {
-    _.extend(this, options);
+    _.extend(view, options);
   }
 
   // Setup helpers
-  bindHelpers.call(this);
+  bindHelpers(view);
 
   _.each(inheritVars, function(obj) {
     if (obj.configure) {
-      obj.configure.call(this);
+      obj.configure(view);
     }
-  }, this);
+  });
 
-  this.trigger('configure');
+  view.trigger('configure');
 }
 
-function bindHelpers() {
-  if (this.helpers) {
-    _.each(this.helpers, function(helper, name) {
-      var view = this;
-      this.helpers[name] = function() {
+function bindHelpers(view) {
+  if (view.helpers) {
+    _.each(view.helpers, function(helper, name) {
+      view.helpers[name] = function() {
         var args = _.toArray(arguments),
             options = _.last(args);
         options.context = this;
         return helper.apply(view, args);
       };
-    }, this);
+    });
   }
 }
 

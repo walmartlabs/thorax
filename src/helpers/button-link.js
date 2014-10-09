@@ -51,7 +51,7 @@ function handleClick(event) {
       methodName = $this.attr(callMethodAttributeName),
       eventName = $this.attr(triggerEventAttributeName),
       methodResponse = false;
-  methodName && (methodResponse = view[methodName].call(view, event));
+  methodName && (methodResponse = view[methodName](event));
   eventName && view.trigger(eventName, event);
   this.tagName === 'A' && methodResponse === false && event.preventDefault();
 }

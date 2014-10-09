@@ -7,13 +7,13 @@ function dataObject(type, spec) {
   }, spec);
 
   // Add a callback in the view constructor
-  spec.ctor = function() {
-    if (this[type]) {
+  spec.ctor = function(view) {
+    if (view[type]) {
       // Need to null this.model/collection so setModel/Collection will
       // not treat it as the old model/collection and immediately return
-      var object = this[type];
-      this[type] = null;
-      this[spec.set](object);
+      var object = view[type];
+      view[type] = null;
+      view[spec.set](object);
     }
   };
 
@@ -32,7 +32,7 @@ function dataObject(type, spec) {
       this[type] = dataObject;
 
       if (spec.loading) {
-        spec.loading.call(this);
+        spec.loading(this);
       }
 
       this.bindDataObject(type, dataObject, _.extend({}, this.options, options));
@@ -48,7 +48,7 @@ function dataObject(type, spec) {
     } else {
       this[type] = false;
       if (spec.change) {
-        spec.change.call(this, false);
+        spec.change(this, false);
       }
       $el && $el.removeAttr(spec.cidAttrName);
     }
@@ -73,17 +73,17 @@ _.extend(Thorax.View.prototype, {
     var options = this._modifyDataObjectOptions(dataObject, _.extend({}, inheritVars[type].defaultOptions, options));
     this._objectOptionsByCid[dataObject.cid] = options;
 
-    bindEvents.call(this, type, dataObject, this.constructor);
-    bindEvents.call(this, type, dataObject, this);
+    bindEvents(this, type, dataObject, this.constructor);
+    bindEvents(this, type, dataObject, this);
 
     var spec = inheritVars[type];
-    spec.bindCallback && spec.bindCallback.call(this, dataObject, options);
+    spec.bindCallback && spec.bindCallback(this, dataObject, options);
 
     if (dataObject.shouldFetch && dataObject.shouldFetch(options)) {
       loadObject(dataObject, options);
     } else if (inheritVars[type].change) {
       // want to trigger built in rendering without triggering event on model
-      inheritVars[type].change.call(this, dataObject, options);
+      inheritVars[type].change(this, dataObject, options);
     }
 
     return true;
@@ -104,8 +104,7 @@ _.extend(Thorax.View.prototype, {
   }
 });
 
-function bindEvents(type, target, source) {
-  var context = this;
+function bindEvents(context, type, target, source) {
   walkInheritTree(source, '_' + type + 'Events', true, function(event) {
     listenTo(context, target, event[0], event[1], event[2] || context);
   });
