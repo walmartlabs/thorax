@@ -5,7 +5,8 @@
     "thorax-dep-jquery": {
       "scripts": [
         {"src": "jquery.js", "bower": "jquery", "global": true, "ignoreWarnings": true, "server": false},
-        {"src": "underscore.js", "bower": "underscore", "global": true, "ignoreWarnings": true},
+        {"src": "underscore.js", "bower": "underscore", "global": true, "ignoreWarnings": true, "server": false},
+        {"src": "dist/lodash.underscore.js", "bower": "lodash", "global": true, "ignoreWarnings": true, "server": true},
         {"src": "backbone.js", "bower": "backbone", "global": true, "ignoreWarnings": true},
         {"src": "handlebars.js", "bower": "handlebars", "global": true, "ignoreWarnings": true},
       ]
@@ -13,7 +14,8 @@
     "thorax-dep-zepto": {
       "scripts": [
         {"src": "zepto.js", "bower": "zepto", "global": true, "ignoreWarnings": true, "server": false},
-        {"src": "underscore.js", "bower": "underscore", "global": true, "ignoreWarnings": true},
+        {"src": "underscore.js", "bower": "underscore", "global": true, "ignoreWarnings": true, "server": false},
+        {"src": "dist/lodash.underscore.js", "bower": "lodash", "global": true, "ignoreWarnings": true, "server": true},
         {"src": "backbone.js", "bower": "backbone", "global": true, "ignoreWarnings": true},
         {"src": "handlebars.runtime.js", "bower": "handlebars", "global": true, "ignoreWarnings": true},
       ]

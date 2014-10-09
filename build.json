@@ -17,7 +17,7 @@
     },
     "fruit-loops": {
       "scripts": [
-        {"src": "underscore.js", "bower": "underscore", "global": true, "ignoreWarnings": true},
+        {"src": "dist/lodash.underscore.js", "bower": "lodash", "global": true, "ignoreWarnings": true},
         {"src": "backbone.js", "bower": "backbone", "global": true, "ignoreWarnings": true},
         {"src": "handlebars.js", "bower": "handlebars", "global": true, "ignoreWarnings": true}
       ]
