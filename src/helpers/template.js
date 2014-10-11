@@ -1,4 +1,3 @@
-/*global getOptionsData */
 Handlebars.registerHelper('template', function(name, options) {
   /*jshint -W089 */
   var hasHash = false;
@@ -16,10 +15,10 @@ Handlebars.registerHelper('template', function(name, options) {
     context = _.extend({fn: options && options.fn}, context, options.hash);
   }
 
-  var output = getOptionsData(options).view.renderTemplate(name, context);
+  var output = options.data.view.renderTemplate(name, context);
   return new Handlebars.SafeString(output);
 });
 
 Handlebars.registerHelper('yield', function(options) {
-  return getOptionsData(options).yield && options.data.yield();
+  return options.data.yield();
 });

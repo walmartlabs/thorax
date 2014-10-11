@@ -1,6 +1,6 @@
 /* global
     $serverSide,
-    collectionElementAttributeName, createErrorMessage, getOptionsData, getParent,
+    collectionElementAttributeName, createErrorMessage, getParent,
     helperViewPrototype, normalizeHTMLAttributeOptions,
     viewRestoreAttribute
 */
@@ -179,7 +179,7 @@ Handlebars.registerViewHelper('collection', Thorax.CollectionHelperView, functio
 });
 
 Handlebars.registerHelper('collection-element', function(options) {
-  if (!getOptionsData(options).view.renderCollection) {
+  if (!options.data.view.renderCollection) {
     throw new Error(createErrorMessage('collection-element-helper'));
   }
   var hash = options.hash;

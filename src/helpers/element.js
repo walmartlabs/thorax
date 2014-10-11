@@ -1,10 +1,10 @@
-/*global getOptionsData, normalizeHTMLAttributeOptions */
+/*global normalizeHTMLAttributeOptions */
 var elementPlaceholderAttributeName = 'data-element-tmp';
 
 Handlebars.registerHelper('element', function(element, options) {
   normalizeHTMLAttributeOptions(options.hash);
   var cid = _.uniqueId('element'),
-      declaringView = getOptionsData(options).view;
+      declaringView = options.data.view;
   options.hash[elementPlaceholderAttributeName] = cid;
   declaringView._elementsByCid || (declaringView._elementsByCid = {});
   declaringView._elementsByCid[cid] = element;

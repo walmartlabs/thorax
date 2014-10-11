@@ -202,13 +202,6 @@ function addEvents(target, source, context, listenToObject) {
   });
 }
 
-function getOptionsData(options) {
-  if (!options || !options.data) {
-    throw new Error(createErrorMessage('handlebars-no-data'));
-  }
-  return options.data;
-}
-
 // In helpers "tagName" or "tag" may be specified, as well
 // as "class" or "className". Normalize to "tagName" and
 // "className" to match the property names used by Backbone

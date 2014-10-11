@@ -1,6 +1,6 @@
 /*global
     ServerMarshal,
-    $serverSide, createError, filterAncestors, getOptionsData,
+    $serverSide, createError, filterAncestors,
     normalizeHTMLAttributeOptions, viewHelperAttributeName
 */
 var viewPlaceholderAttributeName = 'data-view-tmp',
@@ -55,7 +55,7 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
   Handlebars.registerHelper(name, function() {
     var args = _.toArray(arguments),
         options = args.pop(),
-        declaringView = getOptionsData(options).view;
+        declaringView = options.data.view;
  
     // Evaluate any nested parameters that we may have to content with
     var expandTokens = expandHash(this, options.hash);

@@ -1,6 +1,6 @@
 /*global
     $serverSide, FruitLoops,
-    createErrorMessage, getLayoutViewsTargetElement, getOptionsData,
+    createErrorMessage, getLayoutViewsTargetElement,
     normalizeHTMLAttributeOptions, viewNameAttributeName
 */
 var layoutCidAttributeName = 'data-layout-cid';
@@ -110,7 +110,7 @@ Thorax.LayoutView.on('after-restore', function() {
 });
 
 Handlebars.registerHelper('layout-element', function(options) {
-  var view = getOptionsData(options).view;
+  var view = options.data.view;
   // duck type check for LayoutView
   if (!view.getView) {
     throw new Error(createErrorMessage('layout-element-helper'));

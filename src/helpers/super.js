@@ -1,7 +1,7 @@
-/* global createErrorMessage, getOptionsData */
+/* global createErrorMessage */
 
 Handlebars.registerHelper('super', function(options) {
-  var declaringView = getOptionsData(options).view,
+  var declaringView = options.data.view,
       parent = declaringView.constructor && declaringView.constructor.__super__;
   if (parent) {
     var template = parent.template;
