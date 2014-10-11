@@ -181,28 +181,31 @@ Thorax.View = Backbone.View.extend({
   },
 
   _destroy: function() {
-    _.each(this._boundDataObjectsByCid, this.unbindDataObject, this);
     this.trigger('destroyed');
     delete viewsIndexedByCid[this.cid];
 
+    this.stopListening();
+    this.off();
+
     _.each(this.children, function(child) {
-      this._removeChild(child);
-    }, this);
+      child.parent = null;
+      child.release();
+    });
 
     if (this.el) {
       this.undelegateEvents();
-      this.remove();  // Will call stopListening()
-      this.off();     // Kills off remaining events
+      this.$el.remove();
 
       ServerMarshal.destroy(this.$el);
     }
 
     // Absolute worst case scenario, kill off some known fields to minimize the impact
     // of being retained.
-    this.el = this.$el = undefined;
-    this.parent = undefined;
-    this.model = this.collection = this._collection = undefined;
-    this._helperOptions = undefined;
+    this.el = this.$el =
+      this.parent = this.children =
+      this.model = this.collection = this._collection =
+      this._boundDataObjectsByCid = this._objectOptionsByCid =
+      this._helperOptions = undefined;
   },
 
   restore: function(element, forceRerender) {
