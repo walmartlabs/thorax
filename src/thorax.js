@@ -357,11 +357,12 @@ Thorax.View = Backbone.View.extend({
   },
 
   context: function() {
-    return _.extend({}, (this.model && this.model.attributes) || {});
+    return this.model && this.model.attributes;
   },
 
   _getContext: function() {
-    return _.extend({}, this, getValue(this, 'context') || {});
+    var context = Object.create ? Object.create(this) : _.clone(this);
+    return _.extend(context, this.context.call ? this.context() : this.context);
   },
 
   // Private variables in handlebars / options.data in template helpers
