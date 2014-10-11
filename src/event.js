@@ -194,7 +194,7 @@ function bindEventHandler(view, eventName, params) {
       ret = Thorax.bindSection(
         'thorax-event',
         {view: context.name || context.cid, eventName: eventName},
-        _.bind(method, context));
+        function() { return method.apply(context, arguments); });
 
   // Backbone will delegate to _callback in off calls so we should still be able to support
   // calling off on specific handlers.

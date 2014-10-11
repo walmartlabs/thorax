@@ -286,10 +286,11 @@ function helperInit(args, instance, callback, viewOptions) {
 function helperAppend(scope, callback) {
   this._pendingAppend = undefined;
 
+  var self = this;
   (scope || this.$el).find('[' + viewPlaceholderAttributeName + ']').forEach(function(el) {
     var $el = $(el),
         placeholderId = $el.attr(viewPlaceholderAttributeName),
-        view = this.children[placeholderId];
+        view = self.children[placeholderId];
 
     if (view) {
       //see if the view helper declared an override for the view
@@ -303,7 +304,7 @@ function helperAppend(scope, callback) {
       $el.replaceWith(view.el);
       callback && callback(view.$el);
     }
-  }, this);
+  });
 }
 
 /**

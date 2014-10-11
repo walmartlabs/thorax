@@ -27,7 +27,7 @@ Thorax.LayoutView = Thorax.View.extend({
   setView: function(view, options) {
     options = _.extend({
       scroll: true
-    }, options || {});
+    }, options);
 
     if (_.isString(view)) {
       view = new (Thorax.Util.registryGet(Thorax, 'Views', view, false))();
@@ -43,47 +43,51 @@ Thorax.LayoutView = Thorax.View.extend({
     }
     this.ensureRendered();
 
-    var oldView = this._view, append, remove, complete;
+    var oldView = this._view,
+        self = this,
+        append,
+        remove,
+        complete;
     if (view === oldView) {
       return false;
     }
     this.trigger('change:view:start', view, oldView, options);
 
-    remove = _.bind(function() {
+    function remove() {
       if (oldView) {
         oldView.$el && oldView.$el.detach();
         triggerLifecycleEvent(oldView, 'deactivated', options);
-        this._removeChild(oldView);
+        self._removeChild(oldView);
       }
-    }, this);
+    }
 
-    append = _.bind(function() {
+    function append() {
       if (!view) {
-        this._view = undefined;
+        self._view = undefined;
       } else if ($serverSide && !options.serverRender && !view.serverRender) {
         // Emit only data for non-server rendered views
         // But we do want to put ourselves into the queue for cleanup on future exec
-        this._view = view;
-        this._addChild(view);
+        self._view = view;
+        self._addChild(view);
 
         FruitLoops.emit();
       } else {
         view.ensureRendered();
         options.activating = view;
 
-        triggerLifecycleEvent(this, 'activated', options);
+        triggerLifecycleEvent(self, 'activated', options);
         view.trigger('activated', options);
-        this._view = view;
-        var targetElement = this._layoutViewEl;
-        this._view.appendTo(targetElement);
-        this._addChild(view);
+        self._view = view;
+        var targetElement = self._layoutViewEl;
+        self._view.appendTo(targetElement);
+        self._addChild(view);
       }
-    }, this);
+    }
 
-    complete = _.bind(function() {
-      this.hasBeenSet = true;
-      this.trigger('change:view:end', view, oldView, options);
-    }, this);
+    function complete() {
+      self.hasBeenSet = true;
+      self.trigger('change:view:end', view, oldView, options);
+    }
 
     if (!options.transition) {
       remove();
