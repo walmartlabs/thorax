@@ -26,13 +26,6 @@ Thorax.Util.scrollToTop = function() {
   return this.scrollTo(0, 0);
 };
 
-pushDomEvents([
-  'singleTap', 'doubleTap', 'longTap',
-  'swipe',
-  'swipeUp', 'swipeDown',
-  'swipeLeft', 'swipeRight'
-]);
-
 //built in dom events
 Thorax.View.on({
   'submit form': function(/* event */) {

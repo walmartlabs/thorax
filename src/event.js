@@ -2,6 +2,29 @@
 // Save a copy of the _on method to call as a $super method
 var _on = Thorax.View.prototype.on;
 
+var eventSplitter = /^(nested\s+)?(\S+)(?:\s+(.+))?/;
+
+var domEvents = {},
+    eventParamsCache = {};
+
+(function(events) {
+  _.each(events, function(event) { domEvents[event] = true; });
+})([
+  'touchstart', 'touchmove', 'touchend', 'touchcancel',
+  'mouseenter', 'mouseleave', 'mousemove', 'mousedown', 'mouseup', 'mouseover', 'mouseout',
+  'keydown', 'keyup', 'keypress',
+  'contextmenu',
+  'click', 'dblclick',
+  'focusin', 'focusout', 'focus', 'blur',
+  'submit', 'input', 'change',
+  'dragstart', 'drag', 'dragenter', 'dragleave', 'dragover', 'drop', 'dragend',
+
+  'singleTap', 'doubleTap', 'longTap',
+  'swipe',
+  'swipeUp', 'swipeDown',
+  'swipeLeft', 'swipeRight'
+]);
+
 inheritVars.event = {
   name: '_events',
 
@@ -29,6 +52,8 @@ _.extend(Thorax.View, {
         this.on(key, value);
       }, this);
     } else {
+      eventName = eventNameParams(eventName);
+
       //accept on({"rendered": [handler, handler]})
       if (_.isArray(callback)) {
         _.each(callback, function(cb) {
@@ -45,39 +70,49 @@ _.extend(Thorax.View, {
 
 _.extend(Thorax.View.prototype, {
   on: function(eventName, callback, context) {
-    if (objectEvents(this, eventName, callback, context)) {
-      return this;
+    var self = this;
+
+    if (objectEvents(self, eventName, callback, context)) {
+      return self;
     }
 
-    if (_.isObject(eventName) && arguments.length < 3) {
+    if (_.isObject(eventName) && !eventName.type && arguments.length < 3) {
       //accept on({"rendered": callback})
       _.each(eventName, function(value, key) {
-        this.on(key, value, callback || this);    // callback is context in this form of the call
-      }, this);
+        self.on(key, value, callback || self);    // callback is context in this form of the call
+      });
     } else {
       //accept on("rendered", callback, context)
       //accept on("click a", callback, context)
-      _.each((_.isArray(callback) ? callback : [callback]), function(callback) {
-        var params = eventParamsFromEventItem(this, eventName, callback, context || this);
-        if (params.type === 'DOM') {
+      function handleEvent(callback) {
+        var params = eventParamsForInstance(eventName, self, callback, context || self);
+
+        if (params.event.type === 'DOM') {
           // Avoid overhead of handling DOM events on the server
           if ($serverSide) {
             return;
           }
 
           //will call _addEvent during delegateEvents()
-          if (!this._eventsToDelegate) {
-            this._eventsToDelegate = [];
+          if (!self._eventsToDelegate) {
+            self._eventsToDelegate = [];
           }
-          this._eventsToDelegate.push(params);
+          self._eventsToDelegate.push(params);
         }
-        if (params.type !== 'DOM' || this._eventsDelegated) {
-          this._addEvent(params);
+
+        if (params.event.type !== 'DOM' || self._eventsDelegated) {
+          self._addEvent(params);
         }
-      }, this);
+      }
+      if (_.isArray(callback)) {
+        _.each(callback, handleEvent);
+      } else {
+        handleEvent(callback);
+      }
     }
-    return this;
+    return self;
   },
+
   delegateEvents: function(events) {
     this.undelegateEvents();
     if (events) {
@@ -99,33 +134,33 @@ _.extend(Thorax.View.prototype, {
   _addEvent: function(params) {
     // If this is recursvie due to listenTo delegate below then pass through to super class
     if (params.handler._thoraxBind) {
-      return _on.call(this, params.name, params.handler, params.context || this);
+      return _on.call(this, params.event.name, params.handler, params.context || this);
     }
 
     // Shortcircuit DOM events on the server
-    if ($serverSide && params.type !== 'view') {
+    if ($serverSide && params.event.type !== 'view') {
       return;
     }
 
-    var boundHandler = bindEventHandler(this, params.type + '-event:', params);
+    var boundHandler = bindEventHandler(this, params.event.type + '-event:', params);
 
-    if (params.type === 'view') {
+    if (params.event.type === 'view') {
       // If we have our context set to an outside view then listen rather than directly bind so
       // we can cleanup properly.
       if (params.context && params.context !== this && params.context instanceof Thorax.View) {
-        listenTo(params.context, this, params.name, boundHandler, params.context);
+        listenTo(params.context, this, params.event.name, boundHandler, params.context);
       } else {
-        _on.call(this, params.name, boundHandler, params.context || this);
+        _on.call(this, params.event.name, boundHandler, params.context || this);
       }
-    } else if (!$serverSide) {
+    } else {
       // DOM Events
-      if (!params.nested) {
+      if (!params.event.nested) {
         boundHandler = containHandlerToCurentView(boundHandler, this);
       }
 
-      var name = params.name + '.delegateEvents' + this.cid;
-      if (params.selector) {
-        this.$el.on(name, params.selector, boundHandler);
+      var name = params.event.name + '.delegateEvents' + this.cid;
+      if (params.event.selector) {
+        this.$el.on(name, params.event.selector, boundHandler);
       } else {
         this.$el.on(name, boundHandler);
       }
@@ -150,25 +185,6 @@ Thorax.View.on('ready', function(options) {
   }
 });
 
-var eventSplitter = /^(nested\s+)?(\S+)(?:\s+(.+))?/;
-
-var domEvents = [],
-    domEventRegexp;
-function pushDomEvents(events) {
-  domEvents.push.apply(domEvents, events);
-  domEventRegexp = new RegExp('^(nested\\s+)?(' + domEvents.join('|') + ')(?:\\s|$)');
-}
-pushDomEvents([
-  'touchstart', 'touchmove', 'touchend', 'touchcancel',
-  'mouseenter', 'mouseleave', 'mousemove', 'mousedown', 'mouseup', 'mouseover', 'mouseout',
-  'keydown', 'keyup', 'keypress',
-  'contextmenu',
-  'click', 'dblclick',
-  'focusin', 'focusout', 'focus', 'blur',
-  'submit', 'input', 'change',
-  'dragstart', 'drag', 'dragenter', 'dragleave', 'dragover', 'drop', 'dragend'
-]);
-
 function containHandlerToCurentView(handler, current) {
   // Passing the current view rather than just a cid to allow for updates to the view's cid
   // caused by the restore process.
@@ -182,7 +198,7 @@ function containHandlerToCurentView(handler, current) {
 }
 
 function bindEventHandler(view, eventName, params) {
-  eventName += params.originalName;
+  eventName += params.event.originalName;
 
   var callback = params.handler,
       method = typeof callback == 'string' ? view[callback] : callback;
@@ -203,21 +219,38 @@ function bindEventHandler(view, eventName, params) {
   return ret;
 }
 
-function eventParamsFromEventItem(view, name, handler, context) {
-  var params = {
+function eventNameParams(name) {
+  if (name.type) {
+    return name;
+  }
+
+  var params = eventParamsCache[name];
+  if (params) {
+    return params;
+  }
+
+  params = eventNameParams[name] = {
+    type: 'view',
+    name: name,
     originalName: name,
+
+    nested: false,
+    selector: undefined
+  };
+
+  var match = name.match(eventSplitter);
+  if (match && domEvents[match[2]]) {
+    params.type = 'DOM';
+    params.name = match[2];
+    params.nested = !!match[1];
+    params.selector = match[3];
+  }
+  return params;
+}
+function eventParamsForInstance(eventName, view, handler, context) {
+  return {
+    event: eventNameParams(eventName),
+    context: context,
     handler: typeof handler == 'string' ? view[handler] : handler
   };
-  if (name.match(domEventRegexp)) {
-    var match = eventSplitter.exec(name);
-    params.nested = !!match[1];
-    params.name = match[2];
-    params.type = 'DOM';
-    params.selector = match[3];
-  } else {
-    params.name = name;
-    params.type = 'view';
-  }
-  params.context = context;
-  return params;
 }
