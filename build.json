@@ -101,7 +101,8 @@
         "test/src/"
       ],
       "static": [
-        {"src": "test/fruit-loops.html", "dest": "fruit-loops/test.html"}
+        {"src": "test/fruit-loops.html", "dest": "fruit-loops/test.html"},
+        {"src": "benchmark/bench.html", "dest": "fruit-loops/bench.html"}
       ]
     },
   },
