@@ -338,16 +338,15 @@ Thorax.Util = {
     return input;
   },
   tag: function(attributes, content, scope) {
-    var htmlAttributes = _.omit(attributes, 'tagName'),
-        tag = attributes.tagName || 'div',
+    var tag = attributes.tagName || 'div',
         noClose = isVoidTag(tag);
 
     if (noClose && content) {
       throw new Error(createErrorMessage('void-tag-content'));
     }
 
-    var openingTag = '<' + tag + ' ' + _.map(htmlAttributes, function(value, key) {
-      if (_.isUndefined(value) || key === 'expand-tokens') {
+    var openingTag = '<' + tag + ' ' + _.map(attributes, function(value, key) {
+      if (value == null || key === 'expand-tokens' || key === 'tagName') {
         return '';
       }
       var formattedValue = value;
@@ -360,7 +359,7 @@ Thorax.Util = {
     if (noClose) {
       return openingTag;
     } else {
-      return openingTag + (_.isUndefined(content) ? '' : content) + '</' + tag + '>';
+      return openingTag + (content == null ? '' : content) + '</' + tag + '>';
     }
   }
 };
