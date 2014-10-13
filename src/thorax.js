@@ -290,7 +290,7 @@ Thorax.View = Backbone.View.extend({
       return self;
     }
 
-    Thorax.runSection('thorax-render', {name: self.name}, function() {
+    function render() {
       if (self._rendering) {
         // Nested rendering of the same view instances can lead to some very nasty issues with
         // the root render process overwriting any updated data that may have been output in the child
@@ -316,40 +316,45 @@ Thorax.View = Backbone.View.extend({
       self.trigger('before:rendered');
       self._rendering = true;
 
+      if (_.isUndefined(output) || (!_.isElement(output) && !Thorax.Util.is$(output) && !(output && output.el) && !_.isString(output) && !_.isFunction(output))) {
+        // try one more time to assign the template, if we don't
+        // yet have one we must raise
+        assignTemplate(self, 'template', {
+          required: true
+        });
+        output = self.renderTemplate(self.template);
+      } else if (_.isFunction(output)) {
+        output = self.renderTemplate(output);
+      }
+
+      // Destroy any helpers that may be lingering
+      _.each(previous, function(child) {
+        if (child._cull) {
+          self._removeChild(child);
+        }
+      });
+      self._previousHelpers = undefined;
+
+
+      if ($serverSide) {
+        if (self.$el.attr(viewRestoreAttribute) !== 'false') {
+          self.$el.attr(viewRestoreAttribute, $serverSide);
+        }
+      } else {
+        self.$el.removeAttr(viewRestoreAttribute);
+      }
+
+      //accept a view, string, Handlebars.SafeString or DOM element
+      self.html((output && output.el) || (output && output.string) || output);
+
+      ++self._renderCount;
+
+      self.trigger('rendered');
+    }
+
+    Thorax.runSection('thorax-render', {name: self.name}, function() {
       try {
-        if (_.isUndefined(output) || (!_.isElement(output) && !Thorax.Util.is$(output) && !(output && output.el) && !_.isString(output) && !_.isFunction(output))) {
-          // try one more time to assign the template, if we don't
-          // yet have one we must raise
-          assignTemplate(self, 'template', {
-            required: true
-          });
-          output = self.renderTemplate(self.template);
-        } else if (_.isFunction(output)) {
-          output = self.renderTemplate(output);
-        }
-
-        // Destroy any helpers that may be lingering
-        _.each(previous, function(child) {
-          if (child._cull) {
-            self._removeChild(child);
-          }
-        }, self);
-        self._previousHelpers = undefined;
-
-
-        if ($serverSide) {
-          if (self.$el.attr(viewRestoreAttribute) !== 'false') {
-            self.$el.attr(viewRestoreAttribute, $serverSide);
-          }
-        } else {
-          self.$el.removeAttr(viewRestoreAttribute);
-        }
-
-        //accept a view, string, Handlebars.SafeString or DOM element
-        self.html((output && output.el) || (output && output.string) || output);
-
-        ++self._renderCount;
-        self.trigger('rendered');
+        render();
       } finally {
         self._rendering = false;
       }
