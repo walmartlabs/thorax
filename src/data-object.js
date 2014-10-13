@@ -66,7 +66,7 @@ _.extend(Thorax.View.prototype, {
 
   bindDataObject: function(type, dataObject, options) {
     if (this._boundDataObjectsByCid[dataObject.cid]) {
-      return false;
+      return;
     }
     this._boundDataObjectsByCid[dataObject.cid] = dataObject;
 
@@ -85,18 +85,12 @@ _.extend(Thorax.View.prototype, {
       // want to trigger built in rendering without triggering event on model
       inheritVars[type].change(this, dataObject, options);
     }
-
-    return true;
   },
 
   unbindDataObject: function (dataObject) {
-    if (!this._boundDataObjectsByCid[dataObject.cid]) {
-      return false;
-    }
-    delete this._boundDataObjectsByCid[dataObject.cid];
     this.stopListening(dataObject);
+    delete this._boundDataObjectsByCid[dataObject.cid];
     delete this._objectOptionsByCid[dataObject.cid];
-    return true;
   },
 
   _modifyDataObjectOptions: function(dataObject, options) {
