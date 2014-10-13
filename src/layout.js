@@ -7,8 +7,8 @@ var layoutCidAttributeName = 'data-layout-cid';
 
 Thorax.LayoutView = Thorax.View.extend({
   _defaultTemplate: Handlebars.VM.noop,
-  render: function() {
-    var response = Thorax.View.prototype.render.apply(this, arguments);
+  render: function(output) {
+    var response = Thorax.View.prototype.render.call(this, output);
     if (this.template === Handlebars.VM.noop) {
       // if there is no template setView will append to this.$el
       ensureLayoutCid(this);

@@ -13,9 +13,9 @@ var _fetch = Backbone.Collection.prototype.fetch,
 
 Thorax.Collection = Backbone.Collection.extend({
   model: Thorax.Model || Backbone.Model,
-  initialize: function() {
+  initialize: function(models, options) {
     this.cid = _.uniqueId('collection');
-    return Backbone.Collection.prototype.initialize.apply(this, arguments);
+    return Backbone.Collection.prototype.initialize.call(this, models, options);
   },
   isEmpty: function() {
     if (this.length > 0) {
@@ -37,7 +37,7 @@ Thorax.Collection = Backbone.Collection.extend({
       collection._fetched = true;
       success && success(collection, response, options);
     };
-    return _fetch.apply(this, arguments);
+    return _fetch.call(this, options);
   },
   set: function(models, options) {
     this._fetched = !!models;
@@ -102,10 +102,10 @@ Thorax.CollectionView = Thorax.View.extend({
     }
   },
 
-  render: function() {
+  render: function(output) {
     var shouldRender = this.shouldRender();
 
-    Thorax.View.prototype.render.apply(this, arguments);
+    Thorax.View.prototype.render.call(this, output);
     if (!shouldRender) {
       this.renderCollection();
     }

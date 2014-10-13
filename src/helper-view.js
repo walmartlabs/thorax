@@ -9,11 +9,11 @@ var viewPlaceholderAttributeName = 'data-view-tmp',
 // Will be shared by HelperView and CollectionHelperView
 var helperViewPrototype = {
   _ensureElement: function() {
-    Thorax.View.prototype._ensureElement.apply(this, arguments);
+    Thorax.View.prototype._ensureElement.call(this);
     this.$el.attr(viewHelperAttributeName, this._helperName);
   },
   _getContext: function() {
-    return this.parent._getContext.apply(this.parent, arguments);
+    return this.parent._getContext();
   }
 };
 
@@ -80,7 +80,7 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
     viewOptions.attributes = function() {
       var attrs = (ViewClass.prototype && ViewClass.prototype.attributes) || {};
       if (_.isFunction(attrs)) {
-        attrs = attrs.apply(this, arguments);
+        attrs = attrs.call(this);
       }
       _.extend(attrs, _.omit(htmlAttributes, ['tagName']));
       // backbone wants "class"

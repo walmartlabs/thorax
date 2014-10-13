@@ -75,10 +75,10 @@ var Thorax = this.Thorax = {
 };
 
 Thorax.View = Backbone.View.extend({
-  constructor: function() {
+  constructor: function ThoraxView(options) {
     // store first argument for configureView()
-    this._constructorArg = arguments[0];
-    var response = Backbone.View.apply(this, arguments);
+    this._constructorArg = options;
+    var response = Backbone.View.call(this, options);
     delete this._constructorArg;
     _.each(inheritVars, function(obj) {
       if (obj.ctor) {

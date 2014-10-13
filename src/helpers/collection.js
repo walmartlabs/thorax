@@ -102,15 +102,16 @@ Thorax.CollectionHelperView = Thorax.CollectionView.extend({
     return response;
   },
   setAsPrimaryCollectionHelper: function() {
-    var self = this;
+    var self = this,
+        parent = self.parent;
     _.each(forwardableProperties, function(propertyName) {
       forwardMissingProperty(self, propertyName);
     });
 
     _.each(['itemFilter', 'itemContext', 'renderItem', 'renderEmpty'], function(propertyName) {
-      if (self.parent[propertyName]) {
-        self[propertyName] = function() {
-          return self.parent[propertyName].apply(self.parent, arguments);
+      if (parent[propertyName]) {
+        self[propertyName] = function(thing1, thing2) {
+          return parent[propertyName](thing1, thing2);
         };
       }
     });
