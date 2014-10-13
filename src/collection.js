@@ -192,7 +192,7 @@ Thorax.CollectionView = Thorax.View.extend({
   //appendItem(model [,index])
   //appendItem(html_string, index)
   //appendItem(view, index)
-  appendItem: function(model, index, options) {
+  appendItem: function(model, index, options, append) {
     //empty item
     if (!model) {
       return;
@@ -213,7 +213,8 @@ Thorax.CollectionView = Thorax.View.extend({
       itemView = model;
       model = false;
     } else {
-      index = index || collection.indexOf(model) || 0;
+      index = index != null ? index : (collection.indexOf(model) || 0);
+
       // Using call here to avoid v8 prototype inline optimization bug that helper views
       // expose under Android 4.3 (at minimum)
       // https://twitter.com/kpdecker/status/422149634929082370
@@ -229,7 +230,7 @@ Thorax.CollectionView = Thorax.View.extend({
       //if the renderer's output wasn't contained in a tag, wrap it in a div
       //plain text, or a mixture of top level text nodes and element nodes
       //will get wrapped
-      if (_.isString(itemView) && !itemView.match(/^\s*</m)) {
+      if (_.isString(itemView) && !/^\s*</m.test(itemView)) {
         itemView = '<div>' + itemView + '</div>';
       }
       var itemElement = itemView.$el || $($.trim(itemView)).filter(function() {
@@ -243,13 +244,18 @@ Thorax.CollectionView = Thorax.View.extend({
           'data-model-cid': model.cid
         });
       }
-      var previousModel = index > 0 ? collection.at(index - 1) : false;
-      if (!previousModel) {
-        $el.prepend(itemElement);
+
+      if (append) {
+        $el.append(itemElement);
       } else {
-        //use last() as appendItem can accept multiple nodes from a template
-        var last = $el.children('[' + modelCidAttributeName + '="' + previousModel.cid + '"]').last();
-        last.after(itemElement);
+        var previousModel = index > 0 ? collection.at(index - 1) : false;
+        if (!previousModel) {
+          $el.prepend(itemElement);
+        } else {
+          //use last() as appendItem can accept multiple nodes from a template
+          var last = $el.children('[' + modelCidAttributeName + '="' + previousModel.cid + '"]').last();
+          last.after(itemElement);
+        }
       }
 
       this.trigger('append', null, function($el) {
@@ -325,9 +331,11 @@ Thorax.CollectionView = Thorax.View.extend({
         this.restoreCollection(this._forceRerender);
       } else {
         handleChangeFromEmptyToNotEmpty(this);
-        this.collection.forEach(function(item, i) {
-          this.appendItem(item, i);
-        }, this);
+
+        var self = this;
+        _.each(this.collection.models, function(item, i) {
+          self.appendItem(item, i, undefined, true);
+        });
       }
       this.trigger('rendered:collection', this, this.collection);
     } else {
