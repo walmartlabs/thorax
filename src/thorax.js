@@ -79,7 +79,8 @@ Thorax.View = Backbone.View.extend({
     // store first argument for configureView()
     this._constructorArg = options;
     var response = Backbone.View.call(this, options);
-    delete this._constructorArg;
+    this._constructorArg = undefined;
+
     _.each(inheritVars, function(obj) {
       if (obj.ctor) {
         obj.ctor(this, response);
