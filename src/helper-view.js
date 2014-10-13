@@ -285,7 +285,6 @@ function helperInit(args, instance, callback, viewOptions) {
   args.push(instance);
   declaringView._addChild(instance);
   declaringView.trigger.apply(declaringView, ['helper', name].concat(args));
-  declaringView.trigger.apply(declaringView, ['helper:' + name].concat(args));
 
   callback && callback.apply(this, args);
 }

@@ -43,6 +43,7 @@
       ],
       "mixins": [
         "thorax",
+        {"name": "thorax-form", "server": false},
         "thorax-helper-tags",
         "thorax-loading"
       ]
@@ -53,6 +54,7 @@
       ],
       "mixins": [
         "thorax",
+        {"name": "thorax-form", "server": false},
         "thorax-helper-tags",
         "thorax-loading",
         "thorax-mobile"
