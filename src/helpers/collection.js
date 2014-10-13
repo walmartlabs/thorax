@@ -159,7 +159,10 @@ Handlebars.registerViewHelper('collection', Thorax.CollectionHelperView, functio
   if (arguments.length === 1) {
     view = collection;
     collection = view.parent.collection;
-    collection && view.setAsPrimaryCollectionHelper();
+
+    if (collection) {
+      view.setAsPrimaryCollectionHelper();
+    }
     view.$el.attr(collectionElementAttributeName, 'true');
     // propagate future changes to the parent's collection object
     // to the helper view
@@ -170,7 +173,9 @@ Handlebars.registerViewHelper('collection', Thorax.CollectionHelperView, functio
       }
     });
   }
-  collection && view.setCollection(collection);
+  if (collection) {
+    view.setCollection(collection);
+  }
 });
 
 Handlebars.registerHelper('collection-element', function(options) {

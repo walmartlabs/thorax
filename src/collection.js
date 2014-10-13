@@ -204,7 +204,9 @@ Thorax.CollectionView = Thorax.View.extend({
         filter = !options || options.filter == null || options.filter;
 
     //if index argument is a view
-    index && index.el && (index = $el.children().indexOf(index.el) + 1);
+    if (index && index.el) {
+      index = $el.children().indexOf(index.el) + 1;
+    }
 
     //if argument is a view, or html string
     if (model.el || _.isString(model)) {
