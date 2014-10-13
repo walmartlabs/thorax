@@ -9,7 +9,9 @@ Thorax.CollectionHelperView = Thorax.CollectionView.extend({
   // Forward render events to the parent
   events: {
     'rendered:collection': forwardRenderEvent('rendered:collection'),
-    'rendered:item': forwardRenderEvent('rendered:item'),
+    'rendered:item': function(view, collection, model, itemEl, index) {
+      this.parent.trigger('rendered:item', view, collection, model, itemEl, index);
+    },
     'rendered:empty': forwardRenderEvent('rendered:empty'),
     'restore:collection': forwardRenderEvent('restore:collection'),
     'restore:item': forwardRenderEvent('restore:item'),
@@ -132,10 +134,8 @@ Thorax.CollectionHelperView.attributeWhiteList = {
 };
 
 function forwardRenderEvent(eventName) {
-  return function() {
-    var args = _.toArray(arguments);
-    args.unshift(eventName);
-    this.parent.trigger.apply(this.parent, args);
+  return function(thing1, thing2) {
+    this.parent.trigger(eventName, thing1, thing2);
   };
 }
 
