@@ -53,9 +53,12 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
   var viewOptionWhiteList = ViewClass.attributeWhiteList;
 
   Handlebars.registerHelper(name, function() {
-    var args = _.toArray(arguments),
-        options = args.pop(),
+    var args = [],
+        options = arguments[arguments.length-1],
         declaringView = options.data.view;
+    for (var i = 0, len = arguments.length-1; i < len; i++) {
+      args.push(arguments[i]);
+    }
  
     // Evaluate any nested parameters that we may have to content with
     var expandTokens = expandHash(this, options.hash);
@@ -107,32 +110,7 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
       instance.$el.attr('data-view-helper-restore', name);
 
       if ($serverSide && instance.$el.attr('data-view-restore') !== 'false') {
-        try {
-          ServerMarshal.store(instance.$el, 'args', args, options.ids, options);
-          ServerMarshal.store(instance.$el, 'attrs', options.hash, options.hashIds, options);
-          if (options.fn && options.fn !== Handlebars.VM.noop) {
-            if (options.fn.depth) {
-              // Depthed block helpers are not supoprted.
-              throw new Error();
-            }
-            ServerMarshal.store(instance.$el, 'fn', options.fn.program);
-          }
-          if (options.inverse && options.inverse !== Handlebars.VM.noop) {
-            if (options.inverse.depth) {
-              // Depthed block helpers are not supoprted.
-              throw new Error();
-            }
-            ServerMarshal.store(instance.$el, 'inverse', options.inverse.program);
-          }
-        } catch (err) {
-          instance.$el.attr('data-view-restore', 'false');
-
-          instance.trigger('restore:fail', {
-            type: 'serialize',
-            view: instance,
-            err: err
-          });
-        }
+        saveServerState(instance, args, options);
       }
 
       helperInit(args, instance, callback, viewOptions);
@@ -161,8 +139,37 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
     }
     return new Handlebars.SafeString(Thorax.Util.tag(htmlAttributes, '', expandTokens ? this : null));
   });
+
   var helper = Handlebars.helpers[name];
 
+  function saveServerState(instance, args, options) {
+    try {
+      ServerMarshal.store(instance.$el, 'args', args, options.ids, options);
+      ServerMarshal.store(instance.$el, 'attrs', options.hash, options.hashIds, options);
+      if (options.fn && options.fn !== Handlebars.VM.noop) {
+        if (options.fn.depth) {
+          // Depthed block helpers are not supoprted.
+          throw new Error();
+        }
+        ServerMarshal.store(instance.$el, 'fn', options.fn.program);
+      }
+      if (options.inverse && options.inverse !== Handlebars.VM.noop) {
+        if (options.inverse.depth) {
+          // Depthed block helpers are not supoprted.
+          throw new Error();
+        }
+        ServerMarshal.store(instance.$el, 'inverse', options.inverse.program);
+      }
+    } catch (err) {
+      instance.$el.attr('data-view-restore', 'false');
+
+      instance.trigger('restore:fail', {
+        type: 'serialize',
+        view: instance,
+        err: err
+      });
+    }
+  }
   helper.restore = function(declaringView, el, forceRerender) {
     var context = declaringView.context(),
         args = ServerMarshal.load(el, 'args', declaringView, context) || [],
