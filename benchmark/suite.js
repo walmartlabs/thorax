@@ -61,7 +61,7 @@ Suites.prototype._bench = function(suite, options) {
       }
       test += 'window.testFn = ' + options.test + ';';
 
-      page.run(test, function(err) {
+      page.runScript(test, function(err) {
         if (err) {
           throw err;
         }
