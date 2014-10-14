@@ -44,10 +44,7 @@ Thorax.LayoutView = Thorax.View.extend({
     this.ensureRendered();
 
     var oldView = this._view,
-        self = this,
-        append,
-        remove,
-        complete;
+        self = this;
     if (view === oldView) {
       return false;
     }
