@@ -352,7 +352,7 @@ Thorax.CollectionView = Thorax.View.extend({
       if (this.emptyTemplate) {
         viewOptions.template = this.emptyTemplate;
       }
-      return Thorax.Util.getViewInstance(this.emptyView, viewOptions);
+      return Thorax.Util.getViewInstance.call(this, this.emptyView, viewOptions);
     } else {
       return this.emptyTemplate && this.renderTemplate(this.emptyTemplate);
     }
@@ -390,7 +390,7 @@ Thorax.CollectionView = Thorax.View.extend({
       if (this.itemTemplate) {
         viewOptions.template = this.itemTemplate;
       }
-      return Thorax.Util.getViewInstance(this.itemView, viewOptions);
+      return Thorax.Util.getViewInstance.call(this, this.itemView, viewOptions);
     } else {
       // Using call here to avoid v8 prototype inline optimization bug that helper views
       // expose under Android 4.3 (at minimum)

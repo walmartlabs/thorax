@@ -251,7 +251,15 @@ function filterAncestors(parent, callback) {
 Thorax.Util = {
   getViewInstance: function(name, attributes) {
     var ViewClass = Thorax.Util.getViewClass(name, true);
-    return ViewClass ? new ViewClass(attributes || {}) : name;
+    if (ViewClass === false) {
+      return name;
+    } else {
+      if (ViewClass.prototype instanceof Thorax.View) {
+        return new ViewClass(attributes || {});
+      } else {
+        return ViewClass.call(this, attributes || { });
+      }
+    }
   },
 
   getViewClass: function(name, ignoreErrors) {
