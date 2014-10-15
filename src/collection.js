@@ -455,7 +455,7 @@ Thorax.CollectionView = Thorax.View.extend({
   updateFilter: function() {
     var view = this;
     if (view.itemFilter) {
-      view.collection.forEach(function(model) {
+      _.each(view.collection.models, function(model) {
         applyItemVisiblityFilter(view, model);
       });
     }
