@@ -23,6 +23,10 @@ if (!$.fn.forEach) {
   };
 }
 
+var setImmediate = window.setImmediate || function(callback) {
+  setTimeout(callback, 0);
+};
+
 var viewNameAttributeName = 'data-view-name',
     viewCidAttributeName = 'data-view-cid',
     viewHelperAttributeName = 'data-view-helper',
