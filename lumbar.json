@@ -26,6 +26,7 @@
         {"src": "src/server-side.js"},
         {"src": "src/thorax.js"},
         {"src": "src/util.js"},
+        {"src": "src/deferrable.js"},
         {"src": "src/server-marshal.js"},
         {"src": "src/mixin.js"},
         {"src": "src/event.js"},
