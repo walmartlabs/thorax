@@ -12,8 +12,8 @@ Handlebars.registerHelper('template', function(name, options) {
 
   var context = this;
   if (options.fn || hasHash) {
-    var context = Object.create ? Object.create(this) : _.clone(this);
-    context = _.extend(context, {fn: options.fn}, options.hash);
+    context = Object.create ? Object.create(this) : _.clone(this);
+    _.extend(context, {fn: options.fn}, options.hash);
   }
 
   var output = options.data.view.renderTemplate(name, context);
