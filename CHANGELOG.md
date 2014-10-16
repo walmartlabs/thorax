@@ -2,7 +2,25 @@
 
 ## Development
 
-[Commits](https://github.com/walmartlabs/thorax/compare/v3.0.0-beta.3...master)
+[Commits](https://github.com/walmartlabs/thorax/compare/v3.0.0-beta.4...master)
+
+## v3.0.0-beta.4 - October 16th, 2014
+- [#389](https://github.com/walmartlabs/thorax/pull/389) - Performance optimations ([@kpdecker](https://api.github.com/users/kpdecker))
+- [#390](https://github.com/walmartlabs/thorax/pull/390) - Deferrable render ([@kpdecker](https://api.github.com/users/kpdecker))
+- [#388](https://github.com/walmartlabs/thorax/pull/388) - Utilize lodash for server builds ([@kpdecker](https://api.github.com/users/kpdecker))
+- Avoid complex boolean chaining - 56a8b25
+- Implement basic benchmarks - 2f2fcde
+
+Compatibility notes:
+- `setView` callers can not assume that the operation has completed after the call returns unless they pass the `async: false` flag.
+- `rendered:collection` now occurs prior to the `rendered` event
+- `append` and `before:rendered` events can not assume that other handlers have executed prior to their own execution unless they utilize the `deferred.exec` API which does guarantee this case (although the existing concerns of did you register before the other guy hold and this is generally ill advised to make these assumptions in loosely linked event code).
+- Users building with lumbar who desire the forms feature must include the thorax-form mixin
+- The `helper:$name` event has been removed. Users should bind to the `helper` event and check the name parameter that they wish to examine.
+- `_.uniqueId` no longer uses global variables for tracking state. Instead callers must call `_resetIdCounter` when wishing to modify that behavior.
+- `context` no longer clones the model attributes so callers need to take care to not modify the returned value.
+
+[Commits](https://github.com/walmartlabs/thorax/compare/v3.0.0-beta.3...v3.0.0-beta.4)
 
 ## v3.0.0-beta.3 - September 10th, 2014
 - [#382](https://github.com/walmartlabs/thorax/pull/382) - Update DOM events ([@loun4](https://api.github.com/users/loun4))
