@@ -2,7 +2,12 @@
 
 ## Development
 
-[Commits](https://github.com/walmartlabs/thorax/compare/v3.0.0-beta.4...master)
+[Commits](https://github.com/walmartlabs/thorax/compare/v3.0.0-beta.5...master)
+
+## v3.0.0-beta.5 - October 16th, 2014
+- Fix template field iteration logic - 4ae5cf1
+
+[Commits](https://github.com/walmartlabs/thorax/compare/v3.0.0-beta.4...v3.0.0-beta.5)
 
 ## v3.0.0-beta.4 - October 16th, 2014
 - [#389](https://github.com/walmartlabs/thorax/pull/389) - Performance optimations ([@kpdecker](https://api.github.com/users/kpdecker))
