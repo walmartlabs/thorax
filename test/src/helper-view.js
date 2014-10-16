@@ -12,6 +12,25 @@ describe('helper-view', function() {
     delete Handlebars.helpers.test;
   });
 
+  it('should handle deferred rendering', function(done) {
+    this.clock.restore();
+
+    view = new Thorax.View({
+      name: 'outer',
+      template: Handlebars.compile('{{#test}}{{#test}}{{#test}}{{key}}{{/test}}{{/test}}{{/test}}'),
+      key: 'value'
+    });
+    view.on('append', function(scope, callback, deferred) {
+      deferred.exec(function() {
+        expect(_.values(view.children)[0]._renderCount).to.equal(0);
+      });
+    });
+    view.render(undefined, function() {
+      expect(view.$('[data-view-helper]').eq(2).html()).to.equal('value');
+      done();
+    });
+  });
+
   it('should nest helper view instances', function() {
     view = new Thorax.View({
       name: 'outer',

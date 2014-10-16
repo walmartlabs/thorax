@@ -345,4 +345,78 @@ describe('core', function() {
       expect(view.html()).to.contain('t');
     });
   });
+
+  describe('#render', function() {
+    it('should support sync', function() {
+      var view = new Thorax.View(),
+          itRan = 0;
+      view.on('before:rendered', function(deferrable) {
+        deferrable.exec(function() {
+          expect(itRan).to.equal(0);
+          itRan++;
+        });
+      });
+      view.on('rendered', function() {
+        expect(itRan).to.equal(1);
+        itRan++;
+      });
+
+      view.render('<div></div>');
+      expect(itRan).to.equal(2);
+    });
+    it('should support async', function(done) {
+      this.clock.restore();
+
+      var view = new Thorax.View(),
+          itRan = 0;
+      view.on('before:rendered', function(deferrable) {
+        deferrable.exec(function() {
+          expect(itRan).to.equal(0);
+          itRan++;
+        });
+      });
+      view.on('rendered', function() {
+        expect(itRan).to.equal(1);
+        itRan++;
+      });
+
+      view.render('<div></div>', function() {
+        expect(itRan).to.equal(2);
+        done();
+      });
+      expect(itRan).to.equal(0);
+    });
+  });
+
+  describe('#html', function() {
+    it('should trigger append', function() {
+      var view = new Thorax.View(),
+          itRan = false;
+      view.on('append', function(scope, callback, deferrable) {
+        deferrable.exec(function() {
+          itRan = true;
+        });
+      });
+
+      view.html('<div></div>');
+      expect(itRan).to.be(true);
+    });
+    it('should trigger append deferrable', function(done) {
+      this.clock.restore();
+
+      var view = new Thorax.View(),
+          itRan = false;
+      view.on('append', function(scope, callback, deferrable) {
+        deferrable.exec(function() {
+          itRan = true;
+        });
+      });
+
+      view.html('<div></div>', function() {
+        expect(itRan).to.be(true);
+        done();
+      });
+      expect(itRan).to.be(false);
+    });
+  });
 });

@@ -1,7 +1,7 @@
 /*global
     $serverSide, FruitLoops,
     createErrorMessage, getLayoutViewsTargetElement,
-    normalizeHTMLAttributeOptions, viewNameAttributeName
+    normalizeHTMLAttributeOptions, setImmediate, viewNameAttributeName
 */
 var layoutCidAttributeName = 'data-layout-cid';
 
@@ -44,10 +44,22 @@ Thorax.LayoutView = Thorax.View.extend({
     this.ensureRendered();
 
     var oldView = this._view,
-        self = this;
+        self = this,
+        serverRender = view && $serverSide && (options.serverRender || view.serverRender),
+        attemptAsync = options.async !== false ? options.async || serverRender : false;
     if (view === oldView) {
       return false;
     }
+
+    if (attemptAsync && view && !view._renderCount) {
+      setImmediate(function() {
+        view.ensureRendered(function() {
+          self.setView(view, options);
+        });
+      });
+      return;
+    }
+
     this.trigger('change:view:start', view, oldView, options);
 
     function remove() {
@@ -61,7 +73,7 @@ Thorax.LayoutView = Thorax.View.extend({
     function append() {
       if (!view) {
         self._view = undefined;
-      } else if ($serverSide && !options.serverRender && !view.serverRender) {
+      } else if ($serverSide && !serverRender) {
         // Emit only data for non-server rendered views
         // But we do want to put ourselves into the queue for cleanup on future exec
         self._view = view;

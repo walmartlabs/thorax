@@ -359,6 +359,48 @@ describe('collection', function() {
   });
 
   describe('rendering', function() {
+    it('should render deferred', function(done) {
+      var collection = new Thorax.Collection([{id: 1}, {id: 2}, {id: 3}]),
+          itRan = false;
+
+      var view = new Thorax.CollectionView({
+        itemTemplate: Handlebars.compile('<li>foo</li>'),
+        collection: collection
+      });
+      view.on('rendered:collection', function() {
+        itRan = true;
+      });
+      view.render(undefined, function() {
+        expect(view.$('li').length).to.equal(3);
+        expect(itRan).to.be(true);
+        done();
+      });
+      expect(view.$('li').length).to.equal(0);
+      expect(itRan).to.be(false);
+      this.clock.tick(1000);
+    });
+
+    it('should render helper deferred', function(done) {
+      var collection = new Thorax.Collection([{id: 1}, {id: 2}, {id: 3}]),
+          itRan = false;
+
+      var view = new Thorax.View({
+        template: Handlebars.compile('{{#collection}}<li>foo</li>{{/collection}}'),
+        collection: collection
+      });
+      view.on('rendered:collection', function() {
+        itRan = true;
+      });
+      view.render(undefined, function() {
+        expect(view.$('li').length).to.equal(3);
+        expect(itRan).to.be(true);
+        done();
+      });
+      expect(view.$('li').length).to.equal(0);
+      expect(itRan).to.be(false);
+      this.clock.tick(1000);
+    });
+
     it('should render sync fetch', function() {
       var collection = new Thorax.Collection();
       collection.url = true;

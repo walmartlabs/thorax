@@ -3,7 +3,7 @@
     $serverSide,
     assignTemplate, createError, createInheritVars, createRegistryWrapper, getValue,
     inheritVars, resetInheritVars,
-    ServerMarshal
+    Deferrable, ServerMarshal
 */
 
 // Provide default behavior for client-failover
@@ -22,6 +22,10 @@ if (!$.fn.forEach) {
     });
   };
 }
+
+var setImmediate = window.setImmediate || function(callback) {
+  setTimeout(callback, 0);
+};
 
 var viewNameAttributeName = 'data-view-name',
     viewCidAttributeName = 'data-view-cid',
@@ -283,14 +287,14 @@ Thorax.View = Backbone.View.extend({
     }
   },
 
-  render: function(output) {
+  render: function(output, callback) {
     var self = this;
     // NOP for destroyed views
     if (!self.el) {
       return self;
     }
 
-    function render() {
+    Thorax.runSection('thorax-render', {name: self.name}, function render() {
       if (self._rendering) {
         // Nested rendering of the same view instances can lead to some very nasty issues with
         // the root render process overwriting any updated data that may have been output in the child
@@ -300,8 +304,12 @@ Thorax.View = Backbone.View.extend({
         throw createError('nested-render');
       }
 
-      var children = {},
+      self._rendering = true;
+
+      var deferrable = new Deferrable(callback),
+          children = {},
           previous = [];
+
       _.each(self.children, function(child, key) {
         if (!child._helperOptions) {
           children[key] = child;
@@ -313,52 +321,53 @@ Thorax.View = Backbone.View.extend({
       self.children = children;
       self._previousHelpers = previous;
 
-      self.trigger('before:rendered');
-      self._rendering = true;
-
-      if (_.isUndefined(output) || (!_.isElement(output) && !Thorax.Util.is$(output) && !(output && output.el) && !_.isString(output) && !_.isFunction(output))) {
-        // try one more time to assign the template, if we don't
-        // yet have one we must raise
-        assignTemplate(self, 'template', {
-          required: true
-        });
-        output = self.renderTemplate(self.template);
-      } else if (_.isFunction(output)) {
-        output = self.renderTemplate(output);
-      }
-
-      // Destroy any helpers that may be lingering
-      _.each(previous, function(child) {
-        if (child._cull) {
-          self._removeChild(child);
+      // Emulating triggerDeferrable here, without creating a separate deferrable context
+      self.trigger('before:rendered', deferrable);
+      deferrable.exec(function() {
+        if (_.isUndefined(output) || (!_.isElement(output) && !Thorax.Util.is$(output) && !(output && output.el) && !_.isString(output) && !_.isFunction(output))) {
+          // try one more time to assign the template, if we don't
+          // yet have one we must raise
+          assignTemplate(self, 'template', {
+            required: true
+          });
+          output = self.renderTemplate(self.template);
+        } else if (_.isFunction(output)) {
+          output = self.renderTemplate(output);
         }
       });
-      self._previousHelpers = undefined;
 
+      deferrable.exec(function() {
+        // Destroy any helpers that may be lingering
+        _.each(previous, function(child) {
+          if (child._cull) {
+            self._removeChild(child);
+          }
+        });
+        self._previousHelpers = undefined;
 
-      if ($serverSide) {
-        if (self.$el.attr(viewRestoreAttribute) !== 'false') {
-          self.$el.attr(viewRestoreAttribute, $serverSide);
+        if ($serverSide) {
+          if (self.$el.attr(viewRestoreAttribute) !== 'false') {
+            self.$el.attr(viewRestoreAttribute, $serverSide);
+          }
+        } else {
+          self.$el.removeAttr(viewRestoreAttribute);
         }
-      } else {
-        self.$el.removeAttr(viewRestoreAttribute);
-      }
+      });
 
-      //accept a view, string, Handlebars.SafeString or DOM element
-      self.html((output && output.el) || (output && output.string) || output);
+      deferrable.chain(function(next) {
+        //accept a view, string, Handlebars.SafeString or DOM element
+        self.html((output && output.el) || (output && output.string) || output, next);
+      });
 
-      ++self._renderCount;
+      deferrable.exec(function() {
+        ++self._renderCount;
 
-      self.trigger('rendered');
-    }
-
-    Thorax.runSection('thorax-render', {name: self.name}, function() {
-      try {
-        render();
-      } finally {
+        self.trigger('rendered');
         self._rendering = false;
-      }
+      });
+      deferrable.run();
     });
+
     return self;
   },
 
@@ -403,8 +412,12 @@ Thorax.View = Backbone.View.extend({
     }
   },
 
-  ensureRendered: function() {
-    !this._renderCount && this.render();
+  ensureRendered: function(callback) {
+    if (!this._renderCount) {
+      this.render(undefined, callback);
+    } else if (callback) {
+      setImmediate(callback);
+    }
   },
   shouldRender: function(flag) {
     // Render if flag is truthy or if we have already rendered and flag is undefined/null
@@ -422,13 +435,13 @@ Thorax.View = Backbone.View.extend({
     this.trigger('ready', {target: this});
   },
 
-  html: function(html) {
+  html: function(html, callback) {
     if (_.isUndefined(html)) {
       return this.$el.html();
     } else {
       this.trigger('before:append');
       var element = this._replaceHTML(html);
-      this.trigger('append');
+      this.triggerDeferrable('append', undefined, undefined, callback);
       return element;
     }
   },

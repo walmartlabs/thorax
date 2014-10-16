@@ -293,7 +293,7 @@ describe('event', function() {
         });
     expect(spy.callCount).to.equal(0, 'ready event will trigger via LayoutView');
     layoutView.appendTo(document.body);
-    layoutView.setView(view);
+    layoutView.setView(view, {async: false});
     expect(spy.callCount).to.equal(1, 'ready event will trigger via LayoutView');
   });
 
@@ -311,7 +311,7 @@ describe('event', function() {
           template: Handlebars.compile('{{view child}}')
         });
     expect(spy.callCount).to.equal(0, 'ready event will trigger via LayoutView');
-    layoutView.setView(view);
+    layoutView.setView(view, {async: false});
     expect(spy.callCount).to.equal(1, 'ready event will trigger via LayoutView');
 
     var secondChildSpy = this.spy(),

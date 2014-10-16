@@ -32,7 +32,7 @@ describe('serverSide', function() {
         serverRender: true,
         template: function() { return 'bar'; }
       });
-      layout.setView(view);
+      layout.setView(view, {async: false});
       expect(emit.called).to.be(false);
     });
   });
