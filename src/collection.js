@@ -1,7 +1,8 @@
 /*global
     $serverSide,
     assignView, assignTemplate, createRegistryWrapper, dataObject, filterAncestors, getValue,
-    modelCidAttributeName, modelIdAttributeName, viewCidAttributeName
+    modelCidAttributeName, modelIdAttributeName, viewCidAttributeName,
+    Deferrable
 */
 var _fetch = Backbone.Collection.prototype.fetch,
     _set = Backbone.Collection.prototype.set,
@@ -102,13 +103,17 @@ Thorax.CollectionView = Thorax.View.extend({
     }
   },
 
-  render: function(output) {
-    var shouldRender = this.shouldRender();
-
-    Thorax.View.prototype.render.call(this, output);
-    if (!shouldRender) {
-      this.renderCollection();
+  render: function(output, callback) {
+    if (!this.shouldRender()) {
+      var self = this;
+      this.once('append', function(scope, _callback, deferrable) {
+        deferrable.chain(function(complete) {
+          self.renderCollection(complete);
+        });
+      });
     }
+
+    return Thorax.View.prototype.render.call(this, output, callback);
   },
 
   restore: function(el, forceRerender) {
@@ -192,7 +197,7 @@ Thorax.CollectionView = Thorax.View.extend({
   //appendItem(model [,index])
   //appendItem(html_string, index)
   //appendItem(view, index)
-  appendItem: function(model, index, options, append) {
+  appendItem: function(model, index, options, append, callback) {
     //empty item
     if (!model) {
       return;
@@ -258,12 +263,13 @@ Thorax.CollectionView = Thorax.View.extend({
         }
       }
 
-      this.trigger('append', null, function($el) {
+      this.triggerDeferrable('append', null, function($el) {
         $el.attr({
           'data-model-cid': model.cid,
           'data-model-id': model.id,
         });
-      });
+      },
+      callback);
 
       if (!options || !options.silent) {
         this.trigger('rendered:item', this, collection, model, itemElement, index);
@@ -320,27 +326,41 @@ Thorax.CollectionView = Thorax.View.extend({
     return true;
   },
 
-  renderCollection: function() {
-    if (this.collection) {
-      if (this.collection.isEmpty()) {
-        handleChangeFromNotEmptyToEmpty(this);
-      } else if (this._pendingRestore) {
+  renderCollection: function(callback) {
+    var deferrable = new Deferrable(callback),
+        self = this;
+
+    if (self.collection) {
+      if (self.collection.isEmpty()) {
+        deferrable.exec(function() {
+          handleChangeFromNotEmptyToEmpty(self);
+        });
+      } else if (self._pendingRestore) {
         // If we had to delay the initial restore due to the local data set being loaded, then
         // we want to resume that operation where it left off.
-        this._pendingRestore = false;
-        this.restoreCollection(this._forceRerender);
+        self._pendingRestore = false;
+        self.restoreCollection(self._forceRerender);
       } else {
-        handleChangeFromEmptyToNotEmpty(this);
+        deferrable.exec(function() {
+          handleChangeFromEmptyToNotEmpty(self);
+        });
 
-        var self = this;
-        _.each(this.collection.models, function(item, i) {
-          self.appendItem(item, i, undefined, true);
+        _.each(self.collection.models, function(item, i) {
+          deferrable.chain(function(complete) {
+            self.appendItem(item, i, undefined, true, complete);
+          });
         });
       }
-      this.trigger('rendered:collection', this, this.collection);
+      deferrable.exec(function() {
+        self.trigger('rendered:collection', self, self.collection);
+      });
     } else {
-      handleChangeFromNotEmptyToEmpty(this);
+      deferrable.exec(function() {
+        handleChangeFromNotEmptyToEmpty(self);
+      });
     }
+
+    deferrable.complete();
   },
   emptyClass: 'empty',
   renderEmpty: function() {
