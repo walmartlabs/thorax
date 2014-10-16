@@ -345,4 +345,36 @@ describe('core', function() {
       expect(view.html()).to.contain('t');
     });
   });
+
+  describe('#html', function() {
+    it('should trigger append', function() {
+      var view = new Thorax.View(),
+          itRan = false;
+      view.on('append', function(scope, callback, deferrable) {
+        deferrable.exec(function() {
+          itRan = true;
+        });
+      });
+
+      view.html('<div></div>');
+      expect(itRan).to.be(true);
+    });
+    it('should trigger append deferrable', function(done) {
+      this.clock.restore();
+
+      var view = new Thorax.View(),
+          itRan = false;
+      view.on('append', function(scope, callback, deferrable) {
+        deferrable.exec(function() {
+          itRan = true;
+        });
+      });
+
+      view.html('<div></div>', function() {
+        expect(itRan).to.be(true);
+        done();
+      });
+      expect(itRan).to.be(false);
+    });
+  });
 });

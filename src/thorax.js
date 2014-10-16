@@ -426,13 +426,13 @@ Thorax.View = Backbone.View.extend({
     this.trigger('ready', {target: this});
   },
 
-  html: function(html) {
+  html: function(html, callback) {
     if (_.isUndefined(html)) {
       return this.$el.html();
     } else {
       this.trigger('before:append');
       var element = this._replaceHTML(html);
-      this.trigger('append');
+      this.triggerDeferrable('append', undefined, undefined, callback);
       return element;
     }
   },
