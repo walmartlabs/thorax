@@ -1,6 +1,6 @@
 {
   "name": "thorax",
-  "version": "3.0.0-beta.3",
+  "version": "3.0.0-beta.4",
   "devDependencies": {
     "jquery": "1.9.x",
     "underscore": "1.4.4",
