@@ -37,15 +37,15 @@ describe('layout', function() {
       layout = new Thorax.LayoutView();
 
       a = new Thorax.View({
-        render: function() {
-          Thorax.View.prototype.render.call(this, 'a');
+        render: function(output, callback) {
+          Thorax.View.prototype.render.call(this, 'a', callback);
         }
       });
       aEventCounter = bindCounter(a);
 
       b = new Thorax.View({
-        render: function() {
-          Thorax.View.prototype.render.call(this, 'b');
+        render: function(output, callback) {
+          Thorax.View.prototype.render.call(this, 'b', callback);
         }
       });
       bEventCounter = bindCounter(b);
@@ -55,12 +55,12 @@ describe('layout', function() {
       $serverSide = false;
       expect(layout.getView()).to.not.be.ok();
 
-      layout.setView(a);
+      layout.setView(a, {async: false});
       expect(layout.getView()).to.equal(a, 'layout sets view');
       expect(layout.$('[data-view-cid]').length).to.be.above(0, 'layout updates HTML');
 
       b.render();
-      layout.setView(b);
+      layout.setView(b, {async: false});
       expect(layout.getView()).to.equal(b, 'layout sets view');
 
       //lifecycle checks
@@ -98,47 +98,54 @@ describe('layout', function() {
       });
     });
 
-    it('should process server-side', function() {
+    it('should process server-side', function(done) {
       $serverSide = true;
       expect(layout.getView()).to.not.be.ok();
 
+      layout.once('change:view:end', function() {
+        expect(layout.getView()).to.equal(a, 'layout sets view');
+        expect(layout.$('[data-view-cid]')).to.not.be.empty();
+        expect(aEventCounter).to.eql({
+          'before:rendered': 1,
+          rendered: 1,
+          'before:append': 1,
+          append: 1,
+          activated: 1,
+          ready: 1
+        });
+
+        layout.setView(b, {async: false});
+        expect(layout.getView()).to.equal(b, 'layout sets view');
+        expect(layout.$('[data-view-cid]')).to.be.empty();
+        expect(window.FruitLoops.emit.calledOnce).to.be.ok();
+
+        //lifecycle checks
+        expect(aEventCounter).to.eql({
+          'before:rendered': 1,
+          rendered: 1,
+          'before:append': 1,
+          append: 1,
+          activated: 1,
+          ready: 1,
+          deactivated: 1,
+          destroyed: 1
+        });
+
+        expect(bEventCounter).to.eql({});
+
+        layout.setView(false);
+        expect(layout.getView()).to.not.be.ok();
+        expect(bEventCounter).to.eql({
+          deactivated: 1,
+          destroyed: 1
+        });
+
+        done();
+      });
       layout.setView(a, {serverRender: true});
-      expect(layout.getView()).to.equal(a, 'layout sets view');
-      expect(layout.$('[data-view-cid]')).to.not.be.empty();
-      expect(aEventCounter).to.eql({
-        'before:rendered': 1,
-        rendered: 1,
-        'before:append': 1,
-        append: 1,
-        activated: 1,
-        ready: 1
-      });
+      expect(layout.getView()).to.be(undefined);
 
-      layout.setView(b);
-      expect(layout.getView()).to.equal(b, 'layout sets view');
-      expect(layout.$('[data-view-cid]')).to.be.empty();
-      expect(window.FruitLoops.emit.calledOnce).to.be.ok();
-
-      //lifecycle checks
-      expect(aEventCounter).to.eql({
-        'before:rendered': 1,
-        rendered: 1,
-        'before:append': 1,
-        append: 1,
-        activated: 1,
-        ready: 1,
-        deactivated: 1,
-        destroyed: 1
-      });
-
-      expect(bEventCounter).to.eql({});
-
-      layout.setView(false);
-      expect(layout.getView()).to.not.be.ok();
-      expect(bEventCounter).to.eql({
-        deactivated: 1,
-        destroyed: 1
-      });
+      this.clock.tick(1000);
     });
   });
 
@@ -171,7 +178,7 @@ describe('layout', function() {
           ++callCounts.child;
         }
       }
-    }));
+    }), {async: false});
     parent.release();
     expect(callCounts.parent).to.equal(1);
     expect(callCounts.layout).to.equal(1);
@@ -196,9 +203,9 @@ describe('layout', function() {
       template: Handlebars.compile("")
     });
     var layout = new Thorax.LayoutView();
-    layout.setView(a);
+    layout.setView(a, {async: false});
     b.retain();
-    layout.setView(b);
+    layout.setView(b, {async: false});
     layout.setView(false);
     expect(aSpy.callCount).to.equal(1);
     expect(bSpy.callCount).to.equal(0);
@@ -223,7 +230,7 @@ describe('layout', function() {
     layoutWithTemplate.setView(new Thorax.View({
       serverRender: true,
       template: Handlebars.compile('<div class="inner"></div>')
-    }));
+    }), {async: false});
     expect($(layoutWithTemplate.el).attr('data-layout-cid')).to.not.be.ok();
     expect(layoutWithTemplate.$('[data-layout-cid]').length).to.equal(1);
     expect(layoutWithTemplate.$('.outer').length).to.equal(1);
@@ -248,7 +255,9 @@ describe('layout', function() {
     expect(_.bind(view.render, view)).to.throwError();
   });
 
-  it("transition option can be passed to setView", function() {
+  it("transition option can be passed to setView", function(done) {
+    this.clock.restore();
+
     var layout = new Thorax.LayoutView();
     var a = new Thorax.View({
       serverRender: true,
@@ -267,17 +276,20 @@ describe('layout', function() {
       transition: function(newView, oldView, append, remove) {
         append();
         remove();
+
+        expect(layout.$('span').html()).to.equal('a');
+        layout.setView(b, {
+          serverRender: true,
+          transition: function(newView, oldView, append, remove) {
+            append();
+            remove();
+
+            expect(layout.$('span').html()).to.equal('b');
+            done();
+          }
+        });
       }
     });
-    expect(layout.$('span').html()).to.equal('a');
-    layout.setView(b, {
-      serverRender: true,
-      transition: function(newView, oldView, append, remove) {
-        append();
-        remove();
-      }
-    });
-    expect(layout.$('span').html()).to.equal('b');
   });
 
   it('setView should not throw even if old view is destroyed', function() {
@@ -294,10 +306,10 @@ describe('layout', function() {
         return '<span>b</span>';
       }
     });
-    layout.setView(a);
+    layout.setView(a, {async: false});
     expect(layout.$('span').html()).to.equal('a');
     a.release();
-    layout.setView(b);
+    layout.setView(b, {async: false});
     expect(layout.$('span').html()).to.equal('b');
   });
 
