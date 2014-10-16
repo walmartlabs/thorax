@@ -289,7 +289,7 @@ function helperInit(args, instance, callback, viewOptions) {
   callback && callback.apply(this, args);
 }
 
-function helperAppend(scope, callback) {
+function helperAppend(scope, callback, deferrable) {
   this._pendingAppend = undefined;
 
   var self = this;
@@ -299,16 +299,22 @@ function helperAppend(scope, callback) {
         view = self.children[placeholderId];
 
     if (view) {
-      //see if the view helper declared an override for the view
-      //if not, ensure the view has been rendered at least once
-      if (viewTemplateOverrides[placeholderId]) {
-        view.render(viewTemplateOverrides[placeholderId]);
-        delete viewTemplateOverrides[placeholderId];
-      } else {
-        view.ensureRendered();
-      }
-      $el.replaceWith(view.el);
-      callback && callback(view.$el);
+      deferrable.chain(function(complete) {
+        //see if the view helper declared an override for the view
+        //if not, ensure the view has been rendered at least once
+        if (viewTemplateOverrides[placeholderId]) {
+          view.render(viewTemplateOverrides[placeholderId], complete);
+          delete viewTemplateOverrides[placeholderId];
+        } else {
+          view.ensureRendered(complete);
+        }
+        $el.replaceWith(view.el);
+      });
+    }
+    if (view && callback) {
+      deferrable.exec(function() {
+        callback(view.$el);
+      });
     }
   });
 }
