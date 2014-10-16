@@ -1,4 +1,8 @@
 describe('form', function() {
+  if ($serverSide) {
+    return;
+  }
+
   var FormView = Thorax.View.extend({
     name: 'form',
     template: function() {

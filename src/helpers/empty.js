@@ -1,9 +1,8 @@
-/*global getOptionsData */
 Handlebars.registerHelper('empty', function(dataObject, options) {
   if (arguments.length === 1) {
     options = dataObject;
   }
-  var view = getOptionsData(options).view;
+  var view = options.data.view;
   if (arguments.length === 1) {
     dataObject = view.model;
   }

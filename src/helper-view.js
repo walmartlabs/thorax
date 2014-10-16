@@ -1,6 +1,6 @@
 /*global
     ServerMarshal,
-    $serverSide, createError, filterAncestors, getOptionsData,
+    $serverSide, createError, filterAncestors,
     normalizeHTMLAttributeOptions, viewHelperAttributeName
 */
 var viewPlaceholderAttributeName = 'data-view-tmp',
@@ -9,11 +9,11 @@ var viewPlaceholderAttributeName = 'data-view-tmp',
 // Will be shared by HelperView and CollectionHelperView
 var helperViewPrototype = {
   _ensureElement: function() {
-    Thorax.View.prototype._ensureElement.apply(this, arguments);
+    Thorax.View.prototype._ensureElement.call(this);
     this.$el.attr(viewHelperAttributeName, this._helperName);
   },
   _getContext: function() {
-    return this.parent._getContext.apply(this.parent, arguments);
+    return this.parent._getContext();
   }
 };
 
@@ -53,9 +53,12 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
   var viewOptionWhiteList = ViewClass.attributeWhiteList;
 
   Handlebars.registerHelper(name, function() {
-    var args = _.toArray(arguments),
-        options = args.pop(),
-        declaringView = getOptionsData(options).view;
+    var args = [],
+        options = arguments[arguments.length-1],
+        declaringView = options.data.view;
+    for (var i = 0, len = arguments.length-1; i < len; i++) {
+      args.push(arguments[i]);
+    }
  
     // Evaluate any nested parameters that we may have to content with
     var expandTokens = expandHash(this, options.hash);
@@ -80,7 +83,7 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
     viewOptions.attributes = function() {
       var attrs = (ViewClass.prototype && ViewClass.prototype.attributes) || {};
       if (_.isFunction(attrs)) {
-        attrs = attrs.apply(this, arguments);
+        attrs = attrs.call(this);
       }
       _.extend(attrs, _.omit(htmlAttributes, ['tagName']));
       // backbone wants "class"
@@ -107,32 +110,7 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
       instance.$el.attr('data-view-helper-restore', name);
 
       if ($serverSide && instance.$el.attr('data-view-restore') !== 'false') {
-        try {
-          ServerMarshal.store(instance.$el, 'args', args, options.ids, options);
-          ServerMarshal.store(instance.$el, 'attrs', options.hash, options.hashIds, options);
-          if (options.fn && options.fn !== Handlebars.VM.noop) {
-            if (options.fn.depth) {
-              // Depthed block helpers are not supoprted.
-              throw new Error();
-            }
-            ServerMarshal.store(instance.$el, 'fn', options.fn.program);
-          }
-          if (options.inverse && options.inverse !== Handlebars.VM.noop) {
-            if (options.inverse.depth) {
-              // Depthed block helpers are not supoprted.
-              throw new Error();
-            }
-            ServerMarshal.store(instance.$el, 'inverse', options.inverse.program);
-          }
-        } catch (err) {
-          instance.$el.attr('data-view-restore', 'false');
-
-          instance.trigger('restore:fail', {
-            type: 'serialize',
-            view: instance,
-            err: err
-          });
-        }
+        saveServerState(instance, args, options);
       }
 
       helperInit(args, instance, callback, viewOptions);
@@ -161,8 +139,37 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
     }
     return new Handlebars.SafeString(Thorax.Util.tag(htmlAttributes, '', expandTokens ? this : null));
   });
+
   var helper = Handlebars.helpers[name];
 
+  function saveServerState(instance, args, options) {
+    try {
+      ServerMarshal.store(instance.$el, 'args', args, options.ids, options);
+      ServerMarshal.store(instance.$el, 'attrs', options.hash, options.hashIds, options);
+      if (options.fn && options.fn !== Handlebars.VM.noop) {
+        if (options.fn.depth) {
+          // Depthed block helpers are not supoprted.
+          throw new Error();
+        }
+        ServerMarshal.store(instance.$el, 'fn', options.fn.program);
+      }
+      if (options.inverse && options.inverse !== Handlebars.VM.noop) {
+        if (options.inverse.depth) {
+          // Depthed block helpers are not supoprted.
+          throw new Error();
+        }
+        ServerMarshal.store(instance.$el, 'inverse', options.inverse.program);
+      }
+    } catch (err) {
+      instance.$el.attr('data-view-restore', 'false');
+
+      instance.trigger('restore:fail', {
+        type: 'serialize',
+        view: instance,
+        err: err
+      });
+    }
+  }
   helper.restore = function(declaringView, el, forceRerender) {
     var context = declaringView.context(),
         args = ServerMarshal.load(el, 'args', declaringView, context) || [],
@@ -278,7 +285,6 @@ function helperInit(args, instance, callback, viewOptions) {
   args.push(instance);
   declaringView._addChild(instance);
   declaringView.trigger.apply(declaringView, ['helper', name].concat(args));
-  declaringView.trigger.apply(declaringView, ['helper:' + name].concat(args));
 
   callback && callback.apply(this, args);
 }
@@ -286,10 +292,11 @@ function helperInit(args, instance, callback, viewOptions) {
 function helperAppend(scope, callback) {
   this._pendingAppend = undefined;
 
+  var self = this;
   (scope || this.$el).find('[' + viewPlaceholderAttributeName + ']').forEach(function(el) {
     var $el = $(el),
         placeholderId = $el.attr(viewPlaceholderAttributeName),
-        view = this.children[placeholderId];
+        view = self.children[placeholderId];
 
     if (view) {
       //see if the view helper declared an override for the view
@@ -303,7 +310,7 @@ function helperAppend(scope, callback) {
       $el.replaceWith(view.el);
       callback && callback(view.$el);
     }
-  }, this);
+  });
 }
 
 /**

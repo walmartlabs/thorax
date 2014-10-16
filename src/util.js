@@ -39,50 +39,51 @@ function registryGet(object, type, name, ignoreErrors) {
   }
 }
 
-function assignView(attributeName, options) {
+
+function assignView(view, attributeName, options) {
   var ViewClass;
   // if attribute is the name of view to fetch
-  if (_.isString(this[attributeName])) {
-    ViewClass = Thorax.Util.getViewClass(this[attributeName], true);
+  if (_.isString(view[attributeName])) {
+    ViewClass = Thorax.Util.getViewClass(view[attributeName], true);
   // else try and fetch the view based on the name
-  } else if (this.name && !_.isFunction(this[attributeName])) {
-    ViewClass = Thorax.Util.getViewClass(this.name + (options.extension || ''), true);
+  } else if (view.name && !_.isFunction(view[attributeName])) {
+    ViewClass = Thorax.Util.getViewClass(view.name + (options.extension || ''), true);
   }
   // if we found something, assign it
-  if (ViewClass && !_.isFunction(this[attributeName])) {
-    this[attributeName] = ViewClass;
+  if (ViewClass && !_.isFunction(view[attributeName])) {
+    view[attributeName] = ViewClass;
   }
   // if nothing was found and it's required, throw
-  if (options.required && !_.isFunction(this[attributeName])) {
-    throw new Error('View ' + (this.name || this.cid) + ' requires: ' + attributeName);
+  if (options.required && !_.isFunction(view[attributeName])) {
+    throw new Error('View ' + (view.name || view.cid) + ' requires: ' + attributeName);
   }
 }
 
-function assignTemplate(attributeName, options) {
+function assignTemplate(view, attributeName, options) {
   var template;
   // if attribute is the name of template to fetch
-  if (_.isString(this[attributeName])) {
-    template = Thorax.Util.getTemplate(this[attributeName], true);
+  if (_.isString(view[attributeName])) {
+    template = Thorax.Util.getTemplate(view[attributeName], true);
   // else try and fetch the template based on the name
-  } else if (this.name && !_.isFunction(this[attributeName])) {
-    template = Thorax.Util.getTemplate(this.name + (options.extension || ''), true);
+  } else if (view.name && !_.isFunction(view[attributeName])) {
+    template = Thorax.Util.getTemplate(view.name + (options.extension || ''), true);
   }
   // CollectionView and LayoutView have a defaultTemplate that may be used if none
   // was found, regular views must have a template if render() is called
-  if (!template && attributeName === 'template' && this._defaultTemplate) {
-    template = this._defaultTemplate;
+  if (!template && attributeName === 'template' && view._defaultTemplate) {
+    template = view._defaultTemplate;
   }
   // if we found something, assign it
-  if (template && !_.isFunction(this[attributeName])) {
-    this[attributeName] = template;
+  if (template && !_.isFunction(view[attributeName])) {
+    view[attributeName] = template;
   }
   // if nothing was found and it's required, throw
-  if (options.required && !_.isFunction(this[attributeName])) {
+  if (options.required && !_.isFunction(view[attributeName])) {
     var err = new Error('view-requires: ' + attributeName);
     err.info = {
-      name: this.name || this.cid,
-      parent: this.parent && (this.parent.name || this.parent.cid),
-      helperName: this._helperName
+      name: view.name || view.cid,
+      parent: view.parent && (view.parent.name || view.parent.cid),
+      helperName: view._helperName
     };
     throw err;
   }
@@ -199,13 +200,6 @@ function addEvents(target, source, context, listenToObject) {
       addEvent(callback, eventName);
     }
   });
-}
-
-function getOptionsData(options) {
-  if (!options || !options.data) {
-    throw new Error(createErrorMessage('handlebars-no-data'));
-  }
-  return options.data;
 }
 
 // In helpers "tagName" or "tag" may be specified, as well
@@ -344,16 +338,15 @@ Thorax.Util = {
     return input;
   },
   tag: function(attributes, content, scope) {
-    var htmlAttributes = _.omit(attributes, 'tagName'),
-        tag = attributes.tagName || 'div',
+    var tag = attributes.tagName || 'div',
         noClose = isVoidTag(tag);
 
     if (noClose && content) {
       throw new Error(createErrorMessage('void-tag-content'));
     }
 
-    var openingTag = '<' + tag + ' ' + _.map(htmlAttributes, function(value, key) {
-      if (_.isUndefined(value) || key === 'expand-tokens') {
+    var openingTag = '<' + tag + ' ' + _.map(attributes, function(value, key) {
+      if (value == null || key === 'expand-tokens' || key === 'tagName') {
         return '';
       }
       var formattedValue = value;
@@ -366,7 +359,7 @@ Thorax.Util = {
     if (noClose) {
       return openingTag;
     } else {
-      return openingTag + (_.isUndefined(content) ? '' : content) + '</' + tag + '>';
+      return openingTag + (content == null ? '' : content) + '</' + tag + '>';
     }
   }
 };

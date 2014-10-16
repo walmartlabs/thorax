@@ -1,20 +1,20 @@
 /*global
     $serverSide, FruitLoops,
-    createErrorMessage, getLayoutViewsTargetElement, getOptionsData,
+    createErrorMessage, getLayoutViewsTargetElement,
     normalizeHTMLAttributeOptions, viewNameAttributeName
 */
 var layoutCidAttributeName = 'data-layout-cid';
 
 Thorax.LayoutView = Thorax.View.extend({
   _defaultTemplate: Handlebars.VM.noop,
-  render: function() {
-    var response = Thorax.View.prototype.render.apply(this, arguments);
+  render: function(output) {
+    var response = Thorax.View.prototype.render.call(this, output);
     if (this.template === Handlebars.VM.noop) {
       // if there is no template setView will append to this.$el
-      ensureLayoutCid.call(this);
+      ensureLayoutCid(this);
     } else {
       // if a template was specified is must declare a layout-element
-      ensureLayoutViewsTargetElement.call(this);
+      ensureLayoutViewsTargetElement(this);
     }
     return response;
   },
@@ -27,7 +27,7 @@ Thorax.LayoutView = Thorax.View.extend({
   setView: function(view, options) {
     options = _.extend({
       scroll: true
-    }, options || {});
+    }, options);
 
     if (_.isString(view)) {
       view = new (Thorax.Util.registryGet(Thorax, 'Views', view, false))();
@@ -43,47 +43,48 @@ Thorax.LayoutView = Thorax.View.extend({
     }
     this.ensureRendered();
 
-    var oldView = this._view, append, remove, complete;
+    var oldView = this._view,
+        self = this;
     if (view === oldView) {
       return false;
     }
     this.trigger('change:view:start', view, oldView, options);
 
-    remove = _.bind(function() {
+    function remove() {
       if (oldView) {
         oldView.$el && oldView.$el.detach();
-        triggerLifecycleEvent.call(oldView, 'deactivated', options);
-        this._removeChild(oldView);
+        triggerLifecycleEvent(oldView, 'deactivated', options);
+        self._removeChild(oldView);
       }
-    }, this);
+    }
 
-    append = _.bind(function() {
+    function append() {
       if (!view) {
-        this._view = undefined;
+        self._view = undefined;
       } else if ($serverSide && !options.serverRender && !view.serverRender) {
         // Emit only data for non-server rendered views
         // But we do want to put ourselves into the queue for cleanup on future exec
-        this._view = view;
-        this._addChild(view);
+        self._view = view;
+        self._addChild(view);
 
         FruitLoops.emit();
       } else {
         view.ensureRendered();
         options.activating = view;
 
-        triggerLifecycleEvent.call(this, 'activated', options);
+        triggerLifecycleEvent(self, 'activated', options);
         view.trigger('activated', options);
-        this._view = view;
-        var targetElement = this._layoutViewEl;
-        this._view.appendTo(targetElement);
-        this._addChild(view);
+        self._view = view;
+        var targetElement = self._layoutViewEl;
+        self._view.appendTo(targetElement);
+        self._addChild(view);
       }
-    }, this);
+    }
 
-    complete = _.bind(function() {
-      this.hasBeenSet = true;
-      this.trigger('change:view:end', view, oldView, options);
-    }, this);
+    function complete() {
+      self.hasBeenSet = true;
+      self.trigger('change:view:end', view, oldView, options);
+    }
 
     if (!options.transition) {
       remove();
@@ -101,10 +102,12 @@ Thorax.LayoutView = Thorax.View.extend({
   }
 });
 
-Thorax.LayoutView.on('after-restore', ensureLayoutViewsTargetElement);
+Thorax.LayoutView.on('after-restore', function() {
+  ensureLayoutViewsTargetElement(this);
+});
 
 Handlebars.registerHelper('layout-element', function(options) {
-  var view = getOptionsData(options).view;
+  var view = options.data.view;
   // duck type check for LayoutView
   if (!view.getView) {
     throw new Error(createErrorMessage('layout-element-helper'));
@@ -114,28 +117,28 @@ Handlebars.registerHelper('layout-element', function(options) {
   return new Handlebars.SafeString(Thorax.Util.tag.call(this, options.hash, '', this));
 });
 
-function triggerLifecycleEvent(eventName, options) {
+function triggerLifecycleEvent(view, eventName, options) {
   options = options || {};
-  options.target = this;
-  this.trigger(eventName, options);
-  _.each(this.children, function(child) {
+  options.target = view;
+  view.trigger(eventName, options);
+  _.each(view.children, function(child) {
     child.trigger(eventName, options);
   });
 }
 
-function ensureLayoutCid() {
+function ensureLayoutCid(view) {
   //set the layoutCidAttributeName on this.$el if there was no template
-  this.$el.attr(layoutCidAttributeName, this.cid);
-  this._layoutViewEl = this.el;
+  view.$el.attr(layoutCidAttributeName, view.cid);
+  view._layoutViewEl = view.el;
 }
 
-function ensureLayoutViewsTargetElement() {
-  var el = this.$('[' + layoutCidAttributeName + '="' + this.cid + '"]')[0];
-  if (!el && this.$el.attr(layoutCidAttributeName)) {
-    el = this.el;
+function ensureLayoutViewsTargetElement(view) {
+  var el = view.$('[' + layoutCidAttributeName + '="' + view.cid + '"]')[0];
+  if (!el && view.$el.attr(layoutCidAttributeName)) {
+    el = view.el;
   }
   if (!el) {
-    throw new Error('No layout element found in ' + (this.name || this.cid));
+    throw new Error('No layout element found in ' + (view.name || view.cid));
   }
-  this._layoutViewEl = el;
+  view._layoutViewEl = el;
 }

@@ -2,15 +2,20 @@
 
 // Override uniqueId to ensure uniqueness across both the server and client
 // rendering cycles
-window._idCounter = window._idCounter || 0;
+var _idCounter = window._idCounter || 0,
+    _reqId = '';
+window._resetIdCounter = function(reqId) {
+  _idCounter = 0;
+  _reqId = reqId || '';
+};
 
 _.uniqueId = function(prefix) {
-  var id = (window._reqId || '') + (++window._idCounter);
+  var id = _reqId + (++_idCounter);
   return prefix ? prefix + id : id;
 };
 
 if (window.$serverSide) {
   FruitLoops.onEmit(function() {
-    $('body').append('<script>window._idCounter = ' + window._idCounter + ';</script>');
+    $('body').append('<script>window._idCounter = ' + _idCounter + ';</script>');
   });
 }

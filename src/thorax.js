@@ -75,14 +75,15 @@ var Thorax = this.Thorax = {
 };
 
 Thorax.View = Backbone.View.extend({
-  constructor: function() {
+  constructor: function ThoraxView(options) {
     // store first argument for configureView()
-    this._constructorArg = arguments[0];
-    var response = Backbone.View.apply(this, arguments);
-    delete this._constructorArg;
+    this._constructorArg = options;
+    var response = Backbone.View.call(this, options);
+    this._constructorArg = undefined;
+
     _.each(inheritVars, function(obj) {
       if (obj.ctor) {
-        obj.ctor.call(this, response);
+        obj.ctor(this, response);
       }
     }, this);
     return response;
@@ -97,7 +98,7 @@ Thorax.View = Backbone.View.extend({
   // for Backwards compatibility with 1.0 and earlier
   _configure: function() {},
   _ensureElement: function () {
-    configureView.call(this);
+    configureView(this);
 
     if (!$serverSide && this.el) {
       var $el = $(_.result(this, 'el'));
@@ -110,14 +111,13 @@ Thorax.View = Backbone.View.extend({
   },
 
 
-  setElement : function(element) {
+  setElement : function(element, delegate) {
     var $element = $(element),
         existingCid = $element.attr('data-view-cid');
     if (existingCid) {
       this._assignCid(existingCid);
     }
-
-    var response = Backbone.View.prototype.setElement.apply(this, arguments);
+    var response = Backbone.View.prototype.setElement.call(this, $element, delegate);
 
     // Use a hash here to avoid multiple DOM operations
     var attr = {'data-view-cid': this.cid};
@@ -182,28 +182,31 @@ Thorax.View = Backbone.View.extend({
   },
 
   _destroy: function() {
-    _.each(this._boundDataObjectsByCid, this.unbindDataObject, this);
     this.trigger('destroyed');
     delete viewsIndexedByCid[this.cid];
 
+    this.stopListening();
+    this.off();
+
     _.each(this.children, function(child) {
-      this._removeChild(child);
-    }, this);
+      child.parent = null;
+      child.release();
+    });
 
     if (this.el) {
       this.undelegateEvents();
-      this.remove();  // Will call stopListening()
-      this.off();     // Kills off remaining events
+      this.$el.remove();
 
       ServerMarshal.destroy(this.$el);
     }
 
     // Absolute worst case scenario, kill off some known fields to minimize the impact
     // of being retained.
-    this.el = this.$el = undefined;
-    this.parent = undefined;
-    this.model = this.collection = this._collection = undefined;
-    this._helperOptions = undefined;
+    this.el = this.$el =
+      this.parent = this.children =
+      this.model = this.collection = this._collection =
+      this._boundDataObjectsByCid = this._objectOptionsByCid =
+      this._helperOptions = undefined;
   },
 
   restore: function(element, forceRerender) {
@@ -235,7 +238,7 @@ Thorax.View = Backbone.View.extend({
     if (!$serverSide && restoreable) {
       // Ensure that our associated template is wired up so that helpers who need to
       // resolve template children are able to do so.
-      assignTemplate.call(this, 'template', {
+      assignTemplate(this, 'template', {
         required: false
       });
 
@@ -287,7 +290,7 @@ Thorax.View = Backbone.View.extend({
       return self;
     }
 
-    Thorax.runSection('thorax-render', {name: self.name}, function() {
+    function render() {
       if (self._rendering) {
         // Nested rendering of the same view instances can lead to some very nasty issues with
         // the root render process overwriting any updated data that may have been output in the child
@@ -313,40 +316,45 @@ Thorax.View = Backbone.View.extend({
       self.trigger('before:rendered');
       self._rendering = true;
 
+      if (_.isUndefined(output) || (!_.isElement(output) && !Thorax.Util.is$(output) && !(output && output.el) && !_.isString(output) && !_.isFunction(output))) {
+        // try one more time to assign the template, if we don't
+        // yet have one we must raise
+        assignTemplate(self, 'template', {
+          required: true
+        });
+        output = self.renderTemplate(self.template);
+      } else if (_.isFunction(output)) {
+        output = self.renderTemplate(output);
+      }
+
+      // Destroy any helpers that may be lingering
+      _.each(previous, function(child) {
+        if (child._cull) {
+          self._removeChild(child);
+        }
+      });
+      self._previousHelpers = undefined;
+
+
+      if ($serverSide) {
+        if (self.$el.attr(viewRestoreAttribute) !== 'false') {
+          self.$el.attr(viewRestoreAttribute, $serverSide);
+        }
+      } else {
+        self.$el.removeAttr(viewRestoreAttribute);
+      }
+
+      //accept a view, string, Handlebars.SafeString or DOM element
+      self.html((output && output.el) || (output && output.string) || output);
+
+      ++self._renderCount;
+
+      self.trigger('rendered');
+    }
+
+    Thorax.runSection('thorax-render', {name: self.name}, function() {
       try {
-        if (_.isUndefined(output) || (!_.isElement(output) && !Thorax.Util.is$(output) && !(output && output.el) && !_.isString(output) && !_.isFunction(output))) {
-          // try one more time to assign the template, if we don't
-          // yet have one we must raise
-          assignTemplate.call(self, 'template', {
-            required: true
-          });
-          output = self.renderTemplate(self.template);
-        } else if (_.isFunction(output)) {
-          output = self.renderTemplate(output);
-        }
-
-        // Destroy any helpers that may be lingering
-        _.each(previous, function(child) {
-          if (child._cull) {
-            self._removeChild(child);
-          }
-        }, self);
-        self._previousHelpers = undefined;
-
-
-        if ($serverSide) {
-          if (self.$el.attr(viewRestoreAttribute) !== 'false') {
-            self.$el.attr(viewRestoreAttribute, $serverSide);
-          }
-        } else {
-          self.$el.removeAttr(viewRestoreAttribute);
-        }
-
-        //accept a view, string, Handlebars.SafeString or DOM element
-        self.html((output && output.el) || (output && output.string) || output);
-
-        ++self._renderCount;
-        self.trigger('rendered');
+        render();
       } finally {
         self._rendering = false;
       }
@@ -355,11 +363,12 @@ Thorax.View = Backbone.View.extend({
   },
 
   context: function() {
-    return _.extend({}, (this.model && this.model.attributes) || {});
+    return this.model && this.model.attributes;
   },
 
   _getContext: function() {
-    return _.extend({}, this, getValue(this, 'context') || {});
+    var context = Object.create ? Object.create(this) : _.clone(this);
+    return _.extend(context, this.context.call ? this.context() : this.context);
   },
 
   // Private variables in handlebars / options.data in template helpers
@@ -492,52 +501,50 @@ Thorax.View.extend = function() {
 
 createRegistryWrapper(Thorax.View, Thorax.Views);
 
-function configureView () {
-  var options = this._constructorArg;
-  var self = this;
+function configureView(view) {
+  var options = view._constructorArg;
 
-  this._referenceCount = 0;
+  view._referenceCount = 0;
 
-  this._objectOptionsByCid = {};
-  this._boundDataObjectsByCid = {};
+  view._objectOptionsByCid = {};
+  view._boundDataObjectsByCid = {};
 
   // Setup object event tracking
   _.each(inheritVars, function(obj) {
-    self[obj.name] = [];
+    view[obj.name] = [];
   });
 
-  this.children = {};
-  this._renderCount = 0;
+  view.children = {};
+  view._renderCount = 0;
 
   //this.options is removed in Thorax.View, we merge passed
   //properties directly with the view and template context
   if (options) {
-    _.extend(this, options);
+    _.extend(view, options);
   }
 
   // Setup helpers
-  bindHelpers.call(this);
+  bindHelpers(view);
 
   _.each(inheritVars, function(obj) {
     if (obj.configure) {
-      obj.configure.call(this);
+      obj.configure(view);
     }
-  }, this);
+  });
 
-  this.trigger('configure');
+  view.trigger('configure');
 }
 
-function bindHelpers() {
-  if (this.helpers) {
-    _.each(this.helpers, function(helper, name) {
-      var view = this;
-      this.helpers[name] = function() {
+function bindHelpers(view) {
+  if (view.helpers) {
+    _.each(view.helpers, function(helper, name) {
+      view.helpers[name] = function() {
         var args = _.toArray(arguments),
             options = _.last(args);
         options.context = this;
         return helper.apply(view, args);
       };
-    }, this);
+    });
   }
 }
 

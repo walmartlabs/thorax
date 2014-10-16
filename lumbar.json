@@ -33,13 +33,18 @@
         {"src": "src/data-object.js"},
         {"src": "src/model.js"},
         {"src": "src/collection.js"},
-        {"src": "src/form.js"},
         {"src": "src/layout.js"},
         {"src": "src/helpers/collection.js"},
         {"src": "src/helpers/empty.js"},
         {"src": "src/helpers/template.js"},
         {"src": "src/helpers/url.js"},
         {"src": "src/helpers/view.js"},
+      ]
+    },
+
+    "thorax-form": {
+      "scripts": [
+        {"src": "src/form.js"},
       ]
     },
 

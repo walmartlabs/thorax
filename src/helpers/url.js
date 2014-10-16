@@ -1,12 +1,13 @@
-Handlebars.registerHelper('url', function(url) {
-  url = url || '';
+Handlebars.registerHelper('url', function(_url, options) {
+  var url = _url || '';
 
-  var fragment;
+  var fragment = '';
   if (arguments.length > 2) {
-    fragment = _.map(_.head(arguments, arguments.length - 1), encodeURIComponent).join('/');
+    for (var i = 0, len = arguments.length - 1; i < len; i++) {
+      fragment += (i ? '/' : '') + encodeURIComponent(arguments[i]);
+    }
   } else {
-    var options = arguments[1],
-        hash = (options && options.hash) || options;
+    var hash = (options && options.hash) || options;
     if (hash && hash['expand-tokens']) {
       fragment = Thorax.Util.expandToken(url, this, true);
     } else {

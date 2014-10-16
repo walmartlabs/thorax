@@ -1,6 +1,6 @@
 /* global
     $serverSide,
-    collectionElementAttributeName, createErrorMessage, getOptionsData, getParent,
+    collectionElementAttributeName, createErrorMessage, getParent,
     helperViewPrototype, normalizeHTMLAttributeOptions,
     viewRestoreAttribute
 */
@@ -9,7 +9,9 @@ Thorax.CollectionHelperView = Thorax.CollectionView.extend({
   // Forward render events to the parent
   events: {
     'rendered:collection': forwardRenderEvent('rendered:collection'),
-    'rendered:item': forwardRenderEvent('rendered:item'),
+    'rendered:item': function(view, collection, model, itemEl, index) {
+      this.parent.trigger('rendered:item', view, collection, model, itemEl, index);
+    },
     'rendered:empty': forwardRenderEvent('rendered:empty'),
     'restore:collection': forwardRenderEvent('restore:collection'),
     'restore:item': forwardRenderEvent('restore:item'),
@@ -102,15 +104,16 @@ Thorax.CollectionHelperView = Thorax.CollectionView.extend({
     return response;
   },
   setAsPrimaryCollectionHelper: function() {
+    var self = this,
+        parent = self.parent;
     _.each(forwardableProperties, function(propertyName) {
-      forwardMissingProperty.call(this, propertyName);
-    }, this);
+      forwardMissingProperty(self, propertyName);
+    });
 
-    var self = this;
     _.each(['itemFilter', 'itemContext', 'renderItem', 'renderEmpty'], function(propertyName) {
-      if (self.parent[propertyName]) {
-        self[propertyName] = function() {
-          return self.parent[propertyName].apply(self.parent, arguments);
+      if (parent[propertyName]) {
+        self[propertyName] = function(thing1, thing2) {
+          return parent[propertyName](thing1, thing2);
         };
       }
     });
@@ -131,10 +134,8 @@ Thorax.CollectionHelperView.attributeWhiteList = {
 };
 
 function forwardRenderEvent(eventName) {
-  return function() {
-    var args = _.toArray(arguments);
-    args.unshift(eventName);
-    this.parent.trigger.apply(this.parent, args);
+  return function(thing1, thing2) {
+    this.parent.trigger(eventName, thing1, thing2);
   };
 }
 
@@ -145,12 +146,12 @@ var forwardableProperties = [
   'emptyView'
 ];
 
-function forwardMissingProperty(propertyName) {
-  var parent = getParent(this);
-  if (!this[propertyName]) {
+function forwardMissingProperty(view, propertyName) {
+  var parent = getParent(view);
+  if (!view[propertyName]) {
     var prop = parent[propertyName];
     if (prop){
-      this[propertyName] = prop;
+      view[propertyName] = prop;
     }
   }
 }
@@ -179,7 +180,7 @@ Handlebars.registerViewHelper('collection', Thorax.CollectionHelperView, functio
 });
 
 Handlebars.registerHelper('collection-element', function(options) {
-  if (!getOptionsData(options).view.renderCollection) {
+  if (!options.data.view.renderCollection) {
     throw new Error(createErrorMessage('collection-element-helper'));
   }
   var hash = options.hash;

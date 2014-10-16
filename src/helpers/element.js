@@ -1,26 +1,36 @@
-/*global getOptionsData, normalizeHTMLAttributeOptions */
+/*global normalizeHTMLAttributeOptions */
 var elementPlaceholderAttributeName = 'data-element-tmp';
 
 Handlebars.registerHelper('element', function(element, options) {
   normalizeHTMLAttributeOptions(options.hash);
   var cid = _.uniqueId('element'),
-      declaringView = getOptionsData(options).view;
+      declaringView = options.data.view;
   options.hash[elementPlaceholderAttributeName] = cid;
   declaringView._elementsByCid || (declaringView._elementsByCid = {});
   declaringView._elementsByCid[cid] = element;
+
+  // Register the append helper if not already done
+  if (!declaringView._pendingElement) {
+    declaringView._pendingElement = true;
+    declaringView.once('append', elementAppend);
+  }
+
   return new Handlebars.SafeString(Thorax.Util.tag(options.hash));
 });
 
-Thorax.View.on('append', function(scope, callback) {
+function elementAppend(scope, callback) {
+  this._pendingElement = undefined;
+
+  var self = this;
   (scope || this.$el).find('[' + elementPlaceholderAttributeName + ']').forEach(function(el) {
     var $el = $(el),
         cid = $el.attr(elementPlaceholderAttributeName),
-        element = this._elementsByCid[cid];
+        element = self._elementsByCid[cid];
     // A callback function may be specified as the value
     if (_.isFunction(element)) {
-      element = element.call(this);
+      element = element.call(self);
     }
     $el.replaceWith(element);
     callback && callback($(element));
-  }, this);
-});
+  });
+}

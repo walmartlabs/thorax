@@ -13,9 +13,9 @@ var _fetch = Backbone.Collection.prototype.fetch,
 
 Thorax.Collection = Backbone.Collection.extend({
   model: Thorax.Model || Backbone.Model,
-  initialize: function() {
+  initialize: function(models, options) {
     this.cid = _.uniqueId('collection');
-    return Backbone.Collection.prototype.initialize.apply(this, arguments);
+    return Backbone.Collection.prototype.initialize.call(this, models, options);
   },
   isEmpty: function() {
     if (this.length > 0) {
@@ -37,7 +37,7 @@ Thorax.Collection = Backbone.Collection.extend({
       collection._fetched = true;
       success && success(collection, response, options);
     };
-    return _fetch.apply(this, arguments);
+    return _fetch.call(this, options);
   },
   set: function(models, options) {
     this._fetched = !!models;
@@ -102,10 +102,10 @@ Thorax.CollectionView = Thorax.View.extend({
     }
   },
 
-  render: function() {
+  render: function(output) {
     var shouldRender = this.shouldRender();
 
-    Thorax.View.prototype.render.apply(this, arguments);
+    Thorax.View.prototype.render.call(this, output);
     if (!shouldRender) {
       this.renderCollection();
     }
@@ -192,7 +192,7 @@ Thorax.CollectionView = Thorax.View.extend({
   //appendItem(model [,index])
   //appendItem(html_string, index)
   //appendItem(view, index)
-  appendItem: function(model, index, options) {
+  appendItem: function(model, index, options, append) {
     //empty item
     if (!model) {
       return;
@@ -213,7 +213,8 @@ Thorax.CollectionView = Thorax.View.extend({
       itemView = model;
       model = false;
     } else {
-      index = index || collection.indexOf(model) || 0;
+      index = index != null ? index : (collection.indexOf(model) || 0);
+
       // Using call here to avoid v8 prototype inline optimization bug that helper views
       // expose under Android 4.3 (at minimum)
       // https://twitter.com/kpdecker/status/422149634929082370
@@ -229,7 +230,7 @@ Thorax.CollectionView = Thorax.View.extend({
       //if the renderer's output wasn't contained in a tag, wrap it in a div
       //plain text, or a mixture of top level text nodes and element nodes
       //will get wrapped
-      if (_.isString(itemView) && !itemView.match(/^\s*</m)) {
+      if (_.isString(itemView) && !/^\s*</m.test(itemView)) {
         itemView = '<div>' + itemView + '</div>';
       }
       var itemElement = itemView.$el || $($.trim(itemView)).filter(function() {
@@ -243,13 +244,18 @@ Thorax.CollectionView = Thorax.View.extend({
           'data-model-cid': model.cid
         });
       }
-      var previousModel = index > 0 ? collection.at(index - 1) : false;
-      if (!previousModel) {
-        $el.prepend(itemElement);
+
+      if (append) {
+        $el.append(itemElement);
       } else {
-        //use last() as appendItem can accept multiple nodes from a template
-        var last = $el.children('[' + modelCidAttributeName + '="' + previousModel.cid + '"]').last();
-        last.after(itemElement);
+        var previousModel = index > 0 ? collection.at(index - 1) : false;
+        if (!previousModel) {
+          $el.prepend(itemElement);
+        } else {
+          //use last() as appendItem can accept multiple nodes from a template
+          var last = $el.children('[' + modelCidAttributeName + '="' + previousModel.cid + '"]').last();
+          last.after(itemElement);
+        }
       }
 
       this.trigger('append', null, function($el) {
@@ -263,7 +269,7 @@ Thorax.CollectionView = Thorax.View.extend({
         this.trigger('rendered:item', this, collection, model, itemElement, index);
       }
       if (filter) {
-        applyItemVisiblityFilter.call(this, model);
+        applyItemVisiblityFilter(this, model);
       }
     }
     return itemView;
@@ -317,32 +323,34 @@ Thorax.CollectionView = Thorax.View.extend({
   renderCollection: function() {
     if (this.collection) {
       if (this.collection.isEmpty()) {
-        handleChangeFromNotEmptyToEmpty.call(this);
+        handleChangeFromNotEmptyToEmpty(this);
       } else if (this._pendingRestore) {
         // If we had to delay the initial restore due to the local data set being loaded, then
         // we want to resume that operation where it left off.
         this._pendingRestore = false;
         this.restoreCollection(this._forceRerender);
       } else {
-        handleChangeFromEmptyToNotEmpty.call(this);
-        this.collection.forEach(function(item, i) {
-          this.appendItem(item, i);
-        }, this);
+        handleChangeFromEmptyToNotEmpty(this);
+
+        var self = this;
+        _.each(this.collection.models, function(item, i) {
+          self.appendItem(item, i, undefined, true);
+        });
       }
       this.trigger('rendered:collection', this, this.collection);
     } else {
-      handleChangeFromNotEmptyToEmpty.call(this);
+      handleChangeFromNotEmptyToEmpty(this);
     }
   },
   emptyClass: 'empty',
   renderEmpty: function() {
     if (!this.emptyView) {
-      assignView.call(this, 'emptyView', {
+      assignView(this, 'emptyView', {
         extension: '-empty'
       });
     }
     if (!this.emptyTemplate && !this.emptyView) {
-      assignTemplate.call(this, 'emptyTemplate', {
+      assignTemplate(this, 'emptyTemplate', {
         extension: '-empty',
         required: false
       });
@@ -370,13 +378,13 @@ Thorax.CollectionView = Thorax.View.extend({
 
   renderItem: function(model, i) {
     if (!this.itemView) {
-      assignView.call(this, 'itemView', {
+      assignView(this, 'itemView', {
         extension: '-item',
         required: false
       });
     }
     if (!this.itemTemplate && !this.itemView) {
-      assignTemplate.call(this, 'itemTemplate', {
+      assignTemplate(this, 'itemTemplate', {
         extension: '-item',
         // only require an itemTemplate if an itemView
         // is not present
@@ -445,7 +453,12 @@ Thorax.CollectionView = Thorax.View.extend({
   },
 
   updateFilter: function() {
-    applyVisibilityFilter.call(this);
+    var view = this;
+    if (view.itemFilter) {
+      _.each(view.collection.models, function(model) {
+        applyItemVisiblityFilter(view, model);
+      });
+    }
   }
 });
 
@@ -453,20 +466,24 @@ Thorax.CollectionView.on({
   restore: 'restoreCollection',
 
   collection: {
-    reset: onCollectionReset,
-    sort: onCollectionReset,
+    'reset': function(collection) {
+      onCollectionReset(this, collection);
+    },
+    'sort': function(collection) {
+      onCollectionReset(this, collection);
+    },
     change: function(model) {
       var options = this.getObjectOptions(this.collection);
       if (options && options.change) {
         this.updateItem(model);
       }
-      applyItemVisiblityFilter.call(this, model);
+      applyItemVisiblityFilter(this, model);
     },
     add: function(model) {
       var $el = this._collectionElement;
       if ($el.length) {
         if (this.collection.length === 1) {
-          handleChangeFromEmptyToNotEmpty.call(this);
+          handleChangeFromEmptyToNotEmpty(this);
         }
 
         var index = this.collection.indexOf(model);
@@ -476,7 +493,10 @@ Thorax.CollectionView.on({
     remove: function(model) {
       var $el = this._collectionElement;
       this.removeItem(model);
-      this.collection.length === 0 && $el.length && handleChangeFromNotEmptyToEmpty.call(this);
+
+      if (this.collection.length === 0 && $el.length) {
+        handleChangeFromNotEmptyToEmpty(this);
+      }
     }
   }
 });
@@ -494,56 +514,50 @@ Thorax.View.on({
   }
 });
 
-function onCollectionReset(collection) {
+function onCollectionReset(view, collection) {
   // Undefined to force conditional render
-  var options = this.getObjectOptions(collection) || undefined;
-  if (this.shouldRender(options && options.render)) {
-    this.renderCollection && this.renderCollection();
+  var options = view.getObjectOptions(collection) || undefined;
+  if (view.shouldRender(options && options.render)) {
+    view.renderCollection && view.renderCollection();
   }
 }
 
 // Even if the view is not a CollectionView
 // ensureRendered() to provide similar behavior
 // to a model
-function onSetCollection(collection) {
+function onSetCollection(view, collection) {
   // Undefined to force conditional render
-  var options = this.getObjectOptions(collection) || undefined;
-  if (this.shouldRender(options && options.render)) {
+  var options = view.getObjectOptions(collection) || undefined;
+  if (view.shouldRender(options && options.render)) {
     // Ensure that something is there if we are going to render the collection.
-    this.ensureRendered();
+    view.ensureRendered();
   }
 }
 
-function applyVisibilityFilter() {
-  if (this.itemFilter) {
-    this.collection.forEach(applyItemVisiblityFilter, this);
-  }
+function applyItemVisiblityFilter(view, model) {
+  var $el = view._collectionElement;
+  view.itemFilter && $el.find('[' + modelCidAttributeName + '="' + model.cid + '"]')[itemShouldBeVisible(view, model) ? 'show' : 'hide']();
 }
 
-function applyItemVisiblityFilter(model) {
-  var $el = this._collectionElement;
-  this.itemFilter && $el.find('[' + modelCidAttributeName + '="' + model.cid + '"]')[itemShouldBeVisible.call(this, model) ? 'show' : 'hide']();
-}
-
-function itemShouldBeVisible(model) {
+function itemShouldBeVisible(view, model) {
   // Using call here to avoid v8 prototype inline optimization bug that helper views
   // expose under Android 4.3 (at minimum)
   // https://twitter.com/kpdecker/status/422149634929082370
-  return this.itemFilter.call(this, model, this.collection.indexOf(model));
+  return view.itemFilter.call(view, model, view.collection.indexOf(model));
 }
 
-function handleChangeFromEmptyToNotEmpty() {
-  var $el = this._collectionElement;
-  this.emptyClass && $el.removeClass(this.emptyClass);
+function handleChangeFromEmptyToNotEmpty(view) {
+  var $el = view._collectionElement;
+  view.emptyClass && $el.removeClass(view.emptyClass);
   $el.removeAttr(collectionEmptyAttributeName);
   $el.empty();
 }
 
-function handleChangeFromNotEmptyToEmpty() {
-  var $el = this._collectionElement;
-  this.emptyClass && $el.addClass(this.emptyClass);
+function handleChangeFromNotEmptyToEmpty(view) {
+  var $el = view._collectionElement;
+  view.emptyClass && $el.addClass(view.emptyClass);
   $el.attr(collectionEmptyAttributeName, true);
-  this.appendEmpty();
+  view.appendEmpty();
 }
 
 //$(selector).collection() helper
