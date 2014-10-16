@@ -346,6 +346,48 @@ describe('core', function() {
     });
   });
 
+  describe('#render', function() {
+    it('should support sync', function() {
+      var view = new Thorax.View(),
+          itRan = 0;
+      view.on('before:rendered', function(deferrable) {
+        deferrable.exec(function() {
+          expect(itRan).to.equal(0);
+          itRan++;
+        });
+      });
+      view.on('rendered', function() {
+        expect(itRan).to.equal(1);
+        itRan++;
+      });
+
+      view.render('<div></div>');
+      expect(itRan).to.equal(2);
+    });
+    it('should support async', function(done) {
+      this.clock.restore();
+
+      var view = new Thorax.View(),
+          itRan = 0;
+      view.on('before:rendered', function(deferrable) {
+        deferrable.exec(function() {
+          expect(itRan).to.equal(0);
+          itRan++;
+        });
+      });
+      view.on('rendered', function() {
+        expect(itRan).to.equal(1);
+        itRan++;
+      });
+
+      view.render('<div></div>', function() {
+        expect(itRan).to.equal(2);
+        done();
+      });
+      expect(itRan).to.equal(0);
+    });
+  });
+
   describe('#html', function() {
     it('should trigger append', function() {
       var view = new Thorax.View(),
