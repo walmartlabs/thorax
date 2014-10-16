@@ -354,9 +354,9 @@ Thorax.View = Backbone.View.extend({
         }
       });
 
-      deferrable.chain(function(complete) {
+      deferrable.chain(function(next) {
         //accept a view, string, Handlebars.SafeString or DOM element
-        self.html((output && output.el) || (output && output.string) || output, complete);
+        self.html((output && output.el) || (output && output.string) || output, next);
       });
 
       deferrable.exec(function() {
@@ -365,7 +365,7 @@ Thorax.View = Backbone.View.extend({
         self.trigger('rendered');
         self._rendering = false;
       });
-      deferrable.complete();
+      deferrable.run();
     });
 
     return self;

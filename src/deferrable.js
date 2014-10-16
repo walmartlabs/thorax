@@ -5,11 +5,15 @@
 // in server side (async) vs. client side (sync) operations but code utilizing
 // this should not make assumptions about one state or another.
 //
-// Within a given deferable instance, all calls to `exec`/`chain` are guaranteed
-// to execute in the order that they were received. All operations will be run
-// or registered when the complete call is made, meaning the normal code interleaved
-// with deferrable tasks will run before the deferrable task. Generally it's not
-// recommended to mix and match the two code styles outside of initialization logic.
+// When `complete` is is a callback passed, all of the tasks will be executed
+// asynchronously. If this parameter is omitted, then all tasks will be executed
+// synchronously.
+//
+// All callbacks to `exec`/`chain` are guaranteed to execute in the order that they
+// were received. All operations will be run when the `run` call is made, meaning
+// the normal code interleaved with deferrable tasks will run before the deferrable
+// task. Generally it's not recommended to mix and match the two code styles
+// outside of initialization logic.
 function Deferrable(complete) {
   var queue = [];
 
@@ -65,12 +69,12 @@ function Deferrable(complete) {
 
     // Signal that all potential tasks have been registered and execution should
     // commence.
-    complete: function() {
+    run: function() {
       // Check if there were no asyncable calls made and complete immediately
       if (complete && !queue.length) {
         setImmediate(complete);
       } else {
-        // Otherwise fire off the aync processes
+        // Otherwise fire off the async processes
         next();
       }
     }
@@ -94,5 +98,5 @@ Thorax.View.prototype.triggerDeferrable = function() {
   args.push(controller);
 
   this.trigger.apply(this, args);
-  controller.complete();
+  controller.run();
 };

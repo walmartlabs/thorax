@@ -4,7 +4,7 @@ describe('Deferrable', function() {
     describe('sync', function() {
       it('should work on no exec', function() {
         // Does not throw
-        Thorax.Util.Deferrable().complete();
+        Thorax.Util.Deferrable().run();
       });
       it('should handle', function() {
         var deferrable = Thorax.Util.Deferrable(),
@@ -18,7 +18,7 @@ describe('Deferrable', function() {
           foo = 'bar';
         });
         expect(foo).to.be(undefined);
-        deferrable.complete();
+        deferrable.run();
         expect(foo).to.equal('bar');
       });
       it('should handle late addition', function() {
@@ -38,7 +38,7 @@ describe('Deferrable', function() {
           foo = 'bar';
         });
         expect(foo).to.be(undefined);
-        deferrable.complete();
+        deferrable.run();
         expect(foo).to.equal('bat');
       });
       it('should handle chaining', function() {
@@ -53,7 +53,7 @@ describe('Deferrable', function() {
           foo = 'bar';
         });
         expect(foo).to.be(undefined);
-        deferrable.complete();
+        deferrable.run();
         expect(foo).to.equal('bar');
       });
     });
@@ -61,7 +61,7 @@ describe('Deferrable', function() {
     describe('async', function() {
       it('should work on no exec', function(done) {
         this.clock.restore();
-        Thorax.Util.Deferrable(done).complete();
+        Thorax.Util.Deferrable(done).run();
       });
       it('should handle', function(done) {
         this.clock.restore();
@@ -78,7 +78,7 @@ describe('Deferrable', function() {
           expect(foo).to.equal('foo');
           foo = 'bar';
         });
-        deferrable.complete();
+        deferrable.run();
         expect(foo).to.be(undefined);
       });
       it('should handle late addition', function(done) {
@@ -102,7 +102,7 @@ describe('Deferrable', function() {
           foo = 'bar';
         });
         expect(foo).to.be(undefined);
-        deferrable.complete();
+        deferrable.run();
       });
       it('should handle chaining', function(done) {
         this.clock.restore();
@@ -115,13 +115,13 @@ describe('Deferrable', function() {
           expect(foo).to.be(undefined);
           foo = 'foo';
         });
-        deferrable.chain(function(complete) {
+        deferrable.chain(function(next) {
           expect(foo).to.equal('foo');
           foo = 'bar';
-          complete();
+          next();
         });
         expect(foo).to.be(undefined);
-        deferrable.complete();
+        deferrable.run();
       });
     });
   });

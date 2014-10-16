@@ -107,8 +107,8 @@ Thorax.CollectionView = Thorax.View.extend({
     if (!this.shouldRender()) {
       var self = this;
       this.once('append', function(scope, _callback, deferrable) {
-        deferrable.chain(function(complete) {
-          self.renderCollection(complete);
+        deferrable.chain(function(next) {
+          self.renderCollection(next);
         });
       });
     }
@@ -346,8 +346,8 @@ Thorax.CollectionView = Thorax.View.extend({
         });
 
         _.each(self.collection.models, function(item, i) {
-          deferrable.chain(function(complete) {
-            self.appendItem(item, i, undefined, true, complete);
+          deferrable.chain(function(next) {
+            self.appendItem(item, i, undefined, true, next);
           });
         });
       }
@@ -360,7 +360,7 @@ Thorax.CollectionView = Thorax.View.extend({
       });
     }
 
-    deferrable.complete();
+    deferrable.run();
   },
   emptyClass: 'empty',
   renderEmpty: function() {

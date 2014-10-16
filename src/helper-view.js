@@ -299,14 +299,14 @@ function helperAppend(scope, callback, deferrable) {
         view = self.children[placeholderId];
 
     if (view) {
-      deferrable.chain(function(complete) {
+      deferrable.chain(function(next) {
         //see if the view helper declared an override for the view
         //if not, ensure the view has been rendered at least once
         if (viewTemplateOverrides[placeholderId]) {
-          view.render(viewTemplateOverrides[placeholderId], complete);
+          view.render(viewTemplateOverrides[placeholderId], next);
           delete viewTemplateOverrides[placeholderId];
         } else {
-          view.ensureRendered(complete);
+          view.ensureRendered(next);
         }
         $el.replaceWith(view.el);
       });
