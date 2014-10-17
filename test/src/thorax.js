@@ -10,6 +10,9 @@ describe('core', function() {
   Handlebars.templates.parent = Handlebars.compile('<div>{{view child}}</div>');
   Handlebars.templates.child = Handlebars.compile('<div>{{value}}</div>');
   Handlebars.templates['extension-test.handlebars'] = Handlebars.compile('123');
+  Thorax.onException = function(name, err) {
+    throw err;
+  };
 
   it("registry", function() {
     var ViewClass = Thorax.View.extend({name: 'a-name'}, {});
@@ -204,7 +207,7 @@ describe('core', function() {
   });
 
   describe('onException', function() {
-    it('should handle DOM exceptions', function() {
+    it('should handle DOM exceptions when onException is defined', function() {
       if ($serverSide) {
         return;
       }
