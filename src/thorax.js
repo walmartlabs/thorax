@@ -58,17 +58,18 @@ var Thorax = this.Thorax = {
       callback = info;
       info = undefined;
     }
-    return function() {
-      if (typeof Thorax.onException === 'function') {
+    if (Thorax.onException) {
+      return function() {
         try {
           return callback.apply(this, arguments);
         } catch (err) {
           Thorax.onException(name, err, info);
         }
-      } else {
-        return callback.apply(this, arguments);
-      }
-    };
+      };
+    }
+    else {
+      return callback;
+    }
   },
   runSection: function(name, info, callback) {
     return Thorax.bindSection(name, info, callback)();
