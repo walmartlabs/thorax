@@ -1356,7 +1356,7 @@ Override these APIs with your own logging / debugging handler or utilize [Costan
 
 ### onException *Thorax.onException(name, error, info)*
 
-Logs exceptions when they occur. Passed to the function are a unique identifier, `name`, the thrown exception, `error`, and an object containing any additional information, `info`. The default implementation is `null` instead of a function which makes Thorax not intervene with the exception process at all. The typical use case for this method is if you use an error reporting service, such as [Raven.js](https://raven-js.readthedocs.org/en/latest/usage/index.html):
+Logs exceptions when they occur. Passed to the function are a unique identifier, `name`, the thrown exception, `error`, and an object containing any additional information, `info`. The default implementation is `null` instead of a function which makes Thorax not intervene with the exception process at all. The typical use case for this method is if you use an error reporting service, such as [Costanza](https://github.com/walmartlabs/costanza), or in this example, [Raven.js](https://github.com/getsentry/raven-js):
 
     Throax.onException = function(name, error) {
       Raven.captureException(error);
