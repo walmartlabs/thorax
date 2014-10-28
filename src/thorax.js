@@ -58,21 +58,24 @@ var Thorax = this.Thorax = {
       callback = info;
       info = undefined;
     }
-    return function() {
-      try {
-        return callback.apply(this, arguments);
-      } catch (err) {
-        Thorax.onException(name, err, info);
-      }
-    };
+    if (Thorax.onException) {
+      return function() {
+        try {
+          return callback.apply(this, arguments);
+        } catch (err) {
+          Thorax.onException(name, err, info);
+        }
+      };
+    }
+    else {
+      return callback;
+    }
   },
   runSection: function(name, info, callback) {
     return Thorax.bindSection(name, info, callback)();
   },
 
-  onException: function(name, err /* , info */) {
-    throw err;
-  },
+  onException: null,
 
   //deprecated, here to ensure existing projects aren't mucked with
   templates: Handlebars.templates
