@@ -392,7 +392,7 @@ function fetchQueue(dataObj, options, $super) {
 
   var fetchQueue = dataObj.fetchQueue;
   dataObj.fetchQueue.push({
-    // Individual requests can only fail individually. Success willl always occur via the
+    // Individual requests can only fail individually. Success will always occur via the
     // normal xhr path
     aborted: function() {
       var index = _.indexOf(fetchQueue, this);
