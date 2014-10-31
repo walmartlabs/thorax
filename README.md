@@ -1083,7 +1083,7 @@ As a result the following two views are equivalent:
 
 ### empty *{{#empty [modelOrCollection]}}*
 
-A conditional helper much like `if` that calls `isEmpty` on the specified object. In addition it will bind events to re-render the view should the object's state change from empty to not empty, or visa versa.
+A conditional helper much like `if` that calls `isEmpty` on the specified object. In addition it will bind events to re-render the view should the object's state change from empty to not empty, or vice versa.
 
     {{#empty collection}}
       So empty!
