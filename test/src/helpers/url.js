@@ -29,4 +29,30 @@ describe('url helper', function() {
       expect(actual).to.equal(expected);
     });
   });
+
+  describe('history root is handled properly for pushState', function () {
+    afterEach(function () {
+      Backbone.history.stop();
+    });
+    it('when root is not defined and absolute url', function () {
+      Backbone.history.start({pushState: true});
+      var actual = Handlebars.helpers.url.call({}, '/articles/');
+      expect(actual).to.equal('/articles/');
+    });
+    it('when root is not defined and relative url', function () {
+      Backbone.history.start({pushState: true});
+      var actual = Handlebars.helpers.url.call({}, 'articles/');
+      expect(actual).to.equal('/articles/');
+    });
+    it('when root is defined and absolute url', function () {
+      Backbone.history.start({pushState: true, root: '/context/'});
+      var actual = Handlebars.helpers.url.call({}, '/articles/');
+      expect(actual).to.equal('/articles/');
+    });
+    it('when root is defined and relative url', function () {
+      Backbone.history.start({pushState: true, root: '/context/'});
+      var actual = Handlebars.helpers.url.call({}, 'articles/');
+      expect(actual).to.equal('/context/articles/');
+    });
+  });
 });
