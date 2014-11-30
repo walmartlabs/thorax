@@ -183,6 +183,10 @@ See the [TodoMVC Thorax implementation](http://addyosmani.github.com/todomvc/lab
 
 [kenwheeler](https://github.com/kenwheeler) has an example [Parse-Todos](https://github.com/kenwheeler/Parse-Todos) implementation of Thorax combined with Parse.
 
+### Examples
+
+- [mulderp/thorax-movies](https://github.com/mulderp/thorax-movies)
+
 ## Resources
 
 ### Thorax Yeoman Generator
