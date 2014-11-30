@@ -186,6 +186,7 @@ See the [TodoMVC Thorax implementation](http://addyosmani.github.com/todomvc/lab
 ### Examples
 
 - [mulderp/thorax-movies](https://github.com/mulderp/thorax-movies)
+- [colinmegill/thorax-contacts-list-require-tutorial](https://github.com/colinmegill/thorax-contacts-list-require-tutorial/blob/master/REQUIRE-TUTORIAL.md)
 
 ## Resources
 
