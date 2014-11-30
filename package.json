@@ -16,7 +16,7 @@
     "url": "git://github.com/walmartlabs/thorax.git"
   },
   "engines": {
-    "node": "~0.8"
+    "node": ">=0.8"
   },
   "devDependencies": {
     "async": "0.2.9",
