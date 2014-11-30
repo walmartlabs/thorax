@@ -164,7 +164,7 @@ The restore process is well suited for handling distinctions between user and pu
 
 # Getting Started
 
-## Tutorials
+## Tutorials/Examples
 
 ### [Thorax Yeoman Generator](https://github.com/walmartlabs/generator-thorax)
 
@@ -180,6 +180,8 @@ Read an overview of the features of Thorax, as well as some of the theory behind
 
 ### TodoMVC
 See the [TodoMVC Thorax implementation](http://addyosmani.github.com/todomvc/labs/architecture-examples/thorax/) and its [source code](https://github.com/addyosmani/todomvc/tree/gh-pages/labs/architecture-examples/thorax). There is also a [Lumbar flavored version](https://github.com/addyosmani/todomvc/tree/gh-pages/labs/dependency-examples/thorax_lumbar) of the implementation.
+
+[kenwheeler](https://github.com/kenwheeler) has an example [Parse-Todos](https://github.com/kenwheeler/Parse-Todos) implementation of Thorax combined with Parse.
 
 ## Resources
 
@@ -1531,7 +1533,6 @@ A complex object was serialized without a proper context path to lookup the obje
 `$.view` found a view element that was inserted manually into the DOM and was not registered with `_addChild` or `retain`. Call `parent._addChild(view)` or `view.retain()` on view insertion or instantiation.
 
 
-[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/walmartlabs/thorax/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
 
 [fruit-loops]: https://github.com/walmartlabs/fruit-loops
 [phantomjs]: http://phantomjs.org/
