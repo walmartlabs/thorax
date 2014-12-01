@@ -178,6 +178,10 @@ Read an overview of the features of Thorax, as well as some of the theory behind
 
 [Backbone Fundamentals](http://addyosmani.github.com/backbone-fundamentals/) also covers [Lumbar's](http://walmartlabs.github.com/lumbar) approach to modular application development and routing, which is used in all of the seed projects except the standalone and Rails seeds.
 
+### [Thorax Seed](https://github.com/walmartlabs/thorax-seed)
+
+Thorax seed provides an example of a Lumber and Server-Side JavaScript project in action. This [commit](https://github.com/walmartlabs/thorax-seed/commit/e656579699187cbec59d1e405e474836ef2edd8b) shows an example of converting an existing Thorax+Lumbar application to support SSJS.
+
 ### TodoMVC
 See the [TodoMVC Thorax implementation](http://addyosmani.github.com/todomvc/labs/architecture-examples/thorax/) and its [source code](https://github.com/addyosmani/todomvc/tree/gh-pages/labs/architecture-examples/thorax). There is also a [Lumbar flavored version](https://github.com/addyosmani/todomvc/tree/gh-pages/labs/dependency-examples/thorax_lumbar) of the implementation.
 
