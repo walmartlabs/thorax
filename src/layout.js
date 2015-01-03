@@ -16,6 +16,12 @@ Thorax.LayoutView = Thorax.View.extend({
       // if a template was specified is must declare a layout-element
       ensureLayoutViewsTargetElement(this);
     }
+
+    // Restore our child view if we had one previously
+    if (this._view) {
+      this._view.appendTo(this._layoutViewEl);
+    }
+
     return response;
   },
   restore: function(element, forceRerender) {

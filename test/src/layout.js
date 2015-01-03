@@ -313,4 +313,23 @@ describe('layout', function() {
     expect(layout.$('span').html()).to.equal('b');
   });
 
+  it('keeps the set view in the DOM after render', function() {
+    var layoutView = new Thorax.LayoutView({
+      template: Handlebars.compile('<p class="layout-view">My Layout View {{layout-element}}</p>')
+    });
+
+    var childView = new Thorax.View({
+      template: Handlebars.compile('<p class="child-view">My Child View</p>')
+    });
+
+    layoutView.setView(childView, {serverRender: true, async: false});
+
+    expect(layoutView.$(".layout-view").length).to.not.equal(0);
+    expect(layoutView.$(".child-view").length).to.not.equal(0);
+
+    layoutView.render();
+
+    expect(layoutView.$(".layout-view").length).to.not.equal(0);
+    expect(layoutView.$(".child-view").length).to.not.equal(0);
+  });
 });
