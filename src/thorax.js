@@ -495,6 +495,12 @@ Thorax.View = Backbone.View.extend({
 
     // Route anything that starts with # or / (excluding //domain urls)
     if (href && (href[0] === '#' || (href[0] === '/' && href[1] !== '/'))) {
+      if (Backbone.history._hasPushState) {
+        var root = Backbone.history.root;
+        if (root && root !== '/' && href.indexOf(root) === 0) {
+          href = href.slice(root.length);
+        }
+      }
       Backbone.history.navigate(href, {
         trigger: true
       });

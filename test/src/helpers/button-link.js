@@ -15,6 +15,16 @@ describe('link helper with pushState', function() {
 });
 
 describe('button-link helpers', function() {
+  var root,
+      pushState;
+  beforeEach(function() {
+    root = Backbone.history.root;
+    pushState =Backbone.history._hasPushState;
+  });
+  afterEach(function() {
+    Backbone.history.root = root;
+    Backbone.history._hasPushState = pushState;
+  });
 
   it("option hash required arguments for button and link", function() {
     var link = $(Handlebars.helpers.link({hash: {href: 'a'}}).toString()),
@@ -73,6 +83,32 @@ describe('button-link helpers', function() {
     expect($(view.$('button')[1]).attr('data-trigger-event')).to.equal('testEvent');
     expect(view.$('a').html()).to.equal('content');
     expect(view.$('a').attr('href')).to.equal('#href');
+  });
+
+  it('strip root', function () {
+    if ($serverSide) {
+      return;
+    }
+
+    this.stub(Backbone.history, 'navigate');
+
+    var root = Backbone.history.root,
+        pushState =Backbone.history._hasPushState;
+    Backbone.history._hasPushState = true;
+    Backbone.history.root = '/foo';
+
+    var spy = this.spy(),
+        view = new Thorax.View({
+          template: Handlebars.compile('{{#link "foo/test"}}<span>text</span>{{/link}}')
+        });
+    // Append the view to the body for testing
+    view.appendTo(document.body);
+    view.retain();
+    view.$('a span').trigger('click');
+    view.$el.remove();
+
+    expect(Backbone.history.navigate.callCount).to.equal(1);
+    expect(Backbone.history.navigate.args[0][0]).to.equal('/test');
   });
 
   it('nested prevent default', function (done) {
