@@ -534,6 +534,9 @@ function configureView(view) {
   // Setup object event tracking
   _.each(inheritVars, function(obj) {
     view[obj.name] = [];
+    if (obj.preConfig) {
+      obj.preConfig(view, options);
+    }
   });
 
   view.children = {};

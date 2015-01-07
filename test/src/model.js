@@ -205,4 +205,30 @@ describe('model', function() {
     view.setModel(collection);
     expect(view.html()).to.equal('value');
   });
+
+  it('should bind on setModel after constructor set', function() {
+    var changed = this.spy();
+
+    var MyView = Thorax.View.extend({
+      template: Handlebars.compile('{{title}}'),
+      events: {
+        model: {
+          change: changed
+        }
+      }
+    });
+
+    var m1 = new Thorax.Model({title: 'M1'}),
+        m2 = new Thorax.Model({title: 'M2'});
+
+    var view = new MyView({model: m1});
+    expect(changed.callCount).to.equal(0);
+
+    m1.set({title: 'M1 TWEAKED'});
+    expect(changed.callCount).to.equal(1);
+
+    view.setModel(m2);
+    m2.set({title: 'M2 TWEAKED'});
+    expect(changed.callCount).to.equal(2);
+  });
 });

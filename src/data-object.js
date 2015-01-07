@@ -6,13 +6,24 @@ function dataObject(type, spec) {
     event: true
   }, spec);
 
+  spec.preConfig = function(view, options) {
+    // If we were passed this data object in the options, then we want to
+    // save it for later so we don't bind to it imediately (and consequently
+    // be unable to bind to future set* calls)
+    if (options && options[type]) {
+      options['_' + type] = options[type];
+      options[type] = null;
+    }
+  };
+
   // Add a callback in the view constructor
   spec.ctor = function(view) {
-    if (view[type]) {
+    var object = view['_' + type];
+    if (object) {
       // Need to null this.model/collection so setModel/Collection will
       // not treat it as the old model/collection and immediately return
-      var object = view[type];
-      view[type] = null;
+      delete view['_' + type];
+
       view[spec.set](object);
     }
   };
