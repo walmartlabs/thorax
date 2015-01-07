@@ -1,23 +1,20 @@
 sudo: false
 language: node_js
 node_js:
-  - 0.10
-
+- 0.1
 before_script:
-  - npm install -g grunt-cli
-  - "./node_modules/bower/bin/bower install"
-  - "export DISPLAY=:99.0" 
-  - "sh -e /etc/init.d/xvfb start"
-  - sleep 5
-
+- npm install -g grunt-cli
+- "./node_modules/bower/bin/bower install"
+- export DISPLAY=:99.0
+- sh -e /etc/init.d/xvfb start
+- sleep 5
 notifications:
   webhooks:
     urls:
-      secure: "RaVEv4a1Dk75pN5R+0/gfdZleNvw++ojCkwxS1Nrm6hCWLAdfRpDL5QPq/a6iKYu6+HFEt5b37YUIx14Q12L7BhVBtLQhbxEwRV0gD00CcfuxqHENv52vNIVXH0MkENFwW0hE9HaMVXkFho0IvHmSBYNXSQywyP6LhL3fP+Ia+Y="
+      secure: RaVEv4a1Dk75pN5R+0/gfdZleNvw++ojCkwxS1Nrm6hCWLAdfRpDL5QPq/a6iKYu6+HFEt5b37YUIx14Q12L7BhVBtLQhbxEwRV0gD00CcfuxqHENv52vNIVXH0MkENFwW0hE9HaMVXkFho0IvHmSBYNXSQywyP6LhL3fP+Ia+Y=
     on_success: change
     on_failure: always
-
 env:
   global:
-    - secure: n8x41C7M+bPdE/tiK0RTq6HQyh0+fz3H+1ZMkR6du2zFdzVGbiOhmSgwz4J7lGkS++SzHv8D3CUP5cRBgeuiAc/VYYNK2uZ3sSVhk5PRc9Xp94F2PtvI0BL9x2+7F18ZPpQI+n13q2lo4+mDvxXScjZsufqhW+rDuDGwpUpC7cI=
-    - secure: i5o40z8ozug8fepmTVYc/JoyCfwtHG8V+rKtIIJiGyg2iGoVBsz8SjRWgvgVxpFP0G1MsaWPTV13aJccshW7/aW+TlnuTyv8BTfH607aFEoPvVMVzmeIg06MlSPtSZGGEtGIz5p8WARYzLbiiOgCgF/vZmUaU8xjrRpAk8RKXd4=
+  - secure: BE8kRmR7tK6Akxru7zEdXs6W6vQnJYWluBtKi3DUJx29CQ6lzD8OvnBLOl2MaVeeXK63xDxhKQC8OQZ8Ux5Y78WYnWpKtA+r/GZuhkMQCIx7z+xpnBlWZCGjxK0USrlnuZL1sBA1AI7lB3burXuxivAfj++j1WdcX2jBl91204U=
+  - secure: TCgiYb5FeyuXq2bmCguavSMZuAUhz2oZZPIIY+ksIPxEZY6eoIRvMDOZeJnUknNnDzX/XhXXFGSgSZ6fKflNH4xEeQeonxRWczh0sF5p8i8tv+ZUs4PECBuy4phRBISfJ4mtF5ai42t1x4EBgv506Zo9Ea6I/akAj9H7+d7b1bw=

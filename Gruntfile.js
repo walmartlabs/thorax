@@ -61,8 +61,9 @@ module.exports = function(grunt) {
       options: {
         testname: 'thorax',
         build: process.env.TRAVIS_JOB_ID,
-        detailedError: true,
-        concurrency: 4
+        tunnelArgs: [
+          '--verbose'
+        ]
       },
       jquery: {
         options: {
