@@ -580,6 +580,11 @@ function ensureNotEmpty(view, force) {
 
     $el.removeAttr(collectionEmptyAttributeName);
     $el.empty();
+
+    // Release any child references we might be maintaining
+    _.each(_.values(view.children), function(child) {
+      view._removeChild(child);
+    });
   }
 }
 

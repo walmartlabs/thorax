@@ -63,23 +63,49 @@ describe('collection', function() {
     });
   });
 
-  it("should re-render when sort is triggered", function() {
-    var collection = new Thorax.Collection(letterCollection.models);
-    var view = new Thorax.View({
-      collection: collection,
-      template: Handlebars.compile('{{#collection tag="ul"}}<li>{{letter}}</li>{{/collection}}')
-    });
-    view.render();
-    expect(view.$('li').length).to.equal(collection.length);
-    expect(view.$('li').eq(0).html()).to.equal('a');
-    // reverse alphabetical sort
-    collection.comparator = function(letter) {
-      return _.map(letter.get('letter').toLowerCase().split(''), function(l) {
-        return String.fromCharCode(-(l.charCodeAt(0)));
+  describe('sort', function() {
+    it("should re-render when sort is triggered", function() {
+      var collection = new Thorax.Collection(letterCollection.models);
+      var view = new Thorax.View({
+        collection: collection,
+        template: Handlebars.compile('{{#collection tag="ul"}}<li>{{letter}}</li>{{/collection}}')
       });
-    };
-    collection.sort();
-    expect(view.$('li').eq(0).html()).to.equal('d');
+      view.render();
+      expect(view.$el.text()).to.equal('abcd');
+
+      // reverse alphabetical sort
+      collection.comparator = function(letter) {
+        return _.map(letter.get('letter').toLowerCase().split(''), function(l) {
+          return String.fromCharCode(-(l.charCodeAt(0)));
+        });
+      };
+      collection.sort();
+      expect(view.$el.text()).to.equal('dcba');
+    });
+
+    it('does not leak item views on sort', function() {
+      var collection = new Thorax.Collection(letterCollection.models);
+      var view = new Thorax.View({
+        collection: collection,
+        template: Handlebars.compile('{{collection}}'),
+        itemView: Thorax.View.extend({
+          template: Handlebars.compile('{{letter}}')
+        })
+      });
+      view.render();
+      expect(view.$el.text()).to.equal('abcd');
+      expect(_.keys(_.values(view.children)[0].children).length).to.equal(4);
+
+      // reverse alphabetical sort
+      collection.comparator = function(letter) {
+        return _.map(letter.get('letter').toLowerCase().split(''), function(l) {
+          return String.fromCharCode(-(l.charCodeAt(0)));
+        });
+      };
+      collection.sort();
+      expect(view.$el.text()).to.equal('dcba');
+      expect(_.keys(_.values(view.children)[0].children).length).to.equal(4);
+    });
   });
 
   describe('multiple collections', function() {
