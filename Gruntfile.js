@@ -30,7 +30,7 @@ module.exports = function(grunt) {
         options: {
           base: 'build/dev',
           hostname: '*',
-          port: 9998
+          port: 9999
         }
       }
     },
@@ -42,16 +42,16 @@ module.exports = function(grunt) {
       quick: {
         options: {
           urls: [
-            'http://localhost:9998/jquery/test.html' + mochaArgs,
-            'http://localhost:9998/zepto/test.html' + mochaArgs
+            'http://localhost:9999/jquery/test.html' + mochaArgs,
+            'http://localhost:9999/zepto/test.html' + mochaArgs
           ]
         }
       },
       legacy: {
         options: {
           urls: [
-            'http://localhost:9998/jquery-backbone-1-0/test.html' + mochaArgs,
-            'http://localhost:9998/zepto-backbone-1-0/test.html' + mochaArgs
+            'http://localhost:9999/jquery-backbone-1-0/test.html' + mochaArgs,
+            'http://localhost:9999/zepto-backbone-1-0/test.html' + mochaArgs
           ]
         }
       }
@@ -68,8 +68,8 @@ module.exports = function(grunt) {
         options: {
           tags: ['jquery'],
           urls: [
-            'http://localhost:9998/jquery/test.html',
-            'http://localhost:9998/jquery-backbone-1-0/test.html'
+            'http://localhost:9999/jquery/test.html',
+            'http://localhost:9999/jquery-backbone-1-0/test.html'
           ],
           browsers: [
             {browserName: 'chrome'},
@@ -84,7 +84,7 @@ module.exports = function(grunt) {
         options: {
           tags: ['zepto'],
           urls: [
-            'http://localhost:9998/zepto/test.html'
+            'http://localhost:9999/zepto/test.html'
           ],
           browsers: [
             {browserName: 'chrome'},

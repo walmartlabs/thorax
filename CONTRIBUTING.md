@@ -25,7 +25,7 @@ To build you'll need a few things installed:
 
 Project dependencies may be installed via `npm install`.
 
-The `grunt dev` implements watching for tests and allows for in browser testing at `http://localhost:9998/jquery/test.html` and `http://localhost:9998/zepto/test.html`.
+The `grunt dev` implements watching for tests and allows for in browser testing at `http://localhost:9999/jquery/test.html` and `http://localhost:9999/zepto/test.html`.
 
 If you notice any problems, please report them to the GitHub issue tracker.
 
