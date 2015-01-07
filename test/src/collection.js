@@ -272,6 +272,35 @@ describe('collection', function() {
       expect(view.$('li').eq(1).css('display')).to.not.equal('none');
     });
 
+    it("itemFilter will ignore nested view helpers", function() {
+      var view = new Thorax.View({
+        collection: new Thorax.Collection([
+          {letter: 'a'},
+          {letter: 'b'}
+        ]),
+        template: Handlebars.compile('{{#collection tag="ul"}}<li>{{view innerView}}{{letter}}</li>{{/collection}}'),
+        itemContext: function(item) {
+          return _.defaults({
+            innerView: new Thorax.View({
+              model: item,
+              template: Handlebars.compile('{{letter}}')
+            })
+          }, item.attributes);
+        },
+        itemFilter: function(model) {
+          return model.get('letter') !== 'a';
+        }
+      });
+      view.retain();
+      view.render();
+
+      expect(view.$('li').eq(0).css('display')).to.equal('none');
+      expect(view.$('li').eq(1).css('display')).to.not.equal('none');
+
+      expect(view.$('div').eq(0).css('display')).to.not.equal('none');
+      expect(view.$('div').eq(1).css('display')).to.not.equal('none');
+    });
+
     it('will re-render on updateFilter call', function() {
       var view = new Thorax.CollectionView({
         collection: new Thorax.Collection([

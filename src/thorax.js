@@ -583,14 +583,19 @@ $.fn.view = function(options) {
   if (el) {
     if (options.el) {
       return el;
-    } else {
-      var cid = el.attr(viewCidAttributeName),
-          view = viewsIndexedByCid[cid];
-      if (!view) {
-        throw createError('fn-view-unregistered');
-      }
-      return view;
     }
+
+    var cid = el.attr(viewCidAttributeName);
+    if (options.cid) {
+      return cid;
+    }
+
+    var view = viewsIndexedByCid[cid];
+    if (!view) {
+      throw createError('fn-view-unregistered');
+    }
+
+    return view;
   } else {
     return false;
   }
