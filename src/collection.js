@@ -1,5 +1,4 @@
-/*global
-    $serverSide,
+/*global $serverSide,
     assignView, assignTemplate, createRegistryWrapper, dataObject, filterAncestors, getValue,
     modelCidAttributeName, modelIdAttributeName, viewCidAttributeName,
     Deferrable
@@ -330,19 +329,15 @@ Thorax.CollectionView = Thorax.View.extend({
     var deferrable = new Deferrable(callback),
         self = this;
 
-    if (self.collection) {
-      if (self.collection.isEmpty()) {
-        deferrable.exec(function() {
-          handleChangeFromNotEmptyToEmpty(self);
-        });
-      } else if (self._pendingRestore) {
+    if (self.collection && !self.collection.isEmpty()) {
+      if (self._pendingRestore) {
         // If we had to delay the initial restore due to the local data set being loaded, then
         // we want to resume that operation where it left off.
         self._pendingRestore = false;
         self.restoreCollection(self._forceRerender);
       } else {
         deferrable.exec(function() {
-          handleChangeFromEmptyToNotEmpty(self);
+          ensureNotEmpty(self, true);
         });
 
         _.each(self.collection.models, function(item, i) {
@@ -351,12 +346,15 @@ Thorax.CollectionView = Thorax.View.extend({
           });
         });
       }
-      deferrable.exec(function() {
-        self.trigger('rendered:collection', self, self.collection);
-      });
     } else {
       deferrable.exec(function() {
-        handleChangeFromNotEmptyToEmpty(self);
+        ensureEmpty(self);
+      });
+    }
+
+    if (self.collection) {
+      deferrable.exec(function() {
+        self.trigger('rendered:collection', self, self.collection);
       });
     }
 
@@ -502,9 +500,7 @@ Thorax.CollectionView.on({
     add: function(model) {
       var $el = this._collectionElement;
       if ($el.length) {
-        if (this.collection.length === 1) {
-          handleChangeFromEmptyToNotEmpty(this);
-        }
+        ensureNotEmpty(this);
 
         var index = this.collection.indexOf(model);
         this.appendItem(model, index);
@@ -514,8 +510,8 @@ Thorax.CollectionView.on({
       var $el = this._collectionElement;
       this.removeItem(model);
 
-      if (this.collection.length === 0 && $el.length) {
-        handleChangeFromNotEmptyToEmpty(this);
+      if (!this.collection.length) {
+        ensureEmpty(this);
       }
     }
   }
@@ -575,18 +571,27 @@ function itemShouldBeVisible(view, model) {
   return view.itemFilter.call(view, model, view.collection.indexOf(model));
 }
 
-function handleChangeFromEmptyToNotEmpty(view) {
+function ensureNotEmpty(view, force) {
   var $el = view._collectionElement;
-  view.emptyClass && $el.removeClass(view.emptyClass);
-  $el.removeAttr(collectionEmptyAttributeName);
-  $el.empty();
+  if (force || $el.attr(collectionEmptyAttributeName)) {
+    if (view.emptyClass) {
+      $el.removeClass(view.emptyClass);
+    }
+
+    $el.removeAttr(collectionEmptyAttributeName);
+    $el.empty();
+  }
 }
 
-function handleChangeFromNotEmptyToEmpty(view) {
+function ensureEmpty(view) {
   var $el = view._collectionElement;
-  view.emptyClass && $el.addClass(view.emptyClass);
-  $el.attr(collectionEmptyAttributeName, true);
-  view.appendEmpty();
+  if (!$el.attr(collectionEmptyAttributeName)) {
+    if (view.emptyClass) {
+      $el.addClass(view.emptyClass);
+    }
+    $el.attr(collectionEmptyAttributeName, true);
+    view.appendEmpty();
+  }
 }
 
 //$(selector).collection() helper

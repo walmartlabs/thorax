@@ -178,6 +178,20 @@ describe('collection', function() {
       view.collection.remove(model);
       expect(view.$('ul').hasClass('empty')).to.be(true);
     });
+
+    it('should make non-empty after multiple insert', function() {
+      var view = new Thorax.View({
+        template: Handlebars.compile('{{#collection}}foo{{else}}bar{{/collection}}'),
+        collection: new (Thorax.Collection.extend({url: false}))()
+      });
+      view.render();
+      expect(view.$el.text()).to.equal('bar');
+      view.collection.set([
+        new Thorax.Model({id: 1, key: 'value'}),
+        new Thorax.Model({id: 2, key: 'value'})
+      ]);
+      expect(view.$el.text()).to.equal('foofoo');
+    });
   });
 
   describe('filter', function() {
