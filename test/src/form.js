@@ -298,7 +298,23 @@ describe('form', function() {
     view.render();
     expect(view.serialize()).to.eql({foo: true});
   });
-  
+
+  it('should update form fields on render', function () {
+    var TestView = Thorax.View.extend({
+      template: Handlebars.compile('<input name="foo" id="foo" value="{{foo}}">')
+    });
+
+    var view = new TestView({foo: 'foo'});
+    view.render();
+
+    expect(view.$('input').val()).to.equal('foo');
+
+    view.foo = 'bar';
+    view.render();
+
+    expect(view.$('input').val()).to.equal('bar');
+  });
+
   describe( "populate checked", function() {
     var view;
     
