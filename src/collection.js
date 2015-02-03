@@ -554,11 +554,11 @@ function applyItemVisiblityFilter(view, model) {
   var $el = view._collectionElement;
   if (view.itemFilter) {
     var show = !!itemShouldBeVisible(view, model);
-    $el.find('[' + modelCidAttributeName + '="' + model.cid + '"]').forEach(function(el) {
-      var $el = $(el),
+    $el.find('[' + modelCidAttributeName + '="' + model.cid + '"]').forEach(function(itemElement) {
+      var $itemElement = $(itemElement),
           parentCid = $el.view({cid: true});
       if (view.cid === parentCid) {
-        $el.toggle(show);
+        $itemElement.toggle(show);
       }
     });
   }
