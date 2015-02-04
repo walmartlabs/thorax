@@ -341,6 +341,27 @@ describe('collection', function() {
       expect(view.$('div').eq(1).css('display')).to.not.equal('none');
     });
 
+    it("itemFilter will work when itemView is used", function() {
+      var view = new Thorax.View({
+        collection: new Thorax.Collection([
+          {letter: 'a'},
+          {letter: 'b'}
+        ]),
+        itemView: Thorax.View.extend({
+          tagName: 'li',
+          template: Handlebars.compile('{{letter}}')
+        }),
+        template: Handlebars.compile('{{collection tag="ul" item-view=itemView}}'),
+        itemFilter: function(model) {
+          return model.get('letter') !== 'a';
+        }
+      });
+      view.render();
+
+      expect(view.$('li').eq(0).css('display')).to.equal('none');
+      expect(view.$('li').eq(1).css('display')).to.not.equal('none');
+    });
+
     it('will re-render on updateFilter call', function() {
       var view = new Thorax.CollectionView({
         collection: new Thorax.Collection([

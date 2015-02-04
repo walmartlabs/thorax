@@ -556,7 +556,7 @@ function applyItemVisiblityFilter(view, model) {
     var show = !!itemShouldBeVisible(view, model);
     $el.find('[' + modelCidAttributeName + '="' + model.cid + '"]').forEach(function(el) {
       var $el = $(el),
-          parentCid = $el.view({cid: true});
+          parentCid = $el.parent().attr(viewCidAttributeName);
       if (view.cid === parentCid) {
         $el.toggle(show);
       }
