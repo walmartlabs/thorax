@@ -70,7 +70,7 @@ Thorax.loadHandler = function(start, end, context) {
 
     loadInfo.events.push(object);
 
-    object.on(loadEnd, function endCallback() {
+    $(object).on(loadEnd, function endCallback() {
       var loadingEndTimeout = self._loadingTimeoutEndDuration;
       if (loadingEndTimeout === void 0) {
         // If we are running on a non-view object pull the default timeout
