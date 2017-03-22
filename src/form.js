@@ -136,7 +136,7 @@ _.extend(Thorax.View.prototype, {
           var isBinary = type === 'checkbox' || type === 'radio';
           if (isBinary) {
             value = _.isBoolean(value) ? value : value === $element.val();
-            $element[value ? 'attr' : 'removeAttr']('checked', 'checked');
+            $element[value ? 'attr' : 'removeAttr'](true, 'checked');
           } else {
             $element.val(value);
           }
