@@ -16,7 +16,7 @@ Handlebars.registerHelper('url', function(_url, options) {
   }
   if (Backbone.history._hasPushState) {
     var root = Backbone.history.options.root;
-    if (root === '/' && fragment.substr(0, 1) === '/') {
+    if (root.substr(-1) === '/' && fragment.substr(0, 1) === '/') {
       return fragment;
     } else {
       return root + fragment;
