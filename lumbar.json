@@ -35,6 +35,7 @@
         {"src": "src/model.js"},
         {"src": "src/collection.js"},
         {"src": "src/layout.js"},
+        {"src": "src/auto-helper.js"},
         {"src": "src/helpers/collection.js"},
         {"src": "src/helpers/empty.js"},
         {"src": "src/helpers/template.js"},
