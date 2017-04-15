@@ -64,6 +64,9 @@ Thorax.Collections = {};
 createRegistryWrapper(Thorax.Collection, Thorax.Collections);
 
 dataObject('collection', {
+  cast: function(collection) {
+    return _.isArray(collection) ? new Thorax.Collection(collection) : collection;
+  },
   set: 'setCollection',
   bindCallback: onSetCollection,
   defaultOptions: {
