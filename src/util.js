@@ -1,4 +1,4 @@
-/*global createRegistryWrapper:true, getEventCallback */
+/*global createRegistryWrapper:true, getEventCallback, jQuery */
 
 function createErrorMessage(code) {
   return 'Error "' + code + '". For more information visit http://thoraxjs.org/error-codes.html' + '#' + code;
@@ -285,10 +285,8 @@ Thorax.Util = {
     return template;
   },
 
-  //'selector' is not present in $('<p></p>')
-  //TODO: investigage a better detection method
   is$: function(obj) {
-    return _.isObject(obj) && ('length' in obj);
+    return obj instanceof jQuery;
   },
   expandToken: function(input, scope, encode) {
     /*jshint boss:true */
