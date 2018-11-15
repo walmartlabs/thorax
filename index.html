@@ -12,7 +12,7 @@
   <script type="text/javascript" src="//use.typekit.net/vyf6wqz.js"></script>
   <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
 
-  <!--[if IE 8]><script src="js/ie.min.js"></script><!--> 
+  <!--[if IE 8]><script src="js/ie.min.js"></script><!-->
 </head>
 <body>
 
@@ -199,7 +199,7 @@ layout.appendTo(<span class="string">'body'</span>);
 })
 layout.setView(view);</code></pre>
 <h2 id="server-side-rendering">Server Side Rendering</h2>
-<p>Thorax allows for rendering outside of the normal browser context using environments such as [Fruit Loops][fruit-loops] or [PhantomJS][phantomjs] to render content in the initial server response and then restore the view hierarchy on the client render. Rendering in such a manner allows for Thorax applications to expose their content for SEO purposes as well as speed up the perceived initial page load.
+<p>Thorax allows for rendering outside of the normal browser context using environments such as <a href="https://github.com/walmartlabs/fruit-loops">Fruit Loops</a> or <a href="http://phantomjs.org/">PhantomJS</a> to render content in the initial server response and then restore the view hierarchy on the client render. Rendering in such a manner allows for Thorax applications to expose their content for SEO purposes as well as speed up the perceived initial page load.
 
 </p>
 <p>The restore process is well suited for handling distinctions between user and public data, allowing for the server response to include only public, long cache-able, content. The client can then augment this data with any user specific data on restoration.
@@ -208,27 +208,27 @@ layout.setView(view);</code></pre>
 
         </div>
         <ul class="features-nav js-menu" data-control=".features-nav-toggle">
-          
+
             <li><a href="#hello-world">Hello World</a></li>
-          
+
             <li><a href="#easy-data-binding">Easy Data Binding</a></li>
-          
+
             <li><a href="#context-control">Context Control</a></li>
-          
+
             <li><a href="#collection-rendering">Collection Rendering</a></li>
-          
+
             <li><a href="#j-query-and-zepto-integration">jQuery and Zepto Integration</a></li>
-          
+
             <li><a href="#event-enhancements">Event Enhancements</a></li>
-          
+
             <li><a href="#form-handling">Form Handling</a></li>
-          
+
             <li><a href="#embeddable-views">Embeddable Views</a></li>
-          
+
             <li><a href="#layouts-and-lifecycle">Layouts and Lifecycle</a></li>
-          
+
             <li><a href="#server-side-rendering">Server Side Rendering</a></li>
-          
+
         </ul>
       </div>
     </div>
@@ -238,7 +238,7 @@ layout.setView(view);</code></pre>
 <li>Generate your application using the <a href="https://github.com/walmartlabs/generator-thorax">Thorax Yeoman Generator</a></li>
 <li>Read about how Thorax works in the new <a href="http://addyosmani.github.com/backbone-fundamentals/#thorax">Backbone Fundamentals Book</a>.</li>
 <li>Install the <a href="https://chrome.google.com/webstore/detail/thorax-inspector/poioalbefcopgeaeaadelomciijaondk">Thorax Inspector</a> Chrome extension.</li>
-<li>Building something smaller? Just link the <a href="http://github.com/walmartlabs/thorax">core library</a> as a <a href="http://cdnjs.cloudflare.com/ajax/libs/thorax/2.0.0rc6/thorax.js">single file from cdnjs</a> compiled with all of its dependencies and use it anywhere or play with our <a href="http://jsfiddle.net/KRuPZ/">Hello World fiddle</a> or <a href="http://jsfiddle.net/mZzhy/">Todos fiddle</a>.</li>
+<li>Building something smaller? Just link the <a href="http://github.com/walmartlabs/thorax">core library</a> as a <a href="http://cdnjs.com/libraries/thorax/">single file from cdnjs</a> compiled with all of its dependencies and use it anywhere or play with our <a href="http://jsfiddle.net/KRuPZ/">Hello World fiddle</a> or <a href="http://jsfiddle.net/mZzhy/">Todos fiddle</a>.</li>
 </ul>
 
     </div>
@@ -264,6 +264,6 @@ layout.setView(view);</code></pre>
         var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
       })();
     </script>
-  
+
   </body>
 </html>
