@@ -750,7 +750,7 @@ For complex objects, `parentView` and `context` will be used to lookup any conte
 
 Retrieves the stringified representation of the marshal data set. Generally this does not need to be called explicitly as an `onEmit` handler will ensure that the data is output for the client exec.
 
-### destory *Thorax.ServerMarshal.destroy($el)*
+### destroy *Thorax.ServerMarshal.destroy($el)*
 
 Removes any marshal data that may be associated with a given element.
 
