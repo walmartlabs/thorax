@@ -148,14 +148,14 @@ Handlebars.registerViewHelper = function(name, ViewClass, callback) {
       ServerMarshal.store(instance.$el, 'attrs', options.hash, options.hashIds, options);
       if (options.fn && options.fn !== Handlebars.VM.noop) {
         if (options.fn.depth) {
-          // Depthed block helpers are not supoprted.
+          // Depthed block helpers are not supported.
           throw new Error();
         }
         ServerMarshal.store(instance.$el, 'fn', options.fn.program);
       }
       if (options.inverse && options.inverse !== Handlebars.VM.noop) {
         if (options.inverse.depth) {
-          // Depthed block helpers are not supoprted.
+          // Depthed block helpers are not supported.
           throw new Error();
         }
         ServerMarshal.store(instance.$el, 'inverse', options.inverse.program);
