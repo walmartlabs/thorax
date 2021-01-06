@@ -1,3 +1,11 @@
+***
+# NOTICE:
+
+## This repository has been archived and is not supported.
+
+[![No Maintenance Intended](http://unmaintained.tech/badge.svg)](http://unmaintained.tech/)
+***
+
 # Thorax
 
 [![Selenium Test Status](https://saucelabs.com/buildstatus/thorax)](https://saucelabs.com/u/thorax)
