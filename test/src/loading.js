@@ -68,6 +68,24 @@ describe('loading', function() {
       expect(endSpy.callCount).to.equal(0);
     });
 
+
+    it("calls the success handler on the first fetch call when the fetch operation is synchronous", function () {
+      var collection = new (Thorax.Collection.extend({
+        url: "test"
+      }));
+
+      var syncStub = sinon.stub(Backbone, "sync", function (method, model, options) {
+        options.success(model, [ { name: "Test", value: "Value" } ], options)
+      });
+
+      var successSpy = sinon.spy();
+
+      collection.fetch({ success: successSpy });
+      syncStub.restore();
+
+      expect(successSpy.callCount).to.equal(1);
+    });
+
     // for jQuery or Zepto when built with Deferred
     if ($.when) {
       it("returns a promise", function() {
